@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-
-export type EmotionLevel = 3 | 2 | 1 | 0 | -1 | -2 | -3;
-export type SubEmotion = 'sad' | 'angry' | 'uncomfortable' | null;
+import type { EmotionLevel, SubEmotion } from '@/lib/constants';
+import { getTodayStr } from '@/lib/utils';
+export type { EmotionLevel, SubEmotion };
 
 export interface EmotionRecord {
   id: string;
@@ -14,26 +14,6 @@ export interface EmotionRecord {
   createdAt: string;
 }
 
-const LEVEL_NAMES: Record<EmotionLevel, string> = {
-  3: '非常开心',
-  2: '很开心',
-  1: '开心',
-  0: '中性',
-  [-1]: '不开心',
-  [-2]: '很不开心',
-  [-3]: '非常不开心',
-};
-
-const LEVEL_COLORS: Record<EmotionLevel, string> = {
-  3: '#FFB347',
-  2: '#F0D878',
-  1: '#90EE90',
-  0: '#B0E0E6',
-  [-1]: '#B0C4DE',
-  [-2]: '#DDA0DD',
-  [-3]: '#800080',
-};
-
 const DEMO_EMOTIONS: EmotionRecord[] = [
   {
     id: 'e1',
@@ -41,7 +21,7 @@ const DEMO_EMOTIONS: EmotionRecord[] = [
     subEmotion: null,
     status: '学习中',
     note: '今天高效完成了论文大纲',
-    recordDate: new Date().toISOString().split('T')[0],
+    recordDate: getTodayStr(),
     createdAt: new Date(Date.now() - 3600000).toISOString(),
   },
   {
@@ -50,7 +30,7 @@ const DEMO_EMOTIONS: EmotionRecord[] = [
     subEmotion: 'uncomfortable',
     status: '通勤',
     note: '地铁太挤了，有点烦躁',
-    recordDate: new Date(Date.now() - 86400000).toISOString().split('T')[0],
+    recordDate: getTodayStr(new Date(Date.now() - 86400000)),
     createdAt: new Date(Date.now() - 86400000).toISOString(),
   },
   {
@@ -59,7 +39,7 @@ const DEMO_EMOTIONS: EmotionRecord[] = [
     subEmotion: null,
     status: '聚会',
     note: '和老同学聚餐，超级开心！',
-    recordDate: new Date(Date.now() - 172800000).toISOString().split('T')[0],
+    recordDate: getTodayStr(new Date(Date.now() - 172800000)),
     createdAt: new Date(Date.now() - 172800000).toISOString(),
   },
   {
@@ -68,7 +48,7 @@ const DEMO_EMOTIONS: EmotionRecord[] = [
     subEmotion: null,
     status: '工作',
     note: '平淡的一天',
-    recordDate: new Date(Date.now() - 259200000).toISOString().split('T')[0],
+    recordDate: getTodayStr(new Date(Date.now() - 259200000)),
     createdAt: new Date(Date.now() - 259200000).toISOString(),
   },
   {
@@ -77,7 +57,7 @@ const DEMO_EMOTIONS: EmotionRecord[] = [
     subEmotion: 'sad',
     status: '深夜',
     note: '想起一些往事，有点难过',
-    recordDate: new Date(Date.now() - 345600000).toISOString().split('T')[0],
+    recordDate: getTodayStr(new Date(Date.now() - 345600000)),
     createdAt: new Date(Date.now() - 345600000).toISOString(),
   },
 ];
@@ -90,20 +70,18 @@ interface EmotionState {
   deleteEmotion: (id: string) => void;
   setCurrentLevel: (level: EmotionLevel) => void;
   setCurrentSubEmotion: (sub: SubEmotion) => void;
-  getEmotionsByDate: (date: string) => EmotionRecord[];
-  getDominantEmotionForDate: (date: string) => EmotionLevel | null;
 }
 
 export const useEmotionStore = create<EmotionState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       emotions: DEMO_EMOTIONS,
       currentLevel: 1,
       currentSubEmotion: null,
       addEmotion: (record) => {
         const newRecord: EmotionRecord = {
           ...record,
-          id: Date.now().toString(),
+          id: crypto.randomUUID(),
           createdAt: new Date().toISOString(),
         };
         set((state) => ({
@@ -117,31 +95,13 @@ export const useEmotionStore = create<EmotionState>()(
       },
       setCurrentLevel: (level) => set({ currentLevel: level }),
       setCurrentSubEmotion: (sub) => set({ currentSubEmotion: sub }),
-      getEmotionsByDate: (date) => {
-        return get().emotions.filter((e) => e.recordDate === date);
-      },
-      getDominantEmotionForDate: (date) => {
-        const dayEmotions = get().emotions.filter((e) => e.recordDate === date);
-        if (dayEmotions.length === 0) return null;
-        const counts = new Map<EmotionLevel, number>();
-        dayEmotions.forEach((e) => {
-          counts.set(e.level, (counts.get(e.level) || 0) + 1);
-        });
-        let dominant: EmotionLevel = dayEmotions[0].level;
-        let maxCount = 0;
-        counts.forEach((count, level) => {
-          if (count > maxCount || (count === maxCount && level > dominant)) {
-            maxCount = count;
-            dominant = level;
-          }
-        });
-        return dominant;
-      },
     }),
     {
       name: 'flash-emotions',
+      version: 1,
+      partialize: (state) => ({
+        emotions: state.emotions,
+      }),
     }
   )
 );
-
-export { LEVEL_NAMES, LEVEL_COLORS };

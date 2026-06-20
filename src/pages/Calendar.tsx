@@ -1,8 +1,10 @@
-import { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useMemo, memo, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useLogStore, TAG_COLORS, type ColorTag } from '@/stores/logStore';
-import { useEmotionStore, LEVEL_COLORS, type EmotionLevel } from '@/stores/emotionStore';
+import { useLogStore } from '@/stores/logStore';
+import { TAG_COLORS, type ColorTag } from '@/lib/constants';
+import { useEmotionStore } from '@/stores/emotionStore';
+import { LEVEL_COLORS, type EmotionLevel } from '@/lib/constants';
 import LiquidGlassCard from '@/components/LiquidGlassCard';
 import {
   format,
@@ -16,41 +18,145 @@ import {
   addMonths,
   subMonths,
 } from 'date-fns';
+import { useReducedMotion } from '@/lib/motion';
+import { getTodayStr } from '@/lib/utils';
 
 const WEEKDAYS = ['Su', 'M', 'T', 'W', 'TH', 'F', 'Sa'];
 
+interface CalendarDayData {
+  date: Date;
+  dateStr: string;
+  isCurrentMonth: boolean;
+  isToday: boolean;
+  tagColor: string | null;
+  emotionColors: string[];
+  recordCount: number;
+}
+
+const CalendarDay = memo(function CalendarDay({
+  day,
+  selected,
+  onClick,
+}: {
+  day: CalendarDayData;
+  selected: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label={`${format(day.date, 'yyyy年M月d日')}${day.recordCount > 0 ? `，${day.recordCount} 条记录` : ''}`}
+      className={`relative flex flex-col items-center justify-center py-2 rounded-xl transition-all ${
+        day.isCurrentMonth ? '' : 'opacity-30'
+      } ${selected ? 'bg-white/10' : 'active:bg-white/5'}`}
+    >
+      <span
+        className={`text-sm font-medium ${
+          day.isToday
+            ? 'w-7 h-7 rounded-full bg-blue-500 flex items-center justify-center text-white'
+            : day.isCurrentMonth
+              ? 'text-white'
+              : 'text-slate-600'
+        }`}
+      >
+        {format(day.date, 'd')}
+      </span>
+
+      {day.tagColor && (
+        <div
+          className="w-1.5 h-1.5 rounded-full mt-0.5"
+          style={{
+            backgroundColor: day.tagColor,
+            boxShadow: `0 0 4px ${day.tagColor}80`,
+          }}
+        />
+      )}
+
+      {day.emotionColors.length > 0 && (
+        <div className="w-5 h-[3px] rounded-full mt-0.5 overflow-hidden flex">
+          {day.emotionColors.map((c, ci) => (
+            <div key={ci} className="flex-1 h-full" style={{ backgroundColor: c }} />
+          ))}
+        </div>
+      )}
+
+      {day.recordCount > 1 && (
+        <span className="absolute top-0.5 right-0.5 text-[8px] text-slate-500">
+          {day.recordCount}
+        </span>
+      )}
+    </button>
+  );
+});
+
+const TodayRecords = memo(function TodayRecords({ todayStr }: { todayStr: string }) {
+  const logs = useLogStore((state) => state.logs);
+  const todayLogs = useMemo(
+    () => logs.filter((log) => log.recordDate === todayStr),
+    [logs, todayStr]
+  );
+
+  if (todayLogs.length === 0) {
+    return <p className="text-sm text-slate-600 text-center py-8">今天还没有记录</p>;
+  }
+
+  return (
+    <div className="space-y-3">
+      {todayLogs.map((log, i) => (
+        <LiquidGlassCard key={log.id} colorTag={TAG_COLORS[log.colorTag]} index={i}>
+          <div className="py-3 pr-4">
+            <p className="text-[14px] text-white">{log.content}</p>
+            <span className="text-[10px] text-slate-500 mt-1 block">
+              {format(new Date(log.createdAt), 'HH:mm')}
+            </span>
+          </div>
+        </LiquidGlassCard>
+      ))}
+    </div>
+  );
+});
+
 export default function Calendar() {
+  const reduced = useReducedMotion();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const { logs, getLogsByDate } = useLogStore();
-  const { getEmotionsByDate } = useEmotionStore();
+  const [monthDirection, setMonthDirection] = useState(0);
 
-  const todayStr = new Date().toISOString().split('T')[0];
+  const handlePrevMonth = useCallback(() => {
+    setMonthDirection(-1);
+    setCurrentMonth((prev) => subMonths(prev, 1));
+  }, []);
 
-  // Generate calendar grid
+  const handleNextMonth = useCallback(() => {
+    setMonthDirection(1);
+    setCurrentMonth((prev) => addMonths(prev, 1));
+  }, []);
+
+  const handleDayClick = useCallback(
+    (dateStr: string) => {
+      setSelectedDate((prev) => (prev === dateStr ? null : dateStr));
+    },
+    [setSelectedDate]
+  );
+  const logs = useLogStore((state) => state.logs);
+  const emotions = useEmotionStore((state) => state.emotions);
+
+  const todayStr = getTodayStr();
+
   const calendarDays = useMemo(() => {
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(monthStart);
     const calendarStart = startOfWeek(monthStart);
     const calendarEnd = endOfWeek(monthEnd);
 
-    const days: {
-      date: Date;
-      dateStr: string;
-      isCurrentMonth: boolean;
-      isToday: boolean;
-      tagColor: string | null;
-      emotionColors: string[];
-      recordCount: number;
-    }[] = [];
+    const days: CalendarDayData[] = [];
 
     let day = calendarStart;
     while (day <= calendarEnd) {
       const dateStr = format(day, 'yyyy-MM-dd');
-      const dayLogs = getLogsByDate(dateStr);
-      const dayEmotions = getEmotionsByDate(dateStr);
+      const dayLogs = logs.filter((log) => log.recordDate === dateStr && log.category === 'log');
+      const dayEmotions = emotions.filter((e) => e.recordDate === dateStr);
 
-      // Get dominant tag color
       let tagColor: string | null = null;
       if (dayLogs.length > 0) {
         const tagCounts = new Map<string, number>();
@@ -68,7 +174,6 @@ export default function Calendar() {
         tagColor = TAG_COLORS[maxTag] || null;
       }
 
-      // Get emotion colors for the day (unique colors, deduped)
       const emotionColors: string[] = [];
       if (dayEmotions.length > 0) {
         const seen = new Set<string>();
@@ -95,28 +200,31 @@ export default function Calendar() {
     }
 
     return days;
-  }, [currentMonth, logs]);
+  }, [currentMonth, logs, emotions]);
 
-  const selectedDayLogs = selectedDate ? getLogsByDate(selectedDate) : [];
+  const selectedDayLogs = useMemo(() => {
+    if (!selectedDate) return [];
+    return logs.filter((log) => log.recordDate === selectedDate);
+  }, [selectedDate, logs]);
 
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="px-4 pt-3 pb-2">
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-semibold text-white">
-            {format(currentMonth, 'yyyy年 M月')}
-          </h1>
+          <h1 className="text-lg font-semibold text-white">{format(currentMonth, 'yyyy年 M月')}</h1>
           <div className="flex gap-1">
             <button
-              onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 active:bg-white/10"
+              onClick={handlePrevMonth}
+              aria-label="上个月"
+              className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 active:bg-white/10 transition-colors"
             >
               <ChevronLeft size={18} className="text-slate-300" />
             </button>
             <button
-              onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 active:bg-white/10"
+              onClick={handleNextMonth}
+              aria-label="下个月"
+              className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 active:bg-white/10 transition-colors"
             >
               <ChevronRight size={18} className="text-slate-300" />
             </button>
@@ -127,7 +235,6 @@ export default function Calendar() {
       {/* Calendar Grid */}
       <div className="px-4 pb-2">
         <div className="liquid-glass p-4">
-          {/* Weekday headers */}
           <div className="grid grid-cols-7 gap-1 mb-2">
             {WEEKDAYS.map((d) => (
               <div key={d} className="text-center text-[10px] text-slate-500 font-medium py-1">
@@ -136,114 +243,58 @@ export default function Calendar() {
             ))}
           </div>
 
-          {/* Days */}
-          <div className="grid grid-cols-7 gap-1">
-            {calendarDays.map((day, i) => (
-              <motion.button
+          <motion.div
+            key={format(currentMonth, 'yyyy-MM')}
+            initial={{
+              opacity: 0,
+              x: reduced ? 0 : monthDirection * 24,
+            }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: reduced ? 0 : 0.25, ease: 'easeOut' }}
+            className="grid grid-cols-7 gap-1"
+          >
+            {calendarDays.map((day) => (
+              <CalendarDay
                 key={day.dateStr}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: i * 0.01 }}
-                onClick={() =>
-                  setSelectedDate(selectedDate === day.dateStr ? null : day.dateStr)
-                }
-                className={`relative flex flex-col items-center justify-center py-2 rounded-xl transition-all ${
-                  day.isCurrentMonth ? '' : 'opacity-30'
-                } ${selectedDate === day.dateStr ? 'bg-white/10' : 'active:bg-white/5'}`}
-              >
-                {/* Date number */}
-                <span
-                  className={`text-sm font-medium ${
-                    day.isToday
-                      ? 'w-7 h-7 rounded-full bg-blue-500 flex items-center justify-center text-white'
-                      : day.isCurrentMonth
-                      ? 'text-white'
-                      : 'text-slate-600'
-                  }`}
-                >
-                  {format(day.date, 'd')}
-                </span>
-
-                {/* Tag color dot */}
-                {day.tagColor && (
-                  <div
-                    className="w-1.5 h-1.5 rounded-full mt-0.5"
-                    style={{
-                      backgroundColor: day.tagColor,
-                      boxShadow: `0 0 4px ${day.tagColor}80`,
-                    }}
-                  />
-                )}
-
-                {/* Emotion color bar - pieced stripe showing all emotions */}
-                {day.emotionColors.length > 0 && (
-                  <div className="w-5 h-[3px] rounded-full mt-0.5 overflow-hidden flex">
-                    {day.emotionColors.map((c, ci) => (
-                      <div
-                        key={ci}
-                        className="flex-1 h-full"
-                        style={{ backgroundColor: c }}
-                      />
-                    ))}
-                  </div>
-                )}
-
-                {/* Record count badge */}
-                {day.recordCount > 1 && (
-                  <span className="absolute top-0.5 right-0.5 text-[8px] text-slate-500">
-                    {day.recordCount}
-                  </span>
-                )}
-              </motion.button>
+                day={day}
+                selected={selectedDate === day.dateStr}
+                onClick={() => handleDayClick(day.dateStr)}
+              />
             ))}
-          </div>
+          </motion.div>
         </div>
       </div>
 
       {/* Selected day records */}
-      {selectedDate && selectedDayLogs.length > 0 && (
-        <div className="px-4 pb-2">
-          <h3 className="text-xs text-slate-400 mb-2">
-            {format(new Date(selectedDate), 'M月d日')} 的记录
-          </h3>
-          <div className="space-y-2 max-h-40 overflow-y-auto no-scrollbar">
-            {selectedDayLogs.map((log, i) => (
-              <LiquidGlassCard key={log.id} colorTag={TAG_COLORS[log.colorTag]} index={i}>
-                <div className="py-2 pr-4">
-                  <p className="text-[13px] text-white line-clamp-2">{log.content}</p>
-                </div>
-              </LiquidGlassCard>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Today's Records */}
-      <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-4 pt-2">
-        <h3 className="text-xs text-slate-400 mb-2 sticky top-0">今日记录</h3>
-        {(() => {
-          const todayLogs = getLogsByDate(todayStr);
-          return todayLogs.length > 0 ? (
-            <div className="space-y-3">
-              {todayLogs.map((log, i) => (
-                <LiquidGlassCard
-                  key={log.id}
-                  colorTag={TAG_COLORS[log.colorTag]}
-                  index={i}
-                >
-                  <div className="py-3 pr-4">
-                    <p className="text-[14px] text-white">{log.content}</p>
-                    <span className="text-[10px] text-slate-500 mt-1 block">
-                      {format(new Date(log.createdAt), 'HH:mm')}
-                    </span>
+      <AnimatePresence mode="popLayout">
+        {selectedDate && selectedDayLogs.length > 0 && (
+          <motion.div
+            key="selected"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="px-4 pb-2 overflow-hidden"
+          >
+            <h3 className="text-xs text-slate-400 mb-2">
+              {format(new Date(selectedDate), 'M月d日')} 的记录
+            </h3>
+            <div className="space-y-2 max-h-40 overflow-y-auto no-scrollbar">
+              {selectedDayLogs.map((log, i) => (
+                <LiquidGlassCard key={log.id} colorTag={TAG_COLORS[log.colorTag]} index={i}>
+                  <div className="py-2 pr-4">
+                    <p className="text-[13px] text-white line-clamp-2">{log.content}</p>
                   </div>
                 </LiquidGlassCard>
               ))}
             </div>
-          ) : (
-            <p className="text-sm text-slate-600 text-center py-8">今天还没有记录</p>
-          );
-        })()}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Today's Records */}
+      <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-4 pt-2">
+        <h3 className="text-xs text-slate-400 mb-2 sticky top-0">今日记录</h3>
+        <TodayRecords todayStr={todayStr} />
       </div>
 
       {/* Legend Bar */}

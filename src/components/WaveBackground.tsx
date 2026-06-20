@@ -1,121 +1,147 @@
-import { useRef, useMemo } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
+import { useEffect, useRef } from 'react';
 
-const vertexShader = `
-  uniform float uTime;
-  varying vec2 vUv;
-  varying float vElevation;
+const PALETTE = [
+  { r: 160, g: 210, b: 240 }, // pale azure
+  { r: 140, g: 190, b: 230 }, // soft sky
+  { r: 120, g: 170, b: 220 }, // muted blue
+];
 
-  float random(vec2 st) {
-    return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+function drawWave(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  time: number,
+  layer: number,
+  color: { r: number; g: number; b: number }
+) {
+  const yBase = height * (0.55 + layer * 0.1);
+  const amplitude = height * (0.04 + layer * 0.015);
+  const frequency = 0.002 + layer * 0.0006;
+  const speed = 0.0005 + layer * 0.0002;
+  const phase = time * speed + layer * 1.5;
+
+  ctx.beginPath();
+  ctx.moveTo(0, height);
+
+  for (let x = 0; x <= width; x += 6) {
+    const y =
+      yBase +
+      Math.sin(x * frequency + phase) * amplitude +
+      Math.sin(x * frequency * 2 + phase * 1.2) * amplitude * 0.3;
+    ctx.lineTo(x, y);
   }
 
-  float noise(vec2 st) {
-    vec2 i = floor(st);
-    vec2 f = fract(st);
-    f = f * f * (3.0 - 2.0 * f);
-    float a = random(i);
-    float b = random(i + vec2(1.0, 0.0));
-    float c = random(i + vec2(0.0, 1.0));
-    float d = random(i + vec2(1.0, 1.0));
-    return mix(a, b, f.x) + (c - a) * f.y * (1.0 - f.x) + (d - b) * f.x * f.y;
+  ctx.lineTo(width, height);
+  ctx.closePath();
+
+  const gradient = ctx.createLinearGradient(0, yBase - amplitude, 0, height);
+  gradient.addColorStop(0, `rgba(${color.r}, ${color.g}, ${color.b}, ${0.12 - layer * 0.025})`);
+  gradient.addColorStop(1, `rgba(${color.r}, ${color.g}, ${color.b}, 0)`);
+
+  ctx.fillStyle = gradient;
+  ctx.fill();
+}
+
+function drawStaticBackground(ctx: CanvasRenderingContext2D, width: number, height: number) {
+  const bgGradient = ctx.createLinearGradient(0, 0, 0, height);
+  bgGradient.addColorStop(0, '#0f172a');
+  bgGradient.addColorStop(0.5, '#1e2d42');
+  bgGradient.addColorStop(1, '#243954');
+  ctx.fillStyle = bgGradient;
+  ctx.fillRect(0, 0, width, height);
+
+  // Draw static waves at time 0 for reduced-motion preference.
+  for (let i = 0; i < PALETTE.length; i++) {
+    drawWave(ctx, width, height, 0, i, PALETTE[i]);
   }
-
-  void main() {
-    vUv = uv;
-    vec3 pos = position;
-    float t = uTime * 0.05;
-    float elevation = sin(pos.x * 0.06 + t) * cos(pos.y * 0.06 + t) * 1.2;
-    elevation += noise(pos.xy * 0.3 + t) * 0.6;
-    elevation += noise(pos.xy * 1.2 - t) * 0.25;
-    pos.z = elevation;
-    vElevation = elevation;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-  }
-`;
-
-const fragmentShader = `
-  uniform float uTime;
-  uniform float uOpacity;
-  varying vec2 vUv;
-  varying float vElevation;
-
-  void main() {
-    // Soft pastel palette: desaturated cyan-teal-blue
-    // Base colors shift slowly with elevation and time
-    float pt = vElevation * 0.08 + uTime * 0.015;
-
-    // Color A: soft mint green (low saturation, light)
-    vec3 colorA = vec3(0.55, 0.68, 0.62);
-    // Color B: pale sky blue
-    vec3 colorB = vec3(0.58, 0.72, 0.78);
-    // Color C: light lavender
-    vec3 colorC = vec3(0.65, 0.62, 0.72);
-
-    float mixAB = sin(pt) * 0.5 + 0.5;
-    float mixBC = cos(pt * 0.7) * 0.5 + 0.5;
-
-    vec3 color = mix(mix(colorA, colorB, mixAB), colorC, mixBC * 0.3);
-
-    // Very subtle wave highlight
-    float edge = smoothstep(-1.0, 1.0, vElevation);
-    color += vec3(0.95, 0.97, 1.0) * edge * 0.04;
-
-    // Soft glass distortion
-    vec2 glassDistortion = vec2(
-      sin(vUv.y * 4.0 + uTime * 0.4),
-      cos(vUv.x * 4.0 + uTime * 0.4)
-    ) * 0.02;
-    color += glassDistortion.xyx * 0.08;
-
-    // Gentle radial vignette to darken edges slightly
-    float dist = length(vUv - 0.5);
-    color *= 1.0 - smoothstep(0.3, 0.75, dist) * 0.2;
-
-    // Overall brightness: light and airy
-    color *= 0.65;
-
-    gl_FragColor = vec4(color, uOpacity);
-  }
-`;
-
-function WaveMesh() {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const materialRef = useRef<THREE.ShaderMaterial>(null);
-
-  const uniforms = useMemo(
-    () => ({
-      uTime: { value: 0 },
-      uOpacity: { value: 1.0 },
-    }),
-    []
-  );
-
-  useFrame((state) => {
-    if (materialRef.current) {
-      materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
-    }
-  });
-
-  return (
-    <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
-      <planeGeometry args={[100, 100, 256, 256]} />
-      <shaderMaterial
-        ref={materialRef}
-        vertexShader={vertexShader}
-        fragmentShader={fragmentShader}
-        uniforms={uniforms}
-        transparent
-        side={THREE.DoubleSide}
-      />
-    </mesh>
-  );
 }
 
 export default function WaveBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const rafRef = useRef<number>(0);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const reducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const resize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      canvas.style.width = `${window.innerWidth}px`;
+      canvas.style.height = `${window.innerHeight}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (reducedMotion) {
+        drawStaticBackground(ctx, window.innerWidth, window.innerHeight);
+      }
+    };
+
+    resize();
+    window.addEventListener('resize', resize);
+
+    let isVisible = true;
+    const handleVisibility = () => {
+      isVisible = document.visibilityState === 'visible';
+      if (!reducedMotion && isVisible && !rafRef.current) {
+        rafRef.current = requestAnimationFrame(animate);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    if (reducedMotion) {
+      drawStaticBackground(ctx, window.innerWidth, window.innerHeight);
+      return () => {
+        window.removeEventListener('resize', resize);
+        document.removeEventListener('visibilitychange', handleVisibility);
+      };
+    }
+
+    const startTime = performance.now();
+    const animate = (now: number) => {
+      if (!isVisible) {
+        rafRef.current = 0;
+        return;
+      }
+      const time = now - startTime;
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+
+      ctx.clearRect(0, 0, width, height);
+
+      const bgGradient = ctx.createLinearGradient(0, 0, 0, height);
+      bgGradient.addColorStop(0, '#0f172a');
+      bgGradient.addColorStop(0.5, '#1e2d42');
+      bgGradient.addColorStop(1, '#243954');
+      ctx.fillStyle = bgGradient;
+      ctx.fillRect(0, 0, width, height);
+
+      for (let i = 0; i < PALETTE.length; i++) {
+        drawWave(ctx, width, height, time, i, PALETTE[i]);
+      }
+
+      rafRef.current = requestAnimationFrame(animate);
+    };
+
+    rafRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      window.removeEventListener('resize', resize);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = 0;
+    };
+  }, []);
+
   return (
-    <div
+    <canvas
+      ref={canvasRef}
       style={{
         position: 'fixed',
         top: 0,
@@ -125,14 +151,6 @@ export default function WaveBackground() {
         zIndex: 0,
         pointerEvents: 'none',
       }}
-    >
-      <Canvas
-        camera={{ position: [0, -10, 5], fov: 45 }}
-        gl={{ antialias: true, alpha: true }}
-        style={{ width: '100%', height: '100%' }}
-      >
-        <WaveMesh />
-      </Canvas>
-    </div>
+    />
   );
 }

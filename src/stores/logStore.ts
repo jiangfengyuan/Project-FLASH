@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-
-export type ColorTag = 'urgent' | 'inspiration' | 'daily' | 'memo' | 'emotion' | 'idea';
-export type Category = 'log' | 'idea';
+import type { ColorTag, Category } from '@/lib/constants';
+import { getTodayStr } from '@/lib/utils';
+export type { ColorTag, Category };
 
 export interface LogItem {
   id: string;
@@ -14,24 +14,6 @@ export interface LogItem {
   recordDate: string;
 }
 
-const TAG_COLORS: Record<ColorTag, string> = {
-  urgent: '#FF6B6B',
-  inspiration: '#FFD93D',
-  daily: '#4D96FF',
-  memo: '#6BCB77',
-  emotion: '#9B59B6',
-  idea: '#FF9F43',
-};
-
-const TAG_NAMES: Record<ColorTag, string> = {
-  urgent: '紧急',
-  inspiration: '灵感',
-  daily: '日常',
-  memo: '备忘',
-  emotion: '情绪',
-  idea: '想法',
-};
-
 const DEMO_LOGS: LogItem[] = [
   {
     id: '1',
@@ -40,7 +22,7 @@ const DEMO_LOGS: LogItem[] = [
     category: 'log',
     importance: 0,
     createdAt: new Date(Date.now() - 3600000).toISOString(),
-    recordDate: new Date().toISOString().split('T')[0],
+    recordDate: getTodayStr(),
   },
   {
     id: '2',
@@ -49,7 +31,7 @@ const DEMO_LOGS: LogItem[] = [
     category: 'log',
     importance: 0,
     createdAt: new Date(Date.now() - 7200000).toISOString(),
-    recordDate: new Date().toISOString().split('T')[0],
+    recordDate: getTodayStr(),
   },
   {
     id: '3',
@@ -58,7 +40,7 @@ const DEMO_LOGS: LogItem[] = [
     category: 'idea',
     importance: 2,
     createdAt: new Date(Date.now() - 86400000).toISOString(),
-    recordDate: new Date(Date.now() - 86400000).toISOString().split('T')[0],
+    recordDate: getTodayStr(new Date(Date.now() - 86400000)),
   },
   {
     id: '4',
@@ -67,7 +49,7 @@ const DEMO_LOGS: LogItem[] = [
     category: 'log',
     importance: 0,
     createdAt: new Date(Date.now() - 172800000).toISOString(),
-    recordDate: new Date(Date.now() - 172800000).toISOString().split('T')[0],
+    recordDate: getTodayStr(new Date(Date.now() - 172800000)),
   },
   {
     id: '5',
@@ -76,7 +58,7 @@ const DEMO_LOGS: LogItem[] = [
     category: 'log',
     importance: 0,
     createdAt: new Date(Date.now() - 259200000).toISOString(),
-    recordDate: new Date(Date.now() - 259200000).toISOString().split('T')[0],
+    recordDate: getTodayStr(new Date(Date.now() - 259200000)),
   },
 ];
 
@@ -86,7 +68,6 @@ interface LogState {
   filterTag: ColorTag | null;
   editingId: string | null;
   getFilteredLogs: () => LogItem[];
-  getLogsByDate: (date: string) => LogItem[];
   getIdeas: () => LogItem[];
   addLog: (content: string, colorTag: ColorTag, category?: Category) => void;
   updateLog: (id: string, updates: Partial<LogItem>) => void;
@@ -108,26 +89,24 @@ export const useLogStore = create<LogState>()(
         const { logs, searchQuery, filterTag } = get();
         return logs.filter((log) => {
           if (log.category !== 'log') return false;
-          const matchesSearch = !searchQuery || log.content.toLowerCase().includes(searchQuery.toLowerCase());
+          const matchesSearch =
+            !searchQuery || log.content.toLowerCase().includes(searchQuery.toLowerCase());
           const matchesTag = !filterTag || log.colorTag === filterTag;
           return matchesSearch && matchesTag;
         });
-      },
-      getLogsByDate: (date) => {
-        return get().logs.filter((log) => log.recordDate === date);
       },
       getIdeas: () => {
         return get().logs.filter((log) => log.category === 'idea');
       },
       addLog: (content, colorTag, category = 'log') => {
         const newLog: LogItem = {
-          id: Date.now().toString(),
+          id: crypto.randomUUID(),
           content,
           colorTag,
           category,
           importance: 0,
           createdAt: new Date().toISOString(),
-          recordDate: new Date().toISOString().split('T')[0],
+          recordDate: getTodayStr(),
         };
         set((state) => ({ logs: [newLog, ...state.logs] }));
       },
@@ -146,14 +125,18 @@ export const useLogStore = create<LogState>()(
       setEditingId: (id) => set({ editingId: id }),
       moveToIdea: (id) => {
         set((state) => ({
-          logs: state.logs.map((log) => (log.id === id ? { ...log, category: 'idea' as Category } : log)),
+          logs: state.logs.map((log) =>
+            log.id === id ? { ...log, category: 'idea' as Category } : log
+          ),
         }));
       },
     }),
     {
       name: 'flash-logs',
+      version: 1,
+      partialize: (state) => ({
+        logs: state.logs,
+      }),
     }
   )
 );
-
-export { TAG_COLORS, TAG_NAMES };

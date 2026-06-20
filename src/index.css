@@ -59,9 +59,27 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
     overscroll-behavior-y: none;
     overflow: hidden;
+  }
+
+  /* Focus visible styles for keyboard navigation */
+  :focus-visible {
+    outline: 2px solid rgba(77, 150, 255, 0.8);
+    outline-offset: 2px;
+  }
+
+  /* Respect reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
@@ -141,33 +159,66 @@
 
   /* Animations */
   @keyframes breathe {
-    0%, 100% { transform: translateY(0) scale(1); }
-    50% { transform: translateY(-4px) scale(1.02); }
+    0%,
+    100% {
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      transform: translateY(-4px) scale(1.02);
+    }
   }
 
   @keyframes pulse-ring {
-    0% { transform: scale(1); opacity: 0.6; }
-    100% { transform: scale(1.8); opacity: 0; }
+    0% {
+      transform: scale(1);
+      opacity: 0.6;
+    }
+    100% {
+      transform: scale(1.8);
+      opacity: 0;
+    }
   }
 
   @keyframes float-up {
-    0% { opacity: 0; transform: translateY(8px) scale(0.95); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
+    0% {
+      opacity: 0;
+      transform: translateY(8px) scale(0.95);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
   }
 
   @keyframes slide-up {
-    0% { opacity: 0; transform: translateY(20px); }
-    100% { opacity: 1; transform: translateY(0); }
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   @keyframes confetti-fall {
-    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(-300px) rotate(720deg); opacity: 0; }
+    0% {
+      transform: translateY(0) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-300px) rotate(720deg);
+      opacity: 0;
+    }
   }
 
   @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
   }
 
   .animate-breathe {
@@ -187,36 +238,88 @@
   }
 
   /* Color tag styles */
-  .tag-urgent { color: #FF6B6B; }
-  .tag-inspiration { color: #FFD93D; }
-  .tag-daily { color: #4D96FF; }
-  .tag-memo { color: #6BCB77; }
-  .tag-emotion { color: #9B59B6; }
-  .tag-idea { color: #FF9F43; }
+  .tag-urgent {
+    color: #ff6b6b;
+  }
+  .tag-inspiration {
+    color: #ffd93d;
+  }
+  .tag-daily {
+    color: #4d96ff;
+  }
+  .tag-memo {
+    color: #6bcb77;
+  }
+  .tag-emotion {
+    color: #9b59b6;
+  }
+  .tag-idea {
+    color: #ff9f43;
+  }
 
-  .bg-tag-urgent { background-color: #FF6B6B; }
-  .bg-tag-inspiration { background-color: #FFD93D; }
-  .bg-tag-daily { background-color: #4D96FF; }
-  .bg-tag-memo { background-color: #6BCB77; }
-  .bg-tag-emotion { background-color: #9B59B6; }
-  .bg-tag-idea { background-color: #FF9F43; }
+  .bg-tag-urgent {
+    background-color: #ff6b6b;
+  }
+  .bg-tag-inspiration {
+    background-color: #ffd93d;
+  }
+  .bg-tag-daily {
+    background-color: #4d96ff;
+  }
+  .bg-tag-memo {
+    background-color: #6bcb77;
+  }
+  .bg-tag-emotion {
+    background-color: #9b59b6;
+  }
+  .bg-tag-idea {
+    background-color: #ff9f43;
+  }
 
   /* Emotion level colors */
-  .emotion-very-happy { color: #FFB347; }
-  .emotion-happy { color: #F0D878; }
-  .emotion-content { color: #90EE90; }
-  .emotion-neutral { color: #B0E0E6; }
-  .emotion-unhappy { color: #B0C4DE; }
-  .emotion-sad { color: #DDA0DD; }
-  .emotion-very-sad { color: #800080; }
+  .emotion-very-happy {
+    color: #ffb347;
+  }
+  .emotion-happy {
+    color: #f0d878;
+  }
+  .emotion-content {
+    color: #90ee90;
+  }
+  .emotion-neutral {
+    color: #b0e0e6;
+  }
+  .emotion-unhappy {
+    color: #b0c4de;
+  }
+  .emotion-sad {
+    color: #dda0dd;
+  }
+  .emotion-very-sad {
+    color: #800080;
+  }
 
-  .bg-emotion-very-happy { background-color: #FFB347; }
-  .bg-emotion-happy { background-color: #F0D878; }
-  .bg-emotion-content { background-color: #90EE90; }
-  .bg-emotion-neutral { background-color: #B0E0E6; }
-  .bg-emotion-unhappy { background-color: #B0C4DE; }
-  .bg-emotion-sad { background-color: #DDA0DD; }
-  .bg-emotion-very-sad { background-color: #800080; }
+  .bg-emotion-very-happy {
+    background-color: #ffb347;
+  }
+  .bg-emotion-happy {
+    background-color: #f0d878;
+  }
+  .bg-emotion-content {
+    background-color: #90ee90;
+  }
+  .bg-emotion-neutral {
+    background-color: #b0e0e6;
+  }
+  .bg-emotion-unhappy {
+    background-color: #b0c4de;
+  }
+  .bg-emotion-sad {
+    background-color: #dda0dd;
+  }
+  .bg-emotion-very-sad {
+    background-color: #800080;
+  }
 }
 
 /* Hide scrollbar but allow scroll */
@@ -226,4 +329,10 @@
 }
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+/* Reduced motion utility */
+.reduce-motion * {
+  animation: none !important;
+  transition: none !important;
 }
