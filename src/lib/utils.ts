@@ -15,3 +15,12 @@ export function getTodayStr(date: Date = new Date()): string {
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
+
+/**
+ * Parses a 'YYYY-MM-DD' string in the user's local timezone.
+ * `new Date('YYYY-MM-DD')` can shift to the previous day in negative UTC offsets.
+ */
+export function parseLocalDate(dateStr: string): Date {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}

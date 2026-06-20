@@ -13,7 +13,6 @@ import CategorySheet from './CategorySheet';
 
 export default function LogStream() {
   const { navigateTo } = useNavigationStore();
-  const logs = useLogStore((state) => state.logs);
   const addLog = useLogStore((state) => state.addLog);
   const deleteLog = useLogStore((state) => state.deleteLog);
   const updateLog = useLogStore((state) => state.updateLog);
@@ -69,7 +68,7 @@ export default function LogStream() {
   };
 
   const handleTransfer = (id: string) => {
-    const log = logs.find((l) => l.id === id);
+    const log = useLogStore.getState().logs.find((l) => l.id === id);
     if (log) {
       const nextCategory = log.category === 'idea' ? 'log' : 'idea';
       updateLog(id, { category: nextCategory });

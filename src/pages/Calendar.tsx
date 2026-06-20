@@ -19,7 +19,7 @@ import {
   subMonths,
 } from 'date-fns';
 import { useReducedMotion } from '@/lib/motion';
-import { getTodayStr } from '@/lib/utils';
+import { getTodayStr, parseLocalDate } from '@/lib/utils';
 
 const WEEKDAYS = ['Su', 'M', 'T', 'W', 'TH', 'F', 'Sa'];
 
@@ -276,7 +276,7 @@ export default function Calendar() {
             className="px-4 pb-2 overflow-hidden"
           >
             <h3 className="text-xs text-slate-400 mb-2">
-              {format(new Date(selectedDate), 'M月d日')} 的记录
+              {format(parseLocalDate(selectedDate), 'M月d日')} 的记录
             </h3>
             <div className="space-y-2 max-h-40 overflow-y-auto no-scrollbar">
               {selectedDayLogs.map((log, i) => (

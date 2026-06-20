@@ -93,6 +93,7 @@ export default function CurrentEmotion() {
     setShowEdit(false);
     setStatus('');
     setNote('');
+    setCurrentSubEmotion(null);
   };
 
   return (

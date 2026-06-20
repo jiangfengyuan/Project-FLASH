@@ -5,12 +5,13 @@ import { useLogStore } from '@/stores/logStore';
 import { useToastStore } from '@/stores/toastStore';
 import { getImportanceFromContent } from '@/lib/constants';
 import { haptic, HAPTIC_SUCCESS } from '@/lib/haptics';
+import { parseLocalDate } from '@/lib/utils';
 import IdeaList from './IdeaList';
 import DetailDrawer from '@/components/DetailDrawer';
 import EditDrawer from '@/components/EditDrawer';
 
 function getTimeGroup(dateStr: string): string {
-  const d = new Date(dateStr);
+  const d = parseLocalDate(dateStr);
   const today = new Date();
   const diffDays = Math.floor((today.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
   if (diffDays === 0) return '今天';

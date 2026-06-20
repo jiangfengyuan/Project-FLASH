@@ -1,6 +1,6 @@
-import { useEffect, lazy, Suspense, useMemo, useRef, useState } from 'react';
+import { useEffect, lazy, Suspense, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useNavigationStore, type Tab, type Page, TAB_PAGES } from '@/stores/navigationStore';
+import { useNavigationStore, type Page, TAB_PAGES, type Tab } from '@/stores/navigationStore';
 import { useReducedMotion } from '@/lib/motion';
 import BottomNav from '@/components/BottomNav';
 import SplashScreen from '@/components/SplashScreen';
@@ -36,42 +36,12 @@ const renderPage = (currentPage: Page) => {
   }
 };
 
-function getPageDirection(prevPage: Page, nextPage: Page): number {
-  const prevTabIndex = TAB_PAGES.indexOf(prevPage as Tab);
-  const nextTabIndex = TAB_PAGES.indexOf(nextPage as Tab);
-
-  // Both pages are tabs: direction follows tab order.
-  if (prevTabIndex !== -1 && nextTabIndex !== -1) {
-    return Math.sign(nextTabIndex - prevTabIndex);
-  }
-
-  // Entering a non-tab page (e.g. log -> logFlow): slide forward.
-  if (prevTabIndex !== -1 && nextTabIndex === -1) {
-    return 1;
-  }
-
-  // Leaving a non-tab page (e.g. logFlow -> log): slide backward relative to active tab.
-  if (prevTabIndex === -1 && nextTabIndex !== -1) {
-    return -1;
-  }
-
-  // Both non-tab pages: no directional preference.
-  return 0;
-}
-
 export default function App() {
   const reduced = useReducedMotion();
   const currentPage = useNavigationStore((state) => state.currentPage);
   const showSplash = useNavigationStore((state) => state.showSplash);
   const setShowSplash = useNavigationStore((state) => state.setShowSplash);
-
-  const prevPageRef = useRef<Page>(currentPage);
-  const [direction, setDirection] = useState(0);
-
-  useEffect(() => {
-    setDirection(getPageDirection(prevPageRef.current, currentPage));
-    prevPageRef.current = currentPage;
-  }, [currentPage]);
+  const direction = useNavigationStore((state) => state.direction);
 
   useEffect(() => {
     if (showSplash) {

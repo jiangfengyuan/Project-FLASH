@@ -68,6 +68,9 @@ export default function InputArea({ mode, onModeChange, onSubmit }: InputAreaPro
   const recordingTimer = useRef<ReturnType<typeof setInterval>>(undefined);
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const recordingActiveRef = useRef(false);
+  const finalTranscriptRef = useRef('');
+  const interimTranscriptRef = useRef('');
+  const lastFinalIndexRef = useRef(-1);
 
   const SpeechRecognitionCtor = getSpeechRecognition();
   const speechSupported = SpeechRecognitionCtor !== null;
@@ -110,6 +113,9 @@ export default function InputArea({ mode, onModeChange, onSubmit }: InputAreaPro
     haptic(HAPTIC_TAP);
     setRecordingError(null);
     setTranscript('');
+    finalTranscriptRef.current = '';
+    interimTranscriptRef.current = '';
+    lastFinalIndexRef.current = -1;
 
     if (!speechSupported) {
       showToast('当前浏览器不支持语音转写，请使用键盘输入', 'error');
@@ -128,22 +134,24 @@ export default function InputArea({ mode, onModeChange, onSubmit }: InputAreaPro
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       const results = event.results;
-      let final = '';
       let interim = '';
       for (let i = 0; i < results.length; i++) {
         const result = results.item(i);
         const transcriptText = result.item(0).transcript;
         if (result.isFinal) {
-          final += transcriptText;
+          if (i > lastFinalIndexRef.current) {
+            finalTranscriptRef.current +=
+              (finalTranscriptRef.current ? ' ' : '') + transcriptText;
+            lastFinalIndexRef.current = i;
+          }
         } else {
-          interim += transcriptText;
+          interim = transcriptText;
         }
       }
-      setTranscript((prev) => {
-        const base = prev.replace(/\.\.\.$/, '');
-        const next = final || interim;
-        return next ? `${base}${next}...` : prev;
-      });
+      interimTranscriptRef.current = interim;
+      const display =
+        finalTranscriptRef.current + (interim ? ` ${interim}...` : '');
+      setTranscript(display.trim());
     };
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
@@ -237,6 +245,9 @@ export default function InputArea({ mode, onModeChange, onSubmit }: InputAreaPro
     setText('');
     setSelectedTag(null);
     setTranscript('');
+    finalTranscriptRef.current = '';
+    interimTranscriptRef.current = '';
+    lastFinalIndexRef.current = -1;
     setRecordingTime(0);
     setRecordingError(null);
   };

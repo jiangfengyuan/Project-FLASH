@@ -7,6 +7,7 @@ import { CATEGORY_LABELS, getImportanceDisplay } from '@/lib/constants';
 import LiquidGlassCard from '@/components/LiquidGlassCard';
 import ConfirmDrawer from '@/components/ConfirmDrawer';
 import { format } from 'date-fns';
+import { parseLocalDate } from '@/lib/utils';
 import { useReducedMotion, fadeTransition } from '@/lib/motion';
 import { haptic, HAPTIC_DELETE, HAPTIC_TAP } from '@/lib/haptics';
 
@@ -69,7 +70,7 @@ const IdeaItem = memo(function IdeaItem({
       <div className="p-4 relative">
         <div className="flex items-center gap-2 mb-1.5">
           <span className="text-[11px] text-slate-300 font-mono">
-            {format(new Date(idea.recordDate), 'yy.MM.dd')}
+            {format(parseLocalDate(idea.recordDate), 'yy.MM.dd')}
           </span>
           {importanceMark && (
             <span
