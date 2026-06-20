@@ -5,6 +5,13 @@
 # For more details, see
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
+# Capacitor plugin keep rules
+-keep public class * extends com.getcapacitor.Plugin { *; }
+-keep public class com.getcapacitor.** { *; }
+-keepclassmembers class * {
+    @com.getcapacitor.annotation.CapacitorPlugin *;
+}
+
 # If your project uses WebView with JS, uncomment the following
 # and specify the fully qualified class name to the JavaScript interface
 # class:
