@@ -143,6 +143,27 @@ export default function Calendar() {
 
   const todayStr = getTodayStr();
 
+  const logsByDate = useMemo(() => {
+    const map = new Map<string, (typeof logs)[0][]>();
+    logs.forEach((log) => {
+      if (log.category !== 'log') return;
+      const list = map.get(log.recordDate) || [];
+      list.push(log);
+      map.set(log.recordDate, list);
+    });
+    return map;
+  }, [logs]);
+
+  const emotionsByDate = useMemo(() => {
+    const map = new Map<string, (typeof emotions)[0][]>();
+    emotions.forEach((e) => {
+      const list = map.get(e.recordDate) || [];
+      list.push(e);
+      map.set(e.recordDate, list);
+    });
+    return map;
+  }, [emotions]);
+
   const calendarDays = useMemo(() => {
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(monthStart);
@@ -154,8 +175,8 @@ export default function Calendar() {
     let day = calendarStart;
     while (day <= calendarEnd) {
       const dateStr = format(day, 'yyyy-MM-dd');
-      const dayLogs = logs.filter((log) => log.recordDate === dateStr && log.category === 'log');
-      const dayEmotions = emotions.filter((e) => e.recordDate === dateStr);
+      const dayLogs = logsByDate.get(dateStr) || [];
+      const dayEmotions = emotionsByDate.get(dateStr) || [];
 
       let tagColor: string | null = null;
       if (dayLogs.length > 0) {
@@ -200,7 +221,7 @@ export default function Calendar() {
     }
 
     return days;
-  }, [currentMonth, logs, emotions]);
+  }, [currentMonth, logsByDate, emotionsByDate]);
 
   const selectedDayLogs = useMemo(() => {
     if (!selectedDate) return [];

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, memo } from 'react';
 
 const PALETTE = [
   { r: 160, g: 210, b: 240 }, // pale azure
@@ -56,7 +56,7 @@ function drawStaticBackground(ctx: CanvasRenderingContext2D, width: number, heig
   }
 }
 
-export default function WaveBackground() {
+function WaveBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number>(0);
 
@@ -154,3 +154,5 @@ export default function WaveBackground() {
     />
   );
 }
+
+export default memo(WaveBackground);
