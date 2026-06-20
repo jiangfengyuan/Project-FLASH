@@ -81,7 +81,7 @@ export default function CurrentEmotion() {
 
   const handleSave = () => {
     addEmotion({
-      level: sliderValue as EmotionLevel,
+      level: sliderValue,
       subEmotion: currentSubEmotion,
       status: status || null,
       note: note || null,
@@ -113,7 +113,7 @@ export default function CurrentEmotion() {
               : { type: 'spring', damping: 0.7, stiffness: 150, duration: 0.3 }
           }
         >
-          <EmotionEmoji level={sliderValue as EmotionLevel} size={140} />
+          <EmotionEmoji level={sliderValue} size={140} />
         </motion.div>
         <motion.p
           key={`label-${sliderValue}`}
@@ -121,9 +121,9 @@ export default function CurrentEmotion() {
           animate={{ opacity: 1, y: 0 }}
           transition={fadeTransition(reduced)}
           className="mt-4 text-lg font-medium"
-          style={{ color: LEVEL_COLORS[sliderValue as EmotionLevel] }}
+          style={{ color: LEVEL_COLORS[sliderValue] }}
         >
-          {LEVEL_NAMES[sliderValue as EmotionLevel]}
+          {LEVEL_NAMES[sliderValue]}
         </motion.p>
       </div>
 
@@ -174,7 +174,7 @@ export default function CurrentEmotion() {
           >
             <div
               className="w-3 h-3 rounded-full"
-              style={{ backgroundColor: LEVEL_COLORS[sliderValue as EmotionLevel] }}
+              style={{ backgroundColor: LEVEL_COLORS[sliderValue] }}
             />
           </div>
         </div>
@@ -267,7 +267,7 @@ export default function CurrentEmotion() {
                 <button
                   onClick={handleSave}
                   className="liquid-glass-pill px-6 py-2 text-sm text-white font-medium flex items-center gap-2 active:scale-95 transition-transform"
-                  style={{ background: `${LEVEL_COLORS[sliderValue as EmotionLevel]}30` }}
+                  style={{ background: `${LEVEL_COLORS[sliderValue]}30` }}
                 >
                   <Save size={14} />
                   保存
@@ -283,7 +283,7 @@ export default function CurrentEmotion() {
           <button
             onClick={handleSave}
             className="w-full liquid-glass-pill py-3 text-white font-medium active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
-            style={{ background: `${LEVEL_COLORS[sliderValue as EmotionLevel]}25` }}
+            style={{ background: `${LEVEL_COLORS[sliderValue]}25` }}
           >
             <Save size={16} />
             记录此刻
@@ -295,7 +295,7 @@ export default function CurrentEmotion() {
 
       {showConfetti && (
         <ConfettiEffect
-          color={LEVEL_COLORS[sliderValue as EmotionLevel]}
+          color={LEVEL_COLORS[sliderValue]}
           onComplete={() => setShowConfetti(false)}
         />
       )}

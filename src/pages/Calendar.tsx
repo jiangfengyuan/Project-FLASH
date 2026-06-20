@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLogStore } from '@/stores/logStore';
 import { TAG_COLORS, type ColorTag } from '@/lib/constants';
 import { useEmotionStore } from '@/stores/emotionStore';
-import { LEVEL_COLORS, type EmotionLevel } from '@/lib/constants';
+import { LEVEL_COLORS } from '@/lib/constants';
 import LiquidGlassCard from '@/components/LiquidGlassCard';
 import {
   format,
@@ -199,7 +199,7 @@ export default function Calendar() {
       if (dayEmotions.length > 0) {
         const seen = new Set<string>();
         dayEmotions.forEach((e) => {
-          const c = LEVEL_COLORS[e.level as EmotionLevel];
+          const c = LEVEL_COLORS[e.level];
           if (!seen.has(c)) {
             seen.add(c);
             emotionColors.push(c);

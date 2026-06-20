@@ -1,13 +1,16 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import BottomNav from '@/components/BottomNav';
 import { useNavigationStore } from '@/stores/navigationStore';
 
 describe('BottomNav', () => {
+  let vibrate: ReturnType<typeof vi.fn>;
+
   beforeEach(() => {
     localStorage.clear();
     useNavigationStore.setState(useNavigationStore.getInitialState(), true);
-    vi.stubGlobal('navigator', { vibrate: vi.fn() });
+    vibrate = vi.fn();
+    vi.stubGlobal('navigator', { vibrate });
   });
 
   afterEach(() => {
@@ -39,6 +42,6 @@ describe('BottomNav', () => {
   it('triggers haptic feedback on click', () => {
     render(<BottomNav />);
     fireEvent.click(screen.getByLabelText('Idea'));
-    expect(navigator.vibrate).toHaveBeenCalled();
+    expect(vibrate).toHaveBeenCalled();
   });
 });

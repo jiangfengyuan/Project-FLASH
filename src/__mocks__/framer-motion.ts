@@ -25,7 +25,7 @@ export const motion = new Proxy(
         delete (cleaned as Record<string, unknown>).whileHover;
         delete (cleaned as Record<string, unknown>).layout;
         delete (cleaned as Record<string, unknown>).layoutId;
-        return createElement(tag as string, cleaned, children as ReactNode);
+        return createElement(tag, cleaned, children as ReactNode);
       });
     },
   }
