@@ -9,12 +9,9 @@ const config: CapacitorConfig = {
   },
   android: {
     backgroundColor: '#0a0e1a',
-    statusBarStyle: 'LIGHT',
-    statusBarColor: '#0a0e1a',
   },
   ios: {
     backgroundColor: '#0a0e1a',
-    statusBarStyle: 'LIGHT',
   },
 };
 

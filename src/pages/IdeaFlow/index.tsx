@@ -144,7 +144,7 @@ export default function IdeaFlow() {
             data={flatIdeas}
             style={{ height: '100%' }}
             className="no-scrollbar"
-            itemContent={(_index, idea) => (
+            itemContent={(_index, _groupIndex, idea) => (
               <div className="pb-3">
                 <IdeaItem
                   idea={idea}
