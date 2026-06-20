@@ -6,7 +6,8 @@ import { useToastStore } from '@/stores/toastStore';
 import { getImportanceFromContent } from '@/lib/constants';
 import { haptic, HAPTIC_SUCCESS } from '@/lib/haptics';
 import { parseLocalDate } from '@/lib/utils';
-import IdeaList from './IdeaList';
+import { GroupedVirtuoso } from 'react-virtuoso';
+import IdeaList, { IdeaItem } from './IdeaList';
 import DetailDrawer from '@/components/DetailDrawer';
 import EditDrawer from '@/components/EditDrawer';
 
@@ -50,6 +51,18 @@ export default function IdeaFlow() {
     });
     return result;
   }, [ideas]);
+
+  const { flatIdeas, groupCounts, groupLabels } = useMemo(() => {
+    const flat: typeof ideas = [];
+    const counts: number[] = [];
+    const labels: string[] = [];
+    groups.forEach((g) => {
+      labels.push(g.label);
+      counts.push(g.items.length);
+      flat.push(...g.items);
+    });
+    return { flatIdeas: flat, groupCounts: counts, groupLabels: labels };
+  }, [groups]);
 
   const handleMenuAction = (action: 'edit' | 'delete' | 'transfer', id: string) => {
     if (action === 'edit') {
@@ -119,29 +132,56 @@ export default function IdeaFlow() {
         </motion.div>
       )}
 
-      <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-4">
-        {groups.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-20 text-slate-500">
-            <Lightbulb size={40} className="mb-3 opacity-40" />
-            <p className="text-sm">还没有想法记录</p>
-            <p className="text-xs mt-1">在 Log 页面将记录标记为 IDEA</p>
-          </div>
-        )}
-        {groups.map((group) => (
-          <div key={group.label} className="mb-4">
-            <h3 className="text-[11px] text-slate-300 font-medium mb-2 sticky top-0 py-1 z-10">
-              {group.label}
-            </h3>
-            <IdeaList
-              ideas={group.items}
-              onDetail={setDetailLog}
-              onMenuAction={handleMenuAction}
-              menuOpenId={menuOpenId}
-              onMenuToggle={(id) => setMenuOpenId(menuOpenId === id ? null : id)}
-            />
-          </div>
-        ))}
-      </div>
+      {ideas.length > 50 ? (
+        <div className="flex-1 overflow-hidden px-4 pb-4">
+          <GroupedVirtuoso
+            groupCounts={groupCounts}
+            groupContent={(index) => (
+              <h3 className="text-[11px] text-slate-300 font-medium mb-2 py-1">
+                {groupLabels[index]}
+              </h3>
+            )}
+            data={flatIdeas}
+            style={{ height: '100%' }}
+            className="no-scrollbar"
+            itemContent={(_index, idea) => (
+              <div className="pb-3">
+                <IdeaItem
+                  idea={idea}
+                  onDetail={setDetailLog}
+                  onMenuAction={handleMenuAction}
+                  menuOpenId={menuOpenId}
+                  onMenuToggle={(id) => setMenuOpenId(menuOpenId === id ? null : id)}
+                />
+              </div>
+            )}
+          />
+        </div>
+      ) : (
+        <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-4">
+          {groups.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+              <Lightbulb size={40} className="mb-3 opacity-40" />
+              <p className="text-sm">还没有想法记录</p>
+              <p className="text-xs mt-1">在 Log 页面将记录标记为 IDEA</p>
+            </div>
+          )}
+          {groups.map((group) => (
+            <div key={group.label} className="mb-4">
+              <h3 className="text-[11px] text-slate-300 font-medium mb-2 sticky top-0 py-1 z-10">
+                {group.label}
+              </h3>
+              <IdeaList
+                ideas={group.items}
+                onDetail={setDetailLog}
+                onMenuAction={handleMenuAction}
+                menuOpenId={menuOpenId}
+                onMenuToggle={(id) => setMenuOpenId(menuOpenId === id ? null : id)}
+              />
+            </div>
+          ))}
+        </div>
+      )}
 
       <AnimatePresence>
         {detailLog && (

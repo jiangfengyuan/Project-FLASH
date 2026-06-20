@@ -13,6 +13,7 @@ import { useNavigationStore } from '@/stores/navigationStore';
 import { useLogStore, type LogItem } from '@/stores/logStore';
 import { TAG_COLORS, TAG_NAMES, COLOR_TAGS } from '@/lib/constants';
 import { useToastStore } from '@/stores/toastStore';
+import { Virtuoso } from 'react-virtuoso';
 import LiquidGlassCard from '@/components/LiquidGlassCard';
 import DetailDrawer from '@/components/DetailDrawer';
 import EditDrawer from '@/components/EditDrawer';
@@ -131,6 +132,13 @@ const LogCard = memo(function LogCard({
     </LiquidGlassCard>
   );
 });
+
+const EmptyLogList = () => (
+  <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+    <Search size={36} className="mb-3 opacity-40" />
+    <p className="text-sm">没有找到匹配的记录</p>
+  </div>
+);
 
 export default function LogFlow() {
   const { navigateTo } = useNavigationStore();
@@ -268,39 +276,62 @@ export default function LogFlow() {
       </AnimatePresence>
 
       {/* Log List */}
-      <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-4 pt-2 space-y-3">
-        <AnimatePresence mode="popLayout">
-          {filteredLogs.map((log) => (
+      {filteredLogs.length > 50 ? (
+        <div className="flex-1 overflow-hidden px-4 pb-4 pt-2">
+          <Virtuoso
+            data={filteredLogs}
+            style={{ height: '100%' }}
+            className="no-scrollbar"
+            components={{ EmptyPlaceholder: EmptyLogList }}
+            itemContent={(_index, log) => (
+              <div className="pb-3">
+                <LogCard
+                  log={log}
+                  menuOpenId={menuOpenId}
+                  onMenuToggle={(id) => setMenuOpenId(menuOpenId === id ? null : id)}
+                  onDetail={setDetailLog}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              </div>
+            )}
+          />
+        </div>
+      ) : (
+        <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-4 pt-2 space-y-3">
+          <AnimatePresence mode="popLayout">
+            {filteredLogs.map((log) => (
+              <motion.div
+                key={log.id}
+                layout
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={fadeTransition(reduced)}
+              >
+                <LogCard
+                  log={log}
+                  menuOpenId={menuOpenId}
+                  onMenuToggle={(id) => setMenuOpenId(menuOpenId === id ? null : id)}
+                  onDetail={setDetailLog}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+          {filteredLogs.length === 0 && (
             <motion.div
-              key={log.id}
-              layout
-              initial={{ opacity: 0, y: 8 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={fadeTransition(reduced)}
+              className="flex flex-col items-center justify-center py-20 text-slate-500"
             >
-              <LogCard
-                log={log}
-                menuOpenId={menuOpenId}
-                onMenuToggle={(id) => setMenuOpenId(menuOpenId === id ? null : id)}
-                onDetail={setDetailLog}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
+              <Search size={36} className="mb-3 opacity-40" />
+              <p className="text-sm">没有找到匹配的记录</p>
             </motion.div>
-          ))}
-        </AnimatePresence>
-        {filteredLogs.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center justify-center py-20 text-slate-500"
-          >
-            <Search size={36} className="mb-3 opacity-40" />
-            <p className="text-sm">没有找到匹配的记录</p>
-          </motion.div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       <AnimatePresence>
         {detailLog && (

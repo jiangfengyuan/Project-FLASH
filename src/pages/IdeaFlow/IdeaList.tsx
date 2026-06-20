@@ -19,7 +19,7 @@ interface IdeaListProps {
   onMenuToggle: (id: string) => void;
 }
 
-const IdeaItem = memo(function IdeaItem({
+export const IdeaItem = memo(function IdeaItem({
   idea,
   onDetail,
   onMenuAction,

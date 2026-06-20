@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { Virtuoso } from 'react-virtuoso';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trash2, Frown, Angry, Meh } from 'lucide-react';
 import { useEmotionStore } from '@/stores/emotionStore';
@@ -82,28 +83,48 @@ const HistoryItem = memo(function HistoryItem({
   );
 });
 
+const EmptyHistoryList = () => (
+  <div className="text-center py-8 text-slate-600 text-sm">还没有情绪记录</div>
+);
+
 export default function HistoryList() {
   const emotions = useEmotionStore((state) => state.emotions);
   const deleteEmotion = useEmotionStore((state) => state.deleteEmotion);
 
   return (
-    <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-4">
-      <h3 className="text-xs text-slate-400 mb-2 sticky top-0 backdrop-blur-sm py-1">历史记录</h3>
-      <AnimatePresence mode="popLayout">
-        <div className="space-y-2">
-          {emotions.map((record, i) => (
-            <HistoryItem key={record.id} record={record} index={i} onDelete={deleteEmotion} />
-          ))}
+    <div className="flex-1 overflow-hidden px-4 pb-4">
+      <h3 className="text-xs text-slate-400 mb-2 backdrop-blur-sm py-1">历史记录</h3>
+      {emotions.length > 50 ? (
+        <Virtuoso
+          data={emotions}
+          style={{ height: '100%' }}
+          className="no-scrollbar"
+          components={{ EmptyPlaceholder: EmptyHistoryList }}
+          itemContent={(_index, record) => (
+            <div className="pb-2">
+              <HistoryItem record={record} index={_index} onDelete={deleteEmotion} />
+            </div>
+          )}
+        />
+      ) : (
+        <div className="h-full overflow-y-auto no-scrollbar">
+          <AnimatePresence mode="popLayout">
+            <div className="space-y-2">
+              {emotions.map((record, i) => (
+                <HistoryItem key={record.id} record={record} index={i} onDelete={deleteEmotion} />
+              ))}
+            </div>
+          </AnimatePresence>
+          {emotions.length === 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center py-8 text-slate-600 text-sm"
+            >
+              还没有情绪记录
+            </motion.div>
+          )}
         </div>
-      </AnimatePresence>
-      {emotions.length === 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center py-8 text-slate-600 text-sm"
-        >
-          还没有情绪记录
-        </motion.div>
       )}
     </div>
   );
