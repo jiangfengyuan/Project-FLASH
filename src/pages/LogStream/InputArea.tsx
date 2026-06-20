@@ -140,8 +140,7 @@ export default function InputArea({ mode, onModeChange, onSubmit }: InputAreaPro
         const transcriptText = result.item(0).transcript;
         if (result.isFinal) {
           if (i > lastFinalIndexRef.current) {
-            finalTranscriptRef.current +=
-              (finalTranscriptRef.current ? ' ' : '') + transcriptText;
+            finalTranscriptRef.current += (finalTranscriptRef.current ? ' ' : '') + transcriptText;
             lastFinalIndexRef.current = i;
           }
         } else {
@@ -149,8 +148,7 @@ export default function InputArea({ mode, onModeChange, onSubmit }: InputAreaPro
         }
       }
       interimTranscriptRef.current = interim;
-      const display =
-        finalTranscriptRef.current + (interim ? ` ${interim}...` : '');
+      const display = finalTranscriptRef.current + (interim ? ` ${interim}...` : '');
       setTranscript(display.trim());
     };
 

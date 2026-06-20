@@ -24,4 +24,22 @@ describe('navigationStore', () => {
     expect(useNavigationStore.getState().activeTab).toBe('calendar');
     expect(useNavigationStore.getState().currentPage).toBe('calendar');
   });
+
+  it('computes direction based on tab order', () => {
+    useNavigationStore.getState().navigateTo('idea');
+    expect(useNavigationStore.getState().direction).toBe(1);
+    useNavigationStore.getState().navigateTo('log');
+    expect(useNavigationStore.getState().direction).toBe(-1);
+  });
+
+  it('computes forward direction when entering a non-tab page', () => {
+    useNavigationStore.getState().navigateTo('logFlow');
+    expect(useNavigationStore.getState().direction).toBe(1);
+  });
+
+  it('computes backward direction when leaving a non-tab page', () => {
+    useNavigationStore.getState().navigateTo('logFlow');
+    useNavigationStore.getState().navigateTo('log');
+    expect(useNavigationStore.getState().direction).toBe(-1);
+  });
 });

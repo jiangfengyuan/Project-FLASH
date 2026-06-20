@@ -120,6 +120,13 @@ export default function IdeaFlow() {
       )}
 
       <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-4">
+        {groups.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+            <Lightbulb size={40} className="mb-3 opacity-40" />
+            <p className="text-sm">还没有想法记录</p>
+            <p className="text-xs mt-1">在 Log 页面将记录标记为 IDEA</p>
+          </div>
+        )}
         {groups.map((group) => (
           <div key={group.label} className="mb-4">
             <h3 className="text-[11px] text-slate-300 font-medium mb-2 sticky top-0 py-1 z-10">
