@@ -1,4 +1,4 @@
-import { useState, useRef, memo, useMemo } from 'react';
+import { useState, useRef, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search,
@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useLogStore, type LogItem } from '@/stores/logStore';
+import { useShallow } from 'zustand/shallow';
 import { TAG_COLORS, TAG_NAMES } from '@/lib/constants';
 import { useToastStore } from '@/stores/toastStore';
 import { Virtuoso } from 'react-virtuoso';
@@ -150,7 +151,6 @@ export default function LogFlow() {
   const startDate = useLogStore((state) => state.startDate);
   const endDate = useLogStore((state) => state.endDate);
   const sortBy = useLogStore((state) => state.sortBy);
-  const getFilteredLogs = useLogStore((state) => state.getFilteredLogs);
   const setDateRange = useLogStore((state) => state.setDateRange);
   const setFilterTags = useLogStore((state) => state.setFilterTags);
   const setSortBy = useLogStore((state) => state.setSortBy);
@@ -166,10 +166,7 @@ export default function LogFlow() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState('');
 
-  const filteredLogs = useMemo(() => {
-    return getFilteredLogs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [logs, searchQuery, filterTags, startDate, endDate, sortBy, getFilteredLogs]);
+  const filteredLogs = useLogStore(useShallow((state) => state.getFilteredLogs()));
 
   const hasActiveFilters =
     filterTags.length > 0 || startDate || endDate || sortBy !== 'newest' || searchQuery;
