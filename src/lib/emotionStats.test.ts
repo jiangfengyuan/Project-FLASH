@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { format, subDays } from 'date-fns';
 import { getDailyAverages, getSubEmotionDistribution } from './emotionStats';
 import type { EmotionRecord } from '@/stores/emotionStore';
 
@@ -16,6 +17,10 @@ const make = (
   createdAt: `${recordDate}T10:00:00Z`,
 });
 
+afterEach(() => {
+  vi.useRealTimers();
+});
+
 describe('getDailyAverages', () => {
   it('averages same-day records', () => {
     const result = getDailyAverages([make('2026-07-13', 1), make('2026-07-13', 3)], 7);
@@ -24,6 +29,26 @@ describe('getDailyAverages', () => {
 
   it('returns empty for no data', () => {
     expect(getDailyAverages([], 7)).toEqual([]);
+  });
+
+  it('includes records on the first day of the window regardless of time of day', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-07-13T12:00:00'));
+
+    const startStr = format(subDays(new Date(), 6), 'yyyy-MM-dd');
+    const result = getDailyAverages([make(startStr, 2)], 7);
+    const day = result.find((d) => d.date === startStr);
+    expect(day?.average).toBe(2);
+  });
+
+  it('includes records on the last day of the window regardless of time of day', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-07-13T12:00:00'));
+
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
+    const result = getDailyAverages([make(todayStr, 3)], 7);
+    const day = result.find((d) => d.date === todayStr);
+    expect(day?.average).toBe(3);
   });
 });
 
@@ -41,5 +66,15 @@ describe('getSubEmotionDistribution', () => {
     const angry = result.find((r) => r.name === '生气');
     expect(sad?.count).toBe(1);
     expect(angry?.count).toBe(1);
+  });
+
+  it('includes sub-emotions on the first day of the window regardless of time of day', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-07-13T12:00:00'));
+
+    const startStr = format(subDays(new Date(), 6), 'yyyy-MM-dd');
+    const result = getSubEmotionDistribution([make(startStr, -2, 'sad')], 7);
+    const sad = result.find((r) => r.name === '伤心');
+    expect(sad?.count).toBe(1);
   });
 });

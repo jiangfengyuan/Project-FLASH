@@ -1,5 +1,5 @@
 import type { EmotionRecord, SubEmotion } from '@/stores/emotionStore';
-import { subDays, format, parseISO, isAfter } from 'date-fns';
+import { subDays, format, parse, startOfDay, endOfDay, isBefore, isAfter } from 'date-fns';
 
 const SUB_EMOTION_NAMES: Record<NonNullable<SubEmotion>, string> = {
   sad: '伤心',
@@ -7,13 +7,24 @@ const SUB_EMOTION_NAMES: Record<NonNullable<SubEmotion>, string> = {
   uncomfortable: '难受',
 };
 
+function parseRecordDate(recordDate: string) {
+  return parse(recordDate, 'yyyy-MM-dd', new Date());
+}
+
+function getDateWindow(days: number) {
+  const end = endOfDay(new Date());
+  const start = startOfDay(subDays(end, days - 1));
+  return { start, end };
+}
+
+function isInWindow(recordDate: string, start: Date, end: Date) {
+  const d = parseRecordDate(recordDate);
+  return !isBefore(d, start) && !isAfter(d, end);
+}
+
 export function getDailyAverages(emotions: EmotionRecord[], days: number) {
-  const end = new Date();
-  const start = subDays(end, days - 1);
-  const filtered = emotions.filter((e) => {
-    const d = parseISO(e.recordDate);
-    return d >= start && d <= end;
-  });
+  const { start, end } = getDateWindow(days);
+  const filtered = emotions.filter((e) => isInWindow(e.recordDate, start, end));
 
   if (filtered.length === 0) return [];
 
@@ -35,14 +46,12 @@ export function getDailyAverages(emotions: EmotionRecord[], days: number) {
 }
 
 export function getSubEmotionDistribution(emotions: EmotionRecord[], days: number) {
-  const end = new Date();
-  const start = subDays(end, days - 1);
+  const { start, end } = getDateWindow(days);
   const counts = new Map<string, number>();
 
   for (const e of emotions) {
-    const d = parseISO(e.recordDate);
     if (e.level >= 0 || !e.subEmotion) continue;
-    if (isAfter(start, d) || isAfter(d, end)) continue;
+    if (!isInWindow(e.recordDate, start, end)) continue;
     const name = SUB_EMOTION_NAMES[e.subEmotion];
     counts.set(name, (counts.get(name) ?? 0) + 1);
   }
