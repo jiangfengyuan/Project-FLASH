@@ -88,16 +88,34 @@ export function validateBackup(data: unknown): { valid: boolean; errors: string[
   return { valid: errors.length === 0, errors };
 }
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function isValidUuid(value: unknown): value is string {
+  return typeof value === 'string' && UUID_REGEX.test(value);
+}
+
+function isValidIsoDate(value: unknown): value is string {
+  return typeof value === 'string' && !Number.isNaN(Date.parse(value));
+}
+
+function isValidRecordDate(value: unknown): value is string {
+  return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+function isValidEmotionLevel(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value >= -3 && value <= 3;
+}
+
 function isValidLog(item: unknown): item is LogItem {
   if (typeof item !== 'object' || item === null) return false;
   const log = item as Partial<LogItem>;
   return (
-    typeof log.id === 'string' &&
+    isValidUuid(log.id) &&
     typeof log.content === 'string' &&
     typeof log.colorTag === 'string' &&
     typeof log.category === 'string' &&
-    typeof log.createdAt === 'string' &&
-    typeof log.recordDate === 'string'
+    isValidIsoDate(log.createdAt) &&
+    isValidRecordDate(log.recordDate)
   );
 }
 
@@ -105,10 +123,10 @@ function isValidEmotion(item: unknown): item is EmotionRecord {
   if (typeof item !== 'object' || item === null) return false;
   const e = item as Partial<EmotionRecord>;
   return (
-    typeof e.id === 'string' &&
-    typeof e.level === 'number' &&
-    typeof e.recordDate === 'string' &&
-    typeof e.createdAt === 'string'
+    isValidUuid(e.id) &&
+    isValidEmotionLevel(e.level) &&
+    isValidRecordDate(e.recordDate) &&
+    isValidIsoDate(e.createdAt)
   );
 }
 
