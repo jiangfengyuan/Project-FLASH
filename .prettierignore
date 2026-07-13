@@ -4,3 +4,4 @@ android
 ios
 package-lock.json
 *.lock
+docs/superpowers
