@@ -50,6 +50,7 @@ export default function Settings() {
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file) return;
     if (file.size > 10 * 1024 * 1024) {
       showToast('文件过大，请检查是否为 Flash 备份', 'error');
@@ -66,8 +67,6 @@ export default function Settings() {
       setPendingBackup(data as FlashBackup);
     } catch {
       showToast('无法解析该文件', 'error');
-    } finally {
-      e.target.value = '';
     }
   };
 
