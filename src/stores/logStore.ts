@@ -17,7 +17,6 @@ export interface LogItem {
 interface LogState {
   logs: LogItem[];
   searchQuery: string;
-  filterTag: ColorTag | null; // legacy, will be removed in Task 9
   editingId: string | null;
   // Filter state
   startDate: string | null;
@@ -30,7 +29,6 @@ interface LogState {
   updateLog: (id: string, updates: Partial<LogItem>) => void;
   deleteLog: (id: string) => void;
   setSearchQuery: (query: string) => void;
-  setFilterTag: (tag: ColorTag | null) => void; // legacy, will be removed in Task 9
   setEditingId: (id: string | null) => void;
   moveToIdea: (id: string) => void;
   // Filter actions
@@ -49,7 +47,6 @@ export const useLogStore = create<LogState>()(
     (set, get) => ({
       logs: [],
       searchQuery: '',
-      filterTag: null,
       editingId: null,
       // Filter state
       startDate: null,
@@ -57,14 +54,12 @@ export const useLogStore = create<LogState>()(
       filterTags: [],
       sortBy: 'newest',
       getFilteredLogs: () => {
-        const { logs, searchQuery, filterTag, filterTags, startDate, endDate, sortBy } = get();
+        const { logs, searchQuery, filterTags, startDate, endDate, sortBy } = get();
         const query = searchQuery.toLowerCase();
-        // Support legacy single-tag filter until Task 9 removes it
-        const effectiveTags = filterTags.length > 0 ? filterTags : filterTag ? [filterTag] : [];
         let filtered = logs.filter((log) => {
           if (log.category !== 'log') return false;
           const matchesSearch = !query || log.content.toLowerCase().includes(query);
-          const matchesTags = effectiveTags.length === 0 || effectiveTags.includes(log.colorTag);
+          const matchesTags = filterTags.length === 0 || filterTags.includes(log.colorTag);
           const matchesStart = !startDate || log.recordDate >= startDate;
           const matchesEnd = !endDate || log.recordDate <= endDate;
           return matchesSearch && matchesTags && matchesStart && matchesEnd;
@@ -110,7 +105,6 @@ export const useLogStore = create<LogState>()(
         }));
       },
       setSearchQuery: (query) => set({ searchQuery: query }),
-      setFilterTag: (tag) => set({ filterTag: tag }),
       setEditingId: (id) => set({ editingId: id }),
       moveToIdea: (id) => {
         set((state) => ({
@@ -131,7 +125,6 @@ export const useLogStore = create<LogState>()(
       resetFilters: () =>
         set({
           searchQuery: '',
-          filterTag: null,
           startDate: null,
           endDate: null,
           filterTags: [],

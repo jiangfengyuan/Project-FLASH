@@ -39,7 +39,7 @@ describe('logStore', () => {
   });
 
   it('filters logs by tag', () => {
-    useLogStore.getState().setFilterTag('urgent');
+    useLogStore.getState().setFilterTags(['urgent']);
     const filtered = useLogStore.getState().getFilteredLogs();
     expect(filtered.every((l) => l.colorTag === 'urgent')).toBe(true);
   });

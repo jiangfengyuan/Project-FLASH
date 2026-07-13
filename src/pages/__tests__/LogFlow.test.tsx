@@ -81,7 +81,7 @@ describe('LogFlow', () => {
       ],
     });
     render(<LogFlow />);
-    fireEvent.click(screen.getByLabelText('筛选标签'));
+    fireEvent.click(screen.getByLabelText('筛选与排序'));
     fireEvent.click(screen.getByRole('button', { name: '紧急' }));
     expect(screen.getByText('urgent task')).toBeInTheDocument();
     expect(screen.queryByText('daily note')).not.toBeInTheDocument();

@@ -11,13 +11,14 @@ import {
 } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useLogStore, type LogItem } from '@/stores/logStore';
-import { TAG_COLORS, TAG_NAMES, COLOR_TAGS } from '@/lib/constants';
+import { TAG_COLORS, TAG_NAMES } from '@/lib/constants';
 import { useToastStore } from '@/stores/toastStore';
 import { Virtuoso } from 'react-virtuoso';
 import LiquidGlassCard from '@/components/LiquidGlassCard';
 import DetailDrawer from '@/components/DetailDrawer';
 import EditDrawer from '@/components/EditDrawer';
 import ConfirmDrawer from '@/components/ConfirmDrawer';
+import FilterDrawer from './FilterDrawer';
 import { format } from 'date-fns';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import { useReducedMotion, fadeTransition } from '@/lib/motion';
@@ -145,28 +146,33 @@ export default function LogFlow() {
   const logs = useLogStore((state) => state.logs);
   const searchQuery = useLogStore((state) => state.searchQuery);
   const setSearchQuery = useLogStore((state) => state.setSearchQuery);
-  const filterTag = useLogStore((state) => state.filterTag);
-  const setFilterTag = useLogStore((state) => state.setFilterTag);
+  const filterTags = useLogStore((state) => state.filterTags);
+  const startDate = useLogStore((state) => state.startDate);
+  const endDate = useLogStore((state) => state.endDate);
+  const sortBy = useLogStore((state) => state.sortBy);
+  const getFilteredLogs = useLogStore((state) => state.getFilteredLogs);
+  const setDateRange = useLogStore((state) => state.setDateRange);
+  const setFilterTags = useLogStore((state) => state.setFilterTags);
+  const setSortBy = useLogStore((state) => state.setSortBy);
+  const resetFilters = useLogStore((state) => state.resetFilters);
   const deleteLog = useLogStore((state) => state.deleteLog);
   const updateLog = useLogStore((state) => state.updateLog);
   const showToast = useToastStore((state) => state.showToast);
 
   const reduced = useReducedMotion();
-  const [showFilters, setShowFilters] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [detailLog, setDetailLog] = useState<LogItem | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState('');
 
   const filteredLogs = useMemo(() => {
-    const query = searchQuery.toLowerCase();
-    return logs.filter((log) => {
-      if (log.category !== 'log') return false;
-      const matchesSearch = !query || log.content.toLowerCase().includes(query);
-      const matchesTag = !filterTag || log.colorTag === filterTag;
-      return matchesSearch && matchesTag;
-    });
-  }, [logs, searchQuery, filterTag]);
+    return getFilteredLogs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [logs, searchQuery, filterTags, startDate, endDate, sortBy, getFilteredLogs]);
+
+  const hasActiveFilters =
+    filterTags.length > 0 || startDate || endDate || sortBy !== 'newest' || searchQuery;
 
   const handleEdit = (id: string) => {
     const log = logs.find((l) => l.id === id);
@@ -201,7 +207,7 @@ export default function LogFlow() {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="relative flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 pt-3 pb-2">
         <button
@@ -227,49 +233,62 @@ export default function LogFlow() {
           )}
         </div>
         <button
-          onClick={() => setShowFilters(!showFilters)}
-          aria-label="筛选标签"
-          aria-expanded={showFilters}
+          onClick={() => setDrawerOpen(true)}
+          aria-label="筛选与排序"
+          aria-expanded={drawerOpen}
           className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors ${
-            showFilters || filterTag ? 'bg-blue-500/30' : 'bg-white/5'
+            drawerOpen || hasActiveFilters ? 'bg-blue-500/30' : 'bg-white/5'
           } active:bg-white/10`}
         >
           <SlidersHorizontal size={16} className="text-slate-300" />
         </button>
       </div>
 
-      {/* Filter Bar */}
+      {/* Active Filter Chips */}
       <AnimatePresence>
-        {showFilters && (
+        {hasActiveFilters && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             className="px-4 pb-2 overflow-hidden"
           >
-            <div className="liquid-glass-sm p-3 flex flex-wrap gap-2">
-              <button
-                onClick={() => setFilterTag(null)}
-                className={`px-3 py-1 rounded-full text-[11px] transition-all ${
-                  !filterTag ? 'bg-white/20 text-white' : 'bg-white/5 text-slate-400'
-                }`}
-              >
-                全部
-              </button>
-              {COLOR_TAGS.map((tag) => (
-                <button
+            <div className="flex flex-wrap gap-2">
+              {searchQuery && (
+                <FilterChip label={`搜索: ${searchQuery}`} onRemove={() => setSearchQuery('')} />
+              )}
+              {startDate && endDate && (
+                <FilterChip
+                  label={`${startDate} 至 ${endDate}`}
+                  onRemove={() => setDateRange(null, null)}
+                />
+              )}
+              {startDate && !endDate && (
+                <FilterChip label={`自 ${startDate}`} onRemove={() => setDateRange(null, null)} />
+              )}
+              {!startDate && endDate && (
+                <FilterChip label={`截至 ${endDate}`} onRemove={() => setDateRange(null, null)} />
+              )}
+              {filterTags.map((tag) => (
+                <FilterChip
                   key={tag}
-                  onClick={() => setFilterTag(filterTag === tag ? null : tag)}
-                  className="px-3 py-1 rounded-full text-[11px] transition-all"
-                  style={
-                    filterTag === tag
-                      ? { backgroundColor: `${TAG_COLORS[tag]}30`, color: TAG_COLORS[tag] }
-                      : { backgroundColor: 'rgba(255,255,255,0.05)', color: '#94A3B8' }
-                  }
-                >
-                  {TAG_NAMES[tag]}
-                </button>
+                  label={TAG_NAMES[tag]}
+                  color={TAG_COLORS[tag]}
+                  onRemove={() => setFilterTags(filterTags.filter((t) => t !== tag))}
+                />
               ))}
+              {sortBy !== 'newest' && (
+                <FilterChip
+                  label={sortBy === 'oldest' ? '时间正序' : '按标签分组'}
+                  onRemove={() => setSortBy('newest')}
+                />
+              )}
+              <button
+                onClick={resetFilters}
+                className="px-2 py-1 rounded-full text-[11px] text-slate-400 bg-white/5 active:bg-white/10 transition-colors"
+              >
+                重置
+              </button>
             </div>
           </motion.div>
         )}
@@ -361,6 +380,46 @@ export default function LogFlow() {
         }}
         placeholder="详细内容..."
       />
+
+      <FilterDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        resultCount={filteredLogs.length}
+      />
     </div>
+  );
+}
+
+function FilterChip({
+  label,
+  color,
+  onRemove,
+}: {
+  label: string;
+  color?: string;
+  onRemove: () => void;
+}) {
+  return (
+    <span
+      className="inline-flex items-center gap-1 pl-2.5 pr-1 py-1 rounded-full text-[11px] border"
+      style={
+        color
+          ? { backgroundColor: `${color}15`, borderColor: `${color}40`, color }
+          : {
+              backgroundColor: 'rgba(255,255,255,0.05)',
+              borderColor: 'rgba(255,255,255,0.1)',
+              color: '#94A3B8',
+            }
+      }
+    >
+      {label}
+      <button
+        onClick={onRemove}
+        aria-label={`移除 ${label}`}
+        className="w-4 h-4 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+      >
+        <X size={10} />
+      </button>
+    </span>
   );
 }
