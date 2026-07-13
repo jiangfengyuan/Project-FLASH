@@ -77,12 +77,9 @@ export default function IdeaFlow() {
       showToast('想法已删除', 'info');
       setMenuOpenId(null);
     } else if (action === 'transfer') {
-      const log = logs.find((l) => l.id === id);
-      if (log) {
-        updateLog(id, { category: log.category === 'idea' ? 'log' : 'idea' });
-        showToast('已转至 Log', 'success');
-        haptic(HAPTIC_SUCCESS);
-      }
+      updateLog(id, { category: 'log' });
+      showToast('已转至 Log', 'success');
+      haptic(HAPTIC_SUCCESS);
       setMenuOpenId(null);
     }
   };
@@ -195,12 +192,9 @@ export default function IdeaFlow() {
               setDetailLog(null);
             }}
             onTransfer={(id) => {
-              const log = logs.find((l) => l.id === id);
-              if (log) {
-                updateLog(id, { category: log.category === 'idea' ? 'log' : 'idea' });
-                showToast('已转至 Log', 'success');
-                haptic(HAPTIC_SUCCESS);
-              }
+              updateLog(id, { category: 'log' });
+              showToast('已转至 Log', 'success');
+              haptic(HAPTIC_SUCCESS);
               setDetailLog(null);
             }}
           />

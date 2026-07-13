@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Vitest localStorage persistence file
+.vitest-localstorage
+.vitest-localstorage-shm
+.vitest-localstorage-wal
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -22,3 +27,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# iOS / Capacitor
+ios/App/build/
+ios/App/Pods/
+ios/App/App.xcworkspace/xcuserdata/
+ios/App/App.xcodeproj/xcuserdata/
+ios/App/App.xcodeproj/project.xcworkspace/xcuserdata/
+ios/App/App.xcodeproj/project.xcworkspace/
+ios/DerivedData/

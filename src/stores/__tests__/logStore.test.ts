@@ -1,11 +1,12 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { useLogStore } from '@/stores/logStore';
+import { DEMO_LOGS } from '@/data/demo';
 import { getImportanceFromContent } from '@/lib/constants';
 
 describe('logStore', () => {
   beforeEach(() => {
     localStorage.clear();
-    useLogStore.setState(useLogStore.getInitialState(), true);
+    useLogStore.setState({ ...useLogStore.getInitialState(), logs: DEMO_LOGS }, true);
   });
 
   it('adds a log', () => {

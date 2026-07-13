@@ -112,6 +112,39 @@ npx cap open android
 
 ---
 
+## 构建 iOS 应用
+
+项目已集成 Capacitor iOS 平台，可将 Web 产物打包为 iOS 应用。
+
+### 前置准备
+
+1. 使用 macOS 系统。
+2. 安装 Xcode（建议 15 及以上版本）。
+3. 安装 CocoaPods：`sudo gem install cocoapods`。
+4. 已安装 `@capacitor/ios`（`npm install` 时已包含在 `devDependencies` 中）。
+
+### 构建步骤
+
+```bash
+# 1. 构建 Web 产物
+npm run build
+
+# 2. 同步 Web 资源到 iOS 项目
+npx cap sync ios
+
+# 3. 打开 Xcode 进行构建/签名/发布
+npx cap open ios
+```
+
+在 Xcode 中：
+
+1. 选择 `ios/App/App.xcodeproj` 或 `App.xcworkspace`。
+2. 配置 **Signing & Capabilities**：选择 Team 与 Bundle Identifier。
+3. 选择目标设备或模拟器，点击 **Run** 运行。
+4. 发布时选择 **Product > Archive**，按流程导出或上传 App Store Connect。
+
+---
+
 ## 项目目录
 
 ```
@@ -130,6 +163,11 @@ src/
 ├── pages/                   # 页面级组件
 ├── stores/                  # Zustand 全局状态
 └── test/                    # 测试配置
+
+docs/                        # 架构说明、审计报告等文档
+data/                        # Demo 数据（开发环境使用）
+android/                     # Capacitor Android 工程
+ios/                         # Capacitor iOS 工程
 ```
 
 ---

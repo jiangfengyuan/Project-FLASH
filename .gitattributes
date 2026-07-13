@@ -1,0 +1,23 @@
+# Normalize line endings for cross-platform collaboration
+* text=auto
+
+# Windows batch files must keep CRLF
+*.bat text eol=crlf
+
+# Unix shell scripts must keep LF
+*.sh text eol=lf
+gradlew text eol=lf
+
+# Binary files should not be touched
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.mp4 binary
+*.mov binary
+*.pdf binary
+*.ttf binary
+*.woff binary
+*.woff2 binary

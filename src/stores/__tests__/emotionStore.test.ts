@@ -1,10 +1,14 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { useEmotionStore } from '@/stores/emotionStore';
+import { DEMO_EMOTIONS } from '@/data/demo';
 
 describe('emotionStore', () => {
   beforeEach(() => {
     localStorage.clear();
-    useEmotionStore.setState(useEmotionStore.getInitialState(), true);
+    useEmotionStore.setState(
+      { ...useEmotionStore.getInitialState(), emotions: DEMO_EMOTIONS },
+      true
+    );
   });
 
   it('adds an emotion record', () => {

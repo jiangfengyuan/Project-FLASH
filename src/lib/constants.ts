@@ -77,9 +77,9 @@ export const LEVEL_NAMES: Record<EmotionLevel, string> = {
   2: '很开心',
   1: '开心',
   0: '中性',
-  [-1]: '不开心',
-  [-2]: '很不开心',
-  [-3]: '非常不开心',
+  '-1': '不开心',
+  '-2': '很不开心',
+  '-3': '非常不开心',
 };
 
 export const LEVEL_COLORS: Record<EmotionLevel, string> = {
@@ -87,9 +87,9 @@ export const LEVEL_COLORS: Record<EmotionLevel, string> = {
   2: '#F0D878',
   1: '#90EE90',
   0: '#B0E0E6',
-  [-1]: '#B0C4DE',
-  [-2]: '#DDA0DD',
-  [-3]: '#800080',
+  '-1': '#B0C4DE',
+  '-2': '#DDA0DD',
+  '-3': '#800080',
 };
 
 // ===================== Time =====================

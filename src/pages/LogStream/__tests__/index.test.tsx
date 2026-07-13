@@ -4,11 +4,12 @@ import LogStream from '@/pages/LogStream';
 import { useLogStore } from '@/stores/logStore';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useToastStore } from '@/stores/toastStore';
+import { DEMO_LOGS } from '@/data/demo';
 
 describe('LogStream', () => {
   beforeEach(() => {
     localStorage.clear();
-    useLogStore.setState(useLogStore.getInitialState(), true);
+    useLogStore.setState({ ...useLogStore.getInitialState(), logs: DEMO_LOGS }, true);
     useNavigationStore.setState(useNavigationStore.getInitialState(), true);
     useToastStore.setState(useToastStore.getInitialState(), true);
     vi.stubGlobal('navigator', { vibrate: vi.fn() });

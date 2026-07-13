@@ -56,9 +56,7 @@ export default function CurrentEmotion() {
       const newLevel = LEVELS[clampedIdx];
       if (newLevel !== currentLevel) {
         setCurrentLevel(newLevel);
-        if (typeof navigator !== 'undefined' && navigator.vibrate) {
-          navigator.vibrate(10);
-        }
+        haptic(HAPTIC_TAP);
       }
     },
     [currentLevel, setCurrentLevel]

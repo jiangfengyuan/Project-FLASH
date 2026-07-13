@@ -73,7 +73,7 @@ describe('InputArea', () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it('truncates text over 140 characters and shows toast', () => {
+  it('truncates text over 140 characters, submits truncated text and shows toast', () => {
     const onSubmit = vi.fn();
     const { rerender } = render(
       <InputArea mode="idle" onModeChange={vi.fn()} onSubmit={onSubmit} />
@@ -86,7 +86,7 @@ describe('InputArea', () => {
     fireEvent.change(input, { target: { value: longText } });
     fireEvent.click(screen.getByLabelText('发送'));
 
-    expect(onSubmit).not.toHaveBeenCalled();
+    expect(onSubmit).toHaveBeenCalledWith('a'.repeat(140), null);
     expect(useToastStore.getState().toast?.message).toContain('140');
   });
 });

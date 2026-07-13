@@ -6,13 +6,16 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': path.resolve(import.meta.dirname, './src'),
     },
   },
   test: {
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
+    env: {
+      NODE_OPTIONS: '--localstorage-file=./.vitest-localstorage',
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],
