@@ -10,7 +10,9 @@ import {
   validateBackup,
   mergeImport,
   overwriteImport,
+  sanitizeBackup,
   type FlashBackup,
+  type ImportResult,
 } from '@/lib/backup';
 import { exportToFile, readTextFromFile } from '@/lib/fileIO';
 import ConfirmDrawer from '@/components/ConfirmDrawer';
@@ -30,7 +32,16 @@ export default function Settings() {
   const [pendingBackup, setPendingBackup] = useState<FlashBackup | null>(null);
   const [importMode, setImportMode] = useState<'merge' | 'overwrite'>('merge');
   const [importIssues, setImportIssues] = useState<string[]>([]);
+  const [previewResult, setPreviewResult] = useState<ImportResult | null>(null);
+  const [importFinished, setImportFinished] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+
+  const closeImportDrawer = () => {
+    setPendingBackup(null);
+    setPreviewResult(null);
+    setImportIssues([]);
+    setImportFinished(false);
+  };
 
   const handleExport = async () => {
     if (logs.length === 0 && emotions.length === 0) {
@@ -65,34 +76,51 @@ export default function Settings() {
         showToast(`备份校验失败：${validation.errors[0]}`, 'error');
         return;
       }
-      setPendingBackup(data as FlashBackup);
+      const backup = data as FlashBackup;
+      const preview = sanitizeBackup(backup);
+      setImportFinished(false);
+      setImportIssues(
+        preview.importedLogs === 0 && preview.importedEmotions === 0
+          ? [...preview.specificIssues, '备份中没有可导入的有效记录，未执行覆盖']
+          : preview.specificIssues
+      );
+      setPreviewResult(preview);
+      setPendingBackup(backup);
     } catch {
       showToast('无法解析该文件', 'error');
     }
   };
 
   const handleImport = () => {
-    if (!pendingBackup) return;
-    const logResult =
+    if (!pendingBackup || !previewResult) return;
+    if (previewResult.importedLogs === 0 && previewResult.importedEmotions === 0) {
+      setImportIssues((prev) =>
+        prev.includes('备份中没有可导入的有效记录，未执行覆盖')
+          ? prev
+          : [...prev, '备份中没有可导入的有效记录，未执行覆盖']
+      );
+      return;
+    }
+    const result =
       importMode === 'merge'
         ? mergeImport(pendingBackup, logs, emotions)
         : overwriteImport(pendingBackup);
-    overwriteLogs(logResult.logs);
-    overwriteEmotions(logResult.emotions);
-    if (logResult.specificIssues.length > 0) {
-      setImportIssues(logResult.specificIssues);
+    overwriteLogs(result.logs);
+    overwriteEmotions(result.emotions);
+    setImportFinished(true);
+    if (result.specificIssues.length > 0) {
+      setImportIssues(result.specificIssues);
       return;
     }
     showToast(
-      `已导入 ${logResult.importedLogs} 条日志和 ${logResult.importedEmotions} 条情绪记录`,
+      `已导入 ${result.importedLogs} 条日志和 ${result.importedEmotions} 条情绪记录`,
       'success'
     );
-    setPendingBackup(null);
+    closeImportDrawer();
   };
 
   const handleDismissIssues = () => {
-    setImportIssues([]);
-    setPendingBackup(null);
+    closeImportDrawer();
   };
 
   const handleClear = () => {
@@ -164,6 +192,7 @@ export default function Settings() {
         ref={fileInputRef}
         type="file"
         accept=".json,application/json"
+        data-testid="import-file-input"
         className="hidden"
         onChange={(e) => {
           void handleFileSelect(e);
@@ -183,14 +212,16 @@ export default function Settings() {
         />
       )}
 
-      {pendingBackup && (
+      {pendingBackup && previewResult && (
         <ImportPreviewDrawer
           backup={pendingBackup}
           mode={importMode}
           issues={importIssues}
+          previewResult={previewResult}
+          importFinished={importFinished}
           onModeChange={setImportMode}
           onImport={handleImport}
-          onClose={() => setPendingBackup(null)}
+          onClose={closeImportDrawer}
           onDismissIssues={handleDismissIssues}
         />
       )}
@@ -272,6 +303,8 @@ interface ImportPreviewDrawerProps {
   backup: FlashBackup;
   mode: 'merge' | 'overwrite';
   issues: string[];
+  previewResult: ImportResult;
+  importFinished: boolean;
   onModeChange: (mode: 'merge' | 'overwrite') => void;
   onImport: () => void;
   onClose: () => void;
@@ -282,6 +315,8 @@ function ImportPreviewDrawer({
   backup,
   mode,
   issues,
+  previewResult,
+  importFinished,
   onModeChange,
   onImport,
   onClose,
@@ -312,13 +347,22 @@ function ImportPreviewDrawer({
           <p>应用版本：{backup.appVersion}</p>
           {backup.notes && <p>备注：{backup.notes}</p>}
           <p>
-            内容：<span className="text-white">{backup.logs.length}</span> 条日志 +{' '}
-            <span className="text-white">{backup.emotions.length}</span> 条情绪记录
+            内容：
+            <span data-testid="preview-log-count" className="text-white">
+              {previewResult.importedLogs}
+            </span>{' '}
+            条日志 +{' '}
+            <span data-testid="preview-emotion-count" className="text-white">
+              {previewResult.importedEmotions}
+            </span>{' '}
+            条情绪记录
           </p>
         </div>
         {issues.length > 0 && (
           <div className="rounded-xl bg-yellow-500/10 border border-yellow-500/20 p-3 space-y-2">
-            <p className="text-sm text-yellow-400">导入完成，但存在以下问题：</p>
+            <p className="text-sm text-yellow-400">
+              {importFinished ? '导入完成，但存在以下问题：' : '存在以下问题，导入时将跳过：'}
+            </p>
             <ul className="text-sm text-slate-300 space-y-1 list-disc list-inside">
               {issues.map((issue, index) => (
                 <li key={index}>{issue}</li>
@@ -360,19 +404,32 @@ function ImportPreviewDrawer({
             </div>
           </label>
         </div>
-        <button
-          onClick={onImport}
-          disabled={issues.length > 0}
-          className={`w-full py-3 rounded-xl text-white text-sm font-medium transition-colors ${
-            issues.length > 0
-              ? 'bg-white/10 text-slate-500 cursor-not-allowed'
-              : mode === 'overwrite'
-                ? 'bg-red-500/30 active:bg-red-500/40'
-                : 'bg-blue-500/30 active:bg-blue-500/40'
-          }`}
-        >
-          {issues.length > 0 ? '已导入' : mode === 'merge' ? '合并导入' : '确认覆盖'}
-        </button>
+        {(() => {
+          const canImport = previewResult.importedLogs > 0 || previewResult.importedEmotions > 0;
+          const disabled = !canImport || (importFinished && issues.length > 0);
+          const label = !canImport
+            ? '无法导入'
+            : importFinished && issues.length > 0
+              ? '已导入'
+              : mode === 'merge'
+                ? '合并导入'
+                : '确认覆盖';
+          return (
+            <button
+              onClick={onImport}
+              disabled={disabled}
+              className={`w-full py-3 rounded-xl text-sm font-medium transition-colors ${
+                disabled
+                  ? 'bg-white/10 text-slate-500 cursor-not-allowed'
+                  : mode === 'overwrite'
+                    ? 'bg-red-500/30 text-white active:bg-red-500/40'
+                    : 'bg-blue-500/30 text-white active:bg-blue-500/40'
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })()}
       </motion.div>
     </div>
   );

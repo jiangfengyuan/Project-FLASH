@@ -130,7 +130,7 @@ function isValidEmotion(item: unknown): item is EmotionRecord {
   );
 }
 
-function sanitizeBackup(backup: FlashBackup): ImportResult {
+export function sanitizeBackup(backup: FlashBackup): ImportResult {
   const logs: LogItem[] = [];
   const emotions: EmotionRecord[] = [];
   const specificIssues: string[] = [];
