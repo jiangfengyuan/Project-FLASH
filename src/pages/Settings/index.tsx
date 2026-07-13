@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, Upload, Download, Trash2, X } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useLogStore } from '@/stores/logStore';
@@ -199,32 +199,36 @@ export default function Settings() {
         }}
       />
 
-      {showExportDrawer && (
-        <ExportDrawer
-          logCount={logs.length}
-          emotionCount={emotions.length}
-          notes={exportNotes}
-          onNotesChange={setExportNotes}
-          onExport={() => {
-            void handleExport();
-          }}
-          onClose={() => setShowExportDrawer(false)}
-        />
-      )}
+      <AnimatePresence>
+        {showExportDrawer && (
+          <ExportDrawer
+            logCount={logs.length}
+            emotionCount={emotions.length}
+            notes={exportNotes}
+            onNotesChange={setExportNotes}
+            onExport={() => {
+              void handleExport();
+            }}
+            onClose={() => setShowExportDrawer(false)}
+          />
+        )}
+      </AnimatePresence>
 
-      {pendingBackup && previewResult && (
-        <ImportPreviewDrawer
-          backup={pendingBackup}
-          mode={importMode}
-          issues={importIssues}
-          previewResult={previewResult}
-          importFinished={importFinished}
-          onModeChange={setImportMode}
-          onImport={handleImport}
-          onClose={closeImportDrawer}
-          onDismissIssues={handleDismissIssues}
-        />
-      )}
+      <AnimatePresence>
+        {pendingBackup && previewResult && (
+          <ImportPreviewDrawer
+            backup={pendingBackup}
+            mode={importMode}
+            issues={importIssues}
+            previewResult={previewResult}
+            importFinished={importFinished}
+            onModeChange={setImportMode}
+            onImport={handleImport}
+            onClose={closeImportDrawer}
+            onDismissIssues={handleDismissIssues}
+          />
+        )}
+      </AnimatePresence>
 
       <ConfirmDrawer
         open={showClearConfirm}
