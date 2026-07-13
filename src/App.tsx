@@ -12,6 +12,7 @@ const LogFlow = lazy(() => import('@/pages/LogFlow'));
 const IdeaFlow = lazy(() => import('@/pages/IdeaFlow'));
 const Calendar = lazy(() => import('@/pages/Calendar'));
 const CurrentEmotion = lazy(() => import('@/pages/CurrentEmotion'));
+const Settings = lazy(() => import('@/pages/Settings'));
 
 const PageLoader = () => (
   <div className="h-full flex items-center justify-center">
@@ -31,6 +32,8 @@ const renderPage = (currentPage: Page) => {
       return <Calendar />;
     case 'emotion':
       return <CurrentEmotion />;
+    case 'settings':
+      return <Settings />;
     default:
       return <LogStream />;
   }

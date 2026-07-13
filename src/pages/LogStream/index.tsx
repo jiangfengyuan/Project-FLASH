@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, Settings } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useLogStore, type ColorTag, type LogItem } from '@/stores/logStore';
@@ -84,13 +84,22 @@ export default function LogStream() {
         <div className="liquid-glass-pill px-4 py-1.5">
           <h1 className="text-lg font-semibold text-white">日志</h1>
         </div>
-        <button
-          onClick={() => navigateTo('logFlow')}
-          aria-label="搜索记录"
-          className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 active:bg-white/10 transition-colors"
-        >
-          <Search size={18} className="text-slate-300" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigateTo('settings')}
+            aria-label="设置"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 active:bg-white/10 transition-colors"
+          >
+            <Settings size={18} className="text-white" />
+          </button>
+          <button
+            onClick={() => navigateTo('logFlow')}
+            aria-label="搜索记录"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 active:bg-white/10 transition-colors"
+          >
+            <Search size={18} className="text-slate-300" />
+          </button>
+        </div>
       </div>
 
       <StreamList onDetail={setDetailLog} />
