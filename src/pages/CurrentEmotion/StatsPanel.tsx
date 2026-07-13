@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { subDays, parseISO } from 'date-fns';
+
 import {
   ResponsiveContainer,
   LineChart,
@@ -13,7 +13,7 @@ import {
   Bar,
 } from 'recharts';
 import { useEmotionStore } from '@/stores/emotionStore';
-import { getDailyAverages, getSubEmotionDistribution } from '@/lib/emotionStats';
+import { getDailyAverages, getSubEmotionDistribution, hasEmotionData } from '@/lib/emotionStats';
 import { LEVEL_COLORS } from '@/lib/constants';
 
 const DAYS_OPTIONS = [
@@ -28,14 +28,7 @@ export default function StatsPanel() {
   const averages = useMemo(() => getDailyAverages(emotions, days), [emotions, days]);
   const distribution = useMemo(() => getSubEmotionDistribution(emotions, days), [emotions, days]);
 
-  const hasData = useMemo(() => {
-    const end = new Date();
-    const start = subDays(end, days - 1);
-    return emotions.some((e) => {
-      const d = parseISO(e.recordDate);
-      return d >= start && d <= end;
-    });
-  }, [emotions, days]);
+  const hasData = useMemo(() => hasEmotionData(emotions, days), [emotions, days]);
 
   return (
     <motion.div

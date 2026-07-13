@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { format, subDays } from 'date-fns';
-import { getDailyAverages, getSubEmotionDistribution } from './emotionStats';
+import { getDailyAverages, getSubEmotionDistribution, hasEmotionData } from './emotionStats';
 import type { EmotionRecord } from '@/stores/emotionStore';
 
 const make = (
@@ -76,5 +76,27 @@ describe('getSubEmotionDistribution', () => {
     const result = getSubEmotionDistribution([make(startStr, -2, 'sad')], 7);
     const sad = result.find((r) => r.name === '伤心');
     expect(sad?.count).toBe(1);
+  });
+});
+
+describe('hasEmotionData', () => {
+  it('returns false when there are no records', () => {
+    expect(hasEmotionData([], 7)).toBe(false);
+  });
+
+  it('returns true for a record on the first day of the window regardless of time of day', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-07-13T12:00:00'));
+
+    const startStr = format(subDays(new Date(), 6), 'yyyy-MM-dd');
+    expect(hasEmotionData([make(startStr, 2)], 7)).toBe(true);
+  });
+
+  it('returns false for a record before the window', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-07-13T12:00:00'));
+
+    const beforeStr = format(subDays(new Date(), 7), 'yyyy-MM-dd');
+    expect(hasEmotionData([make(beforeStr, 2)], 7)).toBe(false);
   });
 });

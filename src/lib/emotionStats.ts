@@ -22,6 +22,11 @@ function isInWindow(recordDate: string, start: Date, end: Date) {
   return !isBefore(d, start) && !isAfter(d, end);
 }
 
+export function hasEmotionData(emotions: EmotionRecord[], days: number) {
+  const { start, end } = getDateWindow(days);
+  return emotions.some((e) => isInWindow(e.recordDate, start, end));
+}
+
 export function getDailyAverages(emotions: EmotionRecord[], days: number) {
   const { start, end } = getDateWindow(days);
   const filtered = emotions.filter((e) => isInWindow(e.recordDate, start, end));
