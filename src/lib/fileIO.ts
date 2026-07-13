@@ -1,9 +1,8 @@
+import { Capacitor } from '@capacitor/core';
 import type { FlashBackup } from './backup';
 
 function isCapacitorNative(): boolean {
-  return typeof window !== 'undefined' &&
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).__CAPACITOR__ === true;
+  return Capacitor.isNativePlatform();
 }
 
 export async function exportToFile(backup: FlashBackup, filename: string): Promise<void> {
@@ -48,7 +47,7 @@ export async function exportToFile(backup: FlashBackup, filename: string): Promi
 export function readTextFromFile(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
+    reader.onload = () => resolve(reader.result as string);
     reader.onerror = () => reject(new Error('读取文件失败'));
     reader.readAsText(file);
   });
