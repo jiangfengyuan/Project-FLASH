@@ -19,7 +19,6 @@ interface EmotionState {
   currentSubEmotion: SubEmotion;
   addEmotion: (record: Omit<EmotionRecord, 'id' | 'createdAt'>) => void;
   deleteEmotion: (id: string) => void;
-  importEmotions: (emotions: EmotionRecord[]) => void;
   overwriteEmotions: (emotions: EmotionRecord[]) => void;
   setCurrentLevel: (level: EmotionLevel) => void;
   setCurrentSubEmotion: (sub: SubEmotion) => void;
@@ -46,12 +45,6 @@ export const useEmotionStore = create<EmotionState>()(
           emotions: state.emotions.filter((e) => e.id !== id),
         }));
       },
-      importEmotions: (emotions) =>
-        set((state) => {
-          const map = new Map(state.emotions.map((e) => [e.id, e]));
-          for (const emotion of emotions) map.set(emotion.id, emotion);
-          return { emotions: Array.from(map.values()) };
-        }),
       overwriteEmotions: (emotions) => set({ emotions }),
       setCurrentLevel: (level) => set({ currentLevel: level }),
       setCurrentSubEmotion: (sub) => set({ currentSubEmotion: sub }),

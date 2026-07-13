@@ -38,7 +38,6 @@ interface LogState {
   setSortBy: (sort: 'newest' | 'oldest' | 'tag') => void;
   resetFilters: () => void;
   // Import actions
-  importLogs: (logs: LogItem[]) => void;
   overwriteLogs: (logs: LogItem[]) => void;
 }
 
@@ -131,12 +130,6 @@ export const useLogStore = create<LogState>()(
           sortBy: 'newest',
         }),
       // Import actions
-      importLogs: (logs) =>
-        set((state) => {
-          const map = new Map(state.logs.map((l) => [l.id, l]));
-          for (const log of logs) map.set(log.id, log);
-          return { logs: Array.from(map.values()) };
-        }),
       overwriteLogs: (logs) => set({ logs }),
     }),
     {
