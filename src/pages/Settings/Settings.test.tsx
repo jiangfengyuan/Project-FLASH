@@ -16,7 +16,7 @@ describe('Settings', () => {
     expect(screen.getByText('导入备份')).toBeInTheDocument();
   });
 
-  it('shows empty data toast when exporting nothing', () => {
+  it('opens export drawer when export button is clicked', () => {
     render(<Settings />);
     fireEvent.click(screen.getByText('导出备份'));
     // The drawer opens; clicking export inside would show toast; test the drawer presence instead
