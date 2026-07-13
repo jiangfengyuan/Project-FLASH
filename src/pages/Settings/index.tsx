@@ -29,6 +29,7 @@ export default function Settings() {
   const [exportNotes, setExportNotes] = useState('');
   const [pendingBackup, setPendingBackup] = useState<FlashBackup | null>(null);
   const [importMode, setImportMode] = useState<'merge' | 'overwrite'>('merge');
+  const [importIssues, setImportIssues] = useState<string[]>([]);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const handleExport = async () => {
@@ -78,11 +79,19 @@ export default function Settings() {
         : overwriteImport(pendingBackup);
     overwriteLogs(logResult.logs);
     overwriteEmotions(logResult.emotions);
-    const issueText = logResult.specificIssues.length > 0 ? `，${logResult.specificIssues[0]}` : '';
+    if (logResult.specificIssues.length > 0) {
+      setImportIssues(logResult.specificIssues);
+      return;
+    }
     showToast(
-      `已导入 ${logResult.importedLogs} 条日志和 ${logResult.importedEmotions} 条情绪记录${issueText}`,
+      `已导入 ${logResult.importedLogs} 条日志和 ${logResult.importedEmotions} 条情绪记录`,
       'success'
     );
+    setPendingBackup(null);
+  };
+
+  const handleDismissIssues = () => {
+    setImportIssues([]);
     setPendingBackup(null);
   };
 
@@ -178,9 +187,11 @@ export default function Settings() {
         <ImportPreviewDrawer
           backup={pendingBackup}
           mode={importMode}
+          issues={importIssues}
           onModeChange={setImportMode}
           onImport={handleImport}
           onClose={() => setPendingBackup(null)}
+          onDismissIssues={handleDismissIssues}
         />
       )}
 
@@ -260,17 +271,21 @@ function ExportDrawer({
 interface ImportPreviewDrawerProps {
   backup: FlashBackup;
   mode: 'merge' | 'overwrite';
+  issues: string[];
   onModeChange: (mode: 'merge' | 'overwrite') => void;
   onImport: () => void;
   onClose: () => void;
+  onDismissIssues: () => void;
 }
 
 function ImportPreviewDrawer({
   backup,
   mode,
+  issues,
   onModeChange,
   onImport,
   onClose,
+  onDismissIssues,
 }: ImportPreviewDrawerProps) {
   return (
     <div className="absolute inset-0 z-50 flex items-end bg-black/40" onClick={onClose}>
@@ -301,6 +316,22 @@ function ImportPreviewDrawer({
             <span className="text-white">{backup.emotions.length}</span> 条情绪记录
           </p>
         </div>
+        {issues.length > 0 && (
+          <div className="rounded-xl bg-yellow-500/10 border border-yellow-500/20 p-3 space-y-2">
+            <p className="text-sm text-yellow-400">导入完成，但存在以下问题：</p>
+            <ul className="text-sm text-slate-300 space-y-1 list-disc list-inside">
+              {issues.map((issue, index) => (
+                <li key={index}>{issue}</li>
+              ))}
+            </ul>
+            <button
+              onClick={onDismissIssues}
+              className="w-full py-2 rounded-lg bg-yellow-500/20 text-yellow-400 text-sm font-medium active:bg-yellow-500/30 transition-colors"
+            >
+              我知道了
+            </button>
+          </div>
+        )}
         <div className="space-y-2">
           <label className="flex items-start gap-3 p-3 rounded-xl bg-white/5 cursor-pointer">
             <input
@@ -331,13 +362,16 @@ function ImportPreviewDrawer({
         </div>
         <button
           onClick={onImport}
+          disabled={issues.length > 0}
           className={`w-full py-3 rounded-xl text-white text-sm font-medium transition-colors ${
-            mode === 'overwrite'
-              ? 'bg-red-500/30 active:bg-red-500/40'
-              : 'bg-blue-500/30 active:bg-blue-500/40'
+            issues.length > 0
+              ? 'bg-white/10 text-slate-500 cursor-not-allowed'
+              : mode === 'overwrite'
+                ? 'bg-red-500/30 active:bg-red-500/40'
+                : 'bg-blue-500/30 active:bg-blue-500/40'
           }`}
         >
-          {mode === 'merge' ? '合并导入' : '确认覆盖'}
+          {issues.length > 0 ? '已导入' : mode === 'merge' ? '合并导入' : '确认覆盖'}
         </button>
       </motion.div>
     </div>
