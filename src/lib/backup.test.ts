@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import packageJson from '../../package.json';
 import { exportBackup, validateBackup, mergeImport, overwriteImport } from './backup';
 import type { LogItem } from '@/stores/logStore';
 import type { EmotionRecord } from '@/stores/emotionStore';
@@ -30,7 +31,7 @@ describe('exportBackup', () => {
   it('returns valid backup shape', () => {
     const result = exportBackup([makeLog(LOG_ID_A)], [makeEmotion(EMOTION_ID_A)], 'notes');
     expect(result.version).toBe('flash-backup-v1');
-    expect(result.appVersion).toBe('0.1.0');
+    expect(result.appVersion).toBe(packageJson.version);
     expect(result.notes).toBe('notes');
     expect(result.logs).toHaveLength(1);
     expect(result.emotions).toHaveLength(1);

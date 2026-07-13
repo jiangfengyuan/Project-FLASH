@@ -71,6 +71,8 @@ export default function InputArea({ mode, onModeChange, onSubmit }: InputAreaPro
   const finalTranscriptRef = useRef('');
   const interimTranscriptRef = useRef('');
   const lastFinalIndexRef = useRef(-1);
+  const endInPreviewTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const shouldEndInPreviewRef = useRef(false);
 
   const SpeechRecognitionCtor = getSpeechRecognition();
   const speechSupported = SpeechRecognitionCtor !== null;
@@ -126,6 +128,7 @@ export default function InputArea({ mode, onModeChange, onSubmit }: InputAreaPro
 
     onModeChange('recording');
     setRecordingTime(0);
+    shouldEndInPreviewRef.current = true;
 
     const recognition: SpeechRecognitionInstance = new SpeechRecognitionCtor();
     recognition.lang = 'zh-CN';
@@ -155,6 +158,7 @@ export default function InputArea({ mode, onModeChange, onSubmit }: InputAreaPro
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       if (event.error === 'aborted' || event.error === 'no-speech') return;
       setRecordingError('语音识别出错，请重试');
+      shouldEndInPreviewRef.current = false;
       stopRecognition();
       recordingActiveRef.current = false;
       onModeChange('idle');
@@ -165,8 +169,9 @@ export default function InputArea({ mode, onModeChange, onSubmit }: InputAreaPro
     recognition.onend = () => {
       recordingActiveRef.current = false;
       // Defer mode change to avoid racing with stopRecording.
-      setTimeout(() => {
-        if (mode === 'recording') {
+      endInPreviewTimeoutRef.current = setTimeout(() => {
+        if (shouldEndInPreviewRef.current) {
+          shouldEndInPreviewRef.current = false;
           onModeChange('preview');
         }
       }, 0);
@@ -179,10 +184,15 @@ export default function InputArea({ mode, onModeChange, onSubmit }: InputAreaPro
   const stopRecording = useCallback(() => {
     if (!recordingActiveRef.current) return;
     recordingActiveRef.current = false;
+    shouldEndInPreviewRef.current = false;
 
     if (recordingTimer.current) {
       clearInterval(recordingTimer.current);
       recordingTimer.current = undefined;
+    }
+    if (endInPreviewTimeoutRef.current) {
+      clearTimeout(endInPreviewTimeoutRef.current);
+      endInPreviewTimeoutRef.current = undefined;
     }
     stopRecognition();
     if (!transcript.trim()) {
@@ -238,6 +248,11 @@ export default function InputArea({ mode, onModeChange, onSubmit }: InputAreaPro
   };
 
   const handleCancel = () => {
+    shouldEndInPreviewRef.current = false;
+    if (endInPreviewTimeoutRef.current) {
+      clearTimeout(endInPreviewTimeoutRef.current);
+      endInPreviewTimeoutRef.current = undefined;
+    }
     stopRecognition();
     onModeChange('idle');
     setText('');

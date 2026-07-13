@@ -3,7 +3,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Settings from './index';
 import { useLogStore } from '@/stores/logStore';
 import { useEmotionStore } from '@/stores/emotionStore';
-import { exportBackup } from '@/lib/backup';
+import { useToastStore } from '@/stores/toastStore';
+import { exportBackup, MAX_BACKUP_SIZE_BYTES } from '@/lib/backup';
 import type { LogItem } from '@/stores/logStore';
 import type { EmotionRecord } from '@/stores/emotionStore';
 
@@ -48,6 +49,20 @@ describe('Settings', () => {
     render(<Settings />);
     expect(screen.getByText('导出备份')).toBeInTheDocument();
     expect(screen.getByText('导入备份')).toBeInTheDocument();
+  });
+
+  it('rejects import files larger than the backup size limit', async () => {
+    render(<Settings />);
+
+    const input = screen.getByTestId('import-file-input');
+    const oversized = new File(['x'.repeat(MAX_BACKUP_SIZE_BYTES + 1)], 'oversized.json', {
+      type: 'application/json',
+    });
+    fireEvent.change(input, { target: { files: [oversized] } });
+
+    await waitFor(() => {
+      expect(useToastStore.getState().toast?.message).toBe('文件过大，请检查是否为 Flash 备份');
+    });
   });
 
   it('opens export drawer when export button is clicked', () => {

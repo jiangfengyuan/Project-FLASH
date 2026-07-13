@@ -2,6 +2,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useLogStore } from '@/stores/logStore';
 import { COLOR_TAGS, TAG_NAMES, TAG_COLORS } from '@/lib/constants';
+import { subDays, startOfMonth, format } from 'date-fns';
+import { getTodayStr, parseLocalDate } from '@/lib/utils';
 
 interface FilterDrawerProps {
   open: boolean;
@@ -10,16 +12,30 @@ interface FilterDrawerProps {
 }
 
 export default function FilterDrawer({ open, onClose, resultCount }: FilterDrawerProps) {
-  const {
-    startDate,
-    endDate,
-    filterTags,
-    sortBy,
-    setDateRange,
-    toggleFilterTag,
-    setSortBy,
-    resetFilters,
-  } = useLogStore();
+  const startDate = useLogStore((s) => s.startDate);
+  const endDate = useLogStore((s) => s.endDate);
+  const filterTags = useLogStore((s) => s.filterTags);
+  const sortBy = useLogStore((s) => s.sortBy);
+  const setDateRange = useLogStore((s) => s.setDateRange);
+  const toggleFilterTag = useLogStore((s) => s.toggleFilterTag);
+  const setSortBy = useLogStore((s) => s.setSortBy);
+  const resetFilters = useLogStore((s) => s.resetFilters);
+
+  const handleStartChange = (value: string | null) => {
+    if (value && endDate && value > endDate) {
+      setDateRange(value, value);
+      return;
+    }
+    setDateRange(value, endDate);
+  };
+
+  const handleEndChange = (value: string | null) => {
+    if (value && startDate && value < startDate) {
+      setDateRange(value, value);
+      return;
+    }
+    setDateRange(startDate, value);
+  };
 
   return (
     <AnimatePresence>
@@ -48,22 +64,24 @@ export default function FilterDrawer({ open, onClose, resultCount }: FilterDrawe
               <div className="flex items-center gap-2">
                 <input
                   type="date"
+                  aria-label="开始日期"
                   value={startDate ?? ''}
-                  onChange={(e) => setDateRange(e.target.value || null, endDate)}
+                  onChange={(e) => handleStartChange(e.target.value || null)}
                   className="flex-1 bg-white/5 text-white text-sm rounded-lg px-3 py-2 outline-none"
                 />
                 <span className="text-slate-500">-</span>
                 <input
                   type="date"
+                  aria-label="结束日期"
                   value={endDate ?? ''}
-                  onChange={(e) => setDateRange(startDate, e.target.value || null)}
+                  onChange={(e) => handleEndChange(e.target.value || null)}
                   className="flex-1 bg-white/5 text-white text-sm rounded-lg px-3 py-2 outline-none"
                 />
               </div>
               <div className="flex gap-2 mt-2">
                 <QuickDate label="近 7 天" days={7} />
                 <QuickDate label="近 30 天" days={30} />
-                <QuickDate label="本月" days={0} />
+                <QuickDate label="本月" mode="month" />
               </div>
             </section>
 
@@ -124,15 +142,16 @@ export default function FilterDrawer({ open, onClose, resultCount }: FilterDrawe
   );
 }
 
-function QuickDate({ label, days }: { label: string; days: number }) {
-  const { setDateRange } = useLogStore();
+function QuickDate({ label, days, mode }: { label: string; days?: number; mode?: 'month' }) {
+  const setDateRange = useLogStore((s) => s.setDateRange);
 
   const handleClick = () => {
-    const end = new Date().toISOString().slice(0, 10);
+    const end = getTodayStr();
+    const endDate = parseLocalDate(end);
     const start =
-      days === 0
-        ? new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0, 10)
-        : new Date(Date.now() - days * 86400000).toISOString().slice(0, 10);
+      mode === 'month'
+        ? format(startOfMonth(endDate), 'yyyy-MM-dd')
+        : format(subDays(endDate, (days ?? 7) - 1), 'yyyy-MM-dd');
     setDateRange(start, end);
   };
 

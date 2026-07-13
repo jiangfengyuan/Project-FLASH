@@ -17,6 +17,9 @@ dist-ssr
 .vitest-localstorage-shm
 .vitest-localstorage-wal
 
+# Coverage output
+coverage
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

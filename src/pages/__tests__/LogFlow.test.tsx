@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import LogFlow from '@/pages/LogFlow';
 import { useLogStore } from '@/stores/logStore';
 import { useToastStore } from '@/stores/toastStore';
@@ -105,5 +105,20 @@ describe('LogFlow', () => {
     fireEvent.click(screen.getByText('transfer me'));
     fireEvent.click(screen.getByLabelText('转为 IDEA'));
     expect(useLogStore.getState().logs[0].category).toBe('idea');
+  });
+
+  it('auto-corrects date range when end is before start', async () => {
+    useLogStore.setState({ startDate: '2026-06-15', endDate: '2026-06-20' });
+    render(<LogFlow />);
+    fireEvent.click(screen.getByLabelText('筛选与排序'));
+
+    const endInput = screen.getByLabelText('结束日期');
+    fireEvent.change(endInput, { target: { value: '2026-06-10' } });
+
+    await waitFor(() => {
+      const state = useLogStore.getState();
+      expect(state.startDate).toBe('2026-06-10');
+      expect(state.endDate).toBe('2026-06-10');
+    });
   });
 });

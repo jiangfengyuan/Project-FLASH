@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import InputArea from '@/pages/LogStream/InputArea';
 import { useToastStore } from '@/stores/toastStore';
 
@@ -10,16 +10,18 @@ describe('InputArea', () => {
     vi.stubGlobal('navigator', { vibrate: vi.fn() });
     vi.stubGlobal(
       'SpeechRecognition',
-      vi.fn(() => ({
-        lang: '',
-        continuous: false,
-        interimResults: false,
-        onresult: null,
-        onerror: null,
-        onend: null,
-        start: vi.fn(),
-        stop: vi.fn(),
-      }))
+      vi.fn(function (this: unknown) {
+        return {
+          lang: '',
+          continuous: false,
+          interimResults: false,
+          onresult: null as ((event: Event) => void) | null,
+          onerror: null as ((event: Event) => void) | null,
+          onend: null as (() => void) | null,
+          start: vi.fn(),
+          stop: vi.fn(),
+        };
+      })
     );
   });
 
@@ -88,5 +90,23 @@ describe('InputArea', () => {
 
     expect(onSubmit).toHaveBeenCalledWith('a'.repeat(140), null);
     expect(useToastStore.getState().toast?.message).toContain('140');
+  });
+
+  it('transitions to preview when speech recognition ends naturally', async () => {
+    const onModeChange = vi.fn();
+    render(<InputArea mode="idle" onModeChange={onModeChange} onSubmit={vi.fn()} />);
+
+    const micButton = screen.getByLabelText('按住录音');
+    fireEvent.pointerDown(micButton);
+
+    const recognitionCtor = (
+      globalThis as unknown as { SpeechRecognition: ReturnType<typeof vi.fn> }
+    ).SpeechRecognition;
+    const recognitionInstance = recognitionCtor.mock.results[0].value as {
+      onend: (() => void) | null;
+    };
+    recognitionInstance.onend?.();
+
+    await waitFor(() => expect(onModeChange).toHaveBeenCalledWith('preview'));
   });
 });

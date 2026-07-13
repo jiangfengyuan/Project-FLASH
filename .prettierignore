@@ -2,6 +2,7 @@ node_modules
 dist
 android
 ios
+coverage
 package-lock.json
 *.lock
 docs/superpowers

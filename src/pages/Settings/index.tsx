@@ -11,6 +11,7 @@ import {
   mergeImport,
   overwriteImport,
   sanitizeBackup,
+  MAX_BACKUP_SIZE_BYTES,
   type FlashBackup,
   type ImportResult,
 } from '@/lib/backup';
@@ -64,7 +65,7 @@ export default function Settings() {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
-    if (file.size > 10 * 1024 * 1024) {
+    if (file.size > MAX_BACKUP_SIZE_BYTES) {
       showToast('文件过大，请检查是否为 Flash 备份', 'error');
       return;
     }

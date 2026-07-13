@@ -1,6 +1,8 @@
 import type { LogItem } from '@/stores/logStore';
 import type { EmotionRecord } from '@/stores/emotionStore';
+import packageJson from '../../package.json';
 
+export const APP_VERSION = packageJson.version;
 export const BACKUP_VERSION = 'flash-backup-v1';
 export const MAX_BACKUP_SIZE_BYTES = 10 * 1024 * 1024;
 
@@ -37,7 +39,7 @@ export function exportBackup(logs: LogItem[], emotions: EmotionRecord[], notes =
   return {
     version: BACKUP_VERSION,
     exportedAt: new Date().toISOString(),
-    appVersion: '0.1.0',
+    appVersion: APP_VERSION,
     notes,
     logs,
     emotions,
