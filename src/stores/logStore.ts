@@ -17,17 +17,31 @@ export interface LogItem {
 interface LogState {
   logs: LogItem[];
   searchQuery: string;
-  filterTag: ColorTag | null;
+  filterTag: ColorTag | null; // legacy, will be removed in Task 9
   editingId: string | null;
+  // Filter state
+  startDate: string | null;
+  endDate: string | null;
+  filterTags: ColorTag[];
+  sortBy: 'newest' | 'oldest' | 'tag';
   getFilteredLogs: () => LogItem[];
   getIdeas: () => LogItem[];
   addLog: (content: string, colorTag: ColorTag, category?: Category) => void;
   updateLog: (id: string, updates: Partial<LogItem>) => void;
   deleteLog: (id: string) => void;
   setSearchQuery: (query: string) => void;
-  setFilterTag: (tag: ColorTag | null) => void;
+  setFilterTag: (tag: ColorTag | null) => void; // legacy, will be removed in Task 9
   setEditingId: (id: string | null) => void;
   moveToIdea: (id: string) => void;
+  // Filter actions
+  setDateRange: (start: string | null, end: string | null) => void;
+  setFilterTags: (tags: ColorTag[]) => void;
+  toggleFilterTag: (tag: ColorTag) => void;
+  setSortBy: (sort: 'newest' | 'oldest' | 'tag') => void;
+  resetFilters: () => void;
+  // Import actions
+  importLogs: (logs: LogItem[]) => void;
+  overwriteLogs: (logs: LogItem[]) => void;
 }
 
 export const useLogStore = create<LogState>()(
@@ -37,15 +51,38 @@ export const useLogStore = create<LogState>()(
       searchQuery: '',
       filterTag: null,
       editingId: null,
+      // Filter state
+      startDate: null,
+      endDate: null,
+      filterTags: [],
+      sortBy: 'newest',
       getFilteredLogs: () => {
-        const { logs, searchQuery, filterTag } = get();
-        return logs.filter((log) => {
+        const { logs, searchQuery, filterTag, filterTags, startDate, endDate, sortBy } = get();
+        const query = searchQuery.toLowerCase();
+        // Support legacy single-tag filter until Task 9 removes it
+        const effectiveTags = filterTags.length > 0 ? filterTags : filterTag ? [filterTag] : [];
+        let filtered = logs.filter((log) => {
           if (log.category !== 'log') return false;
-          const matchesSearch =
-            !searchQuery || log.content.toLowerCase().includes(searchQuery.toLowerCase());
-          const matchesTag = !filterTag || log.colorTag === filterTag;
-          return matchesSearch && matchesTag;
+          const matchesSearch = !query || log.content.toLowerCase().includes(query);
+          const matchesTags = effectiveTags.length === 0 || effectiveTags.includes(log.colorTag);
+          const matchesStart = !startDate || log.recordDate >= startDate;
+          const matchesEnd = !endDate || log.recordDate <= endDate;
+          return matchesSearch && matchesTags && matchesStart && matchesEnd;
         });
+
+        if (sortBy === 'oldest') {
+          filtered = [...filtered].sort(
+            (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        } else if (sortBy === 'newest') {
+          filtered = [...filtered].sort(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        } else if (sortBy === 'tag') {
+          filtered = [...filtered].sort((a, b) => a.colorTag.localeCompare(b.colorTag));
+        }
+
+        return filtered;
       },
       getIdeas: () => {
         return get().logs.filter((log) => log.category === 'idea');
@@ -80,6 +117,34 @@ export const useLogStore = create<LogState>()(
           logs: state.logs.map((log) => (log.id === id ? { ...log, category: 'idea' } : log)),
         }));
       },
+      // Filter actions
+      setDateRange: (start, end) => set({ startDate: start, endDate: end }),
+      setFilterTags: (tags) => set({ filterTags: tags }),
+      toggleFilterTag: (tag) =>
+        set((state) => {
+          const next = state.filterTags.includes(tag)
+            ? state.filterTags.filter((t) => t !== tag)
+            : [...state.filterTags, tag];
+          return { filterTags: next };
+        }),
+      setSortBy: (sort) => set({ sortBy: sort }),
+      resetFilters: () =>
+        set({
+          searchQuery: '',
+          filterTag: null,
+          startDate: null,
+          endDate: null,
+          filterTags: [],
+          sortBy: 'newest',
+        }),
+      // Import actions
+      importLogs: (logs) =>
+        set((state) => {
+          const map = new Map(state.logs.map((l) => [l.id, l]));
+          for (const log of logs) map.set(log.id, log);
+          return { logs: Array.from(map.values()) };
+        }),
+      overwriteLogs: (logs) => set({ logs }),
     }),
     {
       name: 'flash-logs',

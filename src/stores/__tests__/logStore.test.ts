@@ -57,3 +57,41 @@ describe('logStore', () => {
     expect(getImportanceFromContent('critical !!!!')).toBe(4);
   });
 });
+
+describe('logStore filters', () => {
+  beforeEach(() => {
+    useLogStore.setState(
+      {
+        ...useLogStore.getInitialState(),
+        logs: [],
+      },
+      true
+    );
+  });
+
+  it('filters by date range', () => {
+    const store = useLogStore.getState();
+    store.overwriteLogs([
+      {
+        id: '1',
+        content: 'a',
+        colorTag: 'daily',
+        category: 'log',
+        importance: 0,
+        createdAt: '2026-07-10T00:00:00Z',
+        recordDate: '2026-07-10',
+      },
+      {
+        id: '2',
+        content: 'b',
+        colorTag: 'daily',
+        category: 'log',
+        importance: 0,
+        createdAt: '2026-07-13T00:00:00Z',
+        recordDate: '2026-07-13',
+      },
+    ]);
+    store.setDateRange('2026-07-11', '2026-07-13');
+    expect(store.getFilteredLogs()).toHaveLength(1);
+  });
+});
