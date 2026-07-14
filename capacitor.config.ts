@@ -12,6 +12,16 @@ const config: CapacitorConfig = {
   },
   ios: {
     backgroundColor: '#0a0e1a',
+    scheme: 'Flash',
+  },
+  plugins: {
+    StatusBar: {
+      style: 'DARK',
+      backgroundColor: '#0a0e1a',
+    },
+    Keyboard: {
+      resize: 'ionic',
+    },
   },
 };
 
