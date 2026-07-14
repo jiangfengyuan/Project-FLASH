@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigationStore, type Page, TAB_PAGES, type Tab } from '@/stores/navigationStore';
 import { useReducedMotion } from '@/lib/motion';
 import { getPlatform } from '@/lib/platform';
+import { useSafeArea } from '@/hooks/useSafeArea';
 import BottomNav from '@/components/BottomNav';
 import SplashScreen from '@/components/SplashScreen';
 import Toast from '@/components/Toast';
@@ -47,6 +48,8 @@ export default function App() {
   const setShowSplash = useNavigationStore((state) => state.setShowSplash);
   const direction = useNavigationStore((state) => state.direction);
 
+  useSafeArea();
+
   useEffect(() => {
     const platform = getPlatform();
     document.documentElement.classList.add(`platform-${platform}`);
@@ -81,7 +84,13 @@ export default function App() {
       </Suspense>
 
       {/* Main Content */}
-      <main className={`relative h-full overflow-hidden ${showNav ? 'pb-16' : ''}`}>
+      <main
+        className={`relative h-full overflow-hidden ${
+          showNav
+            ? 'pb-[calc(4rem+env(safe-area-inset-bottom))]'
+            : 'pb-[env(safe-area-inset-bottom)]'
+        }`}
+      >
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={currentPage}

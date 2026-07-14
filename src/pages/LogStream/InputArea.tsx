@@ -266,7 +266,7 @@ export default function InputArea({ mode, onModeChange, onSubmit }: InputAreaPro
   };
 
   return (
-    <div className="fixed bottom-16 left-0 right-0 px-4 z-40">
+    <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-0 right-0 px-4 z-40">
       <AnimatePresence mode="wait">
         {mode === 'idle' && (
           <motion.div
