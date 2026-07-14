@@ -6,9 +6,16 @@ const { setStyle, setBackgroundColor } = vi.hoisted(() => ({
   setBackgroundColor: vi.fn(),
 }));
 
+const setResizeMode = vi.hoisted(() => vi.fn());
+
 vi.mock('@capacitor/status-bar', () => ({
   StatusBar: { setStyle, setBackgroundColor },
   Style: { Dark: 'DARK' },
+}));
+
+vi.mock('@capacitor/keyboard', () => ({
+  Keyboard: { setResizeMode },
+  KeyboardResize: { Ionic: 'ionic' },
 }));
 
 describe('initNativePlugins', () => {
@@ -24,6 +31,16 @@ describe('initNativePlugins', () => {
 
   it('silently ignores errors on unsupported platforms', async () => {
     setStyle.mockRejectedValueOnce(new Error('not available'));
+    await expect(initNativePlugins()).resolves.toBeUndefined();
+  });
+
+  it('sets keyboard resize mode', async () => {
+    await initNativePlugins();
+    expect(setResizeMode).toHaveBeenCalledWith({ mode: 'ionic' });
+  });
+
+  it('silently ignores keyboard errors on unsupported platforms', async () => {
+    setResizeMode.mockRejectedValueOnce(new Error('not available'));
     await expect(initNativePlugins()).resolves.toBeUndefined();
   });
 });
