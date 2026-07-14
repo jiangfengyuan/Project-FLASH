@@ -18,15 +18,15 @@
 | Idea Flow（灵感池）         | ✅ 可用   | 按时间分组、重要性标记                             |
 | Calendar（日历聚合）        | ✅ 可用   | 日志与情绪聚合、按日期查看                         |
 | Current Emotion（情绪记录） | ✅ 可用   | 拖拽等级、子情绪标签、彩带动画                     |
-| Android 打包                | ⚠️ 已配置 | Capacitor Android 工程已存在，需补充签名与发布流程 |
-| iOS 打包                    | ❌ 未开始 | Capacitor iOS 平台未添加                           |
+| Android 打包                | ✅ 已配置 | release 签名、ProGuard、versionCode/versionName 自动化已配置；keystore 需本地 JDK 生成 |
+| iOS 打包                    | ✅ 基线完成 | Capacitor iOS 工程已添加，竖屏、状态栏、启动图背景色已配置；签名团队待后续设置 |
 | 数据同步/备份               | ❌ 未开始 | 仅 localStorage 本地持久化                         |
 
 **技术栈**：React 19 + TypeScript 5.9 + Vite 8 + Tailwind CSS 3 + Framer Motion + Zustand + Capacitor 8。
 
 **当前工程健康度**：
 
-- 构建、类型检查、Lint、单测（92 个）全部通过。
+- 构建、类型检查、Lint、单测（132 个）全部通过。
 - 已完成一轮结构与配置标准化（docs/、.gitattributes、依赖清理、Bug 修复）。
 - 仍存在的短板：页面目录结构未完全统一、大体积静态资源未压缩、无 iOS 工程、无数据备份机制。
 
@@ -65,12 +65,13 @@
 
 | 任务                | 优先级 | 具体工作                                                                                                                | 验收标准                                                                 |
 | ------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| Android 发布配置    | P0     | 配置 release 签名 keystore、启用代码压缩（`minifyEnabled true` + ProGuard 规则）、设置 `versionCode` 与 `versionName`。 | 可构建出 signed release APK/AAB，`android/app/build.gradle` 中配置完整。 |
-| iOS 发布配置        | P1     | 配置 Bundle Identifier、签名团队、应用图标、启动图，完成 Xcode Archive 构建。                                           | 可在真机或 TestFlight 上安装运行。                                       |
-| 状态栏 / 安全区适配 | P1     | 处理刘海屏底部导航、键盘弹起时输入框被遮挡、状态栏颜色与主题一致。                                                      | 在 iPhone 14/15 系列与主流 Android 机型上 UI 无遮挡。                    |
-| 返回键 / 手势适配   | P1     | Android 物理返回键映射到页面返回；iOS 侧滑返回不冲突。                                                                  | 在双端真机上返回行为符合平台习惯。                                       |
-| 添加 Settings 页面  | P2     | 集中管理主题、数据导出/导入、关于、清除缓存、版本号。                                                                   | 设置入口可访问，所有功能可用。                                           |
-| 深色模式完整适配    | P2     | 检查所有页面在 dark 模式下的可读性，补齐缺失的 `dark:` 样式。                                                           | 切换系统深色模式后无明显色块/文字不可读问题。                            |
+| Android 发布配置    | ✅ 已完成 | 配置 release 签名 keystore（由 `scripts/generate-android-keystore.sh` 生成）、启用代码压缩（`minifyEnabled true` + ProGuard 规则）、设置 `versionCode` 与 `versionName`。 | 可构建出 signed release APK/AAB，`android/app/build.gradle` 中配置完整。 |
+| iOS 发布配置        | ✅ 基线完成 | 添加 Capacitor iOS 工程、配置 Bundle Identifier、竖屏、状态栏颜色、启动图背景色；签名团队与自定义图标待后续。 | 可 `npx cap open ios` 打开 Xcode 工程；真机/TestFlight 需配置签名团队。 |
+| 状态栏 / 安全区适配 | ✅ 已完成 | 集成 StatusBar 插件、处理刘海屏底部导航、键盘弹起时输入框被遮挡。                                                      | 在 iPhone 14/15 系列与主流 Android 机型上 UI 无遮挡。                    |
+| 返回键 / 手势适配   | ✅ 已完成 | Android 物理返回键映射到页面返回；iOS 侧滑返回不冲突。                                                                  | 在双端真机上返回行为符合平台习惯。                                       |
+| 添加 Settings 页面  | ✅ 已完成 | 集中管理主题、数据导出/导入、关于、清除缓存、版本号。                                                                   | 设置入口可访问，所有功能可用。                                           |
+| 深色模式完整适配    | ✅ 已完成 | 检查所有页面在 dark 模式下的可读性，补齐缺失的 `dark:` 样式；新增主题模式切换（跟随系统/始终深色/始终浅色）。             | 切换系统深色模式或手动切换主题后无明显色块/文字不可读问题。              |
+| 平台视觉适配        | ✅ 已完成 | 通过 CSS/Tailwind token 区分 Android Material 3 与 iOS Liquid Glass 视觉风格；Web 预览按 UA 自动切换。                   | Android 端显示 Material 3 圆角/阴影/Indigo 强调色；iOS 端显示 Liquid Glass 较小圆角/Apple 蓝/强模糊。 |
 
 ### Phase 4：功能扩展与生态（第 9–14 周）
 
@@ -118,7 +119,7 @@
 2. **Demo 数据内嵌**：污染生产代码，且会让首次启动看起来“有内容”。
 3. **大体积静态资源**：影响首次加载与 APK 体积。
 4. **缺少数据迁移机制**：后续一旦修改 Store 结构，老用户数据可能损坏。
-5. **Capacitor 平台不平衡**：只有 Android，缺少 iOS 基线。
+5. **Android release keystore 待生成**：配置已就绪，需本地 JDK 环境运行 `scripts/generate-android-keystore.sh`。
 
 ### 4.2 推荐架构演进方向
 
