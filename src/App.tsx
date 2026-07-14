@@ -4,6 +4,7 @@ import { useNavigationStore, type Page, TAB_PAGES, type Tab } from '@/stores/nav
 import { useReducedMotion } from '@/lib/motion';
 import { getPlatform } from '@/lib/platform';
 import { useSafeArea } from '@/hooks/useSafeArea';
+import { useBackButton } from '@/hooks/useBackButton';
 import BottomNav from '@/components/BottomNav';
 import SplashScreen from '@/components/SplashScreen';
 import Toast from '@/components/Toast';
@@ -49,6 +50,10 @@ export default function App() {
   const direction = useNavigationStore((state) => state.direction);
 
   useSafeArea();
+  useBackButton(() => {
+    // On Android, App.exitApp() is available via @capacitor/app
+    import('@capacitor/app').then(({ App }) => App.exitApp()).catch(() => {});
+  });
 
   useEffect(() => {
     const platform = getPlatform();
