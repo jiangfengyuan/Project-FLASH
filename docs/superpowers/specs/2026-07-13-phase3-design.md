@@ -59,6 +59,8 @@ Phase 3 在保留 Flash 自身设计语言的前提下，通过 CSS/Tailwind 设
 - 对差异较大的组件（`BottomNav`、`LiquidGlassCard`、`InputArea`、`FilterDrawer`），提供平台条件渲染或平台相关 class。
 - 不引入 MUI / SwiftUI 等原生框架；所有效果通过 Tailwind + CSS 实现，保持包体可控。
 
+> 边界说明：Phase 3 平台视觉适配仅使用 CSS/Tailwind token。Jetpack Compose / SwiftUI 等原生 UI 框架引入被明确推迟到 Phase 5 评估。
+
 ### 2.4 与发布配置的关系
 
 - 平台视觉适配代码与 Android release 配置、iOS 基线同步开发。

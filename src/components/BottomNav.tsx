@@ -22,7 +22,14 @@ export default function BottomNav() {
   const setActiveTab = useNavigationStore((state) => state.setActiveTab);
 
   return (
-    <nav className="liquid-glass-nav fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around h-16 pb-2">
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around h-16 pb-2 bottom-nav"
+      style={{
+        backgroundColor: 'var(--nav-background)',
+        backdropFilter: 'var(--nav-blur)',
+        WebkitBackdropFilter: 'var(--nav-blur)',
+      }}
+    >
       {tabs.map(({ key, icon: Icon, label }) => {
         const isActive = activeTab === key;
         return (

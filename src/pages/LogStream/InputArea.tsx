@@ -297,8 +297,7 @@ export default function InputArea({ mode, onModeChange, onSubmit }: InputAreaPro
               <div
                 className="absolute inset-0 rounded-full"
                 style={{
-                  boxShadow:
-                    'inset 0 1px 2px rgba(255,255,255,0.15), 0 4px 20px rgba(100,80,255,0.2)',
+                  boxShadow: 'var(--shadow-card)',
                 }}
               />
               <Mic size={24} className="text-white relative z-10" />
@@ -429,7 +428,7 @@ export default function InputArea({ mode, onModeChange, onSubmit }: InputAreaPro
                 onClick={handleTextSubmit}
                 disabled={!text.trim()}
                 aria-label="发送"
-                className="w-8 h-8 rounded-full bg-blue-500/80 flex items-center justify-center disabled:opacity-30 active:scale-90 transition-transform"
+                className="w-8 h-8 rounded-full bg-[var(--color-primary)]/80 flex items-center justify-center disabled:opacity-30 active:scale-90 transition-transform"
               >
                 <Send size={14} className="text-white" />
               </button>

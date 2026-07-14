@@ -2,6 +2,7 @@ import { useEffect, lazy, Suspense, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigationStore, type Page, TAB_PAGES, type Tab } from '@/stores/navigationStore';
 import { useReducedMotion } from '@/lib/motion';
+import { getPlatform } from '@/lib/platform';
 import BottomNav from '@/components/BottomNav';
 import SplashScreen from '@/components/SplashScreen';
 import Toast from '@/components/Toast';
@@ -45,6 +46,14 @@ export default function App() {
   const showSplash = useNavigationStore((state) => state.showSplash);
   const setShowSplash = useNavigationStore((state) => state.setShowSplash);
   const direction = useNavigationStore((state) => state.direction);
+
+  useEffect(() => {
+    const platform = getPlatform();
+    document.documentElement.classList.add(`platform-${platform}`);
+    return () => {
+      document.documentElement.classList.remove(`platform-${platform}`);
+    };
+  }, []);
 
   useEffect(() => {
     if (showSplash) {

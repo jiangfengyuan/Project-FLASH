@@ -45,7 +45,7 @@ export default function FilterDrawer({ open, onClose, resultCount }: FilterDrawe
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="absolute inset-x-0 bottom-0 z-40 rounded-t-3xl liquid-glass overflow-hidden max-h-[80%] flex flex-col"
+          className="absolute inset-x-0 bottom-0 z-40 rounded-t-[var(--radius-sheet)] liquid-glass overflow-hidden max-h-[80%] flex flex-col"
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
             <h2 className="text-base font-medium text-white">筛选与排序</h2>
@@ -67,7 +67,7 @@ export default function FilterDrawer({ open, onClose, resultCount }: FilterDrawe
                   aria-label="开始日期"
                   value={startDate ?? ''}
                   onChange={(e) => handleStartChange(e.target.value || null)}
-                  className="flex-1 bg-white/5 text-white text-sm rounded-lg px-3 py-2 outline-none"
+                  className="flex-1 bg-white/5 text-white text-sm rounded-[var(--radius-card)] px-3 py-2 outline-none"
                 />
                 <span className="text-slate-500">-</span>
                 <input
@@ -75,7 +75,7 @@ export default function FilterDrawer({ open, onClose, resultCount }: FilterDrawe
                   aria-label="结束日期"
                   value={endDate ?? ''}
                   onChange={(e) => handleEndChange(e.target.value || null)}
-                  className="flex-1 bg-white/5 text-white text-sm rounded-lg px-3 py-2 outline-none"
+                  className="flex-1 bg-white/5 text-white text-sm rounded-[var(--radius-card)] px-3 py-2 outline-none"
                 />
               </div>
               <div className="flex gap-2 mt-2">
@@ -131,7 +131,7 @@ export default function FilterDrawer({ open, onClose, resultCount }: FilterDrawe
             </button>
             <button
               onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl bg-blue-500/30 text-sm text-white font-medium active:bg-blue-500/40 transition-colors"
+              className="flex-1 py-2.5 rounded-xl bg-[var(--color-primary)]/30 text-sm text-white font-medium active:bg-[var(--color-primary)]/40 transition-colors"
             >
               查看 {resultCount} 条结果
             </button>
@@ -158,7 +158,7 @@ function QuickDate({ label, days, mode }: { label: string; days?: number; mode?:
   return (
     <button
       onClick={handleClick}
-      className="px-3 py-1 rounded-lg text-xs bg-white/5 text-slate-400 active:bg-white/10 transition-colors"
+      className="px-3 py-1 rounded-[var(--radius-card)] text-xs bg-white/5 text-slate-400 active:bg-white/10 transition-colors"
     >
       {label}
     </button>
