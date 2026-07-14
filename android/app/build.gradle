@@ -37,9 +37,9 @@ android {
     signingConfigs {
         release {
             storeFile file(String.valueOf(System.getenv('FLASH_RELEASE_STORE_FILE') ?: 'flash-release.keystore'))
-            storePassword System.getenv('FLASH_RELEASE_STORE_PASSWORD') ?: 'flashdev'
+            storePassword System.getenv('FLASH_RELEASE_STORE_PASSWORD')
             keyAlias System.getenv('FLASH_RELEASE_KEY_ALIAS') ?: 'flash-release'
-            keyPassword System.getenv('FLASH_RELEASE_KEY_PASSWORD') ?: 'flashdev'
+            keyPassword System.getenv('FLASH_RELEASE_KEY_PASSWORD')
         }
     }
     buildTypes {

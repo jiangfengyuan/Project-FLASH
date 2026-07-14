@@ -387,11 +387,16 @@
   transition: none !important;
 }
 
-/* Dark-first fallback colors to prevent light-mode flashes before JS loads */
+/* Default to a light surface so the app works when .dark is not present;
+   keep html dark to avoid a bright flash before JS hydrates the theme. */
 html {
   background-color: #0a0e1a;
 }
 body {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+html.dark body {
   background-color: #0a0e1a;
   color: #ffffff;
 }

@@ -19,8 +19,9 @@
 
 本环境缺少 JDK，因此以下步骤未在当前会话执行，需你在装有 JDK 17+ 的机器上完成：
 
-1. 生成 Android release keystore：
+1. 生成 Android release keystore（密码通过环境变量注入，运行前请先 `source android/release-signing.env`）：
    ```bash
+   source android/release-signing.env
    ./scripts/generate-android-keystore.sh
    ```
 2. 构建并验证 Android release：

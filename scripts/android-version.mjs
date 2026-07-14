@@ -1,7 +1,9 @@
 import { readFileSync } from 'fs';
-import { resolve } from 'path';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-const pkgPath = resolve(process.cwd(), 'package.json');
+const scriptDir = dirname(fileURLToPath(import.meta.url));
+const pkgPath = resolve(scriptDir, '..', 'package.json');
 const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
 const [major, minor, patch] = pkg.version.split('.').map(Number);
 const versionCode = major * 10000 + minor * 100 + patch;

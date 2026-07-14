@@ -15,9 +15,14 @@ const addListener = vi.hoisted(
     >
 );
 const exitApp = vi.hoisted(() => vi.fn());
+const isNativePlatform = vi.hoisted(() => vi.fn(() => true));
 
 vi.mock('@capacitor/app', () => ({
   App: { addListener, exitApp },
+}));
+
+vi.mock('@capacitor/core', () => ({
+  Capacitor: { isNativePlatform },
 }));
 
 function TestComponent() {
@@ -52,5 +57,11 @@ describe('useBackButton', () => {
     await Promise.resolve();
     expect(useNavigationStore.getState().currentPage).toBe('log');
     expect(exitApp).not.toHaveBeenCalled();
+  });
+
+  it('does not register listener on non-native platforms', () => {
+    isNativePlatform.mockReturnValueOnce(false);
+    render(createElement(TestComponent));
+    expect(addListener).not.toHaveBeenCalled();
   });
 });

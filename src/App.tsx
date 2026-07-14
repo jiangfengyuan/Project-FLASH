@@ -1,5 +1,6 @@
 import { useEffect, lazy, Suspense, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { App as CapacitorApp } from '@capacitor/app';
 import { useNavigationStore, type Page, TAB_PAGES, type Tab } from '@/stores/navigationStore';
 import { useReducedMotion } from '@/lib/motion';
 import { getPlatform } from '@/lib/platform';
@@ -52,8 +53,9 @@ export default function App() {
 
   useSafeArea();
   useBackButton(() => {
-    // On Android, App.exitApp() is available via @capacitor/app
-    import('@capacitor/app').then(({ App }) => App.exitApp()).catch(() => {});
+    // On Android, App.exitApp() is available via @capacitor/app.
+    // The hook only registers on native platforms, so this is safe on web.
+    CapacitorApp.exitApp().catch(() => {});
   });
   const resolved = useThemeStore((s) => s.resolved);
 
