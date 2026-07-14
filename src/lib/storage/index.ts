@@ -3,12 +3,12 @@ import type { StorageAdapter } from './types';
 import { MemoryStorageAdapter } from './memoryAdapter';
 import { IndexedDBStorageAdapter } from './indexedDBAdapter';
 import { SQLiteStorageAdapter } from './sqliteAdapter';
+import { migrateFromLocalStorage, MIGRATION_FLAG_KEY } from './migrateFromLocalStorage';
 
 export type { StorageAdapter } from './types';
 export { MemoryStorageAdapter } from './memoryAdapter';
 export { IndexedDBStorageAdapter } from './indexedDBAdapter';
 export { SQLiteStorageAdapter } from './sqliteAdapter';
-import { migrateFromLocalStorage, MIGRATION_FLAG_KEY } from './migrateFromLocalStorage';
 export { migrateFromLocalStorage, MIGRATION_FLAG_KEY };
 
 let cachedAdapter: StorageAdapter | null = null;

@@ -25,18 +25,28 @@ describe('migrateFromLocalStorage', () => {
       createdAt: '2026-07-14T10:00:00.000Z',
       recordDate: '2026-07-14',
     };
+    const oldEmotion = {
+      id: 'emotion-1',
+      level: 3 as const,
+      subEmotion: 'excited' as const,
+      status: 'positive' as const,
+      note: 'feeling good',
+      recordDate: '2026-07-14',
+      createdAt: '2026-07-14T11:00:00.000Z',
+    };
     window.localStorage.setItem(
       'flash-logs',
       JSON.stringify({ state: { logs: [oldLog] }, version: 1 })
     );
     window.localStorage.setItem(
       'flash-emotions',
-      JSON.stringify({ state: { emotions: [] }, version: 1 })
+      JSON.stringify({ state: { emotions: [oldEmotion] }, version: 1 })
     );
 
     await migrateFromLocalStorage(storage);
 
     expect(await storage.getLogs()).toEqual([oldLog]);
+    expect(await storage.getEmotions()).toEqual([oldEmotion]);
     expect(window.localStorage.getItem(MIGRATION_FLAG_KEY)).toBe('true');
     expect(window.localStorage.getItem('flash-logs')).toBeNull();
   });

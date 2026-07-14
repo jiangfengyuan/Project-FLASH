@@ -17,6 +17,9 @@ export async function migrateFromLocalStorage(storage: StorageAdapter): Promise<
   }
 
   try {
+    // Retry is safe: every adapter uses upsert semantics (Map.set, IDBObjectStore.put,
+    // or INSERT OR REPLACE), so re-running saveLogs/saveEmotions will overwrite the
+    // same records rather than create duplicates.
     if (logs.length > 0) await storage.saveLogs(logs);
     if (emotions.length > 0) await storage.saveEmotions(emotions);
     window.localStorage.setItem(MIGRATION_FLAG_KEY, 'true');
