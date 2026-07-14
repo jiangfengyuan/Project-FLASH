@@ -12,7 +12,6 @@ const config: CapacitorConfig = {
   },
   ios: {
     backgroundColor: '#0a0e1a',
-    scheme: 'Flash',
   },
   plugins: {
     StatusBar: {
