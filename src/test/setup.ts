@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom/vitest';
+import 'fake-indexeddb/auto';
 import { vi } from 'vitest';
 
 vi.mock('framer-motion', async () => await import('@/__mocks__/framer-motion'));
