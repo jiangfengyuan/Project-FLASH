@@ -16,7 +16,7 @@ export class IndexedDBStorageAdapter implements StorageAdapter {
     const tx = db.transaction('logs', 'readonly');
     const store = tx.objectStore('logs');
     const request = store.getAll();
-    const rows: LogItem[] = await promisifyRequest(request);
+    const rows = (await promisifyRequest(request)) as LogItem[];
     return rows.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
@@ -46,7 +46,7 @@ export class IndexedDBStorageAdapter implements StorageAdapter {
     const db = await this.ensureDB();
     const tx = db.transaction('emotions', 'readonly');
     const request = tx.objectStore('emotions').getAll();
-    const rows: EmotionRecord[] = await promisifyRequest(request);
+    const rows = (await promisifyRequest(request)) as EmotionRecord[];
     return rows.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
@@ -74,12 +74,10 @@ export class IndexedDBStorageAdapter implements StorageAdapter {
 
   async clearAll(): Promise<void> {
     const db = await this.ensureDB();
-    const logTx = db.transaction('logs', 'readwrite');
-    logTx.objectStore('logs').clear();
-    await promisifyRequest(logTx);
-    const emotionTx = db.transaction('emotions', 'readwrite');
-    emotionTx.objectStore('emotions').clear();
-    await promisifyRequest(emotionTx);
+    const tx = db.transaction(['logs', 'emotions'], 'readwrite');
+    tx.objectStore('logs').clear();
+    tx.objectStore('emotions').clear();
+    await promisifyRequest(tx);
   }
 
   private async ensureDB(): Promise<IDBDatabase> {
@@ -91,7 +89,7 @@ export class IndexedDBStorageAdapter implements StorageAdapter {
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
-    request.onerror = () => reject(request.error);
+    request.onerror = () => reject(toError(request.error));
     request.onsuccess = () => resolve(request.result);
     request.onupgradeneeded = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
@@ -108,11 +106,15 @@ function openDB(): Promise<IDBDatabase> {
 function promisifyRequest<T>(request: IDBRequest<T> | IDBTransaction): Promise<T> {
   return new Promise((resolve, reject) => {
     if ('onerror' in request && request instanceof IDBTransaction) {
-      request.onerror = () => reject(request.error);
+      request.onerror = () => reject(toError(request.error));
       request.oncomplete = () => resolve(undefined as T);
     } else {
-      request.onerror = () => reject(request.error);
+      request.onerror = () => reject(toError(request.error));
       request.onsuccess = () => resolve(request.result);
     }
   });
+}
+
+function toError(error: DOMException | null): Error {
+  return error ?? new Error('IndexedDB request failed');
 }
