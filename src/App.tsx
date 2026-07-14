@@ -55,18 +55,18 @@ export default function App() {
     // On Android, App.exitApp() is available via @capacitor/app
     import('@capacitor/app').then(({ App }) => App.exitApp()).catch(() => {});
   });
-  const mode = useThemeStore((s) => s.mode);
+  const resolved = useThemeStore((s) => s.resolved);
 
   useEffect(() => {
-    if (mode !== 'system') return;
-    const mql = window.matchMedia('(prefers-color-scheme: dark)');
-    const handler = () => {
-      // Force re-render by touching store state
-      useThemeStore.setState({ mode: 'system' });
-    };
-    mql.addEventListener('change', handler);
-    return () => mql.removeEventListener('change', handler);
-  }, [mode]);
+    const root = document.documentElement;
+    if (resolved === 'dark') {
+      root.classList.add('dark');
+      root.style.colorScheme = 'dark';
+    } else {
+      root.classList.remove('dark');
+      root.style.colorScheme = 'light';
+    }
+  }, [resolved]);
 
   useEffect(() => {
     const platform = getPlatform();

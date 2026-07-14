@@ -60,20 +60,20 @@ export default function StatsPanel() {
             <div className="h-56 liquid-glass-sm rounded-2xl p-3">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={averages}>
-                  <CartesianGrid stroke="rgba(255,255,255,0.05)" />
+                  <CartesianGrid stroke="var(--chart-grid)" />
                   <XAxis
                     dataKey="date"
-                    tick={{ fill: '#94A3B8', fontSize: 10 }}
+                    tick={{ fill: 'var(--chart-tick)', fontSize: 10 }}
                     tickFormatter={(d: string) => d.slice(5)}
                   />
-                  <YAxis domain={[-3, 3]} tick={{ fill: '#94A3B8', fontSize: 10 }} />
+                  <YAxis domain={[-3, 3]} tick={{ fill: 'var(--chart-tick)', fontSize: 10 }} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: 'rgba(15, 23, 42, 0.9)',
                       border: 'none',
                       borderRadius: 8,
                     }}
-                    labelStyle={{ color: '#94A3B8' }}
+                    labelStyle={{ color: 'var(--chart-tick)' }}
                   />
                   <Line
                     type="monotone"
@@ -94,12 +94,12 @@ export default function StatsPanel() {
               <div className="h-40 liquid-glass-sm rounded-2xl p-3">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={distribution} layout="vertical">
-                    <CartesianGrid stroke="rgba(255,255,255,0.05)" horizontal={false} />
-                    <XAxis type="number" tick={{ fill: '#94A3B8', fontSize: 10 }} />
+                    <CartesianGrid stroke="var(--chart-grid)" horizontal={false} />
+                    <XAxis type="number" tick={{ fill: 'var(--chart-tick)', fontSize: 10 }} />
                     <YAxis
                       dataKey="name"
                       type="category"
-                      tick={{ fill: '#CBD5E1', fontSize: 11 }}
+                      tick={{ fill: 'var(--chart-tick-strong)', fontSize: 11 }}
                       width={50}
                     />
                     <Tooltip
@@ -111,7 +111,7 @@ export default function StatsPanel() {
                     />
                     <Bar
                       dataKey="count"
-                      fill="#A78BFA"
+                      fill="var(--chart-bar)"
                       radius={[0, 4, 4, 0]}
                       animationDuration={400}
                     />

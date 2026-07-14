@@ -398,15 +398,11 @@ function FilterChip({
 }) {
   return (
     <span
-      className="inline-flex items-center gap-1 pl-2.5 pr-1 py-1 rounded-full text-[11px] border"
+      className={`inline-flex items-center gap-1 pl-2.5 pr-1 py-1 rounded-full text-[11px] border ${
+        color ? '' : 'bg-white/5 border-white/10 text-slate-400'
+      }`}
       style={
-        color
-          ? { backgroundColor: `${color}15`, borderColor: `${color}40`, color }
-          : {
-              backgroundColor: 'rgba(255,255,255,0.05)',
-              borderColor: 'rgba(255,255,255,0.1)',
-              color: '#94A3B8',
-            }
+        color ? { backgroundColor: `${color}15`, borderColor: `${color}40`, color } : undefined
       }
     >
       {label}

@@ -323,11 +323,11 @@ export default function Calendar() {
         <div className="liquid-glass-sm flex items-center justify-around py-2.5">
           <div className="flex items-center gap-1.5">
             <div className="w-4 h-[3px] rounded-full overflow-hidden flex">
-              <div className="flex-1 h-full bg-[#FFB347]" />
-              <div className="flex-1 h-full bg-[#90EE90]" />
-              <div className="flex-1 h-full bg-[#B0E0E6]" />
-              <div className="flex-1 h-full bg-[#B0C4DE]" />
-              <div className="flex-1 h-full bg-[#800080]" />
+              <div className="flex-1 h-full" style={{ backgroundColor: LEVEL_COLORS[3] }} />
+              <div className="flex-1 h-full" style={{ backgroundColor: LEVEL_COLORS[1] }} />
+              <div className="flex-1 h-full" style={{ backgroundColor: LEVEL_COLORS[0] }} />
+              <div className="flex-1 h-full" style={{ backgroundColor: LEVEL_COLORS[-1] }} />
+              <div className="flex-1 h-full" style={{ backgroundColor: LEVEL_COLORS[-3] }} />
             </div>
             <span className="text-[10px] text-slate-400">情绪</span>
           </div>

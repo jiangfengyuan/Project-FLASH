@@ -52,6 +52,14 @@
     --ring: 212.7 26.8% 83.9%;
   }
 
+  /* Chart colors shared across light/dark for the dark-first UI */
+  :root {
+    --chart-grid: rgba(255, 255, 255, 0.05);
+    --chart-tick: #94a3b8;
+    --chart-tick-strong: #cbd5e1;
+    --chart-bar: #a78bfa;
+  }
+
   .platform-android {
     --radius-card: 16px;
     --radius-sheet: 28px;
@@ -377,4 +385,13 @@
 .reduce-motion * {
   animation: none !important;
   transition: none !important;
+}
+
+/* Dark-first fallback colors to prevent light-mode flashes before JS loads */
+html {
+  background-color: #0a0e1a;
+}
+body {
+  background-color: #0a0e1a;
+  color: #ffffff;
 }

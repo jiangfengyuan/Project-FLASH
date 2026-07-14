@@ -197,7 +197,7 @@ export default function Settings() {
                     name="theme"
                     checked={mode === m}
                     onChange={() => setMode(m)}
-                    className="mt-0.5"
+                    className="mt-0.5 accent-[var(--color-primary)]"
                   />
                   <span className="text-sm text-white">{THEME_LABELS[m]}</span>
                 </label>
@@ -418,7 +418,7 @@ function ImportPreviewDrawer({
               name="importMode"
               checked={mode === 'merge'}
               onChange={() => onModeChange('merge')}
-              className="mt-0.5"
+              className="mt-0.5 accent-[var(--color-primary)]"
             />
             <div>
               <p className="text-sm text-white">合并导入（推荐）</p>
@@ -431,7 +431,7 @@ function ImportPreviewDrawer({
               name="importMode"
               checked={mode === 'overwrite'}
               onChange={() => onModeChange('overwrite')}
-              className="mt-0.5"
+              className="mt-0.5 accent-[var(--color-primary)]"
             />
             <div>
               <p className="text-sm text-red-400">覆盖导入</p>

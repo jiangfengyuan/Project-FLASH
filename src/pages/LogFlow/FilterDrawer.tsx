@@ -94,12 +94,18 @@ export default function FilterDrawer({ open, onClose, resultCount }: FilterDrawe
                     <button
                       key={tag}
                       onClick={() => toggleFilterTag(tag)}
-                      className="px-3 py-1.5 rounded-full text-xs transition-all border"
-                      style={{
-                        backgroundColor: active ? `${TAG_COLORS[tag]}20` : 'rgba(255,255,255,0.05)',
-                        borderColor: active ? `${TAG_COLORS[tag]}60` : 'transparent',
-                        color: active ? TAG_COLORS[tag] : '#94A3B8',
-                      }}
+                      className={`px-3 py-1.5 rounded-full text-xs transition-all border ${
+                        active ? '' : 'bg-white/5 border-transparent text-slate-400'
+                      }`}
+                      style={
+                        active
+                          ? {
+                              backgroundColor: `${TAG_COLORS[tag]}20`,
+                              borderColor: `${TAG_COLORS[tag]}60`,
+                              color: TAG_COLORS[tag],
+                            }
+                          : undefined
+                      }
                     >
                       {TAG_NAMES[tag]}
                     </button>
@@ -115,9 +121,15 @@ export default function FilterDrawer({ open, onClose, resultCount }: FilterDrawe
                 onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest' | 'tag')}
                 className="w-full bg-white/5 text-white text-sm rounded-lg px-3 py-2 outline-none"
               >
-                <option value="newest">时间倒序</option>
-                <option value="oldest">时间正序</option>
-                <option value="tag">按标签分组</option>
+                <option value="newest" className="bg-slate-900 text-white">
+                  时间倒序
+                </option>
+                <option value="oldest" className="bg-slate-900 text-white">
+                  时间正序
+                </option>
+                <option value="tag" className="bg-slate-900 text-white">
+                  按标签分组
+                </option>
               </select>
             </section>
           </div>
