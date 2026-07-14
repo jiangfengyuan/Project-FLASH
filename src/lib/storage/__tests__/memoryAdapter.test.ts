@@ -19,7 +19,7 @@ describe('MemoryStorageAdapter', () => {
     const log = {
       id: 'log-1',
       content: 'hello',
-      colorTag: 'blue' as const,
+      colorTag: 'daily' as const,
       category: 'log' as const,
       importance: 0,
       createdAt: '2026-07-14T10:00:00.000Z',
