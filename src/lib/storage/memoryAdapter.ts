@@ -1,3 +1,8 @@
+/* eslint-disable @typescript-eslint/require-await --
+   MemoryStorageAdapter is a synchronous in-memory implementation of the async
+   StorageAdapter interface. The methods must return Promises to satisfy the
+   interface, but they perform no real I/O, so they legitimately contain no
+   await expressions. */
 import type { StorageAdapter, LogItem, EmotionRecord } from './types';
 
 export class MemoryStorageAdapter implements StorageAdapter {
