@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<!-- versionCode/versionName are kept in sync with package.json via scripts/android-version.mjs -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    android:versionCode="100"
+    android:versionName="0.1.0">
 
     <application
         android:allowBackup="false"

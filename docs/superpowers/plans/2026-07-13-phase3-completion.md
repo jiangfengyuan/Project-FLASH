@@ -13,25 +13,42 @@
 - **Task 9** 键盘插件：`@capacitor/keyboard` 集成，设置 `resize: 'ionic'`。
 - **Task 10** 主题模式：`src/stores/themeStore.ts` 持久化主题状态；Settings 页提供 system/dark 切换。浅色模式因组件层尚未完成适配，暂不提供，留待后续完善。
 - **Task 11** 深色模式审计：修复全局/Calendar/LogFlow/FilterDrawer/Settings/StatsPanel 的暗色样式；`resolvedTheme` 正确驱动 `<html>` 的 `dark` 类。
-- **Task 12** 最终集成：前端质量门禁（lint/format/typecheck/test/build）全绿，132 个测试通过；`npx cap sync ios` 成功；`ROADMAP.md` 已更新。
+- **Task 12** 最终集成：前端质量门禁（lint/format/typecheck/test/build）全绿；`npx cap sync ios` 成功；Android release APK/AAB 构建并签名验证通过。
 
-## 仍需本地完成的步骤
+## Android Release 构建结果
 
-本环境缺少 JDK，因此以下步骤未在当前会话执行，需你在装有 JDK 17+ 的机器上完成：
+在当前环境（Temurin JDK 21 + Android Studio SDK）完成：
 
-1. 生成 Android release keystore（密码通过环境变量注入，运行前请先 `source android/release-signing.env`）：
-   ```bash
-   source android/release-signing.env
-   ./scripts/generate-android-keystore.sh
-   ```
-2. 构建并验证 Android release：
-   ```bash
-   npm run build
-   npx cap sync android
-   cd android && ./gradlew assembleRelease && ./gradlew bundleRelease
-   ```
-3. 用 `apksigner verify android/app/build/outputs/apk/release/app-release.apk` 确认签名。
-4. 在 Android 模拟器/真机与 iOS Simulator 上做最终 smoke test。
+```bash
+cd android
+export JAVA_HOME=$(/usr/libexec/java_home -v 21)
+export FLASH_RELEASE_STORE_PASSWORD=flashdev
+export FLASH_RELEASE_KEY_PASSWORD=flashdev
+./gradlew clean assembleRelease bundleRelease
+```
+
+产出：
+
+- `android/app/build/outputs/apk/release/app-release.apk` — 1.4 MB，已签名
+- `android/app/build/outputs/bundle/release/app-release.aab` — 1.9 MB，已签名
+
+签名验证：
+
+```bash
+/Users/haydenjiang/Library/Android/sdk/build-tools/37.0.0/apksigner verify \
+  android/app/build/outputs/apk/release/app-release.apk
+# => APK signature verified
+```
+
+> 说明：当前使用开发 keystore（`android/app/flash-release.keystore`），密码为示例值 `flashdev`。正式发布前务必替换为私有生产证书，并通过 CI 密钥库或环境变量注入，切勿提交真实密码。
+
+## 已知问题与后续建议
+
+1. **浅色模式**：已暂时移除入口。组件层仍存在硬编码 `text-white`/`bg-white/5` 等 token，需全局审计后才能重新开放。
+2. **iOS 真机验证**：Xcode 项目已基线化，但未在真机或 Simulator 上运行 smoke test。
+3. **Android 安装验证**：APK 已签名生成，但未在模拟器/真机上安装启动验证。
+4. **Gradle 分发版**：`gradle-wrapper.properties` 已改为 `gradle-8.14.3-bin.zip`（更小更快），不影响功能。
+5. **清单版本号**：`AndroidManifest.xml` 中 `android:versionCode`/`android:versionName` 为硬编码，需与 `package.json` 保持一致；后续可考虑在构建前通过脚本自动同步。
 
 ## 质量门禁结果
 
@@ -39,7 +56,8 @@
 npm run lint         ✅
 npm run format:check ✅
 npx tsc -b --noEmit  ✅
-npm run test:run     ✅ 132 tests passed
+npm run test:run     ✅
 npm run build        ✅
 npx cap sync ios     ✅
+Android assembleRelease / bundleRelease / apksigner verify ✅
 ```
