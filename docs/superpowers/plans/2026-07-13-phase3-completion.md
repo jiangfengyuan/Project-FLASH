@@ -11,7 +11,7 @@
 - **Task 7** 安全区适配：`useSafeArea()` hook 注入 CSS 变量并应用到布局、BottomNav、InputArea。
 - **Task 8** Android 返回键：`@capacitor/app` 集成，`useBackButton()` 处理物理返回键。
 - **Task 9** 键盘插件：`@capacitor/keyboard` 集成，设置 `resize: 'ionic'`。
-- **Task 10** 主题模式：`src/stores/themeStore.ts` 持久化主题状态；Settings 页提供 system/dark/light 切换。
+- **Task 10** 主题模式：`src/stores/themeStore.ts` 持久化主题状态；Settings 页提供 system/dark 切换。浅色模式因组件层尚未完成适配，暂不提供，留待后续完善。
 - **Task 11** 深色模式审计：修复全局/Calendar/LogFlow/FilterDrawer/Settings/StatsPanel 的暗色样式；`resolvedTheme` 正确驱动 `<html>` 的 `dark` 类。
 - **Task 12** 最终集成：前端质量门禁（lint/format/typecheck/test/build）全绿，132 个测试通过；`npx cap sync ios` 成功；`ROADMAP.md` 已更新。
 
