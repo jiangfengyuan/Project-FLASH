@@ -1,5 +1,23 @@
 apply plugin: 'com.android.application'
 
+def getVersionCode() {
+    def code = new ByteArrayOutputStream()
+    exec {
+        commandLine 'node', '../../scripts/android-version.mjs'
+        standardOutput = code
+    }
+    return code.toString().trim().toInteger()
+}
+
+def getVersionName() {
+    def name = new ByteArrayOutputStream()
+    exec {
+        commandLine 'node', '-e', "console.log(require('../../package.json').version)"
+        standardOutput = name
+    }
+    return name.toString().trim()
+}
+
 android {
     namespace = "com.flash.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -7,8 +25,8 @@ android {
         applicationId "com.flash.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode getVersionCode()
+        versionName getVersionName()
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -16,11 +34,20 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            storeFile file(String.valueOf(System.getenv('FLASH_RELEASE_STORE_FILE') ?: 'flash-release.keystore'))
+            storePassword System.getenv('FLASH_RELEASE_STORE_PASSWORD') ?: 'flashdev'
+            keyAlias System.getenv('FLASH_RELEASE_KEY_ALIAS') ?: 'flash-release'
+            keyPassword System.getenv('FLASH_RELEASE_KEY_PASSWORD') ?: 'flashdev'
+        }
+    }
     buildTypes {
         release {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }

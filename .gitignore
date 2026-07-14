@@ -40,3 +40,9 @@ ios/App/App.xcodeproj/project.xcworkspace/xcuserdata/
 ios/App/App.xcodeproj/project.xcworkspace/
 ios/DerivedData/
 .worktrees/
+
+# Local JDK used for Android builds
+.jdk/
+
+# Android signing secrets
+android/release-signing.env
