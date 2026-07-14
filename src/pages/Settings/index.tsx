@@ -23,7 +23,6 @@ import { useThemeStore, type ThemeMode } from '@/stores/themeStore';
 const THEME_LABELS: Record<ThemeMode, string> = {
   system: '跟随系统',
   dark: '始终深色',
-  light: '始终浅色',
 };
 
 export default function Settings() {
@@ -190,7 +189,7 @@ export default function Settings() {
           </h2>
           <LiquidGlassCard>
             <div className="divide-y divide-white/10">
-              {(['system', 'dark', 'light'] as ThemeMode[]).map((m) => (
+              {(['system', 'dark'] as ThemeMode[]).map((m) => (
                 <label key={m} className="w-full flex items-center gap-3 py-3.5 cursor-pointer">
                   <input
                     type="radio"

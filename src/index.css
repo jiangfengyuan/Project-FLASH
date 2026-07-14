@@ -387,16 +387,13 @@
   transition: none !important;
 }
 
-/* Default to a light surface so the app works when .dark is not present;
-   keep html dark to avoid a bright flash before JS hydrates the theme. */
+/* Dark-first fallback colors. The app currently renders a dark UI regardless
+   of the resolved theme mode, so keep the surface dark to prevent light-mode
+   flashes before JS hydrates. Light mode will be implemented in a future pass. */
 html {
   background-color: #0a0e1a;
 }
 body {
-  background-color: #ffffff;
-  color: #0f172a;
-}
-html.dark body {
   background-color: #0a0e1a;
   color: #ffffff;
 }

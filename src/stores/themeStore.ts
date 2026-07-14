@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type ThemeMode = 'system' | 'dark' | 'light';
+export type ThemeMode = 'system' | 'dark';
 
 interface ThemeState {
   mode: ThemeMode;
