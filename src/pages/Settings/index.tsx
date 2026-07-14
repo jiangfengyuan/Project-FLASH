@@ -18,9 +18,17 @@ import {
 import { exportToFile, readTextFromFile } from '@/lib/fileIO';
 import ConfirmDrawer from '@/components/ConfirmDrawer';
 import LiquidGlassCard from '@/components/LiquidGlassCard';
+import { useThemeStore, type ThemeMode } from '@/stores/themeStore';
+
+const THEME_LABELS: Record<ThemeMode, string> = {
+  system: '跟随系统',
+  dark: '始终深色',
+  light: '始终浅色',
+};
 
 export default function Settings() {
   const { navigateTo } = useNavigationStore();
+  const { mode, setMode } = useThemeStore();
   const logs = useLogStore((s) => s.logs);
   const emotions = useEmotionStore((s) => s.emotions);
   const overwriteLogs = useLogStore((s) => s.overwriteLogs);
@@ -172,6 +180,28 @@ export default function Settings() {
                 <Trash2 size={18} className="text-red-400" />
                 <span className="text-sm text-white">清除全部数据</span>
               </button>
+            </div>
+          </LiquidGlassCard>
+        </section>
+
+        <section>
+          <h2 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 px-1">
+            外观
+          </h2>
+          <LiquidGlassCard>
+            <div className="divide-y divide-white/10">
+              {(['system', 'dark', 'light'] as ThemeMode[]).map((m) => (
+                <label key={m} className="w-full flex items-center gap-3 py-3.5 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="theme"
+                    checked={mode === m}
+                    onChange={() => setMode(m)}
+                    className="mt-0.5"
+                  />
+                  <span className="text-sm text-white">{THEME_LABELS[m]}</span>
+                </label>
+              ))}
             </div>
           </LiquidGlassCard>
         </section>

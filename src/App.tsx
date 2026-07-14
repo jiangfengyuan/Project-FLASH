@@ -5,6 +5,7 @@ import { useReducedMotion } from '@/lib/motion';
 import { getPlatform } from '@/lib/platform';
 import { useSafeArea } from '@/hooks/useSafeArea';
 import { useBackButton } from '@/hooks/useBackButton';
+import { useThemeStore } from '@/stores/themeStore';
 import BottomNav from '@/components/BottomNav';
 import SplashScreen from '@/components/SplashScreen';
 import Toast from '@/components/Toast';
@@ -54,6 +55,18 @@ export default function App() {
     // On Android, App.exitApp() is available via @capacitor/app
     import('@capacitor/app').then(({ App }) => App.exitApp()).catch(() => {});
   });
+  const mode = useThemeStore((s) => s.mode);
+
+  useEffect(() => {
+    if (mode !== 'system') return;
+    const mql = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = () => {
+      // Force re-render by touching store state
+      useThemeStore.setState({ mode: 'system' });
+    };
+    mql.addEventListener('change', handler);
+    return () => mql.removeEventListener('change', handler);
+  }, [mode]);
 
   useEffect(() => {
     const platform = getPlatform();
