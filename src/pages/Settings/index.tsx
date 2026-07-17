@@ -108,6 +108,12 @@ export default function Settings() {
       );
       return;
     }
+
+    await Promise.all([
+      useLogStore.getState().flushMutations(),
+      useEmotionStore.getState().flushMutations(),
+    ]);
+
     const result =
       importMode === 'merge'
         ? mergeImport(pendingBackup, logs, emotions)
@@ -153,6 +159,11 @@ export default function Settings() {
   };
 
   const handleClear = async () => {
+    await Promise.all([
+      useLogStore.getState().flushMutations(),
+      useEmotionStore.getState().flushMutations(),
+    ]);
+
     try {
       const storage = await getStorageAdapter();
       await storage.clearAll();

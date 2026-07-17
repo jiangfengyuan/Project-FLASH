@@ -22,6 +22,7 @@ interface EmotionState {
   overwriteEmotions: (emotions: EmotionRecord[]) => void;
   setCurrentLevel: (level: EmotionLevel) => void;
   setCurrentSubEmotion: (sub: SubEmotion) => void;
+  flushMutations: () => Promise<void>;
 }
 
 async function withStorageRollback(
@@ -84,4 +85,7 @@ export const useEmotionStore = create<EmotionState>((set, get) => ({
   overwriteEmotions: (emotions) => set({ emotions }),
   setCurrentLevel: (level) => set({ currentLevel: level }),
   setCurrentSubEmotion: (sub) => set({ currentSubEmotion: sub }),
+  flushMutations: async () => {
+    await mutationQueue;
+  },
 }));

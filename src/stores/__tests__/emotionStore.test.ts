@@ -89,4 +89,36 @@ describe('emotionStore', () => {
     expect(adapter.order).toEqual(['start-first', 'end-first', 'start-second', 'end-second']);
     expect(useEmotionStore.getState().emotions).toHaveLength(2);
   });
+
+  it('flushMutations awaits in-flight mutations', async () => {
+    const events: string[] = [];
+    class DelayedAdapter extends MemoryStorageAdapter {
+      async saveEmotion(emotion: EmotionRecord): Promise<void> {
+        events.push('save-start');
+        await new Promise((resolve) => setTimeout(resolve, 30));
+        events.push('save-end');
+        await super.saveEmotion(emotion);
+      }
+    }
+    vi.mocked(storageModule.getStorageAdapter).mockResolvedValue(new DelayedAdapter());
+
+    useEmotionStore.setState({ ...useEmotionStore.getInitialState(), emotions: [] }, true);
+
+    const addPromise = useEmotionStore.getState().addEmotion({
+      level: 1,
+      subEmotion: null,
+      status: 'queued',
+      note: null,
+      recordDate: '2026-07-14',
+    });
+    await useEmotionStore.getState().flushMutations();
+
+    expect(events).toEqual(['save-start', 'save-end']);
+    expect(useEmotionStore.getState().emotions).toHaveLength(1);
+    await addPromise;
+  });
+
+  it('flushMutations resolves immediately when queue is idle', async () => {
+    await expect(useEmotionStore.getState().flushMutations()).resolves.toBeUndefined();
+  });
 });

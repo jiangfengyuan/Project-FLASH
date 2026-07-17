@@ -39,6 +39,7 @@ interface LogState {
   resetFilters: () => void;
   // Import actions
   overwriteLogs: (logs: LogItem[]) => void;
+  flushMutations: () => Promise<void>;
 }
 
 async function withStorageRollback<T>(
@@ -196,4 +197,7 @@ export const useLogStore = create<LogState>((set, get) => ({
     }),
   // Import actions
   overwriteLogs: (logs) => set({ logs }),
+  flushMutations: async () => {
+    await mutationQueue;
+  },
 }));

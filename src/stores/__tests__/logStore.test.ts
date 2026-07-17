@@ -89,6 +89,32 @@ describe('logStore', () => {
     expect(useLogStore.getState().logs).toHaveLength(2);
   });
 
+  it('flushMutations awaits in-flight mutations', async () => {
+    const events: string[] = [];
+    class DelayedAdapter extends MemoryStorageAdapter {
+      async saveLog(log: LogItem): Promise<void> {
+        events.push('save-start');
+        await new Promise((resolve) => setTimeout(resolve, 30));
+        events.push('save-end');
+        await super.saveLog(log);
+      }
+    }
+    vi.mocked(storageModule.getStorageAdapter).mockResolvedValue(new DelayedAdapter());
+
+    useLogStore.setState({ ...useLogStore.getInitialState(), logs: [] }, true);
+
+    const addPromise = useLogStore.getState().addLog('queued', 'daily', 'log');
+    await useLogStore.getState().flushMutations();
+
+    expect(events).toEqual(['save-start', 'save-end']);
+    expect(useLogStore.getState().logs).toHaveLength(1);
+    await addPromise;
+  });
+
+  it('flushMutations resolves immediately when queue is idle', async () => {
+    await expect(useLogStore.getState().flushMutations()).resolves.toBeUndefined();
+  });
+
   it('parses importance from content', () => {
     expect(getImportanceFromContent('plain')).toBe(0);
     expect(getImportanceFromContent('urgent !!')).toBe(2);

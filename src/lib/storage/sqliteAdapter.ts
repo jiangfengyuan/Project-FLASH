@@ -43,24 +43,22 @@ export class SQLiteStorageAdapter implements StorageAdapter {
 
   async saveLogs(logs: LogItem[]): Promise<void> {
     const db = await this.ensureDB();
-    // Capacitor SQLite execute supports multiple statements; use BEGIN/COMMIT for batch safety.
-    const statements = logs.map((log) => [
-      `INSERT OR REPLACE INTO ${TABLE_LOGS} (id, content, colorTag, category, importance, createdAt, recordDate)
-       VALUES (?, ?, ?, ?, ?, ?, ?);`,
-      [
-        log.id,
-        log.content,
-        log.colorTag,
-        log.category,
-        log.importance,
-        log.createdAt,
-        log.recordDate,
-      ],
-    ]);
     await db.execute(`BEGIN TRANSACTION;`);
     try {
-      for (const [sql, values] of statements) {
-        await db.run(sql as string, values as (string | number)[]);
+      for (const log of logs) {
+        await db.run(
+          `INSERT OR REPLACE INTO ${TABLE_LOGS} (id, content, colorTag, category, importance, createdAt, recordDate)
+           VALUES (?, ?, ?, ?, ?, ?, ?);`,
+          [
+            log.id,
+            log.content,
+            log.colorTag,
+            log.category,
+            log.importance,
+            log.createdAt,
+            log.recordDate,
+          ]
+        );
       }
       await db.execute(`COMMIT;`);
     } catch (error) {
