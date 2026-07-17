@@ -38,6 +38,14 @@ async function withStorageRollback(
   }
 }
 
+let mutationQueue: Promise<unknown> = Promise.resolve();
+
+function queueMutation(operation: () => Promise<void>): Promise<void> {
+  const result = mutationQueue.then(operation);
+  mutationQueue = result.catch(() => {});
+  return result;
+}
+
 export const useEmotionStore = create<EmotionState>((set, get) => ({
   emotions: [],
   currentLevel: 1,
@@ -48,26 +56,30 @@ export const useEmotionStore = create<EmotionState>((set, get) => ({
       id: crypto.randomUUID(),
       createdAt: new Date().toISOString(),
     };
-    const previousEmotions = get().emotions;
-    await withStorageRollback(
-      () => set((state) => ({ emotions: [newRecord, ...state.emotions] })),
-      async () => {
-        const storage = await getStorageAdapter();
-        await storage.saveEmotion(newRecord);
-      },
-      () => set({ emotions: previousEmotions })
-    );
+    await queueMutation(async () => {
+      const previousEmotions = get().emotions;
+      await withStorageRollback(
+        () => set((state) => ({ emotions: [newRecord, ...state.emotions] })),
+        async () => {
+          const storage = await getStorageAdapter();
+          await storage.saveEmotion(newRecord);
+        },
+        () => set({ emotions: previousEmotions })
+      );
+    });
   },
   deleteEmotion: async (id) => {
-    const previousEmotions = get().emotions;
-    await withStorageRollback(
-      () => set((state) => ({ emotions: state.emotions.filter((e) => e.id !== id) })),
-      async () => {
-        const storage = await getStorageAdapter();
-        await storage.deleteEmotion(id);
-      },
-      () => set({ emotions: previousEmotions })
-    );
+    await queueMutation(async () => {
+      const previousEmotions = get().emotions;
+      await withStorageRollback(
+        () => set((state) => ({ emotions: state.emotions.filter((e) => e.id !== id) })),
+        async () => {
+          const storage = await getStorageAdapter();
+          await storage.deleteEmotion(id);
+        },
+        () => set({ emotions: previousEmotions })
+      );
+    });
   },
   overwriteEmotions: (emotions) => set({ emotions }),
   setCurrentLevel: (level) => set({ currentLevel: level }),

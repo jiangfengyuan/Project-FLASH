@@ -55,6 +55,14 @@ async function withStorageRollback<T>(
   }
 }
 
+let mutationQueue: Promise<unknown> = Promise.resolve();
+
+function queueMutation(operation: () => Promise<void>): Promise<void> {
+  const result = mutationQueue.then(operation);
+  mutationQueue = result.catch(() => {});
+  return result;
+}
+
 export const useLogStore = create<LogState>((set, get) => ({
   logs: [],
   searchQuery: '',
@@ -103,61 +111,69 @@ export const useLogStore = create<LogState>((set, get) => ({
       createdAt: new Date().toISOString(),
       recordDate: getTodayStr(),
     };
-    const previousLogs = get().logs;
-    await withStorageRollback(
-      () => set((state) => ({ logs: [newLog, ...state.logs] })),
-      async () => {
-        const storage = await getStorageAdapter();
-        await storage.saveLog(newLog);
-      },
-      () => set({ logs: previousLogs })
-    );
+    await queueMutation(async () => {
+      const previousLogs = get().logs;
+      await withStorageRollback(
+        () => set((state) => ({ logs: [newLog, ...state.logs] })),
+        async () => {
+          const storage = await getStorageAdapter();
+          await storage.saveLog(newLog);
+        },
+        () => set({ logs: previousLogs })
+      );
+    });
   },
   updateLog: async (id, updates) => {
-    const previousLogs = get().logs;
-    await withStorageRollback(
-      () =>
-        set((state) => ({
-          logs: state.logs.map((log) => (log.id === id ? { ...log, ...updates } : log)),
-        })),
-      async () => {
-        const storage = await getStorageAdapter();
-        const updated = previousLogs.find((log) => log.id === id);
-        if (!updated) return;
-        const merged = { ...updated, ...updates };
-        await storage.saveLog(merged);
-      },
-      () => set({ logs: previousLogs })
-    );
+    await queueMutation(async () => {
+      const previousLogs = get().logs;
+      await withStorageRollback(
+        () =>
+          set((state) => ({
+            logs: state.logs.map((log) => (log.id === id ? { ...log, ...updates } : log)),
+          })),
+        async () => {
+          const storage = await getStorageAdapter();
+          const updated = previousLogs.find((log) => log.id === id);
+          if (!updated) return;
+          const merged = { ...updated, ...updates };
+          await storage.saveLog(merged);
+        },
+        () => set({ logs: previousLogs })
+      );
+    });
   },
   deleteLog: async (id) => {
-    const previousLogs = get().logs;
-    await withStorageRollback(
-      () => set((state) => ({ logs: state.logs.filter((log) => log.id !== id) })),
-      async () => {
-        const storage = await getStorageAdapter();
-        await storage.deleteLog(id);
-      },
-      () => set({ logs: previousLogs })
-    );
+    await queueMutation(async () => {
+      const previousLogs = get().logs;
+      await withStorageRollback(
+        () => set((state) => ({ logs: state.logs.filter((log) => log.id !== id) })),
+        async () => {
+          const storage = await getStorageAdapter();
+          await storage.deleteLog(id);
+        },
+        () => set({ logs: previousLogs })
+      );
+    });
   },
   setSearchQuery: (query) => set({ searchQuery: query }),
   setEditingId: (id) => set({ editingId: id }),
   moveToIdea: async (id) => {
-    const previousLogs = get().logs;
-    await withStorageRollback(
-      () =>
-        set((state) => ({
-          logs: state.logs.map((log) => (log.id === id ? { ...log, category: 'idea' } : log)),
-        })),
-      async () => {
-        const storage = await getStorageAdapter();
-        const log = previousLogs.find((l) => l.id === id);
-        if (!log) return;
-        await storage.saveLog({ ...log, category: 'idea' });
-      },
-      () => set({ logs: previousLogs })
-    );
+    await queueMutation(async () => {
+      const previousLogs = get().logs;
+      await withStorageRollback(
+        () =>
+          set((state) => ({
+            logs: state.logs.map((log) => (log.id === id ? { ...log, category: 'idea' } : log)),
+          })),
+        async () => {
+          const storage = await getStorageAdapter();
+          const log = previousLogs.find((l) => l.id === id);
+          if (!log) return;
+          await storage.saveLog({ ...log, category: 'idea' });
+        },
+        () => set({ logs: previousLogs })
+      );
+    });
   },
   // Filter actions
   setDateRange: (start, end) => set({ startDate: start, endDate: end }),

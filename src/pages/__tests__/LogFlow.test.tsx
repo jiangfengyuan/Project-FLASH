@@ -87,7 +87,7 @@ describe('LogFlow', () => {
     expect(screen.queryByText('daily note')).not.toBeInTheDocument();
   });
 
-  it('transfers a log to idea from detail drawer', () => {
+  it('transfers a log to idea from detail drawer', async () => {
     useLogStore.setState({
       logs: [
         {
@@ -104,7 +104,9 @@ describe('LogFlow', () => {
     render(<LogFlow />);
     fireEvent.click(screen.getByText('transfer me'));
     fireEvent.click(screen.getByLabelText('转为 IDEA'));
-    expect(useLogStore.getState().logs[0].category).toBe('idea');
+    await waitFor(() => {
+      expect(useLogStore.getState().logs[0].category).toBe('idea');
+    });
   });
 
   it('auto-corrects date range when end is before start', async () => {

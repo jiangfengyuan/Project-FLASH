@@ -33,13 +33,20 @@ export default function LogStream() {
   };
 
   const handleSave = (category: 'log' | 'idea') => {
-    void addLog(pendingContent, pendingTag || 'daily', category);
-    showToast(category === 'idea' ? '已发送至 Idea Flow' : '记录已保存', 'success');
-    haptic(HAPTIC_SUCCESS);
-    setPendingContent('');
-    setPendingTag(null);
-    setShowCategorySheet(false);
-    setMode('idle');
+    addLog(pendingContent, pendingTag || 'daily', category)
+      .then(() => {
+        showToast(category === 'idea' ? '已发送至 Idea Flow' : '记录已保存', 'success');
+        haptic(HAPTIC_SUCCESS);
+      })
+      .catch(() => {
+        showToast('保存失败，请重试', 'error');
+      })
+      .finally(() => {
+        setPendingContent('');
+        setPendingTag(null);
+        setShowCategorySheet(false);
+        setMode('idle');
+      });
   };
 
   const handleDetailEdit = (id: string, content: string) => {
@@ -48,13 +55,20 @@ export default function LogStream() {
   };
 
   const handleEditSave = (id: string, content: string) => {
-    if (content.trim()) {
-      void updateLog(id, { content: content.trim() });
-      showToast('编辑已保存', 'success');
-      haptic(HAPTIC_SUCCESS);
-    }
-    setEditingDetailId(null);
-    setEditInitialContent('');
+    const save = content.trim()
+      ? updateLog(id, { content: content.trim() })
+          .then(() => {
+            showToast('编辑已保存', 'success');
+            haptic(HAPTIC_SUCCESS);
+          })
+          .catch(() => {
+            showToast('保存失败，请重试', 'error');
+          })
+      : Promise.resolve();
+    void save.finally(() => {
+      setEditingDetailId(null);
+      setEditInitialContent('');
+    });
   };
 
   const handleEditClose = () => {
@@ -63,18 +77,27 @@ export default function LogStream() {
   };
 
   const handleDelete = (id: string) => {
-    void deleteLog(id);
-    showToast('记录已删除', 'info');
+    deleteLog(id)
+      .then(() => {
+        showToast('记录已删除', 'info');
+      })
+      .catch(() => {
+        showToast('保存失败，请重试', 'error');
+      });
   };
 
   const handleTransfer = (id: string) => {
     const log = useLogStore.getState().logs.find((l) => l.id === id);
-    if (log) {
-      const nextCategory = log.category === 'idea' ? 'log' : 'idea';
-      void updateLog(id, { category: nextCategory });
-      showToast(nextCategory === 'idea' ? '已转至 Idea Flow' : '已转回 Log', 'success');
-      haptic(HAPTIC_SUCCESS);
-    }
+    if (!log) return;
+    const nextCategory = log.category === 'idea' ? 'log' : 'idea';
+    updateLog(id, { category: nextCategory })
+      .then(() => {
+        showToast(nextCategory === 'idea' ? '已转至 Idea Flow' : '已转回 Log', 'success');
+        haptic(HAPTIC_SUCCESS);
+      })
+      .catch(() => {
+        showToast('保存失败，请重试', 'error');
+      });
   };
 
   return (

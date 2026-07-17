@@ -180,27 +180,48 @@ export default function LogFlow() {
   };
 
   const handleSaveEdit = (id: string, content: string) => {
-    void updateLog(id, { content: content.trim() });
-    showToast('编辑已保存', 'success');
-    haptic(HAPTIC_SUCCESS);
-    setEditingId(null);
-    setEditContent('');
+    updateLog(id, { content: content.trim() })
+      .then(() => {
+        showToast('编辑已保存', 'success');
+        haptic(HAPTIC_SUCCESS);
+      })
+      .catch(() => {
+        showToast('保存失败，请重试', 'error');
+      })
+      .finally(() => {
+        setEditingId(null);
+        setEditContent('');
+      });
   };
 
   const handleDelete = (id: string) => {
-    void deleteLog(id);
-    showToast('记录已删除', 'info');
-    setMenuOpenId(null);
+    deleteLog(id)
+      .then(() => {
+        showToast('记录已删除', 'info');
+      })
+      .catch(() => {
+        showToast('保存失败，请重试', 'error');
+      })
+      .finally(() => {
+        setMenuOpenId(null);
+      });
   };
 
   const handleTransfer = (id: string) => {
     const log = logs.find((l) => l.id === id);
     if (!log) return;
     const nextCategory = log.category === 'idea' ? 'log' : 'idea';
-    void updateLog(id, { category: nextCategory });
-    showToast(nextCategory === 'idea' ? '已转至 Idea Flow' : '已转回 Log', 'success');
-    haptic(HAPTIC_SUCCESS);
-    setDetailLog(null);
+    updateLog(id, { category: nextCategory })
+      .then(() => {
+        showToast(nextCategory === 'idea' ? '已转至 Idea Flow' : '已转回 Log', 'success');
+        haptic(HAPTIC_SUCCESS);
+      })
+      .catch(() => {
+        showToast('保存失败，请重试', 'error');
+      })
+      .finally(() => {
+        setDetailLog(null);
+      });
   };
 
   return (

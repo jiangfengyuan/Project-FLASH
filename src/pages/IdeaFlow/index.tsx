@@ -73,14 +73,28 @@ export default function IdeaFlow() {
         setMenuOpenId(null);
       }
     } else if (action === 'delete') {
-      void deleteLog(id);
-      showToast('想法已删除', 'info');
-      setMenuOpenId(null);
+      deleteLog(id)
+        .then(() => {
+          showToast('想法已删除', 'info');
+        })
+        .catch(() => {
+          showToast('保存失败，请重试', 'error');
+        })
+        .finally(() => {
+          setMenuOpenId(null);
+        });
     } else if (action === 'transfer') {
-      void updateLog(id, { category: 'log' });
-      showToast('已转至 Log', 'success');
-      haptic(HAPTIC_SUCCESS);
-      setMenuOpenId(null);
+      updateLog(id, { category: 'log' })
+        .then(() => {
+          showToast('已转至 Log', 'success');
+          haptic(HAPTIC_SUCCESS);
+        })
+        .catch(() => {
+          showToast('保存失败，请重试', 'error');
+        })
+        .finally(() => {
+          setMenuOpenId(null);
+        });
     }
   };
 
@@ -94,13 +108,20 @@ export default function IdeaFlow() {
   };
 
   const handleEditSave = (id: string, content: string) => {
-    void updateLog(id, {
+    updateLog(id, {
       content,
       importance: getImportanceFromContent(content),
-    });
-    showToast('编辑已保存', 'success');
-    haptic(HAPTIC_SUCCESS);
-    setEditingId(null);
+    })
+      .then(() => {
+        showToast('编辑已保存', 'success');
+        haptic(HAPTIC_SUCCESS);
+      })
+      .catch(() => {
+        showToast('保存失败，请重试', 'error');
+      })
+      .finally(() => {
+        setEditingId(null);
+      });
   };
 
   return (
@@ -187,15 +208,29 @@ export default function IdeaFlow() {
             onClose={() => setDetailLog(null)}
             onEdit={handleDetailEdit}
             onDelete={(id) => {
-              void deleteLog(id);
-              showToast('想法已删除', 'info');
-              setDetailLog(null);
+              deleteLog(id)
+                .then(() => {
+                  showToast('想法已删除', 'info');
+                })
+                .catch(() => {
+                  showToast('保存失败，请重试', 'error');
+                })
+                .finally(() => {
+                  setDetailLog(null);
+                });
             }}
             onTransfer={(id) => {
-              void updateLog(id, { category: 'log' });
-              showToast('已转至 Log', 'success');
-              haptic(HAPTIC_SUCCESS);
-              setDetailLog(null);
+              updateLog(id, { category: 'log' })
+                .then(() => {
+                  showToast('已转至 Log', 'success');
+                  haptic(HAPTIC_SUCCESS);
+                })
+                .catch(() => {
+                  showToast('保存失败，请重试', 'error');
+                })
+                .finally(() => {
+                  setDetailLog(null);
+                });
             }}
           />
         )}

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import CurrentEmotion from '@/pages/CurrentEmotion';
 import { useEmotionStore } from '@/stores/emotionStore';
 import { useToastStore } from '@/stores/toastStore';
@@ -28,10 +28,12 @@ describe('CurrentEmotion', () => {
     expect(screen.getByRole('button', { name: '伤心' })).toBeInTheDocument();
   });
 
-  it('adds an emotion record when saving', () => {
+  it('adds an emotion record when saving', async () => {
     render(<CurrentEmotion />);
     fireEvent.click(screen.getByText('记录此刻'));
-    expect(useEmotionStore.getState().emotions.length).toBeGreaterThan(0);
+    await waitFor(() => {
+      expect(useEmotionStore.getState().emotions.length).toBeGreaterThan(0);
+    });
   });
 
   it('renders history list', async () => {

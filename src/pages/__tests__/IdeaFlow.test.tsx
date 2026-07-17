@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import IdeaFlow from '@/pages/IdeaFlow';
 import { useLogStore } from '@/stores/logStore';
 import { useToastStore } from '@/stores/toastStore';
@@ -55,7 +55,7 @@ describe('IdeaFlow', () => {
     expect(screen.getByText('yesterday idea')).toBeInTheDocument();
   });
 
-  it('transfers an idea to log', () => {
+  it('transfers an idea to log', async () => {
     useLogStore.setState({
       logs: [
         {
@@ -72,6 +72,8 @@ describe('IdeaFlow', () => {
     render(<IdeaFlow />);
     fireEvent.click(screen.getByLabelText('更多操作'));
     fireEvent.click(screen.getByText('转LOG'));
-    expect(useLogStore.getState().logs[0].category).toBe('log');
+    await waitFor(() => {
+      expect(useLogStore.getState().logs[0].category).toBe('log');
+    });
   });
 });

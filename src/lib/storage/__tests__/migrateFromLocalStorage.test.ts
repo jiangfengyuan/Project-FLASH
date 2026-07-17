@@ -63,4 +63,37 @@ describe('migrateFromLocalStorage', () => {
 
     expect(await storage.getLogs()).toEqual([]);
   });
+
+  it('does not overwrite new storage when it already contains data', async () => {
+    await storage.init();
+    const existingLog = {
+      id: 'existing-log',
+      content: 'already here',
+      colorTag: 'daily' as const,
+      category: 'log' as const,
+      importance: 0,
+      createdAt: '2026-07-14T10:00:00.000Z',
+      recordDate: '2026-07-14',
+    };
+    const oldLog = {
+      id: 'old-log',
+      content: 'old log',
+      colorTag: 'blue' as const,
+      category: 'log' as const,
+      importance: 0,
+      createdAt: '2026-07-14T09:00:00.000Z',
+      recordDate: '2026-07-14',
+    };
+    await storage.saveLogs([existingLog]);
+    window.localStorage.setItem(
+      'flash-logs',
+      JSON.stringify({ state: { logs: [oldLog] }, version: 1 })
+    );
+
+    await migrateFromLocalStorage(storage);
+
+    expect(await storage.getLogs()).toEqual([existingLog]);
+    expect(window.localStorage.getItem(MIGRATION_FLAG_KEY)).toBe('true');
+    expect(window.localStorage.getItem('flash-logs')).not.toBeNull();
+  });
 });

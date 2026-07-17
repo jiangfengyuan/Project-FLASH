@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as storageModule from '@/lib/storage';
-import { useEmotionStore } from '@/stores/emotionStore';
+import { MemoryStorageAdapter } from '@/lib/storage/memoryAdapter';
+import { useEmotionStore, type EmotionRecord } from '@/stores/emotionStore';
 import { DEMO_EMOTIONS } from '@/data/demo';
 
 vi.mock('@/lib/storage', async () => {
@@ -51,5 +52,41 @@ describe('emotionStore', () => {
   it('sets current sub emotion', () => {
     useEmotionStore.getState().setCurrentSubEmotion('angry');
     expect(useEmotionStore.getState().currentSubEmotion).toBe('angry');
+  });
+
+  it('serializes concurrent mutations', async () => {
+    class OrderTrackingAdapter extends MemoryStorageAdapter {
+      public order: string[] = [];
+      async saveEmotion(emotion: EmotionRecord): Promise<void> {
+        this.order.push(`start-${emotion.status}`);
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        this.order.push(`end-${emotion.status}`);
+        await super.saveEmotion(emotion);
+      }
+    }
+    const adapter = new OrderTrackingAdapter();
+    vi.mocked(storageModule.getStorageAdapter).mockResolvedValue(adapter);
+
+    useEmotionStore.setState({ ...useEmotionStore.getInitialState(), emotions: [] }, true);
+
+    await Promise.all([
+      useEmotionStore.getState().addEmotion({
+        level: 1,
+        subEmotion: null,
+        status: 'first',
+        note: null,
+        recordDate: '2026-07-14',
+      }),
+      useEmotionStore.getState().addEmotion({
+        level: 2,
+        subEmotion: null,
+        status: 'second',
+        note: null,
+        recordDate: '2026-07-14',
+      }),
+    ]);
+
+    expect(adapter.order).toEqual(['start-first', 'end-first', 'start-second', 'end-second']);
+    expect(useEmotionStore.getState().emotions).toHaveLength(2);
   });
 });

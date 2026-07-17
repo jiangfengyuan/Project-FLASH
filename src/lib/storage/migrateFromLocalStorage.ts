@@ -16,6 +16,15 @@ export async function migrateFromLocalStorage(storage: StorageAdapter): Promise<
     return;
   }
 
+  const existingLogs = await storage.getLogs();
+  const existingEmotions = await storage.getEmotions();
+  if (existingLogs.length > 0 || existingEmotions.length > 0) {
+    // New storage already contains data; do not overwrite it. Mark migration as
+    // done so the stale localStorage data is not reconsidered on future boots.
+    window.localStorage.setItem(MIGRATION_FLAG_KEY, 'true');
+    return;
+  }
+
   try {
     // Retry is safe: every adapter uses upsert semantics (Map.set, IDBObjectStore.put,
     // or INSERT OR REPLACE), so re-running saveLogs/saveEmotions will overwrite the

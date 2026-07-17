@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as storageModule from '@/lib/storage';
-import { useLogStore } from '@/stores/logStore';
+import { MemoryStorageAdapter } from '@/lib/storage/memoryAdapter';
+import { useLogStore, type LogItem } from '@/stores/logStore';
 import { DEMO_LOGS } from '@/data/demo';
 import { getImportanceFromContent } from '@/lib/constants';
 
@@ -62,6 +63,30 @@ describe('logStore', () => {
     const id = useLogStore.getState().logs[0].id;
     await useLogStore.getState().moveToIdea(id);
     expect(useLogStore.getState().logs.find((l) => l.id === id)?.category).toBe('idea');
+  });
+
+  it('serializes concurrent mutations', async () => {
+    class OrderTrackingAdapter extends MemoryStorageAdapter {
+      public order: string[] = [];
+      async saveLog(log: LogItem): Promise<void> {
+        this.order.push(`start-${log.content}`);
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        this.order.push(`end-${log.content}`);
+        await super.saveLog(log);
+      }
+    }
+    const adapter = new OrderTrackingAdapter();
+    vi.mocked(storageModule.getStorageAdapter).mockResolvedValue(adapter);
+
+    useLogStore.setState({ ...useLogStore.getInitialState(), logs: [] }, true);
+
+    await Promise.all([
+      useLogStore.getState().addLog('first', 'daily', 'log'),
+      useLogStore.getState().addLog('second', 'daily', 'log'),
+    ]);
+
+    expect(adapter.order).toEqual(['start-first', 'end-first', 'start-second', 'end-second']);
+    expect(useLogStore.getState().logs).toHaveLength(2);
   });
 
   it('parses importance from content', () => {

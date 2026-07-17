@@ -130,7 +130,8 @@ export class SQLiteStorageAdapter implements StorageAdapter {
 
   async clearAll(): Promise<void> {
     const db = await this.ensureDB();
-    await db.execute(`DELETE FROM ${TABLE_LOGS}; DELETE FROM ${TABLE_EMOTIONS};`);
+    await db.execute(`DELETE FROM ${TABLE_LOGS};`);
+    await db.execute(`DELETE FROM ${TABLE_EMOTIONS};`);
   }
 
   private async ensureDB(): Promise<SQLiteDBConnection> {

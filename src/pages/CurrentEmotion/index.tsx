@@ -80,20 +80,25 @@ export default function CurrentEmotion() {
   };
 
   const handleSave = () => {
-    void addEmotion({
+    addEmotion({
       level: sliderValue,
       subEmotion: currentSubEmotion,
       status: status || null,
       note: note || null,
       recordDate: getTodayStr(),
-    });
-    showToast('情绪已记录', 'success');
-    haptic(HAPTIC_SUCCESS);
-    setShowConfetti(true);
-    setShowEdit(false);
-    setStatus('');
-    setNote('');
-    setCurrentSubEmotion(null);
+    })
+      .then(() => {
+        showToast('情绪已记录', 'success');
+        haptic(HAPTIC_SUCCESS);
+        setShowConfetti(true);
+        setShowEdit(false);
+        setStatus('');
+        setNote('');
+        setCurrentSubEmotion(null);
+      })
+      .catch(() => {
+        showToast('保存失败，请重试', 'error');
+      });
   };
 
   return (
