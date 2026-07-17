@@ -1,12 +1,26 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Settings from './index';
 import { useLogStore } from '@/stores/logStore';
 import { useEmotionStore } from '@/stores/emotionStore';
 import { useToastStore } from '@/stores/toastStore';
 import { exportBackup, MAX_BACKUP_SIZE_BYTES } from '@/lib/backup';
+import * as storageModule from '@/lib/storage';
 import type { LogItem } from '@/stores/logStore';
 import type { EmotionRecord } from '@/stores/emotionStore';
+
+vi.mock('@/lib/storage', async () => {
+  const actual = await vi.importActual<typeof storageModule>('@/lib/storage');
+  const { MemoryStorageAdapter } = actual;
+  return {
+    ...actual,
+    getStorageAdapter: vi.fn(async () => {
+      const adapter = new MemoryStorageAdapter();
+      await adapter.init();
+      return adapter;
+    }),
+  };
+});
 
 const VALID_LOG_ID = 'a1a1a1a1-a1a1-a1a1-a1a1-a1a1a1a1a1a1';
 const VALID_EMOTION_ID = 'b2b2b2b2-b2b2-b2b2-b2b2-b2b2b2b2b2b2';

@@ -6,7 +6,6 @@ import { useLogStore } from '@/stores/logStore';
 import { useEmotionStore } from '@/stores/emotionStore';
 import { useToastStore } from '@/stores/toastStore';
 import {
-  exportBackup,
   validateBackup,
   mergeImport,
   overwriteImport,
@@ -15,7 +14,9 @@ import {
   type FlashBackup,
   type ImportResult,
 } from '@/lib/backup';
-import { exportToFile, readTextFromFile } from '@/lib/fileIO';
+import { readTextFromFile } from '@/lib/fileIO';
+import { exportData } from '@/lib/storage/exportImport';
+import { getStorageAdapter } from '@/lib/storage';
 import ConfirmDrawer from '@/components/ConfirmDrawer';
 import LiquidGlassCard from '@/components/LiquidGlassCard';
 import { useThemeStore, type ThemeMode } from '@/stores/themeStore';
@@ -56,10 +57,8 @@ export default function Settings() {
       showToast('当前没有可导出的记录', 'info');
       return;
     }
-    const backup = exportBackup(logs, emotions, exportNotes);
-    const filename = `flash-backup-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.json`;
     try {
-      await exportToFile(backup, filename);
+      await exportData({ logs, emotions, notes: exportNotes });
       showToast('备份已生成', 'success');
       setShowExportDrawer(false);
       setExportNotes('');
@@ -99,7 +98,7 @@ export default function Settings() {
     }
   };
 
-  const handleImport = () => {
+  const handleImport = async () => {
     if (!pendingBackup || !previewResult) return;
     if (previewResult.importedLogs === 0 && previewResult.importedEmotions === 0) {
       setImportIssues((prev) =>
@@ -113,28 +112,42 @@ export default function Settings() {
       importMode === 'merge'
         ? mergeImport(pendingBackup, logs, emotions)
         : overwriteImport(pendingBackup);
-    overwriteLogs(result.logs);
-    overwriteEmotions(result.emotions);
-    setImportFinished(true);
-    if (result.specificIssues.length > 0) {
-      setImportIssues(result.specificIssues);
-      return;
+
+    try {
+      const storage = await getStorageAdapter();
+      await storage.saveLogs(result.logs);
+      await storage.saveEmotions(result.emotions);
+      overwriteLogs(result.logs);
+      overwriteEmotions(result.emotions);
+      setImportFinished(true);
+      if (result.specificIssues.length > 0) {
+        setImportIssues(result.specificIssues);
+        return;
+      }
+      showToast(
+        `已导入 ${result.importedLogs} 条日志和 ${result.importedEmotions} 条情绪记录`,
+        'success'
+      );
+      closeImportDrawer();
+    } catch {
+      showToast('导入保存失败，请重试', 'error');
     }
-    showToast(
-      `已导入 ${result.importedLogs} 条日志和 ${result.importedEmotions} 条情绪记录`,
-      'success'
-    );
-    closeImportDrawer();
   };
 
   const handleDismissIssues = () => {
     closeImportDrawer();
   };
 
-  const handleClear = () => {
-    overwriteLogs([]);
-    overwriteEmotions([]);
-    showToast('全部数据已清除', 'info');
+  const handleClear = async () => {
+    try {
+      const storage = await getStorageAdapter();
+      await storage.clearAll();
+      overwriteLogs([]);
+      overwriteEmotions([]);
+      showToast('全部数据已清除', 'info');
+    } catch {
+      showToast('清除失败，请重试', 'error');
+    }
     setShowClearConfirm(false);
   };
 
@@ -253,7 +266,9 @@ export default function Settings() {
             previewResult={previewResult}
             importFinished={importFinished}
             onModeChange={setImportMode}
-            onImport={handleImport}
+            onImport={() => {
+              void handleImport();
+            }}
             onClose={closeImportDrawer}
             onDismissIssues={handleDismissIssues}
           />
@@ -267,7 +282,9 @@ export default function Settings() {
         confirmText="清除"
         cancelText="取消"
         danger
-        onConfirm={handleClear}
+        onConfirm={() => {
+          void handleClear();
+        }}
         onCancel={() => setShowClearConfirm(false)}
       />
     </div>
