@@ -113,25 +113,39 @@ export default function Settings() {
         ? mergeImport(pendingBackup, logs, emotions)
         : overwriteImport(pendingBackup);
 
+    const storage = await getStorageAdapter();
+    const backupLogs = [...logs];
+    const backupEmotions = [...emotions];
+
     try {
-      const storage = await getStorageAdapter();
       await storage.saveLogs(result.logs);
       await storage.saveEmotions(result.emotions);
-      overwriteLogs(result.logs);
-      overwriteEmotions(result.emotions);
-      setImportFinished(true);
-      if (result.specificIssues.length > 0) {
-        setImportIssues(result.specificIssues);
-        return;
-      }
-      showToast(
-        `已导入 ${result.importedLogs} 条日志和 ${result.importedEmotions} 条情绪记录`,
-        'success'
-      );
-      closeImportDrawer();
     } catch {
-      showToast('导入保存失败，请重试', 'error');
+      try {
+        await storage.saveLogs(backupLogs);
+        await storage.saveEmotions(backupEmotions);
+      } catch {
+        // Best-effort rollback; if this fails the storage layer is in an unknown state.
+      }
+      showToast('导入保存失败，已恢复原有数据', 'error');
+      return;
     }
+
+    overwriteLogs(result.logs);
+    overwriteEmotions(result.emotions);
+
+    if (result.specificIssues.length > 0) {
+      setImportIssues(result.specificIssues);
+      setImportFinished(true);
+      return;
+    }
+
+    setImportFinished(true);
+    showToast(
+      `已导入 ${result.importedLogs} 条日志和 ${result.importedEmotions} 条情绪记录`,
+      'success'
+    );
+    closeImportDrawer();
   };
 
   const handleDismissIssues = () => {
@@ -145,10 +159,10 @@ export default function Settings() {
       overwriteLogs([]);
       overwriteEmotions([]);
       showToast('全部数据已清除', 'info');
+      setShowClearConfirm(false);
     } catch {
       showToast('清除失败，请重试', 'error');
     }
-    setShowClearConfirm(false);
   };
 
   return (
