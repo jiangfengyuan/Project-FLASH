@@ -1,4 +1,4 @@
-import { useEffect, lazy, Suspense, useMemo } from 'react';
+import { useEffect, useRef, lazy, Suspense, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { App as CapacitorApp } from '@capacitor/app';
 import { useNavigationStore, type Page, TAB_PAGES, type Tab } from '@/stores/navigationStore';
@@ -7,6 +7,11 @@ import { getPlatform } from '@/lib/platform';
 import { useSafeArea } from '@/hooks/useSafeArea';
 import { useBackButton } from '@/hooks/useBackButton';
 import { useThemeStore } from '@/stores/themeStore';
+import { useToastStore } from '@/stores/toastStore';
+import { useLogStore } from '@/stores/logStore';
+import { useEmotionStore } from '@/stores/emotionStore';
+import { getStorageAdapter } from '@/lib/storage';
+import { DEMO_LOGS, DEMO_EMOTIONS } from '@/data/demo';
 import BottomNav from '@/components/BottomNav';
 import SplashScreen from '@/components/SplashScreen';
 import Toast from '@/components/Toast';
@@ -84,6 +89,37 @@ export default function App() {
       return () => clearTimeout(timer);
     }
   }, [showSplash, setShowSplash]);
+
+  const bootedRef = useRef(false);
+  const showToast = useToastStore((s) => s.showToast);
+
+  useEffect(() => {
+    if (bootedRef.current) return;
+    bootedRef.current = true;
+
+    void (async () => {
+      try {
+        const storage = await getStorageAdapter();
+        const [logs, emotions] = await Promise.all([storage.getLogs(), storage.getEmotions()]);
+        useLogStore.setState({ logs });
+        useEmotionStore.setState({ emotions });
+
+        if (import.meta.env.DEV) {
+          if (useLogStore.getState().logs.length === 0) {
+            useLogStore.setState({ logs: DEMO_LOGS });
+            await storage.saveLogs(DEMO_LOGS);
+          }
+          if (useEmotionStore.getState().emotions.length === 0) {
+            useEmotionStore.setState({ emotions: DEMO_EMOTIONS });
+            await storage.saveEmotions(DEMO_EMOTIONS);
+          }
+        }
+      } catch (error) {
+        console.error('App boot failed', error);
+        showToast('本地存储初始化失败，数据仅保留在内存中', 'error');
+      }
+    })();
+  }, [showToast]);
 
   const pageVariants = useMemo(
     () => ({
