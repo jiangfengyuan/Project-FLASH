@@ -29,7 +29,15 @@ export class SQLiteStorageAdapter implements StorageAdapter {
     await db.run(
       `INSERT OR REPLACE INTO ${TABLE_LOGS} (id, content, colorTag, category, importance, createdAt, recordDate)
        VALUES (?, ?, ?, ?, ?, ?, ?);`,
-      [log.id, log.content, log.colorTag, log.category, log.importance, log.createdAt, log.recordDate]
+      [
+        log.id,
+        log.content,
+        log.colorTag,
+        log.category,
+        log.importance,
+        log.createdAt,
+        log.recordDate,
+      ]
     );
   }
 
@@ -39,7 +47,15 @@ export class SQLiteStorageAdapter implements StorageAdapter {
     const statements = logs.map((log) => [
       `INSERT OR REPLACE INTO ${TABLE_LOGS} (id, content, colorTag, category, importance, createdAt, recordDate)
        VALUES (?, ?, ?, ?, ?, ?, ?);`,
-      [log.id, log.content, log.colorTag, log.category, log.importance, log.createdAt, log.recordDate],
+      [
+        log.id,
+        log.content,
+        log.colorTag,
+        log.category,
+        log.importance,
+        log.createdAt,
+        log.recordDate,
+      ],
     ]);
     await db.execute(`BEGIN TRANSACTION;`);
     try {
@@ -69,7 +85,15 @@ export class SQLiteStorageAdapter implements StorageAdapter {
     await db.run(
       `INSERT OR REPLACE INTO ${TABLE_EMOTIONS} (id, level, subEmotion, status, note, recordDate, createdAt)
        VALUES (?, ?, ?, ?, ?, ?, ?);`,
-      [emotion.id, emotion.level, emotion.subEmotion ?? null, emotion.status ?? null, emotion.note ?? null, emotion.recordDate, emotion.createdAt]
+      [
+        emotion.id,
+        emotion.level,
+        emotion.subEmotion ?? null,
+        emotion.status ?? null,
+        emotion.note ?? null,
+        emotion.recordDate,
+        emotion.createdAt,
+      ]
     );
   }
 
@@ -81,7 +105,15 @@ export class SQLiteStorageAdapter implements StorageAdapter {
         await db.run(
           `INSERT OR REPLACE INTO ${TABLE_EMOTIONS} (id, level, subEmotion, status, note, recordDate, createdAt)
            VALUES (?, ?, ?, ?, ?, ?, ?);`,
-          [emotion.id, emotion.level, emotion.subEmotion ?? null, emotion.status ?? null, emotion.note ?? null, emotion.recordDate, emotion.createdAt]
+          [
+            emotion.id,
+            emotion.level,
+            emotion.subEmotion ?? null,
+            emotion.status ?? null,
+            emotion.note ?? null,
+            emotion.recordDate,
+            emotion.createdAt,
+          ]
         );
       }
       await db.execute(`COMMIT;`);
