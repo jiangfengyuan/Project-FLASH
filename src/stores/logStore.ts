@@ -1,7 +1,7 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import type { ColorTag, Category } from '@/lib/constants';
 import { getTodayStr } from '@/lib/utils';
+import { getStorageAdapter } from '@/lib/storage';
 export type { ColorTag, Category };
 
 export interface LogItem {
@@ -25,12 +25,12 @@ interface LogState {
   sortBy: 'newest' | 'oldest' | 'tag';
   getFilteredLogs: () => LogItem[];
   getIdeas: () => LogItem[];
-  addLog: (content: string, colorTag: ColorTag, category?: Category) => void;
-  updateLog: (id: string, updates: Partial<LogItem>) => void;
-  deleteLog: (id: string) => void;
+  addLog: (content: string, colorTag: ColorTag, category?: Category) => Promise<void>;
+  updateLog: (id: string, updates: Partial<LogItem>) => Promise<void>;
+  deleteLog: (id: string) => Promise<void>;
   setSearchQuery: (query: string) => void;
   setEditingId: (id: string | null) => void;
-  moveToIdea: (id: string) => void;
+  moveToIdea: (id: string) => Promise<void>;
   // Filter actions
   setDateRange: (start: string | null, end: string | null) => void;
   setFilterTags: (tags: ColorTag[]) => void;
@@ -41,103 +41,143 @@ interface LogState {
   overwriteLogs: (logs: LogItem[]) => void;
 }
 
-export const useLogStore = create<LogState>()(
-  persist(
-    (set, get) => ({
-      logs: [],
+async function withStorageRollback<T>(
+  mutate: () => void,
+  persist: () => Promise<T>,
+  rollback: () => void
+): Promise<void> {
+  mutate();
+  try {
+    await persist();
+  } catch (error) {
+    rollback();
+    throw error;
+  }
+}
+
+export const useLogStore = create<LogState>((set, get) => ({
+  logs: [],
+  searchQuery: '',
+  editingId: null,
+  // Filter state
+  startDate: null,
+  endDate: null,
+  filterTags: [],
+  sortBy: 'newest',
+  getFilteredLogs: () => {
+    const { logs, searchQuery, filterTags, startDate, endDate, sortBy } = get();
+    const query = searchQuery.toLowerCase();
+    let filtered = logs.filter((log) => {
+      if (log.category !== 'log') return false;
+      const matchesSearch = !query || log.content.toLowerCase().includes(query);
+      const matchesTags = filterTags.length === 0 || filterTags.includes(log.colorTag);
+      const matchesStart = !startDate || log.recordDate >= startDate;
+      const matchesEnd = !endDate || log.recordDate <= endDate;
+      return matchesSearch && matchesTags && matchesStart && matchesEnd;
+    });
+
+    if (sortBy === 'oldest') {
+      filtered = [...filtered].sort(
+        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+    } else if (sortBy === 'newest') {
+      filtered = [...filtered].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+    } else if (sortBy === 'tag') {
+      filtered = [...filtered].sort((a, b) => a.colorTag.localeCompare(b.colorTag));
+    }
+
+    return filtered;
+  },
+  getIdeas: () => {
+    return get().logs.filter((log) => log.category === 'idea');
+  },
+  addLog: async (content, colorTag, category = 'log') => {
+    const newLog: LogItem = {
+      id: crypto.randomUUID(),
+      content,
+      colorTag,
+      category,
+      importance: 0,
+      createdAt: new Date().toISOString(),
+      recordDate: getTodayStr(),
+    };
+    const previousLogs = get().logs;
+    await withStorageRollback(
+      () => set((state) => ({ logs: [newLog, ...state.logs] })),
+      async () => {
+        const storage = await getStorageAdapter();
+        await storage.saveLog(newLog);
+      },
+      () => set({ logs: previousLogs })
+    );
+  },
+  updateLog: async (id, updates) => {
+    const previousLogs = get().logs;
+    await withStorageRollback(
+      () =>
+        set((state) => ({
+          logs: state.logs.map((log) => (log.id === id ? { ...log, ...updates } : log)),
+        })),
+      async () => {
+        const storage = await getStorageAdapter();
+        const updated = previousLogs.find((log) => log.id === id);
+        if (!updated) return;
+        const merged = { ...updated, ...updates };
+        await storage.saveLog(merged);
+      },
+      () => set({ logs: previousLogs })
+    );
+  },
+  deleteLog: async (id) => {
+    const previousLogs = get().logs;
+    await withStorageRollback(
+      () => set((state) => ({ logs: state.logs.filter((log) => log.id !== id) })),
+      async () => {
+        const storage = await getStorageAdapter();
+        await storage.deleteLog(id);
+      },
+      () => set({ logs: previousLogs })
+    );
+  },
+  setSearchQuery: (query) => set({ searchQuery: query }),
+  setEditingId: (id) => set({ editingId: id }),
+  moveToIdea: async (id) => {
+    const previousLogs = get().logs;
+    await withStorageRollback(
+      () =>
+        set((state) => ({
+          logs: state.logs.map((log) => (log.id === id ? { ...log, category: 'idea' } : log)),
+        })),
+      async () => {
+        const storage = await getStorageAdapter();
+        const log = previousLogs.find((l) => l.id === id);
+        if (!log) return;
+        await storage.saveLog({ ...log, category: 'idea' });
+      },
+      () => set({ logs: previousLogs })
+    );
+  },
+  // Filter actions
+  setDateRange: (start, end) => set({ startDate: start, endDate: end }),
+  setFilterTags: (tags) => set({ filterTags: tags }),
+  toggleFilterTag: (tag) =>
+    set((state) => {
+      const next = state.filterTags.includes(tag)
+        ? state.filterTags.filter((t) => t !== tag)
+        : [...state.filterTags, tag];
+      return { filterTags: next };
+    }),
+  setSortBy: (sort) => set({ sortBy: sort }),
+  resetFilters: () =>
+    set({
       searchQuery: '',
-      editingId: null,
-      // Filter state
       startDate: null,
       endDate: null,
       filterTags: [],
       sortBy: 'newest',
-      getFilteredLogs: () => {
-        const { logs, searchQuery, filterTags, startDate, endDate, sortBy } = get();
-        const query = searchQuery.toLowerCase();
-        let filtered = logs.filter((log) => {
-          if (log.category !== 'log') return false;
-          const matchesSearch = !query || log.content.toLowerCase().includes(query);
-          const matchesTags = filterTags.length === 0 || filterTags.includes(log.colorTag);
-          const matchesStart = !startDate || log.recordDate >= startDate;
-          const matchesEnd = !endDate || log.recordDate <= endDate;
-          return matchesSearch && matchesTags && matchesStart && matchesEnd;
-        });
-
-        if (sortBy === 'oldest') {
-          filtered = [...filtered].sort(
-            (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-          );
-        } else if (sortBy === 'newest') {
-          filtered = [...filtered].sort(
-            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
-        } else if (sortBy === 'tag') {
-          filtered = [...filtered].sort((a, b) => a.colorTag.localeCompare(b.colorTag));
-        }
-
-        return filtered;
-      },
-      getIdeas: () => {
-        return get().logs.filter((log) => log.category === 'idea');
-      },
-      addLog: (content, colorTag, category = 'log') => {
-        const newLog: LogItem = {
-          id: crypto.randomUUID(),
-          content,
-          colorTag,
-          category,
-          importance: 0,
-          createdAt: new Date().toISOString(),
-          recordDate: getTodayStr(),
-        };
-        set((state) => ({ logs: [newLog, ...state.logs] }));
-      },
-      updateLog: (id, updates) => {
-        set((state) => ({
-          logs: state.logs.map((log) => (log.id === id ? { ...log, ...updates } : log)),
-        }));
-      },
-      deleteLog: (id) => {
-        set((state) => ({
-          logs: state.logs.filter((log) => log.id !== id),
-        }));
-      },
-      setSearchQuery: (query) => set({ searchQuery: query }),
-      setEditingId: (id) => set({ editingId: id }),
-      moveToIdea: (id) => {
-        set((state) => ({
-          logs: state.logs.map((log) => (log.id === id ? { ...log, category: 'idea' } : log)),
-        }));
-      },
-      // Filter actions
-      setDateRange: (start, end) => set({ startDate: start, endDate: end }),
-      setFilterTags: (tags) => set({ filterTags: tags }),
-      toggleFilterTag: (tag) =>
-        set((state) => {
-          const next = state.filterTags.includes(tag)
-            ? state.filterTags.filter((t) => t !== tag)
-            : [...state.filterTags, tag];
-          return { filterTags: next };
-        }),
-      setSortBy: (sort) => set({ sortBy: sort }),
-      resetFilters: () =>
-        set({
-          searchQuery: '',
-          startDate: null,
-          endDate: null,
-          filterTags: [],
-          sortBy: 'newest',
-        }),
-      // Import actions
-      overwriteLogs: (logs) => set({ logs }),
     }),
-    {
-      name: 'flash-logs',
-      version: 1,
-      partialize: (state) => ({
-        logs: state.logs,
-      }),
-    }
-  )
-);
+  // Import actions
+  overwriteLogs: (logs) => set({ logs }),
+}));

@@ -1,7 +1,21 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import * as storageModule from '@/lib/storage';
 import { useLogStore } from '@/stores/logStore';
 import { DEMO_LOGS } from '@/data/demo';
 import { getImportanceFromContent } from '@/lib/constants';
+
+vi.mock('@/lib/storage', async () => {
+  const actual = await vi.importActual<typeof storageModule>('@/lib/storage');
+  const { MemoryStorageAdapter } = actual;
+  return {
+    ...actual,
+    getStorageAdapter: vi.fn(async () => {
+      const adapter = new MemoryStorageAdapter();
+      await adapter.init();
+      return adapter;
+    }),
+  };
+});
 
 describe('logStore', () => {
   beforeEach(() => {
@@ -9,8 +23,8 @@ describe('logStore', () => {
     useLogStore.setState({ ...useLogStore.getInitialState(), logs: DEMO_LOGS }, true);
   });
 
-  it('adds a log', () => {
-    useLogStore.getState().addLog('hello', 'daily', 'log');
+  it('adds a log', async () => {
+    await useLogStore.getState().addLog('hello', 'daily', 'log');
     const logs = useLogStore.getState().logs;
     expect(logs).toHaveLength(6); // 5 demo + 1 new
     expect(logs[0].content).toBe('hello');
@@ -19,15 +33,15 @@ describe('logStore', () => {
     expect(logs[0].importance).toBe(0);
   });
 
-  it('updates a log', () => {
+  it('updates a log', async () => {
     const id = useLogStore.getState().logs[0].id;
-    useLogStore.getState().updateLog(id, { content: 'updated' });
+    await useLogStore.getState().updateLog(id, { content: 'updated' });
     expect(useLogStore.getState().logs[0].content).toBe('updated');
   });
 
-  it('deletes a log', () => {
+  it('deletes a log', async () => {
     const id = useLogStore.getState().logs[0].id;
-    useLogStore.getState().deleteLog(id);
+    await useLogStore.getState().deleteLog(id);
     expect(useLogStore.getState().logs).toHaveLength(4);
   });
 
@@ -44,9 +58,9 @@ describe('logStore', () => {
     expect(filtered.every((l) => l.colorTag === 'urgent')).toBe(true);
   });
 
-  it('moves a log to idea', () => {
+  it('moves a log to idea', async () => {
     const id = useLogStore.getState().logs[0].id;
-    useLogStore.getState().moveToIdea(id);
+    await useLogStore.getState().moveToIdea(id);
     expect(useLogStore.getState().logs.find((l) => l.id === id)?.category).toBe('idea');
   });
 

@@ -39,10 +39,10 @@ describe('Calendar', () => {
     expect(screen.getByText('今日记录')).toBeInTheDocument();
   });
 
-  it('selects a day and shows records when available', () => {
+  it('selects a day and shows records when available', async () => {
     const todayStr = getTodayStr();
     useLogStore.setState({ logs: [] });
-    useLogStore.getState().addLog('today log', 'daily', 'log');
+    await useLogStore.getState().addLog('today log', 'daily', 'log');
 
     render(<Calendar />);
     const todayDate = new Date(`${todayStr}T00:00:00`);

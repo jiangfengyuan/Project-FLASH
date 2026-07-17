@@ -23,7 +23,7 @@ const HistoryItem = memo(function HistoryItem({
 }: {
   record: ReturnType<typeof useEmotionStore.getState>['emotions'][0];
   index: number;
-  onDelete: (id: string) => void;
+  onDelete: (id: string) => void | Promise<void>;
 }) {
   const reduced = useReducedMotion();
   const subEmotion = record.subEmotion ? subEmotionConfig[record.subEmotion] : null;
@@ -70,7 +70,7 @@ const HistoryItem = memo(function HistoryItem({
           <button
             onClick={() => {
               haptic(HAPTIC_DELETE);
-              onDelete(record.id);
+              void onDelete(record.id);
             }}
             aria-label="删除情绪记录"
             className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full active:bg-red-500/20 transition-colors"

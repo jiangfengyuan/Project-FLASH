@@ -73,11 +73,11 @@ export default function IdeaFlow() {
         setMenuOpenId(null);
       }
     } else if (action === 'delete') {
-      deleteLog(id);
+      void deleteLog(id);
       showToast('想法已删除', 'info');
       setMenuOpenId(null);
     } else if (action === 'transfer') {
-      updateLog(id, { category: 'log' });
+      void updateLog(id, { category: 'log' });
       showToast('已转至 Log', 'success');
       haptic(HAPTIC_SUCCESS);
       setMenuOpenId(null);
@@ -94,7 +94,7 @@ export default function IdeaFlow() {
   };
 
   const handleEditSave = (id: string, content: string) => {
-    updateLog(id, {
+    void updateLog(id, {
       content,
       importance: getImportanceFromContent(content),
     });
@@ -187,12 +187,12 @@ export default function IdeaFlow() {
             onClose={() => setDetailLog(null)}
             onEdit={handleDetailEdit}
             onDelete={(id) => {
-              deleteLog(id);
+              void deleteLog(id);
               showToast('想法已删除', 'info');
               setDetailLog(null);
             }}
             onTransfer={(id) => {
-              updateLog(id, { category: 'log' });
+              void updateLog(id, { category: 'log' });
               showToast('已转至 Log', 'success');
               haptic(HAPTIC_SUCCESS);
               setDetailLog(null);

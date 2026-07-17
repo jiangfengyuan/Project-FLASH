@@ -80,7 +80,7 @@ export default function CurrentEmotion() {
   };
 
   const handleSave = () => {
-    addEmotion({
+    void addEmotion({
       level: sliderValue,
       subEmotion: currentSubEmotion,
       status: status || null,

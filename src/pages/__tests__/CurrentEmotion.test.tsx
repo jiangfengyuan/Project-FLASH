@@ -34,8 +34,8 @@ describe('CurrentEmotion', () => {
     expect(useEmotionStore.getState().emotions.length).toBeGreaterThan(0);
   });
 
-  it('renders history list', () => {
-    useEmotionStore.getState().addEmotion({
+  it('renders history list', async () => {
+    await useEmotionStore.getState().addEmotion({
       level: 2,
       subEmotion: null,
       status: '工作中',

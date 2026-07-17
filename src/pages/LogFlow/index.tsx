@@ -180,7 +180,7 @@ export default function LogFlow() {
   };
 
   const handleSaveEdit = (id: string, content: string) => {
-    updateLog(id, { content: content.trim() });
+    void updateLog(id, { content: content.trim() });
     showToast('编辑已保存', 'success');
     haptic(HAPTIC_SUCCESS);
     setEditingId(null);
@@ -188,7 +188,7 @@ export default function LogFlow() {
   };
 
   const handleDelete = (id: string) => {
-    deleteLog(id);
+    void deleteLog(id);
     showToast('记录已删除', 'info');
     setMenuOpenId(null);
   };
@@ -197,7 +197,7 @@ export default function LogFlow() {
     const log = logs.find((l) => l.id === id);
     if (!log) return;
     const nextCategory = log.category === 'idea' ? 'log' : 'idea';
-    updateLog(id, { category: nextCategory });
+    void updateLog(id, { category: nextCategory });
     showToast(nextCategory === 'idea' ? '已转至 Idea Flow' : '已转回 Log', 'success');
     haptic(HAPTIC_SUCCESS);
     setDetailLog(null);

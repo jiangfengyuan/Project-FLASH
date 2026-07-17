@@ -33,7 +33,7 @@ export default function LogStream() {
   };
 
   const handleSave = (category: 'log' | 'idea') => {
-    addLog(pendingContent, pendingTag || 'daily', category);
+    void addLog(pendingContent, pendingTag || 'daily', category);
     showToast(category === 'idea' ? '已发送至 Idea Flow' : '记录已保存', 'success');
     haptic(HAPTIC_SUCCESS);
     setPendingContent('');
@@ -49,7 +49,7 @@ export default function LogStream() {
 
   const handleEditSave = (id: string, content: string) => {
     if (content.trim()) {
-      updateLog(id, { content: content.trim() });
+      void updateLog(id, { content: content.trim() });
       showToast('编辑已保存', 'success');
       haptic(HAPTIC_SUCCESS);
     }
@@ -63,7 +63,7 @@ export default function LogStream() {
   };
 
   const handleDelete = (id: string) => {
-    deleteLog(id);
+    void deleteLog(id);
     showToast('记录已删除', 'info');
   };
 
@@ -71,7 +71,7 @@ export default function LogStream() {
     const log = useLogStore.getState().logs.find((l) => l.id === id);
     if (log) {
       const nextCategory = log.category === 'idea' ? 'log' : 'idea';
-      updateLog(id, { category: nextCategory });
+      void updateLog(id, { category: nextCategory });
       showToast(nextCategory === 'idea' ? '已转至 Idea Flow' : '已转回 Log', 'success');
       haptic(HAPTIC_SUCCESS);
     }
