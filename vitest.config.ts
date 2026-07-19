@@ -13,6 +13,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
+    exclude: ['**/node_modules/**', '**/.worktrees/**'],
     env: {
       NODE_OPTIONS: '--localstorage-file=./.vitest-localstorage',
     },
