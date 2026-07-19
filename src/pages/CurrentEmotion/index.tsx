@@ -82,7 +82,9 @@ export default function CurrentEmotion() {
   const handleSave = () => {
     addEmotion({
       level: sliderValue,
-      subEmotion: currentSubEmotion,
+      // Sub-emotions are only meaningful for negative levels; never persist
+      // a stale selection on a non-negative record.
+      subEmotion: sliderValue < 0 ? currentSubEmotion : null,
       status: status || null,
       note: note || null,
       recordDate: getTodayStr(),

@@ -49,6 +49,23 @@ describe('emotionStore', () => {
     expect(useEmotionStore.getState().currentLevel).toBe(-2);
   });
 
+  it('clears current sub emotion when level becomes non-negative', () => {
+    useEmotionStore.getState().setCurrentLevel(-2);
+    useEmotionStore.getState().setCurrentSubEmotion('angry');
+    expect(useEmotionStore.getState().currentSubEmotion).toBe('angry');
+
+    useEmotionStore.getState().setCurrentLevel(1);
+    expect(useEmotionStore.getState().currentSubEmotion).toBeNull();
+  });
+
+  it('keeps current sub emotion when level stays negative', () => {
+    useEmotionStore.getState().setCurrentLevel(-3);
+    useEmotionStore.getState().setCurrentSubEmotion('sad');
+
+    useEmotionStore.getState().setCurrentLevel(-1);
+    expect(useEmotionStore.getState().currentSubEmotion).toBe('sad');
+  });
+
   it('sets current sub emotion', () => {
     useEmotionStore.getState().setCurrentSubEmotion('angry');
     expect(useEmotionStore.getState().currentSubEmotion).toBe('angry');

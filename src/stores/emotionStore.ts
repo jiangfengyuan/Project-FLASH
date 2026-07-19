@@ -90,7 +90,13 @@ export const useEmotionStore = create<EmotionState>((set, get) => ({
     });
   },
   overwriteEmotions: (emotions) => set({ emotions }),
-  setCurrentLevel: (level) => set({ currentLevel: level }),
+  setCurrentLevel: (level) =>
+    set((state) => ({
+      currentLevel: level,
+      // Sub-emotions only exist for negative levels; drop any stale
+      // selection when the level becomes non-negative.
+      currentSubEmotion: level < 0 ? state.currentSubEmotion : null,
+    })),
   setCurrentSubEmotion: (sub) => set({ currentSubEmotion: sub }),
   flushMutations: async () => {
     await mutationQueue;

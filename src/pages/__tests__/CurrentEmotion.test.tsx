@@ -36,6 +36,30 @@ describe('CurrentEmotion', () => {
     });
   });
 
+  it('persists null subEmotion when saving a non-negative level with a stale selection', async () => {
+    // Simulate a stale sub-emotion left over from a previous negative level.
+    useEmotionStore.setState({ currentLevel: 2, currentSubEmotion: 'sad' });
+    render(<CurrentEmotion />);
+    fireEvent.click(screen.getByText('记录此刻'));
+    await waitFor(() => {
+      expect(useEmotionStore.getState().emotions.length).toBeGreaterThan(0);
+    });
+    expect(useEmotionStore.getState().emotions[0].level).toBe(2);
+    expect(useEmotionStore.getState().emotions[0].subEmotion).toBeNull();
+  });
+
+  it('persists the selected subEmotion when saving a negative level', async () => {
+    useEmotionStore.getState().setCurrentLevel(-1);
+    render(<CurrentEmotion />);
+    fireEvent.click(screen.getByRole('button', { name: '伤心' }));
+    fireEvent.click(screen.getByText('记录此刻'));
+    await waitFor(() => {
+      expect(useEmotionStore.getState().emotions.length).toBeGreaterThan(0);
+    });
+    expect(useEmotionStore.getState().emotions[0].level).toBe(-1);
+    expect(useEmotionStore.getState().emotions[0].subEmotion).toBe('sad');
+  });
+
   it('renders history list', async () => {
     await useEmotionStore.getState().addEmotion({
       level: 2,
