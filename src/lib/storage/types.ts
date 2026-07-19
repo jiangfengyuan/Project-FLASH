@@ -16,5 +16,12 @@ export interface StorageAdapter {
   saveEmotions(emotions: EmotionRecord[]): Promise<void>;
   deleteEmotion(id: string): Promise<void>;
 
+  /**
+   * Atomically replaces the entire contents of both stores with the given
+   * records. Unlike saveLogs/saveEmotions (upsert-only), this removes any
+   * pre-existing records that are not part of the payload.
+   */
+  replaceAll(logs: LogItem[], emotions: EmotionRecord[]): Promise<void>;
+
   clearAll(): Promise<void>;
 }

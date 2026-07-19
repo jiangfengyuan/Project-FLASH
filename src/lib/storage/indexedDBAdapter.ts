@@ -72,6 +72,18 @@ export class IndexedDBStorageAdapter implements StorageAdapter {
     await promisifyRequest(tx);
   }
 
+  async replaceAll(logs: LogItem[], emotions: EmotionRecord[]): Promise<void> {
+    const db = await this.ensureDB();
+    const tx = db.transaction(['logs', 'emotions'], 'readwrite');
+    const logStore = tx.objectStore('logs');
+    const emotionStore = tx.objectStore('emotions');
+    logStore.clear();
+    emotionStore.clear();
+    for (const log of logs) logStore.put(log);
+    for (const emotion of emotions) emotionStore.put(emotion);
+    await promisifyRequest(tx);
+  }
+
   async clearAll(): Promise<void> {
     const db = await this.ensureDB();
     const tx = db.transaction(['logs', 'emotions'], 'readwrite');

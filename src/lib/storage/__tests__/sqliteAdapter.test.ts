@@ -70,4 +70,80 @@ describe('SQLiteStorageAdapter', () => {
     expect(db.execute).toHaveBeenCalledWith('ROLLBACK;');
     expect(db.execute).not.toHaveBeenCalledWith('COMMIT;');
   });
+
+  it('replaceAll deletes both tables then inserts inside a single transaction', async () => {
+    await adapter.init();
+    const db = (
+      adapter as unknown as {
+        connection: { execute: ReturnType<typeof vi.fn>; run: ReturnType<typeof vi.fn> };
+      }
+    ).connection;
+    db.execute.mockClear();
+    db.run.mockClear();
+
+    await adapter.replaceAll(
+      [
+        {
+          id: 'log-1',
+          content: 'hello',
+          colorTag: 'daily',
+          category: 'log',
+          importance: 0,
+          createdAt: '2026-07-14T10:00:00.000Z',
+          recordDate: '2026-07-14',
+        },
+      ],
+      [
+        {
+          id: 'emotion-1',
+          level: 1,
+          subEmotion: null,
+          status: null,
+          note: null,
+          recordDate: '2026-07-14',
+          createdAt: '2026-07-14T10:00:00.000Z',
+        },
+      ]
+    );
+
+    expect(db.execute.mock.calls).toEqual([
+      ['BEGIN TRANSACTION;'],
+      ['DELETE FROM logs;'],
+      ['DELETE FROM emotions;'],
+      ['COMMIT;'],
+    ]);
+    expect(db.run).toHaveBeenCalledTimes(2);
+  });
+
+  it('replaceAll rolls back the transaction when an insert fails', async () => {
+    await adapter.init();
+    const db = (
+      adapter as unknown as {
+        connection: { execute: ReturnType<typeof vi.fn>; run: ReturnType<typeof vi.fn> };
+      }
+    ).connection;
+    db.execute.mockClear();
+    db.run.mockRejectedValueOnce(new Error('insert failed'));
+
+    await expect(
+      adapter.replaceAll(
+        [
+          {
+            id: 'log-1',
+            content: 'hello',
+            colorTag: 'daily',
+            category: 'log',
+            importance: 0,
+            createdAt: '2026-07-14T10:00:00.000Z',
+            recordDate: '2026-07-14',
+          },
+        ],
+        []
+      )
+    ).rejects.toThrow('insert failed');
+
+    expect(db.execute).toHaveBeenCalledWith('BEGIN TRANSACTION;');
+    expect(db.execute).toHaveBeenCalledWith('ROLLBACK;');
+    expect(db.execute).not.toHaveBeenCalledWith('COMMIT;');
+  });
 });

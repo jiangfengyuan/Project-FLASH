@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Settings from './index';
 import { useLogStore } from '@/stores/logStore';
@@ -6,6 +6,7 @@ import { useEmotionStore } from '@/stores/emotionStore';
 import { useToastStore } from '@/stores/toastStore';
 import { exportBackup, MAX_BACKUP_SIZE_BYTES } from '@/lib/backup';
 import * as storageModule from '@/lib/storage';
+import { MemoryStorageAdapter } from '@/lib/storage/memoryAdapter';
 import type { LogItem } from '@/stores/logStore';
 import type { EmotionRecord } from '@/stores/emotionStore';
 
@@ -57,6 +58,10 @@ describe('Settings', () => {
   beforeEach(() => {
     useLogStore.setState({ logs: [] });
     useEmotionStore.setState({ emotions: [] });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('renders export and import buttons', () => {
@@ -136,5 +141,44 @@ describe('Settings', () => {
     expect(useLogStore.getState().logs).toHaveLength(1);
     expect(useEmotionStore.getState().emotions).toHaveLength(1);
     expect(screen.getByText('备份中没有可导入的有效记录，未执行覆盖')).toBeInTheDocument();
+  });
+
+  it('overwrite import replaces storage contents via replaceAll, dropping old records', async () => {
+    const replaceAllSpy = vi.spyOn(MemoryStorageAdapter.prototype, 'replaceAll');
+    const saveLogsSpy = vi.spyOn(MemoryStorageAdapter.prototype, 'saveLogs');
+
+    const NEW_LOG_ID = 'c3c3c3c3-c3c3-c3c3-c3c3-c3c3c3c3c3c3';
+    const NEW_EMOTION_ID = 'd4d4d4d4-d4d4-d4d4-d4d4-d4d4d4d4d4d4';
+
+    useLogStore.setState({ logs: [makeValidLog(VALID_LOG_ID)] });
+    useEmotionStore.setState({ emotions: [makeValidEmotion(VALID_EMOTION_ID)] });
+
+    render(<Settings />);
+
+    const backup = exportBackup([makeValidLog(NEW_LOG_ID)], [makeValidEmotion(NEW_EMOTION_ID)]);
+    selectFile(backup);
+
+    await waitFor(() => {
+      expect(screen.getByText('确认导入')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('覆盖导入'));
+    fireEvent.click(screen.getByRole('button', { name: '确认覆盖' }));
+
+    await waitFor(() => {
+      expect(replaceAllSpy).toHaveBeenCalledTimes(1);
+    });
+
+    // Storage is replaced with only the backup records; pre-existing ones are dropped.
+    const [logsArg, emotionsArg] = replaceAllSpy.mock.calls[0];
+    expect(logsArg.map((l) => l.id)).toEqual([NEW_LOG_ID]);
+    expect(emotionsArg.map((e) => e.id)).toEqual([NEW_EMOTION_ID]);
+    // Upsert-only persistence must not be used for imports.
+    expect(saveLogsSpy).not.toHaveBeenCalled();
+
+    await waitFor(() => {
+      expect(useLogStore.getState().logs.map((l) => l.id)).toEqual([NEW_LOG_ID]);
+      expect(useEmotionStore.getState().emotions.map((e) => e.id)).toEqual([NEW_EMOTION_ID]);
+    });
   });
 });

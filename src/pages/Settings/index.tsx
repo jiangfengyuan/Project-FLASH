@@ -124,12 +124,10 @@ export default function Settings() {
     const backupEmotions = [...emotions];
 
     try {
-      await storage.saveLogs(result.logs);
-      await storage.saveEmotions(result.emotions);
+      await storage.replaceAll(result.logs, result.emotions);
     } catch {
       try {
-        await storage.saveLogs(backupLogs);
-        await storage.saveEmotions(backupEmotions);
+        await storage.replaceAll(backupLogs, backupEmotions);
       } catch {
         // Best-effort rollback; if this fails the storage layer is in an unknown state.
       }

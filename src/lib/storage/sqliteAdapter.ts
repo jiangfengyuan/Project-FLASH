@@ -126,6 +126,49 @@ export class SQLiteStorageAdapter implements StorageAdapter {
     await db.run(`DELETE FROM ${TABLE_EMOTIONS} WHERE id = ?;`, [id]);
   }
 
+  async replaceAll(logs: LogItem[], emotions: EmotionRecord[]): Promise<void> {
+    const db = await this.ensureDB();
+    await db.execute(`BEGIN TRANSACTION;`);
+    try {
+      await db.execute(`DELETE FROM ${TABLE_LOGS};`);
+      await db.execute(`DELETE FROM ${TABLE_EMOTIONS};`);
+      for (const log of logs) {
+        await db.run(
+          `INSERT OR REPLACE INTO ${TABLE_LOGS} (id, content, colorTag, category, importance, createdAt, recordDate)
+           VALUES (?, ?, ?, ?, ?, ?, ?);`,
+          [
+            log.id,
+            log.content,
+            log.colorTag,
+            log.category,
+            log.importance,
+            log.createdAt,
+            log.recordDate,
+          ]
+        );
+      }
+      for (const emotion of emotions) {
+        await db.run(
+          `INSERT OR REPLACE INTO ${TABLE_EMOTIONS} (id, level, subEmotion, status, note, recordDate, createdAt)
+           VALUES (?, ?, ?, ?, ?, ?, ?);`,
+          [
+            emotion.id,
+            emotion.level,
+            emotion.subEmotion ?? null,
+            emotion.status ?? null,
+            emotion.note ?? null,
+            emotion.recordDate,
+            emotion.createdAt,
+          ]
+        );
+      }
+      await db.execute(`COMMIT;`);
+    } catch (error) {
+      await db.execute(`ROLLBACK;`).catch(() => {});
+      throw error;
+    }
+  }
+
   async clearAll(): Promise<void> {
     const db = await this.ensureDB();
     await db.execute(`BEGIN TRANSACTION;`);

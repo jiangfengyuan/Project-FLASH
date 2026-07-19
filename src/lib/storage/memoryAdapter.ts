@@ -51,6 +51,13 @@ export class MemoryStorageAdapter implements StorageAdapter {
     this.emotions.delete(id);
   }
 
+  async replaceAll(logs: LogItem[], emotions: EmotionRecord[]): Promise<void> {
+    this.logs.clear();
+    this.emotions.clear();
+    for (const log of logs) this.logs.set(log.id, log);
+    for (const emotion of emotions) this.emotions.set(emotion.id, emotion);
+  }
+
   async clearAll(): Promise<void> {
     this.logs.clear();
     this.emotions.clear();
