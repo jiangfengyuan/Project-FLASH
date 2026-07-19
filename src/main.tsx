@@ -4,6 +4,7 @@ import './index.css';
 import App from './App';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { initNativePlugins } from '@/lib/nativePlugins';
+import { useNavigationStore } from '@/stores/navigationStore';
 
 void initNativePlugins();
 
@@ -14,7 +15,11 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <ErrorBoundary>
+    <ErrorBoundary
+      onReset={() => {
+        useNavigationStore.getState().navigateTo('log');
+      }}
+    >
       <App />
     </ErrorBoundary>
   </StrictMode>

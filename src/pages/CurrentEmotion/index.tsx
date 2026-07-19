@@ -1,8 +1,9 @@
 import { useState, useRef, useCallback, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Save, Frown, Angry, Meh } from 'lucide-react';
+import { Save } from 'lucide-react';
 import { useEmotionStore } from '@/stores/emotionStore';
 import { LEVEL_NAMES, LEVEL_COLORS, type EmotionLevel, type SubEmotion } from '@/lib/constants';
+import { SUB_EMOTION_CONFIG } from '@/lib/subEmotionConfig';
 import { useToastStore } from '@/stores/toastStore';
 import { useReducedMotion, fadeTransition } from '@/lib/motion';
 import { haptic, HAPTIC_SUCCESS, HAPTIC_TAP } from '@/lib/haptics';
@@ -15,16 +16,17 @@ const StatsPanel = lazy(() => import('./StatsPanel'));
 
 const LEVELS: EmotionLevel[] = [3, 2, 1, 0, -1, -2, -3];
 
-const SUB_EMOTIONS: {
-  key: SubEmotion;
-  label: string;
-  icon: React.ComponentType<{ size?: number; className?: string }>;
-  color: string;
-}[] = [
-  { key: 'sad', label: '伤心', icon: Frown, color: '#A78BFA' },
-  { key: 'angry', label: '生气', icon: Angry, color: '#F87171' },
-  { key: 'uncomfortable', label: '难受', icon: Meh, color: '#FB923C' },
-];
+const SUB_EMOTIONS = (
+  Object.entries(SUB_EMOTION_CONFIG) as [
+    NonNullable<SubEmotion>,
+    (typeof SUB_EMOTION_CONFIG)[NonNullable<SubEmotion>],
+  ][]
+).map(([key, config]) => ({
+  key,
+  label: config.label,
+  icon: config.icon,
+  color: config.color,
+}));
 
 export default function CurrentEmotion() {
   const reduced = useReducedMotion();

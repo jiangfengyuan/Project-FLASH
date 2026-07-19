@@ -1,5 +1,3 @@
-import type { LogItem } from '@/stores/logStore';
-
 // ===================== Color Tags (Logs / Ideas) =====================
 
 export type ColorTag = 'urgent' | 'inspiration' | 'daily' | 'memo' | 'emotion' | 'idea';
@@ -38,10 +36,6 @@ export const CATEGORY_LABELS: Record<Category, CategoryLabel> = {
   log: { text: 'LOG', bg: 'rgba(77,150,255,0.15)', color: '#4D96FF' },
   idea: { text: 'IDEA', bg: 'rgba(255,159,67,0.15)', color: '#FF9F43' },
 };
-
-export function getCategoryLabel(category: Category): CategoryLabel {
-  return CATEGORY_LABELS[category];
-}
 
 // ===================== Importance =====================
 
@@ -91,14 +85,3 @@ export const LEVEL_COLORS: Record<EmotionLevel, string> = {
   '-2': '#DDA0DD',
   '-3': '#800080',
 };
-
-// ===================== Time =====================
-
-export const MS_PER_HOUR = 60 * 60 * 1000;
-export const MS_PER_DAY = 24 * MS_PER_HOUR;
-
-// ===================== Detail Drawer =====================
-
-export type DetailVariant = 'log' | 'idea';
-
-export type DetailDrawerLog = LogItem;

@@ -24,6 +24,3 @@ export const springTransition = (reduced: boolean) =>
   reduced ? { duration: 0 } : { type: 'spring' as const, damping: 28, stiffness: 300 };
 
 export const fadeTransition = (reduced: boolean) => (reduced ? { duration: 0 } : { duration: 0.2 });
-
-export const slideUpTransition = (reduced: boolean) =>
-  reduced ? { duration: 0 } : { duration: 0.25, ease: 'easeOut' };

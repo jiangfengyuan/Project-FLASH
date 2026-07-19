@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { EmotionLevel, SubEmotion } from '@/lib/constants';
 import { getStorageAdapter } from '@/lib/storage';
+import { withStorageRollback, createMutationQueue } from '@/lib/storage/storeHelpers';
 export type { EmotionLevel, SubEmotion };
 
 export interface EmotionRecord {
@@ -37,27 +38,7 @@ interface EmotionState {
   enqueueMutation: (operation: () => Promise<void>) => Promise<void>;
 }
 
-async function withStorageRollback(
-  mutate: () => void,
-  persist: () => Promise<void>,
-  rollback: () => void
-): Promise<void> {
-  mutate();
-  try {
-    await persist();
-  } catch (error) {
-    rollback();
-    throw error;
-  }
-}
-
-let mutationQueue: Promise<unknown> = Promise.resolve();
-
-function queueMutation(operation: () => Promise<void>): Promise<void> {
-  const result = mutationQueue.then(operation);
-  mutationQueue = result.catch(() => {});
-  return result;
-}
+const { enqueue: queueMutation, flush: flushMutationQueue } = createMutationQueue();
 
 export const useEmotionStore = create<EmotionState>((set, get) => ({
   emotions: [],
@@ -104,10 +85,6 @@ export const useEmotionStore = create<EmotionState>((set, get) => ({
       currentSubEmotion: level < 0 ? state.currentSubEmotion : null,
     })),
   setCurrentSubEmotion: (sub) => set({ currentSubEmotion: sub }),
-  flushMutations: async () => {
-    await mutationQueue;
-  },
-  enqueueMutation: async (operation) => {
-    await queueMutation(operation);
-  },
+  flushMutations: flushMutationQueue,
+  enqueueMutation: queueMutation,
 }));

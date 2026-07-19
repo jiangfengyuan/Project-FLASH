@@ -3,6 +3,7 @@ import { Component, type ReactNode } from 'react';
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
+  onReset?: () => void;
 }
 
 interface State {
@@ -30,6 +31,7 @@ export default class ErrorBoundary extends Component<Props, State> {
 
   handleReset = () => {
     this.setState({ hasError: false, error: undefined });
+    this.props.onReset?.();
   };
 
   render() {

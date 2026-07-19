@@ -257,12 +257,7 @@ export default function InputArea({
 
   const handleTextSubmit = () => {
     if (!text.trim()) return;
-    let content = text.trim();
-    if (content.length > 140) {
-      content = content.slice(0, 140);
-      showToast('内容超过 140 字，已自动截断', 'info');
-    }
-    onSubmit(content, selectedTag);
+    onSubmit(text.trim(), selectedTag);
     haptic(HAPTIC_SUCCESS);
     setText('');
     setSelectedTag(null);

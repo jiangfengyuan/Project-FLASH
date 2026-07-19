@@ -1,20 +1,15 @@
 import { memo } from 'react';
 import { Virtuoso } from 'react-virtuoso';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, Frown, Angry, Meh } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { useEmotionStore } from '@/stores/emotionStore';
 import { LEVEL_NAMES, LEVEL_COLORS } from '@/lib/constants';
+import { SUB_EMOTION_CONFIG } from '@/lib/subEmotionConfig';
 import LiquidGlassCard from '@/components/LiquidGlassCard';
 import { format } from 'date-fns';
 import EmotionEmoji from './EmotionEmoji';
 import { useReducedMotion, fadeTransition } from '@/lib/motion';
 import { haptic, HAPTIC_DELETE } from '@/lib/haptics';
-
-const subEmotionConfig = {
-  sad: { label: '伤心', color: '#A78BFA', icon: Frown },
-  angry: { label: '生气', color: '#F87171', icon: Angry },
-  uncomfortable: { label: '难受', color: '#FB923C', icon: Meh },
-};
 
 const HistoryItem = memo(function HistoryItem({
   record,
@@ -26,7 +21,7 @@ const HistoryItem = memo(function HistoryItem({
   onDelete: (id: string) => void | Promise<void>;
 }) {
   const reduced = useReducedMotion();
-  const subEmotion = record.subEmotion ? subEmotionConfig[record.subEmotion] : null;
+  const subEmotion = record.subEmotion ? SUB_EMOTION_CONFIG[record.subEmotion] : null;
 
   return (
     <motion.div

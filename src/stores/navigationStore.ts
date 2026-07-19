@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export type Tab = 'log' | 'idea' | 'calendar' | 'emotion';
-export type Page = Tab | 'logFlow' | 'ideaEdit' | 'ideaDetail' | 'settings';
+export type Page = Tab | 'logFlow' | 'settings';
 
 export const TAB_PAGES: Tab[] = ['log', 'idea', 'calendar', 'emotion'];
 

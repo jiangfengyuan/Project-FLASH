@@ -4,7 +4,6 @@ import { App as CapacitorApp } from '@capacitor/app';
 import { useNavigationStore, type Page, TAB_PAGES, type Tab } from '@/stores/navigationStore';
 import { useReducedMotion } from '@/lib/motion';
 import { getPlatform } from '@/lib/platform';
-import { useSafeArea } from '@/hooks/useSafeArea';
 import { useBackButton } from '@/hooks/useBackButton';
 import { useThemeStore } from '@/stores/themeStore';
 import { useToastStore } from '@/stores/toastStore';
@@ -56,7 +55,6 @@ export default function App() {
   const setShowSplash = useNavigationStore((state) => state.setShowSplash);
   const direction = useNavigationStore((state) => state.direction);
 
-  useSafeArea();
   useBackButton(() => {
     // On Android, App.exitApp() is available via @capacitor/app.
     // The hook only registers on native platforms, so this is safe on web.

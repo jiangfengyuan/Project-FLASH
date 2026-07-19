@@ -75,23 +75,6 @@ describe('InputArea', () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it('truncates text over 140 characters, submits truncated text and shows toast', () => {
-    const onSubmit = vi.fn();
-    const { rerender } = render(
-      <InputArea mode="idle" onModeChange={vi.fn()} onSubmit={onSubmit} />
-    );
-    fireEvent.click(screen.getByLabelText('键盘输入'));
-    rerender(<InputArea mode="typing" onModeChange={vi.fn()} onSubmit={onSubmit} />);
-
-    const input = screen.getByLabelText('记录内容');
-    const longText = 'a'.repeat(150);
-    fireEvent.change(input, { target: { value: longText } });
-    fireEvent.click(screen.getByLabelText('发送'));
-
-    expect(onSubmit).toHaveBeenCalledWith('a'.repeat(140), null);
-    expect(useToastStore.getState().toast?.message).toContain('140');
-  });
-
   it('transitions to preview when speech recognition ends naturally', async () => {
     const onModeChange = vi.fn();
     render(<InputArea mode="idle" onModeChange={onModeChange} onSubmit={vi.fn()} />);
