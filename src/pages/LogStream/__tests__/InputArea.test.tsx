@@ -109,4 +109,23 @@ describe('InputArea', () => {
 
     await waitFor(() => expect(onModeChange).toHaveBeenCalledWith('preview'));
   });
+
+  it('stops speech recognition when unmounted mid-recording', () => {
+    const { unmount } = render(<InputArea mode="idle" onModeChange={vi.fn()} onSubmit={vi.fn()} />);
+
+    fireEvent.pointerDown(screen.getByLabelText('按住录音'));
+
+    const recognitionCtor = (
+      globalThis as unknown as { SpeechRecognition: ReturnType<typeof vi.fn> }
+    ).SpeechRecognition;
+    const recognitionInstance = recognitionCtor.mock.results[0].value as {
+      start: ReturnType<typeof vi.fn>;
+      stop: ReturnType<typeof vi.fn>;
+    };
+    expect(recognitionInstance.start).toHaveBeenCalled();
+
+    unmount();
+
+    expect(recognitionInstance.stop).toHaveBeenCalled();
+  });
 });

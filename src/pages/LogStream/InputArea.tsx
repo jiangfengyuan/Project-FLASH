@@ -108,6 +108,24 @@ export default function InputArea({ mode, onModeChange, onSubmit }: InputAreaPro
     }
   }, []);
 
+  // Unmount cleanup: if the page unmounts mid-recording, stop the speech
+  // recognition session and clear pending timers so nothing leaks.
+  useEffect(
+    () => () => {
+      recordingActiveRef.current = false;
+      stopRecognition();
+      if (endInPreviewTimeoutRef.current) {
+        clearTimeout(endInPreviewTimeoutRef.current);
+        endInPreviewTimeoutRef.current = undefined;
+      }
+      if (recordingTimer.current) {
+        clearInterval(recordingTimer.current);
+        recordingTimer.current = undefined;
+      }
+    },
+    [stopRecognition]
+  );
+
   const startRecording = () => {
     if (recordingActiveRef.current) return;
     recordingActiveRef.current = true;
