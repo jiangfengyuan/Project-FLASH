@@ -24,9 +24,17 @@ export function createStorageAdapter(): StorageAdapter {
   return new MemoryStorageAdapter();
 }
 
-export async function getStorageAdapter(): Promise<StorageAdapter> {
-  if (cachedAdapter) return cachedAdapter;
-  if (initPromise) return initPromise;
+export async function getStorageAdapterWithMeta(): Promise<{
+  adapter: StorageAdapter;
+  isFallback: boolean;
+}> {
+  if (cachedAdapter) {
+    return { adapter: cachedAdapter, isFallback: cachedAdapter instanceof MemoryStorageAdapter };
+  }
+  if (initPromise) {
+    const adapter = await initPromise;
+    return { adapter, isFallback: adapter instanceof MemoryStorageAdapter };
+  }
 
   initPromise = (async () => {
     let adapter = createStorageAdapter();
@@ -42,5 +50,11 @@ export async function getStorageAdapter(): Promise<StorageAdapter> {
     return adapter;
   })();
 
-  return initPromise;
+  const adapter = await initPromise;
+  return { adapter, isFallback: adapter instanceof MemoryStorageAdapter };
+}
+
+export async function getStorageAdapter(): Promise<StorageAdapter> {
+  const { adapter } = await getStorageAdapterWithMeta();
+  return adapter;
 }
