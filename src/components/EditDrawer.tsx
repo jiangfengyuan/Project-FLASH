@@ -22,8 +22,9 @@ export default function EditDrawer({
   const [editContent, setEditContent] = useState(initialContent);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing external prop to internal draft state when the target record changes.
     setEditContent(initialContent);
-  }, [initialContent]);
+  }, [editingId, initialContent]);
 
   const handleSave = () => {
     haptic(HAPTIC_TAP);

@@ -1,14 +1,19 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import EditDrawer from '@/components/EditDrawer';
 
 describe('EditDrawer', () => {
   beforeEach(() => {
     vi.stubGlobal('navigator', { vibrate: vi.fn() });
+    // The drawer's autoFocus calls focus() on mount, which puts the textarea in
+    // a state where fireEvent.input does not update the controlled value in
+    // jsdom. Mocking focus() avoids that test-environment quirk.
+    vi.spyOn(HTMLTextAreaElement.prototype, 'focus').mockImplementation(() => {});
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
 
   it('does not render when editingId is null', () => {
@@ -59,5 +64,20 @@ describe('EditDrawer', () => {
     );
     fireEvent.click(screen.getByText('取消'));
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('resets edited text when switching to a different log with identical content', async () => {
+    const { rerender } = render(
+      <EditDrawer editingId="log-1" initialContent="same" onSave={vi.fn()} onClose={vi.fn()} />
+    );
+    const textarea = screen.getByRole('textbox');
+    fireEvent.input(textarea, { target: { value: 'user typed something else' } });
+    expect(textarea).toHaveValue('user typed something else');
+
+    // A different log with the same initial content must still reset the draft.
+    rerender(
+      <EditDrawer editingId="log-2" initialContent="same" onSave={vi.fn()} onClose={vi.fn()} />
+    );
+    await waitFor(() => expect(screen.getByRole('textbox')).toHaveValue('same'));
   });
 });
