@@ -6,13 +6,27 @@ const PALETTE = [
   { r: 120, g: 170, b: 220 }, // muted blue
 ];
 
+function createWaveGradient(
+  ctx: CanvasRenderingContext2D,
+  height: number,
+  layer: number,
+  color: { r: number; g: number; b: number }
+) {
+  const yBase = height * (0.55 + layer * 0.1);
+  const amplitude = height * (0.04 + layer * 0.015);
+  const gradient = ctx.createLinearGradient(0, yBase - amplitude, 0, height);
+  gradient.addColorStop(0, `rgba(${color.r}, ${color.g}, ${color.b}, ${0.12 - layer * 0.025})`);
+  gradient.addColorStop(1, `rgba(${color.r}, ${color.g}, ${color.b}, 0)`);
+  return gradient;
+}
+
 function drawWave(
   ctx: CanvasRenderingContext2D,
   width: number,
   height: number,
   time: number,
   layer: number,
-  color: { r: number; g: number; b: number }
+  gradient: CanvasGradient
 ) {
   const yBase = height * (0.55 + layer * 0.1);
   const amplitude = height * (0.04 + layer * 0.015);
@@ -34,10 +48,6 @@ function drawWave(
   ctx.lineTo(width, height);
   ctx.closePath();
 
-  const gradient = ctx.createLinearGradient(0, yBase - amplitude, 0, height);
-  gradient.addColorStop(0, `rgba(${color.r}, ${color.g}, ${color.b}, ${0.12 - layer * 0.025})`);
-  gradient.addColorStop(1, `rgba(${color.r}, ${color.g}, ${color.b}, 0)`);
-
   ctx.fillStyle = gradient;
   ctx.fill();
 }
@@ -52,7 +62,8 @@ function drawStaticBackground(ctx: CanvasRenderingContext2D, width: number, heig
 
   // Draw static waves at time 0 for reduced-motion preference.
   for (let i = 0; i < PALETTE.length; i++) {
-    drawWave(ctx, width, height, 0, i, PALETTE[i]);
+    const gradient = createWaveGradient(ctx, height, i, PALETTE[i]);
+    drawWave(ctx, width, height, 0, i, gradient);
   }
 }
 
@@ -104,6 +115,10 @@ function WaveBackground() {
     }
 
     const startTime = performance.now();
+    let bgGradient: CanvasGradient | null = null;
+    let waveGradients: CanvasGradient[] = [];
+    let cachedHeight = 0;
+
     const animate = (now: number) => {
       if (!isVisible) {
         rafRef.current = 0;
@@ -113,17 +128,24 @@ function WaveBackground() {
       const width = window.innerWidth;
       const height = window.innerHeight;
 
+      if (height !== cachedHeight) {
+        cachedHeight = height;
+        bgGradient = ctx.createLinearGradient(0, 0, 0, height);
+        bgGradient.addColorStop(0, '#0f172a');
+        bgGradient.addColorStop(0.5, '#1e2d42');
+        bgGradient.addColorStop(1, '#243954');
+        waveGradients = PALETTE.map((color, i) => createWaveGradient(ctx, height, i, color));
+      }
+
       ctx.clearRect(0, 0, width, height);
 
-      const bgGradient = ctx.createLinearGradient(0, 0, 0, height);
-      bgGradient.addColorStop(0, '#0f172a');
-      bgGradient.addColorStop(0.5, '#1e2d42');
-      bgGradient.addColorStop(1, '#243954');
-      ctx.fillStyle = bgGradient;
-      ctx.fillRect(0, 0, width, height);
+      if (bgGradient) {
+        ctx.fillStyle = bgGradient;
+        ctx.fillRect(0, 0, width, height);
+      }
 
       for (let i = 0; i < PALETTE.length; i++) {
-        drawWave(ctx, width, height, time, i, PALETTE[i]);
+        drawWave(ctx, width, height, time, i, waveGradients[i]);
       }
 
       rafRef.current = requestAnimationFrame(animate);

@@ -72,7 +72,12 @@ export default function InputArea({
   const setText = onTextChange ?? setInternalText;
   const [selectedTag, setSelectedTag] = useState<ColorTag | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
-  const [transcript, setTranscript] = useState('');
+  const [transcript, setTranscriptState] = useState('');
+  const transcriptRef = useRef('');
+  const setTranscript = (value: string) => {
+    transcriptRef.current = value;
+    setTranscriptState(value);
+  };
   const [recordingError, setRecordingError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const recordingTimer = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -223,13 +228,13 @@ export default function InputArea({
       endInPreviewTimeoutRef.current = undefined;
     }
     stopRecognition();
-    if (!transcript.trim()) {
+    if (!transcriptRef.current.trim()) {
       onModeChange('idle');
       showToast('未识别到语音，请重试', 'info');
       return;
     }
     onModeChange('preview');
-  }, [stopRecognition, transcript, onModeChange, showToast]);
+  }, [stopRecognition, onModeChange, showToast]);
 
   // Safety net: stop recording if pointer/touch ends anywhere outside the button.
   useEffect(() => {

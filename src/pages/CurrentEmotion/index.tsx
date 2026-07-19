@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Save, Frown, Angry, Meh } from 'lucide-react';
 import { useEmotionStore } from '@/stores/emotionStore';
@@ -10,7 +10,8 @@ import { getTodayStr } from '@/lib/utils';
 import EmotionEmoji from './EmotionEmoji';
 import ConfettiEffect from './ConfettiEffect';
 import HistoryList from './HistoryList';
-import StatsPanel from './StatsPanel';
+
+const StatsPanel = lazy(() => import('./StatsPanel'));
 
 const LEVELS: EmotionLevel[] = [3, 2, 1, 0, -1, -2, -3];
 
@@ -329,7 +330,11 @@ export default function CurrentEmotion() {
         </>
       )}
 
-      {activeTab === 'stats' && <StatsPanel />}
+      {activeTab === 'stats' && (
+        <Suspense fallback={null}>
+          <StatsPanel />
+        </Suspense>
+      )}
     </div>
   );
 }

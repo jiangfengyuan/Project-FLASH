@@ -1,10 +1,14 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { useNavigationStore, TAB_PAGES, type Tab } from '@/stores/navigationStore';
 
 export function useBackButton(exitApp: () => void): void {
-  const { currentPage, activeTab, navigateTo } = useNavigationStore();
+  const exitAppRef = useRef(exitApp);
+
+  useEffect(() => {
+    exitAppRef.current = exitApp;
+  }, [exitApp]);
 
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) {
@@ -13,11 +17,12 @@ export function useBackButton(exitApp: () => void): void {
 
     const listener = App.addListener('backButton', ({ canGoBack }) => {
       if (!canGoBack) {
-        exitApp();
+        exitAppRef.current();
         return;
       }
+      const { currentPage, activeTab, navigateTo } = useNavigationStore.getState();
       if (TAB_PAGES.includes(currentPage as Tab)) {
-        exitApp();
+        exitAppRef.current();
       } else {
         navigateTo(activeTab);
       }
@@ -26,5 +31,5 @@ export function useBackButton(exitApp: () => void): void {
     return () => {
       void listener.then((l) => l.remove()).catch(() => {});
     };
-  }, [currentPage, activeTab, navigateTo, exitApp]);
+  }, []);
 }

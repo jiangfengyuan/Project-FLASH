@@ -36,15 +36,15 @@ interface CalendarDayData {
 const CalendarDay = memo(function CalendarDay({
   day,
   selected,
-  onClick,
+  onDayClick,
 }: {
   day: CalendarDayData;
   selected: boolean;
-  onClick: () => void;
+  onDayClick: (dateStr: string) => void;
 }) {
   return (
     <button
-      onClick={onClick}
+      onClick={() => onDayClick(day.dateStr)}
       aria-label={`${format(day.date, 'yyyy年M月d日')}${day.recordCount > 0 ? `，${day.recordCount} 条记录` : ''}`}
       className={`relative flex flex-col items-center justify-center py-2 rounded-xl transition-all ${
         day.isCurrentMonth ? '' : 'opacity-30'
@@ -288,7 +288,7 @@ export default function Calendar() {
                 key={day.dateStr}
                 day={day}
                 selected={selectedDate === day.dateStr}
-                onClick={() => handleDayClick(day.dateStr)}
+                onDayClick={handleDayClick}
               />
             ))}
           </motion.div>

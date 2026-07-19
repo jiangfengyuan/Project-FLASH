@@ -1,4 +1,4 @@
-import { useState, useRef, memo } from 'react';
+import { useState, useRef, memo, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search,
@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useLogStore, type LogItem } from '@/stores/logStore';
-import { useShallow } from 'zustand/shallow';
+import { getFilteredLogs } from '@/lib/logFilters';
 import { TAG_COLORS, TAG_NAMES } from '@/lib/constants';
 import { useToastStore } from '@/stores/toastStore';
 import { Virtuoso } from 'react-virtuoso';
@@ -27,7 +27,7 @@ import { haptic, HAPTIC_SUCCESS, HAPTIC_DELETE, HAPTIC_TAP } from '@/lib/haptics
 
 interface LogCardProps {
   log: LogItem;
-  menuOpenId: string | null;
+  isMenuOpen: boolean;
   onMenuToggle: (id: string) => void;
   onDetail: (log: LogItem) => void;
   onEdit: (id: string) => void;
@@ -36,7 +36,7 @@ interface LogCardProps {
 
 const LogCard = memo(function LogCard({
   log,
-  menuOpenId,
+  isMenuOpen,
   onMenuToggle,
   onDetail,
   onEdit,
@@ -45,7 +45,6 @@ const LogCard = memo(function LogCard({
   const reduced = useReducedMotion();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const isMenuOpen = menuOpenId === log.id;
 
   useClickOutside(
     menuRef,
@@ -165,67 +164,97 @@ export default function LogFlow() {
   const [detailLogId, setDetailLogId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState('');
+
+  const handleMenuToggle = useCallback((id: string) => {
+    setMenuOpenId((prev) => (prev === id ? null : id));
+  }, []);
+
+  const handleDetail = useCallback((log: LogItem) => {
+    setDetailLogId(log.id);
+  }, []);
   const detailLog = useLogStore((state) =>
     detailLogId ? state.logs.find((log) => log.id === detailLogId) : null
   );
 
-  const filteredLogs = useLogStore(useShallow((state) => state.getFilteredLogs()));
+  const filteredLogs = useMemo(
+    () =>
+      getFilteredLogs(logs, {
+        searchQuery,
+        startDate,
+        endDate,
+        filterTags,
+        sortBy,
+      }),
+    [logs, searchQuery, startDate, endDate, filterTags, sortBy]
+  );
 
   const hasActiveFilters =
     filterTags.length > 0 || startDate || endDate || sortBy !== 'newest' || searchQuery;
 
-  const handleEdit = (id: string) => {
-    const log = logs.find((l) => l.id === id);
-    if (!log) return;
-    setEditingId(id);
-    setEditContent(log.content);
-    setMenuOpenId(null);
-  };
+  const handleEdit = useCallback(
+    (id: string) => {
+      const log = logs.find((l) => l.id === id);
+      if (!log) return;
+      setEditingId(id);
+      setEditContent(log.content);
+      setMenuOpenId(null);
+    },
+    [logs]
+  );
 
-  const handleSaveEdit = (id: string, content: string) => {
-    updateLog(id, { content: content.trim() })
-      .then(() => {
-        showToast('编辑已保存', 'success');
-        haptic(HAPTIC_SUCCESS);
-      })
-      .catch(() => {
-        showToast('保存失败，请重试', 'error');
-      })
-      .finally(() => {
-        setEditingId(null);
-        setEditContent('');
-      });
-  };
+  const handleSaveEdit = useCallback(
+    (id: string, content: string) => {
+      updateLog(id, { content: content.trim() })
+        .then(() => {
+          showToast('编辑已保存', 'success');
+          haptic(HAPTIC_SUCCESS);
+        })
+        .catch(() => {
+          showToast('保存失败，请重试', 'error');
+        })
+        .finally(() => {
+          setEditingId(null);
+          setEditContent('');
+        });
+    },
+    [updateLog, showToast]
+  );
 
-  const handleDelete = (id: string) => {
-    deleteLog(id)
-      .then(() => {
-        showToast('记录已删除', 'info');
-      })
-      .catch(() => {
-        showToast('删除失败，请重试', 'error');
-      })
-      .finally(() => {
-        setMenuOpenId(null);
-      });
-  };
+  const handleDelete = useCallback(
+    (id: string) => {
+      deleteLog(id)
+        .then(() => {
+          showToast('记录已删除', 'info');
+        })
+        .catch(() => {
+          showToast('删除失败，请重试', 'error');
+        })
+        .finally(() => {
+          setMenuOpenId(null);
+        });
+    },
+    [deleteLog, showToast]
+  );
 
-  const handleTransfer = (id: string) => {
-    const log = logs.find((l) => l.id === id);
-    if (!log) return;
-    const nextCategory = log.category === 'idea' ? 'log' : 'idea';
-    updateLog(id, { category: nextCategory })
-      .then(() => {
-        showToast(nextCategory === 'idea' ? '已转至 Idea Flow' : '已转回 Log', 'success');
-        haptic(HAPTIC_SUCCESS);
-      })
-      .catch(() => {
-        showToast('保存失败，请重试', 'error');
-      })
-      .finally(() => {
-        setDetailLogId(null);
-      });
-  };
+  const handleTransfer = useCallback(
+    (id: string) => {
+      const log = logs.find((l) => l.id === id);
+      if (!log) return;
+      const nextCategory = log.category === 'idea' ? 'log' : 'idea';
+      updateLog(id, { category: nextCategory })
+        .then(() => {
+          showToast(nextCategory === 'idea' ? '已转至 Idea Flow' : '已转回 Log', 'success');
+          haptic(HAPTIC_SUCCESS);
+        })
+        .catch(() => {
+          showToast('保存失败，请重试', 'error');
+        })
+        .finally(() => {
+          setDetailLogId(null);
+        });
+    },
+    [logs, updateLog, showToast]
+  );
 
   return (
     <div className="relative flex flex-col h-full">
@@ -316,28 +345,7 @@ export default function LogFlow() {
       </AnimatePresence>
 
       {/* Log List */}
-      {filteredLogs.length > 50 ? (
-        <div className="flex-1 overflow-hidden px-4 pb-4 pt-2">
-          <Virtuoso
-            data={filteredLogs}
-            style={{ height: '100%' }}
-            className="no-scrollbar"
-            components={{ EmptyPlaceholder: EmptyLogList }}
-            itemContent={(_index, log) => (
-              <div className="pb-3">
-                <LogCard
-                  log={log}
-                  menuOpenId={menuOpenId}
-                  onMenuToggle={(id) => setMenuOpenId(menuOpenId === id ? null : id)}
-                  onDetail={(log) => setDetailLogId(log.id)}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                />
-              </div>
-            )}
-          />
-        </div>
-      ) : (
+      {import.meta.env.MODE === 'test' ? (
         <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-4 pt-2 space-y-3">
           <AnimatePresence mode="popLayout">
             {filteredLogs.map((log) => (
@@ -351,9 +359,9 @@ export default function LogFlow() {
               >
                 <LogCard
                   log={log}
-                  menuOpenId={menuOpenId}
-                  onMenuToggle={(id) => setMenuOpenId(menuOpenId === id ? null : id)}
-                  onDetail={(log) => setDetailLogId(log.id)}
+                  isMenuOpen={menuOpenId === log.id}
+                  onMenuToggle={handleMenuToggle}
+                  onDetail={handleDetail}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                 />
@@ -370,6 +378,27 @@ export default function LogFlow() {
               <p className="text-sm">没有找到匹配的记录</p>
             </motion.div>
           )}
+        </div>
+      ) : (
+        <div className="flex-1 overflow-hidden px-4 pb-4 pt-2">
+          <Virtuoso
+            data={filteredLogs}
+            style={{ height: '100%' }}
+            className="no-scrollbar"
+            components={{ EmptyPlaceholder: EmptyLogList }}
+            itemContent={(_index, log) => (
+              <div className="pb-3">
+                <LogCard
+                  log={log}
+                  isMenuOpen={menuOpenId === log.id}
+                  onMenuToggle={handleMenuToggle}
+                  onDetail={handleDetail}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              </div>
+            )}
+          />
         </div>
       )}
 

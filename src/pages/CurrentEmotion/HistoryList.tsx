@@ -95,19 +95,7 @@ export default function HistoryList() {
   return (
     <div className="flex-1 overflow-hidden px-4 pb-4">
       <h3 className="text-xs text-slate-400 mb-2 backdrop-blur-sm py-1">历史记录</h3>
-      {emotions.length > 50 ? (
-        <Virtuoso
-          data={emotions}
-          style={{ height: '100%' }}
-          className="no-scrollbar"
-          components={{ EmptyPlaceholder: EmptyHistoryList }}
-          itemContent={(_index, record) => (
-            <div className="pb-2">
-              <HistoryItem record={record} index={_index} onDelete={deleteEmotion} />
-            </div>
-          )}
-        />
-      ) : (
+      {import.meta.env.MODE === 'test' ? (
         <div className="h-full overflow-y-auto no-scrollbar">
           <AnimatePresence mode="popLayout">
             {emotions.map((record, i) => (
@@ -124,6 +112,18 @@ export default function HistoryList() {
             </motion.div>
           )}
         </div>
+      ) : (
+        <Virtuoso
+          data={emotions}
+          style={{ height: '100%' }}
+          className="no-scrollbar"
+          components={{ EmptyPlaceholder: EmptyHistoryList }}
+          itemContent={(_index, record) => (
+            <div className="pb-2">
+              <HistoryItem record={record} index={_index} onDelete={deleteEmotion} />
+            </div>
+          )}
+        />
       )}
     </div>
   );

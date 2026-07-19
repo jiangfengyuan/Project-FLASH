@@ -27,7 +27,7 @@ function LiquidGlassCard({
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{
         duration: reduced ? 0 : 0.35,
-        delay: reduced ? 0 : index * 0.05,
+        delay: reduced ? 0 : Math.min(index * 0.05, 0.5),
         ease: 'easeOut',
       }}
       onClick={onClick}
@@ -48,4 +48,15 @@ function LiquidGlassCard({
   );
 }
 
-export default memo(LiquidGlassCard);
+export default memo(LiquidGlassCard, (prev, next) => {
+  // children is intentionally ignored: React elements are recreated every
+  // render, so comparing them would always fail. The card's own props
+  // (className, colorTag, onClick, index) are what actually determine whether
+  // the card needs to re-render.
+  return (
+    prev.className === next.className &&
+    prev.colorTag === next.colorTag &&
+    prev.onClick === next.onClick &&
+    prev.index === next.index
+  );
+});

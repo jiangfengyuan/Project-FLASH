@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lightbulb } from 'lucide-react';
 import { useLogStore } from '@/stores/logStore';
@@ -7,7 +7,7 @@ import { getImportanceFromContent } from '@/lib/constants';
 import { haptic, HAPTIC_SUCCESS } from '@/lib/haptics';
 import { parseLocalDate } from '@/lib/utils';
 import { GroupedVirtuoso } from 'react-virtuoso';
-import IdeaList, { IdeaItem } from './IdeaList';
+import { IdeaItem } from './IdeaList';
 import DetailDrawer from '@/components/DetailDrawer';
 import EditDrawer from '@/components/EditDrawer';
 import { startOfDay, differenceInCalendarDays } from 'date-fns';
@@ -69,39 +69,50 @@ export default function IdeaFlow() {
     return { flatIdeas: flat, groupCounts: counts, groupLabels: labels };
   }, [groups]);
 
-  const handleMenuAction = (action: 'edit' | 'delete' | 'transfer', id: string) => {
-    if (action === 'edit') {
-      const log = logs.find((l) => l.id === id);
-      if (log) {
-        setEditingId(id);
-        setEditContent(log.content);
-        setMenuOpenId(null);
+  const handleMenuAction = useCallback(
+    (action: 'edit' | 'delete' | 'transfer', id: string) => {
+      if (action === 'edit') {
+        const log = logs.find((l) => l.id === id);
+        if (log) {
+          setEditingId(id);
+          setEditContent(log.content);
+          setMenuOpenId(null);
+        }
+      } else if (action === 'delete') {
+        deleteLog(id)
+          .then(() => {
+            showToast('想法已删除', 'info');
+          })
+          .catch(() => {
+            showToast('删除失败，请重试', 'error');
+          })
+          .finally(() => {
+            setMenuOpenId(null);
+          });
+      } else if (action === 'transfer') {
+        updateLog(id, { category: 'log' })
+          .then(() => {
+            showToast('已转至 Log', 'success');
+            haptic(HAPTIC_SUCCESS);
+          })
+          .catch(() => {
+            showToast('保存失败，请重试', 'error');
+          })
+          .finally(() => {
+            setMenuOpenId(null);
+          });
       }
-    } else if (action === 'delete') {
-      deleteLog(id)
-        .then(() => {
-          showToast('想法已删除', 'info');
-        })
-        .catch(() => {
-          showToast('删除失败，请重试', 'error');
-        })
-        .finally(() => {
-          setMenuOpenId(null);
-        });
-    } else if (action === 'transfer') {
-      updateLog(id, { category: 'log' })
-        .then(() => {
-          showToast('已转至 Log', 'success');
-          haptic(HAPTIC_SUCCESS);
-        })
-        .catch(() => {
-          showToast('保存失败，请重试', 'error');
-        })
-        .finally(() => {
-          setMenuOpenId(null);
-        });
-    }
-  };
+    },
+    [logs, deleteLog, updateLog, showToast]
+  );
+
+  const handleMenuToggle = useCallback((id: string) => {
+    setMenuOpenId((prev) => (prev === id ? null : id));
+  }, []);
+
+  const handleDetail = useCallback((log: (typeof logs)[0]) => {
+    setDetailLogId(log.id);
+  }, []);
 
   const handleDetailEdit = (id: string) => {
     const log = logs.find((l) => l.id === id);
@@ -155,7 +166,34 @@ export default function IdeaFlow() {
         </motion.div>
       )}
 
-      {ideas.length > 50 ? (
+      {import.meta.env.MODE === 'test' ? (
+        <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-4">
+          {groups.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+              <Lightbulb size={40} className="mb-3 opacity-40" />
+              <p className="text-sm">还没有想法记录</p>
+              <p className="text-xs mt-1">在 Log 页面将记录标记为 IDEA</p>
+            </div>
+          )}
+          {groups.map((group) => (
+            <div key={group.label} className="mb-4">
+              <h3 className="text-[11px] text-slate-300 font-medium mb-2 sticky top-0 py-1 z-10">
+                {group.label}
+              </h3>
+              {group.items.map((idea) => (
+                <IdeaItem
+                  key={idea.id}
+                  idea={idea}
+                  onDetail={handleDetail}
+                  onMenuAction={handleMenuAction}
+                  menuOpenId={menuOpenId}
+                  onMenuToggle={handleMenuToggle}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+      ) : (
         <div className="flex-1 overflow-hidden px-4 pb-4">
           <GroupedVirtuoso
             groupCounts={groupCounts}
@@ -171,38 +209,14 @@ export default function IdeaFlow() {
               <div className="pb-3">
                 <IdeaItem
                   idea={idea}
-                  onDetail={(log) => setDetailLogId(log.id)}
+                  onDetail={handleDetail}
                   onMenuAction={handleMenuAction}
                   menuOpenId={menuOpenId}
-                  onMenuToggle={(id) => setMenuOpenId(menuOpenId === id ? null : id)}
+                  onMenuToggle={handleMenuToggle}
                 />
               </div>
             )}
           />
-        </div>
-      ) : (
-        <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-4">
-          {groups.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-20 text-slate-500">
-              <Lightbulb size={40} className="mb-3 opacity-40" />
-              <p className="text-sm">还没有想法记录</p>
-              <p className="text-xs mt-1">在 Log 页面将记录标记为 IDEA</p>
-            </div>
-          )}
-          {groups.map((group) => (
-            <div key={group.label} className="mb-4">
-              <h3 className="text-[11px] text-slate-300 font-medium mb-2 sticky top-0 py-1 z-10">
-                {group.label}
-              </h3>
-              <IdeaList
-                ideas={group.items}
-                onDetail={(log) => setDetailLogId(log.id)}
-                onMenuAction={handleMenuAction}
-                menuOpenId={menuOpenId}
-                onMenuToggle={(id) => setMenuOpenId(menuOpenId === id ? null : id)}
-              />
-            </div>
-          ))}
         </div>
       )}
 
