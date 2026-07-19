@@ -1,4 +1,4 @@
-import { useState, useMemo, memo, useCallback } from 'react';
+import { useState, useMemo, memo, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLogStore } from '@/stores/logStore';
@@ -92,7 +92,7 @@ const CalendarDay = memo(function CalendarDay({
 const TodayRecords = memo(function TodayRecords({ todayStr }: { todayStr: string }) {
   const logs = useLogStore((state) => state.logs);
   const todayLogs = useMemo(
-    () => logs.filter((log) => log.recordDate === todayStr),
+    () => logs.filter((log) => log.category === 'log' && log.recordDate === todayStr),
     [logs, todayStr]
   );
 
@@ -121,6 +121,17 @@ export default function Calendar() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [monthDirection, setMonthDirection] = useState(0);
+  const [todayStr, setTodayStr] = useState(() => getTodayStr());
+
+  useEffect(() => {
+    const now = new Date();
+    const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    const msUntilMidnight = tomorrow.getTime() - now.getTime();
+    const timer = setTimeout(() => {
+      setTodayStr(getTodayStr());
+    }, msUntilMidnight);
+    return () => clearTimeout(timer);
+  }, [todayStr]);
 
   const handlePrevMonth = useCallback(() => {
     setMonthDirection(-1);
@@ -140,8 +151,6 @@ export default function Calendar() {
   );
   const logs = useLogStore((state) => state.logs);
   const emotions = useEmotionStore((state) => state.emotions);
-
-  const todayStr = getTodayStr();
 
   const logsByDate = useMemo(() => {
     const map = new Map<string, (typeof logs)[0][]>();
@@ -225,7 +234,7 @@ export default function Calendar() {
 
   const selectedDayLogs = useMemo(() => {
     if (!selectedDate) return [];
-    return logs.filter((log) => log.recordDate === selectedDate);
+    return logs.filter((log) => log.category === 'log' && log.recordDate === selectedDate);
   }, [selectedDate, logs]);
 
   return (

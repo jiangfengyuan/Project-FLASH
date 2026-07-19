@@ -6,9 +6,10 @@ interface CategorySheetProps {
   open: boolean;
   onClose: () => void;
   onSave: (category: 'log' | 'idea') => void;
+  disabled?: boolean;
 }
 
-export default function CategorySheet({ open, onClose, onSave }: CategorySheetProps) {
+export default function CategorySheet({ open, onClose, onSave, disabled }: CategorySheetProps) {
   const reduced = useReducedMotion();
 
   const handleSave = (category: 'log' | 'idea') => {
@@ -43,13 +44,15 @@ export default function CategorySheet({ open, onClose, onSave }: CategorySheetPr
               <p className="text-center text-sm text-slate-400 mb-3">保存为</p>
               <button
                 onClick={() => handleSave('log')}
-                className="w-full liquid-glass-pill py-3.5 text-white font-medium text-sm active:scale-[0.98] transition-transform"
+                disabled={disabled}
+                className="w-full liquid-glass-pill py-3.5 text-white font-medium text-sm active:scale-[0.98] transition-transform disabled:opacity-40"
               >
                 作为 LOG 保存
               </button>
               <button
                 onClick={() => handleSave('idea')}
-                className="w-full liquid-glass-pill py-3.5 text-amber-300 font-medium text-sm active:scale-[0.98] transition-transform"
+                disabled={disabled}
+                className="w-full liquid-glass-pill py-3.5 text-amber-300 font-medium text-sm active:scale-[0.98] transition-transform disabled:opacity-40"
                 style={{ background: 'rgba(255,159,67,0.15)' }}
               >
                 作为 IDEA 发送
@@ -57,7 +60,8 @@ export default function CategorySheet({ open, onClose, onSave }: CategorySheetPr
             </div>
             <button
               onClick={onClose}
-              className="w-full liquid-glass-pill py-3 text-slate-400 text-sm active:scale-[0.98] transition-transform"
+              disabled={disabled}
+              className="w-full liquid-glass-pill py-3 text-slate-400 text-sm active:scale-[0.98] transition-transform disabled:opacity-40"
             >
               取消
             </button>

@@ -114,20 +114,29 @@ export default function Settings() {
       useEmotionStore.getState().flushMutations(),
     ]);
 
+    // Read the latest state after flushing queued mutations; render-closure
+    // logs/emotions may be stale if a mutation completed during the flush.
+    const latestLogs = useLogStore.getState().logs;
+    const latestEmotions = useEmotionStore.getState().emotions;
+
     const result =
       importMode === 'merge'
-        ? mergeImport(pendingBackup, logs, emotions)
+        ? mergeImport(pendingBackup, latestLogs, latestEmotions)
         : overwriteImport(pendingBackup);
 
     const storage = await getStorageAdapter();
-    const backupLogs = [...logs];
-    const backupEmotions = [...emotions];
+    const backupLogs = [...latestLogs];
+    const backupEmotions = [...latestEmotions];
 
     try {
-      await storage.replaceAll(result.logs, result.emotions);
+      await useLogStore.getState().enqueueMutation(async () => {
+        await storage.replaceAll(result.logs, result.emotions);
+      });
     } catch {
       try {
-        await storage.replaceAll(backupLogs, backupEmotions);
+        await useLogStore.getState().enqueueMutation(async () => {
+          await storage.replaceAll(backupLogs, backupEmotions);
+        });
       } catch {
         // Best-effort rollback; if this fails the storage layer is in an unknown state.
       }
@@ -164,7 +173,9 @@ export default function Settings() {
 
     try {
       const storage = await getStorageAdapter();
-      await storage.clearAll();
+      await useLogStore.getState().enqueueMutation(async () => {
+        await storage.clearAll();
+      });
       overwriteLogs([]);
       overwriteEmotions([]);
       showToast('全部数据已清除', 'info');

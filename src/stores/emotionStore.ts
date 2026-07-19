@@ -29,6 +29,12 @@ interface EmotionState {
   setCurrentLevel: (level: EmotionLevel) => void;
   setCurrentSubEmotion: (sub: SubEmotion) => void;
   flushMutations: () => Promise<void>;
+  /**
+   * Enqueue an arbitrary async operation against this store's mutation queue.
+   * External bulk operations (e.g. Settings import/clear) should use this so
+   * they cannot interleave with queued add/update/delete mutations.
+   */
+  enqueueMutation: (operation: () => Promise<void>) => Promise<void>;
 }
 
 async function withStorageRollback(
@@ -100,5 +106,8 @@ export const useEmotionStore = create<EmotionState>((set, get) => ({
   setCurrentSubEmotion: (sub) => set({ currentSubEmotion: sub }),
   flushMutations: async () => {
     await mutationQueue;
+  },
+  enqueueMutation: async (operation) => {
+    await queueMutation(operation);
   },
 }));

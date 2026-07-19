@@ -247,6 +247,42 @@ function getPaths(level: EmotionLevel) {
           />
         ),
       };
+    default:
+      return {
+        eyes: (
+          <>
+            <line
+              x1="36"
+              y1="50"
+              x2="48"
+              y2="50"
+              stroke="white"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+            <line
+              x1="72"
+              y1="50"
+              x2="84"
+              y2="50"
+              stroke="white"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+          </>
+        ),
+        mouth: (
+          <line
+            x1="45"
+            y1="76"
+            x2="75"
+            y2="76"
+            stroke="white"
+            strokeWidth="3"
+            strokeLinecap="round"
+          />
+        ),
+      };
   }
 }
 

@@ -46,6 +46,12 @@ interface LogState {
   // Import actions
   overwriteLogs: (logs: LogItem[]) => void;
   flushMutations: () => Promise<void>;
+  /**
+   * Enqueue an arbitrary async operation against this store's mutation queue.
+   * External bulk operations (e.g. Settings import/clear) should use this so
+   * they cannot interleave with queued add/update/delete mutations.
+   */
+  enqueueMutation: (operation: () => Promise<void>) => Promise<void>;
 }
 
 async function withStorageRollback<T>(
@@ -206,5 +212,8 @@ export const useLogStore = create<LogState>((set, get) => ({
   overwriteLogs: (logs) => set({ logs }),
   flushMutations: async () => {
     await mutationQueue;
+  },
+  enqueueMutation: async (operation) => {
+    await queueMutation(operation);
   },
 }));

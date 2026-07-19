@@ -11,7 +11,7 @@ export const DEMO_LOGS: {
   recordDate: string;
 }[] = [
   {
-    id: '1',
+    id: '11111111-1111-4111-8111-111111111111',
     content: '课堂上想到的关于AI辅助学习的创意点子，可以快速记下来了',
     colorTag: 'inspiration',
     category: 'log',
@@ -20,7 +20,7 @@ export const DEMO_LOGS: {
     recordDate: getTodayStr(),
   },
   {
-    id: '2',
+    id: '22222222-2222-4222-8222-222222222222',
     content: '下午3点小组讨论，记得带笔记本',
     colorTag: 'urgent',
     category: 'log',
@@ -29,7 +29,7 @@ export const DEMO_LOGS: {
     recordDate: getTodayStr(),
   },
   {
-    id: '3',
+    id: '33333333-3333-4333-8333-333333333333',
     content: '今天在图书馆看到一本关于认知科学的书，觉得很有意思',
     colorTag: 'idea',
     category: 'idea',
@@ -38,7 +38,7 @@ export const DEMO_LOGS: {
     recordDate: getTodayStr(new Date(Date.now() - 86400000)),
   },
   {
-    id: '4',
+    id: '44444444-4444-4444-8444-444444444444',
     content: '晚上记得去超市买牛奶和面包',
     colorTag: 'daily',
     category: 'log',
@@ -47,7 +47,7 @@ export const DEMO_LOGS: {
     recordDate: getTodayStr(new Date(Date.now() - 172800000)),
   },
   {
-    id: '5',
+    id: '55555555-5555-4555-8555-555555555555',
     content: '心理课的笔记：情绪ABC理论，A是诱发事件，B是信念，C是情绪结果',
     colorTag: 'memo',
     category: 'log',
@@ -67,7 +67,7 @@ export const DEMO_EMOTIONS: {
   createdAt: string;
 }[] = [
   {
-    id: 'e1',
+    id: 'e1111111-1111-4111-8111-111111111111',
     level: 2,
     subEmotion: null,
     status: '学习中',
@@ -76,7 +76,7 @@ export const DEMO_EMOTIONS: {
     createdAt: new Date(Date.now() - 3600000).toISOString(),
   },
   {
-    id: 'e2',
+    id: 'e2222222-2222-4222-8222-222222222222',
     level: -1,
     subEmotion: 'uncomfortable',
     status: '通勤',
@@ -85,7 +85,7 @@ export const DEMO_EMOTIONS: {
     createdAt: new Date(Date.now() - 86400000).toISOString(),
   },
   {
-    id: 'e3',
+    id: 'e3333333-3333-4333-8333-333333333333',
     level: 3,
     subEmotion: null,
     status: '聚会',
@@ -94,7 +94,7 @@ export const DEMO_EMOTIONS: {
     createdAt: new Date(Date.now() - 172800000).toISOString(),
   },
   {
-    id: 'e4',
+    id: 'e4444444-4444-4444-8444-444444444444',
     level: 0,
     subEmotion: null,
     status: '工作',
@@ -103,7 +103,7 @@ export const DEMO_EMOTIONS: {
     createdAt: new Date(Date.now() - 259200000).toISOString(),
   },
   {
-    id: 'e5',
+    id: 'e5555555-5555-4555-8555-555555555555',
     level: -2,
     subEmotion: 'sad',
     status: '深夜',

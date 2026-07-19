@@ -108,6 +108,16 @@ function isValidEmotionLevel(value: unknown): value is number {
   return typeof value === 'number' && Number.isInteger(value) && value >= -3 && value <= 3;
 }
 
+const VALID_COLOR_TAGS: readonly string[] = [
+  'urgent',
+  'inspiration',
+  'daily',
+  'memo',
+  'emotion',
+  'idea',
+];
+const VALID_CATEGORIES: readonly string[] = ['log', 'idea'];
+
 function isValidLog(item: unknown): item is LogItem {
   if (typeof item !== 'object' || item === null) return false;
   const log = item as Partial<LogItem>;
@@ -115,7 +125,9 @@ function isValidLog(item: unknown): item is LogItem {
     isValidUuid(log.id) &&
     typeof log.content === 'string' &&
     typeof log.colorTag === 'string' &&
+    VALID_COLOR_TAGS.includes(log.colorTag) &&
     typeof log.category === 'string' &&
+    VALID_CATEGORIES.includes(log.category) &&
     isValidIsoDate(log.createdAt) &&
     isValidRecordDate(log.recordDate)
   );
@@ -188,10 +200,13 @@ export function mergeImport(
   for (const emotion of sanitized.emotions) {
     emotionMap.set(emotion.id, emotion);
   }
+  const sortByCreatedAtDesc = <T extends { createdAt: string }>(items: T[]): T[] =>
+    [...items].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
   return {
     ...sanitized,
-    logs: Array.from(logMap.values()),
-    emotions: Array.from(emotionMap.values()),
+    logs: sortByCreatedAtDesc(Array.from(logMap.values())),
+    emotions: sortByCreatedAtDesc(Array.from(emotionMap.values())),
   };
 }
 

@@ -162,9 +162,12 @@ export default function LogFlow() {
   const reduced = useReducedMotion();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
-  const [detailLog, setDetailLog] = useState<LogItem | null>(null);
+  const [detailLogId, setDetailLogId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState('');
+  const detailLog = useLogStore((state) =>
+    detailLogId ? state.logs.find((log) => log.id === detailLogId) : null
+  );
 
   const filteredLogs = useLogStore(useShallow((state) => state.getFilteredLogs()));
 
@@ -200,7 +203,7 @@ export default function LogFlow() {
         showToast('记录已删除', 'info');
       })
       .catch(() => {
-        showToast('保存失败，请重试', 'error');
+        showToast('删除失败，请重试', 'error');
       })
       .finally(() => {
         setMenuOpenId(null);
@@ -220,7 +223,7 @@ export default function LogFlow() {
         showToast('保存失败，请重试', 'error');
       })
       .finally(() => {
-        setDetailLog(null);
+        setDetailLogId(null);
       });
   };
 
@@ -326,7 +329,7 @@ export default function LogFlow() {
                   log={log}
                   menuOpenId={menuOpenId}
                   onMenuToggle={(id) => setMenuOpenId(menuOpenId === id ? null : id)}
-                  onDetail={setDetailLog}
+                  onDetail={(log) => setDetailLogId(log.id)}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                 />
@@ -350,7 +353,7 @@ export default function LogFlow() {
                   log={log}
                   menuOpenId={menuOpenId}
                   onMenuToggle={(id) => setMenuOpenId(menuOpenId === id ? null : id)}
-                  onDetail={setDetailLog}
+                  onDetail={(log) => setDetailLogId(log.id)}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                 />
@@ -374,14 +377,14 @@ export default function LogFlow() {
         {detailLog && (
           <DetailDrawer
             log={detailLog}
-            onClose={() => setDetailLog(null)}
+            onClose={() => setDetailLogId(null)}
             onEdit={(id) => {
               handleEdit(id);
-              setDetailLog(null);
+              setDetailLogId(null);
             }}
             onDelete={(id) => {
               handleDelete(id);
-              setDetailLog(null);
+              setDetailLogId(null);
             }}
             onTransfer={handleTransfer}
           />

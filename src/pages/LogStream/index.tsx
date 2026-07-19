@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Search, Settings } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { useNavigationStore } from '@/stores/navigationStore';
-import { useLogStore, type ColorTag, type LogItem } from '@/stores/logStore';
+import { useLogStore, type ColorTag } from '@/stores/logStore';
 import { useToastStore } from '@/stores/toastStore';
 import { haptic, HAPTIC_SUCCESS } from '@/lib/haptics';
 import StreamList from './StreamList';
@@ -19,12 +19,17 @@ export default function LogStream() {
   const showToast = useToastStore((state) => state.showToast);
 
   const [mode, setMode] = useState<InputMode>('idle');
+  const [inputText, setInputText] = useState('');
   const [showCategorySheet, setShowCategorySheet] = useState(false);
   const [pendingContent, setPendingContent] = useState('');
   const [pendingTag, setPendingTag] = useState<ColorTag | null>(null);
-  const [detailLog, setDetailLog] = useState<LogItem | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [detailLogId, setDetailLogId] = useState<string | null>(null);
   const [editingDetailId, setEditingDetailId] = useState<string | null>(null);
   const [editInitialContent, setEditInitialContent] = useState('');
+  const detailLog = useLogStore((state) =>
+    detailLogId ? state.logs.find((log) => log.id === detailLogId) : null
+  );
 
   const handleSubmit = (content: string, tag: ColorTag | null) => {
     setPendingContent(content);
@@ -32,7 +37,16 @@ export default function LogStream() {
     setShowCategorySheet(true);
   };
 
+  const handleCategoryCancel = () => {
+    setInputText(pendingContent);
+    setPendingContent('');
+    setPendingTag(null);
+    setShowCategorySheet(false);
+  };
+
   const handleSave = (category: 'log' | 'idea') => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     addLog(pendingContent, pendingTag || 'daily', category)
       .then(() => {
         showToast(category === 'idea' ? '已发送至 Idea Flow' : '记录已保存', 'success');
@@ -42,8 +56,10 @@ export default function LogStream() {
         showToast('保存失败，请重试', 'error');
       })
       .finally(() => {
+        setIsSubmitting(false);
         setPendingContent('');
         setPendingTag(null);
+        setInputText('');
         setShowCategorySheet(false);
         setMode('idle');
       });
@@ -82,7 +98,7 @@ export default function LogStream() {
         showToast('记录已删除', 'info');
       })
       .catch(() => {
-        showToast('保存失败，请重试', 'error');
+        showToast('删除失败，请重试', 'error');
       });
   };
 
@@ -125,15 +141,21 @@ export default function LogStream() {
         </div>
       </div>
 
-      <StreamList onDetail={setDetailLog} />
+      <StreamList onDetail={(log) => setDetailLogId(log.id)} />
 
-      <InputArea mode={mode} onModeChange={setMode} onSubmit={handleSubmit} />
+      <InputArea
+        mode={mode}
+        onModeChange={setMode}
+        onSubmit={handleSubmit}
+        text={inputText}
+        onTextChange={setInputText}
+      />
 
       <AnimatePresence>
         {detailLog && (
           <DetailDrawer
             log={detailLog}
-            onClose={() => setDetailLog(null)}
+            onClose={() => setDetailLogId(null)}
             onEdit={handleDetailEdit}
             onDelete={handleDelete}
             onTransfer={handleTransfer}
@@ -150,8 +172,9 @@ export default function LogStream() {
 
       <CategorySheet
         open={showCategorySheet}
-        onClose={() => setShowCategorySheet(false)}
+        onClose={handleCategoryCancel}
         onSave={handleSave}
+        disabled={isSubmitting}
       />
     </div>
   );

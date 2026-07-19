@@ -35,6 +35,7 @@ const HistoryItem = memo(function HistoryItem({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={fadeTransition(reduced)}
+      className="pb-2"
     >
       <LiquidGlassCard index={index} className="!rounded-2xl">
         <div className="p-3 flex items-center gap-3">
@@ -109,11 +110,9 @@ export default function HistoryList() {
       ) : (
         <div className="h-full overflow-y-auto no-scrollbar">
           <AnimatePresence mode="popLayout">
-            <div className="space-y-2">
-              {emotions.map((record, i) => (
-                <HistoryItem key={record.id} record={record} index={i} onDelete={deleteEmotion} />
-              ))}
-            </div>
+            {emotions.map((record, i) => (
+              <HistoryItem key={record.id} record={record} index={i} onDelete={deleteEmotion} />
+            ))}
           </AnimatePresence>
           {emotions.length === 0 && (
             <motion.div

@@ -40,12 +40,12 @@ export function getDailyAverages(emotions: EmotionRecord[], days: number) {
     grouped.set(e.recordDate, list);
   }
 
-  const result: { date: string; average: number }[] = [];
+  const result: { date: string; average: number | null }[] = [];
   for (let i = 0; i < days; i++) {
     const date = format(subDays(end, days - 1 - i), 'yyyy-MM-dd');
     const levels = grouped.get(date);
-    const average = levels ? levels.reduce((a, b) => a + b, 0) / levels.length : 0;
-    result.push({ date, average: Number(average.toFixed(2)) });
+    const average = levels ? levels.reduce((a, b) => a + b, 0) / levels.length : null;
+    result.push({ date, average: average === null ? null : Number(average.toFixed(2)) });
   }
   return result;
 }

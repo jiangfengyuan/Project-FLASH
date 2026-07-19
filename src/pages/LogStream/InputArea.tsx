@@ -13,6 +13,8 @@ interface InputAreaProps {
   mode: InputMode;
   onModeChange: (mode: InputMode) => void;
   onSubmit: (content: string, tag: ColorTag | null) => void;
+  text?: string;
+  onTextChange?: (text: string) => void;
 }
 
 interface SpeechRecognitionErrorEvent extends Event {
@@ -56,10 +58,18 @@ function getSpeechRecognition(): (new () => SpeechRecognitionInstance) | null {
   );
 }
 
-export default function InputArea({ mode, onModeChange, onSubmit }: InputAreaProps) {
+export default function InputArea({
+  mode,
+  onModeChange,
+  onSubmit,
+  text: controlledText,
+  onTextChange,
+}: InputAreaProps) {
   const reduced = useReducedMotion();
   const showToast = useToastStore((state) => state.showToast);
-  const [text, setText] = useState('');
+  const [internalText, setInternalText] = useState('');
+  const text = controlledText !== undefined ? controlledText : internalText;
+  const setText = onTextChange ?? setInternalText;
   const [selectedTag, setSelectedTag] = useState<ColorTag | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
   const [transcript, setTranscript] = useState('');

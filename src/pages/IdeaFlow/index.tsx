@@ -10,11 +10,13 @@ import { GroupedVirtuoso } from 'react-virtuoso';
 import IdeaList, { IdeaItem } from './IdeaList';
 import DetailDrawer from '@/components/DetailDrawer';
 import EditDrawer from '@/components/EditDrawer';
+import { startOfDay, differenceInCalendarDays } from 'date-fns';
 
 function getTimeGroup(dateStr: string): string {
-  const d = parseLocalDate(dateStr);
-  const today = new Date();
-  const diffDays = Math.floor((today.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+  const d = startOfDay(parseLocalDate(dateStr));
+  const today = startOfDay(new Date());
+  const diffDays = differenceInCalendarDays(today, d);
+  if (diffDays < 0) return '今天';
   if (diffDays === 0) return '今天';
   if (diffDays === 1) return '昨天';
   if (diffDays <= 7) return '本周';
@@ -32,7 +34,10 @@ export default function IdeaFlow() {
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState('');
-  const [detailLog, setDetailLog] = useState<(typeof logs)[0] | null>(null);
+  const [detailLogId, setDetailLogId] = useState<string | null>(null);
+  const detailLog = useLogStore((state) =>
+    detailLogId ? state.logs.find((log) => log.id === detailLogId) : null
+  );
 
   const ideas = useMemo(() => logs.filter((l) => l.category === 'idea'), [logs]);
   const unprocessedCount = ideas.length;
@@ -78,7 +83,7 @@ export default function IdeaFlow() {
           showToast('想法已删除', 'info');
         })
         .catch(() => {
-          showToast('保存失败，请重试', 'error');
+          showToast('删除失败，请重试', 'error');
         })
         .finally(() => {
           setMenuOpenId(null);
@@ -103,7 +108,7 @@ export default function IdeaFlow() {
     if (log) {
       setEditingId(id);
       setEditContent(log.content);
-      setDetailLog(null);
+      setDetailLogId(null);
     }
   };
 
@@ -166,7 +171,7 @@ export default function IdeaFlow() {
               <div className="pb-3">
                 <IdeaItem
                   idea={idea}
-                  onDetail={setDetailLog}
+                  onDetail={(log) => setDetailLogId(log.id)}
                   onMenuAction={handleMenuAction}
                   menuOpenId={menuOpenId}
                   onMenuToggle={(id) => setMenuOpenId(menuOpenId === id ? null : id)}
@@ -191,7 +196,7 @@ export default function IdeaFlow() {
               </h3>
               <IdeaList
                 ideas={group.items}
-                onDetail={setDetailLog}
+                onDetail={(log) => setDetailLogId(log.id)}
                 onMenuAction={handleMenuAction}
                 menuOpenId={menuOpenId}
                 onMenuToggle={(id) => setMenuOpenId(menuOpenId === id ? null : id)}
@@ -205,7 +210,7 @@ export default function IdeaFlow() {
         {detailLog && (
           <DetailDrawer
             log={detailLog}
-            onClose={() => setDetailLog(null)}
+            onClose={() => setDetailLogId(null)}
             onEdit={handleDetailEdit}
             onDelete={(id) => {
               deleteLog(id)
@@ -213,10 +218,10 @@ export default function IdeaFlow() {
                   showToast('想法已删除', 'info');
                 })
                 .catch(() => {
-                  showToast('保存失败，请重试', 'error');
+                  showToast('删除失败，请重试', 'error');
                 })
                 .finally(() => {
-                  setDetailLog(null);
+                  setDetailLogId(null);
                 });
             }}
             onTransfer={(id) => {
@@ -229,7 +234,7 @@ export default function IdeaFlow() {
                   showToast('保存失败，请重试', 'error');
                 })
                 .finally(() => {
-                  setDetailLog(null);
+                  setDetailLogId(null);
                 });
             }}
           />

@@ -81,6 +81,7 @@ export default function StatsPanel() {
                     stroke={LEVEL_COLORS[1]}
                     strokeWidth={2}
                     dot={{ r: 3, fill: LEVEL_COLORS[1] }}
+                    connectNulls={false}
                     animationDuration={500}
                   />
                 </LineChart>
