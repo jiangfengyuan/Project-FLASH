@@ -43,6 +43,22 @@ describe('App', () => {
     expect(await screen.findByText('日志')).toBeInTheDocument();
   });
 
+  it('gates main content until storage boot completes', async () => {
+    useNavigationStore.setState({ showSplash: false });
+    render(<App />);
+
+    // Boot is async; main content must stay unmounted until it finishes.
+    expect(useLogStore.getState().booted).toBe(false);
+    expect(useEmotionStore.getState().booted).toBe(false);
+    expect(screen.queryByText('日志')).not.toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(useLogStore.getState().booted).toBe(true);
+      expect(useEmotionStore.getState().booted).toBe(true);
+    });
+    expect(await screen.findByText('日志')).toBeInTheDocument();
+  });
+
   it('switches page when active tab changes', async () => {
     useNavigationStore.setState({ showSplash: false });
     render(<App />);

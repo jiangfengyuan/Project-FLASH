@@ -15,6 +15,12 @@ export interface EmotionRecord {
 
 interface EmotionState {
   emotions: EmotionRecord[];
+  /**
+   * False until the initial storage load in App.tsx completes. Main content
+   * must not render before this flips true, otherwise the boot-time setState
+   * would clobber user mutations made during the splash window.
+   */
+  booted: boolean;
   currentLevel: EmotionLevel;
   currentSubEmotion: SubEmotion;
   addEmotion: (record: Omit<EmotionRecord, 'id' | 'createdAt'>) => Promise<void>;
@@ -49,6 +55,7 @@ function queueMutation(operation: () => Promise<void>): Promise<void> {
 
 export const useEmotionStore = create<EmotionState>((set, get) => ({
   emotions: [],
+  booted: false,
   currentLevel: 1,
   currentSubEmotion: null,
   addEmotion: async (record) => {

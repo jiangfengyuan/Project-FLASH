@@ -103,22 +103,33 @@ export default function App() {
         if (isFallback) {
           showToast('本地存储初始化失败，数据仅保留在内存中', 'error');
         }
-        const [logs, emotions] = await Promise.all([storage.getLogs(), storage.getEmotions()]);
-        useLogStore.setState({ logs });
-        useEmotionStore.setState({ emotions });
+        const [storedLogs, storedEmotions] = await Promise.all([
+          storage.getLogs(),
+          storage.getEmotions(),
+        ]);
 
+        let logs = storedLogs;
+        let emotions = storedEmotions;
         if (import.meta.env.DEV) {
-          if (useLogStore.getState().logs.length === 0) {
-            useLogStore.setState({ logs: DEMO_LOGS });
+          if (logs.length === 0) {
+            logs = DEMO_LOGS;
             await storage.saveLogs(DEMO_LOGS);
           }
-          if (useEmotionStore.getState().emotions.length === 0) {
-            useEmotionStore.setState({ emotions: DEMO_EMOTIONS });
+          if (emotions.length === 0) {
+            emotions = DEMO_EMOTIONS;
             await storage.saveEmotions(DEMO_EMOTIONS);
           }
         }
+
+        // Flip booted only after the initial data is in place; main content
+        // stays unmounted until then so user mutations cannot be clobbered.
+        useLogStore.setState({ logs, booted: true });
+        useEmotionStore.setState({ emotions, booted: true });
       } catch (error) {
         console.error('App boot failed', error);
+        // Unblock rendering even on failure; the stores stay empty.
+        useLogStore.setState({ booted: true });
+        useEmotionStore.setState({ booted: true });
         showToast('本地存储初始化失败，数据仅保留在内存中', 'error');
       }
     })();
@@ -132,6 +143,10 @@ export default function App() {
     }),
     [reduced, direction]
   );
+
+  const logsBooted = useLogStore((s) => s.booted);
+  const emotionsBooted = useEmotionStore((s) => s.booted);
+  const booted = logsBooted && emotionsBooted;
 
   const showNav = TAB_PAGES.includes(currentPage as Tab);
 
@@ -150,19 +165,23 @@ export default function App() {
             : 'pb-[env(safe-area-inset-bottom)]'
         }`}
       >
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={currentPage}
-            variants={pageVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            transition={{ duration: reduced ? 0 : 0.28, ease: 'easeInOut' }}
-            className="h-full"
-          >
-            <Suspense fallback={<PageLoader />}>{renderPage(currentPage)}</Suspense>
-          </motion.div>
-        </AnimatePresence>
+        {booted ? (
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={currentPage}
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: reduced ? 0 : 0.28, ease: 'easeInOut' }}
+              className="h-full"
+            >
+              <Suspense fallback={<PageLoader />}>{renderPage(currentPage)}</Suspense>
+            </motion.div>
+          </AnimatePresence>
+        ) : (
+          <PageLoader />
+        )}
       </main>
 
       {/* Bottom Navigation */}

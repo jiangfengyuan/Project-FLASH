@@ -16,6 +16,12 @@ export interface LogItem {
 
 interface LogState {
   logs: LogItem[];
+  /**
+   * False until the initial storage load in App.tsx completes. Main content
+   * must not render before this flips true, otherwise the boot-time setState
+   * would clobber user mutations made during the splash window.
+   */
+  booted: boolean;
   searchQuery: string;
   editingId: string | null;
   // Filter state
@@ -66,6 +72,7 @@ function queueMutation(operation: () => Promise<void>): Promise<void> {
 
 export const useLogStore = create<LogState>((set, get) => ({
   logs: [],
+  booted: false,
   searchQuery: '',
   editingId: null,
   // Filter state
