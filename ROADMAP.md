@@ -86,6 +86,20 @@
 | 数据迁移与版本兼容 | P2     | 为 Zustand persist 增加版本号与 migration，防止后续数据结构变更导致旧数据加载失败。                             | 修改数据模型后旧用户数据可自动迁移。                  |
 | 桌面端适配（可选） | P3     | 微调大屏布局，或评估是否用 Capacitor 暂不支持的桌面方案。                                                       | 在 768px 以上屏幕布局不崩坏。                         |
 
+### Phase 6：原生重写（2026-07 启动，与 Web 版并行）
+
+目标：以原生技术栈重写双端，获得完整平台体验。**Android 先行**（工具链稳定、Kotlin 逻辑层未来可抽取为 KMP 共享模块），iOS（SwiftUI）随后。
+
+| 任务 | 优先级 | 具体工作 | 验收标准 |
+| --- | --- | --- | --- |
+| Android 原生工程骨架 | P0 | `native-android/`：Kotlin 2.2 + Jetpack Compose + Material 3 + Room（表结构对齐现有 SQLite schema）+ MVVM/StateFlow | `./gradlew assembleDebug` 通过，模拟器可运行 |
+| 情绪记录主流程 | P0 | MD3 离散滑块（-3..+3）、负面子情绪 Chip、备注、历史列表；`EmotionStats` 算法已移植 | 数据落 Room，杀进程重启不丢 |
+| 日志 / 灵感模块 | P1 | 移植 Log Stream / Log Flow / Idea Flow，含搜索筛选与重要性标记 | 功能与 Web 版对齐 |
+| 日历与统计图表 | P1 | 移植 Calendar 聚合页与情绪趋势图（克制动画） | 图表渲染正确 |
+| 设置与导入导出 | P2 | JSON 导入导出，格式与 Web 版互通 | Web 导出文件可在原生端导入 |
+| MD3 主题精调 | P2 | 用 Material Theme Builder 从 Seed #4D96FF 生成精确 Tonal Palette；动态取色已支持 | 色彩对比度符合 WCAG |
+| iOS 原生（SwiftUI） | P2 | 待 Android 版稳定后启动；届时评估将 Kotlin 逻辑层抽为 KMP 共享模块，iOS 只写 SwiftUI 界面 | — |
+
 ### Phase 5：长期优化与运营（第 15–24 周）
 
 目标：建立可持续迭代的能力。
@@ -108,6 +122,7 @@
 | M3：正式版 1.0 | 第 8 周末  | 双端签名、设置页、深色模式、平台适配     | 上架 Google Play / App Store（或 TestFlight） |
 | M4：功能扩展版 | 第 14 周末 | 图片附件、标签系统、本地提醒、多语言     | 1.1/1.2 迭代更新                              |
 | M5：稳定运营版 | 第 24 周末 | E2E 测试、性能监控、云同步方案           | 持续小版本迭代                                |
+| M6：原生 Android Alpha | 原生启动后第 4 周 | 情绪记录 + 日志主流程可用的原生 APK | 与 Capacitor 版并行内测，收集对比反馈 |
 
 ---
 
