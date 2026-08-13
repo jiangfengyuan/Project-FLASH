@@ -91,4 +91,35 @@ struct BackupServiceTests {
         #expect(preview.skippedLogs == 1)
         #expect(preview.logs.isEmpty)
     }
+
+    @Test func nonDictionaryEntriesSkippedNotFatal() throws {
+        let json = """
+        {"version":"flash-backup-v1","logs":[
+          {"id":"11111111-1111-1111-1111-111111111111","content":"好","colorTag":"daily",
+           "category":"log","importance":0,"createdAt":"2026-08-13T08:00:00.000Z",
+           "recordDate":"2026-08-13"},
+          42
+        ],"emotions":[
+          {"id":"22222222-2222-2222-2222-222222222222","level":-2,"subEmotion":"sad",
+           "status":null,"note":null,"recordDate":"2026-08-13",
+           "createdAt":"2026-08-13T08:00:00.000Z"},
+          "oops"
+        ]}
+        """
+        let preview = try BackupService.parse(json)
+        #expect(preview.skippedLogs == 1)          // 非字典元素 42 跳过
+        #expect(preview.skippedEmotions == 1)      // 非字典元素 "oops" 跳过
+        #expect(preview.logs.count == 1)
+        #expect(preview.emotions.count == 1)
+        #expect(preview.logs[0] == LogItem(id: "11111111-1111-1111-1111-111111111111",
+                                           content: "好", colorTag: .daily, category: .log,
+                                           importance: 0,
+                                           createdAt: "2026-08-13T08:00:00.000Z",
+                                           recordDate: "2026-08-13"))
+        #expect(preview.emotions[0] == EmotionRecord(id: "22222222-2222-2222-2222-222222222222",
+                                                     level: .unhappy, subEmotion: .sad,
+                                                     status: nil, note: nil,
+                                                     recordDate: "2026-08-13",
+                                                     createdAt: "2026-08-13T08:00:00.000Z"))
+    }
 }

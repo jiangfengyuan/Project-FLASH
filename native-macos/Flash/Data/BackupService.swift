@@ -82,23 +82,31 @@ enum BackupService {
         guard version == backupVersion else {
             throw BackupError.incompatibleVersion(version)
         }
-        guard let logsArray = root["logs"] as? [[String: Any]] else {
+        guard let logsArray = root["logs"] as? [Any] else {
             throw BackupError.invalidArray("logs")
         }
-        guard let emotionsArray = root["emotions"] as? [[String: Any]] else {
+        guard let emotionsArray = root["emotions"] as? [Any] else {
             throw BackupError.invalidArray("emotions")
         }
 
         var logs: [LogItem] = []
         var skippedLogs = 0
-        for entry in logsArray.prefix(maxEntryCount) {
-            if let log = parseLog(entry) { logs.append(log) } else { skippedLogs += 1 }
+        for element in logsArray.prefix(maxEntryCount) {
+            if let entry = element as? [String: Any], let log = parseLog(entry) {
+                logs.append(log)
+            } else {
+                skippedLogs += 1
+            }
         }
 
         var emotions: [EmotionRecord] = []
         var skippedEmotions = 0
-        for entry in emotionsArray.prefix(maxEntryCount) {
-            if let emotion = parseEmotion(entry) { emotions.append(emotion) } else { skippedEmotions += 1 }
+        for element in emotionsArray.prefix(maxEntryCount) {
+            if let entry = element as? [String: Any], let emotion = parseEmotion(entry) {
+                emotions.append(emotion)
+            } else {
+                skippedEmotions += 1
+            }
         }
 
         return ImportPreview(logCount: logs.count, emotionCount: emotions.count,
