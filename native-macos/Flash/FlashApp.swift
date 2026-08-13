@@ -24,6 +24,7 @@ struct FlashApp: App {
                 }
             }
             .environment(appState)
+            .environment(\.flashRepository, FlashRepository(container: container))
             .environmentObject(settings)
             .preferredColorScheme(colorScheme(for: settings.themeMode))
         }
