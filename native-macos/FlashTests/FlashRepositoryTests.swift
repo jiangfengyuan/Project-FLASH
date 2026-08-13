@@ -54,10 +54,21 @@ struct FlashRepositoryTests {
 
     @Test func logsSortedNewestFirst() throws {
         let repo = makeRepo()
-        try repo.addLog(content: "A", colorTag: .daily)
-        try repo.addLog(content: "B", colorTag: .daily)
+        // 固定且互不相同的 createdAt，避免同毫秒并列导致排序不稳定
+        let oldest = LogItem(id: "11111111-1111-1111-1111-111111111111", content: "A",
+                             colorTag: .daily, category: .log, importance: 0,
+                             createdAt: "2026-08-10T01:00:00.000Z", recordDate: "2026-08-10")
+        let middle = LogItem(id: "22222222-2222-2222-2222-222222222222", content: "B",
+                             colorTag: .daily, category: .log, importance: 0,
+                             createdAt: "2026-08-10T02:00:00.000Z", recordDate: "2026-08-10")
+        let newest = LogItem(id: "33333333-3333-3333-3333-333333333333", content: "C",
+                             colorTag: .daily, category: .log, importance: 0,
+                             createdAt: "2026-08-10T03:00:00.000Z", recordDate: "2026-08-10")
+        try repo.mergeAll(logs: [oldest, middle, newest], emotions: [])
         let logs = try repo.allLogs()
-        #expect(logs.map(\.content) == ["B", "A"]) // createdAt 降序
+        #expect(logs.map(\.createdAt) == ["2026-08-10T03:00:00.000Z",
+                                          "2026-08-10T02:00:00.000Z",
+                                          "2026-08-10T01:00:00.000Z"]) // createdAt 严格降序
     }
 
     @Test func mergeAllOverwritesSameId() throws {
