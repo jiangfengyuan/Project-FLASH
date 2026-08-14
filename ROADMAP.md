@@ -3,6 +3,8 @@
 > 版本：Alpha v6 整理后现状
 > 更新日期：2026-07-13
 
+> **⚠️ 2026-08-14 现状更新**：本仓库已转为**纯原生仓库**——Web 版（React/Vite）与 Capacitor 壳（android/ ios/）已从工作区移除（git 历史可查），现役工程为 `android/`（Kotlin 原生，原 native-android/）与 `macos/`（SwiftUI 原生，原 native-macos/）。下文中 Web/Capacitor 相关的阶段与依赖清单均为历史记录；最新进行中事项见 M6/M7 里程碑。
+
 ---
 
 ## 一、项目现状速览
