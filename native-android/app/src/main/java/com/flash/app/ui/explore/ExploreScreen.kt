@@ -1,4 +1,4 @@
-package com.flash.app.ui.logstream
+package com.flash.app.ui.explore
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -19,7 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -50,13 +50,14 @@ import com.flash.app.ui.components.LogCard
 import com.flash.app.ui.theme.LocalUiStyle
 import com.flash.app.ui.theme.glass.glass
 
-/** Log Tab：快速输入 + 最近日志流，对应 Web 版 LogStream 页 */
+/** 探索 Tab：统一信息流 + 模块筛选 + 快速输入坞 */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LogStreamScreen(onOpenLogFlow: () -> Unit, onOpenSettings: () -> Unit) {
+fun ExploreScreen(onOpenLogFlow: () -> Unit, onOpenCalendar: () -> Unit) {
     val app = LocalContext.current.applicationContext as FlashApplication
-    val viewModel: LogStreamViewModel = viewModel(factory = LogStreamViewModel.factory(app.repository))
-    val logs by viewModel.recentLogs.collectAsStateWithLifecycle()
+    val viewModel: ExploreViewModel = viewModel(factory = ExploreViewModel.factory(app.repository))
+    val logs by viewModel.logs.collectAsStateWithLifecycle()
+    val filter by viewModel.filter.collectAsStateWithLifecycle()
     val text by viewModel.text.collectAsStateWithLifecycle()
     val selectedTag by viewModel.selectedTag.collectAsStateWithLifecycle()
 
@@ -64,18 +65,17 @@ fun LogStreamScreen(onOpenLogFlow: () -> Unit, onOpenSettings: () -> Unit) {
         containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
-                title = { Text("一闪") },
+                title = { Text("探索") },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 actions = {
-                    TextButton(onClick = onOpenLogFlow) { Text("管理") }
-                    IconButton(onClick = onOpenSettings) {
-                        Icon(Icons.Filled.Settings, contentDescription = "设置")
+                    IconButton(onClick = onOpenCalendar) {
+                        Icon(Icons.Filled.CalendarMonth, contentDescription = "日历")
                     }
+                    TextButton(onClick = onOpenLogFlow) { Text("管理") }
                 },
             )
         },
         bottomBar = {
-            // edge-to-edge 下需要 imePadding，否则软键盘会盖住输入区
             Box(modifier = Modifier.imePadding()) {
                 InputDock(
                     text = text,
@@ -87,32 +87,48 @@ fun LogStreamScreen(onOpenLogFlow: () -> Unit, onOpenSettings: () -> Unit) {
             }
         },
     ) { innerPadding ->
-        if (logs.isEmpty()) {
-            Column(
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize(),
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
             ) {
-                Text("✈️", fontSize = 56.sp)
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    "闪过即留，写下第一条吧",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                ExploreFilter.entries.forEach { f ->
+                    FilterChip(
+                        selected = filter == f,
+                        onClick = { viewModel.setFilter(f) },
+                        label = { Text(f.displayName) },
+                    )
+                }
             }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                items(items = logs, key = { it.id }) { log ->
-                    LogCard(log = log)
+            if (logs.isEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Text("✈️", fontSize = 56.sp)
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        "闪过即留，写下第一条吧",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    items(items = logs, key = { it.id }) { log ->
+                        LogCard(log = log, modifier = Modifier.animateItem())
+                    }
                 }
             }
         }
@@ -154,7 +170,7 @@ private fun InputDock(
                 onValueChange = onTextChange,
                 placeholder = { Text("闪过即留...") },
                 supportingText = {
-                    Text("${text.length}/${LogStreamViewModel.MAX_LENGTH}")
+                    Text("${text.length}/${ExploreViewModel.MAX_LENGTH}")
                 },
                 singleLine = true,
                 modifier = Modifier.weight(1f),

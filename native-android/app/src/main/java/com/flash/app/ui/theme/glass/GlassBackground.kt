@@ -15,8 +15,10 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 
 /**
- * 全屏渐变天空 + 有机色块（插画感）+ 微光星星。
+ * 全屏渐变天空 + 有机色块（径向渐变软边）+ 微光星星。
  * 作为 Haze 模糊源，所有玻璃面模糊的内容就是它。
+ * 注意：天空使用多段色阶避免线性渐变的色彩断层；
+ * 色块使用径向渐变消隐边缘，避免生硬边界。
  */
 @Composable
 fun GlassBackground(
@@ -24,37 +26,52 @@ fun GlassBackground(
     hazeState: HazeState?,
     modifier: Modifier = Modifier,
 ) {
-    val top = if (darkTheme) GlassPalette.SkyDarkTop else GlassPalette.SkyLightTop
-    val mid = if (darkTheme) GlassPalette.SkyDarkMid else GlassPalette.SkyLightMid
-    val bottom = if (darkTheme) GlassPalette.SkyDarkBottom else GlassPalette.SkyLightBottom
+    val skyStops = if (darkTheme) {
+        listOf(
+            GlassPalette.SkyDarkTop,
+            GlassPalette.SkyDarkTop.blendToward(GlassPalette.SkyDarkMid, 0.55f),
+            GlassPalette.SkyDarkMid,
+            GlassPalette.SkyDarkMid.blendToward(GlassPalette.SkyDarkBottom, 0.55f),
+            GlassPalette.SkyDarkBottom,
+        )
+    } else {
+        listOf(
+            GlassPalette.SkyLightTop,
+            GlassPalette.SkyLightTop.blendToward(GlassPalette.SkyLightMid, 0.55f),
+            GlassPalette.SkyLightMid,
+            GlassPalette.SkyLightMid.blendToward(GlassPalette.SkyLightBottom, 0.55f),
+            GlassPalette.SkyLightBottom,
+        )
+    }
 
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Brush.verticalGradient(listOf(top, mid, bottom)))
+            .background(Brush.verticalGradient(skyStops))
             .then(if (hazeState != null) Modifier.hazeSource(hazeState) else Modifier),
     ) {
         Canvas(Modifier.fillMaxSize()) {
             val w = size.width
             val h = size.height
-            val blobAlpha = if (darkTheme) 0.30f else 0.38f
+            // 深色下降低色块不透明度，避免深蓝底上的彩斑显脏
+            val blobAlpha = if (darkTheme) 0.24f else 0.42f
 
-            // 有机色块：紫 / 橙 / 薄荷三团，位置错开营造层次
-            drawCircle(
-                GlassPalette.Purple.copy(alpha = blobAlpha),
-                radius = w * 0.55f,
-                center = Offset(w * 0.9f, h * 0.08f),
-            )
-            drawCircle(
-                GlassPalette.Orange.copy(alpha = blobAlpha * 0.85f),
-                radius = w * 0.42f,
-                center = Offset(w * 0.02f, h * 0.42f),
-            )
-            drawCircle(
-                GlassPalette.Mint.copy(alpha = blobAlpha * 0.9f),
-                radius = w * 0.5f,
-                center = Offset(w * 0.8f, h * 0.85f),
-            )
+            // 有机色块：径向渐变软边，中心实、边缘消隐
+            fun softBlob(color: Color, radius: Float, center: Offset) {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(color.copy(alpha = blobAlpha), color.copy(alpha = 0f)),
+                        center = center,
+                        radius = radius,
+                    ),
+                    radius = radius,
+                    center = center,
+                )
+            }
+
+            softBlob(GlassPalette.Purple, w * 0.75f, Offset(w * 0.9f, h * 0.08f))
+            softBlob(GlassPalette.Orange, w * 0.62f, Offset(w * 0.02f, h * 0.42f))
+            softBlob(GlassPalette.Mint, w * 0.70f, Offset(w * 0.8f, h * 0.85f))
 
             // 微光星星（插画指南里的点缀元素）
             val sparkleColor = Color.White.copy(alpha = if (darkTheme) 0.5f else 0.85f)
@@ -72,6 +89,17 @@ fun GlassBackground(
             }
         }
     }
+}
+
+/** 两色线性插值，用于生成天空渐变中间色阶 */
+private fun Color.blendToward(other: Color, fraction: Float): Color {
+    val f = fraction.coerceIn(0f, 1f)
+    return Color(
+        red = red + (other.red - red) * f,
+        green = green + (other.green - green) * f,
+        blue = blue + (other.blue - blue) * f,
+        alpha = alpha + (other.alpha - alpha) * f,
+    )
 }
 
 /** 四角星（✦）路径 */

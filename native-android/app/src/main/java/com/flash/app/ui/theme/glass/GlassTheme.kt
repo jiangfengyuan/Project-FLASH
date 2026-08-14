@@ -27,14 +27,14 @@ object GlassPalette {
     val InkSecondaryDark = Color(0xFFB2BEC3)
 
     // ---- 玻璃面 ----
-    // 浅色：粉彩渐变底，填充白需较高不透明度保证可读性
-    val SurfaceLight = Color(0x8FFFFFFF)       // 56% 白
-    val SurfaceStrongLight = Color(0xCFFFFFFF) // 81% 白（输入区/底栏）
+    // 浅色：粉彩渐变底，提高不透明度呈现"毛玻璃"磨砂感
+    val SurfaceLight = Color(0xA6FFFFFF)       // 65% 白
+    val SurfaceStrongLight = Color(0xD9FFFFFF) // 85% 白（输入区/底栏）
     val BorderLight = Color(0x80FFFFFF)        // 50%
     val HighlightLight = Color(0x99FFFFFF)     // 顶部高光
     // 深色：低填充白，还原玻璃拟态指南 rgba(255,255,255,0.15)
-    val SurfaceDark = Color(0x26FFFFFF)        // 15%
-    val SurfaceStrongDark = Color(0x40FFFFFF)  // 25%
+    val SurfaceDark = Color(0x33FFFFFF)        // 20%
+    val SurfaceStrongDark = Color(0x4DFFFFFF)  // 30%
     val BorderDark = Color(0x40FFFFFF)         // 25%
     val HighlightDark = Color(0x59FFFFFF)      // 35%
 

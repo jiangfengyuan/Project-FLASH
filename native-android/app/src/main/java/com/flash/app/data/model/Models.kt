@@ -77,6 +77,18 @@ data class EmotionRecord(
     val createdAt: String,
 )
 
+/** 对应 PRD 的 emoji 情绪模型：😍😊🙂😐😔😣😡（level 3→-3） */
+val EmotionLevel.emoji: String
+    get() = when (this) {
+        EmotionLevel.VERY_HAPPY -> "😍"
+        EmotionLevel.HAPPY -> "😊"
+        EmotionLevel.SLIGHTLY_HAPPY -> "🙂"
+        EmotionLevel.NEUTRAL -> "😐"
+        EmotionLevel.SLIGHTLY_UNHAPPY -> "😔"
+        EmotionLevel.UNHAPPY -> "😣"
+        EmotionLevel.VERY_UNHAPPY -> "😡"
+    }
+
 /** 与 Web 版 getImportanceFromContent 对齐：从内容中的 !! 标记推断重要度 */
 fun importanceFromContent(content: String): Int = when {
     content.contains("!!!!") -> 4

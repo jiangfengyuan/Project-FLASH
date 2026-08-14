@@ -24,7 +24,8 @@ fun StyleCard(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     if (LocalUiStyle.current == UiStyle.GLASS) {
-        GlassCard(modifier = modifier, onClick = onClick, content = content)
+        // 小卡片不启用实时模糊（滚动流畅优先），观感上保留半透+描边+高光
+        GlassCard(modifier = modifier, blur = false, onClick = onClick, content = content)
     } else {
         Card(
             modifier = modifier,

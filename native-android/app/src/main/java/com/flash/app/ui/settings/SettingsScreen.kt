@@ -13,7 +13,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,10 +50,10 @@ import com.flash.app.data.UiStyle
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-/** 设置页：外观 / 数据备份 / 关于，对应 Web 版 Settings */
+/** 设置/我的 页：外观 / 界面风格 / 数据备份 / 关于。作为「我的」Tab 时 onBack 传 null */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(onBack: () -> Unit) {
+fun SettingsScreen(onBack: (() -> Unit)? = null) {
     val app = LocalContext.current.applicationContext as FlashApplication
     val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.factory(app))
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
@@ -81,11 +83,13 @@ fun SettingsScreen(onBack: () -> Unit) {
         containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
-                title = { Text("设置") },
+                title = { Text(if (onBack == null) "我的" else "设置") },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+                    if (onBack != null) {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+                        }
                     }
                 },
             )
@@ -111,6 +115,7 @@ fun SettingsScreen(onBack: () -> Unit) {
                             index = index,
                             count = UiStyle.entries.size,
                         ),
+                        colors = segmentedBrandColors(),
                     ) {
                         Text(style.displayName)
                     }
@@ -135,6 +140,7 @@ fun SettingsScreen(onBack: () -> Unit) {
                             index = index,
                             count = ThemeMode.entries.size,
                         ),
+                        colors = segmentedBrandColors(),
                     ) {
                         Text(
                             when (mode) {
@@ -155,17 +161,25 @@ fun SettingsScreen(onBack: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedButton(
+                FilledTonalButton(
                     onClick = {
                         val timestamp = LocalDateTime.now()
                             .format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HHmmss"))
                         exportLauncher.launch("flash-backup-$timestamp.json")
                     },
                     modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.filledTonalButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    ),
                 ) { Text("导出备份") }
-                OutlinedButton(
+                FilledTonalButton(
                     onClick = { importLauncher.launch(arrayOf("application/json", "text/*")) },
                     modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.filledTonalButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    ),
                 ) { Text("导入备份") }
             }
             OutlinedButton(
@@ -241,3 +255,11 @@ fun SettingsScreen(onBack: () -> Unit) {
 private fun SectionTitle(text: String) {
     Text(text, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
 }
+
+/** 分段按钮选中态统一品牌紫（默认 secondaryContainer 橙系与整体色调不协调） */
+@Composable
+private fun segmentedBrandColors() = SegmentedButtonDefaults.colors(
+    activeContainerColor = MaterialTheme.colorScheme.primaryContainer,
+    activeContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+    activeBorderColor = MaterialTheme.colorScheme.primary,
+)

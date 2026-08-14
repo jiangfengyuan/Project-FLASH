@@ -5,12 +5,20 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import com.flash.app.data.UiStyle
 
 /** 当前界面风格，供组件库感知（玻璃面 vs MD3 实体面） */
 val LocalUiStyle = staticCompositionLocalOf { UiStyle.GLASS }
+
+/**
+ * 当前生效的深色标记（由设置里的主题模式决定，经 FlashTheme 下发）。
+ * 玻璃系统、系统栏样式等必须统一读它，禁止再用 isSystemInDarkTheme()，
+ * 否则"系统浅色 + App 选深色"时两套 token 会撕裂。
+ */
+val LocalIsDarkTheme = staticCompositionLocalOf { false }
 
 // ==================== 玻璃拟态（插画 × Glassmorphism） ====================
 // 色板取自插画风指南（IMG_5661）与玻璃拟态指南（IMG_5662），玻璃面参数见 ui/theme/glass/
@@ -156,9 +164,11 @@ fun FlashTheme(
         UiStyle.MD3 -> if (darkTheme) Md3DarkScheme else Md3LightScheme
         UiStyle.GLASS -> if (darkTheme) GlassDarkScheme else GlassLightScheme
     }
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = FlashTypography,
-        content = content,
-    )
+    CompositionLocalProvider(LocalIsDarkTheme provides darkTheme) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = FlashTypography,
+            content = content,
+        )
+    }
 }
