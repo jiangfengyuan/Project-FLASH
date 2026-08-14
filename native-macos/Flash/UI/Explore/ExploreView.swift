@@ -22,6 +22,7 @@ struct ExploreView: View {
     @State private var filter: ExploreFilter = .all
     @State private var draft = ""
     @State private var selectedTag: ColorTag? = nil
+    @State private var errorMessage: String? = nil
     @FocusState private var inputFocused: Bool
 
     private static let maxLength = 140
@@ -90,6 +91,11 @@ struct ExploreView: View {
             .padding(12)
             .background(Color(nsColor: .controlBackgroundColor))
         }
+        .alert("提示", isPresented: errorPresented) {
+            Button("好") { errorMessage = nil }
+        } message: {
+            Text(errorMessage ?? "")
+        }
     }
 
     private func tagButton(_ tag: ColorTag) -> some View {
@@ -111,6 +117,10 @@ struct ExploreView: View {
         .accessibilityLabel(tag.displayName)
     }
 
+    private var errorPresented: Binding<Bool> {
+        Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })
+    }
+
     private func save() {
         let content = draft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !content.isEmpty else { return }
@@ -126,7 +136,7 @@ struct ExploreView: View {
             draft = ""
             selectedTag = nil
         } catch {
-            print("Explore save failed: \(error)")
+            errorMessage = "保存失败：\(error.localizedDescription)"
         }
     }
 }

@@ -10,6 +10,7 @@ struct HomeView: View {
 
     @State private var draft = ""
     @FocusState private var inputFocused: Bool
+    @State private var errorMessage: String? = nil
 
     private var logs: [LogItem] { logEntities.map { $0.toModel() } }
     private var emotions: [EmotionRecord] { emotionEntities.map { $0.toModel() } }
@@ -66,6 +67,11 @@ struct HomeView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(nsColor: .windowBackgroundColor))
+        .alert("提示", isPresented: errorPresented) {
+            Button("好") { errorMessage = nil }
+        } message: {
+            Text(errorMessage ?? "")
+        }
     }
 
     private func statCard(title: String, count: Int, icon: String) -> some View {
@@ -82,6 +88,10 @@ struct HomeView: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
+    private var errorPresented: Binding<Bool> {
+        Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })
+    }
+
     private func quickAdd(as category: Category) {
         let content = draft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !content.isEmpty else { return }
@@ -95,8 +105,7 @@ struct HomeView: View {
             }
             draft = ""
         } catch {
-            // 静默失败不可接受——但 SwiftUI 无 toast；错误打印到控制台，Task 16 统一错误提示
-            print("quickAdd failed: \(error)")
+            errorMessage = "保存失败：\(error.localizedDescription)"
         }
     }
 }
