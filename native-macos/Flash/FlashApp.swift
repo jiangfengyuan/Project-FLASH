@@ -36,7 +36,7 @@ struct FlashApp: App {
                 Button("设置…") { appState.selectedModule = .settings }
                     .keyboardShortcut(",", modifiers: .command)
             }
-            CommandGroup(after: .newItem) {
+            CommandGroup(replacing: .newItem) {
                 Button("新建记录") { appState.requestNewLog() }
                     .keyboardShortcut("n", modifiers: .command)
             }

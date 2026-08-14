@@ -86,6 +86,10 @@ struct HomeView: View {
         .padding(.vertical, 16)
         .background(Color(nsColor: .controlBackgroundColor))
         .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay {
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color(nsColor: .separatorColor), lineWidth: 0.5)
+        }
     }
 
     private var errorPresented: Binding<Bool> {

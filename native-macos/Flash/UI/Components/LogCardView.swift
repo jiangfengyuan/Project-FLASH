@@ -32,5 +32,9 @@ struct LogCardView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(nsColor: .controlBackgroundColor))
         .clipShape(RoundedRectangle(cornerRadius: 10))
+        .overlay {
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(Color(nsColor: .separatorColor), lineWidth: 0.5)
+        }
     }
 }

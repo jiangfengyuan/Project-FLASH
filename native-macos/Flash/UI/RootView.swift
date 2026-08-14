@@ -6,6 +6,7 @@ struct RootView: View {
     var body: some View {
         NavigationSplitView {
             Sidebar()
+                .navigationSplitViewColumnWidth(min: 225, ideal: 240, max: 350)
         } detail: {
             detailView(for: appState.selectedModule)
                 .navigationTitle(appState.selectedModule.title)

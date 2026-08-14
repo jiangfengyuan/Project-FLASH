@@ -35,9 +35,11 @@ struct LogFlowView: View {
                 HStack(spacing: 8) {
                     DatePicker("开始", selection: startBinding, displayedComponents: .date)
                         .labelsHidden()
+                        .opacity(filter.startDate == nil ? 0.45 : 1)
                     Text("至").foregroundStyle(.secondary)
                     DatePicker("结束", selection: endBinding, displayedComponents: .date)
                         .labelsHidden()
+                        .opacity(filter.endDate == nil ? 0.45 : 1)
                     if filter.startDate != nil || filter.endDate != nil {
                         Button("清除日期") {
                             filter.startDate = nil

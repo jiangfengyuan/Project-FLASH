@@ -115,7 +115,7 @@ struct CalendarView: View {
             VStack(spacing: 2) {
                 Text("\(Calendar(identifier: .gregorian).component(.day, from: date))")
                     .font(.callout)
-                    .foregroundStyle(inMonth ? Color.primary : Color.secondary.opacity(0.5))
+                    .foregroundStyle(isSelected ? .white : (inMonth ? Color.primary : Color.secondary.opacity(0.5)))
                 HStack(spacing: 3) {
                     if let count = aggregate?.logs.count, count > 0 {
                         Text("\(count)")
