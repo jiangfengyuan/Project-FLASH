@@ -16,11 +16,7 @@ enum BrandColors {
         })
     }
 
-    static func tagColor(_ tag: ColorTag, for colorScheme: ColorScheme? = nil) -> Color {
-        Color(hex: tag.colorHex)
-    }
+    static func tagColor(_ tag: ColorTag) -> Color { tag.color }
 
-    static func emotionColor(_ level: EmotionLevel) -> Color {
-        Color(hex: level.colorHex)
-    }
+    static func emotionColor(_ level: EmotionLevel) -> Color { level.color }
 }

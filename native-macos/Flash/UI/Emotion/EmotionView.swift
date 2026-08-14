@@ -28,7 +28,7 @@ struct EmotionView: View {
                         .animation(.easeInOut(duration: 0.2), value: selectedLevel)
                     Text(selectedLevel.displayName)
                         .font(.title3)
-                        .foregroundStyle(BrandColors.emotionColor(selectedLevel))
+                        .foregroundStyle(selectedLevel.color)
 
                     Slider(value: $sliderValue, in: 1...7, step: 1) {
                         Text("情绪等级")
@@ -112,11 +112,11 @@ struct EmotionView: View {
                 .font(.callout)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 6)
-                .background(isOn ? Color(hex: sub.colorHex).opacity(0.3)
+                .background(isOn ? sub.color.opacity(0.3)
                                  : Color(nsColor: .controlBackgroundColor))
                 .clipShape(Capsule())
                 .overlay {
-                    Capsule().stroke(isOn ? Color(hex: sub.colorHex)
+                    Capsule().stroke(isOn ? sub.color
                                           : Color(nsColor: .separatorColor),
                                      lineWidth: 1)
                 }
@@ -135,7 +135,7 @@ struct EmotionView: View {
                             .font(.caption)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 2)
-                            .background(Color(hex: sub.colorHex).opacity(0.25))
+                            .background(sub.color.opacity(0.25))
                             .clipShape(Capsule())
                     }
                 }

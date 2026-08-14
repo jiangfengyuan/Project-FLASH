@@ -6,7 +6,6 @@ struct FlashApp: App {
     private let container: ModelContainer
     @State private var appState = AppState()
     @StateObject private var settings = SettingsStore()
-    @Environment(\.openWindow) private var openWindow
 
     init() {
         self.container = FlashDatabase.makeContainer()
@@ -30,6 +29,7 @@ struct FlashApp: App {
         }
         .modelContainer(container)
         .windowResizability(.contentMinSize)
+        .defaultSize(width: 1200, height: 760)
         .commands {
             // 单 WindowGroup、无 Settings scene 时系统不会生成「设置 ⌘,」，手动补
             CommandGroup(replacing: .appSettings) {

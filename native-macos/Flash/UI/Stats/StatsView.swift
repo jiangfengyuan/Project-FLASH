@@ -97,7 +97,7 @@ struct StatsView: View {
     private func barColor(for name: String) -> Color {
         // 与 SubEmotion 配色一致（伤心/生气/难受）
         SubEmotion.allCases.first { $0.displayName == name }
-            .map { Color(hex: $0.colorHex) } ?? .secondary
+            .map { $0.color } ?? .secondary
     }
 
     private func kpiCard(_ title: String, _ value: Int, _ icon: String) -> some View {

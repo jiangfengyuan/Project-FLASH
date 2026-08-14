@@ -11,6 +11,7 @@ struct HomeView: View {
     @State private var draft = ""
     @FocusState private var inputFocused: Bool
     @State private var errorMessage: String? = nil
+    @State private var handledNewLogToken = 0
 
     private var logs: [LogItem] { logEntities.map { $0.toModel() } }
     private var emotions: [EmotionRecord] { emotionEntities.map { $0.toModel() } }
@@ -43,7 +44,8 @@ struct HomeView: View {
                         .textFieldStyle(.roundedBorder)
                         .lineLimit(1...4)
                         .focused($inputFocused)
-                        .onChange(of: appState.newLogRequestToken) { inputFocused = true }
+                        .onAppear { flushNewLogRequest() }
+                        .onChange(of: appState.newLogRequestToken) { flushNewLogRequest() }
                     HStack {
                         Button("记为日志") { quickAdd(as: .log) }
                             .buttonStyle(.borderedProminent)
@@ -96,16 +98,25 @@ struct HomeView: View {
         Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })
     }
 
+    /// 菜单「新建记录」⌘N：token 递增时聚焦输入框。
+    /// onAppear 兜底：跨模块命令使本视图首次创建时 token 已递增，onChange 不会回放。
+    private func flushNewLogRequest() {
+        guard appState.newLogRequestToken != handledNewLogToken else { return }
+        handledNewLogToken = appState.newLogRequestToken
+        inputFocused = true
+    }
+
     private func quickAdd(as category: Category) {
         let content = draft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !content.isEmpty else { return }
+        guard let repository else { errorMessage = "内部错误：存储未就绪"; return }
         do {
             switch category {
             case .log:
-                try repository?.addLog(content: content, colorTag: .daily, category: .log)
+                try repository.addLog(content: content, colorTag: .daily, category: .log)
             case .idea:
-                try repository?.addLog(content: content, colorTag: .idea, category: .idea,
-                                       importance: importanceFromContent(content))
+                try repository.addLog(content: content, colorTag: .idea, category: .idea,
+                                      importance: importanceFromContent(content))
             }
             draft = ""
         } catch {

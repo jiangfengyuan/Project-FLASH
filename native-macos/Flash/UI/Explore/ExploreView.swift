@@ -23,6 +23,7 @@ struct ExploreView: View {
     @State private var draft = ""
     @State private var selectedTag: ColorTag? = nil
     @State private var errorMessage: String? = nil
+    @State private var handledNewLogToken = 0
     @FocusState private var inputFocused: Bool
 
     private static let maxLength = 140
@@ -76,7 +77,8 @@ struct ExploreView: View {
                         .textFieldStyle(.roundedBorder)
                         .lineLimit(1...3)
                         .focused($inputFocused)
-                        .onChange(of: appState.newLogRequestToken) { inputFocused = true }
+                        .onAppear { flushNewLogRequest() }
+                        .onChange(of: appState.newLogRequestToken) { flushNewLogRequest() }
                         .onChange(of: draft) {
                             if draft.count > Self.maxLength {
                                 draft = String(draft.prefix(Self.maxLength))
@@ -104,7 +106,7 @@ struct ExploreView: View {
             selectedTag = isSelected ? nil : tag
         } label: {
             Circle()
-                .fill(BrandColors.tagColor(tag))
+                .fill(tag.color)
                 .frame(width: 18, height: 18)
                 .overlay {
                     if isSelected {
@@ -121,13 +123,22 @@ struct ExploreView: View {
         Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })
     }
 
+    /// 菜单「新建记录」⌘N：token 递增时聚焦输入框。
+    /// onAppear 兜底：跨模块命令使本视图首次创建时 token 已递增，onChange 不会回放。
+    private func flushNewLogRequest() {
+        guard appState.newLogRequestToken != handledNewLogToken else { return }
+        handledNewLogToken = appState.newLogRequestToken
+        inputFocused = true
+    }
+
     private func save() {
         let content = draft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !content.isEmpty else { return }
+        guard let repository else { errorMessage = "内部错误：存储未就绪"; return }
         let asIdea = filter == .idea
         let tag = selectedTag ?? (asIdea ? .idea : .daily)
         do {
-            try repository?.addLog(
+            try repository.addLog(
                 content: content,
                 colorTag: tag,
                 category: asIdea ? .idea : .log,

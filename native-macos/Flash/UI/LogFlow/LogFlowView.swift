@@ -130,12 +130,12 @@ struct LogFlowView: View {
                 .font(.caption)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 4)
-                .background(isOn ? BrandColors.tagColor(tag).opacity(0.25)
+                .background(isOn ? tag.color.opacity(0.25)
                                  : Color(nsColor: .controlBackgroundColor))
                 .foregroundStyle(.primary)
                 .clipShape(Capsule())
                 .overlay {
-                    Capsule().stroke(isOn ? BrandColors.tagColor(tag)
+                    Capsule().stroke(isOn ? tag.color
                                           : Color(nsColor: .separatorColor),
                                      lineWidth: 1)
                 }

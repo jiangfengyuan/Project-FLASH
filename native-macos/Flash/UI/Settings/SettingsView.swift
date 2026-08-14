@@ -12,6 +12,7 @@ struct SettingsView: View {
     @State private var showOverwriteConfirm = false
     @State private var showClearConfirm = false
     @State private var message: String? = nil
+    @State private var handledExportToken = 0
 
     var body: some View {
         Form {
@@ -39,7 +40,8 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .padding()
-        .onChange(of: appState.exportRequestToken) { exportBackup() }
+        .onAppear { flushExportRequest() }
+        .onChange(of: appState.exportRequestToken) { flushExportRequest() }
         .alert("导入备份", isPresented: previewPresented) {
             Button("合并导入") { confirmImport(overwrite: false) }
             Button("覆盖导入", role: .destructive) { showOverwriteConfirm = true }
@@ -85,6 +87,14 @@ struct SettingsView: View {
     }
 
     // MARK: - 导出
+
+    /// 菜单「导出备份…」⇧⌘E：token 递增时弹导出面板。
+    /// onAppear 兜底：跨模块命令使本视图首次创建时 token 已递增，onChange 不会回放。
+    private func flushExportRequest() {
+        guard appState.exportRequestToken != handledExportToken else { return }
+        handledExportToken = appState.exportRequestToken
+        exportBackup()
+    }
 
     private func exportBackup() {
         let panel = NSSavePanel()

@@ -1,4 +1,4 @@
-import Foundation
+import SwiftUI
 
 /// 与 Web 版 src/lib/constants.ts 对齐。rawValue 即 storageKey，保证三端数据互通。
 enum ColorTag: String, CaseIterable, Codable {
@@ -15,6 +15,7 @@ enum ColorTag: String, CaseIterable, Codable {
         }
     }
 
+    /// light 外观色值（与 Web/Android 互通的存储色）
     var colorHex: String {
         switch self {
         case .urgent: "#FF6B6B"
@@ -25,4 +26,19 @@ enum ColorTag: String, CaseIterable, Codable {
         case .idea: "#FF9F43"
         }
     }
+
+    /// dark 外观色值
+    var darkColorHex: String {
+        switch self {
+        case .urgent: "#FF8585"
+        case .inspiration: "#C9A227"
+        case .daily: "#6BA8FF"
+        case .memo: "#82D18E"
+        case .emotion: "#B578D1"
+        case .idea: "#FFB268"
+        }
+    }
+
+    /// 跟随系统外观的动态色（light/dark 双变体）
+    var color: Color { BrandColors.dynamic(light: colorHex, dark: darkColorHex) }
 }

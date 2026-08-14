@@ -1,4 +1,4 @@
-import Foundation
+import SwiftUI
 
 enum SubEmotion: String, CaseIterable, Codable {
     case sad, angry, uncomfortable
@@ -11,6 +11,7 @@ enum SubEmotion: String, CaseIterable, Codable {
         }
     }
 
+    /// light 外观色值
     var colorHex: String {
         switch self {
         case .sad: "#A78BFA"
@@ -18,4 +19,16 @@ enum SubEmotion: String, CaseIterable, Codable {
         case .uncomfortable: "#FB923C"
         }
     }
+
+    /// dark 外观色值
+    var darkColorHex: String {
+        switch self {
+        case .sad: "#BFA2FC"
+        case .angry: "#FA9292"
+        case .uncomfortable: "#FCA763"
+        }
+    }
+
+    /// 跟随系统外观的动态色（light/dark 双变体）
+    var color: Color { BrandColors.dynamic(light: colorHex, dark: darkColorHex) }
 }

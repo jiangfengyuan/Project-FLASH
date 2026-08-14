@@ -8,7 +8,7 @@ struct LogCardView: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
                 Circle()
-                    .fill(BrandColors.tagColor(log.colorTag))
+                    .fill(log.colorTag.color)
                     .frame(width: 8, height: 8)
                 Text(log.colorTag.displayName)
                     .font(.caption)
@@ -16,7 +16,7 @@ struct LogCardView: View {
                 if log.importance > 0 {
                     Text(String(repeating: "!", count: log.importance))
                         .font(.caption).bold()
-                        .foregroundStyle(BrandColors.tagColor(.urgent))
+                        .foregroundStyle(ColorTag.urgent.color)
                 }
                 Spacer()
                 Text(log.recordDate)
