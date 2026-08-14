@@ -31,6 +31,11 @@ struct FlashApp: App {
         .modelContainer(container)
         .windowResizability(.contentMinSize)
         .commands {
+            // 单 WindowGroup、无 Settings scene 时系统不会生成「设置 ⌘,」，手动补
+            CommandGroup(replacing: .appSettings) {
+                Button("设置…") { appState.selectedModule = .settings }
+                    .keyboardShortcut(",", modifiers: .command)
+            }
             CommandGroup(after: .newItem) {
                 Button("新建记录") { appState.requestNewLog() }
                     .keyboardShortcut("n", modifiers: .command)

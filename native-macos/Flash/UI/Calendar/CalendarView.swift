@@ -23,11 +23,13 @@ struct CalendarView: View {
             HStack {
                 Button { shiftMonth(-1) } label: { Image(systemName: "chevron.left") }
                     .accessibilityLabel("上一月")
+                    .help("上一月")
                 Text(monthTitle)
                     .font(.headline)
                     .frame(minWidth: 140)
                 Button { shiftMonth(1) } label: { Image(systemName: "chevron.right") }
                     .accessibilityLabel("下一月")
+                    .help("下一月")
                 Spacer()
                 Button("回到今天") {
                     displayedMonth = Date()
