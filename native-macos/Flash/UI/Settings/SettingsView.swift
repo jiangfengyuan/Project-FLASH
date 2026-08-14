@@ -93,7 +93,9 @@ struct SettingsView: View {
     private func flushExportRequest() {
         guard appState.exportRequestToken != handledExportToken else { return }
         handledExportToken = appState.exportRequestToken
-        exportBackup()
+        // 菜单 action 在 AppKit 菜单跟踪事件循环内同步触发，同步 runModal() 会被吞；
+        // 异步逃逸出菜单跟踪后再弹面板（onAppear 路径同样安全）
+        DispatchQueue.main.async { exportBackup() }
     }
 
     private func exportBackup() {
