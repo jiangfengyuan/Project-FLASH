@@ -123,6 +123,7 @@
 | M4：功能扩展版 | 第 14 周末 | 图片附件、标签系统、本地提醒、多语言     | 1.1/1.2 迭代更新                              |
 | M5：稳定运营版 | 第 24 周末 | E2E 测试、性能监控、云同步方案           | 持续小版本迭代                                |
 | M6：原生 Android Alpha | 原生启动后第 4 周 | 情绪记录 + 日志主流程可用的原生 APK | 与 Capacitor 版并行内测，收集对比反馈 |
+| M7：原生 macOS Alpha ✅ | 2026-08（已完成） | SwiftUI + SwiftData 九模块全量（首页/探索/记录流/情绪/日历/统计/设置/欢迎/复用组件）、universal2 双架构、JSON 备份与 Android/Web 互通、38 个单测全过 | 本地 adhoc 构建内测，对外分发需 Developer ID + 公证；后续候选：menu bar extra 快速记录、iCloud 同步、原生 iOS 版共享模型 |
 
 ---
 
