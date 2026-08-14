@@ -36,11 +36,11 @@ struct FlashApp: App {
                 Button("设置…") { appState.selectedModule = .settings }
                     .keyboardShortcut(",", modifiers: .command)
             }
+            // .importExport 锚点仅在文档型应用存在，非文档型 WindowGroup 下挂其上的命令组会被系统静默丢弃；
+            // 「导出备份…」改挂 .newItem 组内（快捷键 ⇧⌘E 不变）
             CommandGroup(replacing: .newItem) {
                 Button("新建记录") { appState.requestNewLog() }
                     .keyboardShortcut("n", modifiers: .command)
-            }
-            CommandGroup(after: .importExport) {
                 Button("导出备份…") { appState.requestExport() }
                     .keyboardShortcut("e", modifiers: [.command, .shift])
             }
