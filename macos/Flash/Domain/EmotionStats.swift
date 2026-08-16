@@ -21,7 +21,9 @@ enum EmotionStats {
     }
 
     /// 返回窗口内每天的平均情绪值（yyyy-MM-dd, 均值）；当日无记录为 nil。
-    /// 均值四舍五入到两位小数（对齐 Android roundToInt/100）。
+    /// 均值保留两位小数，口径对齐 Kotlin Math.round（half-up）：
+    /// (value * 100 + 0.5).rounded(.down) / 100；Swift `.rounded()` 是
+    /// half-away-from-zero，负均值（如 -0.125）会与 Android 差 0.01。
     static func dailyAverages(_ emotions: [EmotionRecord], days: Int,
                               today: Date = Date()) -> [(date: String, average: Double?)] {
         let (start, end) = window(days: days, today: today)
@@ -35,9 +37,24 @@ enum EmotionStats {
             let date = calendar.date(byAdding: .day, value: i, to: startDate)!
             let key = DateFormatting.dayString(date)
             let average = grouped[key].map { values in
-                (Double(values.reduce(0, +)) / Double(values.count) * 100).rounded() / 100
+                (Double(values.reduce(0, +)) / Double(values.count) * 100 + 0.5).rounded(.down) / 100
             }
             return (date: key, average: average)
+        }
+    }
+
+    /// 按给定日期数组对齐输出每日均值（与 days 一一对应），当日无记录为 nil。
+    /// 舍入口径同 dailyAverages(_:days:today:)，对齐 Kotlin Math.round。
+    static func dailyAverages(_ emotions: [EmotionRecord], onDays days: [String]) -> [Double?] {
+        let daySet = Set(days)
+        var grouped: [String: [Int]] = [:]
+        for emotion in emotions where daySet.contains(emotion.recordDate) {
+            grouped[emotion.recordDate, default: []].append(emotion.level.rawValue)
+        }
+        return days.map { day in
+            grouped[day].map { values in
+                (Double(values.reduce(0, +)) / Double(values.count) * 100 + 0.5).rounded(.down) / 100
+            }
         }
     }
 

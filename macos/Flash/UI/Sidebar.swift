@@ -2,6 +2,7 @@ import SwiftUI
 
 struct Sidebar: View {
     @Environment(AppState.self) private var appState
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         @Bindable var state = appState
@@ -25,5 +26,7 @@ struct Sidebar: View {
         }
         .listStyle(.sidebar)
         .navigationTitle("Flash")
+        // 选中圆角条平滑过渡（减弱动态时关闭）
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: appState.selectedModule)
     }
 }

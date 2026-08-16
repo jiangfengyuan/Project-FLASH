@@ -8,17 +8,16 @@ struct StatsView: View {
     @Query(sort: \EmotionEntity.createdAt, order: .reverse) private var emotionEntities: [EmotionEntity]
 
     @State private var windowDays = 7
-
-    private var logs: [LogItem] { logEntities.map { $0.toModel() } }
-    private var emotions: [EmotionRecord] { emotionEntities.map { $0.toModel() } }
-
-    private var totalLogs: Int { logs.filter { $0.category == .log }.count }
-    private var totalIdeas: Int { logs.filter { $0.category == .idea }.count }
-    private var activeDays: Int {
-        Set(logs.map(\.recordDate) + emotions.map(\.recordDate)).count
-    }
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
+        // 实体 → 模型只映射一次，KPI 与图表统计复用同一结果
+        let logs = logEntities.map { $0.toModel() }
+        let emotions = emotionEntities.map { $0.toModel() }
+        let totalLogs = logs.filter { $0.category == .log }.count
+        let totalIdeas = logs.filter { $0.category == .idea }.count
+        let activeDays = Set(logs.map(\.recordDate) + emotions.map(\.recordDate)).count
+
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 // KPI
@@ -65,7 +64,7 @@ struct StatsView: View {
                         AxisMarks(values: [-3, -2, -1, 0, 1, 2, 3])
                     }
                     .frame(height: 220)
-                    .animation(.easeInOut(duration: 0.3), value: windowDays)
+                    .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: windowDays)
 
                     // 负面子情绪分布
                     let distribution = EmotionStats.subEmotionDistribution(emotions,
@@ -81,7 +80,7 @@ struct StatsView: View {
                             .cornerRadius(4)
                         }
                         .frame(height: 140)
-                        .animation(.easeInOut(duration: 0.3), value: windowDays)
+                        .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: windowDays)
                     }
                 } else {
                     ContentUnavailableView("暂无情绪数据",

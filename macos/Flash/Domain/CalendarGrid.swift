@@ -7,14 +7,17 @@ struct DayAggregate: Equatable {
 }
 
 /// 按 recordDate 聚合（对应 Android CalendarViewModel.aggregates）
+/// 单遍分组：Dictionary(grouping:) 各扫一遍，组内保持原数组顺序。
 func aggregateDay(logs: [LogItem], emotions: [EmotionRecord]) -> [String: DayAggregate] {
-    let dates = Set(logs.map(\.recordDate) + emotions.map(\.recordDate))
+    let logsByDay = Dictionary(grouping: logs, by: \.recordDate)
+    let emotionsByDay = Dictionary(grouping: emotions, by: \.recordDate)
     var result: [String: DayAggregate] = [:]
-    for date in dates {
+    result.reserveCapacity(logsByDay.count + emotionsByDay.count)
+    for date in Set(logsByDay.keys).union(emotionsByDay.keys) {
         result[date] = DayAggregate(
             date: date,
-            logs: logs.filter { $0.recordDate == date },
-            emotions: emotions.filter { $0.recordDate == date }
+            logs: logsByDay[date] ?? [],
+            emotions: emotionsByDay[date] ?? []
         )
     }
     return result
@@ -38,10 +41,6 @@ enum CalendarGrid {
     }
 
     static func monthString(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.calendar = Calendar(identifier: .gregorian)
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "yyyy-MM"
-        return formatter.string(from: date)
+        DateFormatting.monthString(date)
     }
 }

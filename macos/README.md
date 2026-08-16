@@ -21,9 +21,17 @@ SwiftUI + SwiftData，零第三方依赖，App Sandbox 内运行，数据不出�
 | Stats 统计 | KPI、情绪趋势、子情绪分布（Swift Charts） |
 | Settings 设置 | 主题（跟随系统/浅色/深色）、备份导入导出、清空数据、关于 |
 | Welcome 欢迎 | 首次启动引导 |
-| 复用组件 | Sidebar / LogCardView / LogEditSheet / PlaceholderView |
+| 复用组件 | Sidebar / LogCardView / LogEditSheet |
 
-快捷键：⌘N 新建记录、⌘F 搜索、⌘, 设置等，详见各视图菜单。
+快捷键：⌘N 新建记录、⌘K 搜索、⌘, 设置等，详见各视图菜单。
+
+## 架构口径
+
+本工程采用「View + @Query 直读 + Domain 纯函数 + 写路径走 FlashRepository」的分层模式：
+视图经 SwiftData `@Query` 直接读取数据；聚合 / 统计 / 搜索等纯逻辑下沉为 `Flash/Domain/`
+下的纯函数（可单测、与 Android / Web 算法口径一一对应）；一切写操作统一经
+`FlashRepository`。这是有意为之的取舍——本地单机应用的读路径无需再叠一层仓库抽象，
+属于既定架构口径，而非技术债务。
 
 ## 系统要求
 
@@ -94,6 +102,11 @@ xcodebuild test -project Flash.xcodeproj -scheme Flash -configuration Debug \
 
 冷启动数字为进程出现时间的下界近似，未含首帧渲染；后续可用
 `os_signpost` + Instruments Time Profiler / Animation Hitches 补精确数据。
+
+## 安全
+
+- 本地数据的静态加密依赖系统 FileVault；未启用 FileVault 的机器上，本地数据库以明文落盘。
+- 当前分发版本为 ad-hoc 签名、未经公证，仅限本机使用；对外分发需改用 Developer ID 签名 + 公证。
 
 ## 已知限制
 

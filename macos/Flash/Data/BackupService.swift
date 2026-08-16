@@ -40,6 +40,18 @@ enum BackupService {
         pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
     private static let dayRegex = try! NSRegularExpression(pattern: "^\\d{4}-\\d{2}-\\d{2}$")
 
+    // ISO8601DateFormatter 文档保证线程安全，提取共享实例避免逐条 new（对齐 DateFormatting 的 nonisolated(unsafe) 模式）
+    nonisolated(unsafe) private static let isoFractionFormatter: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return f
+    }()
+    nonisolated(unsafe) private static let isoWholeSecondFormatter: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime]
+        return f
+    }()
+
     // MARK: - Export
 
     static func exportJSON(logs: [LogItem], emotions: [EmotionRecord],
@@ -119,20 +131,20 @@ enum BackupService {
               let content = dict["content"] as? String,
               let colorTag = (dict["colorTag"] as? String).flatMap(ColorTag.init(rawValue:)),
               let category = (dict["category"] as? String).flatMap(Category.init(rawValue:)),
-              let createdAt = dict["createdAt"] as? String, isISODate(createdAt),
+              let createdAt = dict["createdAt"] as? String, let normalizedCreatedAt = normalizeISODate(createdAt),
               let recordDate = dict["recordDate"] as? String, isDay(recordDate)
         else { return nil }
         let importance = min(max(dict["importance"] as? Int ?? 0, 0), 4)
         return LogItem(id: id, content: String(content.prefix(maxTextLength)),
                        colorTag: colorTag, category: category,
-                       importance: importance, createdAt: createdAt, recordDate: recordDate)
+                       importance: importance, createdAt: normalizedCreatedAt, recordDate: recordDate)
     }
 
     private static func parseEmotion(_ dict: [String: Any]) -> EmotionRecord? {
         guard let id = dict["id"] as? String, isUUID(id),
               let rawLevel = dict["level"] as? Int,
               let level = EmotionLevel(rawValue: rawLevel),
-              let createdAt = dict["createdAt"] as? String, isISODate(createdAt),
+              let createdAt = dict["createdAt"] as? String, let normalizedCreatedAt = normalizeISODate(createdAt),
               let recordDate = dict["recordDate"] as? String, isDay(recordDate)
         else { return nil }
         let subEmotion = (dict["subEmotion"] as? String).flatMap(SubEmotion.init(rawValue:))
@@ -140,7 +152,7 @@ enum BackupService {
         let note = (dict["note"] as? String).map { String($0.prefix(maxTextLength)) }
         return EmotionRecord(id: id, level: level, subEmotion: subEmotion,
                              status: status, note: note,
-                             recordDate: recordDate, createdAt: createdAt)
+                             recordDate: recordDate, createdAt: normalizedCreatedAt)
     }
 
     private static func isUUID(_ value: String) -> Bool {
@@ -148,16 +160,22 @@ enum BackupService {
     }
 
     private static func isDay(_ value: String) -> Bool {
-        dayRegex.firstMatch(in: value, range: NSRange(value.startIndex..., in: value)) != nil
+        guard dayRegex.firstMatch(in: value, range: NSRange(value.startIndex..., in: value)) != nil else {
+            return false
+        }
+        // 正则只验格式，再验真实日期；DateFormatter 对 2026-02-30 这类会宽容进位，
+        // 需解析后回写比对才能拦截
+        guard let date = DateFormatting.parseDay(value) else { return false }
+        return DateFormatting.dayString(date) == value
     }
 
-    /// 严格 ISO-8601（对齐 Android Instant.parse 口径）
-    private static func isISODate(_ value: String) -> Bool {
-        guard !value.isEmpty else { return false }
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        if formatter.date(from: value) != nil { return true }
-        formatter.formatOptions = [.withInternetDateTime]
-        return formatter.date(from: value) != nil
+    /// 严格 ISO-8601 解析（对齐 Android Instant.parse 口径），通过后统一按
+    /// .withFractionalSeconds 重新格式化再入库：Android 整秒省略小数（...T08:00:00Z），
+    /// 与本端 .000Z 混排时字典序错乱（'.' < 'Z'）。导出格式不变。
+    private static func normalizeISODate(_ value: String) -> String? {
+        guard !value.isEmpty else { return nil }
+        guard let date = isoFractionFormatter.date(from: value)
+                ?? isoWholeSecondFormatter.date(from: value) else { return nil }
+        return isoFractionFormatter.string(from: date)
     }
 }

@@ -10,12 +10,11 @@ struct LogFlowView: View {
     @State private var editingLog: LogItem? = nil
     @State private var deletingLog: LogItem? = nil
     @State private var errorMessage: String? = nil
-
-    private var filteredLogs: [LogItem] {
-        filter.apply(to: logEntities.map { $0.toModel() })
-    }
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
+        // 每次 body 求值只过滤一次，空态与列表复用同一结果
+        let filtered = filter.apply(to: logEntities.map { $0.toModel() })
         VStack(spacing: 0) {
             // 工具区
             VStack(spacing: 10) {
@@ -56,14 +55,14 @@ struct LogFlowView: View {
 
             Divider()
 
-            if filteredLogs.isEmpty {
+            if filtered.isEmpty {
                 ContentUnavailableView("没有匹配的记录",
                                        systemImage: "magnifyingglass",
                                        description: Text("调整筛选条件试试"))
             } else {
                 ScrollView {
                     LazyVStack(spacing: 8) {
-                        ForEach(filteredLogs) { log in
+                        ForEach(filtered) { log in
                             LogCardView(log: log)
                                 .contextMenu {
                                     Button("编辑…") { editingLog = log }
@@ -72,6 +71,8 @@ struct LogFlowView: View {
                         }
                     }
                     .padding(16)
+                    // 增删行默认动画（减弱动态时关闭）
+                    .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: filtered)
                 }
             }
         }
@@ -79,14 +80,21 @@ struct LogFlowView: View {
         .sheet(item: $editingLog) { log in
             LogEditSheet(log: log) { updated in
                 do { try repository?.updateLog(updated) }
-                catch { errorMessage = "保存失败：\(error.localizedDescription)" }
+                catch {
+                    // 固定文案，详情仅输出到控制台，避免向用户暴露内部路径
+                    print("[LogFlowView] 更新记录失败: \(error)")
+                    errorMessage = "保存失败，请重试"
+                }
             }
         }
         .alert("删除这条记录？", isPresented: deletePresented) {
             Button("删除", role: .destructive) {
                 if let log = deletingLog {
                     do { try repository?.deleteLog(id: log.id) }
-                    catch { errorMessage = "删除失败：\(error.localizedDescription)" }
+                    catch {
+                        print("[LogFlowView] 删除记录失败: \(error)")
+                        errorMessage = "删除失败，请重试"
+                    }
                 }
             }
             Button("取消", role: .cancel) {}

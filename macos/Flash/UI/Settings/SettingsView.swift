@@ -9,10 +9,15 @@ struct SettingsView: View {
     @Environment(AppState.self) private var appState
 
     @State private var importPreview: ImportPreview? = nil
+    /// 独立保存待导入数据：首个 alert dismiss 会把 importPreview 置 nil，
+    /// 覆盖导入的二次确认从 pendingImport 取，避免 guard 落空静默失效
+    @State private var pendingImport: ImportPreview? = nil
     @State private var showOverwriteConfirm = false
     @State private var showClearConfirm = false
     @State private var message: String? = nil
     @State private var handledExportToken = 0
+    /// 导入/导出进行中（大文件 IO 已移到后台，期间禁用按钮防重入）
+    @State private var isBusy = false
 
     var body: some View {
         Form {
@@ -29,7 +34,16 @@ struct SettingsView: View {
                 Button("导出备份…") { exportBackup() }
                 Button("导入备份…") { chooseImportFile() }
                 Button("清空全部数据…", role: .destructive) { showClearConfirm = true }
+                if isBusy {
+                    HStack(spacing: 8) {
+                        ProgressView().controlSize(.small)
+                        Text("正在处理…")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
             }
+            .disabled(isBusy)
 
             Section("关于") {
                 LabeledContent("版本", value: appVersion)
@@ -43,9 +57,9 @@ struct SettingsView: View {
         .onAppear { flushExportRequest() }
         .onChange(of: appState.exportRequestToken) { flushExportRequest() }
         .alert("导入备份", isPresented: previewPresented) {
-            Button("合并导入") { confirmImport(overwrite: false) }
-            Button("覆盖导入", role: .destructive) { showOverwriteConfirm = true }
-            Button("取消", role: .cancel) { importPreview = nil }
+            Button("合并导入") { pendingImport = importPreview; confirmImport(overwrite: false) }
+            Button("覆盖导入", role: .destructive) { pendingImport = importPreview; showOverwriteConfirm = true }
+            Button("取消", role: .cancel) { importPreview = nil; pendingImport = nil }
         } message: {
             if let preview = importPreview {
                 Text("包含 \(preview.logCount) 条日志、\(preview.emotionCount) 条情绪" +
@@ -55,7 +69,7 @@ struct SettingsView: View {
         }
         .alert("覆盖导入将清空现有全部数据，确定继续？", isPresented: $showOverwriteConfirm) {
             Button("覆盖导入", role: .destructive) { confirmImport(overwrite: true) }
-            Button("取消", role: .cancel) {}
+            Button("取消", role: .cancel) { pendingImport = nil }
         }
         .alert("清空全部数据？此操作不可撤销。", isPresented: $showClearConfirm) {
             Button("清空", role: .destructive) { clearAll() }
@@ -103,15 +117,28 @@ struct SettingsView: View {
         panel.allowedContentTypes = [.json]
         panel.nameFieldStringValue = "flash-backup-\(DateFormatting.today()).json"
         guard panel.runModal() == .OK, let url = panel.url else { return }
-        do {
-            let logs = try repository?.allLogs() ?? []
-            let emotions = try repository?.allEmotions() ?? []
-            let json = BackupService.exportJSON(logs: logs, emotions: emotions,
-                                                appVersion: appVersion)
-            try json.write(to: url, atomically: true, encoding: .utf8)
-            message = "备份已导出"
-        } catch {
-            message = "导出失败：\(error.localizedDescription)"
+        isBusy = true
+        Task {
+            defer { isBusy = false }
+            do {
+                // repository 写库/读库方法均为 @MainActor，序列化与文件 IO 移出主线程
+                let logs = try repository?.allLogs() ?? []
+                let emotions = try repository?.allEmotions() ?? []
+                let version = appVersion
+                try await Task.detached(priority: .userInitiated) {
+                    let json = BackupService.exportJSON(logs: logs, emotions: emotions,
+                                                        appVersion: version)
+                    try json.write(to: url, atomically: true, encoding: .utf8)
+                    // 日记明文备份：限制为仅当前用户可读写（多用户 Mac 保护）
+                    try FileManager.default.setAttributes([.posixPermissions: NSNumber(value: 0o600)],
+                                                          ofItemAtPath: url.path)
+                }.value
+                message = "备份已导出"
+            } catch {
+                // 弹窗只给固定文案，路径等详情只进日志
+                print("导出备份失败: \(error)")
+                message = "导出失败，请检查目标位置的写入权限后重试"
+            }
         }
     }
 
@@ -122,23 +149,35 @@ struct SettingsView: View {
         panel.allowedContentTypes = [.json]
         panel.allowsMultipleSelection = false
         guard panel.runModal() == .OK, let url = panel.url else { return }
-        do {
-            let data = try Data(contentsOf: url)
-            guard data.count <= BackupService.maxFileBytes else {
-                message = BackupError.fileTooLarge.userMessage
-                return
+        isBusy = true
+        Task {
+            defer { isBusy = false }
+            do {
+                let preview = try await Task.detached(priority: .userInitiated) {
+                    // 全量读入前先查文件大小，超 50MB 直接拒绝
+                    let values = try url.resourceValues(forKeys: [.fileSizeKey])
+                    if let size = values.fileSize, size > BackupService.maxFileBytes {
+                        throw BackupError.fileTooLarge
+                    }
+                    let data = try Data(contentsOf: url)
+                    guard data.count <= BackupService.maxFileBytes else {
+                        throw BackupError.fileTooLarge
+                    }
+                    return try BackupService.parse(String(decoding: data, as: UTF8.self))
+                }.value
+                pendingImport = preview
+                importPreview = preview
+            } catch let error as BackupError {
+                message = error.userMessage
+            } catch {
+                print("导入备份失败: \(error)")
+                message = "导入失败，请确认选择的是 Flash 备份文件后重试"
             }
-            let text = String(decoding: data, as: UTF8.self)
-            importPreview = try BackupService.parse(text)
-        } catch let error as BackupError {
-            message = error.userMessage
-        } catch {
-            message = "导入失败：\(error.localizedDescription)"
         }
     }
 
     private func confirmImport(overwrite: Bool) {
-        guard let preview = importPreview else { return }
+        guard let preview = pendingImport else { return }
         do {
             if overwrite {
                 try repository?.replaceAll(logs: preview.logs, emotions: preview.emotions)
@@ -149,8 +188,10 @@ struct SettingsView: View {
             message = "已导入 \(preview.logCount) 条日志、\(preview.emotionCount) 条情绪" +
                 (skipped > 0 ? "（跳过异常数据 \(skipped) 条）" : "")
         } catch {
-            message = "导入失败：\(error.localizedDescription)"
+            print("导入写库失败: \(error)")
+            message = "导入失败：写入数据库时出错，请重试"
         }
+        pendingImport = nil
         importPreview = nil
     }
 
@@ -159,7 +200,8 @@ struct SettingsView: View {
             try repository?.clearAll()
             message = "已清空全部数据"
         } catch {
-            message = "清空失败：\(error.localizedDescription)"
+            print("清空数据失败: \(error)")
+            message = "清空失败，请重试"
         }
     }
 }

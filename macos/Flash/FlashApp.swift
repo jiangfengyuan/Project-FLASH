@@ -44,6 +44,26 @@ struct FlashApp: App {
                 Button("导出备份…") { appState.requestExport() }
                     .keyboardShortcut("e", modifiers: [.command, .shift])
             }
+            // ⌘K 搜索：token 递增，各页面监听并聚焦搜索框
+            CommandGroup(after: .sidebar) {
+                Button("搜索") { appState.requestSearch() }
+                    .keyboardShortcut("k", modifiers: .command)
+            }
+            // 模块切换 ⌘1…⌘6（顺序同侧栏；设置已有 ⌘,，不重复占用）
+            CommandMenu("模块") {
+                Button("首页") { appState.selectedModule = .home }
+                    .keyboardShortcut("1", modifiers: .command)
+                Button("探索") { appState.selectedModule = .explore }
+                    .keyboardShortcut("2", modifiers: .command)
+                Button("记录流") { appState.selectedModule = .logflow }
+                    .keyboardShortcut("3", modifiers: .command)
+                Button("情绪") { appState.selectedModule = .emotion }
+                    .keyboardShortcut("4", modifiers: .command)
+                Button("日历") { appState.selectedModule = .calendar }
+                    .keyboardShortcut("5", modifiers: .command)
+                Button("统计") { appState.selectedModule = .stats }
+                    .keyboardShortcut("6", modifiers: .command)
+            }
         }
     }
 

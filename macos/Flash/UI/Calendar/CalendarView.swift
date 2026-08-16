@@ -8,16 +8,18 @@ struct CalendarView: View {
 
     @State private var displayedMonth = Date()
     @State private var selectedDate = Date()
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    private var aggregates: [String: DayAggregate] {
-        aggregateDay(logs: logEntities.map { $0.toModel() },
-                     emotions: emotionEntities.map { $0.toModel() })
-    }
+    /// 共享公历实例，避免每次渲染格子都新建 Calendar
+    nonisolated(unsafe) private static let gregorian = Calendar(identifier: .gregorian)
 
     private var weeks: [[Date]] { CalendarGrid.weeks(containing: displayedMonth) }
     private var selectedKey: String { DateFormatting.dayString(selectedDate) }
 
     var body: some View {
+        // 每次 body 求值只聚合一次，42 个格子与选中行复用同一字典
+        let aggregates = aggregateDay(logs: logEntities.map { $0.toModel() },
+                                      emotions: emotionEntities.map { $0.toModel() })
         VStack(spacing: 0) {
             // 头部
             HStack {
@@ -54,10 +56,13 @@ struct CalendarView: View {
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 7),
                       spacing: 4) {
                 ForEach(weeks.flatMap { $0 }, id: \.self) { date in
-                    dayCell(date)
+                    dayCell(date, aggregates: aggregates)
                 }
             }
             .padding(.horizontal, 16)
+            .id(displayedMonth)
+            .transition(monthTransition)
+            .animation(.easeOut(duration: reduceMotion ? 0.15 : 0.2), value: displayedMonth)
 
             Divider().padding(.vertical, 8)
 
@@ -89,20 +94,21 @@ struct CalendarView: View {
     }
 
     private var monthTitle: String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "zh_CN")
-        formatter.dateFormat = "yyyy 年 M 月"
-        return formatter.string(from: displayedMonth)
+        DateFormatting.monthTitle(displayedMonth)
+    }
+
+    /// 月份切换过渡：淡入淡出 + 极轻上移；减弱动态时仅淡入淡出（对齐 RootView 惯例）
+    private var monthTransition: AnyTransition {
+        reduceMotion ? .opacity : .opacity.combined(with: .offset(y: 6))
     }
 
     private func shiftMonth(_ delta: Int) {
-        let calendar = Calendar(identifier: .gregorian)
-        displayedMonth = calendar.date(byAdding: .month, value: delta, to: displayedMonth)!
+        displayedMonth = Self.gregorian.date(byAdding: .month, value: delta, to: displayedMonth)!
     }
 
-    private func dayCell(_ date: Date) -> some View {
+    private func dayCell(_ date: Date, aggregates: [String: DayAggregate]) -> some View {
         let key = DateFormatting.dayString(date)
-        let inMonth = CalendarGrid.monthString(date) == CalendarGrid.monthString(displayedMonth)
+        let inMonth = DateFormatting.monthString(date) == DateFormatting.monthString(displayedMonth)
         let isToday = key == DateFormatting.today()
         let isSelected = key == selectedKey
         let aggregate = aggregates[key]
@@ -113,7 +119,7 @@ struct CalendarView: View {
             if !inMonth { displayedMonth = date }
         } label: {
             VStack(spacing: 2) {
-                Text("\(Calendar(identifier: .gregorian).component(.day, from: date))")
+                Text("\(Self.gregorian.component(.day, from: date))")
                     .font(.callout)
                     .foregroundStyle(isSelected ? .white : (inMonth ? Color.primary : Color.secondary.opacity(0.5)))
                 HStack(spacing: 3) {

@@ -38,6 +38,8 @@ final class AppState {
     private(set) var newLogRequestToken = 0
     /// 菜单「导出备份…」⇧⌘E → token 递增，Settings 监听并弹导出面板
     private(set) var exportRequestToken = 0
+    /// 菜单「搜索」⌘K → 切到首页 + token 递增，Home 监听并聚焦搜索框
+    private(set) var searchRequestToken = 0
 
     func requestNewLog() {
         if selectedModule != .home && selectedModule != .explore {
@@ -49,5 +51,13 @@ final class AppState {
     func requestExport() {
         selectedModule = .settings
         exportRequestToken += 1
+    }
+
+    /// ⌘K 搜索：先切到首页再递增 token。
+    /// 若已在首页，HomeView 的 onChange 直接消费；不在首页时本视图随切换重建，
+    /// onAppear 兜底消费一次，handledSearchToken 机制保证不回放旧 token。
+    func requestSearch() {
+        selectedModule = .home
+        searchRequestToken += 1
     }
 }

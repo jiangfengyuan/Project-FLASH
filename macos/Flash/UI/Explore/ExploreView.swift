@@ -17,7 +17,6 @@ enum ExploreFilter: String, CaseIterable {
 struct ExploreView: View {
     @Environment(\.flashRepository) private var repository
     @Environment(AppState.self) private var appState
-    @Query(sort: \LogEntity.createdAt, order: .reverse) private var logEntities: [LogEntity]
 
     @State private var filter: ExploreFilter = .all
     @State private var draft = ""
@@ -27,15 +26,6 @@ struct ExploreView: View {
     @FocusState private var inputFocused: Bool
 
     private static let maxLength = 140
-
-    private var filteredLogs: [LogItem] {
-        let all = logEntities.map { $0.toModel() }
-        switch filter {
-        case .all: return all
-        case .log: return all.filter { $0.category == .log }
-        case .idea: return all.filter { $0.category == .idea }
-        }
-    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -47,16 +37,9 @@ struct ExploreView: View {
             .pickerStyle(.segmented)
             .padding(12)
 
-            ScrollView {
-                LazyVStack(spacing: 8) {
-                    ForEach(filteredLogs) { log in
-                        LogCardView(log: log)
-                    }
-                }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 12)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            ExploreLogListView(filter: filter)
+                // 筛选切换时强制重建列表查询（@Query 谓词初始化后不随新实例更新）
+                .id(filter)
 
             Divider()
 
@@ -147,7 +130,43 @@ struct ExploreView: View {
             draft = ""
             selectedTag = nil
         } catch {
-            errorMessage = "保存失败：\(error.localizedDescription)"
+            // 固定文案，详情仅输出到控制台，避免向用户暴露内部路径
+            print("[ExploreView] 保存记录失败: \(error)")
+            errorMessage = "保存失败，请重试"
         }
+    }
+}
+
+/// 信息流列表：自带 @Query（静态 category 谓词），与底部输入框的 draft 状态隔离，
+/// 每敲一键不再触发全量 map。
+private struct ExploreLogListView: View {
+    @Query private var logEntities: [LogEntity]
+
+    init(filter: ExploreFilter) {
+        switch filter {
+        case .all:
+            _logEntities = Query(sort: \LogEntity.createdAt, order: .reverse)
+        case .log:
+            let category = Category.log.rawValue
+            _logEntities = Query(filter: #Predicate<LogEntity> { $0.category == category },
+                                 sort: \LogEntity.createdAt, order: .reverse)
+        case .idea:
+            let category = Category.idea.rawValue
+            _logEntities = Query(filter: #Predicate<LogEntity> { $0.category == category },
+                                 sort: \LogEntity.createdAt, order: .reverse)
+        }
+    }
+
+    var body: some View {
+        ScrollView {
+            LazyVStack(spacing: 8) {
+                ForEach(logEntities.map { $0.toModel() }) { log in
+                    LogCardView(log: log)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.bottom, 12)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

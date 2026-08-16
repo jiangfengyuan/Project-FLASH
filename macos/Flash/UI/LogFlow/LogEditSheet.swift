@@ -5,14 +5,17 @@ struct LogEditSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     let log: LogItem
+    /// 标题（新建场景传「新建日志」/「新建灵感」，默认保持编辑语义）
+    let title: String
     let onSave: (LogItem) -> Void
 
     @State private var content: String
     @State private var colorTag: ColorTag
     @State private var importance: Int
 
-    init(log: LogItem, onSave: @escaping (LogItem) -> Void) {
+    init(log: LogItem, title: String = "编辑记录", onSave: @escaping (LogItem) -> Void) {
         self.log = log
+        self.title = title
         self.onSave = onSave
         _content = State(initialValue: log.content)
         _colorTag = State(initialValue: log.colorTag)
@@ -21,7 +24,7 @@ struct LogEditSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("编辑记录").font(.headline)
+            Text(title).font(.headline)
 
             TextEditor(text: $content)
                 .font(.body)
