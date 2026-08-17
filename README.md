@@ -1,53 +1,83 @@
 # Flash 一闪
 
-> 闪过即留，一目了然 —— 本地优先的灵感 / 日志 / 情绪记录应用。
+闪过即留，一目了然。本地优先的日志 / 灵感 / 情绪记录应用。
 
-爱发电主页：ifdian.net/a/HEY10086D
+没有账号、没有后端、不申请网络权限——数据只存在你自己的设备上，
+换设备靠 JSON 备份文件互通。
 
-Flash 是一款面向个人用户的本地优先笔记应用，支持快速记录日志、收藏灵感、日历聚合回顾与每日情绪记录。数据完全存储在本地，无需后端、不联网、不收集任何数据，三端通过 JSON 备份文件互通。
+[爱发电主页](https://ifdian.net/a/HEY10086D)
 
-## 仓库结构
+## 平台
 
-本仓库自 2026-08-14 起为**纯原生仓库**（Web 版与 Capacitor 壳已退役，git 历史可查）：
+| 平台 | 技术栈 | 状态 |
+| --- | --- | --- |
+| Android | Kotlin + Jetpack Compose + Material 3 + Room | Alpha |
+| macOS | SwiftUI + SwiftData，universal2（arm64 + x86_64） | Alpha |
 
-```
-├── android/        # 原生 Android：Kotlin + Jetpack Compose + Material 3 + Room
-├── macos/          # 原生 macOS：SwiftUI + SwiftData（universal2，arm64 + x86_64，含菜单栏伴侣）
-├── scripts/        # Android 发布签名脚本
-├── ROADMAP.md      # 开发路线图
-└── README.md
-```
+历史上有过 React + Capacitor 的 Web/混合版，已退役（git 历史可查），
+本仓库现在是纯原生仓库。
 
-## 构建与测试
+## 功能
 
-### Android（`android/`）
+- **快速记录**：macOS 有菜单栏伴侣（回车即存），Android 有全局 FAB；`!!` 语法标记重要度
+- **日志 / 灵感**：时间线、搜索、标签与日期筛选、编辑删除
+- **情绪**：七级滑块 + 子情绪标签 + 备注，周趋势与统计图表
+- **日历**：日志与情绪按日聚合的月历视图
+- **统计**：累计 KPI、情绪趋势、子情绪分布
+- **备份**：JSON 导出 / 导入（合并或覆盖），两端格式一致、互相可读
+
+## 构建
+
+### Android
 
 ```bash
 cd android
-./gradlew :app:assembleDebug    # 产出 app/build/outputs/apk/debug/app-debug.apk
-./gradlew test                  # 单元测试
+./gradlew :app:assembleDebug   # 产出 app/build/outputs/apk/debug/app-debug.apk
+./gradlew test                 # 单元测试
 ```
 
-### macOS（`macos/`）
+详见 [android/README.md](android/README.md)。
 
-要求 macOS 15+（Apple Silicon 与 Intel 均支持），Xcode 26+：
+### macOS
+
+要求 macOS 15+ 与 Xcode 26。本仓库日常用 Xcode beta 构建（`DEVELOPER_DIR` 前缀），
+稳定版 Xcode 可去掉：
 
 ```bash
 cd macos
-# 若 xcode-select 指向 CommandLineTools，需加 DEVELOPER_DIR 前缀指向完整 Xcode
-xcodebuild -project Flash.xcodeproj -scheme Flash -configuration Debug build
-xcodebuild -project Flash.xcodeproj -scheme Flash -configuration Debug test
+DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer \
+xcodebuild -scheme Flash -destination 'platform=macOS' build
+DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer \
+xcodebuild test -scheme Flash -destination 'platform=macOS'
 ```
 
-详细说明见 [macos/README.md](macos/README.md)。
+详见 [macos/README.md](macos/README.md)。
 
-## 数据互通
+## 仓库结构
 
-三端（Android / macOS / 历史 Web 版）共享同一 JSON 备份格式 `flash-backup-v1`，字段与校验规则逐字对齐：
+```
+├── android/     # 原生 Android 工程
+├── macos/       # 原生 macOS 工程（含单元测试）
+├── scripts/     # Android 发布签名脚本
+├── ROADMAP.md   # 开发路线图
+└── README.md
+```
+
+## 备份格式
+
+两端共享同一 JSON 格式 `flash-backup-v1`：
 
 ```json
 { "version": "flash-backup-v1", "exportedAt": "...", "appVersion": "...",
   "notes": "", "logs": [...], "emotions": [...] }
 ```
 
-在各端「设置 → 导出备份 / 导入备份」（支持合并导入与覆盖导入）即可跨端迁移数据。
+在「设置 → 导出备份 / 导入备份」操作即可跨端迁移；版本不匹配会拒绝导入，
+非法条目逐条跳过而不是整体失败。
+
+## 路线图与参与
+
+见 [ROADMAP.md](ROADMAP.md)。目前处于个人维护的 Alpha 阶段，
+问题与建议欢迎提 Issue。
+
+许可证尚未确定，确定前默认保留所有权利。
