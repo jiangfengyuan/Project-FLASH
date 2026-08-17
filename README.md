@@ -7,6 +7,8 @@
 
 [爱发电主页](https://ifdian.net/a/HEY10086D)
 
+![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-brightgreen.svg)
+
 ## 平台
 
 | 平台 | 技术栈 | 状态 |
@@ -80,4 +82,9 @@ xcodebuild test -scheme Flash -destination 'platform=macOS'
 见 [ROADMAP.md](ROADMAP.md)。目前处于个人维护的 Alpha 阶段，
 问题与建议欢迎提 Issue。
 
-许可证尚未确定，确定前默认保留所有权利。
+## 许可证
+
+[Mozilla Public License 2.0](LICENSE)（MPL-2.0）。
+
+可自由使用、修改、再分发（包括商用）；对本仓库已有文件的修改需以
+相同条款开源，你自己新写的文件不受此限。商标与本项目无关的素材不在授权范围内。
