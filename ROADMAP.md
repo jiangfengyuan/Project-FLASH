@@ -127,6 +127,8 @@
 | M6：原生 Android Alpha | 原生启动后第 4 周 | 情绪记录 + 日志主流程可用的原生 APK | 与 Capacitor 版并行内测，收集对比反馈 |
 | M7：原生 macOS Alpha ✅ | 2026-08（已完成） | SwiftUI + SwiftData 九模块全量（首页/探索/记录流/情绪/日历/统计/设置/欢迎/复用组件）、universal2 双架构、JSON 备份与 Android/Web 互通、38 个单测全过 | 本地 adhoc 构建内测，对外分发需 Developer ID + 公证；后续候选：menu bar extra 快速记录、iCloud 同步、原生 iOS 版共享模型 |
 
+> **2026-08-17 现状更新（macOS Aero 轮）**：统一动效系统 `FlashMotion`（Soft/Fast/Playful，全量尊重 Reduce Motion）；V1.1 首项落地——Menu Bar Companion 菜单栏伴侣（快速记录/今日概览/一键跳转）；情绪页主视觉为大 emoji + 调色板连续插值；架构债清偿——`RepositoryEnvironment.makeDefault()` 单一装配入口、Models 层去除 SwiftUI 依赖、数据库内存降级启动告警全链路打通；数据层微优化（覆盖式导入单事务、按 id 查询 fetchLimit=1、全局搜索单遍过滤）；测试 51 用例全绿。下一候选：全局快捷键 ⌘⇧Space、Favorites、Advanced Search、Widgets、Idea→Task。
+
 ---
 
 ## 四、技术债务与架构演进

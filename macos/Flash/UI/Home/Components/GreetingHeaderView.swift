@@ -10,6 +10,7 @@ struct GreetingHeaderView: View {
 
     @State private var isSearchHovered = false
     @State private var isNewHovered = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(searchText: Binding<String>,
          focus: FocusState<Bool>.Binding? = nil,
@@ -96,6 +97,7 @@ struct GreetingHeaderView: View {
                 .strokeBorder(Color.primary.opacity(isSearchHovered ? 0.14 : 0.10), lineWidth: 1)
         )
         .onHover { isSearchHovered = $0 }
+        .animation(Motion.quick(reduceMotion), value: isSearchHovered)
         .help("搜索 ⌘K")
     }
 
@@ -130,6 +132,7 @@ struct GreetingHeaderView: View {
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
         .onHover { isNewHovered = $0 }
+        .animation(Motion.quick(reduceMotion), value: isNewHovered)
         .help("新建记录 ⌘N")
     }
 }

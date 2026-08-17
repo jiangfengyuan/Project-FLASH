@@ -1,5 +1,6 @@
-import SwiftUI
+import Foundation
 
+/// 纯数据模型：仅保存 hex 色值字符串，SwiftUI Color 换算见 Theme/ModelColors.swift（A4）。
 enum SubEmotion: String, CaseIterable, Codable {
     case sad, angry, uncomfortable
 
@@ -28,7 +29,4 @@ enum SubEmotion: String, CaseIterable, Codable {
         case .uncomfortable: "#FCA763"
         }
     }
-
-    /// 跟随系统外观的动态色（light/dark 双变体）
-    var color: Color { BrandColors.dynamic(light: colorHex, dark: darkColorHex) }
 }

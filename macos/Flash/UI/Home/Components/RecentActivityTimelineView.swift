@@ -21,6 +21,7 @@ struct RecentActivityTimelineView: View {
     }
 
     @State private var isViewAllHovering = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         GlassCard {
@@ -28,8 +29,10 @@ struct RecentActivityTimelineView: View {
                 header
                 if entries.isEmpty {
                     emptyState
+                        .transition(.appear(reduceMotion: reduceMotion))
                 } else {
                     timeline
+                        .transition(.appear(reduceMotion: reduceMotion))
                 }
             }
             .padding(16)
@@ -50,18 +53,21 @@ struct RecentActivityTimelineView: View {
                 .font(.caption)
                 .foregroundStyle(BrandColors.accent.opacity(isViewAllHovering ? 0.7 : 1))
                 .onHover { isViewAllHovering = $0 }
+                .animation(Motion.quick(reduceMotion), value: isViewAllHovering)
                 .help("查看全部记录")
         }
     }
 
     // MARK: - 空状态
 
+    /// 空状态：品牌化文案由外部传入（PRD §34，如「今天还没有故事。」），
+    /// .appear 过渡在父级动画事务（HomeView 的 Motion.soft）中生效
     private var emptyState: some View {
         Text(emptyMessage)
             .font(.subheadline)
             .foregroundStyle(Color.secondary)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 24)
+            .padding(.vertical, 32)
     }
 
     // MARK: - 时间线
@@ -126,6 +132,7 @@ struct RecentActivityTimelineView: View {
                     .padding(.top, 8)
             }
         }
+        .cardFloat(reduceMotion: reduceMotion)
     }
 
     // MARK: - 模块映射

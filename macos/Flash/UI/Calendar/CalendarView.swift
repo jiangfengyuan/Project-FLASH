@@ -8,6 +8,8 @@ struct CalendarView: View {
 
     @State private var displayedMonth = Date()
     @State private var selectedDate = Date()
+    /// 月份切换方向：+1 前进 / -1 后退 / 0 无方向（回到本月），驱动方向性过渡
+    @State private var monthDirection = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// 共享公历实例，避免每次渲染格子都新建 Calendar
@@ -34,8 +36,11 @@ struct CalendarView: View {
                     .help("下一月")
                 Spacer()
                 Button("回到今天") {
-                    displayedMonth = Date()
-                    selectedDate = Date()
+                    let today = Date()
+                    let order = Self.gregorian.compare(today, to: displayedMonth, toGranularity: .month)
+                    monthDirection = order == .orderedAscending ? -1 : (order == .orderedDescending ? 1 : 0)
+                    displayedMonth = today
+                    selectedDate = today
                 }
             }
             .padding(.horizontal, 16)
@@ -51,6 +56,7 @@ struct CalendarView: View {
                 }
             }
             .padding(.horizontal, 16)
+            .padding(.bottom, 6)
 
             // 月网格
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 7),
@@ -62,7 +68,8 @@ struct CalendarView: View {
             .padding(.horizontal, 16)
             .id(displayedMonth)
             .transition(monthTransition)
-            .animation(.easeOut(duration: reduceMotion ? 0.15 : 0.2), value: displayedMonth)
+            .animation(reduceMotion ? Motion.reducedFade(true) : Motion.emphasize(false),
+                       value: displayedMonth)
 
             Divider().padding(.vertical, 8)
 
@@ -97,55 +104,100 @@ struct CalendarView: View {
         DateFormatting.monthTitle(displayedMonth)
     }
 
-    /// 月份切换过渡：淡入淡出 + 极轻上移；减弱动态时仅淡入淡出（对齐 RootView 惯例）
+    /// 月份切换过渡：方向性水平滑移（前进自右入/向左出，后退反之）+ 淡入淡出；
+    /// 无方向（回到本月）退化为轻上移；Reduce Motion 仅淡入淡出。
     private var monthTransition: AnyTransition {
-        reduceMotion ? .opacity : .opacity.combined(with: .offset(y: 6))
+        guard !reduceMotion else { return .opacity }
+        guard monthDirection != 0 else { return .appear(reduceMotion: false) }
+        let x: CGFloat = monthDirection > 0 ? 14 : -14
+        return .asymmetric(
+            insertion: .opacity.combined(with: .offset(x: x)),
+            removal: .opacity.combined(with: .offset(x: -x))
+        )
     }
 
     private func shiftMonth(_ delta: Int) {
+        monthDirection = delta < 0 ? -1 : 1
         displayedMonth = Self.gregorian.date(byAdding: .month, value: delta, to: displayedMonth)!
     }
 
     private func dayCell(_ date: Date, aggregates: [String: DayAggregate]) -> some View {
         let key = DateFormatting.dayString(date)
         let inMonth = DateFormatting.monthString(date) == DateFormatting.monthString(displayedMonth)
-        let isToday = key == DateFormatting.today()
-        let isSelected = key == selectedKey
         let aggregate = aggregates[key]
 
-        return Button {
+        return DayCell(
+            day: Self.gregorian.component(.day, from: date),
+            key: key,
+            inMonth: inMonth,
+            isToday: key == DateFormatting.today(),
+            isSelected: key == selectedKey,
+            logCount: aggregate?.logs.count ?? 0,
+            emotionEmoji: aggregate?.emotions.first?.level.emoji,
+            reduceMotion: reduceMotion
+        ) {
             selectedDate = date
             // 选中溢出天时跟随切换月份（对齐 Android selectDate）
-            if !inMonth { displayedMonth = date }
-        } label: {
+            if !inMonth {
+                let order = Self.gregorian.compare(date, to: displayedMonth, toGranularity: .month)
+                monthDirection = order == .orderedAscending ? -1 : 1
+                displayedMonth = date
+            }
+        }
+    }
+}
+
+/// 日历单格：选中态 / 今天高亮 / hover 微反馈，状态变化统一走 Motion.quick。
+/// hover 状态下沉到格子内部，避免整页 body（含 aggregates）因 hover 重算。
+private struct DayCell: View {
+    let day: Int
+    let key: String
+    let inMonth: Bool
+    let isToday: Bool
+    let isSelected: Bool
+    let logCount: Int
+    let emotionEmoji: String?
+    let reduceMotion: Bool
+    let action: () -> Void
+
+    @State private var hovering = false
+
+    var body: some View {
+        Button(action: action) {
             VStack(spacing: 2) {
-                Text("\(Self.gregorian.component(.day, from: date))")
+                Text("\(day)")
                     .font(.callout)
-                    .foregroundStyle(isSelected ? .white : (inMonth ? Color.primary : Color.secondary.opacity(0.5)))
+                    .foregroundStyle(isSelected ? Color.white
+                                     : (inMonth ? Color.primary : Color.secondary.opacity(0.5)))
                 HStack(spacing: 3) {
-                    if let count = aggregate?.logs.count, count > 0 {
-                        Text("\(count)")
+                    if logCount > 0 {
+                        Text("\(logCount)")
                             .font(.caption2)
                             .foregroundStyle(Color(nsColor: .controlAccentColor))
                     }
-                    if let emoji = aggregate?.emotions.first?.level.emoji {
-                        Text(emoji).font(.caption2)
+                    if let emotionEmoji {
+                        Text(emotionEmoji).font(.caption2)
                     }
                 }
                 .frame(height: 14)
             }
             .frame(maxWidth: .infinity, minHeight: 44)
-            .background(isSelected ? Color(nsColor: .selectedContentBackgroundColor)
-                                   : Color.clear)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .background {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(isSelected ? Color(nsColor: .selectedContentBackgroundColor)
+                                    : Color.primary.opacity(hovering ? 0.05 : 0))
+            }
             .overlay {
                 if isToday {
-                    RoundedRectangle(cornerRadius: 8)
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
                         .stroke(Color(nsColor: .controlAccentColor), lineWidth: 1)
                 }
             }
         }
         .buttonStyle(.plain)
+        .onHover { hovering = $0 }
+        .animation(Motion.quick(reduceMotion), value: hovering)
+        .animation(Motion.quick(reduceMotion), value: isSelected)
         .accessibilityLabel(key)
     }
 }

@@ -7,6 +7,8 @@ struct InsightOfWeekCard: View {
     let detail: String
     let trend: [Double]
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     init(headline: String, detail: String, trend: [Double]) {
         self.headline = headline
         self.detail = detail
@@ -44,6 +46,7 @@ struct InsightOfWeekCard: View {
             }
             .padding(16)
         }
+        .cardFloat(reduceMotion: reduceMotion)
     }
 }
 

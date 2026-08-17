@@ -29,7 +29,7 @@ struct HomeView: View {
     /// 顶部 toast 文案（nil 表示不展示）；toastID 用于相同文案连发时重置计时
     @State private var toastMessage: String? = nil
     @State private var toastID = 0
-    /// 入场动画标记（问候区 / 今日概览 / 主双栏，依次错开 0.05s）
+    /// 入场动画标记（问候区 / 今日概览 / 主双栏，按 Motion.staggerDelay 依次入场）
     @State private var headerAppeared = false
     @State private var overviewAppeared = false
     @State private var columnsAppeared = false
@@ -39,7 +39,7 @@ struct HomeView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 24) {
                 GreetingHeaderView(
                     searchText: $searchText,
                     focus: $searchFocused,
@@ -47,17 +47,17 @@ struct HomeView: View {
                     onNewIdea: { presentNewLog(category: .idea) }
                 )
                 .opacity(headerAppeared ? 1 : 0)
-                .offset(y: !headerAppeared && !reduceMotion ? 8 : 0)
+                .offset(y: !headerAppeared && !reduceMotion ? 6 : 0)
                 .onAppear { flushSearchRequest() }
                 .onChange(of: appState.searchRequestToken) { flushSearchRequest() }
 
                 TodayOverviewView(stats: viewModel.overviewStats)
                     .opacity(overviewAppeared ? 1 : 0)
-                    .offset(y: !overviewAppeared && !reduceMotion ? 8 : 0)
+                    .offset(y: !overviewAppeared && !reduceMotion ? 6 : 0)
 
-                HStack(alignment: .top, spacing: 20) {
+                HStack(alignment: .top, spacing: 24) {
                     // 左栏（约 2fr）
-                    VStack(spacing: 20) {
+                    VStack(spacing: 24) {
                         RecentActivityTimelineView(
                             entries: displayedEntries,
                             title: isSearching ? "搜索结果" : "最近动态",
@@ -94,7 +94,7 @@ struct HomeView: View {
                     .frame(maxWidth: 300)
                 }
                 .opacity(columnsAppeared ? 1 : 0)
-                .offset(y: !columnsAppeared && !reduceMotion ? 8 : 0)
+                .offset(y: !columnsAppeared && !reduceMotion ? 6 : 0)
             }
             .padding(24)
         }
@@ -107,14 +107,11 @@ struct HomeView: View {
         .onChange(of: logs) { syncViewModel() }
         .onChange(of: emotions) { syncViewModel() }
         .onChange(of: searchText) { scheduleSearchUpdate() }
-        // 顶部 toast：move(top)+淡入淡出，减弱动态时仅淡入淡出
+        // 顶部 toast：过渡由 ToastView 内置 .pop 接管，调用点不再叠加 .transition
         .overlay(alignment: .top) {
             if let toastMessage {
                 ToastView(message: toastMessage)
                     .padding(.top, 12)
-                    .transition(reduceMotion
-                        ? AnyTransition.opacity
-                        : AnyTransition.move(edge: .top).combined(with: .opacity))
             }
         }
         .animation(toastAnimation, value: toastMessage != nil)
@@ -137,22 +134,23 @@ struct HomeView: View {
         }
     }
 
-    /// toast 弹簧动效（减弱动态时退化为 200ms 淡入淡出）
-    private var toastAnimation: Animation {
-        reduceMotion ? .easeInOut(duration: 0.2) : .spring(response: 0.3, dampingFraction: 0.85)
+    /// toast 动效：Motion.spring 轻弹簧；减弱动态时退化为 reducedFade 极短淡变
+    private var toastAnimation: Animation? {
+        reduceMotion ? Motion.reducedFade(true) : Motion.spring()
     }
 
-    /// 时间线内容变化过渡（减弱动态时直接替换，不做过渡）
+    /// 时间线内容变化过渡（走 Motion.soft；减弱动态时直接替换，不做过渡）
     private var listContentAnimation: Animation? {
-        reduceMotion ? nil : .easeInOut(duration: 0.2)
+        Motion.soft(reduceMotion)
     }
 
-    /// 入场动画：三区块 fade + 轻微上移（y 8→0），依次错开 0.05s；减弱动态时只留淡入
+    /// 入场动画：三区块 fade + 轻微上移（y 6→0，对齐 .appear 过渡），
+    /// 按 staggerDelay 依次入场；减弱动态时 Motion.softOut 返回 nil，只留瞬时呈现
     private func playEntranceAnimation() {
         guard !headerAppeared else { return }
-        withAnimation(.easeOut(duration: 0.22)) { headerAppeared = true }
-        withAnimation(.easeOut(duration: 0.22).delay(0.05)) { overviewAppeared = true }
-        withAnimation(.easeOut(duration: 0.22).delay(0.10)) { columnsAppeared = true }
+        withAnimation(Motion.softOut(reduceMotion)) { headerAppeared = true }
+        withAnimation(Motion.softOut(reduceMotion)?.delay(Motion.staggerDelay(1))) { overviewAppeared = true }
+        withAnimation(Motion.softOut(reduceMotion)?.delay(Motion.staggerDelay(2))) { columnsAppeared = true }
     }
 
     // MARK: - 数据注入 / 搜索

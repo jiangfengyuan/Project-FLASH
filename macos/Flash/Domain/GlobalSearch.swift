@@ -18,14 +18,13 @@ enum GlobalSearch {
             .filter { $0.content.localizedCaseInsensitiveContains(query) }
             .map { SearchMatch(id: $0.id, isEmotion: false,
                                title: $0.content, createdAt: $0.createdAt) }
-        let emotionMatches = emotions
-            .map { emotion -> SearchMatch in
-                // 标题：emoji + 备注，无备注时用情绪中文名
-                let title = "\(emotion.level.emoji) \(emotion.note ?? emotion.level.displayName)"
-                return SearchMatch(id: emotion.id, isEmotion: true,
-                                   title: title, createdAt: emotion.createdAt)
-            }
-            .filter { $0.title.localizedCaseInsensitiveContains(query) }
+        // 标题：emoji + 备注，无备注时用情绪中文名；compactMap 单遍完成构造与匹配
+        let emotionMatches = emotions.compactMap { emotion -> SearchMatch? in
+            let title = "\(emotion.level.emoji) \(emotion.note ?? emotion.level.displayName)"
+            guard title.localizedCaseInsensitiveContains(query) else { return nil }
+            return SearchMatch(id: emotion.id, isEmotion: true,
+                               title: title, createdAt: emotion.createdAt)
+        }
         let merged = logMatches + emotionMatches
         return Array(merged.sorted { $0.createdAt > $1.createdAt }.prefix(limit))
     }

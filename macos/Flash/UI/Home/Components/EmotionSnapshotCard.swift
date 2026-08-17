@@ -14,6 +14,9 @@ struct EmotionSnapshotCard: View {
     /// 「查看全部」回调
     let onViewAll: () -> Void
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var isViewAllHovering = false
+
     init(
         emoji: String,
         title: String,
@@ -43,7 +46,9 @@ struct EmotionSnapshotCard: View {
                     Button("查看全部", action: onViewAll)
                         .buttonStyle(.plain)
                         .font(.caption)
-                        .foregroundStyle(BrandColors.accent)
+                        .foregroundStyle(BrandColors.accent.opacity(isViewAllHovering ? 0.7 : 1))
+                        .onHover { isViewAllHovering = $0 }
+                        .animation(Motion.quick(reduceMotion), value: isViewAllHovering)
                 }
 
                 // 中部：emoji + 标题 + 摘要
@@ -78,6 +83,7 @@ struct EmotionSnapshotCard: View {
             }
             .padding(16)
         }
+        .cardFloat(reduceMotion: reduceMotion)
         .accessibilityElement(children: .contain)
     }
 }

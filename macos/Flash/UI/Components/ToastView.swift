@@ -1,10 +1,15 @@
 import SwiftUI
 
 /// 顶部轻提示（toast）：.regularMaterial 胶囊 + 细边框 + 轻阴影。
-/// 纯展示组件——出现/消失由外部用 transition + animation 控制，
+/// 出现/消失过渡内置为 FlashMotion `.pop`（淡入 + 缩放 0.94，锚点顶部），
+/// 尊重 Reduce Motion。已实测：SwiftUI 会采用被插入视图 body 根部的 transition，
+/// 因此调用方只需用 `Motion.animate`/`withAnimation` 切换 message 即可，
+/// 不要再叠加自己的 `.transition`（会与内置过渡复合）。
 /// 自动消隐由外部定时把 message 置回 nil（参考 HomeView 用法）。
 struct ToastView: View {
     let message: String
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         Text(message)
@@ -19,6 +24,7 @@ struct ToastView: View {
             }
             .shadow(color: .black.opacity(0.12), radius: 8, y: 3)
             .accessibilityLabel(message)
+            .transition(.pop(reduceMotion: reduceMotion))
     }
 }
 

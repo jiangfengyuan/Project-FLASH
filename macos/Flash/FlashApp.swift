@@ -3,16 +3,22 @@ import SwiftData
 
 @main
 struct FlashApp: App {
-    private let container: ModelContainer
-    @State private var appState = AppState()
+    /// 装配单一入口（债务 A6）：容器、仓储、内存降级标记三者同源
+    private let assembly: RepositoryEnvironment.Assembly
+    @State private var appState: AppState
     @StateObject private var settings = SettingsStore()
 
     init() {
-        self.container = FlashDatabase.makeContainer()
+        let assembly = RepositoryEnvironment.makeDefault()
+        self.assembly = assembly
+        let appState = AppState()
+        appState.checkDatabaseFallback(didFallbackToMemory: assembly.didFallbackToMemory)
+        _appState = State(initialValue: appState)
     }
 
     var body: some Scene {
-        WindowGroup {
+        // 显式 id：MenuBarExtra 通过 openWindow(id: "main") 唤起主窗口
+        WindowGroup(id: "main") {
             Group {
                 if settings.welcomed {
                     RootView()
@@ -23,11 +29,11 @@ struct FlashApp: App {
                 }
             }
             .environment(appState)
-            .environment(\.flashRepository, FlashRepository(container: container))
+            .environment(\.flashRepository, assembly.repository)
             .environmentObject(settings)
             .preferredColorScheme(colorScheme(for: settings.themeMode))
         }
-        .modelContainer(container)
+        .modelContainer(assembly.container)
         .windowResizability(.contentMinSize)
         .defaultSize(width: 1200, height: 760)
         .commands {
@@ -65,6 +71,17 @@ struct FlashApp: App {
                     .keyboardShortcut("6", modifiers: .command)
             }
         }
+
+        // V1.1 Menu Bar Companion（PRD §26）：窗口式面板，点击外部自动关闭（系统默认行为）
+        MenuBarExtra("Flash", systemImage: "sparkles") {
+            MenuBarCompanionView()
+                .environment(appState)
+                .environment(\.flashRepository, assembly.repository)
+                .environmentObject(settings)
+                .preferredColorScheme(colorScheme(for: settings.themeMode))
+        }
+        .menuBarExtraStyle(.window)
+        .modelContainer(assembly.container)
     }
 
     private func colorScheme(for mode: ThemeMode) -> ColorScheme? {

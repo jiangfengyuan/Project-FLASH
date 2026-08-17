@@ -2,9 +2,15 @@ import SwiftUI
 
 /// 统计卡片底部的迷你柱状图（参考稿约 7 根圆角细柱）。
 /// 内部归一化到最大值；空数据渲染低矮占位柱，不崩溃。
+/// 首次出现与数据切换时柱条自底 stagger 生长（Motion.emphasize；
+/// Reduce Motion 下直接完整呈现）。
 struct SparklineView: View {
     let values: [Double]
     let color: Color
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// 柱条展开开关（配合逐项 delay 做 stagger 生长）
+    @State private var shown = false
 
     init(values: [Double], color: Color) {
         self.values = values
@@ -22,14 +28,31 @@ struct SparklineView: View {
     var body: some View {
         GeometryReader { proxy in
             HStack(alignment: .bottom, spacing: 3) {
-                ForEach(Array(normalized.enumerated()), id: \.offset) { _, ratio in
+                ForEach(Array(normalized.enumerated()), id: \.offset) { index, ratio in
                     RoundedRectangle(cornerRadius: 2, style: .continuous)
                         .fill(color)
                         .frame(width: 4, height: max(proxy.size.height * ratio, 2))
+                        .scaleEffect(x: 1, y: shown ? 1 : 0.05, anchor: .bottom)
+                        .opacity(shown ? 1 : 0)
+                        .animation(
+                            Motion.emphasize(reduceMotion)?.delay(Motion.staggerDelay(index)),
+                            value: shown)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
         }
+        .onAppear { replay() }
+        .onChange(of: values) { _, _ in replay() }
+    }
+
+    /// 重播生长动画。重置不进动画事务（异步触发展开），避免首尾状态被合并导致动画丢失。
+    private func replay() {
+        guard !reduceMotion else {
+            shown = true
+            return
+        }
+        shown = false
+        DispatchQueue.main.async { shown = true }
     }
 }
 

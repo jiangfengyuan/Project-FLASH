@@ -1,6 +1,7 @@
-import SwiftUI
+import Foundation
 
 /// 对应 PRD 的 emoji 情绪模型：😍😊🙂😐😔😣😡（3→-3）
+/// 纯数据模型：仅保存 hex 色值字符串，SwiftUI Color 换算见 Theme/ModelColors.swift（A4）。
 enum EmotionLevel: Int, CaseIterable, Codable {
     case veryUnhappy = -3
     case unhappy = -2
@@ -47,9 +48,6 @@ enum EmotionLevel: Int, CaseIterable, Codable {
         case .veryHappy: "#F5A83C"
         }
     }
-
-    /// 跟随系统外观的动态色（light/dark 双变体）
-    var color: Color { BrandColors.dynamic(light: colorHex, dark: darkColorHex) }
 
     var emoji: String {
         switch self {

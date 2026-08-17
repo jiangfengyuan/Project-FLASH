@@ -98,10 +98,13 @@ final class FlashRepository {
 
     // MARK: - Import / Export
 
-    /// 覆盖式导入：清空后写入（对应 Web 版 overwriteImport）
+    /// 覆盖式导入：清空后写入（对应 Web 版 overwriteImport）。
+    /// 直接内联删除而不走 clearAll()：整个过程只有一次 save，
+    /// 避免中间态 save 让 @Query 观察者看到「瞬间空库」的闪烁。
     @MainActor
     func replaceAll(logs: [LogItem], emotions: [EmotionRecord]) throws {
-        try clearAll()
+        try context.delete(model: LogEntity.self)
+        try context.delete(model: EmotionEntity.self)
         for log in logs { upsertLogEntity(log) }
         for emotion in emotions { upsertEmotionEntity(emotion) }
         try context.save()
@@ -127,13 +130,17 @@ final class FlashRepository {
     @MainActor
     private func fetchLog(id: String) throws -> LogEntity? {
         let predicate = #Predicate<LogEntity> { $0.id == id }
-        return try context.fetch(FetchDescriptor(predicate: predicate)).first
+        var descriptor = FetchDescriptor(predicate: predicate)
+        descriptor.fetchLimit = 1 // id 唯一，命中即停
+        return try context.fetch(descriptor).first
     }
 
     @MainActor
     private func fetchEmotion(id: String) throws -> EmotionEntity? {
         let predicate = #Predicate<EmotionEntity> { $0.id == id }
-        return try context.fetch(FetchDescriptor(predicate: predicate)).first
+        var descriptor = FetchDescriptor(predicate: predicate)
+        descriptor.fetchLimit = 1
+        return try context.fetch(descriptor).first
     }
 
     @MainActor

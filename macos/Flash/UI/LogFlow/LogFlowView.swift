@@ -46,6 +46,7 @@ struct LogFlowView: View {
                         }
                         .buttonStyle(.plain)
                         .foregroundStyle(Color(nsColor: .controlAccentColor))
+                        .transition(.opacity)
                     }
                     Spacer()
                 }
@@ -56,14 +57,25 @@ struct LogFlowView: View {
             Divider()
 
             if filtered.isEmpty {
-                ContentUnavailableView("没有匹配的记录",
-                                       systemImage: "magnifyingglass",
-                                       description: Text("调整筛选条件试试"))
+                // PRD §34：空态用品牌化文案；筛选无结果时保留搜索语义
+                Group {
+                    if logEntities.isEmpty {
+                        ContentUnavailableView("今天还没有故事。",
+                                               systemImage: "square.and.pencil")
+                    } else {
+                        ContentUnavailableView("没有匹配的记录",
+                                               systemImage: "magnifyingglass",
+                                               description: Text("调整筛选条件试试"))
+                    }
+                }
+                .transition(.appear(reduceMotion: reduceMotion))
             } else {
                 ScrollView {
                     LazyVStack(spacing: 8) {
                         ForEach(filtered) { log in
-                            LogCardView(log: log)
+                            LogCardView(log: log,
+                                        onEdit: { editingLog = log },
+                                        onDelete: { deletingLog = log })
                                 .contextMenu {
                                     Button("编辑…") { editingLog = log }
                                     Button("删除", role: .destructive) { deletingLog = log }
@@ -71,11 +83,14 @@ struct LogFlowView: View {
                         }
                     }
                     .padding(16)
-                    // 增删行默认动画（减弱动态时关闭）
-                    .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: filtered)
+                    // 列表插入/删除/筛选切换统一 Motion.soft；行重排走默认 move
+                    .animation(Motion.soft(reduceMotion), value: filtered)
                 }
+                .transition(.appear(reduceMotion: reduceMotion))
             }
         }
+        // 空态 ↔ 列表切换的过渡动画
+        .animation(Motion.soft(reduceMotion), value: filtered.isEmpty)
         .searchable(text: $filter.query, placement: .toolbar, prompt: "搜索记录内容")
         .sheet(item: $editingLog) { log in
             LogEditSheet(log: log) { updated in
@@ -147,6 +162,7 @@ struct LogFlowView: View {
                                           : Color(nsColor: .separatorColor),
                                      lineWidth: 1)
                 }
+                .animation(Motion.quick(reduceMotion), value: isOn)
         }
         .buttonStyle(.plain)
     }

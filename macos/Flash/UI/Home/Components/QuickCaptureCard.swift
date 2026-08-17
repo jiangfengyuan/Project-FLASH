@@ -9,6 +9,8 @@ struct QuickCaptureCard: View {
     let focus: FocusState<Bool>.Binding?
     let onSave: (HomeModule) -> Void
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     init(draft: Binding<String>,
          enabledModules: Set<HomeModule> = [.log, .idea],
          focus: FocusState<Bool>.Binding? = nil,
@@ -46,6 +48,7 @@ struct QuickCaptureCard: View {
             }
             .padding(16)
         }
+        .cardFloat(reduceMotion: reduceMotion)
     }
 
     private func moduleButton(_ module: HomeModule, title: String, icon: String) -> some View {
@@ -66,6 +69,7 @@ struct QuickCaptureCard: View {
         .buttonStyle(.plain)
         .disabled(!enabled)
         .opacity(enabled ? 1 : 0.4)
+        .animation(Motion.quick(reduceMotion), value: enabled)
         .help(helpText(for: module))
     }
 

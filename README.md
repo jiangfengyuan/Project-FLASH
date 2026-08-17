@@ -12,9 +12,8 @@ Flash 是一款面向个人用户的本地优先笔记应用，支持快速记�
 
 ```
 ├── android/        # 原生 Android：Kotlin + Jetpack Compose + Material 3 + Room
-├── macos/          # 原生 macOS：SwiftUI + SwiftData（universal2，arm64 + x86_64）
+├── macos/          # 原生 macOS：SwiftUI + SwiftData（universal2，arm64 + x86_64，含菜单栏伴侣）
 ├── scripts/        # Android 发布签名脚本
-├── docs/           # 设计与流程文档（含 superpowers spec/plan）
 ├── ROADMAP.md      # 开发路线图
 └── README.md
 ```

@@ -2,10 +2,18 @@ import SwiftUI
 
 /// 情绪趋势折线图（Emotion Snapshot）：Catmull-Rom 平滑曲线 + 圆点。
 /// points 每天一个点；nil 表示当天无数据（断点跳过）。全 nil 时渲染浅灰虚线占位。
+/// 首次出现与数据切换时以 trim 0→1 描绘曲线、圆点 stagger 淡入（Motion.emphasize；
+/// Reduce Motion 下直接完整呈现）。
 struct TrendLineView: View {
     /// 每天一个点；nil 表示当天无数据（断点跳过）
     let points: [Double?]
     let color: Color
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// 曲线描绘进度（0→1）
+    @State private var drawProgress: CGFloat = 0
+    /// 圆点可见性开关（配合逐项 delay 做 stagger 淡入）
+    @State private var dotsVisible = false
 
     init(points: [Double?], color: Color) {
         self.points = points
@@ -73,20 +81,45 @@ struct TrendLineView: View {
                 .stroke(Color.secondary.opacity(0.35), style: StrokeStyle(lineWidth: 1.5, dash: [4, 4]))
             } else {
                 ZStack {
-                    ForEach(Array(segs.enumerated()), id: \.offset) { _, seg in
+                    ForEach(Array(segs.enumerated()), id: \.offset) { segIndex, seg in
+                        // 跨段连续编号，让断点后的圆点继续 stagger
+                        let baseIndex = segs.prefix(segIndex).reduce(0) { $0 + $1.count }
                         smoothPath(through: seg)
+                            .trim(from: 0, to: drawProgress)
                             .stroke(color, style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
-                        ForEach(Array(seg.enumerated()), id: \.offset) { _, point in
+                        ForEach(Array(seg.enumerated()), id: \.offset) { pointIndex, point in
                             Circle()
                                 .fill(color)
                                 .frame(width: 5, height: 5)
+                                .opacity(dotsVisible ? 1 : 0)
+                                .animation(
+                                    Motion.softOut(reduceMotion)?
+                                        .delay(Motion.staggerDelay(baseIndex + pointIndex)),
+                                    value: dotsVisible)
                                 .position(point)
                         }
                     }
                 }
             }
         }
+        .onAppear { replay() }
+        .onChange(of: points) { _, _ in replay() }
         .accessibilityLabel("情绪趋势图")
+    }
+
+    /// 重播绘制动画。重置不进动画事务（异步触发描绘），避免首尾状态被合并导致动画丢失。
+    private func replay() {
+        guard !reduceMotion else {
+            drawProgress = 1
+            dotsVisible = true
+            return
+        }
+        drawProgress = 0
+        dotsVisible = false
+        DispatchQueue.main.async {
+            withAnimation(Motion.emphasize()) { drawProgress = 1 }
+            dotsVisible = true // 各圆点由 .animation(value:) 带 delay 逐项淡入
+        }
     }
 }
 

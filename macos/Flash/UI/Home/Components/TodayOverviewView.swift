@@ -55,9 +55,10 @@ private struct StatCard: View {
                     .font(.system(size: 26, weight: .bold))
                     .monospacedDigit()
                     .foregroundStyle(Color.primary)
-                    // 数字变化滚动过渡（macOS 14+）；减弱动态时不附加动画
+                    // 数字变化滚动过渡（macOS 14+；工程最低 macOS 15，无需降级判断）
+                    // 减弱动态时 Motion.soft 返回 nil，contentTransition 无动画直接替换
                     .contentTransition(.numericText())
-                    .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: stat.valueText)
+                    .animation(Motion.soft(reduceMotion), value: stat.valueText)
 
                 Text(stat.title)
                     .font(.caption)
@@ -66,7 +67,7 @@ private struct StatCard: View {
                 SparklineView(values: stat.trend, color: moduleColor)
                     .frame(height: 24)
             }
-            .padding(14)
+            .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
     }

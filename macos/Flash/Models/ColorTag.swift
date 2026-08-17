@@ -1,6 +1,7 @@
-import SwiftUI
+import Foundation
 
 /// 与 Web 版 src/lib/constants.ts 对齐。rawValue 即 storageKey，保证三端数据互通。
+/// 纯数据模型：仅保存 hex 色值字符串，SwiftUI Color 换算见 Theme/ModelColors.swift（A4）。
 enum ColorTag: String, CaseIterable, Codable {
     case urgent, inspiration, daily, memo, emotion, idea
 
@@ -38,7 +39,4 @@ enum ColorTag: String, CaseIterable, Codable {
         case .idea: "#FFB268"
         }
     }
-
-    /// 跟随系统外观的动态色（light/dark 双变体）
-    var color: Color { BrandColors.dynamic(light: colorHex, dark: darkColorHex) }
 }

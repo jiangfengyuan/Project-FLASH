@@ -12,18 +12,34 @@ struct RootView: View {
             detailView(for: appState.selectedModule)
                 .id(appState.selectedModule)
                 .transition(pageTransition)
-                .animation(.easeOut(duration: reduceMotion ? 0.15 : 0.2), value: appState.selectedModule)
+                .animation(pageAnimation, value: appState.selectedModule)
                 .navigationTitle(appState.selectedModule.title)
                 .frame(minWidth: 560, minHeight: 480)
         }
         .frame(minWidth: 960, minHeight: 640)
+        .alert("数据存储异常", isPresented: databaseFallbackAlertPresented) {
+            Button("我知道了") { appState.databaseFallbackMessage = nil }
+        } message: {
+            Text(appState.databaseFallbackMessage ?? "")
+        }
     }
 
-    /// 页面过渡：淡入淡出 + 极轻上移；减弱动态时仅淡入淡出
+    /// SwiftData 回退内存库时 AppState 置入提示文案，展示后由「我知道了」置 nil
+    private var databaseFallbackAlertPresented: Binding<Bool> {
+        Binding(
+            get: { appState.databaseFallbackMessage != nil },
+            set: { if !$0 { appState.databaseFallbackMessage = nil } }
+        )
+    }
+
+    /// 页面过渡：淡入淡出 + 极轻上移；减弱动态时仅淡入淡出（FlashMotion .appear）
     private var pageTransition: AnyTransition {
-        reduceMotion
-            ? .opacity
-            : .opacity.combined(with: .offset(y: 6))
+        .appear(reduceMotion: reduceMotion)
+    }
+
+    /// 页面切换曲线：正常用标准 easeOut；减弱动态时保底极短淡变（不产生位移）
+    private var pageAnimation: Animation? {
+        reduceMotion ? Motion.reducedFade(true) : Motion.softOut()
     }
 
     @ViewBuilder
