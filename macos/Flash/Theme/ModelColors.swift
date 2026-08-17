@@ -1,3 +1,9 @@
+// Copyright (c) 2026 Fengyuan Jiang
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 import SwiftUI
 
 /// A4：Models 层只保存 hex 纯数据（三端互通的存储色），SwiftUI Color 换算集中在 Theme。

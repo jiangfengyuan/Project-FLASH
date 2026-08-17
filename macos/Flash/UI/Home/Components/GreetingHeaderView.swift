@@ -1,3 +1,9 @@
+// Copyright (c) 2026 Fengyuan Jiang
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 import SwiftUI
 
 /// Home 仪表盘顶部问候区：左侧问候语 + 副标题，右侧搜索框与「+ 新建」菜单。

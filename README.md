@@ -84,6 +84,8 @@ xcodebuild test -scheme Flash -destination 'platform=macOS'
 
 ## 许可证
 
+Copyright (c) 2026 Fengyuan Jiang
+
 [Mozilla Public License 2.0](LICENSE)（MPL-2.0）。
 
 可自由使用、修改、再分发（包括商用）；对本仓库已有文件的修改需以
