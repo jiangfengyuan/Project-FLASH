@@ -28,8 +28,6 @@ struct HomeView: View {
     @FocusState private var inputFocused: Bool
     @FocusState private var searchFocused: Bool
     @State private var errorMessage: String? = nil
-    @State private var handledNewLogToken = 0
-    @State private var handledSearchToken = 0
     /// 「+ 新建」sheet 的草稿（nil 表示不展示）
     @State private var newLogDraft: LogItem? = nil
     /// 顶部 toast 文案（nil 表示不展示）；toastID 用于相同文案连发时重置计时
@@ -130,7 +128,7 @@ struct HomeView: View {
         .sheet(item: $newLogDraft) { draftItem in
             LogEditSheet(log: draftItem,
                          title: draftItem.category == .idea ? "新建灵感" : "新建日志") { updated in
-                saveNewLog(updated)
+                try saveNewLog(updated)
             }
         }
         .alert("提示", isPresented: errorPresented) {
@@ -200,15 +198,15 @@ struct HomeView: View {
     /// 菜单「新建记录」⌘N：token 递增时聚焦输入框。
     /// onAppear 兜底：跨模块命令使本视图首次创建时 token 已递增，onChange 不会回放。
     private func flushNewLogRequest() {
-        guard appState.newLogRequestToken != handledNewLogToken else { return }
-        handledNewLogToken = appState.newLogRequestToken
+        guard appState.newLogRequestToken != appState.handledNewLogToken else { return }
+        appState.markNewLogHandled()
         inputFocused = true
     }
 
     /// 菜单「搜索」⌘K：token 递增时聚焦搜索框；onAppear 兜底同上
     private func flushSearchRequest() {
-        guard appState.searchRequestToken != handledSearchToken else { return }
-        handledSearchToken = appState.searchRequestToken
+        guard appState.searchRequestToken != appState.handledSearchToken else { return }
+        appState.markSearchHandled()
         searchFocused = true
     }
 
@@ -224,18 +222,14 @@ struct HomeView: View {
             recordDate: DateFormatting.today())
     }
 
+    private struct SaveError: Error {}
+
     /// LogEditSheet 保存回调：作为新记录入库（id/时间由仓库重新生成）
-    private func saveNewLog(_ item: LogItem) {
-        guard let repository else { errorMessage = "内部错误：存储未就绪"; return }
-        do {
-            try repository.addLog(content: item.content, colorTag: item.colorTag,
-                                  category: item.category, importance: item.importance)
-            showToast(item.category == .idea ? "✓ 已保存到灵感" : "✓ 已保存到日志")
-        } catch {
-            // 弹窗文案固定，详细错误只进控制台（localizedDescription 可能含本机路径）
-            print("HomeView: 新建记录保存失败 - \(error)")
-            errorMessage = "保存失败，请重试"
-        }
+    private func saveNewLog(_ item: LogItem) throws {
+        guard let repository else { throw SaveError() }
+        try repository.addLog(content: item.content, colorTag: item.colorTag,
+                              category: item.category, importance: item.importance)
+        showToast(item.category == .idea ? "✓ 已保存到灵感" : "✓ 已保存到日志")
     }
 
     /// 展示顶部 toast；toastID 递增使相同文案连发也重新计时（.task(id:) 自动取消旧计时）

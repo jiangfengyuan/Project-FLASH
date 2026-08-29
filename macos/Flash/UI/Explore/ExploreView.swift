@@ -29,7 +29,6 @@ struct ExploreView: View {
     @State private var draft = ""
     @State private var selectedTag: ColorTag? = nil
     @State private var errorMessage: String? = nil
-    @State private var handledNewLogToken = 0
     @FocusState private var inputFocused: Bool
 
     private static let maxLength = 140
@@ -127,8 +126,8 @@ struct ExploreView: View {
     /// 菜单「新建记录」⌘N：token 递增时聚焦输入框。
     /// onAppear 兜底：跨模块命令使本视图首次创建时 token 已递增，onChange 不会回放。
     private func flushNewLogRequest() {
-        guard appState.newLogRequestToken != handledNewLogToken else { return }
-        handledNewLogToken = appState.newLogRequestToken
+        guard appState.newLogRequestToken != appState.handledNewLogToken else { return }
+        appState.markNewLogHandled()
         inputFocused = true
     }
 

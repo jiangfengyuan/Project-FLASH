@@ -22,7 +22,6 @@ struct SettingsView: View {
     @State private var showOverwriteConfirm = false
     @State private var showClearConfirm = false
     @State private var message: String? = nil
-    @State private var handledExportToken = 0
     /// 导入/导出进行中（大文件 IO 已移到后台，期间禁用按钮防重入）
     @State private var isBusy = false
     /// 成功反馈走顶部 toast（与 Home 一致，nil 表示不展示）；失败仍走 alert 保留详情。
@@ -166,8 +165,8 @@ struct SettingsView: View {
     /// 菜单「导出备份…」⇧⌘E：token 递增时弹导出面板。
     /// onAppear 兜底：跨模块命令使本视图首次创建时 token 已递增，onChange 不会回放。
     private func flushExportRequest() {
-        guard appState.exportRequestToken != handledExportToken else { return }
-        handledExportToken = appState.exportRequestToken
+        guard appState.exportRequestToken != appState.handledExportToken else { return }
+        appState.markExportHandled()
         // 菜单 action 在 AppKit 菜单跟踪事件循环内同步触发，同步 runModal() 会被吞；
         // 异步逃逸出菜单跟踪后再弹面板（onAppear 路径同样安全）
         DispatchQueue.main.async { exportBackup() }
@@ -189,10 +188,21 @@ struct SettingsView: View {
                 try await Task.detached(priority: .userInitiated) {
                     let json = BackupService.exportJSON(logs: logs, emotions: emotions,
                                                         appVersion: version)
-                    try json.write(to: url, atomically: true, encoding: .utf8)
-                    // 日记明文备份：限制为仅当前用户可读写（多用户 Mac 保护）
-                    try FileManager.default.setAttributes([.posixPermissions: NSNumber(value: 0o600)],
-                                                          ofItemAtPath: url.path)
+                    // 先写入同目录临时文件并立即 0600，再 move 到目标：避免明文窗口期 + exFAT 卷 chmod 失败
+                    let temp = url.deletingLastPathComponent()
+                        .appendingPathComponent(".flash-backup-\(UUID().uuidString).tmp")
+                    try json.write(to: temp, atomically: true, encoding: .utf8)
+                    do {
+                        try FileManager.default.setAttributes([.posixPermissions: NSNumber(value: 0o600)],
+                                                              ofItemAtPath: temp.path)
+                    } catch {
+                        // 部分卷不支持 chmod；继续移动，权限已尽力加固
+                        print("chmod temp 文件失败: \(error)")
+                    }
+                    if FileManager.default.fileExists(atPath: url.path) {
+                        try FileManager.default.removeItem(at: url)
+                    }
+                    try FileManager.default.moveItem(at: temp, to: url)
                 }.value
                 showToast("✓ 备份已导出")
             } catch {
@@ -239,26 +249,30 @@ struct SettingsView: View {
 
     private func confirmImport(overwrite: Bool) {
         guard let preview = pendingImport else { return }
-        do {
-            if overwrite {
-                try repository?.replaceAll(logs: preview.logs, emotions: preview.emotions)
-            } else {
-                try repository?.mergeAll(logs: preview.logs, emotions: preview.emotions)
+        isBusy = true
+        Task {
+            defer { isBusy = false }
+            do {
+                if overwrite {
+                    try repository?.replaceAll(logs: preview.logs, emotions: preview.emotions)
+                } else {
+                    try repository?.mergeAll(logs: preview.logs, emotions: preview.emotions)
+                }
+                let skipped = preview.skippedLogs + preview.skippedEmotions
+                if skipped > 0 {
+                    // 有跳过条目时保留 alert，把异常明细告知用户
+                    message = "已导入 \(preview.logCount) 条日志、\(preview.emotionCount) 条情绪" +
+                        "（跳过异常数据 \(skipped) 条）"
+                } else {
+                    showToast("✓ 已导入 \(preview.logCount) 条日志、\(preview.emotionCount) 条情绪")
+                }
+            } catch {
+                print("导入写库失败: \(error)")
+                message = "导入失败：写入数据库时出错，请重试"
             }
-            let skipped = preview.skippedLogs + preview.skippedEmotions
-            if skipped > 0 {
-                // 有跳过条目时保留 alert，把异常明细告知用户
-                message = "已导入 \(preview.logCount) 条日志、\(preview.emotionCount) 条情绪" +
-                    "（跳过异常数据 \(skipped) 条）"
-            } else {
-                showToast("✓ 已导入 \(preview.logCount) 条日志、\(preview.emotionCount) 条情绪")
-            }
-        } catch {
-            print("导入写库失败: \(error)")
-            message = "导入失败：写入数据库时出错，请重试"
+            pendingImport = nil
+            importPreview = nil
         }
-        pendingImport = nil
-        importPreview = nil
     }
 
     private func clearAll() {

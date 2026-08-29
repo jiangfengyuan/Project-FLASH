@@ -100,12 +100,7 @@ struct LogFlowView: View {
         .searchable(text: $filter.query, placement: .toolbar, prompt: "搜索记录内容")
         .sheet(item: $editingLog) { log in
             LogEditSheet(log: log) { updated in
-                do { try repository?.updateLog(updated) }
-                catch {
-                    // 固定文案，详情仅输出到控制台，避免向用户暴露内部路径
-                    print("[LogFlowView] 更新记录失败: \(error)")
-                    errorMessage = "保存失败，请重试"
-                }
+                try repository?.updateLog(updated)
             }
         }
         .alert("删除这条记录？", isPresented: deletePresented) {
