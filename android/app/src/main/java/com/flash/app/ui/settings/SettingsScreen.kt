@@ -197,7 +197,7 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
 
             HorizontalDivider()
             SectionTitle("关于")
-            Text("一闪 Native ${BuildConfig.VERSION_NAME}", style = MaterialTheme.typography.bodyMedium)
+            Text("Flash Aero v${BuildConfig.VERSION_NAME}", style = MaterialTheme.typography.bodyMedium)
             Text(
                 "原生 Android 版（Kotlin + Compose + Room）",
                 style = MaterialTheme.typography.bodySmall,

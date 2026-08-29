@@ -1,6 +1,9 @@
-# Flash 一闪
+# Flash Aero · 一闪
 
 闪过即留，一目了然。本地优先的日志 / 灵感 / 情绪记录应用。
+
+当前版本：**Flash Aero v0.1.0**。`Aero` 是 v0 Alpha 阶段的版本代号；
+首个正式版将统一命名为 **Flash Pulse v1.0.0**。
 
 没有账号、没有后端、不申请网络权限——数据只存在你自己的设备上，
 换设备靠 JSON 备份文件互通。
@@ -13,8 +16,8 @@
 
 | 平台 | 技术栈 | 状态 |
 | --- | --- | --- |
-| Android | Kotlin + Jetpack Compose + Material 3 + Room | Alpha |
-| macOS | SwiftUI + SwiftData，universal2（arm64 + x86_64） | Alpha |
+| Android | Kotlin + Jetpack Compose + Material 3 + Room | Flash Aero v0.1.0 |
+| macOS | SwiftUI + SwiftData，universal2（arm64 + x86_64） | Flash Aero v0.1.0 |
 
 历史上有过 React + Capacitor 的 Web/混合版，已退役（git 历史可查），
 本仓库现在是纯原生仓库。

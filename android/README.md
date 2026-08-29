@@ -1,6 +1,9 @@
-# Flash 一闪 · Android
+# Flash Aero · Android
 
 Android 端原生实现。Kotlin + Jetpack Compose，严格遵循 Material Design 3。
+
+当前发布身份为 **Flash Aero v0.1.0**；`Aero` 为 v0 Alpha 阶段的版本代号。
+首个正式版将统一命名为 **Flash Pulse v1.0.0**。
 
 - applicationId：发布前改回 `com.flash.app`
 - minSdk 26 / targetSdk 36

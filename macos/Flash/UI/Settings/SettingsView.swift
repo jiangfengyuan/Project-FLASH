@@ -142,7 +142,7 @@ struct SettingsView: View {
     private var appVersion: String {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
         let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?"
-        return "\(version) (\(build))"
+        return "Flash Aero v\(version) (\(build))"
     }
 
     /// 入场动画：三分组 fade + 轻微上移（y 6→0，对齐 .appear 过渡），

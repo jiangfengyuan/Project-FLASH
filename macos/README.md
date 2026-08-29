@@ -1,6 +1,9 @@
-# Flash 一闪 · macOS
+# Flash Aero · macOS
 
 桌面端原生实现。SwiftUI + SwiftData，零第三方依赖，App Sandbox 内运行，无网络权限。
+
+当前发布身份为 **Flash Aero v0.1.0**；`Aero` 为 v0 Alpha 阶段的版本代号。
+首个正式版将统一命名为 **Flash Pulse v1.0.0**。
 
 - Bundle ID：`com.flash.app.macos`
 - 部署目标：macOS 15.0
