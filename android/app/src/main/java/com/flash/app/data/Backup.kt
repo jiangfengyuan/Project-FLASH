@@ -16,6 +16,11 @@ import com.flash.app.BuildConfig
 import org.json.JSONArray
 import org.json.JSONObject
 import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatterBuilder
+import java.time.temporal.ChronoField
 
 /**
  * JSON 备份导出/导入，格式与 Web 版 src/lib/backup.ts 完全一致：
@@ -25,6 +30,19 @@ import java.time.Instant
 object Backup {
 
     const val BACKUP_VERSION = "flash-backup-v1"
+
+    /** 与 macOS BackupService 对齐的导入上限 */
+    const val MAX_FILE_BYTES = 50L * 1024 * 1024        // 50 MB
+    const val MAX_ENTRY_COUNT = 1_000_000               // 单类条目上限
+    const val MAX_FIELD_LENGTH = 100_000                // content / note / status 单字段上限
+
+    /** 统一归一化为 UTC .SSSZ，避免整秒时省略小数导致字典序错乱 */
+    private val NORMALIZED_ISO: DateTimeFormatter = DateTimeFormatterBuilder()
+        .appendPattern("yyyy-MM-dd'T'HH:mm:ss")
+        .appendValue(ChronoField.MILLI_OF_SECOND, 3)
+        .appendLiteral('Z')
+        .toFormatter()
+        .withZone(ZoneOffset.UTC)
 
     fun exportJson(logs: List<LogItem>, emotions: List<EmotionRecord>, notes: String = ""): String {
         val logsArray = JSONArray()
@@ -78,8 +96,20 @@ object Backup {
     private val VALID_COLOR_TAGS = ColorTag.entries.map { it.storageKey }.toSet()
     private val VALID_CATEGORIES = Category.entries.map { it.storageKey }.toSet()
 
+    private fun isValidRecordDate(value: String): Boolean {
+        if (!RECORD_DATE_REGEX.matches(value)) return false
+        return try {
+            LocalDate.parse(value).toString() == value
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     /** @throws BackupFormatException 文件整体不合法时抛出；单条非法数据跳过。 */
     fun parse(json: String): ImportResult {
+        if (json.length > MAX_FILE_BYTES) {
+            throw BackupFormatException("备份文件超过 ${MAX_FILE_BYTES / 1024 / 1024} MB，无法导入")
+        }
         val root = try {
             JSONObject(json)
         } catch (e: Exception) {
@@ -99,6 +129,10 @@ object Backup {
         val logs = mutableListOf<LogItem>()
         var skippedLogs = 0
         for (i in 0 until logsJson.length()) {
+            if (logs.size >= MAX_ENTRY_COUNT) {
+                skippedLogs += logsJson.length() - i
+                break
+            }
             val obj = logsJson.optJSONObject(i)
             val log = obj?.let(::parseLog)
             if (log != null) logs.add(log) else skippedLogs++
@@ -107,6 +141,10 @@ object Backup {
         val emotions = mutableListOf<EmotionRecord>()
         var skippedEmotions = 0
         for (i in 0 until emotionsJson.length()) {
+            if (emotions.size >= MAX_ENTRY_COUNT) {
+                skippedEmotions += emotionsJson.length() - i
+                break
+            }
             val obj = emotionsJson.optJSONObject(i)
             val emotion = obj?.let(::parseEmotion)
             if (emotion != null) emotions.add(emotion) else skippedEmotions++
@@ -117,18 +155,23 @@ object Backup {
 
     private fun parseLog(obj: JSONObject): LogItem? {
         val id = obj.optString("id").takeIf { UUID_REGEX.matches(it) } ?: return null
-        val content = obj.stringOrNull("content") ?: return null
-        val colorTag = obj.optString("colorTag").takeIf { it in VALID_COLOR_TAGS } ?: return null
-        val category = obj.optString("category").takeIf { it in VALID_CATEGORIES } ?: return null
-        val createdAt = obj.optString("createdAt").takeIf(::isIsoDate) ?: return null
-        val recordDate = obj.optString("recordDate").takeIf { RECORD_DATE_REGEX.matches(it) }
+        val content = obj.stringOrNull("content")?.takeIf { it.length <= MAX_FIELD_LENGTH }
             ?: return null
+        val colorTag = obj.stringOrNull("colorTag")?.takeIf { it in VALID_COLOR_TAGS }
+            ?: return null
+        val category = obj.stringOrNull("category")?.takeIf { it in VALID_CATEGORIES }
+            ?: return null
+        val createdAt = normalizeIsoDate(obj.stringOrNull("createdAt")) ?: return null
+        val recordDate = obj.stringOrNull("recordDate")?.takeIf(::isValidRecordDate)
+            ?: return null
+        val importance = obj.optInt("importance", 0).takeIf { it == obj.opt("importance") }
+            ?.coerceIn(0, 4) ?: return null
         return LogItem(
             id = id,
             content = content,
             colorTag = ColorTag.fromStorage(colorTag),
             category = Category.fromStorage(category),
-            importance = obj.optInt("importance", 0).coerceIn(0, 4),
+            importance = importance,
             createdAt = createdAt,
             recordDate = recordDate,
         )
@@ -137,31 +180,50 @@ object Backup {
     private fun parseEmotion(obj: JSONObject): EmotionRecord? {
         val id = obj.optString("id").takeIf { UUID_REGEX.matches(it) } ?: return null
         if (!obj.has("level")) return null
-        val level = obj.optInt("level", Int.MIN_VALUE)
-        if (level < -3 || level > 3) return null
-        val createdAt = obj.optString("createdAt").takeIf(::isIsoDate) ?: return null
-        val recordDate = obj.optString("recordDate").takeIf { RECORD_DATE_REGEX.matches(it) }
+        val level = obj.optInt("level", Int.MIN_VALUE).takeIf { it == obj.opt("level") }
             ?: return null
-        val subEmotion = if (obj.isNull("subEmotion")) null
-        else SubEmotion.fromStorage(obj.optString("subEmotion"))
+        if (level < -3 || level > 3) return null
+        val createdAt = normalizeIsoDate(obj.stringOrNull("createdAt")) ?: return null
+        val recordDate = obj.stringOrNull("recordDate")?.takeIf(::isValidRecordDate)
+            ?: return null
+        if (!obj.hasValidOptionalString("status") || !obj.hasValidOptionalString("note")) {
+            return null
+        }
+        val subEmotion = when {
+            !obj.has("subEmotion") || obj.isNull("subEmotion") -> null
+            else -> SubEmotion.fromStorage(obj.stringOrNull("subEmotion") ?: return null) ?: return null
+        }
         return EmotionRecord(
             id = id,
             level = EmotionLevel.fromValue(level),
             subEmotion = subEmotion,
-            status = obj.stringOrNull("status"),
-            note = obj.stringOrNull("note"),
+            status = obj.stringOrNull("status")?.takeIf { it.length <= MAX_FIELD_LENGTH },
+            note = obj.stringOrNull("note")?.takeIf { it.length <= MAX_FIELD_LENGTH },
             recordDate = recordDate,
             createdAt = createdAt,
         )
     }
 
-    private fun JSONObject.stringOrNull(key: String): String? =
-        if (isNull(key)) null else getString(key)
+    private fun JSONObject.stringOrNull(key: String): String? {
+        if (!has(key) || isNull(key)) return null
+        return opt(key) as? String
+    }
 
-    private fun isIsoDate(value: String): Boolean = try {
-        value.isNotBlank() && Instant.parse(value) != null
-    } catch (e: Exception) {
-        // Instant.parse 要求严格的 ISO-8601；Web 端 Date.parse 更宽松，这里按严格口径即可
-        false
+    /**
+     * Optional text fields may be absent or null, but an explicitly supplied value must be a
+     * bounded string. Treating an oversized or wrongly typed field as null silently loses data
+     * while reporting a successful import.
+     */
+    private fun JSONObject.hasValidOptionalString(key: String): Boolean =
+        !has(key) || isNull(key) || ((opt(key) as? String)?.length ?: Int.MAX_VALUE) <= MAX_FIELD_LENGTH
+
+    private fun normalizeIsoDate(value: String?): String? {
+        if (value.isNullOrBlank()) return null
+        return try {
+            val instant = Instant.parse(value)
+            NORMALIZED_ISO.format(instant)
+        } catch (e: Exception) {
+            null
+        }
     }
 }

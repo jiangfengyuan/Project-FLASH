@@ -50,9 +50,6 @@ class SettingsStore(context: Context) {
     )
     val uiStyle: StateFlow<UiStyle> = _uiStyle.asStateFlow()
 
-    private val _dynamicColor = MutableStateFlow(prefs.getBoolean(KEY_DYNAMIC_COLOR, true))
-    val dynamicColor: StateFlow<Boolean> = _dynamicColor.asStateFlow()
-
     private val _welcomed = MutableStateFlow(prefs.getBoolean(KEY_WELCOMED, false))
     val welcomed: StateFlow<Boolean> = _welcomed.asStateFlow()
 
@@ -66,11 +63,6 @@ class SettingsStore(context: Context) {
         prefs.edit().putString(KEY_UI_STYLE, style.storageKey).apply()
     }
 
-    fun setDynamicColor(enabled: Boolean) {
-        _dynamicColor.value = enabled
-        prefs.edit().putBoolean(KEY_DYNAMIC_COLOR, enabled).apply()
-    }
-
     /** Welcome 页完成后调用 */
     fun setWelcomed() {
         _welcomed.value = true
@@ -80,7 +72,6 @@ class SettingsStore(context: Context) {
     private companion object {
         const val KEY_THEME_MODE = "themeMode"
         const val KEY_UI_STYLE = "uiStyle"
-        const val KEY_DYNAMIC_COLOR = "dynamicColor"
         const val KEY_WELCOMED = "welcomed"
     }
 }

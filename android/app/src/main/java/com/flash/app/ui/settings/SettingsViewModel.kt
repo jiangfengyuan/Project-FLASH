@@ -18,10 +18,12 @@ import com.flash.app.data.Backup
 import com.flash.app.data.SettingsStore
 import com.flash.app.data.ThemeMode
 import com.flash.app.data.UiStyle
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 data class ImportPreview(
     val logCount: Int,
@@ -41,7 +43,6 @@ class SettingsViewModel(
 
     val themeMode = settings.themeMode
     val uiStyle = settings.uiStyle
-    val dynamicColor = settings.dynamicColor
 
     private val _message = MutableStateFlow<String?>(null)
     val message: StateFlow<String?> = _message.asStateFlow()
@@ -51,14 +52,13 @@ class SettingsViewModel(
 
     fun setThemeMode(mode: ThemeMode) = settings.setThemeMode(mode)
     fun setUiStyle(style: UiStyle) = settings.setUiStyle(style)
-    fun setDynamicColor(enabled: Boolean) = settings.setDynamicColor(enabled)
 
     fun clearMessage() {
         _message.value = null
     }
 
     fun exportBackup(target: Uri) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 val (logs, emotions) = repository.exportSnapshot()
                 val json = Backup.exportJson(logs, emotions)
@@ -75,10 +75,39 @@ class SettingsViewModel(
 
     /** 第一步：读取并解析，弹出预览让用户选择合并或覆盖 */
     fun loadImport(source: Uri) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             runCatching {
+                val size = app.contentResolver.query(
+                    source,
+                    arrayOf(android.provider.OpenableColumns.SIZE),
+                    null,
+                    null,
+                    null,
+                )?.use { cursor ->
+                    if (cursor.moveToFirst()) {
+                        cursor.getLong(cursor.getColumnIndexOrThrow(android.provider.OpenableColumns.SIZE))
+                    } else 0L
+                } ?: 0L
+                if (size > Backup.MAX_FILE_BYTES) {
+                    throw Backup.BackupFormatException("备份文件超过 ${Backup.MAX_FILE_BYTES / 1024 / 1024} MB，无法导入")
+                }
+
                 val text = app.contentResolver.openInputStream(source)?.use { input ->
-                    input.readBytes().toString(Charsets.UTF_8)
+                    input.bufferedReader(Charsets.UTF_8).use { reader ->
+                        val sb = StringBuilder()
+                        var total = 0L
+                        val buffer = CharArray(8192)
+                        while (true) {
+                            val read = reader.read(buffer)
+                            if (read == -1) break
+                            total += read
+                            if (total > Backup.MAX_FILE_BYTES) {
+                                throw Backup.BackupFormatException("备份文件超过 ${Backup.MAX_FILE_BYTES / 1024 / 1024} MB，无法导入")
+                            }
+                            sb.appendRange(buffer, 0, read)
+                        }
+                        sb.toString()
+                    }
                 } ?: error("无法读取文件")
                 val result = Backup.parse(text)
                 ImportPreview(
@@ -102,7 +131,7 @@ class SettingsViewModel(
 
     fun confirmImport(overwrite: Boolean) {
         val preview = _importPreview.value ?: return
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 if (overwrite) {
                     repository.replaceAll(preview.logs, preview.emotions)

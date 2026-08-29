@@ -32,12 +32,18 @@ fun StyleCard(
     if (LocalUiStyle.current == UiStyle.GLASS) {
         // 小卡片不启用实时模糊（滚动流畅优先），观感上保留半透+描边+高光
         GlassCard(modifier = modifier, blur = false, onClick = onClick, content = content)
+    } else if (onClick == null) {
+        Card(
+            modifier = modifier,
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        ) {
+            Column(Modifier.padding(12.dp), content = content)
+        }
     } else {
         Card(
             modifier = modifier,
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-            onClick = { onClick?.invoke() },
-            enabled = onClick != null,
+            onClick = onClick,
         ) {
             Column(Modifier.padding(12.dp), content = content)
         }

@@ -6,7 +6,10 @@
 
 package com.flash.app.ui.home
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -19,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Favorite
@@ -32,16 +36,21 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.activity.compose.BackHandler
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.flash.app.FlashApplication
@@ -64,26 +73,23 @@ fun HomeScreen(
     val app = LocalContext.current.applicationContext as FlashApplication
     val viewModel: HomeViewModel = viewModel(factory = HomeViewModel.factory(app.repository))
     val ui by viewModel.uiState.collectAsStateWithLifecycle()
-    var quickCreate by remember { mutableStateOf<Category?>(null) }
+    var quickCreateKey by rememberSaveable { mutableStateOf<String?>(null) }
+    val quickCreate = quickCreateKey?.let { Category.valueOf(it) }
+    var fabExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = Color.Transparent,
-        floatingActionButton = {
-            QuickCreateFab(
-                onCreateLog = { quickCreate = Category.LOG },
-                onCreateIdea = { quickCreate = Category.IDEA },
-                onCreateEmotion = onOpenEmotion,
-                onCreateCalendar = onOpenCalendar,
-            )
-        },
     ) { innerPadding ->
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
             item(key = "greeting") {
                 Column(modifier = Modifier.padding(vertical = 12.dp)) {
                     Text(
@@ -151,15 +157,50 @@ fun HomeScreen(
             }
             item(key = "fab-space") { Spacer(Modifier.height(72.dp)) }
         }
+
+            androidx.compose.animation.AnimatedVisibility(
+                visible = fabExpanded,
+                enter = androidx.compose.animation.fadeIn(),
+                exit = androidx.compose.animation.fadeOut(),
+            ) {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.32f))
+                        .clickable { fabExpanded = false },
+                )
+            }
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.BottomEnd,
+            ) {
+                QuickCreateFab(
+                    expanded = fabExpanded,
+                    onExpandedChange = { fabExpanded = it },
+                    onCreateLog = { quickCreateKey = Category.LOG.name },
+                    onCreateIdea = { quickCreateKey = Category.IDEA.name },
+                    onCreateEmotion = {
+                        fabExpanded = false
+                        onOpenEmotion()
+                    },
+                    onCreateCalendar = {
+                        fabExpanded = false
+                        onOpenCalendar()
+                    },
+                )
+            }
+        }
     }
+
+    BackHandler(enabled = fabExpanded) { fabExpanded = false }
 
     quickCreate?.let { category ->
         QuickInputDialog(
             category = category,
-            onDismiss = { quickCreate = null },
+            onDismiss = { quickCreateKey = null },
             onSave = { text ->
                 viewModel.quickAdd(text, category)
-                quickCreate = null
+                quickCreateKey = null
             },
         )
     }
@@ -221,6 +262,8 @@ private fun QuickInputDialog(
 ) {
     var text by remember { mutableStateOf("") }
     val isIdea = category == Category.IDEA
+    val focusRequester = androidx.compose.ui.focus.FocusRequester()
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (isIdea) "记录灵感" else "记录日志") },
@@ -230,12 +273,15 @@ private fun QuickInputDialog(
                 onValueChange = { text = it.take(140) },
                 placeholder = { Text(if (isIdea) "此刻的想法是..." else "闪过即留...") },
                 supportingText = { Text("${text.length}/140") },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(focusRequester),
             )
         },
         confirmButton = {
             TextButton(
-                onClick = { if (text.isNotBlank()) onSave(text) },
+                onClick = { onSave(text) },
+                enabled = text.isNotBlank(),
             ) { Text("保存") }
         },
         dismissButton = {

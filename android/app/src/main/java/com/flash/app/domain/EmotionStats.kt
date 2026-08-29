@@ -20,8 +20,10 @@ object EmotionStats {
         today.minusDays(days - 1L) to today
 
     private fun inWindow(recordDate: String, start: LocalDate, end: LocalDate): Boolean {
-        val d = LocalDate.parse(recordDate)
-        return !d.isBefore(start) && !d.isAfter(end)
+        // yyyy-MM-dd 字典序即时间序，避免 LocalDate.parse 在非法日期时抛异常
+        val startKey = start.toString()
+        val endKey = end.toString()
+        return recordDate >= startKey && recordDate <= endKey
     }
 
     fun hasEmotionData(

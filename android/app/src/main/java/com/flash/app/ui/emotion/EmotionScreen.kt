@@ -37,6 +37,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -65,8 +66,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.flash.app.FlashApplication
 import com.flash.app.data.model.EmotionLevel
 import com.flash.app.data.model.EmotionRecord
+import com.flash.app.data.model.SubEmotion
 import com.flash.app.data.model.emoji
 import com.flash.app.ui.components.StyleCard
+import com.flash.app.ui.components.hexToColor
 import com.flash.app.ui.theme.ModuleColors
 
 /** 情绪页（PRD 7.4 / 效果图）：emoji 选择器 + 简短文字 + 周趋势 + 历史 */
@@ -135,6 +138,13 @@ fun EmotionScreen(onBack: () -> Unit) {
                 onSelect = viewModel::selectLevel,
             )
             Spacer(Modifier.height(12.dp))
+            if (viewModel.selectedLevel.isNegative) {
+                SubEmotionSelector(
+                    selected = viewModel.selectedSubEmotion,
+                    onSelect = viewModel::selectSubEmotion,
+                )
+                Spacer(Modifier.height(12.dp))
+            }
             OutlinedTextField(
                 value = viewModel.note,
                 onValueChange = viewModel::updateNote,
@@ -193,6 +203,38 @@ fun EmotionScreen(onBack: () -> Unit) {
                 TextButton(onClick = { deletingRecord = null }) { Text("取消") }
             },
         )
+    }
+}
+
+/** 负面情绪子类型选择器（伤心/生气/难受） */
+@Composable
+private fun SubEmotionSelector(
+    selected: SubEmotion?,
+    onSelect: (SubEmotion?) -> Unit,
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        SubEmotion.entries.forEach { sub ->
+            val isSelected = selected == sub
+            FilterChip(
+                selected = isSelected,
+                onClick = { onSelect(if (isSelected) null else sub) },
+                label = { Text(sub.displayName) },
+                leadingIcon = {
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .background(
+                                color = sub.colorHex.hexToColor(),
+                                shape = CircleShape,
+                            ),
+                    )
+                },
+                modifier = Modifier.weight(1f),
+            )
+        }
     }
 }
 

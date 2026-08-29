@@ -21,7 +21,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatterBuilder
+import java.time.temporal.ChronoField
 import java.util.UUID
 
 /**
@@ -29,6 +32,16 @@ import java.util.UUID
  * createdAt 使用 ISO-8601（与 JS Date#toISOString 同格式），recordDate 为 yyyy-MM-dd。
  */
 class FlashRepository(private val db: FlashDatabase) {
+
+    /** 与 macOS DateFormatting.isoNow() 对齐：UTC .SSSZ，固定 3 位毫秒 */
+    private val ISO_MILLIS: DateTimeFormatter = DateTimeFormatterBuilder()
+        .appendPattern("yyyy-MM-dd'T'HH:mm:ss")
+        .appendValue(ChronoField.MILLI_OF_SECOND, 3)
+        .appendLiteral('Z')
+        .toFormatter()
+        .withZone(ZoneOffset.UTC)
+
+    private fun isoNow(): String = ISO_MILLIS.format(Instant.now())
 
     val logs: Flow<List<LogItem>> =
         db.logDao().observeAll().map { list -> list.map { it.toModel() } }
@@ -49,7 +62,7 @@ class FlashRepository(private val db: FlashDatabase) {
                 colorTag = colorTag,
                 category = category,
                 importance = importance.coerceIn(0, 4),
-                createdAt = DateTimeFormatter.ISO_INSTANT.format(Instant.now()),
+                createdAt = isoNow(),
                 recordDate = LocalDate.now().toString(),
             ).toEntity()
         )
@@ -73,7 +86,7 @@ class FlashRepository(private val db: FlashDatabase) {
                 status = status,
                 note = note,
                 recordDate = LocalDate.now().toString(),
-                createdAt = DateTimeFormatter.ISO_INSTANT.format(Instant.now()),
+                createdAt = isoNow(),
             ).toEntity()
         )
     }

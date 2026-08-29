@@ -71,6 +71,9 @@ class ExploreViewModel(private val repository: FlashRepository) : ViewModel() {
         if (content.isEmpty()) return
         val asIdea = _filter.value == ExploreFilter.IDEA
         val tag = _selectedTag.value ?: if (asIdea) ColorTag.IDEA else ColorTag.DAILY
+        // 先同步清状态再 launch，防止连点产生重复记录
+        _text.value = ""
+        _selectedTag.value = null
         viewModelScope.launch {
             repository.addLog(
                 content = content,
@@ -78,8 +81,6 @@ class ExploreViewModel(private val repository: FlashRepository) : ViewModel() {
                 category = if (asIdea) Category.IDEA else Category.LOG,
                 importance = if (asIdea) importanceFromContent(content) else 0,
             )
-            _text.value = ""
-            _selectedTag.value = null
         }
     }
 

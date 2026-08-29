@@ -55,37 +55,19 @@ import com.flash.app.ui.theme.ModuleColors
  */
 @Composable
 fun QuickCreateFab(
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
     onCreateLog: () -> Unit,
     onCreateIdea: () -> Unit,
     onCreateEmotion: () -> Unit,
     onCreateCalendar: () -> Unit,
 ) {
-    var expanded by remember { mutableStateOf(false) }
-
     fun collapse(action: () -> Unit) {
-        expanded = false
+        onExpandedChange(false)
         action()
     }
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomEnd) {
-        // 展开时的全屏半透明遮罩：位于内容层之上、FAB 列之下，点击收起菜单
-        AnimatedVisibility(
-            visible = expanded,
-            enter = fadeIn(tween(180)),
-            exit = fadeOut(tween(150)),
-        ) {
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.32f))
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                    ) { expanded = false },
-            )
-        }
-
-        Column(horizontalAlignment = Alignment.End) {
+    Column(horizontalAlignment = Alignment.End) {
         AnimatedVisibility(
             visible = expanded,
             enter = fadeIn(tween(180)) + expandVertically(tween(220)),
@@ -111,7 +93,7 @@ fun QuickCreateFab(
         }
         val rotation by animateFloatAsState(if (expanded) 45f else 0f, tween(200), label = "fabRot")
         FloatingActionButton(
-            onClick = { expanded = !expanded },
+            onClick = { onExpandedChange(!expanded) },
             containerColor = MaterialTheme.colorScheme.primary,
         ) {
             Icon(
@@ -119,7 +101,6 @@ fun QuickCreateFab(
                 contentDescription = if (expanded) "收起" else "快速创建",
                 modifier = Modifier.rotate(rotation),
             )
-        }
         }
     }
 }

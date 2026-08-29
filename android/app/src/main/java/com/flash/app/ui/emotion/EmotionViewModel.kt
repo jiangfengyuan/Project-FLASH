@@ -53,10 +53,11 @@ class EmotionViewModel(private val repository: FlashRepository) : ViewModel() {
         val level = selectedLevel
         val sub = if (level.isNegative) selectedSubEmotion else null
         val noteValue = note.ifBlank { null }
+        // 先同步清状态再 launch，防止连点产生重复记录
+        note = ""
+        selectedSubEmotion = null
         viewModelScope.launch {
             repository.addEmotion(level = level, subEmotion = sub, note = noteValue)
-            note = ""
-            selectedSubEmotion = null
         }
     }
 
