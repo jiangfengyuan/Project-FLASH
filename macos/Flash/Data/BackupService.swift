@@ -31,6 +31,7 @@ struct ImportPreview {
     let skippedEmotions: Int
     let logs: [LogItem]
     let emotions: [EmotionRecord]
+    var difference: BackupDifference? = nil
 }
 
 /// JSON 备份导出/导入，格式与 Android Backup.kt / Web backup.ts 完全一致：

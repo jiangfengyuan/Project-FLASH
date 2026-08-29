@@ -37,6 +37,19 @@ Android 端原生实现。Kotlin + Jetpack Compose，严格遵循 Material Desig
 
 APK 输出：`app/build/outputs/apk/debug/app-debug.apk`
 
+## 跨设备备份传输
+
+设置页的「传输到其他设备」会在缓存目录生成一次性 JSON 副本，通过受限
+`FileProvider` URI 调用 Android 系统分享面板。可选择附近分享、邮件、聊天应用或
+云盘。
+
+「局域网发送 / 接收」使用 Android NSD 自动发现同一网络内的 Android 或 macOS
+设备。发送方随机生成四位 PIN；PIN 60 秒失效、最多尝试五次，正确配对并完成
+一次传输后服务立即关闭。App 仅申请局域网发现与连接所需权限，不连接 Flash
+服务器；接收内容会执行格式校验并分析新增、修改、相同与仅本机数据，再选择差异
+合并或覆盖。
+建议只在可信的家庭或办公局域网使用。
+
 ## 目录结构
 
 ```
@@ -62,7 +75,7 @@ app/src/main/java/com/flash/app/
     ├── emotion/             # 情绪 Tab：滑块/子情绪/统计图表/历史
     ├── stats/               # 统计 Tab：情绪趋势与分布
     ├── welcome/             # 首次启动引导页
-    └── settings/            # 设置：外观/备份导入导出/清空/关于
+    └── settings/            # 设置：外观/备份分享与局域网传输/导入导出/清空/关于
 ```
 
 ## 发布签名 / Release Signing

@@ -1,6 +1,6 @@
 # Flash Aero · macOS
 
-桌面端原生实现。SwiftUI + SwiftData，零第三方依赖，App Sandbox 内运行，无网络权限。
+桌面端原生实现。SwiftUI + SwiftData，零第三方依赖，在 App Sandbox 内运行。
 
 当前发布身份为 **Flash Aero v0.1.0**；`Aero` 为 v0 Alpha 阶段的版本代号。
 首个正式版将统一命名为 **Flash Pulse v1.0.0**。
@@ -19,7 +19,7 @@
 | 情绪 | 七级滑块 + 子情绪 + 备注，周趋势，近期记录 |
 | 日历 | 日志与情绪按日聚合的月历 |
 | 统计 | KPI、情绪趋势、子情绪分布 |
-| 设置 | 主题（系统 / 浅色 / 深色）、备份导入导出、清空数据 |
+| 设置 | 主题、备份导入导出、系统分享、PIN 配对局域网直传、清空数据 |
 | 菜单栏伴侣 | MenuBarExtra：快速记录（回车即存）、今日概览、一键跳转主窗口 |
 
 快捷键：⌘N 新建、⌘K 搜索、⌘, 设置、⇧⌘E 导出备份、⌘1…⌘6 切换模块。
@@ -65,8 +65,8 @@ DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer \
 xcodebuild test -scheme Flash -destination 'platform=macOS'
 ```
 
-当前 51 个用例，覆盖模型 / Repository / BackupService / SettingsStore /
-Domain 纯函数 / 主题色。
+当前 54 个用例，覆盖模型 / Repository / BackupService / BackupTransfer / BackupDiff /
+LocalBackupTransfer / SettingsStore / Domain 纯函数 / 主题色。
 
 ## 备份格式
 
@@ -79,6 +79,13 @@ Domain 纯函数 / 主题色。
 
 - `version` 不匹配拒绝导入；非法条目逐条跳过；单文件上限 50 MB。
 - 读写走 App Sandbox 的用户择定文件授权，导出文件权限 0600。
+- 「通过系统分享」会创建沙箱缓存副本并调用系统分享服务，可选择 AirDrop、
+  信息、邮件或云盘；Flash 不会自行上传文件。
+- 「局域网发送 / 接收」通过 Bonjour 自动发现 Android 或 macOS 设备。发送方生成
+  随机四位 PIN，PIN 60 秒失效、最多尝试五次；正确配对并完成一次传输后监听立即
+  关闭。接收后会分析新增、修改、相同与仅本机数据，再选择差异合并或覆盖。仅启用
+  App Sandbox 的客户端 / 服务端网络能力，数据不经过 Flash 服务器；
+  建议只在可信的家庭或办公局域网使用。
 
 ## 性能基线
 

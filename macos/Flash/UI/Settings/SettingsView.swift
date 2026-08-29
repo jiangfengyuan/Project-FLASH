@@ -22,6 +22,8 @@ struct SettingsView: View {
     @State private var showOverwriteConfirm = false
     @State private var showClearConfirm = false
     @State private var message: String? = nil
+    @State private var sharingPicker: NSSharingServicePicker? = nil
+    @State private var lanTransfer = LocalBackupTransferController()
     /// 导入/导出进行中（大文件 IO 已移到后台，期间禁用按钮防重入）
     @State private var isBusy = false
     /// 成功反馈走顶部 toast（与 Home 一致，nil 表示不展示）；失败仍走 alert 保留详情。
@@ -47,13 +49,19 @@ struct SettingsView: View {
             .offset(y: !appearanceAppeared && !reduceMotion ? 6 : 0)
 
             Section("数据") {
+                Button("通过系统分享…") { transferBackup() }
+                    .hoverFeedback(reduceMotion: reduceMotion)
+                HStack {
+                    Button("局域网发送…") { startLanSend() }
+                    Button("局域网接收…") { lanTransfer.startReceiving() }
+                }
                 Button("导出备份…") { exportBackup() }
                     .hoverFeedback(reduceMotion: reduceMotion)
                 Button("导入备份…") { chooseImportFile() }
                     .hoverFeedback(reduceMotion: reduceMotion)
                 Button("清空全部数据…", role: .destructive) { showClearConfirm = true }
                     .hoverFeedback(reduceMotion: reduceMotion)
-                Text("备份为明文 JSON 文件，请妥善选择存放位置。")
+                Text("通过系统分享传输明文 JSON；可选择 AirDrop、信息、邮件或云盘。")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
                 if isBusy {
@@ -87,6 +95,23 @@ struct SettingsView: View {
             playEntranceAnimation()
         }
         .onChange(of: appState.exportRequestToken) { flushExportRequest() }
+        .onDisappear { lanTransfer.cancel() }
+        .sheet(isPresented: lanTransferPresented) { lanTransferSheet }
+        .onChange(of: lanTransfer.receivedJSON) { _, json in
+            guard let json else { return }
+            lanTransfer.receivedJSON = nil
+            prepareLanImport(json)
+        }
+        .onChange(of: lanTransfer.errorMessage) { _, error in
+            guard let error else { return }
+            lanTransfer.errorMessage = nil
+            message = error
+        }
+        .onChange(of: lanTransfer.sendCompleted) { _, completed in
+            guard completed else { return }
+            lanTransfer.sendCompleted = false
+            showToast("✓ 局域网备份已发送")
+        }
         // 顶部 toast：过渡由 ToastView 内置 .pop 接管，调用点不再叠加 .transition
         .overlay(alignment: .top) {
             if let toastMessage {
@@ -102,14 +127,12 @@ struct SettingsView: View {
             toastMessage = nil
         }
         .alert("导入备份", isPresented: previewPresented) {
-            Button("合并导入") { pendingImport = importPreview; confirmImport(overwrite: false) }
+            Button("按差异合并") { pendingImport = importPreview; confirmImport(overwrite: false) }
             Button("覆盖导入", role: .destructive) { pendingImport = importPreview; showOverwriteConfirm = true }
             Button("取消", role: .cancel) { importPreview = nil; pendingImport = nil }
         } message: {
             if let preview = importPreview {
-                Text("包含 \(preview.logCount) 条日志、\(preview.emotionCount) 条情绪" +
-                     (preview.skippedLogs + preview.skippedEmotions > 0
-                      ? "\n跳过异常数据 \(preview.skippedLogs + preview.skippedEmotions) 条" : ""))
+                Text(importAnalysisText(preview))
             }
         }
         .alert("覆盖导入将清空现有全部数据，确定继续？", isPresented: $showOverwriteConfirm) {
@@ -139,10 +162,87 @@ struct SettingsView: View {
         Binding(get: { message != nil }, set: { if !$0 { message = nil } })
     }
 
+    private var lanTransferPresented: Binding<Bool> {
+        Binding(get: { lanTransfer.mode != .idle }, set: { if !$0 { lanTransfer.cancel() } })
+    }
+
+    @ViewBuilder private var lanTransferSheet: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            switch lanTransfer.mode {
+            case .sending:
+                Text("等待接收设备").font(.title2.bold())
+                Text("在另一台设备选择“局域网接收”，然后输入配对 PIN：")
+                Text(lanTransfer.pin)
+                    .font(.system(size: 48, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.tint)
+                    .textSelection(.enabled)
+                Text("PIN 仅本次有效，60 秒后自动失效。")
+                    .font(.caption).foregroundStyle(.secondary)
+                Button("取消发送") { lanTransfer.cancel() }
+
+            case .receiving:
+                Text("从局域网接收").font(.title2.bold())
+                if lanTransfer.devices.isEmpty {
+                    HStack { ProgressView(); Text("正在查找附近的 Flash Aero…") }
+                } else {
+                    Text("选择发送设备：")
+                    ForEach(lanTransfer.devices) { device in
+                        Button {
+                            lanTransfer.selectedDevice = device
+                        } label: {
+                            HStack {
+                                Image(systemName: lanTransfer.selectedDevice == device ? "checkmark.circle.fill" : "circle")
+                                Text(device.name)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                TextField("四位配对 PIN", text: $lanTransfer.enteredPIN)
+                    .textFieldStyle(.roundedBorder)
+                    .onChange(of: lanTransfer.enteredPIN) { _, value in
+                        lanTransfer.enteredPIN = String(value.filter(\.isNumber).prefix(4))
+                    }
+                HStack {
+                    Button("取消") { lanTransfer.cancel() }
+                    Spacer()
+                    Button("配对并接收") { lanTransfer.connect() }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(lanTransfer.selectedDevice == nil || lanTransfer.enteredPIN.count != 4)
+                }
+
+            case .connecting:
+                Text("正在配对").font(.title2.bold())
+                HStack { ProgressView(); Text("正在验证 PIN 并接收备份…") }
+                Button("取消") { lanTransfer.cancel() }
+
+            case .idle:
+                EmptyView()
+            }
+        }
+        .padding(24)
+        .frame(width: 420)
+    }
+
     private var appVersion: String {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
         let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?"
         return "Flash Aero v\(version) (\(build))"
+    }
+
+    private func importAnalysisText(_ preview: ImportPreview) -> String {
+        var text = "包含 \(preview.logCount) 条日志、\(preview.emotionCount) 条情绪"
+        let skipped = preview.skippedLogs + preview.skippedEmotions
+        if skipped > 0 { text += "\n跳过异常数据 \(skipped) 条" }
+        if let difference = preview.difference {
+            text += "\n\n差异分析"
+            text += "\n日志：新增 \(difference.logs.added) · 修改 \(difference.logs.changed)" +
+                " · 相同 \(difference.logs.unchanged) · 仅本机 \(difference.logs.localOnly)"
+            text += "\n情绪：新增 \(difference.emotions.added) · 修改 \(difference.emotions.changed)" +
+                " · 相同 \(difference.emotions.unchanged) · 仅本机 \(difference.emotions.localOnly)"
+            text += "\n\n差异合并会新增或更新接收数据，并保留仅本机数据；覆盖会先清空本机数据。"
+        }
+        return text
     }
 
     /// 入场动画：三分组 fade + 轻微上移（y 6→0，对齐 .appear 过渡），
@@ -161,6 +261,71 @@ struct SettingsView: View {
     }
 
     // MARK: - 导出
+
+    private func transferBackup() {
+        isBusy = true
+        Task {
+            defer { isBusy = false }
+            do {
+                let logs = try repository?.allLogs() ?? []
+                let emotions = try repository?.allEmotions() ?? []
+                let version = appVersion
+                let url = try await Task.detached(priority: .userInitiated) {
+                    let json = BackupService.exportJSON(logs: logs, emotions: emotions,
+                                                        appVersion: version)
+                    return try BackupTransfer.createShareFile(json: json)
+                }.value
+                guard let view = NSApp.keyWindow?.contentView ?? NSApp.mainWindow?.contentView else {
+                    throw TransferPresentationError.noWindow
+                }
+                let picker = NSSharingServicePicker(items: [url])
+                sharingPicker = picker
+                picker.show(relativeTo: view.bounds, of: view, preferredEdge: .minY)
+            } catch {
+                print("传输备份失败: \(error)")
+                message = "生成传输文件失败，请重试"
+            }
+        }
+    }
+
+    private func startLanSend() {
+        do {
+            let logs = try repository?.allLogs() ?? []
+            let emotions = try repository?.allEmotions() ?? []
+            let json = BackupService.exportJSON(logs: logs, emotions: emotions, appVersion: appVersion)
+            lanTransfer.startSending(json: json)
+        } catch {
+            message = "无法生成局域网备份，请重试"
+        }
+    }
+
+    private func prepareLanImport(_ json: String) {
+        isBusy = true
+        Task {
+            defer { isBusy = false }
+            do {
+                let localLogs = try repository?.allLogs() ?? []
+                let localEmotions = try repository?.allEmotions() ?? []
+                let preview = try await Task.detached(priority: .userInitiated) {
+                    var preview = try BackupService.parse(json)
+                    preview.difference = BackupDiff.analyze(
+                        localLogs: localLogs, localEmotions: localEmotions,
+                        incomingLogs: preview.logs, incomingEmotions: preview.emotions)
+                    return preview
+                }.value
+                pendingImport = preview
+                importPreview = preview
+            } catch let error as BackupError {
+                message = error.userMessage
+            } catch {
+                message = "接收到的内容不是有效的 Flash 备份"
+            }
+        }
+    }
+
+    private enum TransferPresentationError: Error {
+        case noWindow
+    }
 
     /// 菜单「导出备份…」⇧⌘E：token 递增时弹导出面板。
     /// onAppear 兜底：跨模块命令使本视图首次创建时 token 已递增，onChange 不会回放。
@@ -224,6 +389,8 @@ struct SettingsView: View {
         Task {
             defer { isBusy = false }
             do {
+                let localLogs = try repository?.allLogs() ?? []
+                let localEmotions = try repository?.allEmotions() ?? []
                 let preview = try await Task.detached(priority: .userInitiated) {
                     // 全量读入前先查文件大小，超 50MB 直接拒绝
                     let values = try url.resourceValues(forKeys: [.fileSizeKey])
@@ -234,7 +401,11 @@ struct SettingsView: View {
                     guard data.count <= BackupService.maxFileBytes else {
                         throw BackupError.fileTooLarge
                     }
-                    return try BackupService.parse(String(decoding: data, as: UTF8.self))
+                    var preview = try BackupService.parse(String(decoding: data, as: UTF8.self))
+                    preview.difference = BackupDiff.analyze(
+                        localLogs: localLogs, localEmotions: localEmotions,
+                        incomingLogs: preview.logs, incomingEmotions: preview.emotions)
+                    return preview
                 }.value
                 pendingImport = preview
                 importPreview = preview

@@ -6,6 +6,11 @@
 
 package com.flash.app.ui.settings
 
+import android.Manifest
+import android.content.ClipData
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -27,6 +32,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -47,12 +54,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.core.content.ContextCompat
 import com.flash.app.BuildConfig
 import com.flash.app.FlashApplication
 import com.flash.app.data.ThemeMode
 import com.flash.app.data.UiStyle
+import com.flash.app.data.LocalBackupTransfer
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -60,14 +71,21 @@ import java.time.format.DateTimeFormatter
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(onBack: (() -> Unit)? = null) {
-    val app = LocalContext.current.applicationContext as FlashApplication
+    val context = LocalContext.current
+    val app = context.applicationContext as FlashApplication
     val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.factory(app))
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
     val uiStyle by viewModel.uiStyle.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
     val importPreview by viewModel.importPreview.collectAsStateWithLifecycle()
+    val shareUri by viewModel.shareUri.collectAsStateWithLifecycle()
+    val transferInProgress by viewModel.transferInProgress.collectAsStateWithLifecycle()
+    val lanTransfer by viewModel.lanTransfer.collectAsStateWithLifecycle()
 
     var showClearConfirm by remember { mutableStateOf(false) }
+    var selectedLanDevice by remember { mutableStateOf<LocalBackupTransfer.Device?>(null) }
+    var lanPin by remember { mutableStateOf("") }
+    var pendingLanAction by remember { mutableStateOf<(() -> Unit)?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     val exportLauncher = rememberLauncherForActivityResult(
@@ -78,10 +96,46 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
         ActivityResultContracts.OpenDocument(),
     ) { uri -> uri?.let(viewModel::loadImport) }
 
+    val nearbyPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        val action = pendingLanAction
+        pendingLanAction = null
+        if (granted) action?.invoke() else viewModel.reportLanPermissionDenied()
+    }
+
+    val runWithLanPermission: (() -> Unit) -> Unit = { action ->
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+            ContextCompat.checkSelfPermission(context, Manifest.permission.NEARBY_WIFI_DEVICES) ==
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            action()
+        } else {
+            pendingLanAction = action
+            nearbyPermissionLauncher.launch(Manifest.permission.NEARBY_WIFI_DEVICES)
+        }
+    }
+
     LaunchedEffect(message) {
         message?.let {
             snackbarHostState.showSnackbar(it)
             viewModel.clearMessage()
+        }
+    }
+
+    LaunchedEffect(shareUri) {
+        val uri = shareUri ?: return@LaunchedEffect
+        viewModel.consumeShareUri()
+        runCatching {
+            val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "application/json"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                clipData = ClipData.newRawUri("Flash Aero 备份", uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            context.startActivity(Intent.createChooser(sendIntent, "传输 Flash Aero 备份"))
+        }.onFailure {
+            viewModel.reportShareFailure()
         }
     }
 
@@ -162,10 +216,33 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
             HorizontalDivider()
             SectionTitle("数据")
             Text(
-                "备份为 JSON 文件，与 Web 版格式互通",
+                "备份为 JSON 文件，可通过系统分享传输到其他设备",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            FilledTonalButton(
+                onClick = viewModel::prepareBackupTransfer,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !transferInProgress,
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
+            ) { Text(if (transferInProgress) "正在准备…" else "传输到其他设备") }
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                FilledTonalButton(
+                    onClick = { runWithLanPermission(viewModel::startLanSend) },
+                    modifier = Modifier.weight(1f),
+                ) { Text("局域网发送") }
+                FilledTonalButton(
+                    onClick = { runWithLanPermission {
+                        selectedLanDevice = null
+                        lanPin = ""
+                        viewModel.startLanReceive()
+                    } },
+                    modifier = Modifier.weight(1f),
+                ) { Text("局域网接收") }
+            }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 FilledTonalButton(
                     onClick = {
@@ -217,13 +294,18 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
                         if (preview.skippedLogs + preview.skippedEmotions > 0) {
                             append("\n${preview.skippedLogs + preview.skippedEmotions} 条数据格式异常，将被跳过。")
                         }
-                        append("\n\n合并：保留现有数据，同 ID 覆盖。\n覆盖：清空现有数据后导入。")
+                        append("\n\n差异分析")
+                        append("\n日志：新增 ${preview.difference.logs.added} · 修改 ${preview.difference.logs.changed}" +
+                            " · 相同 ${preview.difference.logs.unchanged} · 仅本机 ${preview.difference.logs.localOnly}")
+                        append("\n情绪：新增 ${preview.difference.emotions.added} · 修改 ${preview.difference.emotions.changed}" +
+                            " · 相同 ${preview.difference.emotions.unchanged} · 仅本机 ${preview.difference.emotions.localOnly}")
+                        append("\n\n差异合并会新增或更新接收数据，并保留仅本机数据；覆盖会先清空本机数据。")
                     }
                 )
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.confirmImport(overwrite = false) }) {
-                    Text("合并")
+                    Text("按差异合并")
                 }
             },
             dismissButton = {
@@ -235,6 +317,78 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
                 }
             },
         )
+    }
+
+    when (lanTransfer.mode) {
+        LanTransferMode.SENDING -> AlertDialog(
+            onDismissRequest = viewModel::cancelLanTransfer,
+            title = { Text("等待接收设备") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("在另一台设备选择“局域网接收”，然后输入配对 PIN：")
+                    Text(
+                        lanTransfer.pin,
+                        style = MaterialTheme.typography.displayMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    Text("PIN 仅本次有效，60 秒后自动失效。")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = viewModel::cancelLanTransfer) { Text("取消发送") }
+            },
+        )
+
+        LanTransferMode.RECEIVING -> AlertDialog(
+            onDismissRequest = viewModel::cancelLanTransfer,
+            title = { Text("从局域网接收") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(if (lanTransfer.devices.isEmpty()) "正在查找附近的 Flash Aero…" else "选择发送设备：")
+                    lanTransfer.devices.forEach { device ->
+                        OutlinedButton(
+                            onClick = { selectedLanDevice = device },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text(if (selectedLanDevice?.id == device.id) "✓ ${device.name}" else device.name)
+                        }
+                    }
+                    OutlinedTextField(
+                        value = lanPin,
+                        onValueChange = { lanPin = it.filter(Char::isDigit).take(4) },
+                        label = { Text("四位配对 PIN") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { selectedLanDevice?.let { viewModel.receiveLanBackup(it, lanPin) } },
+                    enabled = selectedLanDevice != null && lanPin.length == 4,
+                ) { Text("配对并接收") }
+            },
+            dismissButton = {
+                TextButton(onClick = viewModel::cancelLanTransfer) { Text("取消") }
+            },
+        )
+
+        LanTransferMode.CONNECTING -> AlertDialog(
+            onDismissRequest = {},
+            title = { Text("正在配对") },
+            text = {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    CircularProgressIndicator()
+                    Text("正在验证 PIN 并接收备份…")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = viewModel::cancelLanTransfer) { Text("取消") }
+            },
+        )
+
+        LanTransferMode.IDLE -> Unit
     }
 
     if (showClearConfirm) {

@@ -15,6 +15,10 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.flash.app.FlashApplication
 import com.flash.app.data.Backup
+import com.flash.app.data.BackupTransfer
+import com.flash.app.data.BackupDiff
+import com.flash.app.data.BackupDifference
+import com.flash.app.data.LocalBackupTransfer
 import com.flash.app.data.SettingsStore
 import com.flash.app.data.ThemeMode
 import com.flash.app.data.UiStyle
@@ -23,7 +27,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Job
+
+enum class LanTransferMode { IDLE, SENDING, RECEIVING, CONNECTING }
+
+data class LanTransferState(
+    val mode: LanTransferMode = LanTransferMode.IDLE,
+    val pin: String = "",
+    val devices: List<LocalBackupTransfer.Device> = emptyList(),
+)
 
 data class ImportPreview(
     val logCount: Int,
@@ -32,6 +44,7 @@ data class ImportPreview(
     val skippedEmotions: Int,
     val logs: List<com.flash.app.data.model.LogItem>,
     val emotions: List<com.flash.app.data.model.EmotionRecord>,
+    val difference: BackupDifference,
 )
 
 class SettingsViewModel(
@@ -49,6 +62,18 @@ class SettingsViewModel(
 
     private val _importPreview = MutableStateFlow<ImportPreview?>(null)
     val importPreview: StateFlow<ImportPreview?> = _importPreview.asStateFlow()
+
+    private val _shareUri = MutableStateFlow<Uri?>(null)
+    val shareUri: StateFlow<Uri?> = _shareUri.asStateFlow()
+
+    private val _transferInProgress = MutableStateFlow(false)
+    val transferInProgress: StateFlow<Boolean> = _transferInProgress.asStateFlow()
+
+    private val _lanTransfer = MutableStateFlow(LanTransferState())
+    val lanTransfer: StateFlow<LanTransferState> = _lanTransfer.asStateFlow()
+    private var lanSender: LocalBackupTransfer.Sender? = null
+    private var lanDiscovery: LocalBackupTransfer.Discovery? = null
+    private var lanJob: Job? = null
 
     fun setThemeMode(mode: ThemeMode) = settings.setThemeMode(mode)
     fun setUiStyle(style: UiStyle) = settings.setUiStyle(style)
@@ -71,6 +96,107 @@ class SettingsViewModel(
                 _message.value = "导出失败：${it.message}"
             }
         }
+    }
+
+    fun prepareBackupTransfer() {
+        if (_transferInProgress.value) return
+        _transferInProgress.value = true
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching {
+                val (logs, emotions) = repository.exportSnapshot()
+                val json = Backup.exportJson(logs, emotions)
+                BackupTransfer.createShareUri(app, json)
+            }.onSuccess {
+                _shareUri.value = it
+            }.onFailure {
+                _message.value = "生成传输文件失败：${it.message}"
+            }
+            _transferInProgress.value = false
+        }
+    }
+
+    fun consumeShareUri() {
+        _shareUri.value = null
+    }
+
+    fun reportShareFailure() {
+        _message.value = "无法打开系统分享，请先安装可接收文件的应用"
+    }
+
+    fun reportLanPermissionDenied() {
+        _message.value = "需要“附近的设备”权限才能发现并连接局域网设备"
+    }
+
+    fun startLanSend() {
+        cancelLanTransfer()
+        lanJob = viewModelScope.launch(Dispatchers.IO) {
+            runCatching {
+                val (logs, emotions) = repository.exportSnapshot()
+                LocalBackupTransfer.Sender(app, Backup.exportJson(logs, emotions))
+            }.onSuccess { sender ->
+                lanSender = sender
+                _lanTransfer.value = LanTransferState(LanTransferMode.SENDING, pin = sender.pin)
+                val sent = runCatching { sender.run() }.getOrDefault(false)
+                if (sent) _message.value = "局域网备份已发送"
+                else if (_lanTransfer.value.mode == LanTransferMode.SENDING) {
+                    _message.value = "配对已结束，请重新发起"
+                }
+                lanSender = null
+                _lanTransfer.value = LanTransferState()
+            }.onFailure {
+                _message.value = "无法启动局域网发送：${it.message}"
+                _lanTransfer.value = LanTransferState()
+            }
+        }
+    }
+
+    fun startLanReceive() {
+        cancelLanTransfer()
+        _lanTransfer.value = LanTransferState(LanTransferMode.RECEIVING)
+        lanDiscovery = LocalBackupTransfer.Discovery(app) { devices ->
+            if (_lanTransfer.value.mode == LanTransferMode.RECEIVING) {
+                _lanTransfer.value = _lanTransfer.value.copy(devices = devices)
+            }
+        }.also { it.start() }
+    }
+
+    fun receiveLanBackup(device: LocalBackupTransfer.Device, pin: String) {
+        if (!pin.matches(Regex("\\d{4}"))) {
+            _message.value = "请输入四位数字 PIN"
+            return
+        }
+        lanDiscovery?.stop()
+        lanDiscovery = null
+        _lanTransfer.value = LanTransferState(LanTransferMode.CONNECTING)
+        lanJob = viewModelScope.launch(Dispatchers.IO) {
+            runCatching {
+                val json = LocalBackupTransfer.receive(device, pin)
+                val result = Backup.parse(json)
+                val (localLogs, localEmotions) = repository.exportSnapshot()
+                ImportPreview(
+                    result.logs.size, result.emotions.size,
+                    result.skippedLogs, result.skippedEmotions,
+                    result.logs, result.emotions,
+                    BackupDiff.analyze(localLogs, localEmotions, result.logs, result.emotions),
+                )
+            }.onSuccess {
+                _importPreview.value = it
+                _lanTransfer.value = LanTransferState()
+            }.onFailure {
+                _message.value = "局域网接收失败：${it.message}"
+                startLanReceive()
+            }
+        }
+    }
+
+    fun cancelLanTransfer() {
+        lanSender?.stop()
+        lanSender = null
+        lanDiscovery?.stop()
+        lanDiscovery = null
+        lanJob?.cancel()
+        lanJob = null
+        _lanTransfer.value = LanTransferState()
     }
 
     /** 第一步：读取并解析，弹出预览让用户选择合并或覆盖 */
@@ -110,6 +236,7 @@ class SettingsViewModel(
                     }
                 } ?: error("无法读取文件")
                 val result = Backup.parse(text)
+                val (localLogs, localEmotions) = repository.exportSnapshot()
                 ImportPreview(
                     logCount = result.logs.size,
                     emotionCount = result.emotions.size,
@@ -117,6 +244,9 @@ class SettingsViewModel(
                     skippedEmotions = result.skippedEmotions,
                     logs = result.logs,
                     emotions = result.emotions,
+                    difference = BackupDiff.analyze(
+                        localLogs, localEmotions, result.logs, result.emotions,
+                    ),
                 )
             }.onSuccess {
                 _importPreview.value = it
@@ -162,6 +292,11 @@ class SettingsViewModel(
                 .onSuccess { _message.value = "已清空全部数据" }
                 .onFailure { _message.value = "清空失败：${it.message}" }
         }
+    }
+
+    override fun onCleared() {
+        cancelLanTransfer()
+        super.onCleared()
     }
 
     companion object {
