@@ -15,6 +15,10 @@ import com.flash.app.data.model.SubEmotion
 import com.flash.app.BuildConfig
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
+import java.nio.ByteBuffer
+import java.nio.charset.CodingErrorAction
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -90,6 +94,35 @@ object Backup {
 
     class BackupFormatException(message: String) : Exception(message)
 
+    /**
+     * 从外部来源读取 UTF-8 备份时始终按“字节”限额，不能信任内容提供方上报的文件大小。
+     * 严格拒绝损坏的 UTF-8，避免替换字符让被篡改的数据静默通过校验。
+     */
+    fun readJson(input: InputStream, maxBytes: Long = MAX_FILE_BYTES): String {
+        require(maxBytes in 1..Int.MAX_VALUE.toLong())
+        val output = ByteArrayOutputStream(minOf(maxBytes, 64 * 1024L).toInt())
+        val buffer = ByteArray(8192)
+        var total = 0L
+        while (true) {
+            val read = input.read(buffer)
+            if (read < 0) break
+            total += read
+            if (total > maxBytes) {
+                throw BackupFormatException("备份文件超过 ${MAX_FILE_BYTES / 1024 / 1024} MB，无法导入")
+            }
+            output.write(buffer, 0, read)
+        }
+        return try {
+            Charsets.UTF_8.newDecoder()
+                .onMalformedInput(CodingErrorAction.REPORT)
+                .onUnmappableCharacter(CodingErrorAction.REPORT)
+                .decode(ByteBuffer.wrap(output.toByteArray()))
+                .toString()
+        } catch (_: Exception) {
+            throw BackupFormatException("备份文件不是有效的 UTF-8 JSON")
+        }
+    }
+
     private val UUID_REGEX =
         Regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
     private val RECORD_DATE_REGEX = Regex("^\\d{4}-\\d{2}-\\d{2}$")
@@ -107,7 +140,7 @@ object Backup {
 
     /** @throws BackupFormatException 文件整体不合法时抛出；单条非法数据跳过。 */
     fun parse(json: String): ImportResult {
-        if (json.length > MAX_FILE_BYTES) {
+        if (json.toByteArray(Charsets.UTF_8).size > MAX_FILE_BYTES) {
             throw BackupFormatException("备份文件超过 ${MAX_FILE_BYTES / 1024 / 1024} MB，无法导入")
         }
         val root = try {

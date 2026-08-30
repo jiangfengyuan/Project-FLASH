@@ -12,9 +12,27 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "${SCRIPT_DIR}/../android/app"
 
-STORE_PASS="${FLASH_RELEASE_STORE_PASSWORD:-flashdev}"
-KEY_PASS="${FLASH_RELEASE_KEY_PASSWORD:-${STORE_PASS}}"
+STORE_PASS="${FLASH_RELEASE_STORE_PASSWORD:-}"
+KEY_PASS="${FLASH_RELEASE_KEY_PASSWORD:-}"
 KEY_ALIAS="${FLASH_RELEASE_KEY_ALIAS:-flash-release}"
+
+if [[ -z "${STORE_PASS}" || -z "${KEY_PASS}" ]]; then
+  echo "Refusing to create a release key with a default password." >&2
+  echo "Set FLASH_RELEASE_STORE_PASSWORD and FLASH_RELEASE_KEY_PASSWORD first." >&2
+  exit 1
+fi
+
+if [[ ${#STORE_PASS} -lt 12 || ${#KEY_PASS} -lt 12 ]]; then
+  echo "Release-key passwords must each contain at least 12 characters." >&2
+  exit 1
+fi
+
+if [[ -e flash-release.keystore ]]; then
+  echo "Refusing to overwrite android/app/flash-release.keystore." >&2
+  exit 1
+fi
+
+umask 077
 
 keytool -genkey -v \
   -keystore flash-release.keystore \

@@ -89,6 +89,21 @@ enum BackupService {
 
     // MARK: - Import
 
+    /// 对用户选择的文件执行流式限额读取，防止文件大小元数据缺失或读取期间被替换时占满内存。
+    static func readJSON(from url: URL, maxBytes: Int = maxFileBytes) throws -> String {
+        precondition(maxBytes > 0)
+        let handle = try FileHandle(forReadingFrom: url)
+        defer { try? handle.close() }
+        var data = Data()
+        data.reserveCapacity(min(maxBytes, 64 * 1024))
+        while let chunk = try handle.read(upToCount: 64 * 1024), !chunk.isEmpty {
+            guard chunk.count <= maxBytes - data.count else { throw BackupError.fileTooLarge }
+            data.append(chunk)
+        }
+        guard let json = String(data: data, encoding: .utf8) else { throw BackupError.invalidJSON }
+        return json
+    }
+
     static func parse(_ json: String) throws -> ImportPreview {
         if json.utf8.count > maxFileBytes { throw BackupError.fileTooLarge }
         let object = try? JSONSerialization.jsonObject(with: Data(json.utf8))
@@ -109,7 +124,7 @@ enum BackupService {
         }
 
         var logs: [LogItem] = []
-        var skippedLogs = 0
+        var skippedLogs = max(0, logsArray.count - maxEntryCount)
         for element in logsArray.prefix(maxEntryCount) {
             if let entry = element as? [String: Any], let log = parseLog(entry) {
                 logs.append(log)
@@ -119,7 +134,7 @@ enum BackupService {
         }
 
         var emotions: [EmotionRecord] = []
-        var skippedEmotions = 0
+        var skippedEmotions = max(0, emotionsArray.count - maxEntryCount)
         for element in emotionsArray.prefix(maxEntryCount) {
             if let entry = element as? [String: Any], let emotion = parseEmotion(entry) {
                 emotions.append(emotion)
@@ -135,14 +150,14 @@ enum BackupService {
 
     private static func parseLog(_ dict: [String: Any]) -> LogItem? {
         guard let id = dict["id"] as? String, isUUID(id),
-              let content = dict["content"] as? String,
+              let content = dict["content"] as? String, content.count <= maxTextLength,
               let colorTag = (dict["colorTag"] as? String).flatMap(ColorTag.init(rawValue:)),
               let category = (dict["category"] as? String).flatMap(Category.init(rawValue:)),
               let createdAt = dict["createdAt"] as? String, let normalizedCreatedAt = normalizeISODate(createdAt),
-              let recordDate = dict["recordDate"] as? String, isDay(recordDate)
+              let recordDate = dict["recordDate"] as? String, isDay(recordDate),
+              let importance = dict["importance"] as? Int, (0...4).contains(importance)
         else { return nil }
-        let importance = min(max(dict["importance"] as? Int ?? 0, 0), 4)
-        return LogItem(id: id, content: String(content.prefix(maxTextLength)),
+        return LogItem(id: id, content: content,
                        colorTag: colorTag, category: category,
                        importance: importance, createdAt: normalizedCreatedAt, recordDate: recordDate)
     }
@@ -154,12 +169,26 @@ enum BackupService {
               let createdAt = dict["createdAt"] as? String, let normalizedCreatedAt = normalizeISODate(createdAt),
               let recordDate = dict["recordDate"] as? String, isDay(recordDate)
         else { return nil }
-        let subEmotion = (dict["subEmotion"] as? String).flatMap(SubEmotion.init(rawValue:))
-        let status = (dict["status"] as? String).map { String($0.prefix(maxTextLength)) }
-        let note = (dict["note"] as? String).map { String($0.prefix(maxTextLength)) }
+        let subEmotion: SubEmotion?
+        if let value = dict["subEmotion"], !(value is NSNull) {
+            guard let raw = value as? String, let parsed = SubEmotion(rawValue: raw) else { return nil }
+            subEmotion = parsed
+        } else {
+            subEmotion = nil
+        }
+        guard hasValidOptionalText(dict, key: "status"),
+              hasValidOptionalText(dict, key: "note") else { return nil }
+        let status = dict["status"] as? String
+        let note = dict["note"] as? String
         return EmotionRecord(id: id, level: level, subEmotion: subEmotion,
                              status: status, note: note,
                              recordDate: recordDate, createdAt: normalizedCreatedAt)
+    }
+
+    private static func hasValidOptionalText(_ dict: [String: Any], key: String) -> Bool {
+        guard let value = dict[key], !(value is NSNull) else { return true }
+        guard let text = value as? String else { return false }
+        return text.count <= maxTextLength
     }
 
     private static func isUUID(_ value: String) -> Bool {

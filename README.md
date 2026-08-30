@@ -18,9 +18,10 @@
 | --- | --- | --- |
 | Android | Kotlin + Jetpack Compose + Material 3 + Room | Flash Aero v0.1.0 |
 | macOS | SwiftUI + SwiftData，universal2（arm64 + x86_64） | Flash Aero v0.1.0 |
+| HarmonyOS | ArkTS + ArkUI + Preferences，纯原生 HAP | Flash Aero v0.1.0 |
 
 历史上有过 React + Capacitor 的 Web/混合版，已退役（git 历史可查），
-本仓库现在是纯原生仓库。
+本仓库现在包含 Android、macOS 与 HarmonyOS 三个纯原生工程。
 
 ## 功能
 
@@ -58,11 +59,30 @@ xcodebuild test -scheme Flash -destination 'platform=macOS'
 
 详见 [macos/README.md](macos/README.md)。
 
+### HarmonyOS
+
+要求 DevEco Studio 与 HarmonyOS SDK。可直接用 DevEco Studio 打开 `harmonyos/`，
+或执行命令行调试构建：
+
+鸿蒙版已对齐 Android 四模块首页与快速创建体验，并加入页面转场、手机/折叠屏/平板
+响应式导航，以及星闪、实况窗、闪控球的合规能力检测页；需审核能力的限制见子工程说明。
+
+```bash
+cd harmonyos
+DEVECO_SDK_HOME=/Applications/DevEco-Studio.app/Contents/sdk \
+/Applications/DevEco-Studio.app/Contents/tools/hvigor/bin/hvigorw \
+assembleHap --mode module -p product=default -p module=entry@default \
+-p buildMode=debug --no-daemon
+```
+
+详见 [harmonyos/README.md](harmonyos/README.md)。
+
 ## 仓库结构
 
 ```
 ├── android/     # 原生 Android 工程
 ├── macos/       # 原生 macOS 工程（含单元测试）
+├── harmonyos/   # 原生 HarmonyOS 工程（ArkTS + ArkUI）
 ├── scripts/     # Android 发布签名脚本
 ├── ROADMAP.md   # 开发路线图
 └── README.md
@@ -70,7 +90,7 @@ xcodebuild test -scheme Flash -destination 'platform=macOS'
 
 ## 备份格式
 
-两端共享同一 JSON 格式 `flash-backup-v1`：
+三端共享同一 JSON 格式 `flash-backup-v1`：
 
 ```json
 { "version": "flash-backup-v1", "exportedAt": "...", "appVersion": "...",

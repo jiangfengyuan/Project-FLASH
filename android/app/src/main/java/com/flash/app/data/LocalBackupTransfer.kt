@@ -173,7 +173,7 @@ object LocalBackupTransfer {
                 if (count < 0) error("连接中断，备份未接收完整")
                 offset += count
             }
-            return String(bytes, Charsets.UTF_8)
+            return Backup.readJson(bytes.inputStream())
         }
     }
 

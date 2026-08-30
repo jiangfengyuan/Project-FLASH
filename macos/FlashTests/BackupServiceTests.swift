@@ -79,10 +79,9 @@ struct BackupServiceTests {
         ]}
         """
         let preview = try BackupService.parse(json)
-        #expect(preview.skippedLogs == 1)          // 非法 UUID 跳过
+        #expect(preview.skippedLogs == 2)          // 非法 UUID 与越界 importance 均跳过
         #expect(preview.skippedEmotions == 1)      // level 越界跳过
-        #expect(preview.logs.count == 1)
-        #expect(preview.logs[0].importance == 4)   // importance 收敛到 0-4
+        #expect(preview.logs.isEmpty)
     }
 
     @Test func unknownColorTagSkipped() throws {
@@ -184,6 +183,45 @@ struct BackupServiceTests {
         let huge = String(repeating: " ", count: BackupService.maxFileBytes + 1)
         #expect(throws: BackupError.fileTooLarge) {
             _ = try BackupService.parse(huge)
+        }
+    }
+
+    @Test func oversizedAndInvalidOptionalFieldsAreSkipped() throws {
+        let oversized = String(repeating: "x", count: 100_001)
+        let json = """
+        {"version":"flash-backup-v1","logs":[
+          {"id":"11111111-1111-1111-1111-111111111111","content":"\(oversized)",
+           "colorTag":"daily","category":"log","importance":0,
+           "createdAt":"2026-08-13T08:00:00.000Z","recordDate":"2026-08-13"}
+        ],"emotions":[
+          {"id":"22222222-2222-2222-2222-222222222222","level":-2,"subEmotion":"unknown",
+           "status":42,"note":null,"recordDate":"2026-08-13",
+           "createdAt":"2026-08-13T08:00:00.000Z"}
+        ]}
+        """
+        let preview = try BackupService.parse(json)
+        #expect(preview.logs.isEmpty)
+        #expect(preview.emotions.isEmpty)
+        #expect(preview.skippedLogs == 1)
+        #expect(preview.skippedEmotions == 1)
+    }
+
+    @Test func boundedFileReaderRejectsOversizedAndMalformedInput() throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let oversized = directory.appendingPathComponent("oversized.json")
+        try Data("12345".utf8).write(to: oversized)
+        #expect(throws: BackupError.fileTooLarge) {
+            _ = try BackupService.readJSON(from: oversized, maxBytes: 4)
+        }
+
+        let malformed = directory.appendingPathComponent("malformed.json")
+        try Data([0xC3, 0x28]).write(to: malformed)
+        #expect(throws: BackupError.invalidJSON) {
+            _ = try BackupService.readJSON(from: malformed)
         }
     }
 }

@@ -41,6 +41,7 @@ final class LocalBackupSender: @unchecked Sendable {
     private let onFinish: @Sendable (Bool) -> Void
     private var attempts = 0
     private var finished = false
+    private var activeConnection: NWConnection?
 
     static func generatePIN() -> String {
         String(format: "%04d", Int.random(in: 0...9_999))
@@ -69,13 +70,21 @@ final class LocalBackupSender: @unchecked Sendable {
     func cancel() { queue.async { [weak self] in self?.finish(sent: false) } }
 
     private func accept(_ connection: NWConnection) {
+        // 同一时间只处理一个配对请求，避免攻击者预先并发建立大量连接绕过五次 PIN 限制。
+        guard !finished, activeConnection == nil else {
+            connection.cancel()
+            return
+        }
+        activeConnection = connection
         connection.start(queue: queue)
         receiveLine(from: connection, buffer: Data()) { [weak self] line in
             guard let self else { connection.cancel(); return }
+            guard !finished else { connection.cancel(); return }
             guard line == "\(Self.protocolLine) \(pin)" else {
                 attempts += 1
-                connection.send(content: Data("ERR PIN\n".utf8), completion: .contentProcessed { _ in
+                connection.send(content: Data("ERR PIN\n".utf8), completion: .contentProcessed { [weak self] _ in
                     connection.cancel()
+                    self?.activeConnection = nil
                 })
                 if attempts >= 5 { finish(sent: false) }
                 return
@@ -107,6 +116,8 @@ final class LocalBackupSender: @unchecked Sendable {
     private func finish(sent: Bool) {
         guard !finished else { return }
         finished = true
+        activeConnection?.cancel()
+        activeConnection = nil
         listener.cancel()
         onFinish(sent)
     }
@@ -134,6 +145,7 @@ final class LocalBackupBrowser: @unchecked Sendable {
 }
 
 final class LocalBackupReceiver: @unchecked Sendable {
+    private static let maxHeaderBytes = 64
     private let connection: NWConnection
     private let queue = DispatchQueue(label: "com.flash.app.local-transfer.receiver")
     private let completion: @Sendable (Result<String, Error>) -> Void
@@ -174,6 +186,9 @@ final class LocalBackupReceiver: @unchecked Sendable {
             guard let self else { return }
             if let data { buffer.append(data) }
             if expectedSize == nil, let newline = buffer.firstIndex(of: 0x0A) {
+                guard newline < Self.maxHeaderBytes else {
+                    self.complete(.failure(LocalTransferError.invalidResponse)); return
+                }
                 let header = String(decoding: buffer[..<newline], as: UTF8.self)
                 buffer.removeSubrange(...newline)
                 if header == "ERR PIN" { self.complete(.failure(LocalTransferError.invalidPIN)); return }
@@ -182,9 +197,14 @@ final class LocalBackupReceiver: @unchecked Sendable {
                     self.complete(.failure(LocalTransferError.invalidResponse)); return
                 }
                 expectedSize = size
+            } else if expectedSize == nil, buffer.count >= Self.maxHeaderBytes {
+                self.complete(.failure(LocalTransferError.invalidResponse)); return
             }
             if let expectedSize, buffer.count >= expectedSize {
-                let json = String(decoding: buffer.prefix(expectedSize), as: UTF8.self)
+                let payload = Data(buffer.prefix(expectedSize))
+                guard let json = String(data: payload, encoding: .utf8) else {
+                    self.complete(.failure(LocalTransferError.invalidResponse)); return
+                }
                 self.complete(.success(json))
             } else if error != nil || isComplete {
                 self.complete(.failure(error ?? LocalTransferError.interrupted))

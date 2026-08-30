@@ -397,11 +397,8 @@ struct SettingsView: View {
                     if let size = values.fileSize, size > BackupService.maxFileBytes {
                         throw BackupError.fileTooLarge
                     }
-                    let data = try Data(contentsOf: url)
-                    guard data.count <= BackupService.maxFileBytes else {
-                        throw BackupError.fileTooLarge
-                    }
-                    var preview = try BackupService.parse(String(decoding: data, as: UTF8.self))
+                    let json = try BackupService.readJSON(from: url)
+                    var preview = try BackupService.parse(json)
                     preview.difference = BackupDiff.analyze(
                         localLogs: localLogs, localEmotions: localEmotions,
                         incomingLogs: preview.logs, incomingEmotions: preview.emotions)

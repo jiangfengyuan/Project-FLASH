@@ -1,0 +1,6 @@
+-enable-property-obfuscation
+-enable-toplevel-obfuscation
+-enable-filename-obfuscation
+-enable-export-obfuscation
+-keep-global-name FlashStore
+-keep-global-name BackupService

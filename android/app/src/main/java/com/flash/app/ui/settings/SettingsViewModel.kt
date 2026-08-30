@@ -218,23 +218,8 @@ class SettingsViewModel(
                     throw Backup.BackupFormatException("备份文件超过 ${Backup.MAX_FILE_BYTES / 1024 / 1024} MB，无法导入")
                 }
 
-                val text = app.contentResolver.openInputStream(source)?.use { input ->
-                    input.bufferedReader(Charsets.UTF_8).use { reader ->
-                        val sb = StringBuilder()
-                        var total = 0L
-                        val buffer = CharArray(8192)
-                        while (true) {
-                            val read = reader.read(buffer)
-                            if (read == -1) break
-                            total += read
-                            if (total > Backup.MAX_FILE_BYTES) {
-                                throw Backup.BackupFormatException("备份文件超过 ${Backup.MAX_FILE_BYTES / 1024 / 1024} MB，无法导入")
-                            }
-                            sb.appendRange(buffer, 0, read)
-                        }
-                        sb.toString()
-                    }
-                } ?: error("无法读取文件")
+                val text = app.contentResolver.openInputStream(source)?.use(Backup::readJson)
+                    ?: error("无法读取文件")
                 val result = Backup.parse(text)
                 val (localLogs, localEmotions) = repository.exportSnapshot()
                 ImportPreview(

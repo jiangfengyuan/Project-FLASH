@@ -1,0 +1,7 @@
+{
+  "string": [
+    { "name": "module_desc", "value": "Flash Aero HarmonyOS 原生版本" },
+    { "name": "EntryAbility_desc", "value": "Flash Aero 主窗口" },
+    { "name": "EntryAbility_label", "value": "Flash Aero" }
+  ]
+}

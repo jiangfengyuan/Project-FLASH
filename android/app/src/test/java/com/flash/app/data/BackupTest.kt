@@ -6,7 +6,9 @@
 
 package com.flash.app.data
 
+import java.io.ByteArrayInputStream
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Test
 
 class BackupTest {
@@ -91,5 +93,19 @@ class BackupTest {
 
         assertEquals(0, result.emotions.size)
         assertEquals(1, result.skippedEmotions)
+    }
+
+    @Test
+    fun `bounded reader rejects a stream larger than its declared limit`() {
+        assertThrows(Backup.BackupFormatException::class.java) {
+            Backup.readJson(ByteArrayInputStream("12345".toByteArray()), maxBytes = 4)
+        }
+    }
+
+    @Test
+    fun `bounded reader rejects malformed UTF-8`() {
+        assertThrows(Backup.BackupFormatException::class.java) {
+            Backup.readJson(ByteArrayInputStream(byteArrayOf(0xC3.toByte(), 0x28)))
+        }
     }
 }

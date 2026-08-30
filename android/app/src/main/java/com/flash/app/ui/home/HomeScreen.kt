@@ -262,7 +262,7 @@ private fun QuickInputDialog(
 ) {
     var text by remember { mutableStateOf("") }
     val isIdea = category == Category.IDEA
-    val focusRequester = androidx.compose.ui.focus.FocusRequester()
+    val focusRequester = remember { androidx.compose.ui.focus.FocusRequester() }
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
     AlertDialog(
         onDismissRequest = onDismiss,

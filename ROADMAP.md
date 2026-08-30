@@ -3,7 +3,7 @@
 > 版本：Alpha v6 整理后现状
 > 更新日期：2026-07-13
 
-> **⚠️ 2026-08-14 现状更新**：本仓库已转为**纯原生仓库**——Web 版（React/Vite）与 Capacitor 壳（android/ ios/）已从工作区移除（git 历史可查），现役工程为 `android/`（Kotlin 原生，原 native-android/）与 `macos/`（SwiftUI 原生，原 native-macos/）。下文中 Web/Capacitor 相关的阶段与依赖清单均为历史记录；最新进行中事项见 M6/M7 里程碑。
+> **⚠️ 2026-08-29 现状更新**：本仓库已转为**纯原生仓库**——Web 版（React/Vite）与 Capacitor 壳已从工作区移除（git 历史可查），现役工程为 `android/`（Kotlin）、`macos/`（SwiftUI）与 `harmonyos/`（ArkTS/ArkUI）。下文 Web/Capacitor 阶段为历史记录；最新原生进度见 M6–M8。
 
 ---
 
@@ -126,6 +126,7 @@
 | M5：稳定运营版 | 第 24 周末 | E2E 测试、性能监控、云同步方案           | 持续小版本迭代                                |
 | M6：原生 Android Alpha | 原生启动后第 4 周 | 情绪记录 + 日志主流程可用的原生 APK | 与 Capacitor 版并行内测，收集对比反馈 |
 | M7：原生 macOS Alpha ✅ | 2026-08（已完成） | SwiftUI + SwiftData 九模块全量（首页/探索/记录流/情绪/日历/统计/设置/欢迎/复用组件）、universal2 双架构、JSON 备份与 Android/Web 互通、38 个单测全过 | 本地 adhoc 构建内测，对外分发需 Developer ID + 公证；后续候选：menu bar extra 快速记录、iCloud 同步、原生 iOS 版共享模型 |
+| M8：原生 HarmonyOS Alpha ✅ | 2026-08（基线完成） | ArkTS + ArkUI 纯原生移动端 HAP；日志、灵感、情绪、日历、统计、JSON 备份、三端局域网配对、Android 同构首页与快速创建、手机/折叠屏/平板响应式导航、星闪/实况窗/闪控球能力检测 | DevEco API 26 编译与手机、展开折叠屏模拟器通过；下一步为华为签名、平板与真机三端互传验收，以及实况窗/碰一碰/小艺意图场景准入 |
 
 > **2026-08-17 现状更新（macOS Aero 轮）**：统一动效系统 `FlashMotion`（Soft/Fast/Playful，全量尊重 Reduce Motion）；V1.1 首项落地——Menu Bar Companion 菜单栏伴侣（快速记录/今日概览/一键跳转）；情绪页主视觉为大 emoji + 调色板连续插值；架构债清偿——`RepositoryEnvironment.makeDefault()` 单一装配入口、Models 层去除 SwiftUI 依赖、数据库内存降级启动告警全链路打通；数据层微优化（覆盖式导入单事务、按 id 查询 fetchLimit=1、全局搜索单遍过滤）；测试 51 用例全绿。下一候选：全局快捷键 ⌘⇧Space、Favorites、Advanced Search、Widgets、Idea→Task。
 
