@@ -26,6 +26,9 @@ Android 端原生实现。Kotlin + Jetpack Compose，严格遵循 Material Desig
   `theme_from_argb_color(SEED)` 导出 light/dark 两组 roles，替换 `ui/theme/Theme.kt`
 - 数据模型与统计算法和 macOS 端一一对应（`domain/EmotionStats.kt` ↔
   `macos/Flash/Domain/EmotionStats.swift`），保证两端算出来一样
+- 首页、探索、日历和日志流中的记录可进入统一详情页，支持完整内容查看、编辑、
+  标签与重要度调整、日志/灵感分类迁移、分享和删除
+- 探索页支持按内容或标签搜索；日历聚合采用一次分组计算，避免数据量增长后逐日重复扫描
 
 ## 常用命令
 
@@ -68,6 +71,7 @@ app/src/main/java/com/flash/app/
     │   └── glass/           # GLASS 风格背景与主题扩展
     ├── navigation/          # Routes + FlashApp（NavigationBar + NavHost）
     ├── components/          # LogCard / hexToColor 等共享组件
+    ├── detail/              # 日志/灵感统一详情、编辑、分享与删除
     ├── home/                # Home Tab：今日概览与快速记录
     ├── explore/             # Explore Tab：灵感与日志发现
     ├── logflow/             # 日志管理：搜索/筛选/排序/编辑/删除

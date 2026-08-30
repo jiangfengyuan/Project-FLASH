@@ -8,6 +8,7 @@ package com.flash.app.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -55,18 +56,18 @@ class SettingsStore(context: Context) {
 
     fun setThemeMode(mode: ThemeMode) {
         _themeMode.value = mode
-        prefs.edit().putString(KEY_THEME_MODE, mode.storageKey).apply()
+        prefs.edit { putString(KEY_THEME_MODE, mode.storageKey) }
     }
 
     fun setUiStyle(style: UiStyle) {
         _uiStyle.value = style
-        prefs.edit().putString(KEY_UI_STYLE, style.storageKey).apply()
+        prefs.edit { putString(KEY_UI_STYLE, style.storageKey) }
     }
 
     /** Welcome 页完成后调用 */
     fun setWelcomed() {
         _welcomed.value = true
-        prefs.edit().putBoolean(KEY_WELCOMED, true).apply()
+        prefs.edit { putBoolean(KEY_WELCOMED, true) }
     }
 
     private companion object {

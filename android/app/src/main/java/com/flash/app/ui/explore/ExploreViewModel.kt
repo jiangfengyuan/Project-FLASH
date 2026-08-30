@@ -30,21 +30,38 @@ enum class ExploreFilter(val displayName: String) {
     IDEA("灵感"),
 }
 
+internal fun filterExploreLogs(
+    logs: List<LogItem>,
+    filter: ExploreFilter,
+    query: String,
+): List<LogItem> {
+    val categoryMatches = when (filter) {
+        ExploreFilter.ALL -> logs
+        ExploreFilter.LOG -> logs.filter { it.category == Category.LOG }
+        ExploreFilter.IDEA -> logs.filter { it.category == Category.IDEA }
+    }
+    val normalized = query.trim().lowercase()
+    return if (normalized.isEmpty()) categoryMatches else categoryMatches.filter { item ->
+        item.content.lowercase().contains(normalized) ||
+            item.colorTag.displayName.lowercase().contains(normalized)
+    }
+}
+
 /** 探索页：统一信息流（日志+灵感），模块筛选 + 底部快速输入 */
 class ExploreViewModel(private val repository: FlashRepository) : ViewModel() {
 
     private val _filter = MutableStateFlow(ExploreFilter.ALL)
     val filter: StateFlow<ExploreFilter> = _filter.asStateFlow()
 
+    private val _query = MutableStateFlow("")
+    val query: StateFlow<String> = _query.asStateFlow()
+
     val logs: StateFlow<List<LogItem>> = combine(
         repository.logs,
         _filter,
-    ) { logs, filter ->
-        when (filter) {
-            ExploreFilter.ALL -> logs
-            ExploreFilter.LOG -> logs.filter { it.category == Category.LOG }
-            ExploreFilter.IDEA -> logs.filter { it.category == Category.IDEA }
-        }
+        _query,
+    ) { logs, filter, query ->
+        filterExploreLogs(logs, filter, query)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _text = MutableStateFlow("")
@@ -55,6 +72,10 @@ class ExploreViewModel(private val repository: FlashRepository) : ViewModel() {
 
     fun setFilter(filter: ExploreFilter) {
         _filter.value = filter
+    }
+
+    fun setQuery(query: String) {
+        _query.value = query.take(MAX_SEARCH_LENGTH)
     }
 
     fun updateText(value: String) {
@@ -86,6 +107,7 @@ class ExploreViewModel(private val repository: FlashRepository) : ViewModel() {
 
     companion object {
         const val MAX_LENGTH = 140
+        const val MAX_SEARCH_LENGTH = 200
 
         fun factory(repository: FlashRepository): ViewModelProvider.Factory = viewModelFactory {
             initializer { ExploreViewModel(repository) }

@@ -66,7 +66,8 @@ class LogFlowViewModel(private val repository: FlashRepository) : ViewModel() {
     }
 
     fun setDateRange(start: String?, end: String?) {
-        _filter.value = _filter.value.copy(startDate = start, endDate = end)
+        val normalized = if (start != null && end != null && start > end) end to start else start to end
+        _filter.value = _filter.value.copy(startDate = normalized.first, endDate = normalized.second)
     }
 
     fun updateLog(log: LogItem) {

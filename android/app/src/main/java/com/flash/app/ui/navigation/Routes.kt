@@ -6,6 +6,7 @@
 
 package com.flash.app.ui.navigation
 
+import android.net.Uri
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Home
@@ -26,6 +27,10 @@ object Routes {
     const val EMOTION = "emotion"
     const val CALENDAR = "calendar"
     const val LOG_FLOW = "logFlow"
+    const val RECORD_DETAIL = "recordDetail"
+    const val RECORD_DETAIL_PATTERN = "$RECORD_DETAIL/{recordId}"
+
+    fun recordDetail(recordId: String): String = "$RECORD_DETAIL/${Uri.encode(recordId)}"
 }
 
 data class TabDest(val route: String, val label: String, val icon: ImageVector)

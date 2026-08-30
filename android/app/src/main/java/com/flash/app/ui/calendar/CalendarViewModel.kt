@@ -29,6 +29,29 @@ data class DayAggregate(
     val emotions: List<EmotionRecord>,
 )
 
+internal fun aggregateByDate(
+    logs: List<LogItem>,
+    emotions: List<EmotionRecord>,
+): Map<String, DayAggregate> {
+    val logsByDate = logs.groupBy { it.recordDate }
+    val emotionsByDate = emotions.groupBy { it.recordDate }
+    return (logsByDate.keys + emotionsByDate.keys).sorted().associateWith { date ->
+        DayAggregate(
+            date = date,
+            logs = logsByDate[date].orEmpty(),
+            emotions = emotionsByDate[date].orEmpty(),
+        )
+    }
+}
+
+internal fun buildCalendarWeeks(month: YearMonth): List<List<LocalDate>> {
+    val first = month.atDay(1)
+    val start = first.minusDays((first.dayOfWeek.value - 1).toLong())
+    return (0 until 6).map { week ->
+        (0 until 7).map { day -> start.plusDays((week * 7 + day).toLong()) }
+    }
+}
+
 /** 对应 Web 版 Calendar：月视图网格 + 选中日详情，数据按 recordDate 聚合 */
 class CalendarViewModel(repository: FlashRepository) : ViewModel() {
 
@@ -36,14 +59,7 @@ class CalendarViewModel(repository: FlashRepository) : ViewModel() {
         repository.logs,
         repository.emotions,
     ) { logs, emotions ->
-        val dates = (logs.map { it.recordDate } + emotions.map { it.recordDate }).toSortedSet()
-        dates.associateWith { date ->
-            DayAggregate(
-                date = date,
-                logs = logs.filter { it.recordDate == date },
-                emotions = emotions.filter { it.recordDate == date },
-            )
-        }
+        aggregateByDate(logs, emotions)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
     private val _displayedMonth = MutableStateFlow(YearMonth.now())
@@ -60,7 +76,7 @@ class CalendarViewModel(repository: FlashRepository) : ViewModel() {
     ) { map, month, selected ->
         CalendarUiState(
             month = month,
-            weeks = buildWeeks(month),
+            weeks = buildCalendarWeeks(month),
             aggregates = map,
             selectedDate = selected,
             selectedAggregate = map[selected.toString()],
@@ -68,7 +84,13 @@ class CalendarViewModel(repository: FlashRepository) : ViewModel() {
     }.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
-        CalendarUiState(YearMonth.now(), emptyList(), emptyMap(), LocalDate.now(), null),
+        CalendarUiState(
+            YearMonth.now(),
+            buildCalendarWeeks(YearMonth.now()),
+            emptyMap(),
+            LocalDate.now(),
+            null,
+        ),
     )
 
     fun prevMonth() {
@@ -89,16 +111,6 @@ class CalendarViewModel(repository: FlashRepository) : ViewModel() {
         // 选中溢出天时跟随切换到对应月份
         val month = YearMonth.from(date)
         if (month != _displayedMonth.value) _displayedMonth.value = month
-    }
-
-    private fun buildWeeks(month: YearMonth): List<List<LocalDate>> {
-        val first = month.atDay(1)
-        // 周一为一周起点（value: Mon=1..Sun=7）
-        val startOffset = first.dayOfWeek.value - 1
-        val start = first.minusDays(startOffset.toLong())
-        return (0 until 6).map { week ->
-            (0 until 7).map { day -> start.plusDays((week * 7 + day).toLong()) }
-        }
     }
 
     companion object {

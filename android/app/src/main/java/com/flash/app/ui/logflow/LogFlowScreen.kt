@@ -43,6 +43,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -54,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.flash.app.FlashApplication
+import com.flash.app.data.Backup
 import com.flash.app.data.model.ColorTag
 import com.flash.app.data.model.LogItem
 import com.flash.app.ui.components.LogCard
@@ -63,7 +65,7 @@ import java.time.ZoneOffset
 /** 日志管理页：搜索 / 标签筛选 / 排序 / 编辑 / 删除，对应 Web 版 LogFlow */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LogFlowScreen(onBack: () -> Unit) {
+fun LogFlowScreen(onBack: () -> Unit, onOpenRecord: (String) -> Unit) {
     val app = LocalContext.current.applicationContext as FlashApplication
     val viewModel: LogFlowViewModel = viewModel(factory = LogFlowViewModel.factory(app.repository))
     val logs by viewModel.logs.collectAsStateWithLifecycle()
@@ -167,9 +169,20 @@ fun LogFlowScreen(onBack: () -> Unit) {
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) { 
+                if (logs.isEmpty()) {
+                    item(key = "empty") {
+                        Text(
+                            "没有符合条件的日志",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                        )
+                    }
+                }
                 items(items = logs, key = { it.id }) { log ->
                     LogCard(
                         log = log,
+                        onClick = { onOpenRecord(log.id) },
                         actions = {
                             IconButton(onClick = { editingLog = log }) {
                                 Icon(Icons.Filled.Edit, contentDescription = "编辑")
@@ -245,7 +258,7 @@ fun LogFlowScreen(onBack: () -> Unit) {
 private fun EditLogDialog(log: LogItem, onDismiss: () -> Unit, onSave: (LogItem) -> Unit) {
     var content by remember(log.id) { mutableStateOf(log.content) }
     var tag by remember(log.id) { mutableStateOf(log.colorTag) }
-    var importance by remember(log.id) { mutableStateOf(log.importance) }
+    var importance by remember(log.id) { mutableIntStateOf(log.importance) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -256,6 +269,7 @@ private fun EditLogDialog(log: LogItem, onDismiss: () -> Unit, onSave: (LogItem)
                     value = content,
                     onValueChange = { content = it.take(MAX_CONTENT_LENGTH) },
                     label = { Text("内容") },
+                    supportingText = { Text("${content.length}/$MAX_CONTENT_LENGTH") },
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Row(
@@ -302,7 +316,7 @@ private fun EditLogDialog(log: LogItem, onDismiss: () -> Unit, onSave: (LogItem)
 
 private val IMPORTANCE_OPTIONS = listOf(0 to "", 2 to "!!", 3 to "!!!", 4 to "!!!!")
 
-private const val MAX_CONTENT_LENGTH = 140
+private const val MAX_CONTENT_LENGTH = Backup.MAX_FIELD_LENGTH
 
 /** MD3 DatePicker 弹窗；返回的毫秒值为 UTC 零点，按 UTC 解析避免时区偏移 */
 @OptIn(ExperimentalMaterial3Api::class)

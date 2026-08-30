@@ -61,7 +61,7 @@ private val WEEKDAYS = listOf("一", "二", "三", "四", "五", "六", "日")
 /** Calendar Tab：真实月视图 + 选中日详情 */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CalendarScreen(onOpenSettings: () -> Unit) {
+fun CalendarScreen(onOpenSettings: () -> Unit, onOpenRecord: (String) -> Unit) {
     val app = LocalContext.current.applicationContext as FlashApplication
     val viewModel: CalendarViewModel = viewModel(factory = CalendarViewModel.factory(app.repository))
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -122,7 +122,7 @@ fun CalendarScreen(onOpenSettings: () -> Unit) {
                 )
             }
             item(key = "detail") {
-                DayDetail(uiState.selectedAggregate)
+                DayDetail(uiState.selectedAggregate, onOpenRecord)
             }
         }
     }
@@ -237,7 +237,7 @@ private fun DayCell(
 }
 
 @Composable
-private fun DayDetail(aggregate: DayAggregate?) {
+private fun DayDetail(aggregate: DayAggregate?, onOpenRecord: (String) -> Unit) {
     if (aggregate == null || (aggregate.logs.isEmpty() && aggregate.emotions.isEmpty())) {
         Text(
             "这一天没有记录",
@@ -276,7 +276,11 @@ private fun DayDetail(aggregate: DayAggregate?) {
             }
         }
         aggregate.logs.forEach { log ->
-            LogCard(log = log, modifier = Modifier.padding(top = 8.dp))
+            LogCard(
+                log = log,
+                modifier = Modifier.padding(top = 8.dp),
+                onClick = { onOpenRecord(log.id) },
+            )
         }
     }
 }

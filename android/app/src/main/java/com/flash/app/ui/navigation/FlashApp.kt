@@ -37,6 +37,7 @@ import androidx.navigation.compose.rememberNavController
 import com.flash.app.FlashApplication
 import com.flash.app.data.UiStyle
 import com.flash.app.ui.calendar.CalendarScreen
+import com.flash.app.ui.detail.RecordDetailScreen
 import com.flash.app.ui.emotion.EmotionScreen
 import com.flash.app.ui.explore.ExploreScreen
 import com.flash.app.ui.home.HomeScreen
@@ -140,12 +141,14 @@ fun FlashApp(darkTheme: Boolean, uiStyle: UiStyle) {
                             onOpenExplore = { navController.navigate(Routes.EXPLORE) },
                             onOpenCalendar = { navController.navigate(Routes.CALENDAR) },
                             onOpenEmotion = { navController.navigate(Routes.EMOTION) },
+                            onOpenRecord = { navController.navigate(Routes.recordDetail(it)) },
                         )
                     }
                     composable(Routes.EXPLORE) {
                         ExploreScreen(
                             onOpenLogFlow = { navController.navigate(Routes.LOG_FLOW) },
                             onOpenCalendar = { navController.navigate(Routes.CALENDAR) },
+                            onOpenRecord = { navController.navigate(Routes.recordDetail(it)) },
                         )
                     }
                     composable(Routes.STATS) {
@@ -158,10 +161,20 @@ fun FlashApp(darkTheme: Boolean, uiStyle: UiStyle) {
                         EmotionScreen(onBack = { navController.popBackStack() })
                     }
                     composable(Routes.CALENDAR) {
-                        CalendarScreen(onOpenSettings = { navController.navigate(Routes.PROFILE) })
+                        CalendarScreen(
+                            onOpenSettings = { navController.navigate(Routes.PROFILE) },
+                            onOpenRecord = { navController.navigate(Routes.recordDetail(it)) },
+                        )
                     }
                     composable(Routes.LOG_FLOW) {
-                        LogFlowScreen(onBack = { navController.popBackStack() })
+                        LogFlowScreen(
+                            onBack = { navController.popBackStack() },
+                            onOpenRecord = { navController.navigate(Routes.recordDetail(it)) },
+                        )
+                    }
+                    composable(Routes.RECORD_DETAIL_PATTERN) { entry ->
+                        val recordId = entry.arguments?.getString("recordId") ?: return@composable
+                        RecordDetailScreen(recordId = recordId, onBack = { navController.popBackStack() })
                     }
                 }
             }

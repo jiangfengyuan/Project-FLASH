@@ -16,6 +16,9 @@ interface LogDao {
     @Query("SELECT * FROM logs ORDER BY createdAt DESC")
     fun observeAll(): Flow<List<LogEntity>>
 
+    @Query("SELECT * FROM logs WHERE id = :id LIMIT 1")
+    fun observeById(id: String): Flow<LogEntity?>
+
     @Upsert
     suspend fun upsert(log: LogEntity)
 

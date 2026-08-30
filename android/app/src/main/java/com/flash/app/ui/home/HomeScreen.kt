@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Favorite
@@ -69,6 +68,7 @@ fun HomeScreen(
     onOpenExplore: () -> Unit,
     onOpenCalendar: () -> Unit,
     onOpenEmotion: () -> Unit,
+    onOpenRecord: (String) -> Unit,
 ) {
     val app = LocalContext.current.applicationContext as FlashApplication
     val viewModel: HomeViewModel = viewModel(factory = HomeViewModel.factory(app.repository))
@@ -143,7 +143,7 @@ fun HomeScreen(
                 )
             }
             items(items = ui.recentLogs, key = { it.id }) { log ->
-                LogCard(log = log, modifier = Modifier.animateItem())
+                LogCard(log = log, modifier = Modifier.animateItem(), onClick = { onOpenRecord(log.id) })
             }
             if (ui.recentLogs.isEmpty()) {
                 item(key = "empty") {

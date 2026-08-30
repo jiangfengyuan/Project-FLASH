@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -59,11 +60,16 @@ import com.flash.app.ui.theme.glass.glass
 /** 探索 Tab：统一信息流 + 模块筛选 + 快速输入坞 */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExploreScreen(onOpenLogFlow: () -> Unit, onOpenCalendar: () -> Unit) {
+fun ExploreScreen(
+    onOpenLogFlow: () -> Unit,
+    onOpenCalendar: () -> Unit,
+    onOpenRecord: (String) -> Unit,
+) {
     val app = LocalContext.current.applicationContext as FlashApplication
     val viewModel: ExploreViewModel = viewModel(factory = ExploreViewModel.factory(app.repository))
     val logs by viewModel.logs.collectAsStateWithLifecycle()
     val filter by viewModel.filter.collectAsStateWithLifecycle()
+    val query by viewModel.query.collectAsStateWithLifecycle()
     val text by viewModel.text.collectAsStateWithLifecycle()
     val selectedTag by viewModel.selectedTag.collectAsStateWithLifecycle()
 
@@ -98,6 +104,14 @@ fun ExploreScreen(onOpenLogFlow: () -> Unit, onOpenCalendar: () -> Unit) {
                 .padding(innerPadding)
                 .fillMaxSize(),
         ) {
+            OutlinedTextField(
+                value = query,
+                onValueChange = viewModel::setQuery,
+                placeholder = { Text("搜索日志与灵感") },
+                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+            )
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
@@ -121,7 +135,7 @@ fun ExploreScreen(onOpenLogFlow: () -> Unit, onOpenCalendar: () -> Unit) {
                     Text("✈️", fontSize = 56.sp)
                     Spacer(Modifier.height(12.dp))
                     Text(
-                        "闪过即留，写下第一条吧",
+                        if (query.isBlank()) "闪过即留，写下第一条吧" else "没有找到匹配的记录",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -133,7 +147,11 @@ fun ExploreScreen(onOpenLogFlow: () -> Unit, onOpenCalendar: () -> Unit) {
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     items(items = logs, key = { it.id }) { log ->
-                        LogCard(log = log, modifier = Modifier.animateItem())
+                        LogCard(
+                            log = log,
+                            modifier = Modifier.animateItem(),
+                            onClick = { onOpenRecord(log.id) },
+                        )
                     }
                 }
             }
@@ -152,7 +170,7 @@ private fun InputDock(
     Column(
         modifier = Modifier
             .padding(horizontal = 12.dp, vertical = 8.dp)
-            .then(dockContainerModifier())
+            .dockContainer()
             .padding(horizontal = 12.dp, vertical = 8.dp),
     ) {
         Row(
@@ -190,12 +208,11 @@ private fun InputDock(
 
 /** 输入坞容器：GLASS → 浮空玻璃胶囊；MD3 → 标准圆角浮起卡片 */
 @Composable
-private fun dockContainerModifier(): Modifier {
+private fun Modifier.dockContainer(): Modifier {
     return if (LocalUiStyle.current == UiStyle.GLASS) {
-        Modifier.glass(strong = true)
+        glass(strong = true)
     } else {
-        Modifier
-            .shadow(8.dp, RoundedCornerShape(24.dp))
+        shadow(8.dp, RoundedCornerShape(24.dp))
             .clip(RoundedCornerShape(24.dp))
             .background(MaterialTheme.colorScheme.surface)
     }

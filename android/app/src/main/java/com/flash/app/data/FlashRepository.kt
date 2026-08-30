@@ -49,16 +49,21 @@ class FlashRepository(private val db: FlashDatabase) {
     val emotions: Flow<List<EmotionRecord>> =
         db.emotionDao().observeAll().map { list -> list.map { it.toModel() } }
 
+    fun observeLog(id: String): Flow<LogItem?> =
+        db.logDao().observeById(id).map { it?.toModel() }
+
     suspend fun addLog(
         content: String,
         colorTag: ColorTag,
         category: Category = Category.LOG,
         importance: Int = 0,
     ) {
+        val normalized = content.trim().take(Backup.MAX_FIELD_LENGTH)
+        if (normalized.isEmpty()) return
         db.logDao().upsert(
             LogItem(
                 id = UUID.randomUUID().toString(),
-                content = content,
+                content = normalized,
                 colorTag = colorTag,
                 category = category,
                 importance = importance.coerceIn(0, 4),
@@ -68,7 +73,13 @@ class FlashRepository(private val db: FlashDatabase) {
         )
     }
 
-    suspend fun updateLog(log: LogItem) = db.logDao().upsert(log.toEntity())
+    suspend fun updateLog(log: LogItem) {
+        val normalized = log.content.trim().take(Backup.MAX_FIELD_LENGTH)
+        if (normalized.isEmpty()) return
+        db.logDao().upsert(
+            log.copy(content = normalized, importance = log.importance.coerceIn(0, 4)).toEntity()
+        )
+    }
 
     suspend fun deleteLog(id: String) = db.logDao().deleteById(id)
 
@@ -83,8 +94,8 @@ class FlashRepository(private val db: FlashDatabase) {
                 id = UUID.randomUUID().toString(),
                 level = level,
                 subEmotion = subEmotion,
-                status = status,
-                note = note,
+                status = status?.trim()?.take(Backup.MAX_FIELD_LENGTH)?.ifEmpty { null },
+                note = note?.trim()?.take(Backup.MAX_FIELD_LENGTH)?.ifEmpty { null },
                 recordDate = LocalDate.now().toString(),
                 createdAt = isoNow(),
             ).toEntity()

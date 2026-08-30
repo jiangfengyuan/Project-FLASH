@@ -43,7 +43,8 @@ class HomeViewModel(private val repository: FlashRepository) : ViewModel() {
             todayLogCount = logs.count { it.recordDate == today && it.category == Category.LOG },
             todayIdeaCount = logs.count { it.recordDate == today && it.category == Category.IDEA },
             todayEmotionCount = emotions.count { it.recordDate == today },
-            latestEmotion = emotions.firstOrNull(),
+            // “当前”只表示今天的状态，避免把几天前的情绪误导为此刻情绪。
+            latestEmotion = emotions.firstOrNull { it.recordDate == today },
             recentLogs = logs.take(5),
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), HomeUiState())
