@@ -1,0 +1,16 @@
+{
+  "version": "flash-backup-v1",
+  "exportedAt": "2026-09-04T00:00:00.000Z",
+  "appVersion": "0.1.0",
+  "notes": "历史导入样例，不属于 v2 Schema 的有效输入",
+  "logs": [{
+    "id": "11111111-1111-4111-8111-111111111111",
+    "content": "历史记录",
+    "colorTag": "daily",
+    "category": "log",
+    "importance": 0,
+    "createdAt": "2026-09-04T00:00:00.000Z",
+    "recordDate": "2026-09-04"
+  }],
+  "emotions": []
+}

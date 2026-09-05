@@ -28,15 +28,7 @@ object BackupTransfer {
         val directory = File(context.cacheDir, SHARE_DIRECTORY).apply {
             check(exists() || mkdirs()) { "无法创建备份传输目录" }
         }
-        directory.listFiles()
-            ?.filter {
-                it.isFile &&
-                    it.name.startsWith(FILE_PREFIX) &&
-                    it.extension == "json" &&
-                    System.currentTimeMillis() - it.lastModified() > MAX_CACHE_AGE_MILLIS
-            }
-            ?.forEach { it.delete() }
-
+        cleanupExpired(context)
         val suffix = UUID.randomUUID().toString().take(8)
         val file = File(
             directory,
@@ -48,5 +40,19 @@ object BackupTransfer {
             "${context.packageName}.backup-files",
             file,
         )
+    }
+
+    /** Also called at application startup so abandoned plaintext share copies expire. */
+    fun cleanupExpired(context: Context) {
+        val directory = File(context.cacheDir, SHARE_DIRECTORY)
+        if (!directory.isDirectory) return
+        directory.listFiles()
+            ?.filter {
+                it.isFile &&
+                    it.name.startsWith(FILE_PREFIX) &&
+                    it.extension == "json" &&
+                    System.currentTimeMillis() - it.lastModified() > MAX_CACHE_AGE_MILLIS
+            }
+            ?.forEach { it.delete() }
     }
 }

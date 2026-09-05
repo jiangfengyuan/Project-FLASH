@@ -14,7 +14,7 @@ enum Module: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .home: "首页"
-        case .explore: "探索"
+        case .explore: "搜索"
         case .logflow: "记录流"
         case .emotion: "情绪"
         case .calendar: "日历"
@@ -26,7 +26,7 @@ enum Module: String, CaseIterable, Identifiable {
     var systemImage: String {
         switch self {
         case .home: "house"
-        case .explore: "safari"
+        case .explore: "magnifyingglass"
         case .logflow: "list.bullet.rectangle"
         case .emotion: "face.smiling"
         case .calendar: "calendar"
@@ -46,13 +46,17 @@ final class AppState {
     /// 菜单「导出备份…」⇧⌘E → token 递增，Settings 监听并弹导出面板
     private(set) var exportRequestToken = 0
     private(set) var handledExportToken = 0
-    /// 菜单「搜索」⌘K → 切到首页 + token 递增，Home 监听并聚焦搜索框
+    /// 菜单「搜索」⌘K → 切到搜索页 + token 递增，Explore 监听并聚焦搜索框
     private(set) var searchRequestToken = 0
     private(set) var handledSearchToken = 0
     /// 本地数据库回退提示；非 nil 时由 RootView 弹 alert。
     /// 持久化容器创建失败、降级为内存模式时本次运行数据不持久，必须告知用户。
     /// setter 开放：RootView「我知道了」直接置 nil 清除（亦可用 clearDatabaseFallbackMessage()）。
     var databaseFallbackMessage: String?
+    /// 容器是否处于内存降级模式（持久标记，不随 databaseFallbackMessage 的确认而清除）。
+    /// RootView 的 alert 可关闭，但菜单栏伴侣等场景的持久警示依赖此标记，
+    /// 降级期间任何写入都只落在易失内存库。
+    private(set) var isDatabaseInMemoryFallback = false
 
     func requestNewLog() {
         if selectedModule != .home && selectedModule != .explore {
@@ -66,12 +70,12 @@ final class AppState {
         exportRequestToken += 1
     }
 
-    /// ⌘K 搜索：先切到首页再递增 token。
-    /// 若已在首页，HomeView 的 onChange 直接消费；不在首页时本视图随切换重建，
+    /// ⌘K 搜索：先切到搜索页再递增 token。
+    /// 若已在搜索页，ExploreView 的 onChange 直接消费；不在搜索页时本视图随切换重建，
     /// onAppear 兜底消费一次，handled token 与请求 token 同存于 AppState，
     /// 视图重建后不会归零，保证不回放旧 token。
     func requestSearch() {
-        selectedModule = .home
+        selectedModule = .explore
         searchRequestToken += 1
     }
 
@@ -84,6 +88,7 @@ final class AppState {
     /// 已降级内存模式时设置中文提示；未回退时保持 nil。
     func checkDatabaseFallback(didFallbackToMemory: Bool) {
         guard didFallbackToMemory else { return }
+        isDatabaseInMemoryFallback = true
         databaseFallbackMessage = "本地数据库暂时不可用，已进入临时内存模式，重启后数据可能丢失，建议尽快导出备份"
     }
 

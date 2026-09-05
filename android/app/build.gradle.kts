@@ -11,23 +11,64 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+ksp {
+    // Keep Room's canonical schema history under version control so every
+    // released database version can be migration-tested before shipping.
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
+val releaseStoreFile = providers.environmentVariable("FLASH_RELEASE_STORE_FILE").orNull
+val releaseStorePassword = providers.environmentVariable("FLASH_RELEASE_STORE_PASSWORD").orNull
+val releaseKeyAlias = providers.environmentVariable("FLASH_RELEASE_KEY_ALIAS").orNull
+val releaseKeyPassword = providers.environmentVariable("FLASH_RELEASE_KEY_PASSWORD").orNull
+val releaseSigningConfigured = listOf(
+    releaseStoreFile,
+    releaseStorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword,
+).all { !it.isNullOrBlank() }
+val releaseRequested = gradle.startParameter.taskNames.any { it.contains("release", ignoreCase = true) }
+
+if (releaseRequested && !releaseSigningConfigured) {
+    throw GradleException(
+        "Release signing is required. Set FLASH_RELEASE_STORE_FILE, " +
+            "FLASH_RELEASE_STORE_PASSWORD, FLASH_RELEASE_KEY_ALIAS and FLASH_RELEASE_KEY_PASSWORD."
+    )
+}
+
 android {
     namespace = "com.flash.app"
     compileSdk = 36
 
     defaultConfig {
-        // 与 Capacitor 版（com.flash.app）区分开，开发期可同机共存；发布前改回 com.flash.app
-        applicationId = "com.flash.app.native"
+        applicationId = "com.flash.app"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        create("release") {
+            if (releaseSigningConfigured) {
+                storeFile = file(requireNotNull(releaseStoreFile))
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
     }
 
     buildTypes {
+        debug {
+            // 保留既有开发安装包 ID，避免覆盖正式版或丢失当前模拟器数据。
+            applicationIdSuffix = ".native"
+        }
         release {
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
@@ -45,6 +86,12 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+
+    sourceSets {
+        getByName("test").resources.srcDir("../../docs/contracts")
+        getByName("androidTest").assets.srcDir("$projectDir/schemas")
+        getByName("androidTest").assets.srcDir("../../docs/contracts")
     }
 }
 
@@ -65,8 +112,13 @@ dependencies {
     implementation(libs.haze.materials)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.work.runtime)
     ksp(libs.androidx.room.compiler)
     debugImplementation(libs.compose.ui.tooling)
     testImplementation(libs.junit)
     testImplementation(libs.json)
+    androidTestImplementation(libs.androidx.room.testing)
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.ext.junit)
 }

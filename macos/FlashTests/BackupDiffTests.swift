@@ -22,5 +22,6 @@ struct BackupDiffTests {
 
         #expect(difference.logs == DifferenceSummary(added: 1, changed: 1, unchanged: 1, localOnly: 1))
         #expect(difference.emotions == DifferenceSummary(added: 0, changed: 0, unchanged: 0, localOnly: 0))
+        #expect(difference.tasks == DifferenceSummary(added: 0, changed: 0, unchanged: 0, localOnly: 0))
     }
 }

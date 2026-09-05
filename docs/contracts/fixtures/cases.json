@@ -1,0 +1,110 @@
+[
+  {
+    "file": "invalid-importance-range.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-emoji-title.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-emoji-content.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-unknown-root.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-unknown-record.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-unknown-section.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-missing-metadata.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-invalid-export-time.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-boolean-integer.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-boolean-schema.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-fractional-level.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-invalid-day.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-year-zero.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-unknown-offset.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-leap-second.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-utc-year-underflow.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-invalid-instant-day.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-blank-title.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-unknown-zone.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-offset-not-named-zone.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-mixed-due.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-time-order.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-duplicate-id.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-array-cap.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-duplicate-key.json",
+    "valid": false
+  },
+  {
+    "file": "valid-boundaries.json",
+    "valid": true
+  },
+  {
+    "file": "valid-time-zones.json",
+    "valid": true
+  }
+]

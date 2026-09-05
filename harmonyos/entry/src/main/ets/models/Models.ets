@@ -38,13 +38,53 @@ export interface EmotionRecord {
   createdAt: string;
 }
 
+export enum TaskDueKind {
+  ALL_DAY = 'allDay',
+  DATE_TIME = 'dateTime'
+}
+
+export interface TaskDue {
+  kind: string;
+  date?: string;
+  at?: string;
+  timeZone?: string;
+}
+
+export interface TaskItem {
+  id: string;
+  title: string;
+  notes?: string | null;
+  colorTag: string;
+  importance: number;
+  due: TaskDue;
+  reminderAt?: string | null;
+  completedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BackupSchemas {
+  logs: number;
+  emotions: number;
+  tasks: number;
+}
+
+export interface BackupData {
+  logs: LogItem[];
+  emotions: EmotionRecord[];
+  tasks: TaskItem[];
+}
+
 export interface BackupDocument {
   version: string;
   exportedAt: string;
   appVersion: string;
   notes: string;
-  logs: LogItem[];
-  emotions: EmotionRecord[];
+  schemas?: BackupSchemas;
+  data?: BackupData;
+  // flash-backup-v1 compatibility
+  logs?: LogItem[];
+  emotions?: EmotionRecord[];
 }
 
 export const COLOR_TAGS: string[] = [

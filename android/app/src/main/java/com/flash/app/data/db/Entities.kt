@@ -7,6 +7,8 @@
 package com.flash.app.data.db
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.flash.app.data.model.Category
 import com.flash.app.data.model.ColorTag
@@ -14,12 +16,21 @@ import com.flash.app.data.model.EmotionLevel
 import com.flash.app.data.model.EmotionRecord
 import com.flash.app.data.model.LogItem
 import com.flash.app.data.model.SubEmotion
+import com.flash.app.data.model.TaskDueKind
+import com.flash.app.data.model.TaskItem
 
 /**
  * 表结构/列名与 Capacitor 端 SQLite schema 完全一致（见 sqliteAdapter.ts），
  * 为将来的数据迁移/互通保留可能。
  */
-@Entity(tableName = "logs")
+@Entity(
+    tableName = "logs",
+    indices = [
+        Index(value = ["createdAt"]),
+        Index(value = ["recordDate"]),
+        Index(value = ["category", "createdAt"]),
+    ],
+)
 data class LogEntity(
     @PrimaryKey val id: String,
     val content: String,
@@ -30,7 +41,33 @@ data class LogEntity(
     val recordDate: String,
 )
 
-@Entity(tableName = "emotions")
+/**
+ * Idea Reminder 的 Android 本地阅读状态。
+ * 这是界面状态而非用户内容，刻意不写入跨平台 flash-backup-v1。
+ */
+@Entity(
+    tableName = "idea_view_state",
+    foreignKeys = [
+        ForeignKey(
+            entity = LogEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["logId"],
+            onDelete = ForeignKey.CASCADE,
+        ),
+    ],
+)
+data class IdeaViewStateEntity(
+    @PrimaryKey val logId: String,
+    val viewedAt: String,
+)
+
+@Entity(
+    tableName = "emotions",
+    indices = [
+        Index(value = ["createdAt"]),
+        Index(value = ["recordDate"]),
+    ],
+)
 data class EmotionEntity(
     @PrimaryKey val id: String,
     val level: Int,
@@ -39,6 +76,30 @@ data class EmotionEntity(
     val note: String?,
     val recordDate: String,
     val createdAt: String,
+)
+
+@Entity(
+    tableName = "tasks",
+    indices = [
+        Index(value = ["updatedAt"]),
+        Index(value = ["dueDate"]),
+        Index(value = ["dueAt"]),
+    ],
+)
+data class TaskEntity(
+    @PrimaryKey val id: String,
+    val title: String,
+    val notes: String?,
+    val colorTag: String,
+    val importance: Int,
+    val dueKind: String,
+    val dueDate: String?,
+    val dueAt: String?,
+    val timeZone: String?,
+    val reminderAt: String?,
+    val completedAt: String?,
+    val createdAt: String,
+    val updatedAt: String,
 )
 
 fun LogEntity.toModel() = LogItem(
@@ -79,4 +140,36 @@ fun EmotionRecord.toEntity() = EmotionEntity(
     note = note,
     recordDate = recordDate,
     createdAt = createdAt,
+)
+
+fun TaskEntity.toModel() = TaskItem(
+    id = id,
+    title = title,
+    notes = notes,
+    colorTag = ColorTag.fromStorage(colorTag),
+    importance = importance,
+    dueKind = TaskDueKind.fromStorage(dueKind) ?: TaskDueKind.ALL_DAY,
+    dueDate = dueDate,
+    dueAt = dueAt,
+    timeZone = timeZone,
+    reminderAt = reminderAt,
+    completedAt = completedAt,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+)
+
+fun TaskItem.toEntity() = TaskEntity(
+    id = id,
+    title = title,
+    notes = notes,
+    colorTag = colorTag.storageKey,
+    importance = importance,
+    dueKind = dueKind.storageKey,
+    dueDate = dueDate,
+    dueAt = dueAt,
+    timeZone = timeZone,
+    reminderAt = reminderAt,
+    completedAt = completedAt,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
 )

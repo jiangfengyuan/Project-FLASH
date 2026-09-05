@@ -1,0 +1,17 @@
+{
+  "name": "flash-backup-contract",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Development-only validator for the proposed cross-platform backup contract",
+  "scripts": {
+    "test": "node --test contract.test.cjs",
+    "validate": "node validate.cjs"
+  },
+  "devDependencies": {
+    "ajv": "8.18.0",
+    "typescript": "4.9.5"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

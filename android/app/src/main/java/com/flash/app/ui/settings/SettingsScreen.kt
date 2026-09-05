@@ -92,9 +92,12 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
         ActivityResultContracts.CreateDocument("application/json"),
     ) { uri -> uri?.let(viewModel::exportBackup) }
 
+    val recoveryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
+        uri -> uri?.let { viewModel.loadImport(it, recovery = true) }
+    }
     val importLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument(),
-    ) { uri -> uri?.let(viewModel::loadImport) }
+    ) { uri -> uri?.let { viewModel.loadImport(it) } }
 
     val nearbyPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
@@ -216,7 +219,7 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
             HorizontalDivider()
             SectionTitle("数据")
             Text(
-                "备份为 JSON 文件，可通过系统分享传输到其他设备",
+                "备份为明文 JSON，包含日志、情绪和任务内容；请只保存或分享至可信位置",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -243,6 +246,11 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
                     modifier = Modifier.weight(1f),
                 ) { Text("局域网接收") }
             }
+            Text(
+                "局域网传输内容为明文，请在可信的 Wi-Fi 网络下使用",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 FilledTonalButton(
                     onClick = {
@@ -263,8 +271,12 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     ),
-                ) { Text("导入备份") }
+                ) { Text("标准导入") }
             }
+            OutlinedButton(onClick = { recoveryLauncher.launch(arrayOf("application/json", "text/*")) }, modifier = Modifier.fillMaxWidth()) {
+                Text("恢复损坏或旧版备份")
+            }
+            Text("恢复模式会跳过非法、重复和超限记录；原文件不会修改。导入前请核对预览。", style = MaterialTheme.typography.bodySmall)
             OutlinedButton(
                 onClick = { showClearConfirm = true },
                 modifier = Modifier.fillMaxWidth(),
@@ -286,19 +298,21 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
     importPreview?.let { preview ->
         AlertDialog(
             onDismissRequest = viewModel::cancelImport,
-            title = { Text("导入备份") },
+            title = { Text(if (preview.recovery) "部分恢复预览" else "标准导入预览") },
             text = {
                 Text(
                     buildString {
-                        append("包含 ${preview.logCount} 条日志、${preview.emotionCount} 条情绪记录。")
-                        if (preview.skippedLogs + preview.skippedEmotions > 0) {
-                            append("\n${preview.skippedLogs + preview.skippedEmotions} 条数据格式异常，将被跳过。")
+                        append("包含 ${preview.logCount} 条日志、${preview.emotionCount} 条情绪记录、${preview.taskCount} 个任务。")
+                        if (preview.skippedLogs + preview.skippedEmotions + preview.skippedTasks > 0) {
+                            append("\n${preview.skippedLogs + preview.skippedEmotions + preview.skippedTasks} 条数据格式异常，将被跳过。")
                         }
                         append("\n\n差异分析")
                         append("\n日志：新增 ${preview.difference.logs.added} · 修改 ${preview.difference.logs.changed}" +
                             " · 相同 ${preview.difference.logs.unchanged} · 仅本机 ${preview.difference.logs.localOnly}")
                         append("\n情绪：新增 ${preview.difference.emotions.added} · 修改 ${preview.difference.emotions.changed}" +
                             " · 相同 ${preview.difference.emotions.unchanged} · 仅本机 ${preview.difference.emotions.localOnly}")
+                        append("\n任务：新增 ${preview.difference.tasks.added} · 修改 ${preview.difference.tasks.changed}" +
+                            " · 相同 ${preview.difference.tasks.unchanged} · 仅本机 ${preview.difference.tasks.localOnly}")
                         append("\n\n差异合并会新增或更新接收数据，并保留仅本机数据；覆盖会先清空本机数据。")
                     }
                 )
@@ -332,6 +346,11 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
                         color = MaterialTheme.colorScheme.primary,
                     )
                     Text("PIN 仅本次有效，60 秒后自动失效。")
+                    Text(
+                        "内容未做端到端加密，请仅在可信的家庭或办公局域网使用。",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             },
             confirmButton = {
@@ -360,6 +379,11 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                         modifier = Modifier.fillMaxWidth(),
+                    )
+                    Text(
+                        "内容未做端到端加密，请仅连接可信的家庭或办公局域网设备。",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             },
@@ -395,7 +419,7 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
         AlertDialog(
             onDismissRequest = { showClearConfirm = false },
             title = { Text("清空全部数据？") },
-            text = { Text("将删除所有日志与情绪记录，且无法恢复。建议先导出备份。") },
+            text = { Text("将删除所有日志、情绪记录与任务，且无法恢复。建议先导出备份。") },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.clearAll()

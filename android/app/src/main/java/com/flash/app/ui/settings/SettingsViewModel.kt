@@ -23,6 +23,7 @@ import com.flash.app.data.SettingsStore
 import com.flash.app.data.ThemeMode
 import com.flash.app.data.UiStyle
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,9 +43,13 @@ data class ImportPreview(
     val emotionCount: Int,
     val skippedLogs: Int,
     val skippedEmotions: Int,
+    val taskCount: Int,
+    val skippedTasks: Int,
     val logs: List<com.flash.app.data.model.LogItem>,
     val emotions: List<com.flash.app.data.model.EmotionRecord>,
+    val tasks: List<com.flash.app.data.model.TaskItem>,
     val difference: BackupDifference,
+    val recovery: Boolean = false,
 )
 
 class SettingsViewModel(
@@ -53,6 +58,7 @@ class SettingsViewModel(
 ) : ViewModel() {
 
     private val repository get() = (app as FlashApplication).repository
+    private val taskReminders get() = (app as FlashApplication).taskReminders
 
     val themeMode = settings.themeMode
     val uiStyle = settings.uiStyle
@@ -73,7 +79,9 @@ class SettingsViewModel(
     val lanTransfer: StateFlow<LanTransferState> = _lanTransfer.asStateFlow()
     private var lanSender: LocalBackupTransfer.Sender? = null
     private var lanDiscovery: LocalBackupTransfer.Discovery? = null
+    private var lanReceiver: LocalBackupTransfer.Receiver? = null
     private var lanJob: Job? = null
+    private var lanGeneration: Long = 0
 
     fun setThemeMode(mode: ThemeMode) = settings.setThemeMode(mode)
     fun setUiStyle(style: UiStyle) = settings.setUiStyle(style)
@@ -85,8 +93,8 @@ class SettingsViewModel(
     fun exportBackup(target: Uri) {
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                val (logs, emotions) = repository.exportSnapshot()
-                val json = Backup.exportJson(logs, emotions)
+                val snapshot = repository.exportSnapshot()
+                val json = Backup.exportJson(snapshot.logs, snapshot.emotions, snapshot.tasks)
                 app.contentResolver.openOutputStream(target, "wt")?.use { out ->
                     out.write(json.toByteArray(Charsets.UTF_8))
                 } ?: error("无法写入文件")
@@ -103,8 +111,8 @@ class SettingsViewModel(
         _transferInProgress.value = true
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                val (logs, emotions) = repository.exportSnapshot()
-                val json = Backup.exportJson(logs, emotions)
+                val snapshot = repository.exportSnapshot()
+                val json = Backup.exportJson(snapshot.logs, snapshot.emotions, snapshot.tasks)
                 BackupTransfer.createShareUri(app, json)
             }.onSuccess {
                 _shareUri.value = it
@@ -129,25 +137,43 @@ class SettingsViewModel(
 
     fun startLanSend() {
         cancelLanTransfer()
-        lanJob = viewModelScope.launch(Dispatchers.IO) {
-            runCatching {
-                val (logs, emotions) = repository.exportSnapshot()
-                LocalBackupTransfer.Sender(app, Backup.exportJson(logs, emotions))
-            }.onSuccess { sender ->
+        val generation = lanGeneration
+        val job = viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val snapshot = repository.exportSnapshot()
+                val sender = LocalBackupTransfer.Sender(
+                    app,
+                    Backup.exportJson(snapshot.logs, snapshot.emotions, snapshot.tasks),
+                )
+                if (generation != lanGeneration) {
+                    sender.stop()
+                    return@launch
+                }
                 lanSender = sender
                 _lanTransfer.value = LanTransferState(LanTransferMode.SENDING, pin = sender.pin)
-                val sent = runCatching { sender.run() }.getOrDefault(false)
+                val sent = try {
+                    sender.run()
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (_: Exception) {
+                    false
+                }
+                if (lanSender !== sender) return@launch
                 if (sent) _message.value = "局域网备份已发送"
                 else if (_lanTransfer.value.mode == LanTransferMode.SENDING) {
                     _message.value = "配对已结束，请重新发起"
                 }
                 lanSender = null
                 _lanTransfer.value = LanTransferState()
-            }.onFailure {
-                _message.value = "无法启动局域网发送：${it.message}"
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                if (generation != lanGeneration) return@launch
+                _message.value = "无法启动局域网发送：${error.message}"
                 _lanTransfer.value = LanTransferState()
             }
         }
+        lanJob = job
     }
 
     fun startLanReceive() {
@@ -168,21 +194,31 @@ class SettingsViewModel(
         lanDiscovery?.stop()
         lanDiscovery = null
         _lanTransfer.value = LanTransferState(LanTransferMode.CONNECTING)
+        val receiver = LocalBackupTransfer.Receiver(device, pin)
+        lanReceiver = receiver
         lanJob = viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                val json = LocalBackupTransfer.receive(device, pin)
-                val result = Backup.parse(json)
-                val (localLogs, localEmotions) = repository.exportSnapshot()
+                val json = receiver.run()
+                val result = Backup.parseStrict(json)
+                val local = repository.exportSnapshot()
                 ImportPreview(
                     result.logs.size, result.emotions.size,
                     result.skippedLogs, result.skippedEmotions,
-                    result.logs, result.emotions,
-                    BackupDiff.analyze(localLogs, localEmotions, result.logs, result.emotions),
+                    result.tasks.size, result.skippedTasks,
+                    result.logs, result.emotions, result.tasks,
+                    BackupDiff.analyze(
+                        local.logs, local.emotions, result.logs, result.emotions,
+                        local.tasks, result.tasks,
+                    ),
                 )
             }.onSuccess {
+                if (lanReceiver !== receiver) return@onSuccess
+                lanReceiver = null
                 _importPreview.value = it
                 _lanTransfer.value = LanTransferState()
             }.onFailure {
+                if (lanReceiver !== receiver) return@onFailure
+                lanReceiver = null
                 _message.value = "局域网接收失败：${it.message}"
                 startLanReceive()
             }
@@ -190,17 +226,20 @@ class SettingsViewModel(
     }
 
     fun cancelLanTransfer() {
+        lanGeneration++
         lanSender?.stop()
         lanSender = null
         lanDiscovery?.stop()
         lanDiscovery = null
+        lanReceiver?.stop()
+        lanReceiver = null
         lanJob?.cancel()
         lanJob = null
         _lanTransfer.value = LanTransferState()
     }
 
     /** 第一步：读取并解析，弹出预览让用户选择合并或覆盖 */
-    fun loadImport(source: Uri) {
+    fun loadImport(source: Uri, recovery: Boolean = false) {
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 val size = app.contentResolver.query(
@@ -220,17 +259,22 @@ class SettingsViewModel(
 
                 val text = app.contentResolver.openInputStream(source)?.use(Backup::readJson)
                     ?: error("无法读取文件")
-                val result = Backup.parse(text)
-                val (localLogs, localEmotions) = repository.exportSnapshot()
+                val result = if (recovery) Backup.parseRecovery(text) else Backup.parseStrict(text)
+                val local = repository.exportSnapshot()
                 ImportPreview(
+                    recovery = recovery,
                     logCount = result.logs.size,
                     emotionCount = result.emotions.size,
                     skippedLogs = result.skippedLogs,
                     skippedEmotions = result.skippedEmotions,
+                    taskCount = result.tasks.size,
+                    skippedTasks = result.skippedTasks,
                     logs = result.logs,
                     emotions = result.emotions,
+                    tasks = result.tasks,
                     difference = BackupDiff.analyze(
-                        localLogs, localEmotions, result.logs, result.emotions,
+                        local.logs, local.emotions, result.logs, result.emotions,
+                        local.tasks, result.tasks,
                     ),
                 )
             }.onSuccess {
@@ -247,21 +291,33 @@ class SettingsViewModel(
     fun confirmImport(overwrite: Boolean) {
         val preview = _importPreview.value ?: return
         viewModelScope.launch(Dispatchers.IO) {
-            runCatching {
+            val databaseResult = runCatching {
                 if (overwrite) {
-                    repository.replaceAll(preview.logs, preview.emotions)
+                    repository.replaceAll(preview.logs, preview.emotions, preview.tasks)
                 } else {
-                    repository.mergeAll(preview.logs, preview.emotions)
+                    repository.mergeAll(preview.logs, preview.emotions, preview.tasks)
                 }
-            }.onSuccess {
-                _message.value = "已导入 ${preview.logCount} 条日志、${preview.emotionCount} 条情绪" +
-                    if (preview.skippedLogs + preview.skippedEmotions > 0) {
-                        "（跳过异常数据 ${preview.skippedLogs + preview.skippedEmotions} 条）"
-                    } else {
-                        ""
-                    }
-            }.onFailure {
-                _message.value = "导入失败：${it.message}"
+            }
+            if (databaseResult.isFailure) {
+                _message.value = "导入失败：${databaseResult.exceptionOrNull()?.message}"
+                _importPreview.value = null
+                return@launch
+            }
+
+            val importedMessage = "已导入 ${preview.logCount} 条日志、${preview.emotionCount} 条情绪、" +
+                "${preview.taskCount} 个任务" +
+                if (preview.skippedLogs + preview.skippedEmotions + preview.skippedTasks > 0) {
+                    "（跳过异常数据 ${preview.skippedLogs + preview.skippedEmotions + preview.skippedTasks} 条）"
+                } else {
+                    ""
+                }
+            val reminderFailure = runCatching {
+                taskReminders.rebuild(repository.exportSnapshot().tasks)
+            }.exceptionOrNull()
+            _message.value = if (reminderFailure == null) {
+                importedMessage
+            } else {
+                "$importedMessage，但系统提醒恢复失败，请稍后重试"
             }
             _importPreview.value = null
         }
@@ -273,9 +329,17 @@ class SettingsViewModel(
 
     fun clearAll() {
         viewModelScope.launch {
-            runCatching { repository.clearAll() }
-                .onSuccess { _message.value = "已清空全部数据" }
-                .onFailure { _message.value = "清空失败：${it.message}" }
+            val databaseResult = runCatching { repository.clearAll() }
+            if (databaseResult.isFailure) {
+                _message.value = "清空失败：${databaseResult.exceptionOrNull()?.message}"
+                return@launch
+            }
+            val reminderFailure = runCatching { taskReminders.rebuild(emptyList()) }.exceptionOrNull()
+            _message.value = if (reminderFailure == null) {
+                "已清空全部数据"
+            } else {
+                "已清空全部数据，但系统提醒清理失败，请重启应用后重试"
+            }
         }
     }
 

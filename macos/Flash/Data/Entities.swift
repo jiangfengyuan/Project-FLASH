@@ -93,3 +93,69 @@ final class EmotionEntity {
         createdAt = model.createdAt
     }
 }
+
+@Model
+final class TaskEntity {
+    @Attribute(.unique) var id: String
+    var title: String
+    var notes: String?
+    var colorTag: String
+    var importance: Int
+    var dueKind: String
+    var dueDate: String?
+    var dueAt: String?
+    var timeZone: String?
+    var reminderAt: String?
+    var completedAt: String?
+    var createdAt: String
+    var updatedAt: String
+
+    init(_ model: TaskItem) {
+        id = model.id
+        title = model.title
+        notes = model.notes
+        colorTag = model.colorTag.rawValue
+        importance = model.importance
+        dueKind = model.dueKind.rawValue
+        dueDate = model.dueDate
+        dueAt = model.dueAt
+        timeZone = model.timeZone
+        reminderAt = model.reminderAt
+        completedAt = model.completedAt
+        createdAt = model.createdAt
+        updatedAt = model.updatedAt
+    }
+
+    func toModel() -> TaskItem {
+        TaskItem(
+            id: id,
+            title: title,
+            notes: notes,
+            colorTag: ColorTag(rawValue: colorTag) ?? .memo,
+            importance: importance,
+            dueKind: TaskDueKind(rawValue: dueKind) ?? .allDay,
+            dueDate: dueDate,
+            dueAt: dueAt,
+            timeZone: timeZone,
+            reminderAt: reminderAt,
+            completedAt: completedAt,
+            createdAt: createdAt,
+            updatedAt: updatedAt
+        )
+    }
+
+    func apply(_ model: TaskItem) {
+        title = model.title
+        notes = model.notes
+        colorTag = model.colorTag.rawValue
+        importance = model.importance
+        dueKind = model.dueKind.rawValue
+        dueDate = model.dueDate
+        dueAt = model.dueAt
+        timeZone = model.timeZone
+        reminderAt = model.reminderAt
+        completedAt = model.completedAt
+        createdAt = model.createdAt
+        updatedAt = model.updatedAt
+    }
+}

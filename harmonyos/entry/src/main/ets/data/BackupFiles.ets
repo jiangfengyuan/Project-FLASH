@@ -4,19 +4,31 @@ import { fileIo, picker } from '@kit.CoreFileKit';
 import { BackupService } from './BackupService';
 
 export class BackupFiles {
-  static async exportJSON(context: common.UIAbilityContext, json: string): Promise<void> {
+  static async exportJSON(
+    context: common.UIAbilityContext,
+    json: string,
+    filePrefix: string = 'flash-aero-backup'
+  ): Promise<void> {
     const options = new picker.DocumentSaveOptions();
     const day = new Date().toISOString().slice(0, 10);
-    options.newFileNames = [`flash-aero-backup-${day}.json`];
+    options.newFileNames = [`${filePrefix}-${day}.json`];
     options.fileSuffixChoices = ['JSON 备份|.json'];
     const viewPicker = new picker.DocumentViewPicker(context);
     const uris = await viewPicker.save(options);
     if (uris.length === 0) throw new Error('未选择保存位置');
     const file = fileIo.openSync(uris[0], fileIo.OpenMode.READ_WRITE | fileIo.OpenMode.TRUNC);
+    let written: number = 0;
     try {
-      fileIo.writeSync(file.fd, json, { encoding: 'utf-8' });
+      written = fileIo.writeSync(file.fd, json, { encoding: 'utf-8' });
     } finally {
       fileIo.closeSync(file);
+    }
+    // writeSync may report a short write (e.g. full disk) instead of throwing;
+    // a truncated backup must never look like a successful export.
+    const expected = new util.TextEncoder().encodeInto(json).length;
+    if (written !== expected) {
+      try { fileIo.unlinkSync(uris[0]); } catch (_) {}
+      throw new Error('备份写入不完整，导出失败');
     }
   }
 

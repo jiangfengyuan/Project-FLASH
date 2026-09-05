@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:flash:backup:v2:schema:0.1.0",
+  "title": "Flash 跨端备份 v2 — 契约草案 0.1.0",
+  "description": "严格互通文档；不是现有客户端容错导入算法。语义校验及兼容边界见 README.md。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "exportedAt", "appVersion", "notes", "schemas", "data"],
+  "properties": {
+    "version": { "const": "flash-backup-v2" },
+    "exportedAt": { "$ref": "#/$defs/instant" },
+    "appVersion": { "type": "string" },
+    "notes": { "$ref": "#/$defs/text" },
+    "schemas": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["logs", "emotions", "tasks"],
+      "properties": {
+        "logs": { "const": 1 },
+        "emotions": { "const": 1 },
+        "tasks": { "const": 1 }
+      }
+    },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["logs", "emotions", "tasks"],
+      "properties": {
+        "logs": { "type": "array", "maxItems": 100000, "items": { "$ref": "#/$defs/log" } },
+        "emotions": { "type": "array", "maxItems": 100000, "items": { "$ref": "#/$defs/emotion" } },
+        "tasks": { "type": "array", "maxItems": 100000, "items": { "$ref": "#/$defs/task" } }
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+      "$comment": "沿用现有 UUID 外形校验，不追加 version/variant 位限制。分区内 ID 唯一性由语义校验负责。"
+    },
+    "day": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+      "format": "date",
+      "$comment": "必须启用 format 校验，并限制为公历 0001–9999 年的真实日期。"
+    },
+    "instant": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?(Z|[+-][0-9]{2}:[0-9]{2})$",
+      "format": "date-time",
+      "$comment": "还须拒绝闰秒、无效日期、未知偏移 -00:00；规范化输出为 UTC 毫秒，见 README。"
+    },
+    "text": { "type": "string", "maxLength": 100000, "$comment": "语义层额外限制 UTF-16 code units <= 100000。" },
+    "optionalText": { "anyOf": [{ "$ref": "#/$defs/text" }, { "type": "null" }] },
+    "optionalInstant": { "anyOf": [{ "$ref": "#/$defs/instant" }, { "type": "null" }] },
+    "colorTag": { "enum": ["urgent", "inspiration", "daily", "memo", "emotion", "idea"] },
+    "importance": { "type": "integer", "minimum": 0, "maximum": 4 },
+    "log": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "content", "colorTag", "category", "importance", "createdAt", "recordDate"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "content": { "$ref": "#/$defs/text" },
+        "colorTag": { "$ref": "#/$defs/colorTag" },
+        "category": { "enum": ["log", "idea"] },
+        "importance": { "$ref": "#/$defs/importance" },
+        "createdAt": { "$ref": "#/$defs/instant" },
+        "recordDate": { "$ref": "#/$defs/day" }
+      }
+    },
+    "emotion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "level", "createdAt", "recordDate"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "level": { "type": "integer", "minimum": -3, "maximum": 3 },
+        "subEmotion": { "enum": ["sad", "angry", "uncomfortable", null] },
+        "note": { "$ref": "#/$defs/optionalText" },
+        "status": { "$ref": "#/$defs/optionalText" },
+        "createdAt": { "$ref": "#/$defs/instant" },
+        "recordDate": { "$ref": "#/$defs/day" }
+      }
+    },
+    "due": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "date"],
+          "properties": { "kind": { "const": "allDay" }, "date": { "$ref": "#/$defs/day" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "at", "timeZone"],
+          "properties": {
+            "kind": { "const": "dateTime" },
+            "at": { "$ref": "#/$defs/instant" },
+            "timeZone": { "type": "string", "minLength": 1, "$comment": "语义层检查三端支持的时区标识；不能仅凭字符串判定。" }
+          }
+        }
+      ]
+    },
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "colorTag", "importance", "due", "createdAt", "updatedAt"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "title": { "type": "string", "maxLength": 200, "pattern": "\\S", "$comment": "原始 UTF-16 长度 <= 200；ECMAScript trim 后非空。" },
+        "notes": { "$ref": "#/$defs/optionalText" },
+        "colorTag": { "$ref": "#/$defs/colorTag" },
+        "importance": { "$ref": "#/$defs/importance" },
+        "due": { "$ref": "#/$defs/due" },
+        "reminderAt": { "$ref": "#/$defs/optionalInstant" },
+        "completedAt": { "$ref": "#/$defs/optionalInstant" },
+        "createdAt": { "$ref": "#/$defs/instant" },
+        "updatedAt": { "$ref": "#/$defs/instant" }
+      }
+    }
+  }
+}

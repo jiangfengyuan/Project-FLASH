@@ -25,5 +25,6 @@ class BackupDiffTest {
 
         assertEquals(DifferenceSummary(1, 1, 1, 1), difference.logs)
         assertEquals(DifferenceSummary(0, 0, 0, 0), difference.emotions)
+        assertEquals(DifferenceSummary(0, 0, 0, 0), difference.tasks)
     }
 }

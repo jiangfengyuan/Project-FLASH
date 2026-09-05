@@ -16,6 +16,7 @@ struct DifferenceSummary: Equatable {
 struct BackupDifference: Equatable {
     let logs: DifferenceSummary
     let emotions: DifferenceSummary
+    let tasks: DifferenceSummary
 }
 
 enum BackupDiff {
@@ -23,11 +24,14 @@ enum BackupDiff {
         localLogs: [LogItem],
         localEmotions: [EmotionRecord],
         incomingLogs: [LogItem],
-        incomingEmotions: [EmotionRecord]
+        incomingEmotions: [EmotionRecord],
+        localTasks: [TaskItem] = [],
+        incomingTasks: [TaskItem] = []
     ) -> BackupDifference {
         BackupDifference(
             logs: summarize(local: localLogs, incoming: incomingLogs, id: \.id),
-            emotions: summarize(local: localEmotions, incoming: incomingEmotions, id: \.id)
+            emotions: summarize(local: localEmotions, incoming: incomingEmotions, id: \.id),
+            tasks: summarize(local: localTasks, incoming: incomingTasks, id: \.id)
         )
     }
 

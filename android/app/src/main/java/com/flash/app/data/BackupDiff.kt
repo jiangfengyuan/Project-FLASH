@@ -8,9 +8,14 @@ package com.flash.app.data
 
 import com.flash.app.data.model.EmotionRecord
 import com.flash.app.data.model.LogItem
+import com.flash.app.data.model.TaskItem
 
 data class DifferenceSummary(val added: Int, val changed: Int, val unchanged: Int, val localOnly: Int)
-data class BackupDifference(val logs: DifferenceSummary, val emotions: DifferenceSummary)
+data class BackupDifference(
+    val logs: DifferenceSummary,
+    val emotions: DifferenceSummary,
+    val tasks: DifferenceSummary,
+)
 
 object BackupDiff {
     fun analyze(
@@ -18,9 +23,12 @@ object BackupDiff {
         localEmotions: List<EmotionRecord>,
         incomingLogs: List<LogItem>,
         incomingEmotions: List<EmotionRecord>,
+        localTasks: List<TaskItem> = emptyList(),
+        incomingTasks: List<TaskItem> = emptyList(),
     ): BackupDifference = BackupDifference(
         summarize(localLogs, incomingLogs, LogItem::id),
         summarize(localEmotions, incomingEmotions, EmotionRecord::id),
+        summarize(localTasks, incomingTasks, TaskItem::id),
     )
 
     private fun <T> summarize(local: List<T>, incoming: List<T>, id: (T) -> String): DifferenceSummary {

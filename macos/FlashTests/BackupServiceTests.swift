@@ -22,22 +22,45 @@ struct BackupServiceTests {
                       createdAt: "2026-08-13T08:00:00.000Z")
     }
 
+    private func sampleTask() -> TaskItem {
+        TaskItem(
+            id: "33333333-3333-3333-3333-333333333333",
+            title: "交付设计稿",
+            notes: nil,
+            colorTag: .memo,
+            importance: 3,
+            dueKind: .dateTime,
+            dueDate: nil,
+            dueAt: "2026-09-01T01:30:00.000Z",
+            timeZone: "Asia/Shanghai",
+            reminderAt: "2026-09-01T00:30:00.000Z",
+            completedAt: nil,
+            createdAt: "2026-08-31T00:00:00.000Z",
+            updatedAt: "2026-08-31T00:01:00.000Z"
+        )
+    }
+
     @Test func exportParseRoundTrip() throws {
         let json = BackupService.exportJSON(logs: [sampleLog()],
                                             emotions: [sampleEmotion()],
+                                            tasks: [sampleTask()],
                                             appVersion: "0.1.0")
         let preview = try BackupService.parse(json)
         #expect(preview.logCount == 1)
         #expect(preview.emotionCount == 1)
+        #expect(preview.taskCount == 1)
         #expect(preview.skippedLogs == 0)
         #expect(preview.skippedEmotions == 0)
         #expect(preview.logs[0] == sampleLog())
         #expect(preview.emotions[0] == sampleEmotion())
+        #expect(preview.tasks[0] == sampleTask())
     }
 
     @Test func exportContainsMetaFields() {
         let json = BackupService.exportJSON(logs: [], emotions: [], appVersion: "0.1.0")
-        #expect(json.contains("\"version\" : \"flash-backup-v1\"") || json.contains("\"version\":\"flash-backup-v1\""))
+        #expect(json.contains("\"version\" : \"flash-backup-v2\"") || json.contains("\"version\":\"flash-backup-v2\""))
+        #expect(json.contains("\"schemas\""))
+        #expect(json.contains("\"tasks\""))
         #expect(json.contains("exportedAt"))
         #expect(json.contains("appVersion"))
         #expect(json.contains("notes"))

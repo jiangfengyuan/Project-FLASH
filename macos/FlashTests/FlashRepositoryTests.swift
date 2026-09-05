@@ -10,8 +10,8 @@ import SwiftData
 
 @Suite("FlashRepository") @MainActor
 struct FlashRepositoryTests {
-    private func makeRepo() -> FlashRepository {
-        FlashRepository(container: FlashDatabase.makeContainer(inMemory: true))
+    private func makeRepo(beforeSave: @escaping () throws -> Void = {}) -> FlashRepository {
+        FlashRepository(container: FlashDatabase.makeContainer(inMemory: true), beforeSave: beforeSave)
     }
 
     @Test func addLogAssignsFields() throws {
@@ -107,5 +107,98 @@ struct FlashRepositoryTests {
         try repo.clearAll()
         #expect(try repo.allLogs().isEmpty)
         #expect(try repo.allEmotions().isEmpty)
+    }
+
+    @Test func snapshotContainsEveryPortableSection() throws {
+        let repo = makeRepo()
+        try repo.addLog(content: "x", colorTag: .daily)
+        try repo.addEmotion(level: .happy, subEmotion: nil)
+        try repo.saveTask(task(title: "任务", updatedAt: "2026-08-31T01:00:00.000Z"))
+
+        let snapshot = try repo.snapshot()
+
+        #expect(snapshot.logs.count == 1)
+        #expect(snapshot.emotions.count == 1)
+        #expect(snapshot.tasks.count == 1)
+    }
+
+    @Test func failedMutationsRollbackAndNeverLeakIntoLaterSave() throws {
+        var failNextSave = false
+        let repo = makeRepo {
+            if failNextSave {
+                failNextSave = false
+                throw InjectedSaveError.failed
+            }
+        }
+        try repo.addLog(content: "保留", colorTag: .daily)
+        let original = try repo.snapshot()
+        let incoming = LogItem(
+            id: "11111111-1111-1111-1111-111111111111",
+            content: "不应提交",
+            colorTag: .urgent,
+            category: .log,
+            importance: 1,
+            createdAt: "2026-09-05T00:00:00.000Z",
+            recordDate: "2026-09-05"
+        )
+
+        failNextSave = true
+        #expect(throws: InjectedSaveError.self) {
+            try repo.replaceAll(logs: [incoming], emotions: [])
+        }
+        #expect(try repo.snapshot().logs == original.logs)
+
+        failNextSave = true
+        #expect(throws: InjectedSaveError.self) {
+            try repo.mergeAll(logs: [incoming], emotions: [])
+        }
+        #expect(try repo.snapshot().logs == original.logs)
+
+        failNextSave = true
+        #expect(throws: InjectedSaveError.self) {
+            try repo.clearAll()
+        }
+        #expect(try repo.snapshot().logs == original.logs)
+
+        // A later successful save must not carry any pending delete or insert
+        // from the three failed operations.
+        try repo.addEmotion(level: .happy, subEmotion: nil)
+        let final = try repo.snapshot()
+        #expect(final.logs == original.logs)
+        #expect(final.emotions.count == 1)
+        #expect(!final.logs.contains { $0.id == incoming.id })
+    }
+
+    private enum InjectedSaveError: Error {
+        case failed
+    }
+
+    @Test func taskMergeUsesNewestUpdatedAt() throws {
+        let repo = makeRepo()
+        let newer = task(title: "新", updatedAt: "2026-08-31T02:00:00.000Z")
+        let older = task(title: "旧", updatedAt: "2026-08-31T01:00:00.000Z")
+
+        try repo.mergeAll(logs: [], emotions: [], tasks: [newer])
+        try repo.mergeAll(logs: [], emotions: [], tasks: [older])
+
+        #expect(try repo.allTasks().map(\.title) == ["新"])
+    }
+
+    private func task(title: String, updatedAt: String) -> TaskItem {
+        TaskItem(
+            id: "33333333-3333-3333-3333-333333333333",
+            title: title,
+            notes: nil,
+            colorTag: .memo,
+            importance: 0,
+            dueKind: .allDay,
+            dueDate: "2026-09-01",
+            dueAt: nil,
+            timeZone: nil,
+            reminderAt: nil,
+            completedAt: nil,
+            createdAt: "2026-08-31T00:00:00.000Z",
+            updatedAt: updatedAt
+        )
     }
 }

@@ -21,7 +21,7 @@ enum FlashDatabase {
     }
 
     static func makeContainerWithFallback(inMemory: Bool = false) -> ContainerResult {
-        let schema = Schema([LogEntity.self, EmotionEntity.self])
+        let schema = Schema([LogEntity.self, EmotionEntity.self, TaskEntity.self])
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: inMemory)
         do {
             return ContainerResult(container: try ModelContainer(for: schema, configurations: [config]),

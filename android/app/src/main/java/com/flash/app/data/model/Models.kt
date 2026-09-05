@@ -6,6 +6,9 @@
 
 package com.flash.app.data.model
 
+import java.time.Instant
+import java.time.ZoneId
+
 /**
  * 与 Web 版 src/lib/constants.ts 对齐的核心数据模型。
  * storageKey 与 SQLite/Capacitor 端存储值保持一致，保证数据互通。
@@ -82,6 +85,42 @@ data class EmotionRecord(
     val recordDate: String,
     val createdAt: String,
 )
+
+enum class TaskDueKind(val storageKey: String) {
+    ALL_DAY("allDay"),
+    DATE_TIME("dateTime");
+
+    companion object {
+        fun fromStorage(key: String): TaskDueKind? = entries.firstOrNull { it.storageKey == key }
+    }
+}
+
+data class TaskItem(
+    val id: String,
+    val title: String,
+    val notes: String?,
+    val colorTag: ColorTag,
+    val importance: Int,
+    val dueKind: TaskDueKind,
+    val dueDate: String?,
+    val dueAt: String?,
+    val timeZone: String?,
+    val reminderAt: String?,
+    val completedAt: String?,
+    val createdAt: String,
+    val updatedAt: String,
+) {
+    val calendarDate: String
+        get() = when (dueKind) {
+            TaskDueKind.ALL_DAY -> requireNotNull(dueDate)
+            TaskDueKind.DATE_TIME -> Instant.parse(requireNotNull(dueAt))
+                .atZone(ZoneId.of(requireNotNull(timeZone)))
+                .toLocalDate()
+                .toString()
+        }
+
+    val isCompleted: Boolean get() = completedAt != null
+}
 
 /** 对应 PRD 的 emoji 情绪模型：😍😊🙂😐😔😣😡（level 3→-3） */
 val EmotionLevel.emoji: String

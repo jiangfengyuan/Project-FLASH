@@ -1,0 +1,8 @@
+{
+  "version": "flash-backup-v2",
+  "exportedAt": "2026-09-05T00:00:00.000Z",
+  "appVersion": "0.1.0",
+  "notes": "",
+  "schemas": { "logs": 1, "emotions": 1, "tasks": 1 },
+  "data": { "logs": [], "emotions": [], "tasks": [] }
+}
