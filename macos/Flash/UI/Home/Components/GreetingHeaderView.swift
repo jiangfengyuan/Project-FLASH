@@ -6,10 +6,10 @@
 
 import SwiftUI
 
-/// Home 仪表盘顶部问候区：左侧问候语 + 副标题，右侧搜索框与「+ 新建」菜单。
+/// Home 仪表盘顶部问候区：问候与新建操作在首行，醒目的全宽搜索入口在第二行。
 struct GreetingHeaderView: View {
     @Binding var searchText: String
-    /// 可选的外部焦点绑定（如 Home 的 ⌘K 聚焦）；nil 表示不接管焦点
+    /// 可选的外部焦点绑定（焦点环、Esc 失焦、清空后回焦）；nil 表示不接管焦点
     let focus: FocusState<Bool>.Binding?
     let onNewLog: () -> Void
     let onNewIdea: () -> Void
@@ -29,21 +29,22 @@ struct GreetingHeaderView: View {
     }
 
     var body: some View {
-        HStack(alignment: .center, spacing: 16) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text(greeting)
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundStyle(Color.primary)
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .center, spacing: 16) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(greeting)
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundStyle(Color.primary)
 
-                Text("今天也记录一点什么吧。")
-                    .font(.system(size: 13))
-                    .foregroundStyle(Color.secondary)
+                    Text("今天也记录一点什么吧。")
+                        .font(.system(size: 13))
+                        .foregroundStyle(Color.secondary)
+                }
+
+                Spacer(minLength: 16)
+                newMenu
             }
-
-            Spacer(minLength: 16)
-
             searchField
-            newMenu
         }
     }
 
@@ -64,9 +65,9 @@ struct GreetingHeaderView: View {
         HStack(spacing: 6) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(Color.secondary)
+                .foregroundStyle(BrandColors.accent)
 
-            TextField("搜索", text: $searchText)
+            TextField("搜索日志、灵感和情绪", text: $searchText)
                 .textFieldStyle(.plain)
                 .font(.system(size: 13))
                 .foregroundStyle(Color.primary)
@@ -80,31 +81,38 @@ struct GreetingHeaderView: View {
                     focus?.wrappedValue = false
                 }
 
-            Text("⌘K")
-                .font(.system(size: 11, weight: .medium))
-                .monospacedDigit()
-                .foregroundStyle(Color.secondary)
-                .padding(.horizontal, 5)
-                .padding(.vertical, 2)
-                .background(
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.primary.opacity(0.06))
-                )
+            if !searchText.isEmpty {
+                Button {
+                    searchText = ""
+                    focus?.wrappedValue = true
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .help("清除搜索")
+                .transition(.scale(scale: 0.8).combined(with: .opacity))
+            }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .frame(width: 220)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 11)
+        .frame(maxWidth: .infinity)
         .background(
             Capsule()
-                .fill(Color.primary.opacity(isSearchHovered ? 0.07 : 0.05))
+                .fill(Color.primary.opacity(isSearchHovered ? 0.09 : 0.07))
         )
         .overlay(
             Capsule()
-                .strokeBorder(Color.primary.opacity(isSearchHovered ? 0.14 : 0.10), lineWidth: 1)
+                .strokeBorder(
+                    focus?.wrappedValue == true ? BrandColors.accent.opacity(0.7) :
+                        Color.primary.opacity(isSearchHovered ? 0.18 : 0.13),
+                    lineWidth: focus?.wrappedValue == true ? 1.5 : 1
+                )
         )
         .onHover { isSearchHovered = $0 }
         .animation(Motion.quick(reduceMotion), value: isSearchHovered)
-        .help("搜索 ⌘K")
+        .animation(Motion.quick(reduceMotion), value: searchText.isEmpty)
+        .help("搜索日志、灵感和情绪")
     }
 
     // MARK: - New Menu

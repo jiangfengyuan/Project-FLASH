@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -45,11 +46,15 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -79,10 +84,22 @@ fun EmotionScreen(onBack: () -> Unit) {
     val app = LocalContext.current.applicationContext as FlashApplication
     val viewModel: EmotionViewModel = viewModel(factory = EmotionViewModel.factory(app.repository))
     val emotions by viewModel.emotions.collectAsStateWithLifecycle()
+    val statsEmotions by viewModel.statsEmotions.collectAsStateWithLifecycle()
+    val hasMoreHistory by viewModel.hasMoreHistory.collectAsStateWithLifecycle()
     var deletingRecord by remember { mutableStateOf<EmotionRecord?>(null) }
+    val snackbar = remember { SnackbarHostState() }
+
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is EmotionEvent.Failed -> snackbar.showSnackbar(event.message)
+            }
+        }
+    }
 
     Scaffold(
         containerColor = Color.Transparent,
+        snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
                 title = { Text("情绪记录") },
@@ -155,6 +172,7 @@ fun EmotionScreen(onBack: () -> Unit) {
             Spacer(Modifier.height(12.dp))
             Button(
                 onClick = viewModel::save,
+                enabled = !viewModel.saving,
                 colors = ButtonDefaults.buttonColors(containerColor = ModuleColors.Emotion),
                 modifier = Modifier.fillMaxWidth(),
             ) {
@@ -169,17 +187,41 @@ fun EmotionScreen(onBack: () -> Unit) {
                 modifier = Modifier.align(Alignment.Start),
             )
             Spacer(Modifier.height(8.dp))
+            val listState = rememberLazyListState()
+            // 滑到接近底部时增量加载下一页（DAO LIMIT 随 limit 增大）
+            val shouldLoadMore by remember {
+                derivedStateOf {
+                    val info = listState.layoutInfo
+                    val lastVisible = info.visibleItemsInfo.lastOrNull()?.index ?: 0
+                    info.totalItemsCount > 0 && lastVisible >= info.totalItemsCount - 3
+                }
+            }
+            LaunchedEffect(shouldLoadMore) {
+                if (shouldLoadMore) viewModel.loadMoreHistory()
+            }
             LazyColumn(
+                state = listState,
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 item(key = "stats") {
-                    EmotionStatsSection(emotions = emotions)
+                    // 情绪页对应 macOS「本周趋势」：短档用周一对齐自然周
+                    EmotionStatsSection(emotions = statsEmotions, weekAligned = true)
                 }
                 items(items = emotions, key = { it.id }) { record ->
                     Column(modifier = Modifier.animateItem()) {
                         EmotionRow(record, onDelete = { deletingRecord = record })
                         HorizontalDivider(thickness = 0.5.dp)
+                    }
+                }
+                if (hasMoreHistory) {
+                    item(key = "loading") {
+                        Text(
+                            "正在加载更多…",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                        )
                     }
                 }
             }

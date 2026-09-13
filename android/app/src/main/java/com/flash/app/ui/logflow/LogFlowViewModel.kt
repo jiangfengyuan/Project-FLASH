@@ -15,11 +15,15 @@ import com.flash.app.data.FlashRepository
 import com.flash.app.data.model.Category
 import com.flash.app.data.model.ColorTag
 import com.flash.app.data.model.LogItem
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -37,66 +41,126 @@ data class LogFilter(
     val sort: LogSort = LogSort.NEWEST,
 )
 
-/** 对应 Web 版 LogFlow 页 + logFilters.ts */
+sealed interface LogFlowEvent {
+    data class Deleted(val log: LogItem, val wasIdeaViewed: Boolean = false) : LogFlowEvent
+    data class Failed(val message: String) : LogFlowEvent
+}
+
+/** LIKE 通配符转义（与 DAO 的 ESCAPE '\' 配套），保证搜索按字面匹配 */
+internal fun escapeLike(raw: String): String = buildString {
+    for (c in raw) {
+        if (c == '\\' || c == '%' || c == '_') append('\\')
+        append(c)
+    }
+}
+
+internal fun LogSort.toSortKey(): String = when (this) {
+    LogSort.NEWEST -> "newest"
+    LogSort.OLDEST -> "oldest"
+    LogSort.TAG -> "tag"
+}
+
+/** 对应 Web 版 LogFlow 页 + logFilters.ts；过滤/排序下推 SQL，列表分页增量加载 */
+@OptIn(ExperimentalCoroutinesApi::class)
 class LogFlowViewModel(private val repository: FlashRepository) : ViewModel() {
+
+    private val eventChannel = Channel<LogFlowEvent>(Channel.BUFFERED)
+    val events = eventChannel.receiveAsFlow()
 
     private val _filter = MutableStateFlow(LogFilter())
     val filter: StateFlow<LogFilter> = _filter.asStateFlow()
 
-    val logs: StateFlow<List<LogItem>> = combine(
-        repository.logs,
-        _filter,
-    ) { logs, filter ->
-        applyFilter(logs, filter)
+    /** 已加载条数上限，滑到底部时按页增大（配合 DAO 的 LIMIT 查询） */
+    private val _limit = MutableStateFlow(PAGE_SIZE)
+
+    val logs: StateFlow<List<LogItem>> = combine(_filter, _limit) { filter, limit ->
+        filter to limit
+    }.flatMapLatest { (filter, limit) ->
+        repository.observeLogPage(
+            query = escapeLike(filter.query.trim().lowercase()),
+            tags = filter.tags.mapTo(mutableSetOf()) { it.storageKey },
+            startDate = filter.startDate,
+            endDate = filter.endDate,
+            sort = filter.sort.toSortKey(),
+            limit = limit,
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    /** 当前过滤条件下的命中总数（"N 条"展示 + 是否还有更多） */
+    val totalCount: StateFlow<Int> = _filter.flatMapLatest { filter ->
+        repository.observeLogCount(
+            query = escapeLike(filter.query.trim().lowercase()),
+            tags = filter.tags.mapTo(mutableSetOf()) { it.storageKey },
+            startDate = filter.startDate,
+            endDate = filter.endDate,
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    fun loadMore() {
+        if (logs.value.size < totalCount.value) _limit.value += PAGE_SIZE
+    }
+
+    private fun updateFilter(transform: (LogFilter) -> LogFilter) {
+        _filter.value = transform(_filter.value)
+        _limit.value = PAGE_SIZE
+    }
+
     fun setQuery(query: String) {
-        _filter.value = _filter.value.copy(query = query)
+        updateFilter { it.copy(query = query) }
     }
 
     fun toggleTag(tag: ColorTag) {
-        val current = _filter.value.tags
-        _filter.value = _filter.value.copy(
-            tags = if (tag in current) current - tag else current + tag,
-        )
+        updateFilter { current ->
+            val tags = current.tags
+            current.copy(tags = if (tag in tags) tags - tag else tags + tag)
+        }
     }
 
     fun setSort(sort: LogSort) {
-        _filter.value = _filter.value.copy(sort = sort)
+        updateFilter { it.copy(sort = sort) }
     }
 
     fun setDateRange(start: String?, end: String?) {
         val normalized = if (start != null && end != null && start > end) end to start else start to end
-        _filter.value = _filter.value.copy(startDate = normalized.first, endDate = normalized.second)
+        updateFilter { it.copy(startDate = normalized.first, endDate = normalized.second) }
     }
 
     fun updateLog(log: LogItem) {
-        viewModelScope.launch { repository.updateLog(log) }
-    }
-
-    fun deleteLog(id: String) {
-        viewModelScope.launch { repository.deleteLog(id) }
-    }
-
-    private fun applyFilter(logs: List<LogItem>, filter: LogFilter): List<LogItem> {
-        val query = filter.query.lowercase()
-        val filtered = logs.filter { log ->
-            if (log.category != Category.LOG) return@filter false
-            val matchesSearch = query.isEmpty() || log.content.lowercase().contains(query)
-            val matchesTags = filter.tags.isEmpty() || log.colorTag in filter.tags
-            // recordDate 为 yyyy-MM-dd，字典序即时间序（与 Web 版 logFilters.ts 一致）
-            val matchesStart = filter.startDate == null || log.recordDate >= filter.startDate
-            val matchesEnd = filter.endDate == null || log.recordDate <= filter.endDate
-            matchesSearch && matchesTags && matchesStart && matchesEnd
+        viewModelScope.launch {
+            runCatching { repository.updateLog(log) }
+                .onFailure {
+                    eventChannel.send(LogFlowEvent.Failed(it.message ?: "保存失败，请重试"))
+                }
         }
-        return when (filter.sort) {
-            LogSort.TAG -> filtered.sortedBy { it.colorTag.storageKey }
-            LogSort.OLDEST -> filtered.sortedBy { it.createdAt }
-            LogSort.NEWEST -> filtered.sortedByDescending { it.createdAt }
+    }
+
+    fun deleteLog(log: LogItem) {
+        viewModelScope.launch {
+            // 删除会级联清掉 idea_view_state，先记住已读状态供撤销时恢复
+            val wasIdeaViewed = log.category == Category.IDEA &&
+                runCatching { repository.isIdeaViewed(log.id) }.getOrDefault(false)
+            runCatching { repository.deleteLog(log.id) }
+                .onSuccess { eventChannel.send(LogFlowEvent.Deleted(log, wasIdeaViewed)) }
+                .onFailure {
+                    eventChannel.send(LogFlowEvent.Failed(it.message ?: "删除失败，请重试"))
+                }
+        }
+    }
+
+    fun restoreLog(log: LogItem, wasIdeaViewed: Boolean) {
+        viewModelScope.launch {
+            runCatching {
+                repository.updateLog(log)
+                if (wasIdeaViewed) repository.markIdeaViewed(log.id)
+            }.onFailure {
+                eventChannel.send(LogFlowEvent.Failed(it.message ?: "撤销失败，请重试"))
+            }
         }
     }
 
     companion object {
+        const val PAGE_SIZE = 50
+
         fun factory(repository: FlashRepository): ViewModelProvider.Factory = viewModelFactory {
             initializer { LogFlowViewModel(repository) }
         }

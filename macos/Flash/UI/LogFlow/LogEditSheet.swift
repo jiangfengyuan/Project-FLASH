@@ -37,6 +37,9 @@ struct LogEditSheet: View {
         _importance = State(initialValue: log.importance)
     }
 
+    /// 契约上限（UTF-16 单元）：超限禁用保存并显示计数，不静默截断
+    private var contentExceedsLimit: Bool { !TextLimits.fits(content) }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text(title).font(.headline)
@@ -74,6 +77,12 @@ struct LogEditSheet: View {
             Stepper("重要度：\(importance)", value: $importance, in: 0...4)
                 .staggeredIn(index: 3, appeared: appeared, reduceMotion: reduceMotion)
 
+            if contentExceedsLimit {
+                Text("已超出上限（\(content.utf16.count)/\(TextLimits.maxContentUTF16)），请删减后再保存")
+                    .font(.caption)
+                    .foregroundStyle(Color(nsColor: .systemRed))
+            }
+
             HStack {
                 Spacer()
                 if saved {
@@ -88,7 +97,8 @@ struct LogEditSheet: View {
                     Button(isSaving ? "保存中…" : "保存") { save() }
                         .buttonStyle(.borderedProminent)
                         .keyboardShortcut(.return, modifiers: .command)
-                        .disabled(content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSaving)
+                        .disabled(content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                                  || contentExceedsLimit || isSaving)
                 }
             }
             .staggeredIn(index: 4, appeared: appeared, reduceMotion: reduceMotion)
@@ -111,6 +121,8 @@ struct LogEditSheet: View {
         var updated = log
         updated.content = content
         updated.colorTag = colorTag
+        // 「!!」语法只在创建时解析（importanceFromContent）；编辑正文不重解析，
+        // 重要性以 Stepper 的显式值为准，避免覆盖用户手动调整
         updated.importance = importance
         Task {
             do {

@@ -32,6 +32,9 @@ struct MenuBarCompanionView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             header
+            if appState.isDatabaseInMemoryFallback {
+                fallbackBanner
+            }
             captureInput
             Divider()
             TodaySummary(today: today)
@@ -68,6 +71,19 @@ struct MenuBarCompanionView: View {
                     .transition(.pop(reduceMotion: reduceMotion))
             }
         }
+    }
+
+    /// 内存降级持久警示（不可关闭）：与 RootView 的「数据存储异常」alert 同源，
+    /// 提示用户本次记录只写入易失内存库，退出即丢
+    private var fallbackBanner: some View {
+        Label("数据存储异常：本次记录不会被保存到磁盘", systemImage: "exclamationmark.triangle.fill")
+            .font(.caption)
+            .foregroundStyle(Color(nsColor: .systemRed))
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(nsColor: .systemRed).opacity(0.08),
+                        in: RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 
     private var captureInput: some View {
@@ -125,13 +141,23 @@ struct MenuBarCompanionView: View {
     private func save() {
         let content = draft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !content.isEmpty else { return }
+        // 契约上限（UTF-16 单元）：超限不静默截断，保留草稿并给出可见反馈
+        guard TextLimits.fits(content) else {
+            showFeedback("内容超出 \(TextLimits.maxContentUTF16) 字上限", isError: true)
+            return
+        }
         guard let repository else { showFeedback("存储未就绪", isError: true); return }
         do {
             // Quick Capture 默认类型 Idea（PRD §13.3），沿用 !! 语法标记重要度
             try repository.addLog(content: content, colorTag: .idea, category: .idea,
                                   importance: importanceFromContent(content))
             draft = ""
-            showFeedback("已保存", isError: false)
+            // 内存降级模式下记录只落在易失内存库，不能给「已保存」成功反馈误导用户
+            if appState.isDatabaseInMemoryFallback {
+                showFeedback("已记录，重启后丢失", isError: true)
+            } else {
+                showFeedback("已保存", isError: false)
+            }
             inputFocused = true
         } catch {
             // 固定文案，详情仅输出到控制台，避免向用户暴露内部路径

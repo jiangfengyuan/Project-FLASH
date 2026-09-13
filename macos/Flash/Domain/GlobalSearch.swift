@@ -15,13 +15,17 @@ struct SearchMatch: Equatable {
 }
 
 /// 全局搜索（对应 Android/Web 的 ⌘K 搜索）：大小写不敏感，
+/// 日志同时匹配正文与标签中文名（对齐探索页搜索口径），
 /// 合并日志与情绪后按 createdAt 倒序取前 limit 条。
 /// createdAt 为同格式 ISO-8601，字典序即时间序。
 enum GlobalSearch {
     static func search(logs: [LogItem], emotions: [EmotionRecord],
                        query: String, limit: Int = 20) -> [SearchMatch] {
         let logMatches = logs
-            .filter { $0.content.localizedCaseInsensitiveContains(query) }
+            .filter {
+                $0.content.localizedCaseInsensitiveContains(query) ||
+                    $0.colorTag.displayName.localizedCaseInsensitiveContains(query)
+            }
             .map { SearchMatch(id: $0.id, isEmotion: false,
                                title: $0.content, createdAt: $0.createdAt) }
         // 标题：emoji + 备注，无备注时用情绪中文名；compactMap 单遍完成构造与匹配

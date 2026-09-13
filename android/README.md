@@ -17,8 +17,8 @@ Android 端原生实现。Kotlin + Jetpack Compose，严格遵循 Material Desig
 
 ## 设计规范
 
-- 遵循 Material Design 3：Color Roles、State Layers、离散 Slider、
-  FilterChip、OutlinedTextField（设计文档暂未随仓库公开）
+- 遵循 Material Design 3：Color Roles、State Layers、FilterChip、
+  OutlinedTextField 等（情绪等级为七档 emoji 选择器而非滑块；设计文档暂未随仓库公开）
 - 应用使用静态 MD3 主题，品牌 Seed 为 `#4D96FF`，通过 `material-color-utilities`
   离线生成 light/dark 两组 Tonal Palette（与 Material Theme Builder 同算法）
 - 界面风格支持 MD3 与 GLASS（玻璃拟态）两种模式，由 `SettingsStore` 中的 `UiStyle` 控制
@@ -29,6 +29,13 @@ Android 端原生实现。Kotlin + Jetpack Compose，严格遵循 Material Desig
 - 首页、探索、日历和日志流中的记录可进入统一详情页，支持完整内容查看、编辑、
   标签与重要度调整、日志/灵感分类迁移、分享和删除
 - 探索页支持按内容或标签搜索；日历聚合采用一次分组计算，避免数据量增长后逐日重复扫描
+- Idea Reminder 会在至少三条灵感从未打开时显示导航角标、首页提示与“待梳理”标记；
+  阅读状态存于 Room 本地辅助表，不进入跨平台备份
+- 日志管理删除后提供 Snackbar 撤销入口
+- Calendar 支持全天/定时任务、截止时间、完成状态与 WorkManager 本地提醒；Android 13+
+  在用户设置提醒时按需申请通知权限
+- `flash-backup-v2` 以分区 schema 携带日志、情绪和任务，继续兼容导入 v1，并为未来
+  独立的自动同步协议保留稳定数据模型
 
 ## 常用命令
 
@@ -60,12 +67,13 @@ app/src/main/java/com/flash/app/
 ├── FlashApplication.kt      # Room 初始化、仓库与设置注入
 ├── MainActivity.kt          # 单 Activity 入口，主题模式应用
 ├── data/
-│   ├── model/Models.kt      # ColorTag/Category/EmotionLevel/SubEmotion/LogItem/EmotionRecord
+│   ├── model/Models.kt      # 日志、情绪与 TaskItem 跨端模型
 │   ├── db/                  # Entities / DAOs / FlashDatabase（Room）
+│   ├── reminder/            # WorkManager 任务提醒调度与通知
 │   ├── FlashRepository.kt   # 仓储，含合并/覆盖导入
 │   ├── Backup.kt            # JSON 备份导出/导入，与 macOS 端互通
 │   └── SettingsStore.kt     # 主题模式/界面风格/Welcome 状态（SharedPreferences）
-├── domain/EmotionStats.kt   # 情绪统计算法
+├── domain/                  # 情绪统计算法、Idea Reminder 触发规则
 └── ui/
     ├── theme/               # MD3 ColorScheme / Typography / FlashTheme
     │   └── glass/           # GLASS 风格背景与主题扩展
@@ -75,8 +83,8 @@ app/src/main/java/com/flash/app/
     ├── home/                # Home Tab：今日概览与快速记录
     ├── explore/             # Explore Tab：灵感与日志发现
     ├── logflow/             # 日志管理：搜索/筛选/排序/编辑/删除
-    ├── calendar/            # 日历 Tab：日志与情绪按日聚合
-    ├── emotion/             # 情绪 Tab：滑块/子情绪/统计图表/历史
+    ├── calendar/            # 日历页（非底部 Tab，首页等入口进入）：日志/情绪/任务聚合与任务编辑
+    ├── emotion/             # 情绪页（非底部 Tab）：emoji 选择/子情绪/统计图表/历史
     ├── stats/               # 统计 Tab：情绪趋势与分布
     ├── welcome/             # 首次启动引导页
     └── settings/            # 设置：外观/备份分享与局域网传输/导入导出/清空/关于
@@ -85,44 +93,22 @@ app/src/main/java/com/flash/app/
 ## 发布签名 / Release Signing
 
 - `*.keystore` 与 `release-signing.env` 已加入 `.gitignore`，**严禁入库**。
-- 本地准备发布密钥：
+- 旧 Git 历史中的开发 keystore 已公开，**禁止再用于任何发布**。新密钥必须放在仓库外。
+- **作废声明（2026-09-05）**：历史提交 `4c78c55` 入库的 `flash-release.keystore`（密码曾见于 `release-signing.env.example`）经决策**声明作废、保留历史**。它从未用于任何已分发的安装包（已分发的 `Flash-Alpha010.apk` 是 debug 证书签名的 debug 构建）。正式签名一律使用仓库外的新生密钥。
+- 本地准备发布密钥（环境变量不要写入仓库）：
   ```bash
-  keytool -genkey -v -keystore flash-release.keystore -alias flash -keyalg RSA -keysize 2048 -validity 10000
+  export FLASH_RELEASE_STORE_FILE=/absolute/path/outside/repository/flash-release.keystore
+  export FLASH_RELEASE_STORE_PASSWORD='use-a-password-manager-generated-secret'
+  export FLASH_RELEASE_KEY_PASSWORD='use-another-password-manager-generated-secret'
+  export FLASH_RELEASE_KEY_ALIAS=flash-release
+  ../scripts/generate-android-keystore.sh
   ```
-- 将 `flash-release.keystore` 放在仓库外安全位置，并创建 `release-signing.env`：
-  ```
-  STORE_FILE=/absolute/path/to/flash-release.keystore
-  STORE_PASSWORD=your_store_password
-  KEY_PASSWORD=your_key_password
-  KEY_ALIAS=flash
-  ```
-- 在 `app/build.gradle.kts` 中读取 `release-signing.env` 并配置 `signingConfigs.release`，再让 `buildTypes.release` 引用该 signing config：
-  ```kotlin
-  val signingEnv = rootProject.file("release-signing.env")
-  signingConfigs {
-      create("release") {
-          if (signingEnv.exists()) {
-              val props = java.util.Properties().apply { load(signingEnv.inputStream()) }
-              storeFile = file(props.getProperty("STORE_FILE"))
-              storePassword = props.getProperty("STORE_PASSWORD")
-              keyAlias = props.getProperty("KEY_ALIAS")
-              keyPassword = props.getProperty("KEY_PASSWORD")
-          }
-      }
-  }
-  buildTypes {
-      release {
-          isMinifyEnabled = true
-          proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-          signingConfig = signingConfigs.getByName("release")
-      }
-  }
-  ```
-- 打包：`./gradlew :app:assembleRelease`，输出 `app/build/outputs/apk/release/app-release.apk`。
+- `app/build.gradle.kts` 已强制读取上述四个变量；缺少任一变量时 Release 构建会直接失败，避免误发 unsigned APK。
+- 打包：`./gradlew :app:bundleRelease`（商店 AAB）或 `./gradlew :app:assembleRelease`（测试 APK）。
 
 ## 注意
 
-- `AndroidManifest.xml` 中 `android:allowBackup="false"` 为有意设置，避免本地数据通过 Android 云备份泄漏；本地备份请使用应用内加密的 JSON 导出功能（`data/Backup.kt`）。
+- `AndroidManifest.xml` 中 `android:allowBackup="false"` 为有意设置，避免本地数据通过 Android 云备份泄漏；应用内导出的 JSON 当前是明文文件，请只保存到可信位置并通过可信渠道传输。
 - `settings.gradle.kts` 配置了阿里云镜像优先（国内直连 Maven Central 易 TLS 中断），
   海外环境可删除。
 - 首次同步若提示 SDK 路径，新建 `local.properties` 写入 `sdk.dir=<本机 SDK 路径>`

@@ -13,11 +13,11 @@
 
 | 模块 | 说明 |
 | --- | --- |
-| 首页 | 当日概览、快速记录、最近动态、情绪快照、本周洞察、全局搜索（⌘K） |
-| 探索 | 日志 + 灵感统一信息流，模块筛选，底部快速输入（`!!` 标记重要度） |
+| 首页 | 当日概览、快速记录、最近动态、情绪快照、本周洞察、醒目的全宽搜索入口 |
+| 搜索 | 关键词/标签搜索、日志 + 灵感筛选、底部快速输入；⌘K 可直接聚焦 |
 | 记录流 | 搜索、标签 / 日期筛选、排序、编辑、删除 |
 | 情绪 | 七级滑块 + 子情绪 + 备注，周趋势，近期记录 |
-| 日历 | 日志与情绪按日聚合的月历 |
+| 日历 | 日志与情绪按日聚合的月历；任务支持截止时间、完成状态与本地提醒 |
 | 统计 | KPI、情绪趋势、子情绪分布 |
 | 设置 | 主题、备份导入导出、系统分享、PIN 配对局域网直传、清空数据 |
 | 菜单栏伴侣 | MenuBarExtra：快速记录（回车即存）、今日概览、一键跳转主窗口 |
@@ -65,16 +65,17 @@ DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer \
 xcodebuild test -scheme Flash -destination 'platform=macOS'
 ```
 
-当前 54 个用例，覆盖模型 / Repository / BackupService / BackupTransfer / BackupDiff /
+当前 67 个用例（@Test），覆盖模型 / Repository / BackupService / BackupTransfer / BackupDiff /
 LocalBackupTransfer / SettingsStore / Domain 纯函数 / 主题色。
 
 ## 备份格式
 
-与 Android 端 `Backup.kt` 互通的 `flash-backup-v1` JSON：
+与 Android/HarmonyOS 互通的 `flash-backup-v2` JSON（同时兼容导入 v1）：
 
 ```json
-{ "version": "flash-backup-v1", "exportedAt": "...", "appVersion": "...",
-  "notes": "...", "logs": [...], "emotions": [...] }
+{ "version": "flash-backup-v2", "exportedAt": "...", "appVersion": "...",
+  "schemas": { "logs": 1, "emotions": 1, "tasks": 1 },
+  "data": { "logs": [...], "emotions": [...], "tasks": [...] } }
 ```
 
 - `version` 不匹配拒绝导入；非法条目逐条跳过；单文件上限 50 MB。

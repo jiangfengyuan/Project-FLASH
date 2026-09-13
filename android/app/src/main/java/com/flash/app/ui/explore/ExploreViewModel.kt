@@ -16,11 +16,14 @@ import com.flash.app.data.model.Category
 import com.flash.app.data.model.ColorTag
 import com.flash.app.data.model.LogItem
 import com.flash.app.data.model.importanceFromContent
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -47,8 +50,15 @@ internal fun filterExploreLogs(
     }
 }
 
+sealed interface ExploreEvent {
+    data class Failed(val message: String) : ExploreEvent
+}
+
 /** 探索页：统一信息流（日志+灵感），模块筛选 + 底部快速输入 */
 class ExploreViewModel(private val repository: FlashRepository) : ViewModel() {
+
+    private val eventChannel = Channel<ExploreEvent>(Channel.BUFFERED)
+    val events = eventChannel.receiveAsFlow()
 
     private val _filter = MutableStateFlow(ExploreFilter.ALL)
     val filter: StateFlow<ExploreFilter> = _filter.asStateFlow()
@@ -63,6 +73,10 @@ class ExploreViewModel(private val repository: FlashRepository) : ViewModel() {
     ) { logs, filter, query ->
         filterExploreLogs(logs, filter, query)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val unviewedIdeaIds: StateFlow<Set<String>> = repository.unviewedIdeas
+        .map { ideas -> ideas.mapTo(mutableSetOf(), LogItem::id) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
 
     private val _text = MutableStateFlow("")
     val text: StateFlow<String> = _text.asStateFlow()
@@ -96,12 +110,16 @@ class ExploreViewModel(private val repository: FlashRepository) : ViewModel() {
         _text.value = ""
         _selectedTag.value = null
         viewModelScope.launch {
-            repository.addLog(
-                content = content,
-                colorTag = tag,
-                category = if (asIdea) Category.IDEA else Category.LOG,
-                importance = if (asIdea) importanceFromContent(content) else 0,
-            )
+            runCatching {
+                repository.addLog(
+                    content = content,
+                    colorTag = tag,
+                    category = if (asIdea) Category.IDEA else Category.LOG,
+                    importance = if (asIdea) importanceFromContent(content) else 0,
+                )
+            }.onFailure {
+                eventChannel.send(ExploreEvent.Failed(it.message ?: "保存失败，请重试"))
+            }
         }
     }
 

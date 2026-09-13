@@ -11,7 +11,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.flash.app.data.Backup
 import com.flash.app.data.FlashRepository
 import com.flash.app.data.model.Category
 import com.flash.app.data.model.ColorTag
@@ -53,9 +52,16 @@ class RecordDetailViewModel(
     private val eventChannel = Channel<RecordDetailEvent>(Channel.BUFFERED)
     val events = eventChannel.receiveAsFlow()
 
+    init {
+        // SQL 仅会标记实际属于 IDEA 的记录；普通日志不会产生无效阅读状态。
+        viewModelScope.launch { repository.markIdeaViewed(recordId) }
+    }
+
     fun save(content: String, colorTag: ColorTag, category: Category, importance: Int) {
         val current = uiState.value.record ?: return
-        val normalized = content.trim().take(Backup.MAX_FIELD_LENGTH)
+        // 超限不静默截断：repository.updateLog 会拒绝并抛出带可读信息的异常，
+        // 由 Failed 事件提示；编辑框自身也已禁用超限保存。
+        val normalized = content.trim()
         if (normalized.isEmpty() || busy.value) return
         busy.value = true
         viewModelScope.launch {
@@ -68,6 +74,8 @@ class RecordDetailViewModel(
                         importance = importance.coerceIn(0, 4),
                     )
                 )
+                // 从日志切换为 Idea 也属于一次主动处理，不应重新进入“待梳理”。
+                if (category == Category.IDEA) repository.markIdeaViewed(current.id)
             }.onSuccess {
                 eventChannel.send(RecordDetailEvent.Saved)
             }.onFailure {

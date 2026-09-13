@@ -6,11 +6,15 @@
 
 package com.flash.app.ui.theme.glass
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -32,7 +36,7 @@ fun GlassBackground(
     hazeState: HazeState?,
     modifier: Modifier = Modifier,
 ) {
-    val skyStops = if (darkTheme) {
+    val targetSkyStops = if (darkTheme) {
         listOf(
             GlassPalette.SkyDarkTop,
             GlassPalette.SkyDarkTop.blendToward(GlassPalette.SkyDarkMid, 0.55f),
@@ -49,6 +53,23 @@ fun GlassBackground(
             GlassPalette.SkyLightBottom,
         )
     }
+    val skyStops = targetSkyStops.mapIndexed { index, color ->
+        animateColorAsState(
+            targetValue = color,
+            animationSpec = tween(320),
+            label = "Glass sky $index",
+        ).value
+    }
+    val blobAlpha by animateFloatAsState(
+        targetValue = if (darkTheme) 0.24f else 0.42f,
+        animationSpec = tween(320),
+        label = "Glass blob alpha",
+    )
+    val sparkleAlpha by animateFloatAsState(
+        targetValue = if (darkTheme) 0.5f else 0.85f,
+        animationSpec = tween(320),
+        label = "Glass sparkle alpha",
+    )
 
     Box(
         modifier = modifier
@@ -59,9 +80,6 @@ fun GlassBackground(
         Canvas(Modifier.fillMaxSize()) {
             val w = size.width
             val h = size.height
-            // 深色下降低色块不透明度，避免深蓝底上的彩斑显脏
-            val blobAlpha = if (darkTheme) 0.24f else 0.42f
-
             // 有机色块：径向渐变软边，中心实、边缘消隐
             fun softBlob(color: Color, radius: Float, center: Offset) {
                 drawCircle(
@@ -80,7 +98,7 @@ fun GlassBackground(
             softBlob(GlassPalette.Mint, w * 0.70f, Offset(w * 0.8f, h * 0.85f))
 
             // 微光星星（插画指南里的点缀元素）
-            val sparkleColor = Color.White.copy(alpha = if (darkTheme) 0.5f else 0.85f)
+            val sparkleColor = Color.White.copy(alpha = sparkleAlpha)
             val sparkles = listOf(
                 Offset(0.18f, 0.10f) to 6f,
                 Offset(0.55f, 0.06f) to 4f,

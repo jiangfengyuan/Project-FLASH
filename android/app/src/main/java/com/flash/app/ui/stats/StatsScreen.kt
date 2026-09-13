@@ -75,7 +75,8 @@ fun StatsScreen() {
                 }
             }
             item(key = "emotion-stats") {
-                EmotionStatsSection(emotions = ui.emotions)
+                // 统计页对应 macOS StatsView「近 7 天/近 30 天」：滚动窗口
+                EmotionStatsSection(emotions = ui.emotions, weekAligned = false)
             }
         }
     }

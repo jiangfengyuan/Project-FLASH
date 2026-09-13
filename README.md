@@ -18,19 +18,19 @@
 | --- | --- | --- |
 | Android | Kotlin + Jetpack Compose + Material 3 + Room | Flash Aero v0.1.0 |
 | macOS | SwiftUI + SwiftData，universal2（arm64 + x86_64） | Flash Aero v0.1.0 |
-| HarmonyOS | ArkTS + ArkUI + Preferences，纯原生 HAP | Flash Aero v0.1.0 |
+| HarmonyOS | ArkTS + ArkUI + 加密 RDB + Preferences 设置存储，纯原生 HAP | Flash Aero v0.1.0 |
 
 历史上有过 React + Capacitor 的 Web/混合版，已退役（git 历史可查），
 本仓库现在包含 Android、macOS 与 HarmonyOS 三个纯原生工程。
 
 ## 功能
 
-- **快速记录**：macOS 有菜单栏伴侣（按回车保存），Android 有全局 FAB；`!!` 语法标记重要度；
+- **快速记录**：macOS 有菜单栏伴侣（按回车保存），Android 首页有快速创建 FAB；`!!` 语法标记重要度；
 - **日志 / 灵感**：时间线、搜索、标签与日期筛选、编辑删除；
-- **情绪**：七级滑块 + 子情绪标签 + 备注，周趋势与统计图表；
+- **情绪**：七级选择（macOS / HarmonyOS 为滑块，Android 为 emoji 按钮）+ 子情绪标签 + 备注，周趋势与统计图表；
 - **日历**：日志与情绪按日聚合的月历视图；
 - **统计**：累计 KPI、情绪趋势、子情绪分布；
-- **备份与传输**：JSON 导出 / 导入（合并或覆盖）；支持系统分享，以及同一局域网内通过四位临时 PIN 自动发现、配对直传，两端格式一致、可互读。
+- **备份与传输**：JSON 导出 / 导入（合并或覆盖）；支持系统分享，以及同一局域网内通过四位临时 PIN 自动发现、配对直传，两端格式一致、可互读。注意：设备互传（文件分享与局域网直传）尚未完成真机验收，验收矩阵见 [docs/contracts/acceptance.md](docs/contracts/acceptance.md)。
 
 ## 构建
 
@@ -90,20 +90,27 @@ assembleHap --mode module -p product=default -p module=entry@default \
 
 ## 备份格式
 
-三端共享同一 JSON 格式 `flash-backup-v1`：
+三端共享同一分区版本化 JSON 格式 `flash-backup-v2`，并继续兼容导入 v1：
 
 ```json
-{ "version": "flash-backup-v1", "exportedAt": "...", "appVersion": "...",
-  "notes": "", "logs": [...], "emotions": [...] }
+{ "version": "flash-backup-v2", "exportedAt": "...", "appVersion": "...",
+  "notes": "", "schemas": { "logs": 1, "emotions": 1, "tasks": 1 },
+  "data": { "logs": [...], "emotions": [...], "tasks": [...] } }
 ```
 
-在「设置 → 导出备份 / 导入备份」操作即可跨端迁移；版本不匹配会拒绝导入，
-非法条目逐条跳过而不是整体失败。
+在「设置 → 导出备份 / 导入备份」操作即可跨端迁移；版本不匹配会拒绝导入。
+导入分两个入口：标准入口执行严格校验，任何问题整体拒绝、不写库；
+「恢复损坏或旧版备份」入口则逐条跳过非法记录并显示跳过数量，用于抢救旧数据。
+
+v2 增加 Calendar 任务、截止时间、完成状态和提醒时间。协议将快照备份与未来的
+`flash-sync-v1` 自动同步层分离，后续同步可复用相同分区模型而不改变备份语义；
+完整定义见 [docs/flash-backup-v2.md](docs/flash-backup-v2.md)。
 
 也可使用系统分享面板，或选择「局域网发送 / 接收」进行直传。局域网发送方会
 生成随机四位 PIN，接收方只有输入正确 PIN 才能取得备份；PIN 60 秒失效、最多
 尝试五次，成功后服务立即关闭。接收方会看到新增、修改、相同与仅本机数据的差异，
 再选择保留本机数据并合并，或覆盖全部。数据不经过 Flash 服务器。
+设备互传尚待真机验收（见 [docs/contracts/acceptance.md](docs/contracts/acceptance.md)），
 局域网直传建议只在可信的家庭或办公网络使用。
 
 ## 路线图与参与

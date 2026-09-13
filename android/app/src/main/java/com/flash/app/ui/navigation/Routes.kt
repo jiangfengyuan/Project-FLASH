@@ -37,7 +37,7 @@ data class TabDest(val route: String, val label: String, val icon: ImageVector)
 
 val TABS = listOf(
     TabDest(Routes.HOME, "首页", Icons.Filled.Home),
-    TabDest(Routes.EXPLORE, "探索", Icons.Filled.Search),
+    TabDest(Routes.EXPLORE, "搜索", Icons.Filled.Search),
     TabDest(Routes.STATS, "统计", Icons.Filled.BarChart),
     TabDest(Routes.PROFILE, "我的", Icons.Filled.Person),
 )

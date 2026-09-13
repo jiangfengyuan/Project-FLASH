@@ -10,7 +10,7 @@ import SwiftData
 /// 首页仪表盘：问候区 + 今日概览 + 双栏（最近动态/快速记录/本周洞察 | 情绪快照）。
 /// 数据装配全部由 HomeViewModel 完成，仅在注入的 logs/emotions 变化时重算；
 /// 搜索框经 200ms 防抖写入 debouncedQuery 后，「最近动态」切换为全量「搜索结果」；
-/// ⌘K 聚焦搜索框、⌘N 聚焦快速记录输入框；保存成功经顶部 toast 反馈。
+/// ⌘N 聚焦快速记录输入框（⌘K 全局搜索走菜单切到探索页）；保存成功经顶部 toast 反馈。
 struct HomeView: View {
     @Environment(\.flashRepository) private var repository
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -52,8 +52,6 @@ struct HomeView: View {
                 )
                 .opacity(headerAppeared ? 1 : 0)
                 .offset(y: !headerAppeared && !reduceMotion ? 6 : 0)
-                .onAppear { flushSearchRequest() }
-                .onChange(of: appState.searchRequestToken) { flushSearchRequest() }
 
                 TodayOverviewView(stats: viewModel.overviewStats)
                     .opacity(overviewAppeared ? 1 : 0)
@@ -203,13 +201,6 @@ struct HomeView: View {
         inputFocused = true
     }
 
-    /// 菜单「搜索」⌘K：token 递增时聚焦搜索框；onAppear 兜底同上
-    private func flushSearchRequest() {
-        guard appState.searchRequestToken != appState.handledSearchToken else { return }
-        appState.markSearchHandled()
-        searchFocused = true
-    }
-
     /// 「+ 新建」菜单：构造空白 LogItem 预填 category/colorTag，弹 LogEditSheet 真新建
     private func presentNewLog(category: Category) {
         newLogDraft = LogItem(
@@ -241,6 +232,11 @@ struct HomeView: View {
     private func quickAdd(as category: Category) {
         let content = draft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !content.isEmpty else { return }
+        // 契约上限（UTF-16 单元）：超限不静默截断，保留草稿并弹提示
+        guard TextLimits.fits(content) else {
+            errorMessage = "内容超出 \(TextLimits.maxContentUTF16) 字上限，请删减后再保存"
+            return
+        }
         guard let repository else { errorMessage = "内部错误：存储未就绪"; return }
         do {
             switch category {

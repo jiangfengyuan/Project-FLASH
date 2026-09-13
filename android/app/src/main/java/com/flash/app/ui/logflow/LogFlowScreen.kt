@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -33,6 +34,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -42,6 +47,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -56,6 +63,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.flash.app.FlashApplication
 import com.flash.app.data.Backup
+import com.flash.app.data.TextLimits
 import com.flash.app.data.model.ColorTag
 import com.flash.app.data.model.LogItem
 import com.flash.app.ui.components.LogCard
@@ -69,15 +77,36 @@ fun LogFlowScreen(onBack: () -> Unit, onOpenRecord: (String) -> Unit) {
     val app = LocalContext.current.applicationContext as FlashApplication
     val viewModel: LogFlowViewModel = viewModel(factory = LogFlowViewModel.factory(app.repository))
     val logs by viewModel.logs.collectAsStateWithLifecycle()
+    val totalCount by viewModel.totalCount.collectAsStateWithLifecycle()
     val filter by viewModel.filter.collectAsStateWithLifecycle()
 
     var editingLog by remember { mutableStateOf<LogItem?>(null) }
     var deletingLog by remember { mutableStateOf<LogItem?>(null) }
     var showStartPicker by remember { mutableStateOf(false) }
     var showEndPicker by remember { mutableStateOf(false) }
+    val snackbar = remember { SnackbarHostState() }
+
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is LogFlowEvent.Deleted -> {
+                    val result = snackbar.showSnackbar(
+                        message = "已删除日志",
+                        actionLabel = "撤销",
+                        duration = SnackbarDuration.Short,
+                    )
+                    if (result == SnackbarResult.ActionPerformed) {
+                        viewModel.restoreLog(event.log, event.wasIdeaViewed)
+                    }
+                }
+                is LogFlowEvent.Failed -> snackbar.showSnackbar(event.message)
+            }
+        }
+    }
 
     Scaffold(
         containerColor = Color.Transparent,
+        snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
                 title = { Text("日志管理") },
@@ -159,12 +188,26 @@ fun LogFlowScreen(onBack: () -> Unit, onOpenRecord: (String) -> Unit) {
                 }
             }
             Text(
-                "${logs.size} 条",
+                "$totalCount 条",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             )
+            val listState = rememberLazyListState()
+            val hasMore = logs.size < totalCount
+            // 滑到接近底部时增量加载下一页（DAO LIMIT 随 limit 增大）
+            val shouldLoadMore by remember {
+                derivedStateOf {
+                    val info = listState.layoutInfo
+                    val lastVisible = info.visibleItemsInfo.lastOrNull()?.index ?: 0
+                    info.totalItemsCount > 0 && lastVisible >= info.totalItemsCount - 3
+                }
+            }
+            LaunchedEffect(shouldLoadMore) {
+                if (shouldLoadMore) viewModel.loadMore()
+            }
             LazyColumn(
+                state = listState,
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -196,6 +239,16 @@ fun LogFlowScreen(onBack: () -> Unit, onOpenRecord: (String) -> Unit) {
                             }
                         },
                     )
+                }
+                if (hasMore) {
+                    item(key = "loading") {
+                        Text(
+                            "正在加载更多…",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                        )
+                    }
                 }
             }
         }
@@ -241,7 +294,7 @@ fun LogFlowScreen(onBack: () -> Unit, onOpenRecord: (String) -> Unit) {
             text = { Text(log.content.take(50)) },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.deleteLog(log.id)
+                    viewModel.deleteLog(log)
                     deletingLog = null
                 }) {
                     Text("删除", color = MaterialTheme.colorScheme.error)
@@ -259,6 +312,8 @@ private fun EditLogDialog(log: LogItem, onDismiss: () -> Unit, onSave: (LogItem)
     var content by remember(log.id) { mutableStateOf(log.content) }
     var tag by remember(log.id) { mutableStateOf(log.colorTag) }
     var importance by remember(log.id) { mutableIntStateOf(log.importance) }
+    // 超限不静默截断：给出可见错误态并阻止保存（对齐 macOS TextLimits 行为）
+    val overLimit = !TextLimits.fits(content, MAX_CONTENT_LENGTH)
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -267,9 +322,15 @@ private fun EditLogDialog(log: LogItem, onDismiss: () -> Unit, onSave: (LogItem)
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = content,
-                    onValueChange = { content = it.take(MAX_CONTENT_LENGTH) },
+                    onValueChange = { content = it },
                     label = { Text("内容") },
-                    supportingText = { Text("${content.length}/$MAX_CONTENT_LENGTH") },
+                    isError = overLimit,
+                    supportingText = {
+                        Text(
+                            "${content.length}/$MAX_CONTENT_LENGTH",
+                            color = if (overLimit) MaterialTheme.colorScheme.error else Color.Unspecified,
+                        )
+                    },
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Row(
@@ -301,10 +362,9 @@ private fun EditLogDialog(log: LogItem, onDismiss: () -> Unit, onSave: (LogItem)
         },
         confirmButton = {
             TextButton(
+                enabled = content.isNotBlank() && !overLimit,
                 onClick = {
-                    if (content.isNotBlank()) {
-                        onSave(log.copy(content = content.trim(), colorTag = tag, importance = importance))
-                    }
+                    onSave(log.copy(content = content.trim(), colorTag = tag, importance = importance))
                 },
             ) { Text("保存") }
         },

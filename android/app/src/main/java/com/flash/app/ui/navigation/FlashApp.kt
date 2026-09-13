@@ -9,11 +9,15 @@ package com.flash.app.ui.navigation
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -36,6 +40,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.flash.app.FlashApplication
 import com.flash.app.data.UiStyle
+import com.flash.app.domain.shouldShowIdeaReminder
 import com.flash.app.ui.calendar.CalendarScreen
 import com.flash.app.ui.detail.RecordDetailScreen
 import com.flash.app.ui.emotion.EmotionScreen
@@ -55,6 +60,8 @@ import dev.chrisbanes.haze.HazeState
 fun FlashApp(darkTheme: Boolean, uiStyle: UiStyle) {
     val app = LocalContext.current.applicationContext as FlashApplication
     val welcomed by app.settings.welcomed.collectAsStateWithLifecycle()
+    val unviewedIdeas by app.repository.unviewedIdeas.collectAsStateWithLifecycle(emptyList())
+    val showIdeaReminder = shouldShowIdeaReminder(unviewedIdeas.size)
 
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -102,7 +109,22 @@ fun FlashApp(darkTheme: Boolean, uiStyle: UiStyle) {
                                             restoreState = true
                                         }
                                     },
-                                    icon = { Icon(tab.icon, contentDescription = tab.label) },
+                                    icon = {
+                                        BadgedBox(
+                                            badge = {
+                                                if (tab.route == Routes.EXPLORE && showIdeaReminder) {
+                                                    Badge {
+                                                        Text(
+                                                            if (unviewedIdeas.size > 99) "99+"
+                                                            else unviewedIdeas.size.toString()
+                                                        )
+                                                    }
+                                                }
+                                            },
+                                        ) {
+                                            Icon(tab.icon, contentDescription = tab.label)
+                                        }
+                                    },
                                     label = { Text(tab.label) },
                                     // 选中态统一用品牌紫（primary 系），不再用默认的橙系 secondaryContainer
                                     colors = NavigationBarItemDefaults.colors(
@@ -122,11 +144,23 @@ fun FlashApp(darkTheme: Boolean, uiStyle: UiStyle) {
                     navController = navController,
                     startDestination = if (welcomed) Routes.HOME else Routes.WELCOME,
                     modifier = Modifier.padding(innerPadding),
-                    // 全局转场：交叉淡入淡出，保持克制
-                    enterTransition = { fadeIn(animationSpec = tween(280)) },
-                    exitTransition = { fadeOut(animationSpec = tween(280)) },
-                    popEnterTransition = { fadeIn(animationSpec = tween(280)) },
-                    popExitTransition = { fadeOut(animationSpec = tween(280)) },
+                    // 轻微横移配合淡入淡出，保留页面连续性并避免纯交叉淡化的闪屏感。
+                    enterTransition = {
+                        fadeIn(animationSpec = tween(240)) +
+                            slideInHorizontally(animationSpec = tween(240)) { it / 14 }
+                    },
+                    exitTransition = {
+                        fadeOut(animationSpec = tween(180)) +
+                            slideOutHorizontally(animationSpec = tween(180)) { -it / 20 }
+                    },
+                    popEnterTransition = {
+                        fadeIn(animationSpec = tween(240)) +
+                            slideInHorizontally(animationSpec = tween(240)) { -it / 14 }
+                    },
+                    popExitTransition = {
+                        fadeOut(animationSpec = tween(180)) +
+                            slideOutHorizontally(animationSpec = tween(180)) { it / 20 }
+                    },
                 ) {
                     composable(Routes.WELCOME) {
                         WelcomeScreen(onStart = {
@@ -139,6 +173,7 @@ fun FlashApp(darkTheme: Boolean, uiStyle: UiStyle) {
                     composable(Routes.HOME) {
                         HomeScreen(
                             onOpenExplore = { navController.navigate(Routes.EXPLORE) },
+                            onOpenSearch = { navController.navigate(Routes.EXPLORE) },
                             onOpenCalendar = { navController.navigate(Routes.CALENDAR) },
                             onOpenEmotion = { navController.navigate(Routes.EMOTION) },
                             onOpenRecord = { navController.navigate(Routes.recordDetail(it)) },

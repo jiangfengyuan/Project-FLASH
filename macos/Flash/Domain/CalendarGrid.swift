@@ -10,20 +10,25 @@ struct DayAggregate: Equatable {
     let date: String
     let logs: [LogItem]
     let emotions: [EmotionRecord]
+    let tasks: [TaskItem]
 }
 
 /// 按 recordDate 聚合（对应 Android CalendarViewModel.aggregates）
 /// 单遍分组：Dictionary(grouping:) 各扫一遍，组内保持原数组顺序。
-func aggregateDay(logs: [LogItem], emotions: [EmotionRecord]) -> [String: DayAggregate] {
+func aggregateDay(logs: [LogItem], emotions: [EmotionRecord], tasks: [TaskItem] = []) -> [String: DayAggregate] {
     let logsByDay = Dictionary(grouping: logs, by: \.recordDate)
     let emotionsByDay = Dictionary(grouping: emotions, by: \.recordDate)
+    let tasksByDay = Dictionary(grouping: tasks.compactMap { task in
+        task.calendarDate.map { ($0, task) }
+    }, by: \.0).mapValues { $0.map(\.1) }
     var result: [String: DayAggregate] = [:]
-    result.reserveCapacity(logsByDay.count + emotionsByDay.count)
-    for date in Set(logsByDay.keys).union(emotionsByDay.keys) {
+    result.reserveCapacity(logsByDay.count + emotionsByDay.count + tasksByDay.count)
+    for date in Set(logsByDay.keys).union(emotionsByDay.keys).union(tasksByDay.keys) {
         result[date] = DayAggregate(
             date: date,
             logs: logsByDay[date] ?? [],
-            emotions: emotionsByDay[date] ?? []
+            emotions: emotionsByDay[date] ?? [],
+            tasks: tasksByDay[date] ?? []
         )
     }
     return result

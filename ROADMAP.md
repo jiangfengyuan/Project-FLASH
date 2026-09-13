@@ -5,6 +5,8 @@
 
 > **⚠️ 2026-08-29 现状更新**：本仓库已转为**纯原生仓库**——Web 版（React/Vite）与 Capacitor 壳已从工作区移除（git 历史可查），现役工程为 `android/`（Kotlin）、`macos/`（SwiftUI）与 `harmonyos/`（ArkTS/ArkUI）。下文 Web/Capacitor 阶段为历史记录；最新原生进度见 M6–M8。
 
+> **2026-08-31 Android 进度**：统一日志/灵感详情与编辑链路、探索搜索、日历聚合性能优化已完成；Idea Reminder 已加入三条阈值、探索导航角标、首页入口和本地阅读状态。Calendar 已加入任务、截止时间、完成状态和 WorkManager 本地提醒；Room 数据库已升至 v4，支持 v1→v4 无损迁移（MIGRATION_1_2 / 2_3 / 3_4）。三端升级到分区版本化 `flash-backup-v2`，并保留 v1 导入兼容与未来自动同步扩展边界。日志管理删除支持 Snackbar 撤销。
+
 ---
 
 ## 一、项目现状速览
@@ -18,7 +20,7 @@
 | Log Stream（首页输入）      | ✅ 可用     | 文本输入、语音转写、分类保存                                                           |
 | Log Flow（日志管理）        | ✅ 可用     | 搜索、筛选、编辑、删除、转移至灵感                                                     |
 | Idea Flow（灵感池）         | ✅ 可用     | 按时间分组、重要性标记                                                                 |
-| Calendar（日历聚合）        | ✅ 可用     | 日志与情绪聚合、按日期查看                                                             |
+| Calendar（日历聚合）        | ✅ 可用     | 日志、情绪和任务聚合；任务支持截止时间、完成状态与本地提醒                             |
 | Current Emotion（情绪记录） | ✅ 可用     | 拖拽等级、子情绪标签、彩带动画                                                         |
 | Android 打包                | ✅ 已配置   | release 签名、ProGuard、versionCode/versionName 自动化已配置；keystore 需本地 JDK 生成 |
 | iOS 打包                    | ✅ 基线完成 | Capacitor iOS 工程已添加，竖屏、状态栏、启动图背景色已配置；签名团队待后续设置         |
@@ -88,6 +90,17 @@
 | 数据迁移与版本兼容 | P2     | 为 Zustand persist 增加版本号与 migration，防止后续数据结构变更导致旧数据加载失败。                             | 修改数据模型后旧用户数据可自动迁移。                  |
 | 桌面端适配（可选） | P3     | 微调大屏布局，或评估是否用 Capacitor 暂不支持的桌面方案。                                                       | 在 768px 以上屏幕布局不崩坏。                         |
 
+### Phase 5：长期优化与运营（第 15–24 周）
+
+目标：建立可持续迭代的能力。
+
+| 任务                   | 优先级 | 具体工作                                                                                           | 验收标准                     |
+| ---------------------- | ------ | -------------------------------------------------------------------------------------------------- | ---------------------------- |
+| 端到端测试             | P2     | 引入 Playwright 或 Appium，覆盖核心用户路径（记录日志 → 查看日历 → 记录情绪 → 导出数据）。         | 至少 3 条 E2E 用例稳定通过。 |
+| 性能监控               | P2     | 增加 FPS / 启动时长 / 包体积的 CI 告警阈值，避免回归。                                             | CI 中新增体积/性能检查步骤。 |
+| 用户反馈通道           | P3     | 在设置页增加邮件/表单反馈入口。                                                                    | 可收集用户反馈并追踪。       |
+| 云同步（可选，重决策） | P3     | 评估是否需要后端同步；如需要，优先使用用户自托管（WebDAV / iCloud / Google Drive）而非自建服务器。 | 完成方案文档与 PoC。         |
+
 ### Phase 6：原生重写（2026-07 启动，与 Web 版并行）
 
 目标：以原生技术栈重写双端，获得完整平台体验。**Android 先行**（工具链稳定、Kotlin 逻辑层未来可抽取为 KMP 共享模块），iOS（SwiftUI）随后。
@@ -102,17 +115,6 @@
 | MD3 主题精调 | P2 | 用 Material Theme Builder 从 Seed #4D96FF 生成精确 Tonal Palette；动态取色已支持 | 色彩对比度符合 WCAG |
 | iOS 原生（SwiftUI） | P2 | 待 Android 版稳定后启动；届时评估将 Kotlin 逻辑层抽为 KMP 共享模块，iOS 只写 SwiftUI 界面 | — |
 
-### Phase 5：长期优化与运营（第 15–24 周）
-
-目标：建立可持续迭代的能力。
-
-| 任务                   | 优先级 | 具体工作                                                                                           | 验收标准                     |
-| ---------------------- | ------ | -------------------------------------------------------------------------------------------------- | ---------------------------- |
-| 端到端测试             | P2     | 引入 Playwright 或 Appium，覆盖核心用户路径（记录日志 → 查看日历 → 记录情绪 → 导出数据）。         | 至少 3 条 E2E 用例稳定通过。 |
-| 性能监控               | P2     | 增加 FPS / 启动时长 / 包体积的 CI 告警阈值，避免回归。                                             | CI 中新增体积/性能检查步骤。 |
-| 用户反馈通道           | P3     | 在设置页增加邮件/表单反馈入口。                                                                    | 可收集用户反馈并追踪。       |
-| 云同步（可选，重决策） | P3     | 评估是否需要后端同步；如需要，优先使用用户自托管（WebDAV / iCloud / Google Drive）而非自建服务器。 | 完成方案文档与 PoC。         |
-
 ---
 
 ## 三、里程碑与发布节奏
@@ -125,10 +127,10 @@
 | M4：功能扩展版 | 第 14 周末 | 图片附件、标签系统、本地提醒、多语言     | 1.1/1.2 迭代更新                              |
 | M5：稳定运营版 | 第 24 周末 | E2E 测试、性能监控、云同步方案           | 持续小版本迭代                                |
 | M6：原生 Android Alpha | 原生启动后第 4 周 | 情绪记录 + 日志主流程可用的原生 APK | 与 Capacitor 版并行内测，收集对比反馈 |
-| M7：原生 macOS Alpha ✅ | 2026-08（已完成） | SwiftUI + SwiftData 九模块全量（首页/探索/记录流/情绪/日历/统计/设置/欢迎/复用组件）、universal2 双架构、JSON 备份与 Android/Web 互通、38 个单测全过 | 本地 adhoc 构建内测，对外分发需 Developer ID + 公证；后续候选：menu bar extra 快速记录、iCloud 同步、原生 iOS 版共享模型 |
+| M7：原生 macOS Alpha ✅ | 2026-08（已完成） | SwiftUI + SwiftData 九模块全量（首页/探索/记录流/情绪/日历/统计/设置/欢迎/复用组件）、universal2 双架构、JSON 备份与 Android/Web 互通、67 个单测（@Test）全过 | 本地 adhoc 构建内测，对外分发需 Developer ID + 公证；后续候选：menu bar extra 快速记录、iCloud 同步、原生 iOS 版共享模型 |
 | M8：原生 HarmonyOS Alpha ✅ | 2026-08（基线完成） | ArkTS + ArkUI 纯原生移动端 HAP；日志、灵感、情绪、日历、统计、JSON 备份、三端局域网配对、Android 同构首页与快速创建、手机/折叠屏/平板响应式导航、星闪/实况窗/闪控球能力检测 | DevEco API 26 编译与手机、展开折叠屏模拟器通过；下一步为华为签名、平板与真机三端互传验收，以及实况窗/碰一碰/小艺意图场景准入 |
 
-> **2026-08-17 现状更新（macOS Aero 轮）**：统一动效系统 `FlashMotion`（Soft/Fast/Playful，全量尊重 Reduce Motion）；V1.1 首项落地——Menu Bar Companion 菜单栏伴侣（快速记录/今日概览/一键跳转）；情绪页主视觉为大 emoji + 调色板连续插值；架构债清偿——`RepositoryEnvironment.makeDefault()` 单一装配入口、Models 层去除 SwiftUI 依赖、数据库内存降级启动告警全链路打通；数据层微优化（覆盖式导入单事务、按 id 查询 fetchLimit=1、全局搜索单遍过滤）；测试 51 用例全绿。下一候选：全局快捷键 ⌘⇧Space、Favorites、Advanced Search、Widgets、Idea→Task。
+> **2026-08-17 现状更新（macOS Aero 轮）**：统一动效系统 `FlashMotion`（Soft/Fast/Playful，全量尊重 Reduce Motion）；V1.1 首项落地——Menu Bar Companion 菜单栏伴侣（快速记录/今日概览/一键跳转）；情绪页主视觉为大 emoji + 调色板连续插值；架构债清偿——`RepositoryEnvironment.makeDefault()` 单一装配入口、Models 层去除 SwiftUI 依赖、数据库内存降级启动告警全链路打通；数据层微优化（覆盖式导入单事务、按 id 查询 fetchLimit=1、全局搜索单遍过滤）；测试 67 用例全绿。下一候选：全局快捷键 ⌘⇧Space、Favorites、Advanced Search、Widgets、Idea→Task。
 
 ---
 

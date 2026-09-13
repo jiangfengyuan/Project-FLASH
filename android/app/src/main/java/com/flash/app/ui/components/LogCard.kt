@@ -34,6 +34,7 @@ fun LogCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
     actions: (@Composable () -> Unit)? = null,
+    showIdeaReminder: Boolean = false,
 ) {
     val tagColor = log.colorTag.colorHex.hexToColor()
     StyleCard(
@@ -73,6 +74,14 @@ fun LogCard(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.tertiary,
                         )
+                        if (showIdeaReminder) {
+                            Text(
+                                " · 待梳理",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        }
                     }
                     if (log.importance > 0) {
                         Text(

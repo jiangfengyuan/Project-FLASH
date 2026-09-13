@@ -38,9 +38,13 @@ struct RootView: View {
         )
     }
 
-    /// 页面过渡：淡入淡出 + 极轻上移；减弱动态时仅淡入淡出（FlashMotion .appear）
+    /// 页面过渡：淡入淡出 + 极轻横移，与移动端保持方向连续性；减弱动态时仅淡入淡出。
     private var pageTransition: AnyTransition {
-        .appear(reduceMotion: reduceMotion)
+        guard !reduceMotion else { return .opacity }
+        return .asymmetric(
+            insertion: .opacity.combined(with: .offset(x: 12)),
+            removal: .opacity.combined(with: .offset(x: -8))
+        )
     }
 
     /// 页面切换曲线：正常用标准 easeOut；减弱动态时保底极短淡变（不产生位移）

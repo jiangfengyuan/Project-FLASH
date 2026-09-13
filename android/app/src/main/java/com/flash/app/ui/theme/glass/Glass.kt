@@ -6,6 +6,9 @@
 
 package com.flash.app.ui.theme.glass
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,6 +17,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -42,16 +46,31 @@ fun Modifier.glass(
 ): Modifier {
     val dark = LocalIsDarkTheme.current
     val haze = if (blur) LocalHazeState.current else null
-    val surface = GlassPalette.surface(dark, strong)
-    val borderColor = GlassPalette.border(dark)
-    val highlight = GlassPalette.highlight(dark)
+    val surface by animateColorAsState(
+        GlassPalette.surface(dark, strong), tween(320), label = "Glass surface"
+    )
+    val borderColor by animateColorAsState(
+        GlassPalette.border(dark), tween(320), label = "Glass border"
+    )
+    val highlight by animateColorAsState(
+        GlassPalette.highlight(dark), tween(320), label = "Glass highlight"
+    )
     // 柔和投影：全不透明阴影色会在半透明玻璃下缘形成硬边暗带（反衬出"白块"），
     // 玻璃指南要求低透明柔和投影；深色背景下投影进一步减弱
-    val shadowColor = GlassPalette.ShadowTint.copy(alpha = if (dark) 0.22f else 0.16f)
+    val shadowColor by animateColorAsState(
+        GlassPalette.ShadowTint.copy(alpha = if (dark) 0.22f else 0.16f),
+        tween(320),
+        label = "Glass shadow",
+    )
+    val elevation by animateDpAsState(
+        if (dark) 6.dp else 10.dp,
+        tween(320),
+        label = "Glass elevation",
+    )
 
     return this
         .shadow(
-            elevation = if (dark) 6.dp else 10.dp,
+            elevation = elevation,
             shape = shape,
             ambientColor = shadowColor,
             spotColor = shadowColor,

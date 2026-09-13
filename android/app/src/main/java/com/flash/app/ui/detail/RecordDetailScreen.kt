@@ -65,7 +65,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.flash.app.FlashApplication
-import com.flash.app.data.Backup
+import com.flash.app.data.TextLimits
 import com.flash.app.data.model.Category
 import com.flash.app.data.model.ColorTag
 import com.flash.app.data.model.LogItem
@@ -258,6 +258,8 @@ private fun RecordEditor(
     var tag by remember(record.id, record.colorTag) { mutableStateOf(record.colorTag) }
     var category by remember(record.id, record.category) { mutableStateOf(record.category) }
     var importance by remember(record.id, record.importance) { mutableIntStateOf(record.importance) }
+    // 超限不静默截断：允许继续输入，给出可见错误态并阻止保存（对齐 macOS TextLimits 行为）
+    val overLimit = !TextLimits.fits(content)
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -267,9 +269,15 @@ private fun RecordEditor(
         item {
             OutlinedTextField(
                 value = content,
-                onValueChange = { content = it.take(Backup.MAX_FIELD_LENGTH) },
+                onValueChange = { content = it },
                 label = { Text("内容") },
-                supportingText = { Text("${content.length}/${Backup.MAX_FIELD_LENGTH}") },
+                isError = overLimit,
+                supportingText = {
+                    Text(
+                        "${content.length}/${TextLimits.MAX_CONTENT_LENGTH}",
+                        color = if (overLimit) MaterialTheme.colorScheme.error else Color.Unspecified,
+                    )
+                },
                 minLines = 8,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -313,7 +321,7 @@ private fun RecordEditor(
                 TextButton(onClick = onCancel, enabled = !busy, modifier = Modifier.weight(1f)) { Text("取消") }
                 Button(
                     onClick = { onSave(content, tag, category, importance) },
-                    enabled = content.isNotBlank() && !busy,
+                    enabled = content.isNotBlank() && !busy && !overLimit,
                     modifier = Modifier.weight(1f),
                 ) { Text(if (busy) "保存中…" else "保存") }
             }

@@ -11,6 +11,8 @@ import com.flash.app.data.model.ColorTag
 import com.flash.app.data.model.EmotionLevel
 import com.flash.app.data.model.EmotionRecord
 import com.flash.app.data.model.LogItem
+import com.flash.app.data.model.TaskDueKind
+import com.flash.app.data.model.TaskItem
 import java.time.LocalDate
 import java.time.YearMonth
 import org.junit.Assert.assertEquals
@@ -43,6 +45,26 @@ class CalendarViewModelTest {
         assertNull(result["2026-09-01"])
     }
 
+    @Test
+    fun `aggregation uses all-day date and timed task local time zone`() {
+        val allDay = task(
+            id = "all-day",
+            dueKind = TaskDueKind.ALL_DAY,
+            dueDate = "2026-08-30",
+        )
+        val timed = task(
+            id = "timed",
+            dueKind = TaskDueKind.DATE_TIME,
+            dueAt = "2026-08-30T16:30:00.000Z",
+            timeZone = "Asia/Shanghai",
+        )
+
+        val result = aggregateByDate(emptyList(), emptyList(), listOf(allDay, timed))
+
+        assertEquals(listOf(allDay), result["2026-08-30"]?.tasks)
+        assertEquals(listOf(timed), result["2026-08-31"]?.tasks)
+    }
+
     private fun log(id: String, date: String) = LogItem(
         id = id,
         content = id,
@@ -61,5 +83,27 @@ class CalendarViewModelTest {
         note = null,
         recordDate = date,
         createdAt = "${date}T09:00:00.000Z",
+    )
+
+    private fun task(
+        id: String,
+        dueKind: TaskDueKind,
+        dueDate: String? = null,
+        dueAt: String? = null,
+        timeZone: String? = null,
+    ) = TaskItem(
+        id = id,
+        title = id,
+        notes = null,
+        colorTag = ColorTag.MEMO,
+        importance = 0,
+        dueKind = dueKind,
+        dueDate = dueDate,
+        dueAt = dueAt,
+        timeZone = timeZone,
+        reminderAt = null,
+        completedAt = null,
+        createdAt = "2026-08-29T00:00:00.000Z",
+        updatedAt = "2026-08-29T00:00:00.000Z",
     )
 }

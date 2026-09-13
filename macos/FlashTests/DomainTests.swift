@@ -129,6 +129,14 @@ struct DomainTests {
         #expect(DateFormatting.monthTitle(today) == "2026年8月")
     }
 
+    @Test func isoNowUsesFractionalSeconds() {
+        // 任务 updatedAt 必须带毫秒（日历勾选走 isoNow）：同秒内创建+完成不产生
+        // updatedAt < createdAt 的非法任务，且字符串字典序与时间序一致
+        let now = DateFormatting.isoNow()
+        #expect(now.range(of: #"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$"#,
+                          options: .regularExpression) != nil)
+    }
+
     @Test func localTimeFormatsOrDashes() {
         #expect(DateFormatting.localTime(fromISO: "not-a-date") == "--:--")
         let t = DateFormatting.localTime(fromISO: "2026-08-13T08:00:00.000Z")
@@ -230,5 +238,16 @@ struct DomainTests {
         let logs = [log("2026-08-13", content: "a", createdAt: "2026-08-13T09:00:00.000Z")]
         let emotions = [emotion("2026-08-13", .happy)]
         #expect(GlobalSearch.search(logs: logs, emotions: emotions, query: "").isEmpty)
+    }
+
+    @Test func searchMatchesLogTagDisplayName() {
+        // 与探索页口径一致：标签中文名也可命中，即使正文不含该词
+        let logs = [log("2026-08-13", content: "写完了周报", tag: .urgent,
+                        createdAt: "2026-08-13T09:00:00.000Z"),
+                    log("2026-08-13", content: "随便记一笔", tag: .daily,
+                        createdAt: "2026-08-13T10:00:00.000Z")]
+        let result = GlobalSearch.search(logs: logs, emotions: [], query: "紧急")
+        #expect(result.count == 1)
+        #expect(result[0].title == "写完了周报")
     }
 }

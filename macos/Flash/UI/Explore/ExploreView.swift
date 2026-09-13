@@ -19,7 +19,7 @@ enum ExploreFilter: String, CaseIterable {
     }
 }
 
-/// 探索页：统一信息流（日志+灵感），模块筛选 + 底部快速输入
+/// 搜索页：醒目的全局搜索 + 日志/灵感筛选 + 底部快速输入。
 struct ExploreView: View {
     @Environment(\.flashRepository) private var repository
     @Environment(AppState.self) private var appState
@@ -28,13 +28,59 @@ struct ExploreView: View {
     @State private var filter: ExploreFilter = .all
     @State private var draft = ""
     @State private var selectedTag: ColorTag? = nil
+    @State private var searchText = ""
     @State private var errorMessage: String? = nil
     @FocusState private var inputFocused: Bool
+    @FocusState private var searchFocused: Bool
 
     private static let maxLength = 140
 
     var body: some View {
         VStack(spacing: 0) {
+            HStack(spacing: 9) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundStyle(BrandColors.accent)
+                TextField("输入关键词或标签", text: $searchText)
+                    .textFieldStyle(.plain)
+                    .focused($searchFocused)
+                    .focusEffectDisabled()
+                    .onExitCommand {
+                        searchText = ""
+                        searchFocused = false
+                    }
+                if !searchText.isEmpty {
+                    Button {
+                        searchText = ""
+                        searchFocused = true
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .help("清除搜索")
+                    .transition(.scale(scale: 0.8).combined(with: .opacity))
+                }
+                Text("⌘K")
+                    .font(.caption.monospacedDigit())
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 11)
+            .background(
+                Capsule().fill(Color.primary.opacity(searchFocused ? 0.09 : 0.06))
+            )
+            .overlay(
+                Capsule().strokeBorder(
+                    searchFocused ? BrandColors.accent.opacity(0.7) : Color.primary.opacity(0.12),
+                    lineWidth: searchFocused ? 1.5 : 1
+                )
+            )
+            .padding(.horizontal, 16)
+            .padding(.top, 14)
+            .animation(Motion.quick(reduceMotion), value: searchText.isEmpty)
+            .onAppear { flushSearchRequest() }
+            .onChange(of: appState.searchRequestToken) { flushSearchRequest() }
+
             // 模块筛选 chips：选中态弹簧动效 + hover 微反馈
             HStack(spacing: 8) {
                 ForEach(ExploreFilter.allCases, id: \.self) { item in
@@ -47,7 +93,7 @@ struct ExploreView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
 
-            ExploreLogListView(filter: filter)
+            ExploreLogListView(filter: filter, query: searchText)
                 // 筛选切换时强制重建列表查询（@Query 谓词初始化后不随新实例更新）
                 .id(filter)
                 .transition(.appear(reduceMotion: reduceMotion))
@@ -121,6 +167,12 @@ struct ExploreView: View {
 
     private var errorPresented: Binding<Bool> {
         Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })
+    }
+
+    private func flushSearchRequest() {
+        guard appState.searchRequestToken != appState.handledSearchToken else { return }
+        appState.markSearchHandled()
+        searchFocused = true
     }
 
     /// 菜单「新建记录」⌘N：token 递增时聚焦输入框。
@@ -206,12 +258,19 @@ private struct FilterChip: View {
 /// 每敲一键不再触发全量 map。
 private struct ExploreLogListView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.flashRepository) private var repository
     @Query private var logEntities: [LogEntity]
 
     let filter: ExploreFilter
+    let query: String
 
-    init(filter: ExploreFilter) {
+    @State private var editingLog: LogItem? = nil
+    @State private var deletingLog: LogItem? = nil
+    @State private var errorMessage: String? = nil
+
+    init(filter: ExploreFilter, query: String) {
         self.filter = filter
+        self.query = query
         switch filter {
         case .all:
             _logEntities = Query(sort: \LogEntity.createdAt, order: .reverse)
@@ -228,16 +287,22 @@ private struct ExploreLogListView: View {
 
     var body: some View {
         Group {
-            if logEntities.isEmpty {
+            if displayedLogs.isEmpty {
                 emptyState
                     .transition(.appear(reduceMotion: reduceMotion))
             } else {
                 ScrollView {
                     LazyVStack(spacing: 10) {
-                        ForEach(logEntities.map { $0.toModel() }) { log in
-                            LogCardView(log: log)
+                        ForEach(displayedLogs) { log in
+                            LogCardView(log: log,
+                                        onEdit: { editingLog = log },
+                                        onDelete: { deletingLog = log })
                                 .cardFloat(reduceMotion: reduceMotion)
                                 .transition(.card(reduceMotion: reduceMotion))
+                                .contextMenu {
+                                    Button("编辑…") { editingLog = log }
+                                    Button("删除", role: .destructive) { deletingLog = log }
+                                }
                         }
                     }
                     .padding(.horizontal, 16)
@@ -247,8 +312,58 @@ private struct ExploreLogListView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         // 新增/删除条目、空态切换均走 soft 过渡
-        .animation(Motion.soft(reduceMotion), value: logEntities.count)
-        .animation(Motion.soft(reduceMotion), value: logEntities.isEmpty)
+        .animation(Motion.soft(reduceMotion), value: displayedLogs.count)
+        .animation(Motion.soft(reduceMotion), value: displayedLogs.isEmpty)
+        .sheet(item: $editingLog) { log in
+            LogEditSheet(log: log,
+                         title: log.category == .idea ? "编辑灵感" : "编辑记录") { updated in
+                guard let repository else { throw ExploreSaveError.repositoryUnavailable }
+                try repository.updateLog(updated)
+            }
+        }
+        .alert(deleteTitle, isPresented: deletePresented) {
+            Button("删除", role: .destructive) {
+                if let log = deletingLog {
+                    do { try repository?.deleteLog(id: log.id) }
+                    catch {
+                        print("[ExploreView] 删除记录失败: \(error)")
+                        errorMessage = "删除失败，请重试"
+                    }
+                }
+            }
+            Button("取消", role: .cancel) {}
+        }
+        .alert("提示", isPresented: errorPresented) {
+            Button("好") { errorMessage = nil }
+        } message: {
+            Text(errorMessage ?? "")
+        }
+    }
+
+    private var deleteTitle: String {
+        deletingLog?.category == .idea ? "删除这条灵感？" : "删除这条记录？"
+    }
+
+    private var deletePresented: Binding<Bool> {
+        Binding(get: { deletingLog != nil }, set: { if !$0 { deletingLog = nil } })
+    }
+
+    private var errorPresented: Binding<Bool> {
+        Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })
+    }
+
+    private enum ExploreSaveError: Error {
+        case repositoryUnavailable
+    }
+
+    private var displayedLogs: [LogItem] {
+        let logs = logEntities.map { $0.toModel() }
+        let normalized = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !normalized.isEmpty else { return logs }
+        return logs.filter { log in
+            log.content.lowercased().contains(normalized) ||
+                log.colorTag.displayName.lowercased().contains(normalized)
+        }
     }
 
     /// 空状态：PRD §34 品牌化文案，不用 "No Data"
@@ -258,10 +373,14 @@ private struct ExploreLogListView: View {
             Image(systemName: isIdea ? "lightbulb" : "book")
                 .font(.system(size: 26, weight: .light))
                 .foregroundStyle(isIdea ? BrandColors.ideaYellow : BrandColors.logPurple)
-            Text(isIdea ? "灵感还没出现，先给它留个位置。" : "今天还没有故事。")
+            Text(query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?
+                 (isIdea ? "灵感还没出现，先给它留个位置。" : "今天还没有故事。") :
+                 "没有找到匹配的内容。")
                 .font(.callout)
                 .foregroundStyle(.secondary)
-            Text(isIdea ? "在下方记下第一束灵感" : "在下方写下第一条记录")
+            Text(query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?
+                 (isIdea ? "在下方记下第一束灵感" : "在下方写下第一条记录") :
+                 "尝试其他关键词或标签")
                 .font(.caption)
                 .foregroundStyle(.tertiary)
         }

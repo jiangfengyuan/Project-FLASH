@@ -25,7 +25,9 @@ struct LogFlowView: View {
             // 工具区
             VStack(spacing: 10) {
                 HStack(spacing: 8) {
-                    ForEach(ColorTag.allCases, id: \.self) { tag in
+                    // 「想法」标签只挂在 category == .idea 的灵感上，而 LogFilter 只保留
+                    // category == .log（LogFilter.apply），选中它永远无结果，故不出现在筛选 chips
+                    ForEach(ColorTag.allCases.filter { $0 != .idea }, id: \.self) { tag in
                         tagChip(tag)
                     }
                     Spacer()

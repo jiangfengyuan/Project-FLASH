@@ -15,6 +15,7 @@ struct FlashApp: App {
     @StateObject private var settings = SettingsStore()
 
     init() {
+        try? BackupTransfer.cleanupExpired()
         let assembly = RepositoryEnvironment.makeDefault()
         self.assembly = assembly
         let appState = AppState()
@@ -37,7 +38,18 @@ struct FlashApp: App {
             .environment(appState)
             .environment(\.flashRepository, assembly.repository)
             .environmentObject(settings)
-            .preferredColorScheme(colorScheme(for: settings.themeMode))
+            .animatedPreferredColorScheme(settings.themeMode)
+            .task {
+                do {
+                    try await TaskReminderScheduler.shared.rebuild(try assembly.repository.snapshot().tasks)
+                } catch TaskReminderError.permissionDenied {
+                    // 用户拒绝过通知权限：只影响系统提醒，与数据存储无关，
+                    // 不写入 databaseFallbackMessage（避免误报存储故障）；设置页可重新引导权限
+                } catch {
+                    appState.databaseFallbackMessage =
+                        "无法读取任务并恢复系统提醒；本地内容仍然安全，请稍后重启应用重试"
+                }
+            }
         }
         .modelContainer(assembly.container)
         .windowResizability(.contentMinSize)
@@ -84,14 +96,78 @@ struct FlashApp: App {
                 .environment(appState)
                 .environment(\.flashRepository, assembly.repository)
                 .environmentObject(settings)
-                .preferredColorScheme(colorScheme(for: settings.themeMode))
+                .animatedPreferredColorScheme(settings.themeMode)
         }
         .menuBarExtraStyle(.window)
         .modelContainer(assembly.container)
     }
 
-    private func colorScheme(for mode: ThemeMode) -> ColorScheme? {
-        switch mode {
+}
+
+// MARK: - Light / Dark appearance transition
+
+private extension View {
+    /// 先轻微淡出，再应用新外观并淡入；内容树不会被重建，窗口、焦点和页面状态均保留。
+    func animatedPreferredColorScheme(_ mode: ThemeMode) -> some View {
+        modifier(AppearanceTransitionModifier(targetMode: mode))
+    }
+}
+
+private struct AppearanceTransitionModifier: ViewModifier {
+    let targetMode: ThemeMode
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var appliedMode: ThemeMode
+    @State private var contentOpacity = 1.0
+    @State private var contentScale = 1.0
+    @State private var transitionTask: Task<Void, Never>?
+
+    init(targetMode: ThemeMode) {
+        self.targetMode = targetMode
+        _appliedMode = State(initialValue: targetMode)
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(contentOpacity)
+            .scaleEffect(contentScale)
+            .preferredColorScheme(appliedMode.colorScheme)
+            .onChange(of: targetMode) { _, newMode in
+                transition(to: newMode)
+            }
+            .onDisappear {
+                transitionTask?.cancel()
+            }
+    }
+
+    private func transition(to newMode: ThemeMode) {
+        transitionTask?.cancel()
+        guard !reduceMotion else {
+            appliedMode = newMode
+            contentOpacity = 1
+            contentScale = 1
+            return
+        }
+
+        transitionTask = Task { @MainActor in
+            withAnimation(.easeIn(duration: 0.10)) {
+                contentOpacity = 0.82
+                contentScale = 0.998
+            }
+            try? await Task.sleep(for: .milliseconds(100))
+            guard !Task.isCancelled else { return }
+            appliedMode = newMode
+            withAnimation(.easeOut(duration: Motion.durationSlow)) {
+                contentOpacity = 1
+                contentScale = 1
+            }
+        }
+    }
+}
+
+private extension ThemeMode {
+    var colorScheme: ColorScheme? {
+        switch self {
         case .system: nil
         case .light: .light
         case .dark: .dark

@@ -37,14 +37,30 @@ import com.flash.app.data.model.EmotionRecord
 import com.flash.app.domain.EmotionStats
 import com.flash.app.ui.components.StyleCard
 
-/** 情绪统计卡片：近 7/30 天日均走势 + 负面子情绪分布，对应 Web 版 StatsPanel */
+/**
+ * 情绪统计卡片：日均走势 + 负面子情绪分布，对应 Web 版 StatsPanel。
+ * 短档口径由 [weekAligned] 决定：
+ * - true：「本周」，周一对齐自然周（对应 macOS 情绪页「本周趋势」）；
+ * - false：「7天」，滚动近 7 天（对应 macOS 统计页「近 7 天」）。
+ * 长档两端均为滚动近 30 天。
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EmotionStatsSection(emotions: List<EmotionRecord>) {
-    var days by remember { mutableIntStateOf(7) }
-    val averages = remember(emotions, days) { EmotionStats.getDailyAverages(emotions, days) }
-    val distribution = remember(emotions, days) { EmotionStats.getSubEmotionDistribution(emotions, days) }
-    val hasData = remember(emotions, days) { EmotionStats.hasEmotionData(emotions, days) }
+fun EmotionStatsSection(
+    emotions: List<EmotionRecord>,
+    weekAligned: Boolean,
+) {
+    var selection by remember { mutableIntStateOf(0) }
+    val (start, end) = remember(emotions, selection, weekAligned) {
+        when {
+            selection == 1 -> EmotionStats.rollingWindow(30)
+            weekAligned -> EmotionStats.currentWeek()
+            else -> EmotionStats.rollingWindow(7)
+        }
+    }
+    val averages = remember(emotions, start, end) { EmotionStats.getDailyAverages(emotions, start, end) }
+    val distribution = remember(emotions, start, end) { EmotionStats.getSubEmotionDistribution(emotions, start, end) }
+    val hasData = remember(emotions, start, end) { EmotionStats.hasEmotionData(emotions, start, end) }
 
     StyleCard(modifier = Modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -54,13 +70,13 @@ fun EmotionStatsSection(emotions: List<EmotionRecord>) {
                 modifier = Modifier.weight(1f),
             )
             SingleChoiceSegmentedButtonRow {
-                listOf(7, 30).forEachIndexed { index, d ->
+                listOf(if (weekAligned) "本周" else "7天", "30天").forEachIndexed { index, label ->
                     SegmentedButton(
-                        selected = days == d,
-                        onClick = { days = d },
+                        selected = selection == index,
+                        onClick = { selection = index },
                         shape = SegmentedButtonDefaults.itemShape(index = index, count = 2),
                     ) {
-                        Text("${d}天")
+                        Text(label)
                     }
                 }
             }

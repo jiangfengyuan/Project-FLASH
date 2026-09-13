@@ -26,7 +26,7 @@
 
 `.github/workflows/backup-contract.yml` 定义 Schema/HarmonyOS 主机测试、Android 单元测试与测试包构建、Android 模拟器原生数据库测试、macOS 测试四个 job。
 
-仓库管理员还需在分支保护中将这些检查设为 required，才会阻止绕过失败检查合入。本地新增工作流不等于远端工作流已运行或分支保护已开启。HarmonyOS 原生 HAP 构建目前使用本机 DevEco SDK；未配置对应 CI runner。
+这些检查已在远端运行，并已设为 `main` 分支保护的 required checks。HarmonyOS 原生 HAP 构建目前使用本机 DevEco SDK；未配置对应 CI runner。
 
 ## 本地验证记录（2026-09-05）
 
@@ -35,6 +35,8 @@
 - HarmonyOS：DevEco 原生 ArkTS 检查与未签名 HAP 构建通过。
 - Android：38 项 JVM 测试通过；补齐 `AndroidJUnitRunner` 依赖后，API 36 模拟器上的 7 项原生测试全部通过，覆盖共用样例、合并/覆盖、失败回滚、数据库迁移与通知权限失败。模拟器是只读临时会话，测试结束后已关闭。
 - 当前没有 Android 真机连接，且用户无 HarmonyOS 真机。只读模拟器临时会话用于自动测试，不计作真机互传。
+
+本节记录的是最近一次实际执行结果；`CHANGELOG.md` 中的 Android 40、macOS 80、HarmonyOS 58、契约 52 是审查汇总口径，可能按测试声明、参数化展开项或子套件分别计数，不能与本节的执行汇总直接相加。当前 macOS 源码中的 `@Test` 声明数为 80，HarmonyOS `Index.ets` 为 398 行。
 
 ## 设备前置条件与证据
 

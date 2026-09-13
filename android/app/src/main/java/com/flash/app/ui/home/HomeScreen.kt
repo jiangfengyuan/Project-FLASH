@@ -19,19 +19,25 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -55,6 +61,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.flash.app.FlashApplication
 import com.flash.app.data.model.Category
 import com.flash.app.data.model.emoji
+import com.flash.app.domain.shouldShowIdeaReminder
 import com.flash.app.ui.components.LogCard
 import com.flash.app.ui.components.QuickCreateFab
 import com.flash.app.ui.components.StyleCard
@@ -66,6 +73,7 @@ import java.time.LocalTime
 @Composable
 fun HomeScreen(
     onOpenExplore: () -> Unit,
+    onOpenSearch: () -> Unit,
     onOpenCalendar: () -> Unit,
     onOpenEmotion: () -> Unit,
     onOpenRecord: (String) -> Unit,
@@ -76,9 +84,19 @@ fun HomeScreen(
     var quickCreateKey by rememberSaveable { mutableStateOf<String?>(null) }
     val quickCreate = quickCreateKey?.let { Category.valueOf(it) }
     var fabExpanded by remember { mutableStateOf(false) }
+    val snackbar = remember { SnackbarHostState() }
+
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is HomeEvent.Failed -> snackbar.showSnackbar(event.message)
+            }
+        }
+    }
 
     Scaffold(
         containerColor = Color.Transparent,
+        snackbarHost = { SnackbarHost(snackbar) },
     ) { innerPadding ->
         Box(
             modifier = Modifier
@@ -106,6 +124,41 @@ fun HomeScreen(
                 }
             }
 
+            item(key = "search") {
+                Surface(
+                    onClick = onOpenSearch,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(28.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    tonalElevation = 2.dp,
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            Icons.Filled.Search,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text("搜索日志与灵感", style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                "按关键词或标签查找",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        Text(
+                            "搜索",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
+            }
+
             item(key = "modules") {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -113,8 +166,42 @@ fun HomeScreen(
                         ModuleCard("想法", Icons.Filled.Lightbulb, ModuleColors.Idea, ui.todayIdeaCount, Modifier.weight(1f), onOpenExplore)
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        ModuleCard("日程", Icons.Filled.CalendarMonth, ModuleColors.Calendar, null, Modifier.weight(1f), onOpenCalendar)
+                        ModuleCard("日程", Icons.Filled.CalendarMonth, ModuleColors.Calendar, ui.todayTaskCount, Modifier.weight(1f), onOpenCalendar)
                         ModuleCard("情绪", Icons.Filled.Favorite, ModuleColors.Emotion, ui.todayEmotionCount, Modifier.weight(1f), onOpenEmotion)
+                    }
+                }
+            }
+
+            if (shouldShowIdeaReminder(ui.unviewedIdeaCount)) {
+                item(key = "idea-reminder") {
+                    StyleCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            ui.oldestUnviewedIdeaId?.let(onOpenRecord)
+                        },
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Filled.Lightbulb,
+                                contentDescription = null,
+                                tint = ModuleColors.Idea,
+                                modifier = Modifier.size(28.dp),
+                            )
+                            Spacer(Modifier.width(12.dp))
+                            Column(Modifier.weight(1f)) {
+                                Text("想法等待梳理", style = MaterialTheme.typography.titleSmall)
+                                Text(
+                                    "你还有 ${ui.unviewedIdeaCount} 个想法，先看看最早的一条",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            Text(
+                                "${ui.unviewedIdeaCount}",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = ModuleColors.Idea,
+                            )
+                        }
                     }
                 }
             }
@@ -262,6 +349,8 @@ private fun QuickInputDialog(
 ) {
     var text by remember { mutableStateOf("") }
     val isIdea = category == Category.IDEA
+    // 超限不静默截断：允许继续输入，给出可见错误态并阻止保存（对齐 macOS TextLimits 行为）
+    val overLimit = text.length > MAX_QUICK_INPUT_LENGTH
     val focusRequester = remember { androidx.compose.ui.focus.FocusRequester() }
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
     AlertDialog(
@@ -270,9 +359,15 @@ private fun QuickInputDialog(
         text = {
             OutlinedTextField(
                 value = text,
-                onValueChange = { text = it.take(140) },
+                onValueChange = { text = it },
                 placeholder = { Text(if (isIdea) "此刻的想法是..." else "闪过即留...") },
-                supportingText = { Text("${text.length}/140") },
+                isError = overLimit,
+                supportingText = {
+                    Text(
+                        "${text.length}/$MAX_QUICK_INPUT_LENGTH",
+                        color = if (overLimit) MaterialTheme.colorScheme.error else Color.Unspecified,
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .focusRequester(focusRequester),
@@ -281,7 +376,7 @@ private fun QuickInputDialog(
         confirmButton = {
             TextButton(
                 onClick = { onSave(text) },
-                enabled = text.isNotBlank(),
+                enabled = text.isNotBlank() && !overLimit,
             ) { Text("保存") }
         },
         dismissButton = {
@@ -289,6 +384,9 @@ private fun QuickInputDialog(
         },
     )
 }
+
+/** 快速记录上限，与探索页输入坞一致 */
+private const val MAX_QUICK_INPUT_LENGTH = 140
 
 private fun greeting(): String = when (LocalTime.now().hour) {
     in 5..10 -> "早上好"
