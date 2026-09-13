@@ -109,12 +109,13 @@ private val Md3LightScheme = lightColorScheme(
     onError = Color(0xFFFFFFFF),
     errorContainer = Color(0xFFFF574B),
     onErrorContainer = Color(0xFF360001),
-    background = Color(0xFFF9F9FF),
-    onBackground = Color(0xFF171C25),
-    surface = Color(0xFFF9F9FF),
-    onSurface = Color(0xFF171C25),
+    // 中性色对齐全端统一令牌（FlashTokens.Palette）：页面底色/主文字/次文字
+    background = Color(0xFFF7F9FA),
+    onBackground = Color(0xFF2D3436),
+    surface = Color(0xFFF7F9FA),
+    onSurface = Color(0xFF2D3436),
     surfaceVariant = Color(0xFFDDE2F2),
-    onSurfaceVariant = Color(0xFF414753),
+    onSurfaceVariant = Color(0xFF636E72),
     outline = Color(0xFF5F6572),
     outlineVariant = Color(0xFF8C92A0),
     surfaceContainerLowest = Color(0xFFFFFFFF),
@@ -123,7 +124,7 @@ private val Md3LightScheme = lightColorScheme(
     surfaceContainerHigh = Color(0xFFDFE2EF),
     surfaceContainerHighest = Color(0xFFD6DAE6),
     surfaceDim = Color(0xFFCCD0DC),
-    surfaceBright = Color(0xFFF9F9FF),
+    surfaceBright = Color(0xFFF7F9FA),
 )
 
 private val Md3DarkScheme = darkColorScheme(
@@ -143,12 +144,13 @@ private val Md3DarkScheme = darkColorScheme(
     onError = Color(0xFF520003),
     errorContainer = Color(0xFFCF2C27),
     onErrorContainer = Color(0xFFFFFFFF),
-    background = Color(0xFF0F131C),
-    onBackground = Color(0xFFEAEDFA),
-    surface = Color(0xFF0F131C),
-    onSurface = Color(0xFFEAEDFA),
+    // 深色模式使用品牌标准定义的深色 Surface 与文字色
+    background = Color(0xFF191A38),
+    onBackground = Color(0xFFF5F6FA),
+    surface = Color(0xFF191A38),
+    onSurface = Color(0xFFF5F6FA),
     surfaceVariant = Color(0xFF414753),
-    onSurfaceVariant = Color(0xFFC1C6D6),
+    onSurfaceVariant = Color(0xFFB2BEC3),
     outline = Color(0xFF959BA9),
     outlineVariant = Color(0xFF676D7A),
     surfaceContainerLowest = Color(0xFF070B13),
@@ -156,7 +158,7 @@ private val Md3DarkScheme = darkColorScheme(
     surfaceContainer = Color(0xFF1F242D),
     surfaceContainerHigh = Color(0xFF2A2E38),
     surfaceContainerHighest = Color(0xFF353943),
-    surfaceDim = Color(0xFF0F131C),
+    surfaceDim = Color(0xFF191A38),
     surfaceBright = Color(0xFF3A3F49),
 )
 

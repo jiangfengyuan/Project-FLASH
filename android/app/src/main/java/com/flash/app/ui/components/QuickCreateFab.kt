@@ -13,17 +13,19 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
@@ -31,12 +33,16 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,14 +50,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.flash.app.data.model.Category
+import com.flash.app.ui.theme.FlashTokens
 import com.flash.app.ui.theme.ModuleColors
 
 /**
- * FAB 快速创建（PRD 09）：+ 展开四个模块选项（模块品牌色），
- * 展开时 + 旋转 45° 变为 ×。
+ * 快速创建 FAB（PRD 09 / UIUX 阶段一）：Dock 右侧独立圆形 “+”（56×56），
+ * 展开四项动作菜单，自上而下顺序：记录、灵感、情绪、任务。
+ * 展开动效：图标旋转 45° 变为 × + 选项上浮 + 遮罩渐入（遮罩由调用方提供），
+ * 全程缓入缓出 tween，不用弹跳；Compose 动画时钟自动遵守系统减少动态设置。
  */
 @Composable
 fun QuickCreateFab(
@@ -60,41 +72,53 @@ fun QuickCreateFab(
     onCreateLog: () -> Unit,
     onCreateIdea: () -> Unit,
     onCreateEmotion: () -> Unit,
-    onCreateCalendar: () -> Unit,
+    onCreateTask: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     fun collapse(action: () -> Unit) {
         onExpandedChange(false)
         action()
     }
 
-    Column(horizontalAlignment = Alignment.End) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.End) {
         AnimatedVisibility(
             visible = expanded,
-            enter = fadeIn(tween(180)) + expandVertically(tween(220)),
-            exit = fadeOut(tween(150)) + shrinkVertically(tween(180)),
+            enter = fadeIn(tween(FlashTokens.Motion.SelectionMs)) +
+                slideInVertically(tween(FlashTokens.Motion.FabExpandMs)) { it / 6 } +
+                expandVertically(tween(FlashTokens.Motion.FabExpandMs)),
+            exit = fadeOut(tween(150)) +
+                shrinkVertically(tween(FlashTokens.Motion.FabExpandMs)),
         ) {
             Column(
                 horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(FlashTokens.Spacing.SM),
             ) {
-                FabOption("情绪", Icons.Filled.Favorite, ModuleColors.Emotion) {
-                    collapse(onCreateEmotion)
+                FabOption("记录", Icons.AutoMirrored.Filled.MenuBook, ModuleColors.Log) {
+                    collapse(onCreateLog)
                 }
                 FabOption("灵感", Icons.Filled.Lightbulb, ModuleColors.Idea) {
                     collapse(onCreateIdea)
                 }
-                FabOption("日志", Icons.AutoMirrored.Filled.MenuBook, ModuleColors.Log) {
-                    collapse(onCreateLog)
+                FabOption("情绪", Icons.Filled.Favorite, ModuleColors.Emotion) {
+                    collapse(onCreateEmotion)
                 }
-                FabOption("日程", Icons.Filled.CalendarMonth, ModuleColors.Calendar) {
-                    collapse(onCreateCalendar)
+                FabOption("任务", Icons.Filled.CalendarMonth, ModuleColors.Calendar) {
+                    collapse(onCreateTask)
                 }
+                Spacer(Modifier.height(FlashTokens.Spacing.XS))
             }
         }
-        val rotation by animateFloatAsState(if (expanded) 45f else 0f, tween(200), label = "fabRot")
+        val rotation by animateFloatAsState(
+            targetValue = if (expanded) 45f else 0f,
+            animationSpec = tween(FlashTokens.Motion.FabExpandMs),
+            label = "fabRot",
+        )
         FloatingActionButton(
             onClick = { onExpandedChange(!expanded) },
+            shape = CircleShape,
             containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier.size(FlashTokens.Touch.FabMain),
         ) {
             Icon(
                 Icons.Filled.Add,
@@ -135,3 +159,53 @@ private fun FabOption(
         }
     }
 }
+
+/**
+ * 快速输入对话框（记录 / 灵感共用）。
+ * 超限不静默截断：允许继续输入，给出可见错误态并阻止保存（对齐 macOS TextLimits 行为）。
+ */
+@Composable
+fun QuickInputDialog(
+    category: Category,
+    onDismiss: () -> Unit,
+    onSave: (String) -> Unit,
+) {
+    var text by remember { mutableStateOf("") }
+    val isIdea = category == Category.IDEA
+    val overLimit = text.length > MAX_QUICK_INPUT_LENGTH
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(if (isIdea) "记录灵感" else "记录此刻") },
+        text = {
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                placeholder = { Text(if (isIdea) "此刻的想法是..." else "闪过即留...") },
+                isError = overLimit,
+                supportingText = {
+                    Text(
+                        "${text.length}/$MAX_QUICK_INPUT_LENGTH",
+                        color = if (overLimit) MaterialTheme.colorScheme.error else Color.Unspecified,
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(focusRequester),
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onSave(text) },
+                enabled = text.isNotBlank() && !overLimit,
+            ) { Text("保存") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("取消") }
+        },
+    )
+}
+
+/** 快速记录上限，与探索页输入坞一致 */
+const val MAX_QUICK_INPUT_LENGTH = 140

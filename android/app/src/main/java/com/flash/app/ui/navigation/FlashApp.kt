@@ -6,31 +6,41 @@
 
 package com.flash.app.ui.navigation
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -40,8 +50,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.flash.app.FlashApplication
 import com.flash.app.data.UiStyle
+import com.flash.app.data.model.Category
+import com.flash.app.data.model.ColorTag
+import com.flash.app.data.model.importanceFromContent
 import com.flash.app.domain.shouldShowIdeaReminder
 import com.flash.app.ui.calendar.CalendarScreen
+import com.flash.app.ui.components.QuickCreateFab
+import com.flash.app.ui.components.QuickInputDialog
 import com.flash.app.ui.detail.RecordDetailScreen
 import com.flash.app.ui.emotion.EmotionScreen
 import com.flash.app.ui.explore.ExploreScreen
@@ -49,12 +64,13 @@ import com.flash.app.ui.home.HomeScreen
 import com.flash.app.ui.logflow.LogFlowScreen
 import com.flash.app.ui.settings.SettingsScreen
 import com.flash.app.ui.stats.StatsScreen
+import com.flash.app.ui.theme.FlashTokens
 import com.flash.app.ui.theme.LocalUiStyle
 import com.flash.app.ui.theme.glass.GlassBackground
 import com.flash.app.ui.theme.glass.LocalHazeState
-import com.flash.app.ui.theme.glass.glass
 import com.flash.app.ui.welcome.WelcomeScreen
 import dev.chrisbanes.haze.HazeState
+import kotlinx.coroutines.launch
 
 @Composable
 fun FlashApp(darkTheme: Boolean, uiStyle: UiStyle) {
@@ -69,6 +85,23 @@ fun FlashApp(darkTheme: Boolean, uiStyle: UiStyle) {
     val showBottomBar = currentRoute in TABS.map { it.route }
     val hazeState = remember { HazeState() }
     val isGlass = uiStyle == UiStyle.GLASS
+    val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    var fabExpanded by remember { mutableStateOf(false) }
+    var quickCreateKey by rememberSaveable { mutableStateOf<String?>(null) }
+    val quickCreate = quickCreateKey?.let { Category.valueOf(it) }
+
+    // Dock 悬浮于内容之上：为一级页面预留底部空间，内容不被 Dock 或系统手势区遮挡
+    val density = LocalDensity.current
+    val dockReserve = WindowInsets.navigationBars.getBottom(density).let {
+        with(density) { it.toDp() }
+    } + FlashTokens.Dock.BottomMargin + FlashTokens.Dock.Height
+
+    // 离开一级页面（Dock 隐藏）时收起展开菜单
+    LaunchedEffect(showBottomBar) {
+        if (!showBottomBar) fabExpanded = false
+    }
 
     CompositionLocalProvider(LocalHazeState provides hazeState, LocalUiStyle provides uiStyle) {
         Box(Modifier.fillMaxSize()) {
@@ -79,71 +112,14 @@ fun FlashApp(darkTheme: Boolean, uiStyle: UiStyle) {
 
             Scaffold(
                 containerColor = if (isGlass) Color.Transparent else MaterialTheme.colorScheme.background,
-                bottomBar = {
-                    if (showBottomBar) {
-                        NavigationBar(
-                            containerColor = if (isGlass) {
-                                Color.Transparent
-                            } else {
-                                MaterialTheme.colorScheme.surfaceContainer
-                            },
-                            tonalElevation = if (isGlass) 0.dp else 3.dp,
-                            modifier = if (isGlass) {
-                                Modifier.glass(
-                                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-                                    strong = true,
-                                )
-                            } else {
-                                Modifier
-                            },
-                        ) {
-                            TABS.forEach { tab ->
-                                NavigationBarItem(
-                                    selected = currentRoute == tab.route,
-                                    onClick = {
-                                        navController.navigate(tab.route) {
-                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                saveState = true
-                                            }
-                                            launchSingleTop = true
-                                            restoreState = true
-                                        }
-                                    },
-                                    icon = {
-                                        BadgedBox(
-                                            badge = {
-                                                if (tab.route == Routes.EXPLORE && showIdeaReminder) {
-                                                    Badge {
-                                                        Text(
-                                                            if (unviewedIdeas.size > 99) "99+"
-                                                            else unviewedIdeas.size.toString()
-                                                        )
-                                                    }
-                                                }
-                                            },
-                                        ) {
-                                            Icon(tab.icon, contentDescription = tab.label)
-                                        }
-                                    },
-                                    label = { Text(tab.label) },
-                                    // 选中态统一用品牌紫（primary 系），不再用默认的橙系 secondaryContainer
-                                    colors = NavigationBarItemDefaults.colors(
-                                        selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                                        indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    ),
-                                )
-                            }
-                        }
-                    }
-                },
+                snackbarHost = { SnackbarHost(snackbar) },
             ) { innerPadding ->
                 NavHost(
                     navController = navController,
                     startDestination = if (welcomed) Routes.HOME else Routes.WELCOME,
-                    modifier = Modifier.padding(innerPadding),
+                    modifier = Modifier
+                        .padding(innerPadding)
+                        .padding(bottom = if (showBottomBar) dockReserve else 0.dp),
                     // 轻微横移配合淡入淡出，保留页面连续性并避免纯交叉淡化的闪屏感。
                     enterTransition = {
                         fadeIn(animationSpec = tween(240)) +
@@ -213,6 +189,89 @@ fun FlashApp(darkTheme: Boolean, uiStyle: UiStyle) {
                     }
                 }
             }
+
+            if (showBottomBar) {
+                // FAB 展开时的遮罩：渐入，点击或返回键收起
+                AnimatedVisibility(
+                    visible = fabExpanded,
+                    enter = fadeIn(tween(FlashTokens.Motion.SelectionMs)),
+                    exit = fadeOut(tween(150)),
+                ) {
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.32f))
+                            .clickable { fabExpanded = false },
+                    )
+                }
+                // 悬浮 Dock + 右侧独立圆形 “+” FAB
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .navigationBarsPadding()
+                        .padding(
+                            horizontal = FlashTokens.Spacing.PageHorizontal,
+                            vertical = FlashTokens.Dock.BottomMargin,
+                        ),
+                    horizontalArrangement = Arrangement.spacedBy(FlashTokens.Spacing.SM),
+                    verticalAlignment = Alignment.Bottom,
+                ) {
+                    FlashDock(
+                        currentRoute = currentRoute,
+                        onSelect = { tab ->
+                            navController.navigate(tab.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        badgeCount = { route ->
+                            if (route == Routes.EXPLORE && showIdeaReminder) unviewedIdeas.size else 0
+                        },
+                        modifier = Modifier.weight(1f),
+                    )
+                    QuickCreateFab(
+                        expanded = fabExpanded,
+                        onExpandedChange = { fabExpanded = it },
+                        onCreateLog = { quickCreateKey = Category.LOG.name },
+                        onCreateIdea = { quickCreateKey = Category.IDEA.name },
+                        onCreateEmotion = { navController.navigate(Routes.EMOTION) },
+                        onCreateTask = { navController.navigate(Routes.CALENDAR) },
+                    )
+                }
+            }
         }
+    }
+
+    BackHandler(enabled = fabExpanded && showBottomBar) { fabExpanded = false }
+
+    quickCreate?.let { category ->
+        QuickInputDialog(
+            category = category,
+            onDismiss = { quickCreateKey = null },
+            onSave = { text ->
+                quickCreateKey = null
+                val trimmed = text.trim()
+                if (trimmed.isEmpty()) return@QuickInputDialog
+                // 与 HomeViewModel.quickAdd 同口径的快速写入（纯 UI 绑定，Repository 不动）
+                scope.launch {
+                    runCatching {
+                        when (category) {
+                            Category.LOG -> app.repository.addLog(trimmed, ColorTag.DAILY, Category.LOG)
+                            Category.IDEA -> app.repository.addLog(
+                                trimmed,
+                                ColorTag.IDEA,
+                                Category.IDEA,
+                                importance = importanceFromContent(trimmed),
+                            )
+                        }
+                    }.onFailure {
+                        snackbar.showSnackbar(it.message ?: "保存失败，请重试")
+                    }
+                }
+            },
+        )
     }
 }

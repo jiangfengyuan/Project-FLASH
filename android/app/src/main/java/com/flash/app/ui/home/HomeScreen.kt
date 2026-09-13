@@ -6,10 +6,7 @@
 
 package com.flash.app.ui.home
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -29,46 +26,31 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.activity.compose.BackHandler
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.flash.app.FlashApplication
-import com.flash.app.data.model.Category
 import com.flash.app.data.model.emoji
 import com.flash.app.domain.shouldShowIdeaReminder
 import com.flash.app.ui.components.LogCard
-import com.flash.app.ui.components.QuickCreateFab
 import com.flash.app.ui.components.StyleCard
 import com.flash.app.ui.theme.ModuleColors
 import java.time.LocalTime
 
-/** 首页（PRD 08）：问候 → 四模块卡 → 今日概览 → 最近记录，右下 FAB 快速创建 */
+/** 首页（PRD 08）：问候 → 四模块卡 → 今日概览 → 最近记录；快速创建入口在全局 Dock 右侧 FAB */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -81,33 +63,17 @@ fun HomeScreen(
     val app = LocalContext.current.applicationContext as FlashApplication
     val viewModel: HomeViewModel = viewModel(factory = HomeViewModel.factory(app.repository))
     val ui by viewModel.uiState.collectAsStateWithLifecycle()
-    var quickCreateKey by rememberSaveable { mutableStateOf<String?>(null) }
-    val quickCreate = quickCreateKey?.let { Category.valueOf(it) }
-    var fabExpanded by remember { mutableStateOf(false) }
-    val snackbar = remember { SnackbarHostState() }
-
-    LaunchedEffect(viewModel) {
-        viewModel.events.collect { event ->
-            when (event) {
-                is HomeEvent.Failed -> snackbar.showSnackbar(event.message)
-            }
-        }
-    }
 
     Scaffold(
         containerColor = Color.Transparent,
-        snackbarHost = { SnackbarHost(snackbar) },
     ) { innerPadding ->
-        Box(
+        LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
             item(key = "greeting") {
                 Column(modifier = Modifier.padding(vertical = 12.dp)) {
                     Text(
@@ -242,54 +208,7 @@ fun HomeScreen(
                     )
                 }
             }
-            item(key = "fab-space") { Spacer(Modifier.height(72.dp)) }
         }
-
-            androidx.compose.animation.AnimatedVisibility(
-                visible = fabExpanded,
-                enter = androidx.compose.animation.fadeIn(),
-                exit = androidx.compose.animation.fadeOut(),
-            ) {
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.32f))
-                        .clickable { fabExpanded = false },
-                )
-            }
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.BottomEnd,
-            ) {
-                QuickCreateFab(
-                    expanded = fabExpanded,
-                    onExpandedChange = { fabExpanded = it },
-                    onCreateLog = { quickCreateKey = Category.LOG.name },
-                    onCreateIdea = { quickCreateKey = Category.IDEA.name },
-                    onCreateEmotion = {
-                        fabExpanded = false
-                        onOpenEmotion()
-                    },
-                    onCreateCalendar = {
-                        fabExpanded = false
-                        onOpenCalendar()
-                    },
-                )
-            }
-        }
-    }
-
-    BackHandler(enabled = fabExpanded) { fabExpanded = false }
-
-    quickCreate?.let { category ->
-        QuickInputDialog(
-            category = category,
-            onDismiss = { quickCreateKey = null },
-            onSave = { text ->
-                viewModel.quickAdd(text, category)
-                quickCreateKey = null
-            },
-        )
     }
 }
 
@@ -340,53 +259,6 @@ private fun OverviewItem(value: String, label: String) {
         )
     }
 }
-
-@Composable
-private fun QuickInputDialog(
-    category: Category,
-    onDismiss: () -> Unit,
-    onSave: (String) -> Unit,
-) {
-    var text by remember { mutableStateOf("") }
-    val isIdea = category == Category.IDEA
-    // 超限不静默截断：允许继续输入，给出可见错误态并阻止保存（对齐 macOS TextLimits 行为）
-    val overLimit = text.length > MAX_QUICK_INPUT_LENGTH
-    val focusRequester = remember { androidx.compose.ui.focus.FocusRequester() }
-    LaunchedEffect(Unit) { focusRequester.requestFocus() }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(if (isIdea) "记录灵感" else "记录日志") },
-        text = {
-            OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
-                placeholder = { Text(if (isIdea) "此刻的想法是..." else "闪过即留...") },
-                isError = overLimit,
-                supportingText = {
-                    Text(
-                        "${text.length}/$MAX_QUICK_INPUT_LENGTH",
-                        color = if (overLimit) MaterialTheme.colorScheme.error else Color.Unspecified,
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(focusRequester),
-            )
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { onSave(text) },
-                enabled = text.isNotBlank() && !overLimit,
-            ) { Text("保存") }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("取消") }
-        },
-    )
-}
-
-/** 快速记录上限，与探索页输入坞一致 */
-private const val MAX_QUICK_INPUT_LENGTH = 140
 
 private fun greeting(): String = when (LocalTime.now().hour) {
     in 5..10 -> "早上好"

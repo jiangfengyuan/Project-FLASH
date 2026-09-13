@@ -15,8 +15,9 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.graphics.vector.ImageVector
 
 /**
- * 路由：新 IA（PRD 05 / 效果图）— 4 Tab（首页/探索/统计/我的）
+ * 路由：新 IA（PRD 05 / 效果图）— 4 Tab（此刻/记录/回顾/设置）
  * + Welcome（首启）+ Emotion/Calendar/LogFlow 子页面。
+ * route 字符串保持不变，仅用户可见显示名称按阶段一导航映射调整。
  */
 object Routes {
     const val WELCOME = "welcome"
@@ -36,8 +37,8 @@ object Routes {
 data class TabDest(val route: String, val label: String, val icon: ImageVector)
 
 val TABS = listOf(
-    TabDest(Routes.HOME, "首页", Icons.Filled.Home),
-    TabDest(Routes.EXPLORE, "搜索", Icons.Filled.Search),
-    TabDest(Routes.STATS, "统计", Icons.Filled.BarChart),
-    TabDest(Routes.PROFILE, "我的", Icons.Filled.Person),
+    TabDest(Routes.HOME, "此刻", Icons.Filled.Home),
+    TabDest(Routes.EXPLORE, "记录", Icons.Filled.Search),
+    TabDest(Routes.STATS, "回顾", Icons.Filled.BarChart),
+    TabDest(Routes.PROFILE, "设置", Icons.Filled.Person),
 )
