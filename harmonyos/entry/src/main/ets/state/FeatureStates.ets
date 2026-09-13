@@ -1,9 +1,9 @@
 import { EmotionRecord, LogItem, SubEmotion, TaskItem } from '../models/Models';
 import { LanDevice } from '../data/LocalBackupTransfer';
-const LIGHT_BACKGROUND = '#00FFFFFF';
-const LIGHT_SURFACE = '#EFFFFFFF';
-const LIGHT_TEXT = '#172033';
-const LIGHT_MUTED = '#667085';
+const LIGHT_BACKGROUND = '#FFF7F9FA';
+const LIGHT_SURFACE = '#FFFFFFFF';
+const LIGHT_TEXT = '#FF2D3436';
+const LIGHT_MUTED = '#FF636E72';
 
 @Observed
 export class NavigationState {
@@ -24,13 +24,13 @@ export class ThemeState {
   themeSurface: string = LIGHT_SURFACE;
   themeText: string = LIGHT_TEXT;
   themeMuted: string = LIGHT_MUTED;
-  themeControl: string = '#EEF1F6';
-  themeTint: string = '#EAF2FF';
-  themeDanger: string = '#FFF1F0';
-  themeNavigation: string = '#F8FFFFFF';
-  themeGradientStart: string = '#FFF4F0FF';
-  themeGradientMiddle: string = '#FFF1F8FF';
-  themeGradientEnd: string = '#FFFFF3EC';
+  themeControl: string = '#FFEDF0F5';
+  themeTint: string = '#FFEAF2FF';
+  themeDanger: string = '#FFFFF1F0';
+  themeNavigation: string = '#FFFFFFFF';
+  themeGradientStart: string = '#FFF7F9FA';
+  themeGradientMiddle: string = '#FFF7F9FA';
+  themeGradientEnd: string = '#FFF7F9FA';
 }
 
 @Observed

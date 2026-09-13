@@ -1,6 +1,7 @@
 import { common } from '@kit.AbilityKit';
 import { mediaquery } from '@kit.ArkUI';
 import { Category } from '../models/Models';
+import { dayString } from '../data/DateUtils';
 import { AppController } from '../state/AppController';
 import { PageActions } from '../state/PageActions';
 import { NavigationState, ThemeState, HomeState, LogsState, EmotionState, CalendarState, BackupState, SettingsState, FeedbackState } from '../state/FeatureStates';
@@ -18,15 +19,15 @@ import { EditLogDialog } from '../components/EditLogDialog';
 import { TaskEditorDialog } from '../components/TaskEditorDialog';
 import { DestructiveConfirmDialog } from '../components/DestructiveConfirmDialog';
 import { WelcomeOverlay } from '../components/WelcomeOverlay';
-const BRAND = '#6C5CE7';
-const LIGHT_BACKGROUND = '#00FFFFFF';
-const LIGHT_SURFACE = '#EFFFFFFF';
-const LIGHT_TEXT = '#172033';
-const LIGHT_MUTED = '#667085';
-const DARK_BACKGROUND = '#FF101522';
-const DARK_SURFACE = '#F2293040';
-const DARK_TEXT = '#FFF3F5FA';
-const DARK_MUTED = '#FFADB6C8';
+import { BRAND, FabButton, FabOption, FlashDockBar, FAB_SIZE } from '../components/CommonBuilders';
+const LIGHT_BACKGROUND = '#FFF7F9FA';
+const LIGHT_SURFACE = '#FFFFFFFF';
+const LIGHT_TEXT = '#FF2D3436';
+const LIGHT_MUTED = '#FF636E72';
+const DARK_BACKGROUND = '#FF191A38';
+const DARK_SURFACE = '#FF24274A';
+const DARK_TEXT = '#FFF5F6FA';
+const DARK_MUTED = '#FFB2BEC3';
 
 @Entry
 @Component
@@ -179,13 +180,13 @@ struct Index {
     this.theme.themeSurface = dark ? DARK_SURFACE : LIGHT_SURFACE;
     this.theme.themeText = dark ? DARK_TEXT : LIGHT_TEXT;
     this.theme.themeMuted = dark ? DARK_MUTED : LIGHT_MUTED;
-    this.theme.themeControl = dark ? '#FF343C4D' : '#EEF1F6';
-    this.theme.themeTint = dark ? '#FF343052' : '#EAF2FF';
-    this.theme.themeDanger = dark ? '#FF4A292D' : '#FFF1F0';
-    this.theme.themeNavigation = dark ? '#F21B2130' : '#F8FFFFFF';
-    this.theme.themeGradientStart = dark ? '#FF15182D' : '#FFF4F0FF';
-    this.theme.themeGradientMiddle = dark ? '#FF1D1933' : '#FFF1F8FF';
-    this.theme.themeGradientEnd = dark ? '#FF14282B' : '#FFFFF3EC';
+    this.theme.themeControl = dark ? '#FF3A3D5C' : '#FFEDF0F5';
+    this.theme.themeTint = dark ? '#FF343052' : '#FFEAF2FF';
+    this.theme.themeDanger = dark ? '#FF4A292D' : '#FFFFF1F0';
+    this.theme.themeNavigation = dark ? DARK_SURFACE : LIGHT_SURFACE;
+    this.theme.themeGradientStart = dark ? DARK_BACKGROUND : LIGHT_BACKGROUND;
+    this.theme.themeGradientMiddle = dark ? DARK_BACKGROUND : LIGHT_BACKGROUND;
+    this.theme.themeGradientEnd = dark ? DARK_BACKGROUND : LIGHT_BACKGROUND;
   }
 
   private setThemeMode(mode: string): void {
@@ -231,55 +232,40 @@ struct Index {
   }
 
   @Builder
-  private bottomNavigation() {
-    Row() {
-      this.tabButton(0, '⌂', '首页')
-      this.tabButton(1, '⌕', '搜索')
-      this.tabButton(2, '▥', '统计')
-      this.tabButton(3, '○', '我的')
+  private dockBar() {
+    Row({ space: 12 }) {
+      FlashDockBar(this.theme, this.navigation, (index: number) => this.switchTab(index))
+      FabButton(this.navigation, () => this.toggleFab())
     }
     .width('100%')
-    .height(68)
-    .padding({ left: 8, right: 8, bottom: 8 })
-    .backgroundColor(this.theme.themeNavigation)
-    .backdropBlur(18)
-  }
-
-  @Builder
-  private tabButton(index: number, emoji: string, label: string) {
-    Column({ space: 2 }) {
-      Text(emoji).fontSize(20)
-      Text(label).fontSize(11).fontColor(this.navigation.activeTab === index ? BRAND : this.theme.themeMuted)
-    }
-    .layoutWeight(1)
-    .height(56)
-    .justifyContent(FlexAlign.Center)
-    .onClick(() => this.switchTab(index))
+    .padding({ left: 20, right: 20, bottom: 16 })
   }
 
   @Builder
   private navigationRail() {
     Column({ space: 10 }) {
-      Text('⚡').fontSize(30).margin({ top: 24, bottom: 18 })
-      this.railButton(0, '⌂', '首页')
-      this.railButton(1, '⌕', '搜索')
-      this.railButton(2, '▥', '统计')
-      this.railButton(3, '○', '我的')
+      Image($r('app.media.icon')).width(40).height(40).borderRadius(10).margin({ top: 24, bottom: 18 })
+      this.railButton(0, $r('sys.symbol.house'), $r('sys.symbol.house_fill'), '此刻')
+      this.railButton(1, $r('sys.symbol.doc_text'), $r('sys.symbol.doc_text_fill'), '记录')
+      this.railButton(2, $r('sys.symbol.clock_arrow_2_circlepath'), $r('sys.symbol.clock_arrow_2_circlepath_fill'), '回顾')
+      this.railButton(3, $r('sys.symbol.gearshape'), $r('sys.symbol.gearshape_fill'), '设置')
       Blank()
-      Text('Aero').fontSize(11).fontColor(this.theme.themeMuted).margin({ bottom: 20 })
+      Text('Flash').fontSize(11).fontColor(this.theme.themeMuted).margin({ bottom: 20 })
     }
     .width(104)
     .height('100%')
     .alignItems(HorizontalAlign.Center)
     .backgroundColor(this.theme.themeNavigation)
-    .backdropBlur(18)
   }
 
   @Builder
-  private railButton(index: number, emoji: string, label: string) {
+  private railButton(index: number, icon: Resource, activeIcon: Resource, label: string) {
     Column({ space: 5 }) {
-      Text(emoji).fontSize(22).fontColor(this.navigation.activeTab === index ? BRAND : this.theme.themeMuted)
+      SymbolGlyph(this.navigation.activeTab === index ? activeIcon : icon)
+        .fontSize(22)
+        .fontColor([this.navigation.activeTab === index ? BRAND : this.theme.themeMuted])
       Text(label).fontSize(11).fontColor(this.navigation.activeTab === index ? BRAND : this.theme.themeMuted)
+        .fontWeight(this.navigation.activeTab === index ? FontWeight.Medium : FontWeight.Regular)
     }
     .width(78)
     .height(68)
@@ -287,57 +273,52 @@ struct Index {
     .backgroundColor(this.navigation.activeTab === index ? this.theme.themeTint : Color.Transparent)
     .borderRadius(18)
     .onClick(() => this.switchTab(index))
+    .animation({ duration: 200, curve: Curve.EaseOut })
+  }
+
+  private fabBottomGap(): number {
+    return (this.navigation.isExpandedWindow ? 22 : 16) + FAB_SIZE + 12;
   }
 
   @Builder
-  private fabOption(label: string, icon: string, color: string, action: () => void) {
-    Row({ space: 10 }) {
-      Text(label).fontSize(13).fontColor(this.theme.themeText).padding({ left: 12, right: 12, top: 7, bottom: 7 })
-        .backgroundColor(this.theme.themeSurface).borderRadius(18)
-      Button(icon, { type: ButtonType.Circle }).width(44).height(44).fontSize(20)
-        .fontColor(Color.White).backgroundColor(color).onClick(action)
-    }
-  }
-
-  @Builder
-  private quickCreateFab() {
+  private fabOverlay() {
     Stack({ alignContent: Alignment.BottomEnd }) {
       if (this.navigation.fabExpanded) {
         Column().width('100%').height('100%').backgroundColor('#52000000')
+          .opacity(this.navigation.fabProgress)
           .onClick(() => this.dismissFab())
-      }
-      Column({ space: 11 }) {
-        if (this.navigation.fabExpanded) {
-          Column({ space: 11 }) {
-            this.fabOption('情绪', '♥', '#FF6B9D', () => {
-              this.navigation.fabExpanded = false;
-              this.navigation.fabProgress = 0;
-              this.openDetail('emotion');
-            })
-            this.fabOption('灵感', '💡', '#F5B800', () => {
-              this.navigation.fabExpanded = false;
-              this.navigation.fabProgress = 0;
-              this.logs.quickCategory = Category.IDEA;
-            })
-            this.fabOption('日志', '📖', '#8B5CF6', () => {
-              this.navigation.fabExpanded = false;
-              this.navigation.fabProgress = 0;
-              this.logs.quickCategory = Category.LOG;
-            })
-            this.fabOption('日程', '📅', '#22B573', () => {
-              this.navigation.fabExpanded = false;
-              this.navigation.fabProgress = 0;
-              this.openDetail('calendar');
-            })
-          }.opacity(this.navigation.fabProgress).translate({ y: 18 * (1 - this.navigation.fabProgress) })
+        Column({ space: 11 }) {
+          FabOption(this.theme, '记录', $r('sys.symbol.square_and_pencil'), '#8B5CF6', () => {
+            this.navigation.fabExpanded = false;
+            this.navigation.fabProgress = 0;
+            this.logs.quickCategory = Category.LOG;
+          })
+          FabOption(this.theme, '灵感', $r('sys.symbol.lightbulb'), '#F5B800', () => {
+            this.navigation.fabExpanded = false;
+            this.navigation.fabProgress = 0;
+            this.logs.quickCategory = Category.IDEA;
+          })
+          FabOption(this.theme, '情绪', $r('sys.symbol.face_smiling'), '#FF6B9D', () => {
+            this.navigation.fabExpanded = false;
+            this.navigation.fabProgress = 0;
+            this.openDetail('emotion');
+          })
+          FabOption(this.theme, '任务', $r('sys.symbol.checkmark_circle'), '#22B573', () => {
+            this.navigation.fabExpanded = false;
+            this.navigation.fabProgress = 0;
+            this.actions.calendarController.openTaskEditor(undefined, dayString());
+          })
         }
-        Button('+', { type: ButtonType.Circle })
-          .width(54).height(54).fontSize(28).fontColor(Color.White).backgroundColor(BRAND)
-          .rotate({ angle: 45 * this.navigation.fabProgress })
-          .onClick(() => this.toggleFab())
+        .alignItems(HorizontalAlign.End)
+        .opacity(this.navigation.fabProgress)
+        .translate({ y: 18 * (1 - this.navigation.fabProgress) })
+        .margin({ right: this.navigation.isExpandedWindow ? 24 : 20, bottom: this.fabBottomGap() })
       }
-      .alignItems(HorizontalAlign.End)
-      .margin({ right: 18, bottom: this.navigation.isExpandedWindow ? 22 : 82 })
+      if (this.navigation.isExpandedWindow) {
+        Column() {
+          FabButton(this.navigation, () => this.toggleFab())
+        }.margin({ right: 24, bottom: 22 })
+      }
     }.width('100%').height('100%')
   }
 
@@ -368,16 +349,16 @@ struct Index {
         }.width('100%').height('100%').justifyContent(FlexAlign.Center)
 
         if (this.navigation.detail === '') {
-          this.bottomNavigation()
+          this.dockBar()
         }
       }
 
       if (this.feedback.notice !== undefined) {
         Text(this.feedback.notice?.message ?? '').fontSize(13).fontColor(Color.White).padding({ left: 18, right: 18, top: 10, bottom: 10 })
-          .backgroundColor('#DD172033').borderRadius(18).margin({ bottom: 82 })
+          .backgroundColor('#DD172033').borderRadius(18).margin({ bottom: this.navigation.isExpandedWindow ? 32 : 96 })
       }
 
-      if (!this.settings.showWelcome && this.navigation.detail === '' && this.navigation.activeTab === 0) this.quickCreateFab()
+      if (!this.settings.showWelcome && this.navigation.detail === '') this.fabOverlay()
       if (this.logs.quickCategory !== '') QuickInputDialog({ navigation: this.navigation, theme: this.theme, logs: this.logs, actions: this.actions })
       if (this.logs.editingLogId !== '') EditLogDialog({ navigation: this.navigation, theme: this.theme, logs: this.logs, actions: this.actions })
       if (this.calendar.editingTaskId !== '') TaskEditorDialog({ navigation: this.navigation, theme: this.theme, calendar: this.calendar, actions: this.actions })
@@ -390,9 +371,5 @@ struct Index {
     .width('100%')
     .height('100%')
     .backgroundColor(this.theme.themeBackground)
-    .linearGradient({
-      angle: 145,
-      colors: [[this.theme.themeGradientStart, 0.0], [this.theme.themeGradientMiddle, 0.48], [this.theme.themeGradientEnd, 1.0]]
-    })
   }
 }

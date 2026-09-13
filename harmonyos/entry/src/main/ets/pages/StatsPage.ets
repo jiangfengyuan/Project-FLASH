@@ -2,7 +2,7 @@ import { shortDay } from '../data/DateUtils';
 import { Category, LogItem } from '../models/Models';
 import { ThemeState, LogsState, EmotionState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
-import { PageHeader } from '../components/CommonBuilders';
+import { PageHeader, DOCK_CLEARANCE } from '../components/CommonBuilders';
 const BRAND = '#6C5CE7';
 
 @Component
@@ -16,7 +16,7 @@ export struct StatsPage {
   private statsPage() {
     Scroll() {
       Column({ space: 14 }) {
-        PageHeader(this.theme, '统计', '看见记录背后的节奏与情绪')
+        PageHeader(this.theme, '回顾', '看见记录背后的节奏与情绪')
         Row({ space: 10 }) {
           this.metric(`${this.logs.logs.length}`, '全部记录', this.theme.themeTint)
           this.metric(`${requireActions(this.actions).emotionController.averageEmotion()}`, '平均情绪', this.theme.themeTint)
@@ -41,7 +41,7 @@ export struct StatsPage {
           this.statLine('灵感', this.logs.logs.filter((item: LogItem) => item.category === Category.IDEA).length, '#FF9F43')
           this.statLine('情绪', this.emotion.emotions.length, '#9B59B6')
         }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(20)
-      }.width('100%').padding({ left: 16, right: 16, bottom: 90 })
+      }.width('100%').padding({ left: 20, right: 20, bottom: DOCK_CLEARANCE })
     }.width('100%').height('100%').backgroundColor(this.theme.themeBackground)
   }
 

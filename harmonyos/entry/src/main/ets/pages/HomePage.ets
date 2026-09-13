@@ -1,7 +1,7 @@
 import { LogItem } from '../models/Models';
 import { NavigationState, ThemeState, HomeState, FeedbackState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
-import { PageHeader, EmptyState, RecordRow } from '../components/CommonBuilders';
+import { PageHeader, EmptyState, RecordRow, DOCK_CLEARANCE } from '../components/CommonBuilders';
 const BRAND = '#6C5CE7';
 
 @Component
@@ -19,7 +19,7 @@ export struct HomePage {
         PageHeader(this.theme, `${this.greeting()} 👋`, '今天也记录一点什么吧。')
         Column({ space: 12 }) {
           Row({ space: 12 }) {
-            Text('⌕').fontSize(28).fontColor(BRAND)
+            SymbolGlyph($r('sys.symbol.magnifyingglass')).fontSize(24).fontColor([BRAND])
             Column({ space: 3 }) {
               Text('搜索日志与灵感').fontSize(16).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).width('100%')
               Text('按关键词或标签查找').fontSize(12).fontColor(this.theme.themeMuted).width('100%')
@@ -37,20 +37,20 @@ export struct HomePage {
 
           if (this.navigation.isMediumWindow) {
             Row({ space: 10 }) {
-              this.moduleCard('📖', '日志', this.home.todayLogCount, '#8B5CF6', this.theme.themeTint, 'explore')
-              this.moduleCard('💡', '想法', this.home.todayIdeaCount, '#F5B800', '#FFF7D6', 'explore')
-              this.moduleCard('📅', '日程', -1, '#22B573', '#E2F7EC', 'calendar')
-              this.moduleCard('♥', '情绪', this.home.todayEmotionCount, '#FF6B9D', '#FFE8F0', 'emotion')
+              this.moduleCard($r('sys.symbol.doc_text'), '日志', this.home.todayLogCount, '#8B5CF6', this.theme.themeTint, 'explore')
+              this.moduleCard($r('sys.symbol.lightbulb'), '想法', this.home.todayIdeaCount, '#F5B800', '#FFF7D6', 'explore')
+              this.moduleCard($r('sys.symbol.calendar'), '日程', -1, '#22B573', '#E2F7EC', 'calendar')
+              this.moduleCard($r('sys.symbol.face_smiling'), '情绪', this.home.todayEmotionCount, '#FF6B9D', '#FFE8F0', 'emotion')
             }.width('100%')
           } else {
             Column({ space: 10 }) {
               Row({ space: 10 }) {
-                this.moduleCard('📖', '日志', this.home.todayLogCount, '#8B5CF6', this.theme.themeTint, 'explore')
-                this.moduleCard('💡', '想法', this.home.todayIdeaCount, '#F5B800', '#FFF7D6', 'explore')
+                this.moduleCard($r('sys.symbol.doc_text'), '日志', this.home.todayLogCount, '#8B5CF6', this.theme.themeTint, 'explore')
+                this.moduleCard($r('sys.symbol.lightbulb'), '想法', this.home.todayIdeaCount, '#F5B800', '#FFF7D6', 'explore')
               }.width('100%')
               Row({ space: 10 }) {
-                this.moduleCard('📅', '日程', -1, '#22B573', '#E2F7EC', 'calendar')
-                this.moduleCard('♥', '情绪', this.home.todayEmotionCount, '#FF6B9D', '#FFE8F0', 'emotion')
+                this.moduleCard($r('sys.symbol.calendar'), '日程', -1, '#22B573', '#E2F7EC', 'calendar')
+                this.moduleCard($r('sys.symbol.face_smiling'), '情绪', this.home.todayEmotionCount, '#FF6B9D', '#FFE8F0', 'emotion')
               }.width('100%')
             }.width('100%')
           }
@@ -73,7 +73,7 @@ export struct HomePage {
           } else {
             EmptyState(this.theme, '⚡', '第一条记录，正在等你')
           }
-        }.padding({ left: 16, right: 16, bottom: 90 }).width('100%')
+        }.padding({ left: 20, right: 20, bottom: DOCK_CLEARANCE }).width('100%')
       }.width('100%')
     }.width('100%').height('100%').backgroundColor(this.theme.themeBackground)
   }
@@ -92,10 +92,10 @@ export struct HomePage {
   }
 
   @Builder
-  private moduleCard(icon: string, title: string, count: number, color: string, background: string, destination: string) {
+  private moduleCard(icon: Resource, title: string, count: number, color: string, background: string, destination: string) {
     Column({ space: 8 }) {
       Row() {
-        Text(icon).fontSize(23)
+        SymbolGlyph(icon).fontSize(22).fontColor([color])
         Blank()
         if (count >= 0) Text(`${count}`).fontSize(18).fontWeight(FontWeight.Bold).fontColor(color)
       }.width('100%')

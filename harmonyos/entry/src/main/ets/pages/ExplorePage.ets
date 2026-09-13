@@ -1,7 +1,7 @@
 import { LogItem } from '../models/Models';
 import { ThemeState, LogsState, FeedbackState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
-import { PageHeader, EmptyState, RecordRow } from '../components/CommonBuilders';
+import { PageHeader, EmptyState, RecordRow, DOCK_CLEARANCE } from '../components/CommonBuilders';
 const BRAND = '#6C5CE7';
 
 @Component
@@ -15,7 +15,7 @@ export struct ExplorePage {
   private explorePage() {
     Scroll() {
       Column({ space: 14 }) {
-        PageHeader(this.theme, '搜索与探索', '按关键词或标签查找，也可以继续记录新灵感')
+        PageHeader(this.theme, '记录', '按关键词或标签查找，也可以继续记录新灵感')
         Column({ space: 10 }) {
           TextArea({ placeholder: '记录一个新灵感…', text: this.logs.ideaText })
             .height(76).maxLength(10000).fontColor(this.theme.themeText).placeholderColor(this.theme.themeMuted)
@@ -25,7 +25,7 @@ export struct ExplorePage {
         }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(20)
 
         Row({ space: 8 }) {
-          Text('⌕').fontSize(25).fontColor(BRAND)
+          SymbolGlyph($r('sys.symbol.magnifyingglass')).fontSize(22).fontColor([BRAND])
           TextInput({ placeholder: '输入关键词或标签', text: this.logs.searchText })
             .layoutWeight(1).height(50).maxLength(200).fontColor(this.theme.themeText).placeholderColor(this.theme.themeMuted)
             .backgroundColor(Color.Transparent)
@@ -63,7 +63,7 @@ export struct ExplorePage {
               .onClick(() => this.logs.logDisplayLimit += 50)
           }
         }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(20)
-      }.width('100%').padding({ left: 16, right: 16, bottom: 90 })
+      }.width('100%').padding({ left: 20, right: 20, bottom: DOCK_CLEARANCE })
     }.width('100%').height('100%').backgroundColor(this.theme.themeBackground)
   }
 
