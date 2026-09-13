@@ -48,4 +48,30 @@ enum BrandColors {
         case .emotion: return emotionPink
         }
     }
+
+    // MARK: - 设计令牌（品牌标准 §03 中性色与表面，全端统一数值）
+
+    /// 页面底色：浅色 #F7F9FA，深色用品牌标准深色 Surface #191A38
+    static let pageBackground = dynamic(light: "#F7F9FA", dark: "#191A38")
+
+    /// 实色卡片表面：浅色 #FFFFFF（表单/高密度列表用，不依赖玻璃模糊）；
+    /// 深色用品牌弱表面 #3A3D5C
+    static let cardSurface = dynamic(light: "#FFFFFF", dark: "#3A3D5C")
+
+    /// 弱表面：次级卡片、分组
+    static let weakSurface = dynamic(light: "#EDF0F5", dark: "#3A3D5C")
+
+    /// 弱边界：分隔线与非关键边框
+    static let weakBorder = dynamic(light: "#DFE6E9", dark: "#3A3D5C")
+
+    /// 主文字 #2D3436（常规文本仍优先用 Color.primary 语义色，
+    /// 此令牌用于需要跨端精确对齐品牌色值的场景）
+    static let textPrimary = dynamic(light: "#2D3436", dark: "#F5F6FA")
+
+    /// 次文字 #636E72
+    static let textSecondary = dynamic(light: "#636E72", dark: "#B2BEC3")
+
+    /// 品牌主操作色：蓝紫语义 #6C5CE7（禁止硬编码荧光绿）；
+    /// 深色下略提亮保证可读性
+    static let brandPrimary = dynamic(light: "#6C5CE7", dark: "#8B80F0")
 }

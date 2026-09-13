@@ -17,21 +17,20 @@ struct Sidebar: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 2) {
-                sectionHeader("记录")
+                // 一级导航：此刻 / 记录 / 回顾 / 设置
+                sectionHeader("导航")
                 row(.home)
                 row(.explore)
-                row(.logflow)
-                row(.emotion)
-
-                Spacer().frame(height: 20)
-
-                sectionHeader("回顾")
-                row(.calendar)
                 row(.stats)
+                row(.settings)
 
                 Spacer().frame(height: 20)
 
-                row(.settings)
+                // 次级入口：情绪、日历、日志流（保留，不删除不合并）
+                sectionHeader("更多")
+                row(.emotion)
+                row(.calendar)
+                row(.logflow)
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 8)

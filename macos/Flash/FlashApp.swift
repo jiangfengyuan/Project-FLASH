@@ -73,19 +73,20 @@ struct FlashApp: App {
                 Button("搜索") { appState.requestSearch() }
                     .keyboardShortcut("k", modifiers: .command)
             }
-            // 模块切换 ⌘1…⌘6（顺序同侧栏；设置已有 ⌘,，不重复占用）
+            // 模块切换 ⌘1…⌘6：快捷键与模块的绑定保持不变（设置已有 ⌘,，不重复占用）；
+            // 菜单文案跟随 Module.title，与侧栏一级/次级命名同源
             CommandMenu("模块") {
-                Button("首页") { appState.selectedModule = .home }
+                Button(Module.home.title) { appState.selectedModule = .home }
                     .keyboardShortcut("1", modifiers: .command)
-                Button("探索") { appState.selectedModule = .explore }
+                Button(Module.explore.title) { appState.selectedModule = .explore }
                     .keyboardShortcut("2", modifiers: .command)
-                Button("记录流") { appState.selectedModule = .logflow }
+                Button(Module.logflow.title) { appState.selectedModule = .logflow }
                     .keyboardShortcut("3", modifiers: .command)
-                Button("情绪") { appState.selectedModule = .emotion }
+                Button(Module.emotion.title) { appState.selectedModule = .emotion }
                     .keyboardShortcut("4", modifiers: .command)
-                Button("日历") { appState.selectedModule = .calendar }
+                Button(Module.calendar.title) { appState.selectedModule = .calendar }
                     .keyboardShortcut("5", modifiers: .command)
-                Button("统计") { appState.selectedModule = .stats }
+                Button(Module.stats.title) { appState.selectedModule = .stats }
                     .keyboardShortcut("6", modifiers: .command)
             }
         }

@@ -11,14 +11,16 @@ enum Module: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    /// 一级导航：此刻 / 记录 / 回顾 / 设置；
+    /// 情绪、日历、日志流为次级入口（侧栏分组展示）
     var title: String {
         switch self {
-        case .home: "首页"
-        case .explore: "搜索"
-        case .logflow: "记录流"
+        case .home: "此刻"
+        case .explore: "记录"
+        case .logflow: "日志流"
         case .emotion: "情绪"
         case .calendar: "日历"
-        case .stats: "统计"
+        case .stats: "回顾"
         case .settings: "设置"
         }
     }
