@@ -1,8 +1,7 @@
 import { LogItem } from '../models/Models';
 import { ThemeState, LogsState, FeedbackState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
-import { PageHeader, EmptyState, RecordRow, DOCK_CLEARANCE } from '../components/CommonBuilders';
-const BRAND = '#6C5CE7';
+import { PageHeader, EmptyState, RecordRow, DOCK_CLEARANCE, RADIUS_CARD, BRAND } from '../components/CommonBuilders';
 
 @Component
 export struct ExplorePage {
@@ -22,7 +21,7 @@ export struct ExplorePage {
             .backgroundColor(this.theme.themeControl).borderRadius(14)
             .onChange((value: string) => this.logs.ideaText = value.slice(0, 10000))
           Button('保存灵感').width('100%').height(42).backgroundColor('#FF9F43').onClick(() => requireActions(this.actions).logsController.saveIdea())
-        }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(20)
+        }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
 
         Row({ space: 8 }) {
           SymbolGlyph($r('sys.symbol.magnifyingglass')).fontSize(22).fontColor([BRAND])
@@ -62,7 +61,7 @@ export struct ExplorePage {
               .width('100%').height(40).fontColor(BRAND).backgroundColor(this.theme.themeTint)
               .onClick(() => this.logs.logDisplayLimit += 50)
           }
-        }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(20)
+        }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
       }.width('100%').padding({ left: 20, right: 20, bottom: DOCK_CLEARANCE })
     }.width('100%').height('100%').backgroundColor(this.theme.themeBackground)
   }

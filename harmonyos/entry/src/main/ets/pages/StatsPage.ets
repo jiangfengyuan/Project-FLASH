@@ -2,8 +2,7 @@ import { shortDay } from '../data/DateUtils';
 import { Category, LogItem } from '../models/Models';
 import { ThemeState, LogsState, EmotionState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
-import { PageHeader, DOCK_CLEARANCE } from '../components/CommonBuilders';
-const BRAND = '#6C5CE7';
+import { PageHeader, DOCK_CLEARANCE, RADIUS_CARD, BRAND } from '../components/CommonBuilders';
 
 @Component
 export struct StatsPage {
@@ -33,14 +32,14 @@ export struct StatsPage {
               Text(requireActions(this.actions).emotionController.dayEmotionLabel(day)).fontSize(12).fontColor(this.theme.themeText).width(34)
             }.width('100%')
           }, (day: string) => day)
-        }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(20)
+        }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
 
         Column({ space: 10 }) {
           Text('记录构成').fontSize(17).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).width('100%')
           this.statLine('日志', this.logs.logs.filter((item: LogItem) => item.category === Category.LOG).length, '#4D96FF')
           this.statLine('灵感', this.logs.logs.filter((item: LogItem) => item.category === Category.IDEA).length, '#FF9F43')
           this.statLine('情绪', this.emotion.emotions.length, '#9B59B6')
-        }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(20)
+        }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
       }.width('100%').padding({ left: 20, right: 20, bottom: DOCK_CLEARANCE })
     }.width('100%').height('100%').backgroundColor(this.theme.themeBackground)
   }

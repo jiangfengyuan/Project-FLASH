@@ -1,8 +1,7 @@
 import { LogItem } from '../models/Models';
 import { NavigationState, ThemeState, HomeState, FeedbackState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
-import { PageHeader, EmptyState, RecordRow, DOCK_CLEARANCE } from '../components/CommonBuilders';
-const BRAND = '#6C5CE7';
+import { PageHeader, EmptyState, RecordRow, DOCK_CLEARANCE, RADIUS_CARD, BRAND } from '../components/CommonBuilders';
 
 @Component
 export struct HomePage {
@@ -63,13 +62,13 @@ export struct HomePage {
               this.overviewItem(`${this.home.todayEmotionCount}`, '情绪')
               this.overviewItem(this.latestEmotionEmoji(), '当前')
             }.width('100%')
-          }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(20)
+          }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
 
           if (this.home.recentLogs.length > 0) {
             Column() {
               Text('最近动态').fontSize(17).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).width('100%').margin({ bottom: 5 })
               ForEach(this.home.recentLogs.slice(0, 5), (item: LogItem) => RecordRow(this.theme, this.feedback, requireActions(this.actions), item), (item: LogItem) => item.id)
-            }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(20)
+            }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
           } else {
             EmptyState(this.theme, '⚡', '第一条记录，正在等你')
           }
@@ -106,7 +105,7 @@ export struct HomePage {
     .height(112)
     .padding(14)
     .backgroundColor(background)
-    .borderRadius(20)
+    .borderRadius(RADIUS_CARD)
     .onClick(() => {
       if (destination === 'explore') requireActions(this.actions).switchTab(1);
       else requireActions(this.actions).openDetail(destination);

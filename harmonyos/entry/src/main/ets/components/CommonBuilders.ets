@@ -21,6 +21,8 @@ export const RADIUS_FOCUS = 32;
 export const TOUCH_MIN = 44;
 export const FAB_SIZE = 56;
 export const DOCK_HEIGHT = 64;
+// 按压反馈时长（令牌区间 100–160ms），DockItem/FabButton/FabOption 共用。
+export const MOTION_PRESS = 120;
 // 悬浮 Dock 高度 + 底部外边距 + 一档间距，页面内容底部留白统一使用，避免被 Dock/手势区遮挡。
 export const DOCK_CLEARANCE = 104;
 
@@ -117,14 +119,21 @@ export function SegmentedControl(theme: ThemeState, options: string[], selectedI
 
 @Builder
 export function DockItem(theme: ThemeState, icon: Resource, activeIcon: Resource, label: string, selected: boolean, onSelect: () => void) {
-  Column({ space: 3 }) {
-    SymbolGlyph(selected ? activeIcon : icon)
-      .fontSize(22)
-      .fontColor([selected ? BRAND : theme.themeMuted])
-    Text(label)
-      .fontSize(11)
-      .fontColor(selected ? BRAND : theme.themeMuted)
-      .fontWeight(selected ? FontWeight.Medium : FontWeight.Regular)
+  Column() {
+    Column({ space: 3 }) {
+      SymbolGlyph(selected ? activeIcon : icon)
+        .fontSize(22)
+        .fontColor([selected ? BRAND : theme.themeMuted])
+      Text(label)
+        .fontSize(11)
+        .fontColor(selected ? BRAND : theme.themeMuted)
+        .fontWeight(selected ? FontWeight.Medium : FontWeight.Regular)
+    }
+    .stateStyles({
+      normal: { .scale({ x: 1, y: 1 }) },
+      pressed: { .scale({ x: 0.92, y: 0.92 }) }
+    })
+    .animation({ duration: MOTION_PRESS, curve: Curve.EaseOut })
   }
   .layoutWeight(1)
   .height(52)
@@ -163,6 +172,11 @@ export function FabButton(navigation: NavigationState, onToggle: () => void) {
   .backgroundColor(BRAND)
   .rotate({ angle: 45 * navigation.fabProgress })
   .shadow({ radius: 16, color: '#336C5CE7', offsetY: 6 })
+  .stateStyles({
+    normal: { .scale({ x: 1, y: 1 }) },
+    pressed: { .scale({ x: 0.92, y: 0.92 }) }
+  })
+  .animation({ duration: MOTION_PRESS, curve: Curve.EaseOut })
   .onClick(onToggle)
 }
 
@@ -178,6 +192,11 @@ export function FabOption(theme: ThemeState, label: string, icon: Resource, colo
     .height(TOUCH_MIN)
     .borderRadius(TOUCH_MIN / 2)
     .backgroundColor(color)
+    .stateStyles({
+      normal: { .scale({ x: 1, y: 1 }) },
+      pressed: { .scale({ x: 0.92, y: 0.92 }) }
+    })
+    .animation({ duration: MOTION_PRESS, curve: Curve.EaseOut })
     .onClick(action)
   }
 }
