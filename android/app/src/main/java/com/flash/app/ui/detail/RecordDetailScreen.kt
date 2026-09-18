@@ -13,6 +13,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -21,27 +22,27 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -69,7 +70,12 @@ import com.flash.app.data.TextLimits
 import com.flash.app.data.model.Category
 import com.flash.app.data.model.ColorTag
 import com.flash.app.data.model.LogItem
+import com.flash.app.ui.components.FlashFilterChipItem
+import com.flash.app.ui.components.FlashFilterChipRow
+import com.flash.app.ui.components.FlashFormSection
+import com.flash.app.ui.components.FlashSegmentedControl
 import com.flash.app.ui.components.StyleCard
+import com.flash.app.ui.theme.FlashTokens
 import kotlinx.coroutines.launch
 
 private val IMPORTANCE_OPTIONS = listOf(0 to "无", 2 to "!!", 3 to "!!!", 4 to "!!!!")
@@ -90,6 +96,21 @@ fun RecordDetailScreen(recordId: String, onBack: () -> Unit) {
     var editing by remember { mutableStateOf(false) }
     var deleting by remember { mutableStateOf(false) }
 
+    // 编辑态在顶层持有，顶部圆形保存按钮与表单共用同一份草稿
+    var editContent by remember(record?.id, editing) { mutableStateOf(record?.content.orEmpty()) }
+    var editTag by remember(record?.id, editing) {
+        mutableStateOf(record?.colorTag ?: ColorTag.DAILY)
+    }
+    var editCategory by remember(record?.id, editing) {
+        mutableStateOf(record?.category ?: Category.LOG)
+    }
+    var editImportance by remember(record?.id, editing) {
+        mutableIntStateOf(record?.importance ?: 0)
+    }
+    // 超限不静默截断：允许继续输入，给出可见错误态并阻止保存（对齐 macOS TextLimits 行为）
+    val editOverLimit = !TextLimits.fits(editContent)
+    val editBlank = editContent.isBlank()
+
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
@@ -107,39 +128,70 @@ fun RecordDetailScreen(recordId: String, onBack: () -> Unit) {
         containerColor = Color.Transparent,
         snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
-            TopAppBar(
-                title = { Text(if (record?.category == Category.IDEA) "灵感详情" else "记录详情") },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
-                    }
-                },
-                actions = {
-                    if (record != null && !editing) {
-                        IconButton(onClick = {
-                            val intent = Intent(Intent.ACTION_SEND).apply {
-                                type = "text/plain"
-                                putExtra(Intent.EXTRA_SUBJECT, if (record.category == Category.IDEA) "Flash 灵感" else "Flash 记录")
-                                putExtra(Intent.EXTRA_TEXT, record.content)
+            if (editing && record != null) {
+                // 编辑态：圆形关闭 + 居中标题 + 圆形保存
+                CenterAlignedTopAppBar(
+                    title = { Text(if (record.category == Category.IDEA) "编辑灵感" else "编辑记录") },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                    navigationIcon = {
+                        CircularIconButton(onClick = { editing = false }) {
+                            Icon(Icons.Filled.Close, contentDescription = "关闭")
+                        }
+                    },
+                    actions = {
+                        CircularIconButton(
+                            onClick = {
+                                viewModel.save(editContent, editTag, editCategory, editImportance)
+                            },
+                            enabled = !editBlank && !editOverLimit && !uiState.busy,
+                            emphasis = true,
+                        ) {
+                            Icon(Icons.Filled.Check, contentDescription = "保存")
+                        }
+                    },
+                )
+            } else {
+                TopAppBar(
+                    title = { Text(if (record?.category == Category.IDEA) "灵感详情" else "记录详情") },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+                        }
+                    },
+                    actions = {
+                        if (record != null) {
+                            IconButton(onClick = {
+                                val intent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(
+                                        Intent.EXTRA_SUBJECT,
+                                        if (record.category == Category.IDEA) "Flash 灵感" else "Flash 记录",
+                                    )
+                                    putExtra(Intent.EXTRA_TEXT, record.content)
+                                }
+                                runCatching {
+                                    context.startActivity(Intent.createChooser(intent, "分享记录"))
+                                }.onFailure {
+                                    scope.launch { snackbar.showSnackbar("没有可用的分享应用") }
+                                }
+                            }) {
+                                Icon(Icons.Filled.Share, contentDescription = "分享")
                             }
-                            runCatching {
-                                context.startActivity(Intent.createChooser(intent, "分享记录"))
-                            }.onFailure {
-                                scope.launch { snackbar.showSnackbar("没有可用的分享应用") }
+                            IconButton(onClick = { editing = true }) {
+                                Icon(Icons.Filled.Edit, contentDescription = "编辑")
                             }
-                        }) {
-                            Icon(Icons.Filled.Share, contentDescription = "分享")
+                            IconButton(onClick = { deleting = true }) {
+                                Icon(
+                                    Icons.Filled.Delete,
+                                    contentDescription = "删除",
+                                    tint = MaterialTheme.colorScheme.error,
+                                )
+                            }
                         }
-                        IconButton(onClick = { editing = true }) {
-                            Icon(Icons.Filled.Edit, contentDescription = "编辑")
-                        }
-                        IconButton(onClick = { deleting = true }) {
-                            Icon(Icons.Filled.Delete, contentDescription = "删除", tint = MaterialTheme.colorScheme.error)
-                        }
-                    }
-                },
-            )
+                    },
+                )
+            }
         },
     ) { innerPadding ->
         when {
@@ -166,9 +218,16 @@ fun RecordDetailScreen(recordId: String, onBack: () -> Unit) {
                 if (isEditing) {
                     RecordEditor(
                         record = record,
-                        busy = uiState.busy,
-                        onCancel = { editing = false },
-                        onSave = viewModel::save,
+                        content = editContent,
+                        onContentChange = { editContent = it },
+                        overLimit = editOverLimit,
+                        blank = editBlank,
+                        tag = editTag,
+                        onTagChange = { editTag = it },
+                        category = editCategory,
+                        onCategoryChange = { editCategory = it },
+                        importance = editImportance,
+                        onImportanceChange = { editImportance = it },
                     )
                 } else {
                     RecordViewer(record)
@@ -193,6 +252,34 @@ fun RecordDetailScreen(recordId: String, onBack: () -> Unit) {
             },
             dismissButton = { TextButton(onClick = { deleting = false }) { Text("取消") } },
         )
+    }
+}
+
+/** 顶栏圆形按钮；emphasis 用于保存（主色实心） */
+@Composable
+private fun CircularIconButton(
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    emphasis: Boolean = false,
+    content: @Composable () -> Unit,
+) {
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        shape = CircleShape,
+        color = when {
+            emphasis && enabled -> MaterialTheme.colorScheme.primary
+            emphasis -> MaterialTheme.colorScheme.surfaceContainerHigh
+            else -> MaterialTheme.colorScheme.surfaceContainerHigh
+        },
+        contentColor = if (emphasis && enabled) {
+            MaterialTheme.colorScheme.onPrimary
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        },
+        modifier = Modifier.size(FlashTokens.Touch.IconButtonMin),
+    ) {
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) { content() }
     }
 }
 
@@ -247,83 +334,93 @@ private fun MetadataChip(label: String) {
     }
 }
 
+/** 编辑表单：分组白卡（第一组正文与类型 / 第二组标签、重要度、日期） */
 @Composable
 private fun RecordEditor(
     record: LogItem,
-    busy: Boolean,
-    onCancel: () -> Unit,
-    onSave: (String, ColorTag, Category, Int) -> Unit,
+    content: String,
+    onContentChange: (String) -> Unit,
+    overLimit: Boolean,
+    blank: Boolean,
+    tag: ColorTag,
+    onTagChange: (ColorTag) -> Unit,
+    category: Category,
+    onCategoryChange: (Category) -> Unit,
+    importance: Int,
+    onImportanceChange: (Int) -> Unit,
 ) {
-    var content by remember(record.id, record.content) { mutableStateOf(record.content) }
-    var tag by remember(record.id, record.colorTag) { mutableStateOf(record.colorTag) }
-    var category by remember(record.id, record.category) { mutableStateOf(record.category) }
-    var importance by remember(record.id, record.importance) { mutableIntStateOf(record.importance) }
-    // 超限不静默截断：允许继续输入，给出可见错误态并阻止保存（对齐 macOS TextLimits 行为）
-    val overLimit = !TextLimits.fits(content)
-
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(
+            horizontal = FlashTokens.Spacing.PageHorizontal,
+            vertical = FlashTokens.Spacing.SM,
+        ),
+        verticalArrangement = Arrangement.spacedBy(FlashTokens.Spacing.MD),
     ) {
         item {
-            OutlinedTextField(
-                value = content,
-                onValueChange = { content = it },
-                label = { Text("内容") },
-                isError = overLimit,
-                supportingText = {
-                    Text(
-                        "${content.length}/${TextLimits.MAX_CONTENT_LENGTH}",
-                        color = if (overLimit) MaterialTheme.colorScheme.error else Color.Unspecified,
+            FlashFormSection(title = "内容") {
+                StyleCard(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        value = content,
+                        onValueChange = onContentChange,
+                        placeholder = { Text("记录此刻……") },
+                        isError = overLimit || blank,
+                        supportingText = {
+                            when {
+                                blank -> Text(
+                                    "请输入内容",
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                                else -> Text(
+                                    "${content.length}/${TextLimits.MAX_CONTENT_LENGTH}",
+                                    color = if (overLimit) {
+                                        MaterialTheme.colorScheme.error
+                                    } else {
+                                        Color.Unspecified
+                                    },
+                                )
+                            }
+                        },
+                        minLines = 6,
+                        modifier = Modifier.fillMaxWidth(),
                     )
-                },
-                minLines = 8,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-        item {
-            Text("分类", style = MaterialTheme.typography.titleSmall)
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                Category.entries.forEachIndexed { index, item ->
-                    SegmentedButton(
-                        selected = category == item,
-                        onClick = { category = item },
-                        shape = SegmentedButtonDefaults.itemShape(index, Category.entries.size),
-                    ) { Text(if (item == Category.LOG) "日志" else "灵感") }
+                    Spacer(Modifier.height(FlashTokens.Spacing.XS))
+                    FlashSegmentedControl(
+                        options = listOf(Category.LOG to "日志", Category.IDEA to "灵感"),
+                        selected = category,
+                        onSelect = onCategoryChange,
+                    )
                 }
             }
         }
         item {
-            Text("标签", style = MaterialTheme.typography.titleSmall)
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-            ) {
-                ColorTag.entries.forEach { item ->
-                    FilterChip(selected = tag == item, onClick = { tag = item }, label = { Text(item.displayName) })
+            FlashFormSection(title = "属性") {
+                StyleCard(modifier = Modifier.fillMaxWidth()) {
+                    Text("标签", style = MaterialTheme.typography.labelLarge)
+                    FlashFilterChipRow(
+                        items = ColorTag.entries.map {
+                            FlashFilterChipItem(it.name, it.displayName)
+                        },
+                        selectedKey = tag.name,
+                        onSelect = { onTagChange(ColorTag.valueOf(it)) },
+                    )
+                    Spacer(Modifier.height(FlashTokens.Spacing.SM))
+                    Text("重要度", style = MaterialTheme.typography.labelLarge)
+                    FlashFilterChipRow(
+                        items = IMPORTANCE_OPTIONS.map { (value, label) ->
+                            FlashFilterChipItem(value.toString(), label)
+                        },
+                        selectedKey = importance.toString(),
+                        onSelect = { onImportanceChange(it.toInt()) },
+                    )
+                    Spacer(Modifier.height(FlashTokens.Spacing.SM))
+                    Text("日期", style = MaterialTheme.typography.labelLarge)
+                    Text(
+                        record.recordDate,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
-            }
-        }
-        item {
-            Text("重要度", style = MaterialTheme.typography.titleSmall)
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-            ) {
-                IMPORTANCE_OPTIONS.forEach { (value, label) ->
-                    FilterChip(selected = importance == value, onClick = { importance = value }, label = { Text(label) })
-                }
-            }
-        }
-        item {
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-                TextButton(onClick = onCancel, enabled = !busy, modifier = Modifier.weight(1f)) { Text("取消") }
-                Button(
-                    onClick = { onSave(content, tag, category, importance) },
-                    enabled = content.isNotBlank() && !busy && !overLimit,
-                    modifier = Modifier.weight(1f),
-                ) { Text(if (busy) "保存中…" else "保存") }
             }
         }
     }
