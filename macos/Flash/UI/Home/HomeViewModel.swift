@@ -45,6 +45,12 @@ final class HomeViewModel {
 
     /// 「今日概览」统计卡（log / idea / emotion）
     private(set) var overviewStats: [OverviewStat] = []
+    /// 今日一览卡：今日记录数（日志 + 灵感合计）
+    private(set) var todayRecordCount = 0
+    /// 今日一览卡：今日灵感数
+    private(set) var todayIdeaCount = 0
+    /// 「最近闪念」：全部日志/灵感按创建时间倒序的前 6 条（注入的 logs 本身即倒序）
+    private(set) var recentLogs: [LogItem] = []
     /// 「今天」的 Log 与 Emotion 合并，按 createdAt 倒序取前 6 条
     private(set) var recentEntries: [ActivityEntry] = []
     private(set) var emotionSnapshot: EmotionSnapshot
@@ -79,6 +85,9 @@ final class HomeViewModel {
 
     private func recompute() {
         overviewStats = makeOverviewStats()
+        todayRecordCount = todayLogs.count + todayIdeas.count
+        todayIdeaCount = todayIdeas.count
+        recentLogs = Array(logs.prefix(6))
         recentEntries = makeRecentEntries()
         emotionSnapshot = makeEmotionSnapshot()
         weekInsight = makeWeekInsight()

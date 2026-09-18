@@ -6,23 +6,24 @@
 
 import SwiftUI
 
-/// 快速记录卡片：无边框多行输入 + 4 个模块胶囊按钮。
-/// 纯展示型组件——草稿、可用模块与保存回调全部由外部传入。
+/// 快速捕捉卡：SegmentedPicker 切换「日志 / 灵感」+ 无边框多行输入 + 主操作「保存」。
+/// 实色卡片（SolidCard，表单场景）；纯展示型组件——草稿、选中类型、
+/// 焦点与保存回调全部由外部传入，保存成功的轻量反馈（toast）由外部负责。
 struct QuickCaptureCard: View {
     @Binding var draft: String
-    let enabledModules: Set<HomeModule>
+    @Binding var category: Category
     /// 可选的外部焦点绑定（如 Home 的 ⌘N 聚焦）；nil 表示不接管焦点
     let focus: FocusState<Bool>.Binding?
-    let onSave: (HomeModule) -> Void
+    let onSave: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(draft: Binding<String>,
-         enabledModules: Set<HomeModule> = [.log, .idea],
+         category: Binding<Category>,
          focus: FocusState<Bool>.Binding? = nil,
-         onSave: @escaping (HomeModule) -> Void) {
+         onSave: @escaping () -> Void) {
         self._draft = draft
-        self.enabledModules = enabledModules
+        self._category = category
         self.focus = focus
         self.onSave = onSave
     }
@@ -32,61 +33,37 @@ struct QuickCaptureCard: View {
     }
 
     var body: some View {
-        GlassCard {
-            VStack(alignment: .leading, spacing: 12) {
-                Text("快速记录")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+        SolidCard {
+            VStack(alignment: .leading, spacing: Spacing.sm) {
+                HStack {
+                    SegmentedPicker(selection: $category, options: [
+                        .init(value: Category.log, title: "日志"),
+                        .init(value: Category.idea, title: "灵感"),
+                    ])
+                    .frame(maxWidth: 220)
+                    Spacer()
+                }
 
-                TextField("现在想记录什么？", text: $draft, axis: .vertical)
+                TextField("写下刚刚闪过的念头……", text: $draft, axis: .vertical)
                     .textFieldStyle(.plain)
-                    .lineLimit(1...3)
+                    .lineLimit(1...4)
                     .font(.body)
                     .foregroundStyle(.primary)
                     .modifier(OptionalFocusModifier(focus: focus))
 
-                HStack(spacing: 8) {
-                    moduleButton(.log, title: "Log", icon: "note.text")
-                    moduleButton(.idea, title: "Idea", icon: "lightbulb")
-                    moduleButton(.task, title: "Task", icon: "checkmark.circle")
-                    moduleButton(.emotion, title: "Emotion", icon: "face.smiling")
+                HStack {
+                    Spacer()
+                    Button("保存", action: onSave)
+                        .buttonStyle(.borderedProminent)
+                        .tint(BrandColors.brandPrimary)
+                        .disabled(!hasDraft)
+                        .keyboardShortcut(.return, modifiers: .command)
+                        .animation(Motion.quick(reduceMotion), value: hasDraft)
                 }
             }
-            .padding(16)
+            .padding(Spacing.md)
         }
         .cardFloat(reduceMotion: reduceMotion)
-    }
-
-    private func moduleButton(_ module: HomeModule, title: String, icon: String) -> some View {
-        let moduleEnabled = enabledModules.contains(module)
-        let enabled = moduleEnabled && hasDraft
-        let color = BrandColors.moduleColor(module)
-
-        return Button {
-            onSave(module)
-        } label: {
-            Label(title, systemImage: icon)
-                .font(.callout)
-                .foregroundStyle(color)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(color.opacity(0.14), in: Capsule())
-        }
-        .buttonStyle(.plain)
-        .disabled(!enabled)
-        .opacity(enabled ? 1 : 0.4)
-        .animation(Motion.quick(reduceMotion), value: enabled)
-        .help(helpText(for: module))
-    }
-
-    private func helpText(for module: HomeModule) -> String {
-        guard enabledModules.contains(module) else { return "后续版本支持" }
-        switch module {
-        case .log: return "保存为日志"
-        case .idea: return "保存为灵感"
-        case .task: return "保存为任务"
-        case .emotion: return "保存为情绪"
-        }
     }
 }
 
@@ -106,12 +83,12 @@ private struct OptionalFocusModifier: ViewModifier {
 #Preview {
     struct PreviewHost: View {
         @State var draft = "今天把 macOS 首页的仪表盘搭起来了"
+        @State var category: Category = .log
         var body: some View {
-            QuickCaptureCard(draft: $draft) { module in
-                print("save:", module)
-            }
-            .padding(24)
-            .frame(width: 420)
+            QuickCaptureCard(draft: $draft, category: $category) {}
+                .padding(Spacing.lg)
+                .frame(width: 480)
+                .background(BrandColors.pageBackground)
         }
     }
     return PreviewHost()
