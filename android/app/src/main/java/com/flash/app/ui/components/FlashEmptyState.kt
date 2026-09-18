@@ -54,7 +54,7 @@ fun FlashEmptyState(
                 icon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(FlashTokens.Touch.FabMain),
+                modifier = Modifier.size(FlashTokens.IconSize.EmptyState),
             )
         }
         Spacer(Modifier.height(FlashTokens.Spacing.SM))

@@ -70,7 +70,7 @@ fun <T> FlashSegmentedControl(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .heightIn(min = 40.dp)
+                    .heightIn(min = FlashTokens.Touch.IconButtonMin)
                     .clip(RoundedCornerShape(50))
                     .background(segmentColor)
                     .clickable { onSelect(value) },

@@ -92,7 +92,7 @@ private fun FlashFilterChip(
                 MaterialTheme.colorScheme.outlineVariant,
             )
         },
-        modifier = Modifier.heightIn(min = 40.dp),
+        modifier = Modifier.heightIn(min = FlashTokens.Touch.IconButtonMin),
     ) {
         Text(
             text = label,

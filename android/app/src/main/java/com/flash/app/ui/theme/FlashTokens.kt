@@ -61,13 +61,18 @@ object FlashTokens {
         val FabMain = 56.dp
     }
 
+    /** 图形尺寸 */
+    object IconSize {
+        /** 空状态大图标（FlashEmptyState），与触控尺寸无关 */
+        val EmptyState = 56.dp
+    }
+
     /**
-     * 动效时长（毫秒）：按压 100–160，选中态 160–240。
+     * 动效时长（毫秒）：选中态 160–240；按压反馈沿用组件默认涟漪（100–160ms 观感区间）。
      * 一律使用 tween（缓入缓出），不用弹跳；
      * Compose 动画时钟自动遵守系统“移除动画/动画时长缩放”设置。
      */
     object Motion {
-        const val PressMs = 120
         const val SelectionMs = 200
         const val FabExpandMs = 200
 

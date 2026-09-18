@@ -11,7 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.ui.graphics.vector.ImageVector
 
 /**
@@ -38,7 +38,8 @@ data class TabDest(val route: String, val label: String, val icon: ImageVector)
 
 val TABS = listOf(
     TabDest(Routes.HOME, "此刻", Icons.Filled.Home),
-    TabDest(Routes.EXPLORE, "记录", Icons.Filled.Search),
+    // 一级页图标：记录/文档类线性图标，与搜索语义脱钩
+    TabDest(Routes.EXPLORE, "记录", Icons.Outlined.EditNote),
     TabDest(Routes.STATS, "回顾", Icons.Filled.BarChart),
     TabDest(Routes.PROFILE, "设置", Icons.Filled.Person),
 )
