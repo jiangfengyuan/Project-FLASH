@@ -6,7 +6,9 @@
 
 package com.flash.app.ui.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -21,21 +24,35 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.outlined.EditNote
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -43,97 +60,153 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.flash.app.FlashApplication
+import com.flash.app.data.model.Category
+import com.flash.app.data.model.EmotionRecord
 import com.flash.app.data.model.emoji
 import com.flash.app.domain.shouldShowIdeaReminder
-import com.flash.app.ui.components.LogCard
+import com.flash.app.ui.components.FlashEmptyState
+import com.flash.app.ui.components.FlashSegmentedControl
+import com.flash.app.ui.components.MAX_QUICK_INPUT_LENGTH
+import com.flash.app.ui.components.RecordCard
 import com.flash.app.ui.components.StyleCard
+import com.flash.app.ui.theme.FlashTokens
 import com.flash.app.ui.theme.ModuleColors
-import java.time.LocalTime
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
-/** 首页（PRD 08）：问候 → 四模块卡 → 今日概览 → 最近记录；快速创建入口在全局 Dock 右侧 FAB */
-@OptIn(ExperimentalMaterial3Api::class)
+private val DATE_SUBTITLE_FORMAT: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("EEEE，M 月 d 日", Locale.CHINESE)
+
+/** 此刻页（方案 §4.1）：标题+搜索筛选胶囊 → 今日一览 → 快速捕捉 → 最近闪念 */
 @Composable
 fun HomeScreen(
-    onOpenExplore: () -> Unit,
     onOpenSearch: () -> Unit,
-    onOpenCalendar: () -> Unit,
-    onOpenEmotion: () -> Unit,
     onOpenRecord: (String) -> Unit,
 ) {
     val app = LocalContext.current.applicationContext as FlashApplication
     val viewModel: HomeViewModel = viewModel(factory = HomeViewModel.factory(app.repository))
     val ui by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbar = remember { SnackbarHostState() }
+    val captureFocus = remember { FocusRequester() }
+    var captureText by remember { mutableStateOf("") }
+    var captureCategory by remember { mutableStateOf(Category.LOG) }
+    var deletingId by remember { mutableStateOf<String?>(null) }
+    val captureOverLimit = captureText.length > MAX_QUICK_INPUT_LENGTH
+
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                HomeEvent.Saved -> {
+                    captureText = ""
+                    snackbar.showSnackbar("已保存")
+                }
+                is HomeEvent.Failed -> snackbar.showSnackbar(event.message)
+            }
+        }
+    }
 
     Scaffold(
         containerColor = Color.Transparent,
+        snackbarHost = { SnackbarHost(snackbar) },
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            contentPadding = PaddingValues(
+                horizontal = FlashTokens.Spacing.PageHorizontal,
+                vertical = FlashTokens.Spacing.XS,
+            ),
+            verticalArrangement = Arrangement.spacedBy(FlashTokens.Spacing.SM),
         ) {
-            item(key = "greeting") {
-                Column(modifier = Modifier.padding(vertical = 12.dp)) {
-                    Text(
-                        "${greeting()} 👋",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        "今天也记录一点什么吧。",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-
-            item(key = "search") {
-                Surface(
-                    onClick = onOpenSearch,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(28.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    tonalElevation = 2.dp,
+            item(key = "header") {
+                // 仅此页顶部允许极克制的蓝紫光晕，向下消散为底色
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(
+                                    Color(0xFF6C5CE7).copy(alpha = 0.10f),
+                                    Color(0xFF4D96FF).copy(alpha = 0.04f),
+                                    Color.Transparent,
+                                ),
+                            ),
+                        )
+                        .padding(vertical = FlashTokens.Spacing.SM),
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Icon(
-                            Icons.Filled.Search,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                        Spacer(Modifier.width(12.dp))
                         Column(Modifier.weight(1f)) {
-                            Text("搜索日志与灵感", style = MaterialTheme.typography.bodyLarge)
                             Text(
-                                "按关键词或标签查找",
-                                style = MaterialTheme.typography.labelMedium,
+                                "此刻",
+                                style = MaterialTheme.typography.headlineMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                LocalDate.now().format(DATE_SUBTITLE_FORMAT),
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
-                        Text(
-                            "搜索",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
+                        HeaderCapsule("搜索", Icons.Filled.Search, onOpenSearch)
+                        Spacer(Modifier.width(FlashTokens.Spacing.XS))
+                        HeaderCapsule("筛选", Icons.Filled.Tune, onOpenSearch)
                     }
                 }
             }
 
-            item(key = "modules") {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        ModuleCard("日志", Icons.AutoMirrored.Filled.MenuBook, ModuleColors.Log, ui.todayLogCount, Modifier.weight(1f), onOpenExplore)
-                        ModuleCard("想法", Icons.Filled.Lightbulb, ModuleColors.Idea, ui.todayIdeaCount, Modifier.weight(1f), onOpenExplore)
-                    }
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        ModuleCard("日程", Icons.Filled.CalendarMonth, ModuleColors.Calendar, ui.todayTaskCount, Modifier.weight(1f), onOpenCalendar)
-                        ModuleCard("情绪", Icons.Filled.Favorite, ModuleColors.Emotion, ui.todayEmotionCount, Modifier.weight(1f), onOpenEmotion)
+            item(key = "today") {
+                TodayCard(ui = ui, modifier = Modifier.fillMaxWidth())
+            }
+
+            item(key = "capture") {
+                StyleCard(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        value = captureText,
+                        onValueChange = { captureText = it },
+                        placeholder = { Text("写下刚刚闪过的念头……") },
+                        isError = captureOverLimit,
+                        supportingText = {
+                            if (captureOverLimit) {
+                                Text(
+                                    "超出长度限制（${captureText.length}/$MAX_QUICK_INPUT_LENGTH）",
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                            }
+                        },
+                        minLines = 2,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(captureFocus),
+                    )
+                    Spacer(Modifier.height(FlashTokens.Spacing.XS))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        FlashSegmentedControl(
+                            options = listOf(Category.LOG to "日志", Category.IDEA to "灵感"),
+                            selected = captureCategory,
+                            onSelect = { captureCategory = it },
+                            modifier = Modifier.weight(1f),
+                        )
+                        Spacer(Modifier.width(FlashTokens.Spacing.SM))
+                        IconButton(
+                            onClick = { viewModel.quickAdd(captureText, captureCategory) },
+                            enabled = captureText.isNotBlank() && !captureOverLimit,
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.Send,
+                                contentDescription = "保存",
+                                tint = if (captureText.isNotBlank() && !captureOverLimit) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                },
+                            )
+                        }
                     }
                 }
             }
@@ -172,84 +245,155 @@ fun HomeScreen(
                 }
             }
 
-            item(key = "overview") {
-                StyleCard(modifier = Modifier.fillMaxWidth()) {
-                    Text("今日概览", style = MaterialTheme.typography.titleSmall)
-                    Spacer(Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                    ) {
-                        OverviewItem("${ui.todayLogCount}", "日志")
-                        OverviewItem("${ui.todayIdeaCount}", "想法")
-                        OverviewItem("${ui.todayEmotionCount}", "情绪")
-                        OverviewItem(ui.latestEmotion?.level?.emoji ?: "—", "当前")
-                    }
-                }
-            }
-
             item(key = "recent-header") {
                 Text(
-                    "最近记录",
+                    "最近闪念",
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(top = 8.dp),
+                    modifier = Modifier.padding(top = FlashTokens.Spacing.XS),
                 )
             }
             items(items = ui.recentLogs, key = { it.id }) { log ->
-                LogCard(log = log, modifier = Modifier.animateItem(), onClick = { onOpenRecord(log.id) })
+                RecordCard(
+                    log = log,
+                    modifier = Modifier.animateItem(),
+                    onClick = { onOpenRecord(log.id) },
+                    onEdit = { onOpenRecord(log.id) },
+                    onDelete = { deletingId = log.id },
+                )
             }
             if (ui.recentLogs.isEmpty()) {
                 item(key = "empty") {
-                    Text(
-                        "还没有记录，点右下角 + 创建第一条吧",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(vertical = 24.dp),
+                    FlashEmptyState(
+                        title = "今天还没有记录。",
+                        icon = Icons.Outlined.EditNote,
+                        actionLabel = "记下第一个念头",
+                        onAction = { captureFocus.requestFocus() },
                     )
                 }
             }
         }
     }
-}
 
-@Composable
-private fun ModuleCard(
-    name: String,
-    icon: ImageVector,
-    color: Color,
-    todayCount: Int?,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-) {
-    StyleCard(modifier = modifier, onClick = onClick) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                icon,
-                contentDescription = null,
-                tint = color,
-                modifier = Modifier.size(28.dp),
-            )
-            Spacer(Modifier.weight(1f))
-            if (todayCount != null) {
-                Text(
-                    "$todayCount",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = color,
-                )
-            }
-        }
-        Spacer(Modifier.height(8.dp))
-        Text(name, style = MaterialTheme.typography.titleSmall)
-        Text(
-            if (todayCount != null) "今日新增" else "查看",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+    deletingId?.let { id ->
+        AlertDialog(
+            onDismissRequest = { deletingId = null },
+            title = { Text("删除这条记录？") },
+            text = { Text("删除后无法撤销。") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        deletingId = null
+                        viewModel.deleteLog(id)
+                    },
+                ) { Text("删除", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = { TextButton(onClick = { deletingId = null }) { Text("取消") } },
         )
     }
 }
 
+/** 顶部右侧搜索/筛选组合胶囊（触控高 44） */
 @Composable
-private fun OverviewItem(value: String, label: String) {
+private fun HeaderCapsule(label: String, icon: ImageVector, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(50),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        modifier = Modifier.heightIn(min = FlashTokens.Touch.IconButtonMin),
+    ) {
+        Row(
+            modifier = Modifier.padding(
+                horizontal = FlashTokens.Spacing.MD,
+                vertical = FlashTokens.Spacing.XS,
+            ),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(18.dp),
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(label, style = MaterialTheme.typography.labelLarge)
+        }
+    }
+}
+
+/** 今日一览卡：今天的片段 + 两项主数据 + 情绪/已完成任务状态条 */
+@Composable
+private fun TodayCard(ui: HomeUiState, modifier: Modifier = Modifier) {
+    StyleCard(modifier = modifier) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                "今天的片段",
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.weight(1f),
+            )
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            ) {
+                Text(
+                    LocalDate.now().format(DateTimeFormatter.ofPattern("M/d")),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                )
+            }
+        }
+        Spacer(Modifier.height(FlashTokens.Spacing.SM))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+        ) {
+            TodayStat("${ui.todayRecordCount}", "今日记录")
+            TodayStat("${ui.todayTaskCount}", "待办")
+        }
+        Spacer(Modifier.height(FlashTokens.Spacing.SM))
+        if (ui.todayRecordCount == 0 && ui.todayEmotionCount == 0 && ui.todayDoneTaskCount == 0) {
+            Text(
+                "今天可以从一个念头开始",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        } else {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Filled.Favorite,
+                    contentDescription = null,
+                    tint = ModuleColors.Emotion,
+                    modifier = Modifier.size(16.dp),
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    emotionStatus(ui.latestEmotion),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.width(FlashTokens.Spacing.MD))
+                Icon(
+                    Icons.Filled.CheckCircle,
+                    contentDescription = null,
+                    tint = ModuleColors.Calendar,
+                    modifier = Modifier.size(16.dp),
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    "已完成 ${ui.todayDoneTaskCount} 项任务",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+}
+
+private fun emotionStatus(latest: EmotionRecord?): String =
+    if (latest == null) "还没有记录情绪" else "当前情绪 ${latest.level.emoji} ${latest.level.displayName}"
+
+@Composable
+private fun TodayStat(value: String, label: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(value, style = MaterialTheme.typography.titleLarge)
         Text(
@@ -258,12 +402,4 @@ private fun OverviewItem(value: String, label: String) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
-}
-
-private fun greeting(): String = when (LocalTime.now().hour) {
-    in 5..10 -> "早上好"
-    in 11..12 -> "中午好"
-    in 13..17 -> "下午好"
-    in 18..22 -> "晚上好"
-    else -> "夜深了"
 }

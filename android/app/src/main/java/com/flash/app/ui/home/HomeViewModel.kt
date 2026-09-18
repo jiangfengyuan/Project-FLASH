@@ -13,11 +13,10 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.flash.app.data.FlashRepository
 import com.flash.app.data.model.Category
-import com.flash.app.data.model.ColorTag
 import com.flash.app.data.model.EmotionRecord
 import com.flash.app.data.model.LogItem
 import com.flash.app.data.model.TaskItem
-import com.flash.app.data.model.importanceFromContent
+import com.flash.app.domain.quickAdd
 import com.flash.app.domain.todayFlow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
@@ -26,6 +25,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.ZoneId
 
 data class HomeUiState(
     val todayLogCount: Int = 0,
@@ -36,7 +37,11 @@ data class HomeUiState(
     val unviewedIdeaCount: Int = 0,
     val oldestUnviewedIdeaId: String? = null,
     val todayTaskCount: Int = 0,
-)
+    val todayDoneTaskCount: Int = 0,
+) {
+    /** 今日一览主数据：今日记录数（日志 + 灵感） */
+    val todayRecordCount: Int get() = todayLogCount + todayIdeaCount
+}
 
 internal fun buildHomeUiState(
     logs: List<LogItem>,
@@ -54,9 +59,17 @@ internal fun buildHomeUiState(
     // 仓库按时间倒序返回；提醒入口优先处理积压最久的一条。
     oldestUnviewedIdeaId = unviewedIdeas.lastOrNull()?.id,
     todayTaskCount = tasks.count { it.calendarDate == today && !it.isCompleted },
+    todayDoneTaskCount = tasks.count { task ->
+        task.completedAt?.let {
+            runCatching {
+                Instant.parse(it).atZone(ZoneId.systemDefault()).toLocalDate().toString() == today
+            }.getOrDefault(false)
+        } == true
+    },
 )
 
 sealed interface HomeEvent {
+    data object Saved : HomeEvent
     data class Failed(val message: String) : HomeEvent
 }
 
@@ -76,23 +89,25 @@ class HomeViewModel(private val repository: FlashRepository) : ViewModel() {
         buildHomeUiState(logs, emotions, unviewedIdeas, today.toString(), tasks)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), HomeUiState())
 
+    /** 此刻页快速捕捉卡：与全局 FAB 轻输入共用 domain/QuickAdd 用例 */
     fun quickAdd(content: String, category: Category) {
         val trimmed = content.trim()
         if (trimmed.isEmpty()) return
         viewModelScope.launch {
-            runCatching {
-                when (category) {
-                    Category.LOG -> repository.addLog(trimmed, ColorTag.DAILY, Category.LOG)
-                    Category.IDEA -> repository.addLog(
-                        trimmed,
-                        ColorTag.IDEA,
-                        Category.IDEA,
-                        importance = importanceFromContent(trimmed),
-                    )
+            runCatching { repository.quickAdd(trimmed, category) }
+                .onSuccess { eventChannel.send(HomeEvent.Saved) }
+                .onFailure {
+                    eventChannel.send(HomeEvent.Failed(it.message ?: "保存失败，请重试"))
                 }
-            }.onFailure {
-                eventChannel.send(HomeEvent.Failed(it.message ?: "保存失败，请重试"))
-            }
+        }
+    }
+
+    fun deleteLog(id: String) {
+        viewModelScope.launch {
+            runCatching { repository.deleteLog(id) }
+                .onFailure {
+                    eventChannel.send(HomeEvent.Failed(it.message ?: "删除失败，请重试"))
+                }
         }
     }
 
