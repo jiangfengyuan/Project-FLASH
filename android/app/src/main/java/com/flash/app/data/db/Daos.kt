@@ -104,6 +104,14 @@ interface LogDao {
     @Query("DELETE FROM logs WHERE id = :id")
     suspend fun deleteById(id: String)
 
+    /** 待整理批量修改：分类 */
+    @Query("UPDATE logs SET category = :category WHERE id IN (:ids)")
+    suspend fun updateCategoryFor(ids: List<String>, category: String)
+
+    /** 待整理批量修改：标签 */
+    @Query("UPDATE logs SET colorTag = :tag WHERE id IN (:ids)")
+    suspend fun updateColorTagFor(ids: List<String>, tag: String)
+
     @Query("DELETE FROM logs")
     suspend fun clearAll()
 }

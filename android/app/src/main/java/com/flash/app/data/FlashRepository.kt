@@ -128,6 +128,18 @@ class FlashRepository(private val db: FlashDatabase) {
 
     suspend fun deleteLog(id: String) = db.logDao().deleteById(id)
 
+    /** 批量修改分类（记录页「待整理」整理动作用） */
+    suspend fun updateLogCategories(ids: List<String>, category: Category) {
+        if (ids.isEmpty()) return
+        db.logDao().updateCategoryFor(ids, category.storageKey)
+    }
+
+    /** 批量修改标签（记录页「待整理」整理动作用） */
+    suspend fun updateLogColorTags(ids: List<String>, tag: ColorTag) {
+        if (ids.isEmpty()) return
+        db.logDao().updateColorTagFor(ids, tag.storageKey)
+    }
+
     suspend fun isIdeaViewed(id: String): Boolean = db.logDao().isIdeaViewed(id)
 
     suspend fun markIdeaViewed(id: String) = db.logDao().markIdeaViewed(id, isoNow())
