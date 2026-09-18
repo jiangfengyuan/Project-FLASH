@@ -6,10 +6,10 @@
 
 import SwiftUI
 
-/// 筛选 Chip：选中态用品牌主操作蓝紫，未选中用弱表面 + 弱边界。
+/// 筛选 Chip：选中态用深墨 #2D3436 实心 + 白字（跨端统一裁决），未选中用弱表面 + 弱边界。
 /// 状态同时由颜色与文案加粗表达（品牌标准 §03 可访问性：不只靠颜色区分）；
+/// 字号用 .callout（13pt 等效，随系统字体放大），垂直内距用 Spacing.xs（8）令牌。
 /// 选中切换走 Motion.soft（220ms，处于选中态 160–240ms 令牌区间内），尊重减少动态。
-/// 命名带 View 后缀：ExploreView 内已有 file 级私有 `FilterChip`，避免模块内重名。
 struct FilterChipView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -20,13 +20,13 @@ struct FilterChipView: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
-                .foregroundStyle(isSelected ? Color.white : BrandColors.textPrimary)
+                .font(.callout.weight(isSelected ? .semibold : .regular))
+                .foregroundStyle(isSelected ? BrandColors.chipSelectedForeground : BrandColors.textPrimary)
                 .padding(.horizontal, Spacing.sm)
-                .padding(.vertical, 6)
+                .padding(.vertical, Spacing.xs)
                 .background {
                     Capsule()
-                        .fill(isSelected ? BrandColors.brandPrimary : BrandColors.weakSurface)
+                        .fill(isSelected ? BrandColors.chipSelectedBackground : BrandColors.weakSurface)
                 }
                 .overlay {
                     if !isSelected {

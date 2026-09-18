@@ -61,8 +61,15 @@ enum BrandColors {
     /// 弱表面：次级卡片、分组
     static let weakSurface = dynamic(light: "#EDF0F5", dark: "#3A3D5C")
 
-    /// 弱边界：分隔线与非关键边框
-    static let weakBorder = dynamic(light: "#DFE6E9", dark: "#3A3D5C")
+    /// 弱边界：分隔线与非关键边框。
+    /// 深色取 #4A4E6E：与 cardSurface/weakSurface 的 #3A3D5C 保持同族（同色相提明度），
+    /// 但又亮出一档——阶段一曾沿用 #3A3D5C，深色下边框与卡片表面同色导致不可见。
+    static let weakBorder = dynamic(light: "#DFE6E9", dark: "#4A4E6E")
+
+    /// 筛选 Chip 选中态：深墨实心 + 白字（跨端统一裁决，替代阶段一的品牌蓝紫）。
+    /// 深色下用反色（近白底 + 深墨字），保证选中态在两种外观下都是「实心高对比」。
+    static let chipSelectedBackground = dynamic(light: "#2D3436", dark: "#F5F6FA")
+    static let chipSelectedForeground = dynamic(light: "#FFFFFF", dark: "#2D3436")
 
     /// 主文字 #2D3436（常规文本仍优先用 Color.primary 语义色，
     /// 此令牌用于需要跨端精确对齐品牌色值的场景）

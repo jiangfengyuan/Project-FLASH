@@ -21,8 +21,6 @@ enum Spacing {
 }
 
 enum Radius {
-    /// 小组件（品牌标准 12–16 取下限）
-    static let small: CGFloat = 12
     /// 常规卡片
     static let card: CGFloat = 24
     /// 焦点卡片 / 底部面板

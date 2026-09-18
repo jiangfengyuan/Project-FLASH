@@ -28,7 +28,7 @@ enum Module: String, CaseIterable, Identifiable {
     var systemImage: String {
         switch self {
         case .home: "house"
-        case .explore: "magnifyingglass"
+        case .explore: "square.and.pencil"
         case .logflow: "list.bullet.rectangle"
         case .emotion: "face.smiling"
         case .calendar: "calendar"
