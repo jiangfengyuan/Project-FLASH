@@ -52,6 +52,7 @@ export class FeatureProjection {
         groups.set(day, entries);
       });
       calendar.tasksByDay = groups;
+      this.updateTaskCounts();
     }
     const days = new Set<string>();
     calendar.logsByDay.forEach((_, key: string) => { days.add(key); });
@@ -63,6 +64,7 @@ export class FeatureProjection {
   updateDay(): void {
     this.updateLogCounts();
     this.updateEmotionCount();
+    this.updateTaskCounts();
   }
 
   private updateLogCounts(): void {
@@ -77,5 +79,13 @@ export class FeatureProjection {
     const today = dayString();
     this.session.home.todayEmotionCount = this.session.emotion.emotions.filter((item: EmotionRecord) =>
       item.recordDate === today).length;
+  }
+
+  private updateTaskCounts(): void {
+    const today = dayString();
+    const todays = this.session.calendar.tasks.filter((item: TaskItem) => this.taskDay(item) === today);
+    this.session.home.todayTaskCount = todays.length;
+    this.session.home.todayTaskDoneCount = todays.filter((item: TaskItem) =>
+      item.completedAt !== undefined && item.completedAt !== null).length;
   }
 }

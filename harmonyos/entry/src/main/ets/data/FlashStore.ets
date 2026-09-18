@@ -481,6 +481,22 @@ export class FlashStore {
     });
   }
 
+  /** Meta edits (整理分类/标签) mirror updateLog in reverse: the body and the
+   * creation-time importance parse stay untouched, only category/colorTag move. */
+  async updateLogMeta(id: string, category: string, colorTag: string): Promise<void> {
+    return this.enqueue(async () => {
+      const existing = this.logs.find((item: LogItem) => item.id === id);
+      if (!existing) return;
+      const updated: LogItem = {
+        id: existing.id, content: existing.content, colorTag: colorTag, category: category,
+        importance: existing.importance, createdAt: existing.createdAt, recordDate: existing.recordDate
+      };
+      await this.upsert(LOGS_TABLE, updated.id, updated.createdAt, JSON.stringify(updated));
+      this.logs = this.logs.map((item: LogItem) => item.id === id ? updated : item);
+      this.changes.publish(StorePartition.LOGS);
+    });
+  }
+
   async addEmotion(level: number, subEmotion?: string, note?: string): Promise<void> {
     return this.enqueue(async () => {
       const record: EmotionRecord = {

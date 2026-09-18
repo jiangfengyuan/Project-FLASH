@@ -1,7 +1,7 @@
 import { Category } from '../models/Models';
 import { NavigationState, ThemeState, LogsState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
-const BRAND = '#6C5CE7';
+import { BRAND } from './CommonBuilders';
 
 @Component
 export struct QuickInputDialog {

@@ -1,5 +1,7 @@
-import { EmotionRecord, LogItem, SubEmotion, TaskItem } from '../models/Models';
+import { Category, EmotionRecord, LogItem, SubEmotion, TaskItem } from '../models/Models';
 import { LanDevice } from '../data/LocalBackupTransfer';
+// 与 components/CommonBuilders.ets 的浅色令牌保持一致（CommonBuilders 反向依赖
+// 本文件的类型，无法直接引用其常量，改动令牌时需同步）。
 const LIGHT_BACKGROUND = '#FFF7F9FA';
 const LIGHT_SURFACE = '#FFFFFFFF';
 const LIGHT_TEXT = '#FF2D3436';
@@ -38,6 +40,8 @@ export class HomeState {
   todayLogCount: number = 0;
   todayIdeaCount: number = 0;
   todayEmotionCount: number = 0;
+  todayTaskCount: number = 0;
+  todayTaskDoneCount: number = 0;
   recentLogs: LogItem[] = [];
   latestEmoji: string = '—';
 }
@@ -52,6 +56,15 @@ export class LogsState {
   quickCategory: string = '';
   editingLogId: string = '';
   editText: string = '';
+  captureText: string = '';
+  captureCategory: string = Category.LOG;
+  // 记录页筛选：filterCategory 为 all/log/idea/inbox，filterDate 为 all/today/week/month，
+  // filterImportance 为 -1 全部 / 0 无重要度 / 1 有重要度。关闭面板后状态保留。
+  filterCategory: string = 'all';
+  filterTag: string = '';
+  filterDate: string = 'all';
+  filterImportance: number = -1;
+  sortAscending: boolean = false;
   logDisplayLimit: number = 50;
   busy: boolean = false;
 }

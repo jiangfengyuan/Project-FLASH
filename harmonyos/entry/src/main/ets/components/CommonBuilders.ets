@@ -8,7 +8,7 @@ export const BRAND = '#6C5CE7';
 export const PAGE_BACKGROUND_LIGHT = '#F7F9FA';
 export const PAGE_BACKGROUND_DARK = '#191A38';
 export const CARD_SURFACE_LIGHT = '#FFFFFF';
-export const CARD_SURFACE_DARK = '#24274A';
+export const CARD_SURFACE_DARK = '#3A3D5C';
 export const TEXT_PRIMARY_LIGHT = '#2D3436';
 export const TEXT_PRIMARY_DARK = '#F5F6FA';
 export const TEXT_MUTED_LIGHT = '#636E72';
@@ -28,7 +28,7 @@ export const DOCK_CLEARANCE = 104;
 
 @Builder
 export function PageHeader(theme: ThemeState, title: string, subtitle: string) {
-    Column({ space: 3 }) {
+    Column({ space: 4 }) {
       Text(title).fontSize(28).fontWeight(FontWeight.Bold).fontColor(theme.themeText).width('100%')
       Text(subtitle).fontSize(13).fontColor(theme.themeMuted).width('100%')
     }
@@ -85,10 +85,11 @@ export function FilterChip(theme: ThemeState, label: string, selected: boolean, 
     .fontSize(13)
     .fontColor(selected ? Color.White : theme.themeText)
     .fontWeight(selected ? FontWeight.Medium : FontWeight.Regular)
+    .textAlign(TextAlign.Center)
     .padding({ left: 16, right: 16 })
-    .height(36)
+    .height(TOUCH_MIN)
     .backgroundColor(selected ? CHIP_SELECTED : theme.themeControl)
-    .borderRadius(18)
+    .borderRadius(TOUCH_MIN / 2)
     .onClick(onSelect)
     .animation({ duration: 200, curve: Curve.EaseOut })
 }
@@ -97,17 +98,19 @@ export function FilterChip(theme: ThemeState, label: string, selected: boolean, 
 export function SegmentedControl(theme: ThemeState, options: string[], selectedIndex: number, onSelect: (index: number) => void) {
   Row({ space: 4 }) {
     ForEach(options, (option: string, index: number) => {
-      Text(option)
-        .fontSize(13)
-        .fontColor(index === selectedIndex ? theme.themeText : theme.themeMuted)
-        .fontWeight(index === selectedIndex ? FontWeight.Medium : FontWeight.Regular)
-        .textAlign(TextAlign.Center)
-        .layoutWeight(1)
-        .height(36)
-        .padding({ top: 8 })
-        .backgroundColor(index === selectedIndex ? theme.themeSurface : Color.Transparent)
-        .borderRadius(18)
-        .onClick(() => onSelect(index))
+      Row() {
+        Text(option)
+          .fontSize(13)
+          .fontColor(index === selectedIndex ? theme.themeText : theme.themeMuted)
+          .fontWeight(index === selectedIndex ? FontWeight.Medium : FontWeight.Regular)
+          .textAlign(TextAlign.Center)
+      }
+      .layoutWeight(1)
+      .height(36)
+      .justifyContent(FlexAlign.Center)
+      .backgroundColor(index === selectedIndex ? theme.themeSurface : Color.Transparent)
+      .borderRadius(18)
+      .onClick(() => onSelect(index))
     }, (option: string) => option)
   }
   .width('100%')
@@ -120,7 +123,7 @@ export function SegmentedControl(theme: ThemeState, options: string[], selectedI
 @Builder
 export function DockItem(theme: ThemeState, icon: Resource, activeIcon: Resource, label: string, selected: boolean, onSelect: () => void) {
   Column() {
-    Column({ space: 3 }) {
+    Column({ space: 4 }) {
       SymbolGlyph(selected ? activeIcon : icon)
         .fontSize(22)
         .fontColor([selected ? BRAND : theme.themeMuted])
@@ -146,7 +149,7 @@ export function DockItem(theme: ThemeState, icon: Resource, activeIcon: Resource
 
 @Builder
 export function FlashDockBar(theme: ThemeState, navigation: NavigationState, onSelect: (index: number) => void) {
-  Row({ space: 6 }) {
+  Row({ space: 8 }) {
     DockItem(theme, $r('sys.symbol.house'), $r('sys.symbol.house_fill'), '此刻', navigation.activeTab === 0, () => onSelect(0))
     DockItem(theme, $r('sys.symbol.doc_text'), $r('sys.symbol.doc_text_fill'), '记录', navigation.activeTab === 1, () => onSelect(1))
     DockItem(theme, $r('sys.symbol.clock_arrow_2_circlepath'), $r('sys.symbol.clock_arrow_2_circlepath_fill'), '回顾', navigation.activeTab === 2, () => onSelect(2))
@@ -182,7 +185,7 @@ export function FabButton(navigation: NavigationState, onToggle: () => void) {
 
 @Builder
 export function FabOption(theme: ThemeState, label: string, icon: Resource, color: string, action: () => void) {
-  Row({ space: 10 }) {
+  Row({ space: 8 }) {
     Text(label).fontSize(13).fontColor(theme.themeText).padding({ left: 12, right: 12, top: 7, bottom: 7 })
       .backgroundColor(theme.themeSurface).borderRadius(18)
     Stack() {
@@ -203,10 +206,10 @@ export function FabOption(theme: ThemeState, label: string, icon: Resource, colo
 
 @Builder
 export function RecordRow(theme: ThemeState, feedback: FeedbackState, actions: PageActions, item: LogItem) {
-    Row({ space: 10 }) {
+    Row({ space: 12 }) {
       Column().width(5).height(44).borderRadius(3).backgroundColor(colorTagColor(item.colorTag))
       Column({ space: 4 }) {
-        Row({ space: 6 }) {
+        Row({ space: 8 }) {
           Text(item.category === Category.IDEA ? '灵感' : colorTagName(item.colorTag))
             .fontSize(11).fontColor(colorTagColor(item.colorTag))
           if (item.importance > 0) {
@@ -216,7 +219,7 @@ export function RecordRow(theme: ThemeState, feedback: FeedbackState, actions: P
         Text(item.content).fontSize(15).fontColor(theme.themeText).maxLines(3).textOverflow({ overflow: TextOverflow.Ellipsis })
         Text(`${shortDay(item.recordDate)} · ${item.createdAt.slice(11, 16)}`).fontSize(11).fontColor(theme.themeMuted)
       }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-      Column({ space: 5 }) {
+      Column({ space: 4 }) {
         Button('编辑', { type: ButtonType.Normal })
           .fontSize(11).fontColor(BRAND).backgroundColor(theme.themeTint).height(28)
           .onClick(() => actions.logsController.startEditLog(item))
@@ -224,5 +227,44 @@ export function RecordRow(theme: ThemeState, feedback: FeedbackState, actions: P
           .fontSize(11).fontColor('#B42318').backgroundColor(theme.themeDanger).height(28)
           .onClick(() => feedback.destructive = { kind: DeleteKind.LOG, id: item.id })
       }
-    }.width('100%').padding({ top: 10, bottom: 10 })
+    }.width('100%').padding({ top: 8, bottom: 8 })
   }
+
+// 全宽记录卡：此刻页「最近闪念」与记录页列表共用。点击进入编辑详情，
+// 右上角更多菜单提供编辑/删除。
+@Builder
+export function RecordCard(theme: ThemeState, feedback: FeedbackState, actions: PageActions, item: LogItem) {
+  Row({ space: 12 }) {
+    Column().width(4).height(48).borderRadius(2).backgroundColor(colorTagColor(item.colorTag))
+    Column({ space: 4 }) {
+      Row({ space: 8 }) {
+        SymbolGlyph(item.category === Category.IDEA ? $r('sys.symbol.lightbulb') : $r('sys.symbol.doc_text'))
+          .fontSize(12)
+          .fontColor([colorTagColor(item.colorTag)])
+        Text(item.category === Category.IDEA ? '灵感' : colorTagName(item.colorTag))
+          .fontSize(11).fontColor(colorTagColor(item.colorTag))
+        if (item.importance > 0) {
+          Text(`重要度 ${item.importance}`).fontSize(10).fontColor('#D97706')
+        }
+      }.width('100%')
+      Text(item.content)
+        .fontSize(15).fontColor(theme.themeText).width('100%')
+        .maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
+      Text(`${shortDay(item.recordDate)} · ${item.createdAt.slice(11, 16)}`).fontSize(11).fontColor(theme.themeMuted)
+    }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+    SymbolGlyph($r('sys.symbol.ellipsis_circle'))
+      .fontSize(18)
+      .fontColor([theme.themeMuted])
+      .width(TOUCH_MIN)
+      .height(TOUCH_MIN)
+      .bindMenu([
+        { value: '编辑', action: () => actions.logsController.startEditLog(item) },
+        { value: '删除', action: () => feedback.destructive = { kind: DeleteKind.LOG, id: item.id } }
+      ])
+  }
+  .width('100%')
+  .padding(16)
+  .backgroundColor(theme.themeSurface)
+  .borderRadius(RADIUS_CARD)
+  .onClick(() => actions.logsController.startEditLog(item))
+}

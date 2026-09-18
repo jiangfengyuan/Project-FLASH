@@ -19,15 +19,28 @@ import { EditLogDialog } from '../components/EditLogDialog';
 import { TaskEditorDialog } from '../components/TaskEditorDialog';
 import { DestructiveConfirmDialog } from '../components/DestructiveConfirmDialog';
 import { WelcomeOverlay } from '../components/WelcomeOverlay';
-import { BRAND, FabButton, FabOption, FlashDockBar, FAB_SIZE } from '../components/CommonBuilders';
-const LIGHT_BACKGROUND = '#FFF7F9FA';
-const LIGHT_SURFACE = '#FFFFFFFF';
-const LIGHT_TEXT = '#FF2D3436';
-const LIGHT_MUTED = '#FF636E72';
-const DARK_BACKGROUND = '#FF191A38';
-const DARK_SURFACE = '#FF24274A';
-const DARK_TEXT = '#FFF5F6FA';
-const DARK_MUTED = '#FFB2BEC3';
+import {
+  BRAND, FabButton, FabOption, FlashDockBar, FAB_SIZE,
+  PAGE_BACKGROUND_LIGHT, PAGE_BACKGROUND_DARK, CARD_SURFACE_LIGHT, CARD_SURFACE_DARK,
+  TEXT_PRIMARY_LIGHT, TEXT_PRIMARY_DARK, TEXT_MUTED_LIGHT, TEXT_MUTED_DARK,
+  WEAK_SURFACE_LIGHT
+} from '../components/CommonBuilders';
+// 调色板以 CommonBuilders 令牌为准，此处仅组合主题所需的常量。
+const LIGHT_BACKGROUND = PAGE_BACKGROUND_LIGHT;
+const LIGHT_SURFACE = CARD_SURFACE_LIGHT;
+const LIGHT_TEXT = TEXT_PRIMARY_LIGHT;
+const LIGHT_MUTED = TEXT_MUTED_LIGHT;
+const DARK_BACKGROUND = PAGE_BACKGROUND_DARK;
+const DARK_SURFACE = CARD_SURFACE_DARK;
+const DARK_TEXT = TEXT_PRIMARY_DARK;
+const DARK_MUTED = TEXT_MUTED_DARK;
+// 深色卡片与弱表面统一为 WEAK_SURFACE_DARK 后，控件层与品牌弱高亮需抬升以保持层次可读。
+const LIGHT_CONTROL = WEAK_SURFACE_LIGHT;
+const DARK_CONTROL = '#FF484C72';
+const LIGHT_TINT = '#FFEAF2FF';
+const DARK_TINT = '#FF4A4478';
+const LIGHT_DANGER = '#FFFFF1F0';
+const DARK_DANGER = '#FF4A292D';
 
 @Entry
 @Component
@@ -180,9 +193,9 @@ struct Index {
     this.theme.themeSurface = dark ? DARK_SURFACE : LIGHT_SURFACE;
     this.theme.themeText = dark ? DARK_TEXT : LIGHT_TEXT;
     this.theme.themeMuted = dark ? DARK_MUTED : LIGHT_MUTED;
-    this.theme.themeControl = dark ? '#FF3A3D5C' : '#FFEDF0F5';
-    this.theme.themeTint = dark ? '#FF343052' : '#FFEAF2FF';
-    this.theme.themeDanger = dark ? '#FF4A292D' : '#FFFFF1F0';
+    this.theme.themeControl = dark ? DARK_CONTROL : LIGHT_CONTROL;
+    this.theme.themeTint = dark ? DARK_TINT : LIGHT_TINT;
+    this.theme.themeDanger = dark ? DARK_DANGER : LIGHT_DANGER;
     this.theme.themeNavigation = dark ? DARK_SURFACE : LIGHT_SURFACE;
     this.theme.themeGradientStart = dark ? DARK_BACKGROUND : LIGHT_BACKGROUND;
     this.theme.themeGradientMiddle = dark ? DARK_BACKGROUND : LIGHT_BACKGROUND;
@@ -205,7 +218,7 @@ struct Index {
     if (this.navigation.detail !== '') {
       this.detailPage()
     } else if (this.navigation.activeTab === 0) {
-      HomePage({ navigation: this.navigation, theme: this.theme, home: this.home, feedback: this.feedback, actions: this.actions })
+      HomePage({ navigation: this.navigation, theme: this.theme, home: this.home, logs: this.logs, feedback: this.feedback, actions: this.actions })
     } else if (this.navigation.activeTab === 1) {
       ExplorePage({ theme: this.theme, logs: this.logs, feedback: this.feedback, actions: this.actions })
     } else if (this.navigation.activeTab === 2) {
@@ -287,7 +300,7 @@ struct Index {
         Column().width('100%').height('100%').backgroundColor('#52000000')
           .opacity(this.navigation.fabProgress)
           .onClick(() => this.dismissFab())
-        Column({ space: 11 }) {
+        Column({ space: 12 }) {
           FabOption(this.theme, '记录', $r('sys.symbol.square_and_pencil'), '#8B5CF6', () => {
             this.navigation.fabExpanded = false;
             this.navigation.fabProgress = 0;
