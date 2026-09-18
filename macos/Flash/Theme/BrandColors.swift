@@ -26,7 +26,7 @@ enum BrandColors {
 
     static func emotionColor(_ level: EmotionLevel) -> Color { level.color }
 
-    // MARK: - Home 仪表盘模块强调色（Aero PRD，低饱和柔和色）
+    // MARK: - Home 此刻页模块强调色（Aero PRD，低饱和柔和色）
 
     /// 日志模块：柔和紫
     static let logPurple = dynamic(light: "#8B7FD4", dark: "#A89FE0")
@@ -39,15 +39,6 @@ enum BrandColors {
 
     /// 情绪模块：柔粉
     static let emotionPink = dynamic(light: "#D48FA8", dark: "#E0A7BC")
-
-    static func moduleColor(_ module: HomeModule) -> Color {
-        switch module {
-        case .log: return logPurple
-        case .idea: return ideaYellow
-        case .task: return calendarGreen
-        case .emotion: return emotionPink
-        }
-    }
 
     // MARK: - 设计令牌（品牌标准 §03 中性色与表面，全端统一数值）
 
