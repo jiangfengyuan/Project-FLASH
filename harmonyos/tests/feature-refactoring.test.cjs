@@ -38,7 +38,7 @@ test('log publication preserves emotion/task identities and unsaved drafts', () 
   const tasks = state.calendar.tasks;
   const emotionIndex = state.calendar.emotionsByDay;
   const taskIndex = state.calendar.tasksByDay;
-  state.logs.ideaText = '未保存灵感';
+  state.logs.captureText = '未保存灵感';
   state.calendar.taskTitle = '未保存任务';
   state.logs.logDisplayLimit = 100;
   projection.update(P.LOGS, { ...data, logs: [log(undefined, '已更新')] });
@@ -47,7 +47,7 @@ test('log publication preserves emotion/task identities and unsaved drafts', () 
   assert.equal(state.calendar.emotionsByDay, emotionIndex);
   assert.equal(state.calendar.tasksByDay, taskIndex);
   assert.equal(state.home.recentLogs[0].content, '已更新');
-  assert.equal(state.logs.ideaText, '未保存灵感');
+  assert.equal(state.logs.captureText, '未保存灵感');
   assert.equal(state.calendar.taskTitle, '未保存任务');
   assert.equal(state.logs.logDisplayLimit, 100);
   assert.equal(searches, 2);
@@ -60,7 +60,6 @@ test('log publication preserves emotion/task identities and unsaved drafts', () 
   projection.update(P.ALL, { logs: [], emotions: [], tasks: [] });
   assert.deepEqual(state.calendar.activityDays, []);
   assert.deepEqual(state.home.recentLogs, []);
-  assert.equal(state.home.latestEmoji, '—');
 });
 
 test('day rollover updates counts without replacing partition arrays or indexes', () => {
@@ -163,16 +162,16 @@ test('feature busy flags prevent duplicate saves, preserve failed drafts and do 
   const logs = new LogsController(state.logs, r, store);
   const emotions = new EmotionController(state.emotion, r, store);
   state.backup.fileBusy = true;
-  state.logs.ideaText = 'keep this draft';
-  const first = logs.saveIdea();
-  await logs.saveIdea();
+  state.logs.captureText = 'keep this draft';
+  const first = logs.saveCapture();
+  await logs.saveCapture();
   await emotions.saveEmotion();
   assert.equal(logSaves, 1);
   assert.equal(emotionSaves, 1);
   assert.equal(state.logs.busy, true);
   gate.reject(new Error('disk full'));
   await first;
-  assert.equal(state.logs.ideaText, 'keep this draft');
+  assert.equal(state.logs.captureText, 'keep this draft');
   assert.equal(state.logs.busy, false);
   assert.equal(state.emotion.busy, false);
   assert.ok(r.messages.includes('disk full'));

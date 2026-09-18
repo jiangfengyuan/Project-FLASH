@@ -50,20 +50,6 @@ export class LogsController {
     }
   }
 
-  async saveIdea(): Promise<void> {
-    if (!this.state.ideaText.trim() || this.state.busy) return;
-    this.state.busy = true;
-    try {
-      await this.store.addLog(this.state.ideaText, Category.IDEA, ColorTag.IDEA);
-      this.state.ideaText = '';
-      this.runtime.notify('灵感已保存');
-    } catch (error) {
-      this.runtime.notify(this.runtime.errorMessage(error as Error));
-    } finally {
-      this.state.busy = false;
-    }
-  }
-
   async removeLog(id: string): Promise<void> {
     await this.store.deleteLog(id);
   }
@@ -71,15 +57,21 @@ export class LogsController {
   startEditLog(item: LogItem): void {
     this.state.editingLogId = item.id;
     this.state.editText = item.content;
+    this.state.editCategory = item.category;
+    this.state.editTag = item.colorTag;
   }
 
   async saveEditedLog(): Promise<void> {
     if (!this.state.editingLogId || !this.state.editText.trim() || this.state.busy) return;
     this.state.busy = true;
     try {
-      await this.store.updateLog(this.state.editingLogId, this.state.editText.slice(0, 10000));
+      const id = this.state.editingLogId;
+      await this.store.updateLog(id, this.state.editText.slice(0, 10000));
+      await this.store.updateLogMeta(id, this.state.editCategory, this.state.editTag);
       this.state.editingLogId = '';
       this.state.editText = '';
+      this.state.editCategory = '';
+      this.state.editTag = '';
       this.runtime.notify('记录已更新');
     } catch (error) {
       this.runtime.notify(this.runtime.errorMessage(error as Error));

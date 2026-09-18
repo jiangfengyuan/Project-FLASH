@@ -43,7 +43,6 @@ export class HomeState {
   todayTaskCount: number = 0;
   todayTaskDoneCount: number = 0;
   recentLogs: LogItem[] = [];
-  latestEmoji: string = '—';
 }
 
 @Observed
@@ -51,11 +50,12 @@ export class LogsState {
   logs: LogItem[] = [];
   searchResults: LogItem[] = [];
   quickText: string = '';
-  ideaText: string = '';
   searchText: string = '';
   quickCategory: string = '';
   editingLogId: string = '';
   editText: string = '';
+  editCategory: string = '';
+  editTag: string = '';
   captureText: string = '';
   captureCategory: string = Category.LOG;
   // 记录页筛选：filterCategory 为 all/log/idea/inbox，filterDate 为 all/today/week/month，

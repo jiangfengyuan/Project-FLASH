@@ -1,7 +1,7 @@
-import { Category, colorTagName, LogItem } from '../models/Models';
+import { Category, COLOR_TAGS, colorTagName, LogItem } from '../models/Models';
 import { NavigationState, ThemeState, LogsState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
-import { BRAND, FormGroup, FormRow, RADIUS_CARD } from './CommonBuilders';
+import { BRAND, FilterChip, FormGroup, FormRow, RADIUS_CARD, SegmentedControl } from './CommonBuilders';
 
 @Component
 export struct EditLogDialog {
@@ -10,13 +10,11 @@ export struct EditLogDialog {
   @ObjectLink logs: LogsState;
   actions?: PageActions;
 
-  private editingItem(): LogItem | undefined {
-    return this.logs.logs.find((item: LogItem) => item.id === this.logs.editingLogId);
-  }
-
   private close(): void {
     this.logs.editingLogId = '';
     this.logs.editText = '';
+    this.logs.editCategory = '';
+    this.logs.editTag = '';
   }
 
   @Builder
@@ -41,21 +39,34 @@ export struct EditLogDialog {
           Text('内容不能为空，请输入后再保存').fontSize(12).fontColor('#B42318').width('100%')
         }
 
-        FormGroup(this.theme, '正文')
+        FormGroup(this.theme, '正文与类型')
         TextArea({ placeholder: '记录内容', text: this.logs.editText })
           .height(130).maxLength(10000).fontColor(this.theme.themeText).placeholderColor(this.theme.themeMuted)
           .backgroundColor(this.theme.themeControl).borderRadius(14)
           .onChange((value: string) => this.logs.editText = value.slice(0, 10000))
         Text(`${this.logs.editText.length}/10000`).fontSize(11).fontColor(this.theme.themeMuted).width('100%').textAlign(TextAlign.End)
+        SegmentedControl(this.theme, ['日志', '灵感'], this.logs.editCategory === Category.IDEA ? 1 : 0,
+          (index: number) => this.logs.editCategory = index === 1 ? Category.IDEA : Category.LOG)
 
-        FormGroup(this.theme, '标签、重要度与日期')
+        FormGroup(this.theme, '标签')
+        Scroll() {
+          Row({ space: 8 }) {
+            ForEach(COLOR_TAGS, (tag: string) => {
+              FilterChip(this.theme, colorTagName(tag), this.logs.editTag === tag,
+                () => this.logs.editTag = tag)
+            }, (tag: string) => tag)
+          }
+        }
+        .scrollable(ScrollDirection.Horizontal)
+        .scrollBar(BarState.Off)
+        .width('100%')
+
+        FormGroup(this.theme, '重要度与日期')
         Column() {
-          FormRow(this.theme, '类型', this.editingItem()?.category === Category.IDEA ? '灵感' : '日志')
-          FormRow(this.theme, '标签', colorTagName(this.editingItem()?.colorTag ?? ''))
-          FormRow(this.theme, '重要度', `${this.editingItem()?.importance ?? 0}`)
-          FormRow(this.theme, '日期', this.editingItem()?.recordDate ?? '')
+          FormRow(this.theme, '重要度', `${this.editingImportance()}`)
+          FormRow(this.theme, '日期', this.editingDate())
         }.width('100%')
-        Text('标签、重要度与日期沿用原记录，编辑仅修改正文。')
+        Text('重要度由创建时的 !! 语法标记、日期为记录所属日，编辑时沿用原值。')
           .fontSize(11).fontColor(this.theme.themeMuted).width('100%')
       }
       .width(this.navigation.isMediumWindow ? 520 : '88%')
@@ -65,7 +76,16 @@ export struct EditLogDialog {
     }.width('100%').height('100%')
   }
 
+  private editingImportance(): number {
+    return this.logs.logs.find((item: LogItem) => item.id === this.logs.editingLogId)?.importance ?? 0;
+  }
+
+  private editingDate(): string {
+    return this.logs.logs.find((item: LogItem) => item.id === this.logs.editingLogId)?.recordDate ?? '';
+  }
+
   build() {
     this.editLogDialog()
   }
 }
+

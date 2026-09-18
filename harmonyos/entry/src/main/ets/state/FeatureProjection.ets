@@ -1,5 +1,5 @@
 import { StorePartition } from '../data/StoreChanges';
-import { BackupData, Category, EmotionRecord, emotionEmoji, LogItem, TaskItem } from '../models/Models';
+import { BackupData, Category, EmotionRecord, LogItem, TaskItem } from '../models/Models';
 import { dayString } from '../data/DateUtils';
 import { AppSession } from './FeatureStates';
 
@@ -31,7 +31,6 @@ export class FeatureProjection {
     }
     if (partition === StorePartition.ALL || partition === StorePartition.EMOTIONS) {
       this.session.emotion.emotions = data.emotions.slice();
-      this.session.home.latestEmoji = data.emotions.length > 0 ? emotionEmoji(data.emotions[0].level) : '—';
       const groups = new Map<string, EmotionRecord[]>();
       data.emotions.forEach((item: EmotionRecord) => {
         const entries = groups.get(item.recordDate) ?? [];

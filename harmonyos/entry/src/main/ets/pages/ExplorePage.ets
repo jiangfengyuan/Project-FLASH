@@ -105,8 +105,9 @@ export struct ExplorePage {
             }
 
             Column({ space: 12 }) {
-              ForEach(requireActions(this.actions).logsController.displayedLogs(), (item: LogItem) =>
-                RecordCard(this.theme, this.feedback, requireActions(this.actions), item), (item: LogItem) => item.id)
+              ForEach(requireActions(this.actions).logsController.displayedLogs(), (item: LogItem) => {
+                RecordCard({ theme: this.theme, feedback: this.feedback, actions: requireActions(this.actions), item: item })
+              }, (item: LogItem) => item.id)
             }.width('100%')
 
             if (requireActions(this.actions).logsController.filteredLogCount() === 0) {

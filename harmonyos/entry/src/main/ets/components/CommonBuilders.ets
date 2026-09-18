@@ -1,7 +1,7 @@
 import { shortDay } from '../data/DateUtils';
 import { Category, colorTagColor, colorTagName, LogItem } from '../models/Models';
 import { NavigationState, ThemeState, FeedbackState, DeleteKind } from '../state/FeatureStates';
-import { PageActions } from '../state/PageActions';
+import { PageActions, requireActions } from '../state/PageActions';
 
 // 设计令牌与 docs/Design/Flash_品牌标准_v1.0.md 及三端重构简报保持一致。
 export const BRAND = '#6C5CE7';
@@ -14,7 +14,10 @@ export const TEXT_PRIMARY_DARK = '#F5F6FA';
 export const TEXT_MUTED_LIGHT = '#636E72';
 export const TEXT_MUTED_DARK = '#B2BEC3';
 export const WEAK_SURFACE_LIGHT = '#EDF0F5';
-export const WEAK_SURFACE_DARK = '#3A3D5C';
+// 深色卡片面与弱表面已统一（D1 裁决），只保留 CARD_SURFACE_DARK 一个令牌。
+export const CONTROL_SURFACE_DARK = '#484C72';
+export const TINT_SURFACE_LIGHT = '#EAF2FF';
+export const TINT_SURFACE_DARK = '#4A4478';
 export const CHIP_SELECTED = '#2D3436';
 export const RADIUS_CARD = 24;
 export const RADIUS_FOCUS = 32;
@@ -231,40 +234,51 @@ export function RecordRow(theme: ThemeState, feedback: FeedbackState, actions: P
   }
 
 // 全宽记录卡：此刻页「最近闪念」与记录页列表共用。点击进入编辑详情，
-// 右上角更多菜单提供编辑/删除。
-@Builder
-export function RecordCard(theme: ThemeState, feedback: FeedbackState, actions: PageActions, item: LogItem) {
-  Row({ space: 12 }) {
-    Column().width(4).height(48).borderRadius(2).backgroundColor(colorTagColor(item.colorTag))
-    Column({ space: 4 }) {
-      Row({ space: 8 }) {
-        SymbolGlyph(item.category === Category.IDEA ? $r('sys.symbol.lightbulb') : $r('sys.symbol.doc_text'))
-          .fontSize(12)
-          .fontColor([colorTagColor(item.colorTag)])
-        Text(item.category === Category.IDEA ? '灵感' : colorTagName(item.colorTag))
-          .fontSize(11).fontColor(colorTagColor(item.colorTag))
-        if (item.importance > 0) {
-          Text(`重要度 ${item.importance}`).fontSize(10).fontColor('#D97706')
-        }
-      }.width('100%')
-      Text(item.content)
-        .fontSize(15).fontColor(theme.themeText).width('100%')
-        .maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
-      Text(`${shortDay(item.recordDate)} · ${item.createdAt.slice(11, 16)}`).fontSize(11).fontColor(theme.themeMuted)
-    }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-    SymbolGlyph($r('sys.symbol.ellipsis_circle'))
-      .fontSize(18)
-      .fontColor([theme.themeMuted])
-      .width(TOUCH_MIN)
-      .height(TOUCH_MIN)
-      .bindMenu([
-        { value: '编辑', action: () => actions.logsController.startEditLog(item) },
-        { value: '删除', action: () => feedback.destructive = { kind: DeleteKind.LOG, id: item.id } }
-      ])
+// 右上角更多菜单提供编辑/删除。改为组件以持有菜单显隐状态：
+// bindMenu(isShow) 由省略号点按显式控制，避免长按触发/冒泡进编辑。
+@Component
+export struct RecordCard {
+  @ObjectLink theme: ThemeState;
+  @ObjectLink feedback: FeedbackState;
+  actions?: PageActions;
+  @Prop item: LogItem = { id: '', content: '', colorTag: '', category: '', importance: 0, createdAt: '', recordDate: '' };
+  @State private menuOpen: boolean = false;
+
+  build() {
+    Row({ space: 12 }) {
+      Column().width(4).height(48).borderRadius(2).backgroundColor(colorTagColor(this.item.colorTag))
+      Column({ space: 4 }) {
+        Row({ space: 8 }) {
+          SymbolGlyph(this.item.category === Category.IDEA ? $r('sys.symbol.lightbulb') : $r('sys.symbol.doc_text'))
+            .fontSize(12)
+            .fontColor([colorTagColor(this.item.colorTag)])
+          Text(this.item.category === Category.IDEA ? '灵感' : colorTagName(this.item.colorTag))
+            .fontSize(11).fontColor(colorTagColor(this.item.colorTag))
+          if (this.item.importance > 0) {
+            Text(`重要度 ${this.item.importance}`).fontSize(10).fontColor('#D97706')
+          }
+        }.width('100%')
+        Text(this.item.content)
+          .fontSize(15).fontColor(this.theme.themeText).width('100%')
+          .maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
+        Text(`${shortDay(this.item.recordDate)} · ${this.item.createdAt.slice(11, 16)}`)
+          .fontSize(11).fontColor(this.theme.themeMuted)
+      }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+      SymbolGlyph($r('sys.symbol.ellipsis_circle'))
+        .fontSize(18)
+        .fontColor([this.theme.themeMuted])
+        .width(TOUCH_MIN)
+        .height(TOUCH_MIN)
+        .onClick(() => this.menuOpen = true)
+        .bindMenu(this.menuOpen, [
+          { value: '编辑', action: () => requireActions(this.actions).logsController.startEditLog(this.item) },
+          { value: '删除', action: () => this.feedback.destructive = { kind: DeleteKind.LOG, id: this.item.id } }
+        ])
+    }
+    .width('100%')
+    .padding(16)
+    .backgroundColor(this.theme.themeSurface)
+    .borderRadius(RADIUS_CARD)
+    .onClick(() => requireActions(this.actions).logsController.startEditLog(this.item))
   }
-  .width('100%')
-  .padding(16)
-  .backgroundColor(theme.themeSurface)
-  .borderRadius(RADIUS_CARD)
-  .onClick(() => actions.logsController.startEditLog(item))
 }

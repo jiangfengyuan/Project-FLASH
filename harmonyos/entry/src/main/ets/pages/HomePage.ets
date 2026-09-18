@@ -58,8 +58,9 @@ export struct HomePage {
                 Text('全部').fontSize(12).fontColor(BRAND)
                   .onClick(() => requireActions(this.actions).switchTab(1))
               }.width('100%')
-              ForEach(this.home.recentLogs, (item: LogItem) =>
-                RecordCard(this.theme, this.feedback, requireActions(this.actions), item), (item: LogItem) => item.id)
+              ForEach(this.home.recentLogs, (item: LogItem) => {
+                RecordCard({ theme: this.theme, feedback: this.feedback, actions: requireActions(this.actions), item: item })
+              }, (item: LogItem) => item.id)
             }.width('100%')
           } else {
             Column({ space: 12 }) {
