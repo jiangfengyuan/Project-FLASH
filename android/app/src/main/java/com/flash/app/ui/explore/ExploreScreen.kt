@@ -238,6 +238,16 @@ fun ExploreScreen(
                 )
             }
 
+            if (filter == ExploreFilter.UNSORTED) {
+                item(key = "inbox-help") {
+                    Text(
+                        "待整理：使用日常标签的日志。长按记录可批量整理。",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
             item(key = "sort-header") {
                 Row(
                     modifier = Modifier.fillMaxWidth(),

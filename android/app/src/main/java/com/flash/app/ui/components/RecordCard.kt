@@ -159,7 +159,7 @@ fun RecordCard(
                 )
                 if (showIdeaReminder) {
                     Text(
-                        " · 待整理",
+                        " · 未读",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.SemiBold,

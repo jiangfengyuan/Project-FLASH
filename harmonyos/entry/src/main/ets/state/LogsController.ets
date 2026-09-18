@@ -80,10 +80,10 @@ export class LogsController {
     }
   }
 
-  /** 待整理 = 仍为默认「日常」标签的记录。批量整理复用 updateLogMeta，
+  /** 待整理 = 分类为日志且仍为默认「日常」标签的记录。批量整理复用 updateLogMeta，
    * 正文与重要度保持不变。 */
   inboxLogs(): LogItem[] {
-    return this.state.logs.filter((item: LogItem) => item.colorTag === ColorTag.DAILY);
+    return this.state.logs.filter((item: LogItem) => item.category === Category.LOG && item.colorTag === ColorTag.DAILY);
   }
 
   async batchUpdateInbox(category: string, colorTag: string): Promise<void> {
@@ -120,7 +120,7 @@ export class LogsController {
     const category = this.state.filterCategory;
     if (category === 'log' && item.category !== Category.LOG) return false;
     if (category === 'idea' && item.category !== Category.IDEA) return false;
-    if (category === 'inbox' && item.colorTag !== ColorTag.DAILY) return false;
+    if (category === 'inbox' && (item.category !== Category.LOG || item.colorTag !== ColorTag.DAILY)) return false;
     if (this.state.filterTag !== '' && item.colorTag !== this.state.filterTag) return false;
     if (this.state.filterImportance === 0 && item.importance > 0) return false;
     if (this.state.filterImportance === 1 && item.importance === 0) return false;

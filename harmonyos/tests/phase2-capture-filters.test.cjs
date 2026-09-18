@@ -65,7 +65,7 @@ test('log filters narrow by category, inbox tag, date range and importance', () 
   assert.deepEqual(state.searchResults.map(i => i.id), ['b']);
   state.filterCategory = 'inbox';
   controller.updateSearchResults();
-  assert.deepEqual(state.searchResults.map(i => i.id), ['a', 'c'], '待整理只看默认日常标签');
+  assert.deepEqual(state.searchResults.map(i => i.id), ['a', 'c'], '待整理只看默认日常标签的日志');
   state.filterCategory = 'all';
   state.filterTag = 'memo';
   controller.updateSearchResults();
@@ -120,7 +120,10 @@ test('batch inbox retag touches only default-tag logs and preserves content', as
   const controller = new LogsController(state, r, {
     updateLogMeta: async (id, category, colorTag) => calls.push([id, category, colorTag])
   });
-  state.logs = [log('a'), log('b', '想法', { category: 'idea', colorTag: 'idea' }), log('c')];
+  state.logs = [log('a'), log('b', '想法', { category: 'idea', colorTag: 'daily' }), log('c')];
+  state.filterCategory = 'inbox';
+  controller.updateSearchResults();
+  assert.deepEqual(state.searchResults.map(i => i.id), ['a', 'c']);
   await controller.batchUpdateInbox('idea', 'idea');
   assert.deepEqual(calls, [['a', 'idea', 'idea'], ['c', 'idea', 'idea']]);
   assert.ok(r.messages.some(m => m.includes('已整理 2 条记录')));

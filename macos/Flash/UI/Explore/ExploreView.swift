@@ -51,6 +51,11 @@ struct ExploreView: View {
             searchField
             chipsRow
             if filter == .unsorted {
+                Text("待整理：使用日常标签的日志。")
+                    .font(.caption)
+                    .foregroundStyle(BrandColors.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, Spacing.md)
                 batchBar
             }
             ExploreLogListView(filter: filter, query: searchText, criteria: criteria,

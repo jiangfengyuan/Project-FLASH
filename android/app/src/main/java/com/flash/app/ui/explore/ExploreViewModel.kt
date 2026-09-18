@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.flash.app.domain.todayFlow
 import com.flash.app.data.FlashRepository
 import com.flash.app.data.model.Category
 import com.flash.app.data.model.ColorTag
@@ -50,7 +51,6 @@ internal fun filterExploreLogs(
     filter: ExploreFilter,
     query: String,
     panel: ExplorePanel = ExplorePanel(),
-    unviewedIdeaIds: Set<String> = emptySet(),
     newestFirst: Boolean = true,
 ): List<LogItem> {
     val categoryMatches = when (filter) {
@@ -58,7 +58,7 @@ internal fun filterExploreLogs(
         ExploreFilter.LOG -> logs.filter { it.category == Category.LOG }
         ExploreFilter.IDEA -> logs.filter { it.category == Category.IDEA }
         ExploreFilter.UNSORTED -> logs.filter {
-            it.category == Category.IDEA && it.id in unviewedIdeaIds
+            it.category == Category.LOG && it.colorTag == ColorTag.DAILY
         }
     }
     val normalized = query.trim().lowercase()
@@ -80,10 +80,11 @@ internal fun filterExploreLogs(
 }
 
 /** 一行统计摘要：「本周 N 条记录 · M 条待整理」 */
-internal fun buildExploreSummary(logs: List<LogItem>, unviewedCount: Int, today: LocalDate): String {
-    val weekStart = today.minusDays(6).toString()
-    val weekCount = logs.count { it.recordDate >= weekStart }
-    return "本周 $weekCount 条记录 · $unviewedCount 条待整理"
+internal fun buildExploreSummary(logs: List<LogItem>, today: LocalDate): String {
+    val weekStart = today.minusDays((today.dayOfWeek.value - 1).toLong()).toString()
+    val weekCount = logs.count { it.recordDate >= weekStart && it.recordDate <= today.toString() }
+    val unsortedCount = logs.count { it.category == Category.LOG && it.colorTag == ColorTag.DAILY }
+    return "本周 $weekCount 条记录 · $unsortedCount 条待整理"
 }
 
 sealed interface ExploreEvent {
@@ -117,25 +118,16 @@ class ExploreViewModel(private val repository: FlashRepository) : ViewModel() {
         _filter,
         _query,
         _panel,
-        unviewedIdeaIds,
         _newestFirst,
-    ) { values ->
-        @Suppress("UNCHECKED_CAST")
-        filterExploreLogs(
-            logs = values[0] as List<LogItem>,
-            filter = values[1] as ExploreFilter,
-            query = values[2] as String,
-            panel = values[3] as ExplorePanel,
-            unviewedIdeaIds = values[4] as Set<String>,
-            newestFirst = values[5] as Boolean,
-        )
+    ) { logs, filter, query, panel, newestFirst ->
+        filterExploreLogs(logs, filter, query, panel, newestFirst)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val summary: StateFlow<String> = combine(
         repository.logs,
-        unviewedIdeaIds,
-    ) { logs, unviewed ->
-        buildExploreSummary(logs, unviewed.size, LocalDate.now())
+        todayFlow(),
+    ) { logs, today ->
+        buildExploreSummary(logs, today)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
 
     /** 待整理筛选下的批量选择 */
@@ -176,7 +168,7 @@ class ExploreViewModel(private val repository: FlashRepository) : ViewModel() {
 
     fun clearFilters() {
         _query.value = ""
-        _filter.value = ExploreFilter.ALL
+        setFilter(ExploreFilter.ALL)
         _panel.value = ExplorePanel()
     }
 

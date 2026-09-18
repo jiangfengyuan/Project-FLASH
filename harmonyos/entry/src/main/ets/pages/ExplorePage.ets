@@ -65,6 +65,11 @@ export struct ExplorePage {
             .scrollBar(BarState.Off)
             .width('100%')
 
+            if (this.logs.filterCategory === 'inbox') {
+              Text('待整理：使用日常标签的日志。')
+                .fontSize(12).fontColor(this.theme.themeMuted).width('100%')
+            }
+
             Row({ space: 12 }) {
               Text(this.logs.sortAscending ? '按最早记录' : '按最新记录')
                 .fontSize(13).fontColor(BRAND)
@@ -85,7 +90,7 @@ export struct ExplorePage {
             if (this.logs.filterCategory === 'inbox' &&
               requireActions(this.actions).logsController.inboxLogs().length > 0) {
               Column({ space: 8 }) {
-                Text('批量整理（仅影响待整理记录）').fontSize(12).fontColor(this.theme.themeMuted).width('100%')
+                Text('批量整理（影响全部待整理记录）').fontSize(12).fontColor(this.theme.themeMuted).width('100%')
                 Row({ space: 8 }) {
                   Button('转为灵感', { type: ButtonType.Normal })
                     .height(36).fontSize(12).fontColor(BRAND).backgroundColor(this.theme.themeTint)

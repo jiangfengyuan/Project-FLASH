@@ -40,6 +40,34 @@ class ExploreViewModelTest {
         )
     }
 
+    @Test
+    fun `inbox excludes ideas with daily tags and logs with other tags`() {
+        val daily = item("1", "日常日志", Category.LOG, ColorTag.DAILY)
+        val idea = item("2", "日常灵感", Category.IDEA, ColorTag.DAILY)
+        val tagged = item("3", "已分类", Category.LOG, ColorTag.INSPIRATION)
+        val logs = listOf(daily, idea, tagged)
+        assertEquals(listOf(daily), filterExploreLogs(logs, ExploreFilter.UNSORTED, ""))
+        assertEquals(emptyList<LogItem>(), filterExploreLogs(logs, ExploreFilter.UNSORTED, "灵感"))
+        assertEquals(emptyList<LogItem>(), filterExploreLogs(
+            logs, ExploreFilter.UNSORTED, "", ExplorePanel(tags = setOf(ColorTag.INSPIRATION)),
+        ))
+    }
+
+    @Test
+    fun `summary counts current calendar week excluding future records`() {
+        val base = item("1", "日志", Category.LOG, ColorTag.DAILY)
+        val logs = listOf(
+            base.copy(recordDate = "2026-09-13"),
+            base.copy(id = "2", recordDate = "2026-09-14"),
+            base.copy(id = "3", recordDate = "2026-09-18", category = Category.IDEA),
+            base.copy(id = "4", recordDate = "2026-09-19"),
+        )
+        assertEquals("本周 2 条记录 · 3 条待整理",
+            buildExploreSummary(logs, java.time.LocalDate.of(2026, 9, 18)))
+        assertEquals("本周 1 条记录 · 3 条待整理",
+            buildExploreSummary(logs, java.time.LocalDate.of(2026, 9, 14)))
+    }
+
     private fun item(id: String, content: String, category: Category, tag: ColorTag) = LogItem(
         id = id,
         content = content,
