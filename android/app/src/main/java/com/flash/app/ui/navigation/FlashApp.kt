@@ -51,10 +51,10 @@ import androidx.navigation.compose.rememberNavController
 import com.flash.app.FlashApplication
 import com.flash.app.data.UiStyle
 import com.flash.app.data.model.Category
-import com.flash.app.data.model.ColorTag
-import com.flash.app.data.model.importanceFromContent
+import com.flash.app.domain.quickAdd
 import com.flash.app.domain.shouldShowIdeaReminder
 import com.flash.app.ui.calendar.CalendarScreen
+import com.flash.app.ui.calendar.TaskEditorDialog
 import com.flash.app.ui.components.QuickCreateFab
 import com.flash.app.ui.components.QuickInputDialog
 import com.flash.app.ui.detail.RecordDetailScreen
@@ -91,6 +91,8 @@ fun FlashApp(darkTheme: Boolean, uiStyle: UiStyle) {
     var fabExpanded by remember { mutableStateOf(false) }
     var quickCreateKey by rememberSaveable { mutableStateOf<String?>(null) }
     val quickCreate = quickCreateKey?.let { Category.valueOf(it) }
+    // FAB「任务」直达任务编辑器（方案 §4.5），不再绕道日历页
+    var taskEditorOpen by rememberSaveable { mutableStateOf(false) }
 
     // Dock 悬浮于内容之上：为一级页面预留底部空间，内容不被 Dock 或系统手势区遮挡
     val density = LocalDensity.current
@@ -148,17 +150,13 @@ fun FlashApp(darkTheme: Boolean, uiStyle: UiStyle) {
                     }
                     composable(Routes.HOME) {
                         HomeScreen(
-                            onOpenExplore = { navController.navigate(Routes.EXPLORE) },
                             onOpenSearch = { navController.navigate(Routes.EXPLORE) },
-                            onOpenCalendar = { navController.navigate(Routes.CALENDAR) },
-                            onOpenEmotion = { navController.navigate(Routes.EMOTION) },
                             onOpenRecord = { navController.navigate(Routes.recordDetail(it)) },
                         )
                     }
                     composable(Routes.EXPLORE) {
                         ExploreScreen(
                             onOpenLogFlow = { navController.navigate(Routes.LOG_FLOW) },
-                            onOpenCalendar = { navController.navigate(Routes.CALENDAR) },
                             onOpenRecord = { navController.navigate(Routes.recordDetail(it)) },
                         )
                     }
@@ -238,7 +236,7 @@ fun FlashApp(darkTheme: Boolean, uiStyle: UiStyle) {
                         onCreateLog = { quickCreateKey = Category.LOG.name },
                         onCreateIdea = { quickCreateKey = Category.IDEA.name },
                         onCreateEmotion = { navController.navigate(Routes.EMOTION) },
-                        onCreateTask = { navController.navigate(Routes.CALENDAR) },
+                        onCreateTask = { taskEditorOpen = true },
                     )
                 }
             }
@@ -253,22 +251,40 @@ fun FlashApp(darkTheme: Boolean, uiStyle: UiStyle) {
             onDismiss = { quickCreateKey = null },
             onSave = { text ->
                 quickCreateKey = null
-                val trimmed = text.trim()
-                if (trimmed.isEmpty()) return@QuickInputDialog
-                // 与 HomeViewModel.quickAdd 同口径的快速写入（纯 UI 绑定，Repository 不动）
+                // 与 HomeViewModel.quickAdd 同一用例：domain/QuickAdd.kt
+                scope.launch {
+                    runCatching { app.repository.quickAdd(text, category) }.onFailure {
+                        snackbar.showSnackbar(it.message ?: "保存失败，请重试")
+                    }
+                }
+            },
+        )
+    }
+
+    if (taskEditorOpen) {
+        TaskEditorDialog(
+            selectedDate = java.time.LocalDate.now(),
+            existing = null,
+            onDismiss = { taskEditorOpen = false },
+            onSave = { draft ->
+                taskEditorOpen = false
                 scope.launch {
                     runCatching {
-                        when (category) {
-                            Category.LOG -> app.repository.addLog(trimmed, ColorTag.DAILY, Category.LOG)
-                            Category.IDEA -> app.repository.addLog(
-                                trimmed,
-                                ColorTag.IDEA,
-                                Category.IDEA,
-                                importance = importanceFromContent(trimmed),
-                            )
-                        }
+                        val task = app.repository.newTask(
+                            draft.title,
+                            draft.notes,
+                            draft.colorTag,
+                            draft.importance,
+                            draft.dueKind,
+                            draft.dueDate,
+                            draft.dueAt,
+                            draft.timeZone,
+                            draft.reminderAt,
+                        )
+                        app.repository.addTask(task)
+                        app.taskReminders.schedule(task)
                     }.onFailure {
-                        snackbar.showSnackbar(it.message ?: "保存失败，请重试")
+                        snackbar.showSnackbar(it.message ?: "任务保存失败")
                     }
                 }
             },
