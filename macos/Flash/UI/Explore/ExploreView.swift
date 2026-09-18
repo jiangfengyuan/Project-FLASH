@@ -183,17 +183,10 @@ struct ExploreView: View {
             .popover(isPresented: $showFilterPanel, arrowEdge: .bottom) {
                 ExploreFilterPanel(criteria: $criteria, onClear: clearFilters)
             }
-            // 排序入口：当前仅「按最新记录」（createdAt 倒序，由列表查询保证）
-            Menu {
-                Text("按最新记录")
-            } label: {
-                Label("按最新记录", systemImage: "arrow.down")
-                    .font(.caption)
-                    .foregroundStyle(BrandColors.textSecondary)
-            }
-            .menuStyle(.borderlessButton)
-            .menuIndicator(.hidden)
-            .help("排序方式")
+            // 排序状态标签：当前仅「按最新记录」（createdAt 倒序，由列表查询保证），不可点
+            Label("按最新记录", systemImage: "arrow.down")
+                .font(.caption)
+                .foregroundStyle(BrandColors.textSecondary)
         }
         .padding(.horizontal, Spacing.md)
         .padding(.vertical, Spacing.sm)
@@ -211,7 +204,7 @@ struct ExploreView: View {
                     .foregroundStyle(BrandColors.textSecondary)
                 Spacer()
                 Menu {
-                    Button("标记为日志") { batchSetCategory(.log) }
+                    // 待整理集合恒为 log 分类，只保留会实际改变数据的「标记为灵感」
                     Button("标记为灵感") { batchSetCategory(.idea) }
                     Divider()
                     ForEach(ColorTag.allCases, id: \.self) { tag in
@@ -282,11 +275,12 @@ struct ExploreView: View {
 
     private struct SaveError: Error {}
 
-    /// LogEditSheet 保存回调：作为新记录入库（id/时间由仓库重新生成）
+    /// LogEditSheet 保存回调：作为新记录入库（id/时间由仓库重新生成，记录日期透传用户选择）
     private func saveNewLog(_ item: LogItem) throws {
         guard let repository else { throw SaveError() }
         try repository.addLog(content: item.content, colorTag: item.colorTag,
-                              category: item.category, importance: item.importance)
+                              category: item.category, importance: item.importance,
+                              recordDate: DateFormatting.parseDay(item.recordDate))
     }
 
     // MARK: - 批量操作

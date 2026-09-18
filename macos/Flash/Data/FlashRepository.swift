@@ -29,9 +29,11 @@ final class FlashRepository {
 
     // MARK: - Logs
 
+    /// recordDate 为空时取今天；新建面板允许用户指定记录日期，必须透传而不是静默改回今天
     @MainActor
     func addLog(content: String, colorTag: ColorTag,
-                category: Category = .log, importance: Int = 0) throws {
+                category: Category = .log, importance: Int = 0,
+                recordDate: Date? = nil) throws {
         let entity = LogEntity(
             id: UUID().uuidString,
             content: content,
@@ -39,7 +41,7 @@ final class FlashRepository {
             category: category.rawValue,
             importance: min(max(importance, 0), 4),
             createdAt: DateFormatting.isoNow(),
-            recordDate: DateFormatting.today()
+            recordDate: recordDate.map(DateFormatting.dayString) ?? DateFormatting.today()
         )
         try commit { context.insert(entity) }
     }

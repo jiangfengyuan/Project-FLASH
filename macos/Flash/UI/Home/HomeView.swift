@@ -251,11 +251,12 @@ struct HomeView: View {
 
     private struct SaveError: Error {}
 
-    /// LogEditSheet 保存回调：作为新记录入库（id/时间由仓库重新生成）
+    /// LogEditSheet 保存回调：作为新记录入库（id/时间由仓库重新生成，记录日期透传用户选择）
     private func saveNewLog(_ item: LogItem) throws {
         guard let repository else { throw SaveError() }
         try repository.addLog(content: item.content, colorTag: item.colorTag,
-                              category: item.category, importance: item.importance)
+                              category: item.category, importance: item.importance,
+                              recordDate: DateFormatting.parseDay(item.recordDate))
         showToast(item.category == .idea ? "✓ 已保存到灵感" : "✓ 已保存到日志")
     }
 
