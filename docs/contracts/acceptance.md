@@ -7,7 +7,7 @@
 - Android JUnit、macOS Swift Testing、HarmonyOS 主机测试读取 `fixtures/` 同一份文件；参考 Ajv 校验器检查其 Schema 和语义期望。
 - `fixtures/cases.json` 是正反例清单。`generate-cases.cjs --check` 检查生成结果是否与提交样例一致。
 - 共用负例包括重要性、emoji、数组输入上限、元信息、未知字段/分区、布尔数字、非法日期、年份下溢、未知偏移、命名时区、混合 due、重复 ID、任务时间先后。
-- `valid-boundaries.json` 覆盖 200 UTF-16 单元标题、亚毫秒截断后比较和大偏移；`valid-time-zones.json` 覆盖 UTC、上海、纽约、柏林与 Etc/GMT+1。
+- `valid-boundaries.json` 覆盖 200 UTF-16 单元标题、亚毫秒截断后比较和大偏移；`valid-time-zones.json` 覆盖上海、纽约、柏林、东京与悉尼五个规范 IANA 标识（精确白名单，含 ICU 别名负例口径）。
 - `merge-local.json`、`merge-incoming.json` 是两个初始快照；`merge-expected.json`、`overwrite-expected.json` 是预期结果。比较时忽略记录顺序、元信息、缺省与 null 的差别。
 - 合并样例覆盖：日志同 ID 文件胜出、不同 ID 内容相同仍保留、情绪空分区合并保留/覆盖清空、任务本机较新/文件较新/时间相同/各端独有。
 - macOS 使用实际 SwiftData 内存容器；Android instrumentation 使用实际 Room/SQLite 内存数据库与失败触发器，并在 Android 系统 JSON 实现上执行全部共用样例。HarmonyOS Store 测试使用显式 RDB 替身，不能替代原生 RDB 验收。
@@ -21,6 +21,12 @@
 - 三端正式导出先验证数据，所有时刻统一 UTC 毫秒；macOS 正式入口使用 `exportStrictJSON`。不能生成本端标准入口无法导入的备份。
 - 用户仍需预览并选择合并/覆盖。数据提交失败保持数据库原状；提醒重建失败单独报告数据已提交但提醒恢复失败。
 - 三端严格入口统一拒绝 JSON 对象重复键；Android 标准入口还额外拒绝 org.json 宽松接受的非 JSON 语法。
+
+## 局域网握手 v1.1（2026-09-19 安全审计）
+
+局域网备份传输的认证握手以 [lan-handshake-v1.1.md](lan-handshake-v1.1.md) 为三端统一实施规格：接收方先下发 16 字节随机 nonce，发送方以 `HMAC-SHA256(key=PIN ASCII, msg="flash-aero-handshake:"||nonce)` 前 16 字节应答证明 PIN 知识，payload 另附整包 HMAC 完整性校验。**PIN 从此不再明文出现在链路上**；旧版「首包明文 PIN」格式被本规格取代。
+
+兼容性：旧版（明文 PIN 首包）发送方/接收方与新版本均无法配对——握手第一步即不匹配。这是有意为之的断裂：旧格式把 PIN 明文上链、伪造 mDNS 服务即可注入数据、payload 无完整性校验。本应用三端同仓同发，接受此断裂，UI 文案无需兼容提示。协议版本字符串仍为 `FLASH-AERO/1`。
 
 ## CI
 
@@ -69,4 +75,4 @@
 
 真机验收完成后，再处理 HarmonyOS 原生设备级测试、查询索引/日期窗口和搜索性能：先记录 1k/10k/100k 数据下的查询耗时、主线程阻塞与内存，再按瓶颈修改，避免在契约验收期间同时改变持久化与读路径。
 
-局域网加密握手、独立 `flash-sync-v1` 尚未启动，不属于本轮备份契约实现。支持不可信网络或自动同步前必须单独设计和验收。
+局域网认证握手 v1.1 已定稿（见上文与 [lan-handshake-v1.1.md](lan-handshake-v1.1.md)），三端实现与互操作验收待跟进；独立 `flash-sync-v1` 尚未启动，不属于本轮备份契约实现。支持不可信网络或自动同步前必须单独设计和验收。
