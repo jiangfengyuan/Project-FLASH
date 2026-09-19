@@ -164,6 +164,11 @@ struct EmotionView: View {
         let level = selectedLevel
         let sub = level.isNegative ? selectedSubEmotion : nil
         let noteValue = note.isEmpty ? nil : note
+        // 契约上限（与首页/菜单栏伴侣/日志/任务编辑统一口径）：超限可见提示、不入库
+        guard TextLimits.fits(note) else {
+            errorMessage = "内容超出 \(TextLimits.maxContentUTF16) 字上限，请删减后再保存"
+            return
+        }
         // 包一层动画，让下方历史列表对新增记录做柔和的插入过渡
         Motion.animate(Motion.soft(reduceMotion), reduceMotion: reduceMotion) {
             do {
