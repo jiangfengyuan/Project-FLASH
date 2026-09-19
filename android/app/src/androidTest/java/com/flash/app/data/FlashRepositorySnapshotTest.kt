@@ -10,6 +10,8 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.flash.app.data.db.FlashDatabase
+import com.flash.app.data.model.Category
+import org.junit.Assert.assertTrue
 import com.flash.app.data.model.ColorTag
 import com.flash.app.data.model.EmotionLevel
 import com.flash.app.data.model.TaskDueKind
@@ -20,6 +22,35 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class FlashRepositorySnapshotTest {
+
+    @Test
+    fun editedFieldsAndReadStateCommitTogetherAndRejectInvalidDates() = runBlocking {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val database = Room.inMemoryDatabaseBuilder(context, FlashDatabase::class.java)
+            .allowMainThreadQueries().build()
+        try {
+            val repository = FlashRepository(database)
+            repository.addLog("原文", ColorTag.DAILY)
+            val original = repository.exportSnapshot().logs.single()
+            val edited = original.copy(content = "新正文", category = Category.IDEA,
+                colorTag = ColorTag.MEMO, recordDate = "2024-02-29")
+            repository.updateLog(edited, markViewed = true)
+            assertEquals(edited, repository.exportSnapshot().logs.single())
+            assertTrue(repository.isIdeaViewed(edited.id))
+            for (date in listOf("2026-02-30", "0000-01-01", "2026-9-01")) {
+                assertTrue(runCatching { repository.updateLog(edited.copy(recordDate = date)) }.isFailure)
+                assertEquals(edited, repository.exportSnapshot().logs.single())
+            }
+            // A failed second write must also roll back the edited record.
+            database.openHelper.writableDatabase.execSQL(
+                "CREATE TRIGGER reject_view BEFORE INSERT ON idea_view_state BEGIN SELECT RAISE(ABORT, 'disk failure'); END"
+            )
+            assertTrue(runCatching {
+                repository.updateLog(edited.copy(content = "不可部分保存", recordDate = "2026-09-19"), markViewed = true)
+            }.isFailure)
+            assertEquals(edited, repository.exportSnapshot().logs.single())
+        } finally { database.close() }
+    }
 
     @Test
     fun snapshotContainsEveryPortableSection() = runBlocking {

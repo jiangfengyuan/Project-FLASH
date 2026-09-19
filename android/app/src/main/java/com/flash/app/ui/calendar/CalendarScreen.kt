@@ -23,11 +23,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
@@ -78,7 +85,12 @@ private val WEEKDAYS = listOf("一", "二", "三", "四", "五", "六", "日")
 /** Calendar Tab：真实月视图 + 选中日详情 */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CalendarScreen(onOpenSettings: () -> Unit, onOpenRecord: (String) -> Unit) {
+fun CalendarScreen(
+    onOpenSettings: () -> Unit,
+    onOpenRecord: (String) -> Unit,
+    embedded: Boolean = false,
+    listState: LazyListState = rememberLazyListState(),
+) {
     val context = LocalContext.current
     val app = context.applicationContext as FlashApplication
     val viewModel: CalendarViewModel = viewModel(
@@ -109,7 +121,7 @@ fun CalendarScreen(onOpenSettings: () -> Unit, onOpenRecord: (String) -> Unit) {
     Scaffold(
         containerColor = Color.Transparent,
         topBar = {
-            TopAppBar(
+            if (!embedded) TopAppBar(
                 title = { Text("日历") },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 actions = {
@@ -128,12 +140,18 @@ fun CalendarScreen(onOpenSettings: () -> Unit, onOpenRecord: (String) -> Unit) {
         snackbarHost = { SnackbarHost(snackbar) },
     ) { innerPadding ->
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            if (embedded) {
+                item(key = "new-task") {
+                    TextButton(onClick = { editingTask = null; editorOpen = true }) { Text("新建任务") }
+                }
+            }
             item(key = "month-header") {
                 MonthHeader(
                     month = uiState.month,
@@ -283,10 +301,15 @@ private fun DayCell(
     }
     Column(
         modifier = modifier
-            .aspectRatio(1f)
+            .heightIn(min = 48.dp)
             .padding(2.dp)
             .border(1.dp, borderColor, MaterialTheme.shapes.small)
-            .clickable(onClick = onClick)
+            .selectable(selected = isSelected, role = Role.Button, onClick = onClick)
+            .semantics {
+                contentDescription = "$date，${aggregate?.logs?.size ?: 0} 条记录，" +
+                    "${aggregate?.emotions?.size ?: 0} 次情绪，${aggregate?.tasks?.size ?: 0} 项任务" +
+                    if (isToday) "，今天" else ""
+            }
             .padding(2.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {

@@ -117,13 +117,18 @@ class FlashRepository(private val db: FlashDatabase) {
         )
     }
 
-    suspend fun updateLog(log: LogItem) {
+    suspend fun updateLog(log: LogItem, markViewed: Boolean = false) = db.withTransaction {
+        require(Regex("\\d{4}-\\d{2}-\\d{2}").matches(log.recordDate) &&
+            runCatching { LocalDate.parse(log.recordDate).year in 1..9999 }.getOrDefault(false)) {
+            "请输入有效的记录日期"
+        }
         val normalized = log.content.trim()
-        if (normalized.isEmpty()) return
+        require(normalized.isNotEmpty()) { "内容不能为空" }
         TextLimits.requireFits(normalized)
         db.logDao().upsert(
             log.copy(content = normalized, importance = log.importance.coerceIn(0, 4)).toEntity()
         )
+        if (markViewed && log.category == Category.IDEA) markIdeaViewed(log.id)
     }
 
     suspend fun deleteLog(id: String) = db.logDao().deleteById(id)
