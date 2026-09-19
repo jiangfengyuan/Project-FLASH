@@ -61,11 +61,11 @@ struct LocalBackupTransferTests {
         #expect(LanHandshake.constantTimeEqual([], []))
     }
 
-    // MARK: 行解析（严格口径）
+    // MARK: 行解析（严格口径，与 HarmonyOS 正则一致：小写 hex）
 
     @Test func parseChallengeLineStrict() {
         #expect(LanHandshake.parseChallengeLine("CHALLENGE 0123456789abcdef0123456789abcdef") == "0123456789abcdef0123456789abcdef")
-        #expect(LanHandshake.parseChallengeLine("CHALLENGE 0123456789ABCDEF0123456789ABCDEF") == "0123456789ABCDEF0123456789ABCDEF")
+        #expect(LanHandshake.parseChallengeLine("CHALLENGE 0123456789ABCDEF0123456789ABCDEF") == nil)  // 规格/HarmonyOS：仅小写 hex
         #expect(LanHandshake.parseChallengeLine("CHALLENGE 0123456789abcdef") == nil)          // nonce 过短
         #expect(LanHandshake.parseChallengeLine("CHALLENGE") == nil)
         #expect(LanHandshake.parseChallengeLine("CHALLENGE 0123456789abcdef0123456789abcdef x") == nil)
@@ -74,6 +74,7 @@ struct LocalBackupTransferTests {
 
     @Test func parseProofLineStrict() {
         #expect(LanHandshake.parseProofLine("FLASH-AERO/1 eaf2db99644b07d9b250f86ce481647e") != nil)
+        #expect(LanHandshake.parseProofLine("FLASH-AERO/1 EAF2DB99644B07D9B250F86CE481647E") == nil)  // 仅小写 hex
         #expect(LanHandshake.parseProofLine("FLASH-AERO/1 9999") == nil)       // 旧版明文 PIN 首包：形状非法
         #expect(LanHandshake.parseProofLine("FLASH-AERO/1 eaf2db99644b07d9b250f86ce481647") == nil)
         #expect(LanHandshake.parseProofLine("FLASH-AERO/1 eaf2db99644b07d9b250f86ce481647ee") == nil)
@@ -87,37 +88,37 @@ struct LocalBackupTransferTests {
         #expect(LanHandshake.parseOKHeader("OK 123 \(mac)")?.macHex == mac)
         #expect(LanHandshake.parseOKHeader("OK 123abc \(mac)") == nil)   // 规格用例：尾随字符拒绝
         #expect(LanHandshake.parseOKHeader("OK +123 \(mac)") == nil)
+        #expect(LanHandshake.parseOKHeader("OK 007 \(mac)") == nil)      // 规格：拒绝前导零
         #expect(LanHandshake.parseOKHeader("OK 123 \(mac) x") == nil)
         #expect(LanHandshake.parseOKHeader("OK  \(mac)") == nil)
         #expect(LanHandshake.parseOKHeader("OK 0 \(mac)") == nil)        // size 必须为正
         #expect(LanHandshake.parseOKHeader("OK 123 \(String(repeating: "ab", count: 31))") == nil)  // mac 不足 64 hex
-        #expect(LanHandshake.parseOKHeader("OK 123 nothex") == nil)
+        #expect(LanHandshake.parseOKHeader("OK 123 \(String(repeating: "AB", count: 32))") == nil)  // 仅小写 hex
         #expect(LanHandshake.parseOKHeader("ERR PIN") == nil)
     }
 
-    // MARK: 握手分类（PIN 计数口径：仅 proof 形状合法但比较失败才计数）
+    // MARK: proof 验证（接收方角色：用本地 PIN + 发出的 nonceHex 常数时间比较）
 
-    @Test func classifyHandshakeAcceptsCorrectProof() {
+    @Test func proofVerificationAcceptsCorrectProof() {
         let pin = "123456"
         let nonce = "0123456789abcdef0123456789abcdef"
         let line = "FLASH-AERO/1 \(LanHandshake.proof(pin: pin, nonce: nonce))"
-        #expect(LocalBackupSender.classifyHandshake(line, pin: pin, nonce: nonce) == .ok)
+        #expect(LanHandshake.verifyProofLine(pin: pin, nonce: nonce, line: line))
     }
 
-    @Test func classifyHandshakeWrongProofCounts() {
+    @Test func proofVerificationRejectsWrongProof() {
         let nonce = "0123456789abcdef0123456789abcdef"
         let line = "FLASH-AERO/1 \(LanHandshake.proof(pin: "999999", nonce: nonce))"
-        #expect(LocalBackupSender.classifyHandshake(line, pin: "123456", nonce: nonce) == .wrongPIN)
+        #expect(!LanHandshake.verifyProofLine(pin: "123456", nonce: nonce, line: line))
     }
 
-    @Test func classifyHandshakeRejectsNonProtocolTraffic() {
+    @Test func proofVerificationRejectsMalformedLines() {
         let nonce = "0123456789abcdef0123456789abcdef"
-        #expect(LocalBackupSender.classifyHandshake(nil, pin: "123456", nonce: nonce) == .notProtocol)
-        #expect(LocalBackupSender.classifyHandshake("", pin: "123456", nonce: nonce) == .notProtocol)
-        #expect(LocalBackupSender.classifyHandshake("GET / HTTP/1.1", pin: "123456", nonce: nonce) == .notProtocol)
-        #expect(LocalBackupSender.classifyHandshake("FLASH-AERO/1", pin: "123456", nonce: nonce) == .notProtocol)
-        // 旧版明文 PIN 首包（如 "FLASH-AERO/1 1234"）：形状非法，不消耗配对机会
-        #expect(LocalBackupSender.classifyHandshake("FLASH-AERO/1 1234", pin: "123456", nonce: nonce) == .notProtocol)
+        #expect(!LanHandshake.verifyProofLine(pin: "123456", nonce: nonce, line: ""))
+        #expect(!LanHandshake.verifyProofLine(pin: "123456", nonce: nonce, line: "GET / HTTP/1.1"))
+        #expect(!LanHandshake.verifyProofLine(pin: "123456", nonce: nonce, line: "FLASH-AERO/1"))
+        // 旧版明文 PIN 首包（如 "FLASH-AERO/1 1234"）：形状非法
+        #expect(!LanHandshake.verifyProofLine(pin: "123456", nonce: nonce, line: "FLASH-AERO/1 1234"))
     }
 
     // MARK: 空闲超时（有数据到达即续期）
@@ -251,10 +252,10 @@ private func makeLoopbackDevice(port: UInt16) -> LocalTransferDevice {
                                             port: NWEndpoint.Port(rawValue: port)!))
 }
 
-private func waitForSenderPort(_ sender: LocalBackupSender, timeout: TimeInterval = 5) throws -> UInt16 {
+private func waitForPort(_ provider: @Sendable () -> UInt16?, timeout: TimeInterval = 5) throws -> UInt16 {
     let deadline = Date().addingTimeInterval(timeout)
     while Date() < deadline {
-        if let port = sender.port { return port }
+        if let port = provider() { return port }
         Thread.sleep(forTimeInterval: 0.02)
     }
     throw LocalTransferError.timedOut
@@ -273,14 +274,13 @@ struct LocalBackupTransferIntegrationTests {
     }
 
     private func runReceiver(device: LocalTransferDevice, pin: String,
-                             idleTimeout: TimeInterval = 15,
-                             transferLimit: TimeInterval = 120,
+                             timing: LocalTransferTiming = LocalTransferTiming(),
+                             pinSource: (@Sendable () -> String)? = nil,
                              timeout: TimeInterval = 8) throws -> Result<String, Error> {
         let semaphore = DispatchSemaphore(value: 0)
         let box = Box<Result<String, Error>?>(nil)
-        let receiver = LocalBackupReceiver(device: device, pin: pin,
-                                           idleTimeout: idleTimeout,
-                                           transferLimit: transferLimit) { result in
+        let receiver = LocalBackupReceiver(device: device, pin: pin, timing: timing,
+                                           pinSource: pinSource) { result in
             box.value = result
             semaphore.signal()
         }
@@ -292,6 +292,8 @@ struct LocalBackupTransferIntegrationTests {
         return box.value!
     }
 
+    // MARK: 正确方向：接收方发 CHALLENGE，发送方回答 proof + OK + payload
+
     @Test func roundTripOverLoopbackConfirmsDelivery() throws {
         let semaphore = DispatchSemaphore(value: 0)
         let senderResult = Box<LocalBackupSendResult?>(nil)
@@ -301,7 +303,7 @@ struct LocalBackupTransferIntegrationTests {
         }
         sender.start()
         defer { sender.cancel() }
-        let port = try waitForSenderPort(sender)
+        let port = try waitForPort({ sender.port })
 
         let received = try runReceiver(device: makeLoopbackDevice(port: port), pin: sender.pin)
         #expect(try received.get() == payloadJSON)
@@ -311,79 +313,160 @@ struct LocalBackupTransferIntegrationTests {
         #expect(senderResult.value == .confirmed)
     }
 
-    @Test func wrongPINProofIsRejectedWithErrPIN() throws {
+    @Test func rejectedProofIsRetriedAfterBackoffAndPinCorrection() throws {
+        // 前两次 proof 校验用错误 PIN（发送方照样回答，接收方验证失败并排空），
+        // 退避（注入为 0）重挑战后 pinSource 改报正确 PIN：第三次挑战应成功。
         let sender = try LocalBackupSender(json: payloadJSON, timing: fastTiming) { _ in }
         sender.start()
         defer { sender.cancel() }
-        let port = try waitForSenderPort(sender)
+        let port = try waitForPort({ sender.port })
 
-        let result = try runReceiver(device: makeLoopbackDevice(port: port), pin: "000000")
-        #expect(throws: LocalTransferError.invalidPIN) { _ = try result.get() }
+        let proofChecks = Box(0)
+        let correctPin = sender.pin
+        let received = try runReceiver(device: makeLoopbackDevice(port: port), pin: "000000",
+                                       timing: fastTiming,
+                                       pinSource: {
+                                           proofChecks.value += 1
+                                           return proofChecks.value <= 2 ? "000000" : correctPin
+                                       })
+        #expect(try received.get() == payloadJSON)
+        #expect(proofChecks.value >= 3)  // 至少两次失败 + 一次成功校验
     }
 
-    @Test func fifthFailureDisconnectsAndNewConnectionResetsAttempts() throws {
+    @Test func fiveRejectedProofsFailWithErrPINAndSenderFails() throws {
+        let semaphore = DispatchSemaphore(value: 0)
+        let senderResult = Box<LocalBackupSendResult?>(nil)
+        let sender = try LocalBackupSender(json: payloadJSON, timing: fastTiming) { result in
+            senderResult.value = result
+            semaphore.signal()
+        }
+        sender.start()
+        defer { sender.cancel() }
+        let port = try waitForPort({ sender.port })
+
+        // PIN 始终错误：5 次失败后接收方发 ERR PIN 并报 invalidPIN，发送方判 failed
+        let result = try runReceiver(device: makeLoopbackDevice(port: port), pin: "000000",
+                                     timing: fastTiming)
+        #expect(throws: LocalTransferError.invalidPIN) { _ = try result.get() }
+        #expect(semaphore.wait(timeout: .now() + 5) == .success)
+        #expect(senderResult.value == .failed)
+    }
+
+    @Test func senderServesAtMostFiveChallengesPerConnection() throws {
         let sender = try LocalBackupSender(json: payloadJSON, timing: fastTiming) { _ in }
         sender.start()
         defer { sender.cancel() }
-        let port = try waitForSenderPort(sender)
+        let port = try waitForPort({ sender.port })
 
-        // 同一连接上 5 次错误 proof：前 4 次收到 ERR PIN 后可重试，第 5 次失败直接断开
+        // 同一连接连续挑战：前 5 次各得到 proof+OK+payload，第 6 次被断开
         let connection = NWConnection(to: .hostPort(host: .ipv4(.loopback),
                                                     port: NWEndpoint.Port(rawValue: port)!),
                                       using: .tcp)
         let reader = TestConnectionReader(connection: connection,
-                                          queue: DispatchQueue(label: "test.client.attempts"))
+                                          queue: DispatchQueue(label: "test.client.challenges"))
         connection.start(queue: reader.queue)
-        let challenge = try #require(try reader.readLine())
-        let nonce = try #require(LanHandshake.parseChallengeLine(challenge))
-        for attempt in 1...5 {
-            connection.send(content: Data("FLASH-AERO/1 \(LanHandshake.proof(pin: "000000", nonce: nonce))\n".utf8),
-                            completion: .idempotent)
-            if attempt < 5 {
-                #expect(try reader.readLine() == "ERR PIN")
-            } else {
-                #expect(try reader.readLine() == nil)  // 第 5 次失败：断开、无响应
-            }
+        for _ in 1...5 {
+            let nonce = LanHandshake.makeNonce()
+            connection.send(content: Data("CHALLENGE \(nonce)\n".utf8), completion: .idempotent)
+            let proofLine = try #require(try reader.readLine())
+            #expect(LanHandshake.verifyProofLine(pin: sender.pin, nonce: nonce, line: proofLine))
+            let okLine = try #require(try reader.readLine())
+            let ok = try #require(LanHandshake.parseOKHeader(okLine))
+            let payload = try reader.readExact(ok.size)
+            #expect(String(data: payload, encoding: .utf8) == payloadJSON)
         }
-
-        // 第 5 次失败后会话仍有效：新连接计数重置，正确 proof 可完成完整传输
-        let good = NWConnection(to: .hostPort(host: .ipv4(.loopback),
-                                              port: NWEndpoint.Port(rawValue: port)!),
-                                using: .tcp)
-        let goodReader = TestConnectionReader(connection: good,
-                                              queue: DispatchQueue(label: "test.client.good"))
-        good.start(queue: goodReader.queue)
-        let goodChallenge = try #require(try goodReader.readLine())
-        let goodNonce = try #require(LanHandshake.parseChallengeLine(goodChallenge))
-        good.send(content: Data("FLASH-AERO/1 \(LanHandshake.proof(pin: sender.pin, nonce: goodNonce))\n".utf8),
-                  completion: .idempotent)
-        let header = try #require(try goodReader.readLine())
-        let ok = try #require(LanHandshake.parseOKHeader(header))
-        let data = try goodReader.readExact(ok.size)
-        #expect(String(data: data, encoding: .utf8) == payloadJSON)
-        #expect(LanHandshake.verifyPayloadMAC(pin: sender.pin, macHex: ok.macHex, payload: data))
-        good.cancel()
+        connection.send(content: Data("CHALLENGE \(LanHandshake.makeNonce())\n".utf8),
+                        completion: .idempotent)
+        #expect(try reader.readLine() == nil)  // 第 6 次挑战：连接被断开
         connection.cancel()
+
+        // 会话仍有效：新连接正常完成传输
+        let received = try runReceiver(device: makeLoopbackDevice(port: port), pin: sender.pin)
+        #expect(try received.get() == payloadJSON)
     }
 
-    /// 伪造发送方：按配置回挑战、读 proof，然后回 OK 行（可篡改 mac / 畸形头行 / 慢速滴流）
-    private final class FakeSender: @unchecked Sendable {
+    @Test func senderDropsMalformedLineAndSessionSurvives() throws {
+        let sender = try LocalBackupSender(json: payloadJSON, timing: fastTiming) { _ in }
+        sender.start()
+        defer { sender.cancel() }
+        let port = try waitForPort({ sender.port })
+
+        let connection = NWConnection(to: .hostPort(host: .ipv4(.loopback),
+                                                    port: NWEndpoint.Port(rawValue: port)!),
+                                      using: .tcp)
+        let reader = TestConnectionReader(connection: connection,
+                                          queue: DispatchQueue(label: "test.client.malformed"))
+        connection.start(queue: reader.queue)
+        connection.send(content: Data("GET / HTTP/1.1\n".utf8), completion: .idempotent)
+        #expect(try reader.readLine() == nil)  // 非协议行：不回答、断开
+        connection.cancel()
+
+        let received = try runReceiver(device: makeLoopbackDevice(port: port), pin: sender.pin)
+        #expect(try received.get() == payloadJSON)
+    }
+
+    @Test func senderDropsOversizedHeaderWithoutNewline() throws {
+        let sender = try LocalBackupSender(json: payloadJSON, timing: fastTiming) { _ in }
+        sender.start()
+        defer { sender.cancel() }
+        let port = try waitForPort({ sender.port })
+
+        let connection = NWConnection(to: .hostPort(host: .ipv4(.loopback),
+                                                    port: NWEndpoint.Port(rawValue: port)!),
+                                      using: .tcp)
+        let reader = TestConnectionReader(connection: connection,
+                                          queue: DispatchQueue(label: "test.client.oversized"))
+        connection.start(queue: reader.queue)
+        // 收到换行前按 buffer.count 判限：65+ 字节无换行的头行直接断开
+        connection.send(content: Data(repeating: 0x41, count: 70), completion: .idempotent)
+        #expect(try reader.readLine() == nil)
+        connection.cancel()
+
+        let received = try runReceiver(device: makeLoopbackDevice(port: port), pin: sender.pin)
+        #expect(try received.get() == payloadJSON)
+    }
+
+    @Test func silentClientHitsIdleTimeoutButSessionSurvives() throws {
+        // 发送方（监听端）：客户端连接后不发 CHALLENGE → 握手空闲超时断开；
+        // 随后新连接正常完成，证明连接槽已释放、会话未被拖死
+        var timing = fastTiming
+        timing.idleTimeout = 0.3
+        let sender = try LocalBackupSender(json: payloadJSON, timing: timing) { _ in }
+        sender.start()
+        defer { sender.cancel() }
+        let port = try waitForPort({ sender.port })
+
+        let silent = NWConnection(to: .hostPort(host: .ipv4(.loopback),
+                                                port: NWEndpoint.Port(rawValue: port)!),
+                                  using: .tcp)
+        let reader = TestConnectionReader(connection: silent,
+                                          queue: DispatchQueue(label: "test.client.silent"))
+        silent.start(queue: reader.queue)
+        Thread.sleep(forTimeInterval: 1.0)                    // 超过 0.3s 空闲上限
+        #expect(try reader.readLine(timeout: 2) == nil)  // 已被对端断开
+        silent.cancel()
+
+        let received = try runReceiver(device: makeLoopbackDevice(port: port), pin: sender.pin)
+        #expect(try received.get() == payloadJSON)
+    }
+
+    // MARK: 伪造发送方：验证接收方在 proof 通过后的防线
+
+    /// 伪造发送方（监听方）：按配置回答 CHALLENGE——proof 正确但后续负载做手脚
+    private final class FakeServer: @unchecked Sendable {
         enum Behavior {
             case good(json: String)
             case badMAC(json: String)
-            case badHeader(String)
+            case malformedProof
+            case badOKHeader(String)
+            case oversizedHeaderNoNewline
             case drip(json: String, chunkDelay: TimeInterval)
-
-            var isBadMAC: Bool {
-                if case .badMAC = self { return true }
-                return false
-            }
         }
 
+        let pin: String
+        let behavior: Behavior
         let listener: NWListener
-        private let behavior: Behavior
-        private let pin: String
-        private let queue = DispatchQueue(label: "test.fake-sender")
+        private let queue = DispatchQueue(label: "test.fake-server")
 
         init(pin: String, behavior: Behavior) throws {
             self.pin = pin
@@ -402,40 +485,57 @@ struct LocalBackupTransferIntegrationTests {
 
         private func handle(_ connection: NWConnection) {
             connection.start(queue: queue)
-            let nonce = LanHandshake.makeNonce()
-            connection.send(content: Data("CHALLENGE \(nonce)\n".utf8), completion: .contentProcessed { [weak self] _ in
-                self?.readProof(on: connection, nonce: nonce, buffer: Data())
-            })
+            readLines(on: connection, buffer: Data())
         }
 
-        private func readProof(on connection: NWConnection, nonce: String, buffer: Data) {
-            connection.receive(minimumIncompleteLength: 1, maximumLength: 64) { [weak self] data, _, complete, error in
+        private func readLines(on connection: NWConnection, buffer: Data) {
+            connection.receive(minimumIncompleteLength: 1, maximumLength: LanHandshake.maxLineBytes) { [weak self] data, _, complete, error in
+                guard let self else { return }
                 var next = buffer
                 if let data { next.append(data) }
-                guard let newline = next.firstIndex(of: 0x0A), error == nil || !next.isEmpty else {
-                    if error != nil || complete { connection.cancel() }
-                    else { self?.readProof(on: connection, nonce: nonce, buffer: next) }
-                    return
+                while let newline = next.firstIndex(of: 0x0A) {
+                    let line = String(decoding: next[..<newline], as: UTF8.self)
+                        .trimmingCharacters(in: .newlines)
+                    next.removeSubrange(...newline)
+                    self.respond(to: line, on: connection)
                 }
-                let line = String(decoding: next[..<newline], as: UTF8.self)
-                self?.respond(to: line, nonce: nonce, on: connection)
+                if error != nil || complete {
+                    connection.cancel()
+                } else {
+                    self.readLines(on: connection, buffer: next)
+                }
             }
         }
 
-        private func respond(to line: String, nonce: String, on connection: NWConnection) {
-            guard LanHandshake.parseProofLine(line) != nil else { connection.cancel(); return }
+        private func respond(to line: String, on connection: NWConnection) {
+            guard let nonce = LanHandshake.parseChallengeLine(line) else { return }
+            let proofLine = "\(LanHandshake.protocolLine) \(LanHandshake.proof(pin: pin, nonce: nonce))\n"
             switch behavior {
             case .good(let json), .badMAC(let json):
                 let payload = Data(json.utf8)
-                let mac = behavior.isBadMAC ? String(repeating: "0", count: 64) : LanHandshake.payloadMAC(pin: pin, payload: payload)
-                var response = Data("OK \(payload.count) \(mac)\n".utf8)
+                let mac: String = {
+                    if case .badMAC = behavior { return String(repeating: "0", count: 64) }
+                    return LanHandshake.payloadMAC(pin: pin, payload: payload)
+                }()
+                var response = Data(proofLine.utf8)
+                response.append(Data("OK \(payload.count) \(mac)\n".utf8))
                 response.append(payload)
-                connection.send(content: response, completion: .contentProcessed { _ in })
-            case .badHeader(let header):
-                connection.send(content: Data("\(header)\n".utf8), completion: .contentProcessed { _ in })
+                connection.send(content: response, completion: .idempotent)
+            case .malformedProof:
+                connection.send(content: Data("FLASH-AERO/1 not-a-proof\n".utf8),
+                                completion: .idempotent)
+            case .badOKHeader(let header):
+                var response = Data(proofLine.utf8)
+                response.append(Data("\(header)\n".utf8))
+                connection.send(content: response, completion: .idempotent)
+            case .oversizedHeaderNoNewline:
+                var response = Data(proofLine.utf8)
+                response.append(Data("OK 99999999 \(String(repeating: "ab", count: 40))".utf8))
+                connection.send(content: response, completion: .idempotent)
             case .drip(let json, let chunkDelay):
                 let payload = Data(json.utf8)
-                var response = Data("OK \(payload.count) \(LanHandshake.payloadMAC(pin: pin, payload: payload))\n".utf8)
+                var response = Data(proofLine.utf8)
+                response.append(Data("OK \(payload.count) \(LanHandshake.payloadMAC(pin: pin, payload: payload))\n".utf8))
                 response.append(payload)
                 for (index, byte) in response.enumerated() {
                     queue.asyncAfter(deadline: .now() + chunkDelay * Double(index)) {
@@ -446,74 +546,52 @@ struct LocalBackupTransferIntegrationTests {
         }
     }
 
-    private func startFakeSender(pin: String, behavior: FakeSender.Behavior) throws -> FakeSender {
-        let fake = try FakeSender(pin: pin, behavior: behavior)
+    private func startFakeServer(pin: String, behavior: FakeServer.Behavior) throws -> FakeServer {
+        let fake = try FakeServer(pin: pin, behavior: behavior)
         fake.start()
-        let deadline = Date().addingTimeInterval(5)
-        while fake.port == nil && Date() < deadline {
-            Thread.sleep(forTimeInterval: 0.02)
-        }
+        _ = try waitForPort({ fake.port })
         return fake
     }
 
+    @Test func receiverRejectsMalformedProofLine() throws {
+        let fake = try startFakeServer(pin: "123456", behavior: .malformedProof)
+        defer { fake.cancel() }
+        let result = try runReceiver(device: makeLoopbackDevice(port: fake.port!), pin: "123456")
+        #expect(throws: LocalTransferError.invalidResponse) { _ = try result.get() }
+    }
+
     @Test func tamperedPayloadMACIsDiscardedWholeByReceiver() throws {
-        let fake = try startFakeSender(pin: "123456", behavior: .badMAC(json: payloadJSON))
+        let fake = try startFakeServer(pin: "123456", behavior: .badMAC(json: payloadJSON))
         defer { fake.cancel() }
         let result = try runReceiver(device: makeLoopbackDevice(port: fake.port!), pin: "123456")
         #expect(throws: LocalTransferError.payloadTampered) { _ = try result.get() }
     }
 
     @Test func malformedOKLineIsRejectedByReceiver() throws {
-        let fake = try startFakeSender(pin: "123456", behavior: .badHeader("OK 123abc"))
+        let fake = try startFakeServer(pin: "123456", behavior: .badOKHeader("OK 123abc"))
         defer { fake.cancel() }
         let result = try runReceiver(device: makeLoopbackDevice(port: fake.port!), pin: "123456")
         #expect(throws: LocalTransferError.invalidResponse) { _ = try result.get() }
     }
 
     @Test func oversizedOKHeaderWithoutNewlineIsRejected() throws {
-        // 头行无换行且超过 76 字节上限：收到换行前按 buffer.count 拒绝
-        let fake = try startFakeSender(pin: "123456",
-                                       behavior: .badHeader("OK 99999999 " + String(repeating: "ab", count: 40)))
+        // proof 通过后的 OK 阶段：头行无换行且超过 76 字节上限，按 buffer.count 拒绝
+        let fake = try startFakeServer(pin: "123456", behavior: .oversizedHeaderNoNewline)
         defer { fake.cancel() }
         let result = try runReceiver(device: makeLoopbackDevice(port: fake.port!), pin: "123456")
         #expect(throws: LocalTransferError.invalidResponse) { _ = try result.get() }
     }
 
     @Test func slowDripHitsTotalTransferLimit() throws {
-        let fake = try startFakeSender(pin: "123456",
+        let fake = try startFakeServer(pin: "123456",
                                        behavior: .drip(json: String(repeating: "x", count: 4096),
                                                        chunkDelay: 0.02))
         defer { fake.cancel() }
         // 总时长硬顶 0.5s：滴流传不完；空闲超时给足以区分两个上限
+        var timing = LocalTransferTiming()
+        timing.transferLimit = 0.5
         let result = try runReceiver(device: makeLoopbackDevice(port: fake.port!), pin: "123456",
-                                     idleTimeout: 30, transferLimit: 0.5, timeout: 8)
+                                     timing: timing, timeout: 8)
         #expect(throws: LocalTransferError.timedOut) { _ = try result.get() }
-    }
-
-    @Test func silentSenderHitsIdleTimeoutButSessionSurvives() throws {
-        // 发送方（监听端）：客户端连接后不发 proof → 握手空闲超时断开；
-        // 随后新连接正常完成，证明连接槽已释放、会话未被拖死
-        let sender = try LocalBackupSender(json: payloadJSON, timing: {
-            var timing = fastTiming
-            timing.idleTimeout = 0.3
-            return timing
-        }()) { _ in }
-        sender.start()
-        defer { sender.cancel() }
-        let port = try waitForSenderPort(sender)
-
-        let silent = NWConnection(to: .hostPort(host: .ipv4(.loopback),
-                                                port: NWEndpoint.Port(rawValue: port)!),
-                                  using: .tcp)
-        let reader = TestConnectionReader(connection: silent,
-                                          queue: DispatchQueue(label: "test.client.silent"))
-        silent.start(queue: reader.queue)
-        _ = try reader.readLine()  // 读到 CHALLENGE 后保持沉默
-        Thread.sleep(forTimeInterval: 1.0)                    // 超过 0.3s 空闲上限
-        #expect(try reader.readLine(timeout: 2) == nil)  // 已被对端断开
-        silent.cancel()
-
-        let received = try runReceiver(device: makeLoopbackDevice(port: port), pin: sender.pin)
-        #expect(try received.get() == payloadJSON)
     }
 }
