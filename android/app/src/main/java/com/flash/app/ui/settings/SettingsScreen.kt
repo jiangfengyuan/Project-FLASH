@@ -374,8 +374,8 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
                     }
                     OutlinedTextField(
                         value = lanPin,
-                        onValueChange = { lanPin = it.filter(Char::isDigit).take(4) },
-                        label = { Text("四位配对 PIN") },
+                        onValueChange = { lanPin = it.filter(Char::isDigit).take(6) },
+                        label = { Text("六位配对 PIN") },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                         modifier = Modifier.fillMaxWidth(),
@@ -390,7 +390,7 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
             confirmButton = {
                 TextButton(
                     onClick = { selectedLanDevice?.let { viewModel.receiveLanBackup(it, lanPin) } },
-                    enabled = selectedLanDevice != null && lanPin.length == 4,
+                    enabled = selectedLanDevice != null && lanPin.length == 6,
                 ) { Text("配对并接收") }
             },
             dismissButton = {

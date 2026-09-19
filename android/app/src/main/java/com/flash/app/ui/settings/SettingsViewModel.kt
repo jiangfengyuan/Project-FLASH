@@ -187,8 +187,8 @@ class SettingsViewModel(
     }
 
     fun receiveLanBackup(device: LocalBackupTransfer.Device, pin: String) {
-        if (!pin.matches(Regex("\\d{4}"))) {
-            _message.value = "请输入四位数字 PIN"
+        if (!pin.matches(Regex("\\d{6}"))) {
+            _message.value = "请输入六位数字 PIN"
             return
         }
         lanDiscovery?.stop()
