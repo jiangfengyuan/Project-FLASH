@@ -47,7 +47,9 @@ export class BackupFiles {
       const buffer = new ArrayBuffer(size);
       const bytesRead = fileIo.readSync(file.fd, buffer, { length: size });
       if (bytesRead !== size) throw new Error('备份文件读取不完整');
-      const decoder = util.TextDecoder.create('utf-8', { fatal: true, ignoreBOM: true });
+      // No ignoreBOM: a UTF-8 BOM decodes to U+FEFF and the strict importer
+      // rejects it, matching the Android and macOS import paths.
+      const decoder = util.TextDecoder.create('utf-8', { fatal: true });
       return decoder.decodeToString(new Uint8Array(buffer));
     } finally {
       fileIo.closeSync(file);

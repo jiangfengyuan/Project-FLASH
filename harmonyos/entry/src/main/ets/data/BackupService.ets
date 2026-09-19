@@ -48,7 +48,7 @@ class StrictJSONScanner {
         const keys = new Set<string>();
         do {
           this.whitespace();
-          const key = this.string();
+          const key = this.key();
           if (keys.has(key)) throw new Error(`/：JSON 对象包含重复键：${key}`);
           keys.add(key);
           this.expect(':');
@@ -63,7 +63,7 @@ class StrictJSONScanner {
         do this.value(depth + 1); while (this.take(','));
         this.expect(']');
         return;
-      case '"': this.string(); return;
+      case '"': this.scanString(); return;
       case 't': this.literal('true'); return;
       case 'f': this.literal('false'); return;
       case 'n': this.literal('null'); return;
@@ -71,41 +71,66 @@ class StrictJSONScanner {
     }
   }
 
-  private string(): string {
-    if (this.index >= this.text.length || this.text[this.index++] !== '"') this.fail();
-    let result = '';
+  /** Validate a string literal without building its value. Value contents are
+   * never inspected, so accumulating them char-by-char would only cost
+   * quadratic re-copying on large payloads. */
+  private scanString(): void {
+    this.stringStart();
     while (this.index < this.text.length) {
       const character = this.text[this.index++];
-      if (character === '"') return result;
+      if (character === '"') return;
       if (character.charCodeAt(0) < 0x20) this.fail();
-      if (character !== '\\') {
-        result += character;
-        continue;
-      }
-      if (this.index >= this.text.length) this.fail();
-      const escape = this.text[this.index++];
-      switch (escape) {
-        case '"': case '\\': case '/': result += escape; break;
-        case 'b': result += '\b'; break;
-        case 'f': result += '\f'; break;
-        case 'n': result += '\n'; break;
-        case 'r': result += '\r'; break;
-        case 't': result += '\t'; break;
-        case 'u': {
-          let codeUnit = 0;
-          for (let count = 0; count < 4; count++) {
-            if (this.index >= this.text.length) this.fail();
-            const digit = StrictJSONScanner.hex(this.text[this.index++]);
-            if (digit < 0) this.fail();
-            codeUnit = codeUnit * 16 + digit;
-          }
-          result += String.fromCharCode(codeUnit);
-          break;
-        }
-        default: this.fail();
-      }
+      if (character !== '\\') continue;
+      this.escape();
     }
     this.fail();
+  }
+
+  /** Scan a string literal and decode it for duplicate-key detection. */
+  private key(): string {
+    this.stringStart();
+    const parts: string[] = [];
+    while (this.index < this.text.length) {
+      const character = this.text[this.index++];
+      if (character === '"') return parts.join('');
+      if (character.charCodeAt(0) < 0x20) this.fail();
+      if (character !== '\\') {
+        parts.push(character);
+        continue;
+      }
+      parts.push(this.escape());
+    }
+    this.fail();
+  }
+
+  private stringStart(): void {
+    if (this.index >= this.text.length || this.text[this.index++] !== '"') this.fail();
+  }
+
+  /** Consume one escape sequence (the backslash is already read). Keys need
+   * the decoded char; value strings pass the result to an ignored slot. */
+  private escape(): string {
+    if (this.index >= this.text.length) this.fail();
+    const escape = this.text[this.index++];
+    switch (escape) {
+      case '"': case '\\': case '/': return escape;
+      case 'b': return '\b';
+      case 'f': return '\f';
+      case 'n': return '\n';
+      case 'r': return '\r';
+      case 't': return '\t';
+      case 'u': {
+        let codeUnit = 0;
+        for (let count = 0; count < 4; count++) {
+          if (this.index >= this.text.length) this.fail();
+          const digit = StrictJSONScanner.hex(this.text[this.index++]);
+          if (digit < 0) this.fail();
+          codeUnit = codeUnit * 16 + digit;
+        }
+        return String.fromCharCode(codeUnit);
+      }
+      default: this.fail();
+    }
   }
 
   private static hex(character: string): number {
