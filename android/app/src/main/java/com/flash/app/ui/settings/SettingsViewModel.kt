@@ -50,6 +50,8 @@ data class ImportPreview(
     val tasks: List<com.flash.app.data.model.TaskItem>,
     val difference: BackupDifference,
     val recovery: Boolean = false,
+    /** 预览生成时的本地快照；覆盖导入前用它做 TOCTOU 重校验。 */
+    val localSnapshot: com.flash.app.data.FlashSnapshot,
 )
 
 class SettingsViewModel(
@@ -210,6 +212,7 @@ class SettingsViewModel(
                         local.logs, local.emotions, result.logs, result.emotions,
                         local.tasks, result.tasks,
                     ),
+                    localSnapshot = local,
                 )
             }.onSuccess {
                 if (lanReceiver !== receiver) return@onSuccess
@@ -276,6 +279,7 @@ class SettingsViewModel(
                         local.logs, local.emotions, result.logs, result.emotions,
                         local.tasks, result.tasks,
                     ),
+                    localSnapshot = local,
                 )
             }.onSuccess {
                 _importPreview.value = it
@@ -291,6 +295,22 @@ class SettingsViewModel(
     fun confirmImport(overwrite: Boolean) {
         val preview = _importPreview.value ?: return
         viewModelScope.launch(Dispatchers.IO) {
+            if (overwrite) {
+                // 覆盖会删除本机独有记录：差异计数必须反映当前数据，而不是预览那一刻。
+                // 预览后本地有变化时先重出预览，让用户在最新差异上再次确认（TOCTOU）。
+                val current = repository.exportSnapshot()
+                if (!BackupDiff.sameData(preview.localSnapshot, current)) {
+                    _importPreview.value = preview.copy(
+                        difference = BackupDiff.analyze(
+                            current.logs, current.emotions, preview.logs, preview.emotions,
+                            current.tasks, preview.tasks,
+                        ),
+                        localSnapshot = current,
+                    )
+                    _message.value = "预览后本地数据有变化，差异已重新计算，请确认后再覆盖"
+                    return@launch
+                }
+            }
             val databaseResult = runCatching {
                 if (overwrite) {
                     repository.replaceAll(preview.logs, preview.emotions, preview.tasks)

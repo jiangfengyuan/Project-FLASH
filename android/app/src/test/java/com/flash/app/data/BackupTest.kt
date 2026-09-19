@@ -189,4 +189,37 @@ class BackupTest {
             Backup.readJson(ByteArrayInputStream(byteArrayOf(0xC3.toByte(), 0x28)))
         }
     }
+
+    @Test
+    fun `parseRecovery accepts valid legacy and v2 files`() {
+        val legacy = Backup.parseRecovery(sampleBackup())
+        assertEquals(Backup.LEGACY_BACKUP_VERSION, legacy.sourceVersion)
+        assertEquals(1, legacy.logs.size)
+
+        val v2 = Backup.parseRecovery(sampleV2TaskBackup())
+        assertEquals(Backup.BACKUP_VERSION, v2.sourceVersion)
+        assertEquals(1, v2.tasks.size)
+    }
+
+    @Test
+    fun `parseRecovery rejects duplicate keys before org json lenient parse`() {
+        assertThrows(Backup.BackupFormatException::class.java) {
+            Backup.parseRecovery(sampleBackup().replace("\"notes\": \"\"", "\"notes\": \"a\", \"notes\": \"b\""))
+        }
+    }
+
+    @Test
+    fun `parseRecovery rejects deeply nested json`() {
+        val deep = "[".repeat(200) + "]".repeat(200)
+        assertThrows(Backup.BackupFormatException::class.java) {
+            Backup.parseRecovery(deep)
+        }
+    }
+
+    @Test
+    fun `parseRecovery rejects invalid json syntax`() {
+        assertThrows(Backup.BackupFormatException::class.java) {
+            Backup.parseRecovery("""{"version": "flash-backup-v1", invalid}""")
+        }
+    }
 }

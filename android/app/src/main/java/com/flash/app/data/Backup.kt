@@ -313,6 +313,9 @@ object Backup {
     }
 
     fun parseRecovery(json: String): ImportResult {
+        // 先用 StrictJson 做限深/重复键/严格语法校验，再交给 org.json：
+        // 恢复入口同样不接受深度炸弹或重复键文件。
+        StrictJson(json).validate()
         val result = parse(json)
         val root = JSONObject(json)
         val legacy = result.sourceVersion == LEGACY_BACKUP_VERSION
