@@ -5,11 +5,17 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import { common } from '@kit.AbilityKit';
+import { preferences } from '@kit.ArkData';
 import { reminderAgentManager } from '@kit.BackgroundTasksKit';
 import { notificationManager } from '@kit.NotificationKit';
 import { TaskItem } from '../models/Models';
 
 const TASK_GROUP = 'flash-aero-tasks';
+const ID_STORE_NAME = 'flash-task-reminder-ids';
+// Reserved key holding the last allocated notification id. Ids start at 1 and
+// stay below the 32-bit positive range the notification service expects.
+const COUNTER_KEY = '__counter__';
+const MAX_NOTIFICATION_ID = 2147483646;
 
 /** Rebuilds this application's one-shot task reminders from the durable task store. */
 export class TaskReminderScheduler {
@@ -27,13 +33,32 @@ export class TaskReminderScheduler {
     if (requestPermission) await notificationManager.requestEnableNotification(context);
     const previous = (await reminderAgentManager.getAllValidReminders())
       .filter((item: reminderAgentManager.ReminderInfo) => item.reminderReq.groupId === TASK_GROUP);
+    const idStore = await preferences.getPreferences(context, ID_STORE_NAME);
+    const stored = (await idStore.getAll()) as Record<string, number>;
+    const counter = typeof stored[COUNTER_KEY] === 'number' ? stored[COUNTER_KEY] : 0;
+    // Stable per-task notification ids backed by persistent storage: a hash
+    // can collide for two task ids, which would make the second reminder
+    // overwrite or fail. The mapping also survives restarts, so a rebuild
+    // after reboot reuses the same id for the same task.
+    const ids = new Map<string, number>();
+    let next = counter;
+    const allocate = (taskId: string): number => {
+      const existing = ids.get(taskId);
+      if (existing !== undefined) return existing;
+      next = next >= MAX_NOTIFICATION_ID ? TaskReminderScheduler.firstFree(ids, next) : next + 1;
+      ids.set(taskId, next);
+      return next;
+    };
     const now = Date.now();
+    const pending = tasks.filter((task: TaskItem) => {
+      if (!task.reminderAt || task.completedAt) return false;
+      const reminderDate = new Date(task.reminderAt);
+      return Number.isFinite(reminderDate.getTime()) && reminderDate.getTime() > now;
+    });
     // Publish every replacement first. If one fails, the previous full set is
     // still present; a later successful rebuild removes the duplicates.
-    for (const task of tasks) {
-      if (!task.reminderAt || task.completedAt) continue;
-      const reminderDate = new Date(task.reminderAt);
-      if (!Number.isFinite(reminderDate.getTime()) || reminderDate.getTime() <= now) continue;
+    for (const task of pending) {
+      const reminderDate = new Date(task.reminderAt as string);
       const request: reminderAgentManager.ReminderRequestCalendar = {
         reminderType: reminderAgentManager.ReminderType.REMINDER_TYPE_CALENDAR,
         dateTime: {
@@ -43,7 +68,7 @@ export class TaskReminderScheduler {
         title: task.title.slice(0, 200),
         content: task.notes?.slice(0, 500) || '任务即将到期',
         expiredContent: task.title.slice(0, 200),
-        notificationId: TaskReminderScheduler.notificationId(task.id),
+        notificationId: stored[task.id] ?? allocate(task.id),
         groupId: TASK_GROUP,
         wantAgent: { pkgName: 'com.flash.app.harmonyos', abilityName: 'EntryAbility' },
         ringDuration: 0,
@@ -54,14 +79,24 @@ export class TaskReminderScheduler {
     for (const item of previous) {
       await reminderAgentManager.cancelReminder(item.reminderId);
     }
+    // Persist the mapping for tasks that still need reminders and drop the
+    // rest, so deleted or completed tasks release their ids.
+    const keep = new Set<string>(pending.map((task: TaskItem) => task.id));
+    for (const key of Object.keys(stored)) {
+      if (key !== COUNTER_KEY && !keep.has(key)) await idStore.delete(key);
+    }
+    for (const task of pending) {
+      await idStore.put(task.id, stored[task.id] ?? allocate(task.id));
+    }
+    await idStore.put(COUNTER_KEY, next);
+    await idStore.flush();
   }
 
-  private static notificationId(id: string): number {
-    let hash = 2166136261;
-    for (let index = 0; index < id.length; index++) {
-      hash ^= id.charCodeAt(index);
-      hash = Math.imul(hash, 16777619);
+  private static firstFree(ids: Map<string, number>, counter: number): number {
+    const used = new Set<number>(ids.values());
+    for (let candidate = 1; candidate <= counter; candidate++) {
+      if (!used.has(candidate)) return candidate;
     }
-    return Math.abs(hash % 2147483646) + 1;
+    return 1;
   }
 }
