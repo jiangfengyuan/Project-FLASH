@@ -7,14 +7,18 @@
 import Foundation
 
 enum DateFormatting {
-    // Swift 6 并发检查：formatter 实例仅在各方法内短时使用，标记 nonisolated(unsafe)
+    /// DateFormatter/ISO8601DateFormatter 的线程安全不再依赖文档口径（安全审计项）：
+    /// 共享实例统一经串行队列访问，避免并发 string(from:)/date(from:) 竞争；
+    /// nonisolated(unsafe) 仅为编译期标注，运行期由 formatterQueue 串行化
+    private static let formatterQueue = DispatchQueue(label: "com.flash.app.date-formatting")
+
     nonisolated(unsafe) private static let isoFormatter: ISO8601DateFormatter = {
         let f = ISO8601DateFormatter()
         f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return f
     }()
 
-    nonisolated(unsafe) private static let dayFormatter: DateFormatter = {
+    private static let dayFormatter: DateFormatter = {
         let f = DateFormatter()
         f.calendar = Calendar(identifier: .gregorian)
         f.locale = Locale(identifier: "en_US_POSIX")
@@ -22,7 +26,7 @@ enum DateFormatting {
         return f
     }()
 
-    nonisolated(unsafe) private static let monthFormatter: DateFormatter = {
+    private static let monthFormatter: DateFormatter = {
         let f = DateFormatter()
         f.calendar = Calendar(identifier: .gregorian)
         f.locale = Locale(identifier: "en_US_POSIX")
@@ -30,7 +34,7 @@ enum DateFormatting {
         return f
     }()
 
-    nonisolated(unsafe) private static let monthTitleFormatter: DateFormatter = {
+    private static let monthTitleFormatter: DateFormatter = {
         let f = DateFormatter()
         f.calendar = Calendar(identifier: .gregorian)
         f.locale = Locale(identifier: "zh_CN")
@@ -38,7 +42,7 @@ enum DateFormatting {
         return f
     }()
 
-    nonisolated(unsafe) private static let timeFormatter: DateFormatter = {
+    private static let timeFormatter: DateFormatter = {
         let f = DateFormatter()
         f.calendar = Calendar(identifier: .gregorian)
         f.locale = Locale(identifier: "en_US_POSIX")
@@ -54,25 +58,41 @@ enum DateFormatting {
     }()
 
     /// ISO-8601（与 JS Date#toISOString / Android ISO_INSTANT 同格式）
-    static func isoNow() -> String { isoFormatter.string(from: Date()) }
+    static func isoNow() -> String {
+        let now = Date()
+        return formatterQueue.sync { isoFormatter.string(from: now) }
+    }
 
     /// yyyy-MM-dd 本地日期
-    static func today() -> String { dayFormatter.string(from: Date()) }
+    static func today() -> String {
+        let now = Date()
+        return formatterQueue.sync { dayFormatter.string(from: now) }
+    }
 
-    static func dayString(_ date: Date) -> String { dayFormatter.string(from: date) }
+    static func dayString(_ date: Date) -> String {
+        formatterQueue.sync { dayFormatter.string(from: date) }
+    }
 
-    static func parseDay(_ string: String) -> Date? { dayFormatter.date(from: string) }
+    static func parseDay(_ string: String) -> Date? {
+        formatterQueue.sync { dayFormatter.date(from: string) }
+    }
 
     /// yyyy-MM 本地月份
-    static func monthString(_ date: Date) -> String { monthFormatter.string(from: date) }
+    static func monthString(_ date: Date) -> String {
+        formatterQueue.sync { monthFormatter.string(from: date) }
+    }
 
     /// 中文月份标题，如「2026年8月」
-    static func monthTitle(_ date: Date) -> String { monthTitleFormatter.string(from: date) }
+    static func monthTitle(_ date: Date) -> String {
+        formatterQueue.sync { monthTitleFormatter.string(from: date) }
+    }
 
     /// ISO-8601 → 本地时区 HH:mm；解析失败返回 "--:--"
     static func localTime(fromISO iso: String) -> String {
-        guard let date = isoFormatter.date(from: iso) ?? isoFormatterNoFraction.date(from: iso)
-        else { return "--:--" }
-        return timeFormatter.string(from: date)
+        let date = formatterQueue.sync {
+            isoFormatter.date(from: iso) ?? isoFormatterNoFraction.date(from: iso)
+        }
+        guard let date else { return "--:--" }
+        return formatterQueue.sync { timeFormatter.string(from: date) }
     }
 }

@@ -37,8 +37,7 @@ struct TaskItem: Identifiable, Equatable {
             guard let dueAt,
                   let timeZone,
                   let zone = TimeZone(identifier: timeZone),
-                  let date = TaskItem.isoFraction.date(from: dueAt)
-                    ?? TaskItem.isoWholeSecond.date(from: dueAt) else { return nil }
+                  let date = TaskItem.parseFraction(dueAt) ?? TaskItem.parseWholeSecond(dueAt) else { return nil }
             var calendar = Calendar(identifier: .gregorian)
             calendar.timeZone = zone
             let components = calendar.dateComponents([.year, .month, .day], from: date)
@@ -49,6 +48,8 @@ struct TaskItem: Identifiable, Equatable {
         }
     }
 
+    // 共享 ISO8601DateFormatter 经串行队列访问（安全审计项）；nonisolated(unsafe) 仅为编译期标注
+    private static let isoQueue = DispatchQueue(label: "com.flash.app.task-item.iso")
     nonisolated(unsafe) private static let isoFraction: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
@@ -60,4 +61,12 @@ struct TaskItem: Identifiable, Equatable {
         formatter.formatOptions = [.withInternetDateTime]
         return formatter
     }()
+
+    private static func parseFraction(_ string: String) -> Date? {
+        isoQueue.sync { isoFraction.date(from: string) }
+    }
+
+    private static func parseWholeSecond(_ string: String) -> Date? {
+        isoQueue.sync { isoWholeSecond.date(from: string) }
+    }
 }

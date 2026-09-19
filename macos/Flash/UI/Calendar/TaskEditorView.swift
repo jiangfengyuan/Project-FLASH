@@ -72,7 +72,7 @@ struct TaskEditorView: View {
     }
 
     private func makeTask() -> TaskItem {
-        let now = Self.iso.string(from: Date())
+        let now = Self.isoFractionString(from: Date())
         let anchor: Date
         if allDay {
             var components = Calendar.current.dateComponents([.year, .month, .day], from: dueDate)
@@ -90,9 +90,9 @@ struct TaskEditorView: View {
             importance: task?.importance ?? 0,
             dueKind: allDay ? .allDay : .dateTime,
             dueDate: allDay ? DateFormatting.dayString(dueDate) : nil,
-            dueAt: allDay ? nil : Self.iso.string(from: dueDate),
+            dueAt: allDay ? nil : Self.isoFractionString(from: dueDate),
             timeZone: allDay ? nil : editorTimeZone.identifier,
-            reminderAt: reminderMinutes.map { Self.iso.string(from: anchor.addingTimeInterval(-Double($0 * 60))) },
+            reminderAt: reminderMinutes.map { Self.isoFractionString(from: anchor.addingTimeInterval(-Double($0 * 60))) },
             completedAt: task?.completedAt,
             createdAt: task?.createdAt ?? now,
             updatedAt: now
@@ -101,11 +101,11 @@ struct TaskEditorView: View {
 
     private static func dateForTask(_ task: TaskItem) -> Date? {
         if task.dueKind == .allDay, let day = task.dueDate { return DateFormatting.parseDay(day) }
-        return task.dueAt.flatMap { iso.date(from: $0) ?? isoWhole.date(from: $0) }
+        return task.dueAt.flatMap { parseISO($0) }
     }
 
     private static func reminderOffset(task: TaskItem?, dueDate: Date) -> Int? {
-        guard let task, let reminder = task.reminderAt.flatMap({ iso.date(from: $0) ?? isoWhole.date(from: $0) }) else {
+        guard let task, let reminder = task.reminderAt.flatMap({ parseISO($0) }) else {
             return nil
         }
         let anchor: Date
@@ -120,10 +120,20 @@ struct TaskEditorView: View {
         return [0, 15, 60, 1440].contains(minutes) ? minutes : nil
     }
 
+    // 共享 ISO8601DateFormatter 经串行队列访问（安全审计项）；nonisolated(unsafe) 仅为编译期标注
+    private static let isoQueue = DispatchQueue(label: "com.flash.app.task-editor.iso")
     nonisolated(unsafe) private static let iso: ISO8601DateFormatter = {
         let value = ISO8601DateFormatter(); value.formatOptions = [.withInternetDateTime, .withFractionalSeconds]; return value
     }()
     nonisolated(unsafe) private static let isoWhole: ISO8601DateFormatter = {
         let value = ISO8601DateFormatter(); value.formatOptions = [.withInternetDateTime]; return value
     }()
+
+    private static func isoFractionString(from date: Date) -> String {
+        isoQueue.sync { iso.string(from: date) }
+    }
+
+    private static func parseISO(_ string: String) -> Date? {
+        isoQueue.sync { iso.date(from: string) ?? isoWhole.date(from: string) }
+    }
 }
