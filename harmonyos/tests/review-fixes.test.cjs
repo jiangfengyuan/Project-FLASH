@@ -15,7 +15,7 @@ function runtime() {
 }
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const flush = () => new Promise(resolve => setImmediate(resolve));
-async function until(condition, tries = 20) {
+async function until(condition, tries = 1000) {
   for (let i = 0; i < tries && !condition(); i++) await flush();
 }
 
@@ -74,6 +74,10 @@ test('export succeeds when writeSync reports the full byte count', async () => {
 // --- 2/3. backup controller: stale overwrite preview and readiness ----------
 
 function backupStore(data) {
+  const sameData = (expected, current) =>
+    ['logs', 'emotions', 'tasks'].every(section =>
+      expected[section].length === current[section].length &&
+      expected[section].every((item, index) => item === current[section][index]));
   return {
     applied: undefined,
     merged: undefined,
@@ -86,6 +90,12 @@ function backupStore(data) {
     async replaceAll(logs, emotions, tasks) {
       this.applied = { logs, emotions, tasks };
       this.data = { logs: logs.slice(), emotions: emotions.slice(), tasks: tasks.slice() };
+    },
+    async replaceAllIfCurrent(logs, emotions, tasks, expected) {
+      if (!sameData(expected, this.snapshot())) return false;
+      this.applied = { logs, emotions, tasks };
+      this.data = { logs: logs.slice(), emotions: emotions.slice(), tasks: tasks.slice() };
+      return true;
     },
     async mergeAll(logs, emotions, tasks) { this.merged = { logs, emotions, tasks }; }
   };
@@ -215,23 +225,69 @@ test('appVersion comes from bundle info and notes stay empty', async () => {
   }
 });
 
-// --- 7. LAN transfer hardening -------------------------------------------------
+// --- 7. LAN transfer hardening (lan-handshake-v1.1) -----------------------------
 
-function networkOverride() {
+const nodeCrypto = require('node:crypto');
+
+// Deterministic byte source: 1, 2, 3, ... so tests can predict the PIN draw
+// ([1,2,3,4] -> 0x01020304 -> '909060') while nonces stay unique per length.
+function deterministicRandom() {
+  let state = 0;
+  return (length) => {
+    const bytes = [];
+    for (let index = 0; index < length; index++) {
+      state = (state + 1) & 0xff;
+      bytes.push(state === 0 ? 1 : state);
+    }
+    return bytes;
+  };
+}
+
+// Spec-exact reference implementations, independent of the module under test.
+function referenceProof(pin, nonceHex) {
+  return nodeCrypto.createHmac('sha256', Buffer.from(pin, 'ascii'))
+    .update(Buffer.from(`flash-aero-handshake:${nonceHex}`, 'ascii'))
+    .digest().toString('hex').slice(0, 32);
+}
+
+function referenceMac(pin, payload) {
+  return nodeCrypto.createHmac('sha256', Buffer.from(pin, 'ascii'))
+    .update(Buffer.from(payload)).digest().toString('hex');
+}
+
+function cryptoOverride(randomFn) {
+  return { cryptoFramework: {
+    createRandom: () => ({ generateRandomSync: (length) => ({ data: randomFn(length) }) }),
+    createSymKeyGenerator: () => ({
+      convertKey: async (blob) => ({ blob: blob.data }),
+      convertKeySync: (blob) => ({ blob: blob.data })
+    }),
+    createMac: () => {
+      let hmac;
+      return {
+        init: async (key) => { hmac = nodeCrypto.createHmac('sha256', Buffer.from(key.blob)); },
+        update: async (data) => { hmac.update(Buffer.from(data.data)); },
+        doFinal: async () => ({ data: new Uint8Array(hmac.digest()) })
+      };
+    }
+  } };
+}
+
+function networkOverride(randomFn = deterministicRandom()) {
   const servers = [];
   const connections = [];
   function fakeConnection() {
     const connection = { handlers: {}, closed: false, sent: [],
       on(event, callback) { this.handlers[event] = callback; },
       emit(text) { this.handlers.message?.({ message: new TextEncoder().encode(text) }); },
+      emitClose() { this.handlers.close?.(); },
       async send(payload) { this.sent.push(payload.data); },
       close() { this.closed = true; } };
     connections.push(connection);
     return connection;
   }
   const kit = {
-    '@kit.CryptoArchitectureKit': { cryptoFramework: {
-      createRandom: () => ({ generateRandomSync: () => ({ data: [0x04, 0xD2] }) }) } },
+    '@kit.CryptoArchitectureKit': cryptoOverride(randomFn),
     '@kit.NetworkKit': {
       mdns: {
         addLocalService: async (context, info) => info,
@@ -269,39 +325,64 @@ function transferLoader(net) {
   return createLoader({ 'data/LocalBackupTransfer': null, ...net.kit });
 }
 
-test('only well-formed wrong-PIN requests count against the attempt limit', async () => {
+function lastChallengeLine(client) {
+  const line = client.sent.filter(item => typeof item === 'string' && item.startsWith('CHALLENGE ')).pop();
+  assert.ok(line, 'receiver must send a CHALLENGE line');
+  return line.slice('CHALLENGE '.length, -1);
+}
+
+// Malformed traffic and excess challenges never get proof answers.
+test('sender drops malformed traffic silently and caps proofs per connection', async () => {
   const net = networkOverride();
   const { LocalBackupSender } = transferLoader(net)('data/LocalBackupTransfer');
   let finished;
   const sender = new LocalBackupSender({}, '{}', success => { finished = success; });
   await sender.start();
   try {
-    assert.equal(sender.pin, '1234');
     const server = net.servers[0];
-    for (let i = 0; i < 6; i++) {
-      const connection = net.fakeConnection();
-      server.handlers.connect(connection);
-      connection.emit('GET / HTTP/1.0\r\n');
-      await until(() => connection.closed);
-      assert.deepEqual(connection.sent, [], 'malformed traffic gets no reply');
+    const garbage = net.fakeConnection();
+    server.handlers.connect(garbage);
+    garbage.emit('GET / HTTP/1.0\r\n');
+    await until(() => garbage.closed);
+    assert.deepEqual(garbage.sent, [], 'malformed traffic gets no reply');
+    assert.equal(finished, undefined, 'malformed requests never end the session');
+
+    const connection = net.fakeConnection();
+    server.handlers.connect(connection);
+    const nonce = 'a1'.repeat(16);
+    for (let round = 0; round < 5; round++) {
+      connection.emit(`CHALLENGE ${nonce}\n`);
+      await until(() => connection.sent.length >= (round + 1) * 3);
+      assert.match(connection.sent[round * 3], /^FLASH-AERO\/1 [0-9a-f]{32}\n$/);
+      assert.match(connection.sent[round * 3 + 1], /^OK 2 [0-9a-f]{64}\n$/);
     }
-    assert.equal(finished, undefined, 'malformed requests never consume attempts');
-    for (let i = 0; i < 4; i++) {
-      const connection = net.fakeConnection();
-      server.handlers.connect(connection);
-      connection.emit('FLASH-AERO/1 9999\n');
-      await until(() => connection.closed);
-      assert.deepEqual(connection.sent, ['ERR PIN\n']);
-      assert.equal(finished, undefined);
-    }
-    const last = net.fakeConnection();
-    server.handlers.connect(last);
-    last.emit('FLASH-AERO/1 9999\n');
-    await until(() => finished !== undefined);
-    assert.equal(finished, false, 'fifth wrong PIN ends the session');
+    assert.equal(connection.sent.length, 15, 'five proofs served');
+    connection.emit(`CHALLENGE ${nonce}\n`);
+    await until(() => connection.closed);
+    assert.equal(connection.sent.length, 15, 'a sixth challenge gets no answer');
+    assert.equal(finished, undefined, 'looping peer ends only its own connection');
   } finally {
     await sender.stop(false);
   }
+});
+
+test('sender completes the session when the verifier closes after a served payload', async () => {
+  const net = networkOverride();
+  const { LocalBackupSender } = transferLoader(net)('data/LocalBackupTransfer');
+  let finished;
+  const sender = new LocalBackupSender({}, '{"ok":true}', success => { finished = success; });
+  await sender.start();
+  const server = net.servers[0];
+  const connection = net.fakeConnection();
+  server.handlers.connect(connection);
+  const nonce = 'c3'.repeat(16);
+  connection.emit(`CHALLENGE ${nonce}\n`);
+  await until(() => connection.sent.length === 3);
+  assert.equal(new TextDecoder().decode(connection.sent[2]), '{"ok":true}');
+  assert.equal(finished, undefined, 'sender waits for the verifier instead of self-closing');
+  connection.emitClose();
+  await until(() => finished !== undefined);
+  assert.equal(finished, true, 'peer close after a served payload ends the session as success');
 });
 
 test('an idle connection is dropped and the slot is released', async () => {
@@ -330,24 +411,70 @@ test('an idle connection is dropped and the slot is released', async () => {
   }
 });
 
+const FAST_BACKOFF = [1, 2, 3, 4];
+
+test('receiver rejects wrong proofs with backoff and disconnects on the fifth failure', async () => {
+  const net = networkOverride();
+  const { LocalBackupReceiver } = transferLoader(net)('data/LocalBackupTransfer');
+  const device = { id: 'd', name: 'n', host: '127.0.0.1', port: 4321 };
+  const receiver = LocalBackupReceiver.start(device, () => '123456', 60000, 60000, FAST_BACKOFF);
+  // Attach the rejection expectation up front: the result rejects while the
+  // test is still polling for the close, and a transiently unhandled
+  // rejection would fail the run under node --test.
+  const rejection = assert.rejects(receiver.result, /PIN 不正确/);
+  const client = net.client();
+  await flush();
+  for (let round = 0; round < 4; round++) {
+    const nonce = lastChallengeLine(client);
+    // The pipelined tail after a rejected proof is drained, not parsed.
+    client.emit(`FLASH-AERO/1 ${referenceProof('999999', nonce)}\nOK 2 ${referenceMac('999999', '{}')}\n{}`);
+    await until(() => client.sent.filter(item => typeof item === 'string' && item.startsWith('CHALLENGE ')).length === round + 2);
+  }
+  const lastNonce = lastChallengeLine(client);
+  client.emit(`FLASH-AERO/1 ${referenceProof('999999', lastNonce)}\n`);
+  await until(() => client.closed);
+  assert.ok(client.sent.includes('ERR PIN\n'), 'fifth failure replies ERR PIN before closing');
+  await rejection;
+});
+
+test('receiver picks up a corrected PIN on re-challenge', async () => {
+  const net = networkOverride();
+  const { LocalBackupReceiver } = transferLoader(net)('data/LocalBackupTransfer');
+  const device = { id: 'd', name: 'n', host: '127.0.0.1', port: 4321 };
+  let entered = '111111';
+  const receiver = LocalBackupReceiver.start(device, () => entered, 60000, 60000, FAST_BACKOFF);
+  const client = net.client();
+  await flush();
+  // The sender proves knowledge of the displayed PIN '999999' while the user
+  // has typed '111111'; the answer (always pipelined) is rejected and drained.
+  client.emit(`FLASH-AERO/1 ${referenceProof('999999', lastChallengeLine(client))}\nOK 2 ${referenceMac('999999', '{}')}\n{}`);
+  await until(() => client.sent.filter(item => typeof item === 'string' && item.startsWith('CHALLENGE ')).length === 2);
+  entered = '999999';
+  const nonce = lastChallengeLine(client);
+  const payload = '{"ok":true}';
+  client.emit(`FLASH-AERO/1 ${referenceProof('999999', nonce)}\nOK ${payload.length} ${referenceMac('999999', payload)}\n${payload}`);
+  assert.equal(await receiver.result, payload);
+});
+
 test('receiver timeout renews with arriving data instead of a hard deadline', async () => {
   const net = networkOverride();
   const { LocalBackupReceiver } = transferLoader(net)('data/LocalBackupTransfer');
   const device = { id: 'd', name: 'n', host: '127.0.0.1', port: 4321 };
-  const receiver = LocalBackupReceiver.start(device, '1234', 100);
+  const receiver = LocalBackupReceiver.start(device, () => '123456', 100, 60000, FAST_BACKOFF);
   const client = net.client();
   await flush();
-  client.emit('OK 2\n');
+  const payload = '{}';
+  client.emit(`FLASH-AERO/1 ${referenceProof('123456', lastChallengeLine(client))}\nOK 2 ${referenceMac('123456', payload)}\n`);
   await sleep(70);
   client.emit('{');
   await sleep(70); // 140 ms in, beyond the idle window but never idle that long
   client.emit('}');
   assert.equal(await receiver.result, '{}');
 
-  const stalled = LocalBackupReceiver.start(device, '1234', 100);
+  const stalled = LocalBackupReceiver.start(device, () => '123456', 100, 60000, FAST_BACKOFF);
   const stalledClient = net.client();
   await flush();
-  stalledClient.emit('OK 2\n');
+  stalledClient.emit(`FLASH-AERO/1 ${referenceProof('123456', lastChallengeLine(stalledClient))}\nOK 2 ${referenceMac('123456', payload)}\n{`);
   await assert.rejects(stalled.result, /接收超时/);
   assert.ok(stalledClient.closed);
 });

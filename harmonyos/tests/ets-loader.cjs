@@ -29,14 +29,30 @@ function nodeFileIo() {
     writeSync: (fd, data, options) => fs.writeSync(fd, data, null, options?.encoding ?? 'utf-8'),
     readSync: (fd, buffer, options) =>
       fs.readSync(fd, Buffer.from(buffer), 0, options?.length ?? buffer.byteLength, 0),
-    statSync: fd => ({ size: fs.fstatSync(fd).size }),
+    statSync: fd => {
+      const stat = fs.fstatSync(fd);
+      // HarmonyOS Stat.mtime is seconds since epoch; match that shape.
+      return { size: stat.size, mtime: Math.floor(stat.mtime.getTime() / 1000) };
+    },
     closeSync: file => fs.closeSync(typeof file === 'object' ? file.fd : file)
   };
 }
 
+// Node's TextDecoder strips a leading BOM by default, while HarmonyOS
+// util.TextDecoder keeps it unless ignoreBOM:true ("ignore the BOM"). Emulate
+// the HarmonyOS option semantics so BOM behavior is tested as it runs.
 class NodeTextDecoder extends require('node:util').TextDecoder {
-  static create() { return new NodeTextDecoder('utf-8'); }
-  decodeToString(bytes) { return this.decode(bytes); }
+  static create(encoding, options) {
+    const decoder = new NodeTextDecoder(encoding ?? 'utf-8');
+    decoder.harmonyIgnoreBOM = options?.ignoreBOM === true;
+    return decoder;
+  }
+  decodeToString(bytes) {
+    const array = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+    const hadBOM = array.length >= 3 && array[0] === 0xEF && array[1] === 0xBB && array[2] === 0xBF;
+    const text = this.decode(array);
+    return hadBOM && !this.harmonyIgnoreBOM ? '\uFEFF' + text : text;
+  }
 }
 
 function createLoader(overrides = {}) {

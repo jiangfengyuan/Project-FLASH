@@ -201,7 +201,7 @@ test('cancelled discovery/receive and old sender failure cannot overwrite the ne
   const senders = [], discoveries = [], receivers = [];
   const load = createLoader({ 'data/LocalBackupTransfer': {
     LocalBackupSender: class {
-      constructor(context, json, done) { this.done = done; this.pin = '1234'; this.gate = deferred(); senders.push(this); }
+      constructor(context, json, done) { this.done = done; this.pin = '123456'; this.gate = deferred(); senders.push(this); }
       start() { return this.gate.promise; }
       stop() { this.done(false); }
     },
@@ -225,7 +225,7 @@ test('cancelled discovery/receive and old sender failure cannot overwrite the ne
   await old;
   assert.equal(state.lanMode, P.RECEIVING);
   discoveries[0].changed([{ id: 'device', name: 'sender' }]);
-  state.selectedLanDevice = 'device'; state.lanEnteredPin = '1234';
+  state.selectedLanDevice = 'device'; state.lanEnteredPin = '123456';
   const receiving = controller.receiveLan();
   controller.stopLan();
   controller.startLanReceive();
