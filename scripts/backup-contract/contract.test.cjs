@@ -61,6 +61,24 @@ test('real Gregorian dates, offset timestamps and rejected ambiguous instants', 
   }
 });
 
+test('due.timeZone matches Intl.supportedValuesOf exactly (no ICU aliases)', () => {
+  const listed = new Set(Intl.supportedValuesOf('timeZone'));
+  const probe = ['Asia/Shanghai', 'America/New_York', 'Europe/Berlin', 'Asia/Tokyo', 'Australia/Sydney',
+    'utc', 'Zulu', 'GMT0', 'GMT', 'US/Eastern', 'Etc/UTC', 'UTC', 'Etc/GMT+1', 'CET',
+    'GMT+08:00', '+08:00', 'Flash/Unknown', 'asia/shanghai'];
+  for (const zone of probe) {
+    const d = structuredClone(full);
+    d.data.tasks[0].due.timeZone = zone;
+    const result = validateDocument(d);
+    if (listed.has(zone)) {
+      assert.equal(result.valid, true, `expected accepted: ${zone}`);
+    } else {
+      assert.equal(result.valid, false, `expected rejected: ${zone}`);
+      assert.equal(result.errors.some(e => e.path === '/data/tasks/0/due/timeZone' && e.code === 'TIME_ZONE'), true, zone);
+    }
+  }
+});
+
 test('compare normalized milliseconds, not timestamp text or submillisecond precision', () => {
   const d = structuredClone(full);
   d.data.tasks[0].createdAt = '2026-09-05T08:00:00.000999999+08:00';

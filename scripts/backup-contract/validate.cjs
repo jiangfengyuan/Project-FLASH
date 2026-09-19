@@ -76,6 +76,15 @@ function validInstant(value) {
   return year >= 1 && year <= 9999;
 }
 
+// Exact whitelist of canonical IANA identifiers. Deliberately NOT an
+// Intl.DateTimeFormat probe: ICU accepts aliases (utc, Zulu, GMT0, GMT,
+// US/Eastern, ...) which must not round-trip into backup files. Note that
+// V8's supportedValuesOf('timeZone') excludes UTC and the Etc/* family.
+const SUPPORTED_IANA_ZONES = new Set(Intl.supportedValuesOf('timeZone'));
+function isSupportedIANAZone(value) {
+  return typeof value === 'string' && SUPPORTED_IANA_ZONES.has(value);
+}
+
 const ajv = new Ajv2020({ allErrors: true, strict: true });
 ajv.addFormat('date', validDay);
 ajv.addFormat('date-time', validInstant);
@@ -104,12 +113,9 @@ function validateDocument(document) {
       if (Date.parse(item.updatedAt) < Date.parse(item.createdAt)) {
         fail(`${location}/updatedAt`, 'TIME_ORDER', 'updatedAt precedes createdAt at millisecond precision');
       }
-      if (item.due.kind === 'dateTime') {
-        try {
-          if (/^(?:[+-]|GMT[+-]|UTC[+-])/.test(item.due.timeZone)) throw new Error('Expected named IANA zone');
-          new Intl.DateTimeFormat('en', { timeZone: item.due.timeZone });
-        }
-        catch (_) { fail(`${location}/due/timeZone`, 'TIME_ZONE', 'Time zone is unsupported by this validator runtime'); }
+      if (item.due.kind === 'dateTime' && !isSupportedIANAZone(item.due.timeZone)) {
+        fail(`${location}/due/timeZone`, 'TIME_ZONE',
+          'Time zone must be a canonical IANA identifier from Intl.supportedValuesOf(\'timeZone\') (exact match; ICU aliases such as utc, Zulu, GMT0, US/Eastern are rejected)');
       }
     });
   }

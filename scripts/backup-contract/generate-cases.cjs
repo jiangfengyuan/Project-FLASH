@@ -57,7 +57,7 @@ d.data.tasks[0].updatedAt = '2026-09-05T00:00:00.000000001Z';
 d.data.logs[0].createdAt = '2026-09-05T23:59:00+23:59';
 write('valid-boundaries', d, true);
 const zones = structuredClone(full);
-zones.data.tasks = ['UTC', 'Asia/Shanghai', 'America/New_York', 'Europe/Berlin', 'Etc/GMT+1'].map((timeZone, i) => ({
+zones.data.tasks = ['Asia/Shanghai', 'America/New_York', 'Europe/Berlin', 'Asia/Tokyo', 'Australia/Sydney'].map((timeZone, i) => ({
   ...full.data.tasks[0], id: `55555555-5555-4555-8555-${String(i).padStart(12, '0')}`,
   due: {kind: 'dateTime', at: '2026-11-01T01:30:00-04:00', timeZone}
 }));
