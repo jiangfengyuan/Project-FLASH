@@ -5,6 +5,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import Foundation
+import Darwin
 
 /// 创建供 AirDrop、信息、邮件或云盘分享的一次性 JSON 副本。
 /// 文件只位于 App 沙箱缓存目录，接收端仍由 BackupService 完整校验。
@@ -67,16 +68,24 @@ enum BackupTransfer {
         let fileManager = FileManager.default
         let temporary = destination.deletingLastPathComponent()
             .appendingPathComponent(".flash-backup-\(UUID().uuidString).tmp")
-        try json.write(to: temporary, atomically: true, encoding: .utf8)
-        defer { try? fileManager.removeItem(at: temporary) }
-        do {
-            try fileManager.setAttributes([.posixPermissions: NSNumber(value: 0o600)],
-                                          ofItemAtPath: temporary.path)
-        } catch {
-            // Some user-selected volumes do not implement POSIX modes. The
-            // system's volume permissions remain authoritative there.
-            print("chmod temp 文件失败: \(error)")
+        try json.write(to: temporary, atomically: false, encoding: .utf8)
+        // 明文备份在临时文件上收紧到 0o600 再原子换入（rename 同卷内属性随 inode 生效）。
+        // 本地卷（MNT_LOCAL：APFS/HFS/直挂卷）chmod 失败视为导出失败；
+        // 网络卷（SMB/NFS 等）不实现 POSIX 模式，该卷的系统权限仍为最终权威。
+        if isLocalVolume(destination) {
+            do {
+                try fileManager.setAttributes([.posixPermissions: NSNumber(value: 0o600)],
+                                              ofItemAtPath: temporary.path)
+            } catch {
+                try? fileManager.removeItem(at: temporary)
+                throw BackupTransferError.permissionTighteningFailed
+            }
+        } else {
+            // 网络卷（SMB/NFS 等）不实现 POSIX 模式：尽力收紧，失败则以该卷系统权限为准
+            try? fileManager.setAttributes([.posixPermissions: NSNumber(value: 0o600)],
+                                           ofItemAtPath: temporary.path)
         }
+        defer { try? fileManager.removeItem(at: temporary) }
 
         if let finalize {
             try finalize(temporary, destination)
@@ -86,4 +95,16 @@ enum BackupTransfer {
             try fileManager.moveItem(at: temporary, to: destination)
         }
     }
+    /// 目标路径所在卷是否为本地卷（MNT_LOCAL：APFS/HFS/直挂卷；SMB/NFS 等网络卷为否）。
+    /// 查询失败按本地卷处理（chmod 失败从严判为导出失败）。
+    static func isLocalVolume(_ url: URL) -> Bool {
+        var stats = statfs()
+        guard statfs(url.path, &stats) == 0 else { return true }
+        return (Int32(stats.f_flags) & MNT_LOCAL) != 0
+    }
+}
+
+enum BackupTransferError: Error {
+    /// 本地卷 chmod 0o600 收紧失败：明文导出视为失败，不静默留下宽松权限文件
+    case permissionTighteningFailed
 }

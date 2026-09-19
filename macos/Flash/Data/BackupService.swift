@@ -48,6 +48,8 @@ struct ImportPreview {
 private struct StrictJSONScanner {
     private let scalars: [Unicode.Scalar]
     private var index = 0
+    /// JSON 值计数：在 JSONSerialization 前拦截超大 token 负载，防序列化放大内存
+    private var tokenCount = 0
 
     init(_ text: String) { scalars = Array(text.unicodeScalars) }
 
@@ -58,6 +60,10 @@ private struct StrictJSONScanner {
     }
 
     private mutating func value(depth: Int) throws {
+        tokenCount += 1
+        // token/元素数预算：合法文件由 3 分区 × ≤100,000 条记录约束上限，
+        // 超出即非契约输入，拒绝在 JSONSerialization 之前
+        guard tokenCount <= BackupService.maxJSONTokenCount else { throw BackupError.fileTooLarge }
         whitespace()
         guard depth <= 128, index < scalars.count else { throw BackupError.invalidJSON }
         switch scalars[index].value {
@@ -184,12 +190,17 @@ enum BackupService {
     static let maxFileBytes = 50 * 1024 * 1024
     private static let maxEntryCount = 100_000
     private static let maxTextLength = 100_000
+    /// JSON 值（token）预算：严格入口在 JSONSerialization 前拦截超大负载。
+    /// 合法 v2 文件上界 ≈ 3 分区 × 100,000 条 × ≤30 token（含嵌套 due）≈ 9M，取 10M 留量
+    static let maxJSONTokenCount = 10_000_000
 
     private static let uuidRegex = try! NSRegularExpression(
         pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
     private static let dayRegex = try! NSRegularExpression(pattern: "^\\d{4}-\\d{2}-\\d{2}$")
 
-    // ISO8601DateFormatter 文档保证线程安全，提取共享实例避免逐条 new（对齐 DateFormatting 的 nonisolated(unsafe) 模式）
+    // ISO8601DateFormatter 共享实例经串行队列访问（安全审计项）：不再依赖
+    // 「文档保证线程安全」的口径；nonisolated(unsafe) 仅为编译期标注
+    private static let isoQueue = DispatchQueue(label: "com.flash.app.backup-service.iso")
     nonisolated(unsafe) private static let isoFractionFormatter: ISO8601DateFormatter = {
         let f = ISO8601DateFormatter()
         f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
@@ -200,6 +211,14 @@ enum BackupService {
         f.formatOptions = [.withInternetDateTime]
         return f
     }()
+
+    private static func isoWholeSecondDate(from string: String) -> Date? {
+        isoQueue.sync { isoWholeSecondFormatter.date(from: string) }
+    }
+
+    private static func isoWholeSecondString(from date: Date) -> String {
+        isoQueue.sync { isoWholeSecondFormatter.string(from: date) }
+    }
 
     // MARK: - Export
 
@@ -277,9 +296,18 @@ enum BackupService {
 
     static func parse(_ json: String) throws -> ImportPreview {
         if json.utf8.count > maxFileBytes { throw BackupError.fileTooLarge }
+        return try parse(root: serializedRoot(json))
+    }
+
+    /// 单次 JSONSerialization：parse/parseStrict/parseRecovery 复用同一 root，
+    /// 避免同一文本被全量解析多次
+    private static func serializedRoot(_ json: String) throws -> [String: Any] {
         let object = try? JSONSerialization.jsonObject(with: Data(json.utf8))
         guard let root = object as? [String: Any] else { throw BackupError.invalidJSON }
+        return root
+    }
 
+    private static func parse(root: [String: Any]) throws -> ImportPreview {
         guard let versionValue = root["version"], !(versionValue is NSNull) else {
             throw BackupError.missingVersion
         }
@@ -368,9 +396,10 @@ enum BackupService {
         if json.utf8.count > maxFileBytes { throw BackupError.fileTooLarge }
         var scanner = StrictJSONScanner(json)
         try scanner.validate()
-        let result = try parse(json)
+        // 单次序列化：解析与字段检查共用同一 root（原实现在此全量解析两次）
+        let root = try serializedRoot(json)
+        let result = try parse(root: root)
         guard result.sourceVersion == backupVersion else { throw BackupError.contract("/version") }
-        let root = try JSONSerialization.jsonObject(with: Data(json.utf8)) as! [String: Any]
         try checkFields(root, required: ["version", "exportedAt", "appVersion", "notes", "schemas", "data"], path: "/")
         guard let exportedAt = root["exportedAt"] as? String, normalizeISODate(exportedAt) != nil,
               root["appVersion"] is String, let notes = root["notes"] as? String, notes.utf16.count <= maxTextLength else {
@@ -411,8 +440,9 @@ enum BackupService {
     }
 
     static func parseRecovery(_ json: String) throws -> ImportPreview {
-        let result = try parse(json)
-        let root = try JSONSerialization.jsonObject(with: Data(json.utf8)) as! [String: Any]
+        if json.utf8.count > maxFileBytes { throw BackupError.fileTooLarge }
+        let root = try serializedRoot(json)
+        let result = try parse(root: root)
         let legacy = result.sourceVersion == legacyBackupVersion
         try checkFields(root, required: [], optional: legacy ? ["version", "exportedAt", "appVersion", "notes", "logs", "emotions"] : ["version", "exportedAt", "appVersion", "notes", "schemas", "data"], path: "/")
         let data = legacy ? root : root["data"] as! [String: Any]
@@ -594,8 +624,8 @@ enum BackupService {
         return TimeZone(identifier: value) != nil
     }
 
-    private static let minimumInstant = isoWholeSecondFormatter.date(from: "0001-01-01T00:00:00Z")!
-    private static let maximumInstant = isoWholeSecondFormatter.date(from: "9999-12-31T23:59:59Z")!
+    private static let minimumInstant = isoWholeSecondDate(from: "0001-01-01T00:00:00Z")!
+    private static let maximumInstant = isoWholeSecondDate(from: "9999-12-31T23:59:59Z")!
 
     private static func normalizeISODate(_ value: String) -> String? {
         let pattern = #"^([0-9]{4}-[0-9]{2}-[0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})(?:\.([0-9]{1,9}))?(Z|[+-][0-9]{2}:[0-9]{2})$"#
@@ -616,10 +646,10 @@ enum BackupService {
         }
         // Parse whole UTC seconds, then append the original truncated millisecond digits.
         // This avoids floating-point rounding of submillisecond input on Foundation.
-        guard let base = isoWholeSecondFormatter.date(from: "\(day)T\(String(chars[11..<19]))Z") else { return nil }
+        guard let base = isoWholeSecondDate(from: "\(day)T\(String(chars[11..<19]))Z") else { return nil }
         let instant = base.addingTimeInterval(Double(-offset))
         guard instant >= minimumInstant, instant <= maximumInstant else { return nil }
-        let utc = isoWholeSecondFormatter.string(from: instant)
+        let utc = isoWholeSecondString(from: instant)
         guard utc.count == 20, let year = Int(utc.prefix(4)), (1...9999).contains(year) else { return nil }
         let fraction = chars.count > 19 && chars[19] == "." ? String(chars[20..<(chars.count - zone.count)]) : ""
         let milliseconds = String((fraction + "000").prefix(3))

@@ -64,6 +64,21 @@ struct BackupTransferTests {
             .allSatisfy { !$0.hasPrefix(".flash-backup-") || !$0.hasSuffix(".tmp") })
     }
 
+    @Test func exportedFileIsTightenedToOwnerOnlyPermissions() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("flash-export-test-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let destination = root.appendingPathComponent("backup.json")
+
+        try BackupTransfer.writeExportFile(json: "sensitive-plaintext", to: destination)
+
+        // 本地卷 chmod 必须生效：明文备份不允许以宽松权限落盘
+        let attributes = try FileManager.default.attributesOfItem(atPath: destination.path)
+        let permissions = try #require(attributes[.posixPermissions] as? Int)
+        #expect(permissions == 0o600)
+    }
+
     private enum InjectedExportError: Error {
         case failed
     }

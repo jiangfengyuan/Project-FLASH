@@ -209,6 +209,16 @@ struct BackupServiceTests {
         }
     }
 
+    @Test func tokenBudgetRejectsOversizedDocumentBeforeSerialization() {
+        // 合法 JSON 但 token（元素/值）数超预算：严格入口须在 JSONSerialization 前拒绝，
+        // 防止序列化放大内存。元素数 = 预算 + 1，字节数远小于 50MB。
+        let elements = BackupService.maxJSONTokenCount
+        let json = "[" + String(repeating: "1,", count: elements) + "1]"
+        #expect(throws: BackupError.fileTooLarge) {
+            _ = try BackupService.parseStrict(json)
+        }
+    }
+
     @Test func oversizedAndInvalidOptionalFieldsAreSkipped() throws {
         let oversized = String(repeating: "x", count: 100_001)
         let json = """
