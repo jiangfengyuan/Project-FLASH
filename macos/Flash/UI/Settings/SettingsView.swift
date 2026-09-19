@@ -20,6 +20,9 @@ struct SettingsView: View {
     /// 独立保存待导入数据：首个 alert dismiss 会把 importPreview 置 nil，
     /// 覆盖导入的二次确认从 pendingImport 取，避免 guard 落空静默失效
     @State private var pendingImport: ImportPreview? = nil
+    /// 生成预览时的本地快照：覆盖导入必须先重校验（TOCTOU，对齐 HarmonyOS
+    /// BackupController.applyBackup），预览后本地新增的记录不得在覆盖时被静默删除
+    @State private var pendingSnapshot: FlashSnapshot? = nil
     @State private var showOverwriteConfirm = false
     @State private var showClearConfirm = false
     @State private var message: String? = nil
@@ -39,7 +42,13 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
-            Section("外观") {
+            Section {
+                Label("数据默认保存在此设备", systemImage: "internaldrive")
+                    .font(.headline)
+                Text("可导出备份或在可信局域网内传输")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+            Section("外观与使用") {
                 Picker("主题", selection: themeBinding) {
                     ForEach(ThemeMode.allCases, id: \.self) {
                         Text($0.displayName).tag($0)
@@ -50,7 +59,7 @@ struct SettingsView: View {
             .opacity(appearanceAppeared ? 1 : 0)
             .offset(y: !appearanceAppeared && !reduceMotion ? 6 : 0)
 
-            Section("数据") {
+            Section("数据与安全") {
                 Button("通过系统分享…") { transferBackup() }
                     .hoverFeedback(reduceMotion: reduceMotion)
                 HStack {
@@ -61,8 +70,6 @@ struct SettingsView: View {
                     .hoverFeedback(reduceMotion: reduceMotion)
                 Button("标准导入…") { chooseImportFile() }
                 Button("恢复损坏或旧版备份…") { chooseImportFile(recovery: true) }
-                    .hoverFeedback(reduceMotion: reduceMotion)
-                Button("清空全部数据…", role: .destructive) { showClearConfirm = true }
                     .hoverFeedback(reduceMotion: reduceMotion)
                 Text("通过系统分享传输明文 JSON；可选择 AirDrop、信息、邮件或云盘。")
                     .font(.caption)
@@ -82,9 +89,14 @@ struct SettingsView: View {
             .opacity(dataAppeared ? 1 : 0)
             .offset(y: !dataAppeared && !reduceMotion ? 6 : 0)
 
-            Section("关于") {
+            Section("危险操作") {
+                Text("清空后无法撤销，建议先导出备份。").font(.caption).foregroundStyle(.secondary)
+                Button("清空全部数据…", role: .destructive) { showClearConfirm = true }
+            }.disabled(isBusy || lanTransfer.mode != .idle)
+
+            Section("关于 Flash") {
                 LabeledContent("版本", value: appVersion)
-                Label("数据仅保存在本机，不会上传到任何服务器。", systemImage: "lock.shield")
+                Label("无云端账号，备份与传输由你主动发起。", systemImage: "lock.shield")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -139,7 +151,7 @@ struct SettingsView: View {
         .alert(recoveryImport ? "部分恢复预览（原文件不变）" : "标准导入预览", isPresented: previewPresented) {
             Button("按差异合并") { pendingImport = importPreview; confirmImport(overwrite: false) }
             Button("覆盖导入", role: .destructive) { pendingImport = importPreview; showOverwriteConfirm = true }
-            Button("取消", role: .cancel) { importPreview = nil; pendingImport = nil }
+            Button("取消", role: .cancel) { importPreview = nil; pendingImport = nil; pendingSnapshot = nil }
         } message: {
             if let preview = importPreview {
                 Text(importAnalysisText(preview))
@@ -147,7 +159,7 @@ struct SettingsView: View {
         }
         .alert("覆盖导入将清空现有全部数据，确定继续？", isPresented: $showOverwriteConfirm) {
             Button("覆盖导入", role: .destructive) { confirmImport(overwrite: true) }
-            Button("取消", role: .cancel) { pendingImport = nil }
+            Button("取消", role: .cancel) { pendingImport = nil; pendingSnapshot = nil }
         }
         .alert("清空全部数据？此操作不可撤销。", isPresented: $showClearConfirm) {
             Button("清空", role: .destructive) { clearAll() }
@@ -208,17 +220,17 @@ struct SettingsView: View {
                         .buttonStyle(.plain)
                     }
                 }
-                TextField("四位配对 PIN", text: $lanTransfer.enteredPIN)
+                TextField("六位配对 PIN", text: $lanTransfer.enteredPIN)
                     .textFieldStyle(.roundedBorder)
                     .onChange(of: lanTransfer.enteredPIN) { _, value in
-                        lanTransfer.enteredPIN = String(value.filter(\.isNumber).prefix(4))
+                        lanTransfer.enteredPIN = String(value.filter(\.isNumber).prefix(6))
                     }
                 HStack {
                     Button("取消") { lanTransfer.cancel() }
                     Spacer()
                     Button("配对并接收") { lanTransfer.connect() }
                         .buttonStyle(.borderedProminent)
-                        .disabled(lanTransfer.selectedDevice == nil || lanTransfer.enteredPIN.count != 4)
+                        .disabled(lanTransfer.selectedDevice == nil || lanTransfer.enteredPIN.count != 6)
                 }
 
             case .connecting:
@@ -349,6 +361,7 @@ struct SettingsView: View {
                     return preview
                 }.value
                 pendingImport = preview
+                pendingSnapshot = snapshot
                 importPreview = preview
             } catch let error as BackupError {
                 message = error.userMessage
@@ -428,6 +441,7 @@ struct SettingsView: View {
                     return preview
                 }.value
                 pendingImport = preview
+                pendingSnapshot = snapshot
                 importPreview = preview
             } catch let error as BackupError {
                 message = error.userMessage
@@ -446,6 +460,20 @@ struct SettingsView: View {
             do {
                 guard let repository else { throw SettingsDataError.repositoryUnavailable }
                 if overwrite {
+                    // TOCTOU 重校验（对齐 HarmonyOS BackupController.applyBackup）：覆盖会删除
+                    // 本地独有记录，预览后本地数据若已变化，必须按当前数据重算差异并回到
+                    // 预览让用户再次确认，不得静默删除预览后新增的记录
+                    let current = try currentSnapshot()
+                    guard pendingSnapshot == current else {
+                        pendingSnapshot = current
+                        pendingImport?.difference = BackupDiff.analyze(
+                            localLogs: current.logs, localEmotions: current.emotions,
+                            incomingLogs: preview.logs, incomingEmotions: preview.emotions,
+                            localTasks: current.tasks, incomingTasks: preview.tasks)
+                        importPreview = pendingImport
+                        showToast("本地数据在预览后有变化，差异已重新计算，请确认后再覆盖")
+                        return
+                    }
                     try repository.replaceAll(logs: preview.logs, emotions: preview.emotions,
                                               tasks: preview.tasks)
                 } else {
@@ -457,6 +485,7 @@ struct SettingsView: View {
                 } catch {
                     message = "数据已导入，但系统提醒恢复失败，请稍后重试"
                     pendingImport = nil
+                    pendingSnapshot = nil
                     importPreview = nil
                     return
                 }
@@ -475,6 +504,7 @@ struct SettingsView: View {
                 message = "导入失败：写入数据库时出错，请重试"
             }
             pendingImport = nil
+            pendingSnapshot = nil
             importPreview = nil
         }
     }

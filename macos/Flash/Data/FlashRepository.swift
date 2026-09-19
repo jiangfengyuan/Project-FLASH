@@ -7,7 +7,8 @@
 import Foundation
 import SwiftData
 
-struct FlashSnapshot {
+/// 三分区完整快照；Equatable 供覆盖导入前做 TOCTOU 重校验（预览快照 vs 当前数据）
+struct FlashSnapshot: Equatable {
     let logs: [LogItem]
     let emotions: [EmotionRecord]
     let tasks: [TaskItem]
