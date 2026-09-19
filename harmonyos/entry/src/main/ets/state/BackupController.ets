@@ -78,12 +78,23 @@ export class BackupController {
       }
       const context = this.runtime.context() as common.UIAbilityContext;
       await BackupFiles.exportJSON(context, archive, 'flash-aero-recovery');
+      // The originals are now in the user's hands; the plaintext quarantine
+      // copies must not linger once a successful export exists.
+      this.store.clearQuarantine();
+      this.state.recoveryAvailable = false;
       if (generation === this.generation) this.runtime.notify('恢复原始数据已导出，请妥善保管并联系支持人员处理');
     } catch (error) {
       if (generation === this.generation) this.runtime.notify(this.runtime.errorMessage(error as Error));
     } finally {
       if (generation === this.generation) this.state.fileBusy = false;
     }
+  }
+
+  async clearRecoveryData(): Promise<void> {
+    if (this.state.fileBusy) return;
+    this.store.clearQuarantine();
+    this.state.recoveryAvailable = false;
+    this.runtime.notify('隔离区已清除');
   }
 
   async chooseBackup(recovery: boolean = false): Promise<void> {
@@ -180,9 +191,11 @@ export class BackupController {
     if (this.state.lanMode !== TransferPhase.RECEIVING || this.state.busy) return;
     const device = this.state.lanDevices.find((item: LanDevice) => item.id === this.state.selectedLanDevice);
     if (!device) { this.runtime.notify('请先选择发送设备'); return; }
-    if (!/^\d{4}$/.test(this.state.lanEnteredPin)) { this.runtime.notify('请输入四位数字 PIN'); return; }
+    if (!/^\d{6}$/.test(this.state.lanEnteredPin)) { this.runtime.notify('请输入六位数字 PIN'); return; }
     this.state.lanMode = TransferPhase.CONNECTING;
-    const receiver = LocalBackupReceiver.start(device, this.state.lanEnteredPin);
+    // Pass a live PIN source, not a copy: the receiver re-reads the input on
+    // every re-challenge so a corrected PIN is picked up mid-handshake.
+    const receiver = LocalBackupReceiver.start(device, () => this.state.lanEnteredPin);
     this.lanReceiver = receiver;
     try {
       const incoming = BackupService.parseStrict(await receiver.result);
@@ -221,25 +234,34 @@ export class BackupController {
   async applyBackup(merge: boolean): Promise<void> {
     if (!this.pendingImport || this.state.busy) return;
     const incoming = this.pendingImport;
-    if (!merge) {
-      // Overwrite deletes local-only records: the preview counts must reflect
-      // the data as it is now, not as it was when the file was picked.
-      const current = this.store.snapshot();
-      if (!this.pendingSnapshot || !BackupDiff.sameData(this.pendingSnapshot, current)) {
-        this.pendingSnapshot = current;
-        this.state.importSummary = this.describeImport(incoming, current);
-        this.state.importPhase = ImportPhase.PREVIEW;
-        this.runtime.notify('预览后本地数据有变化，差异已重新计算，请确认后再覆盖');
-        return;
-      }
-    }
     this.state.busy = true;
     this.state.importPhase = ImportPhase.APPLYING;
     try {
       if (merge) {
         await this.store.mergeAll(incoming.logs, incoming.emotions, incoming.tasks);
       } else {
-        await this.store.replaceAll(incoming.logs, incoming.emotions, incoming.tasks);
+        // Overwrite deletes local-only records, so the staleness check must be
+        // atomic with the replace itself: any local write between the preview
+        // snapshot and the queued replace aborts it and sends the user back
+        // to a recomputed preview instead of silently deleting fresh records.
+        if (!this.pendingSnapshot) {
+          const current = this.store.snapshot();
+          this.pendingSnapshot = current;
+          this.state.importSummary = this.describeImport(incoming, current);
+          this.state.importPhase = ImportPhase.PREVIEW;
+          this.runtime.notify('预览后本地数据有变化，差异已重新计算，请确认后再覆盖');
+          return;
+        }
+        const applied = await this.store.replaceAllIfCurrent(
+          incoming.logs, incoming.emotions, incoming.tasks, this.pendingSnapshot);
+        if (!applied) {
+          const current = this.store.snapshot();
+          this.pendingSnapshot = current;
+          this.state.importSummary = this.describeImport(incoming, current);
+          this.state.importPhase = ImportPhase.PREVIEW;
+          this.runtime.notify('预览后本地数据有变化，差异已重新计算，请确认后再覆盖');
+          return;
+        }
       }
       this.pendingImport = undefined;
       this.pendingSnapshot = undefined;

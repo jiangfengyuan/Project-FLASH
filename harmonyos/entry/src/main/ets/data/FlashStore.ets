@@ -6,7 +6,8 @@ import {
   BackupData, Category, ColorTag, EmotionRecord, importanceFromContent, LogItem, TaskItem
 } from '../models/Models';
 import { BackupService } from './BackupService';
-import { dayString, isoNow } from './DateUtils';
+import { BackupDiff } from './BackupDiff';
+import { dayString, isoNow, isValidRecordDay } from './DateUtils';
 import { StoreChanges, StorePartition } from './StoreChanges';
 
 const STORE_NAME = 'flash-aero-data';
@@ -28,6 +29,16 @@ const QUARANTINE_LOGS_FILE = 'legacy-logs.json';
 const QUARANTINE_EMOTIONS_FILE = 'legacy-emotions.json';
 const QUARANTINE_TASKS_FILE = 'legacy-tasks.json';
 const QUARANTINE_RDB_FILE = 'rdb-payloads.json';
+const QUARANTINE_FILES: string[] = [
+  QUARANTINE_LOGS_FILE, QUARANTINE_EMOTIONS_FILE, QUARANTINE_TASKS_FILE, QUARANTINE_RDB_FILE
+];
+// Quarantine holds plaintext recovered from the encrypted database; a single
+// file must stay small enough that the exposure stays bounded even if cleanup
+// never runs.
+const QUARANTINE_MAX_FILE_BYTES = 1024 * 1024;
+// Quarantined originals expire after 30 days: they exist to bridge a support
+// conversation, not to keep plaintext forever.
+const QUARANTINE_TTL_MILLIS = 30 * 24 * 60 * 60 * 1000;
 const LOGS_TABLE = 'logs';
 const EMOTIONS_TABLE = 'emotions';
 const TASKS_TABLE = 'tasks';
@@ -65,13 +76,17 @@ export class FlashStore {
   private writes: Promise<void> = Promise.resolve();
 
   /** Serialize write transactions now that independent feature actions may run
-   * concurrently. A failed write does not poison the queue for the next one. */
-  private enqueue(write: () => Promise<void>): Promise<void> {
+   * concurrently. A failed write does not poison the queue for the next one.
+   * The wrapped value passes through so conditional writes can report whether
+   * they applied. */
+  private enqueue<T>(write: () => Promise<T>): Promise<T> {
     const operation = this.writes.then(async () => {
       if (!this.initialized) throw new Error('本地数据尚未加载完成，请稍后重试');
-      await write();
+      return write();
     });
-    this.writes = operation.catch(() => {});
+    // The queue tail stays void regardless of what the current operation
+    // resolves to; a failed write does not poison the next one.
+    this.writes = operation.then(() => {}, () => {});
     return operation;
   }
 
@@ -126,6 +141,7 @@ export class FlashStore {
     await this.createSchema();
     await this.migratePreferencesData();
     await this.migratePreferencesQuarantine();
+    this.cleanupQuarantine();
     this.loadRecoveryState();
     await this.loadBusinessData();
   }
@@ -298,6 +314,10 @@ export class FlashStore {
   private writeQuarantineFile(name: string, content: string): boolean {
     if (!this.filesDir) return false;
     try {
+      if (new util.TextEncoder().encodeInto(content).length > QUARANTINE_MAX_FILE_BYTES) {
+        console.error(`Flash quarantine write refused: ${name} exceeds the size cap`);
+        return false;
+      }
       const dir = `${this.filesDir}/quarantine`;
       try {
         if (!fileIo.accessSync(dir)) fileIo.mkdirSync(dir, true);
@@ -318,15 +338,21 @@ export class FlashStore {
     }
   }
 
+  private quarantinePath(name: string): string {
+    return `${this.filesDir}/quarantine/${name}`;
+  }
+
   private readQuarantineFile(name: string): string {
     if (!this.filesDir) return '';
     try {
-      const path = `${this.filesDir}/quarantine/${name}`;
+      const path = this.quarantinePath(name);
       if (!fileIo.accessSync(path)) return '';
       const file = fileIo.openSync(path, fileIo.OpenMode.READ_ONLY);
       try {
         const size = fileIo.statSync(file.fd).size;
-        if (size < 1) return '';
+        // Never load an oversized quarantine file: plaintext exposure stays
+        // bounded even if a pre-upgrade leftover exceeds the cap.
+        if (size < 1 || size > QUARANTINE_MAX_FILE_BYTES) return '';
         const buffer = new ArrayBuffer(size);
         fileIo.readSync(file.fd, buffer, { length: size });
         const decoder = util.TextDecoder.create('utf-8', { fatal: false, ignoreBOM: true });
@@ -337,6 +363,48 @@ export class FlashStore {
     } catch (_) {
       return '';
     }
+  }
+
+  /** Age out quarantine files. Best-effort, like every quarantine step: a
+   * cleanup failure must never block startup. */
+  private cleanupQuarantine(): void {
+    if (!this.filesDir) return;
+    for (const name of QUARANTINE_FILES) {
+      try {
+        const path = this.quarantinePath(name);
+        if (!fileIo.accessSync(path)) continue;
+        const file = fileIo.openSync(path, fileIo.OpenMode.READ_ONLY);
+        let expired = false;
+        try {
+          // HarmonyOS Stat.mtime is seconds since the epoch.
+          const mtime = fileIo.statSync(file.fd).mtime;
+          expired = Number.isFinite(mtime) && (Date.now() - mtime * 1000) > QUARANTINE_TTL_MILLIS;
+        } finally {
+          fileIo.closeSync(file);
+        }
+        if (expired) fileIo.unlinkSync(path);
+      } catch (error) {
+        console.error(`Flash quarantine cleanup failed: ${(error as Error).message}`);
+      }
+    }
+  }
+
+  /** Remove every quarantine file after the originals have been handed to the
+   * user (successful recovery export) or explicitly discarded. Recomputed on
+   * the next launch from what remains on disk. */
+  clearQuarantine(): void {
+    if (this.filesDir) {
+      for (const name of QUARANTINE_FILES) {
+        try {
+          const path = this.quarantinePath(name);
+          if (fileIo.accessSync(path)) fileIo.unlinkSync(path);
+        } catch (error) {
+          console.error(`Flash quarantine clear failed: ${(error as Error).message}`);
+        }
+      }
+    }
+    this.hasRecoveryData = false;
+    this.recoveryWarning = '';
   }
 
   private async readPayloads(table: string): Promise<RawPayloadRow[]> {
@@ -462,18 +530,18 @@ export class FlashStore {
     });
   }
 
-  async updateLog(id: string, content: string): Promise<void> {
+  /** One queued row write publishes only after all edited fields are persisted. */
+  async updateLog(id: string, content: string, category?: string, colorTag?: string, recordDate?: string): Promise<void> {
     return this.enqueue(async () => {
-      const trimmed = content.trim().slice(0, 10000);
-      if (!trimmed) return;
+      const trimmed = content.trim();
+      if (!trimmed) throw new Error('内容不能为空');
+      if (content.length > 100000) throw new Error('内容超过 100000 字符，请删减后保存');
+      if (recordDate !== undefined && !isValidRecordDay(recordDate)) throw new Error('请输入有效日期（YYYY-MM-DD）');
       const existing = this.logs.find((item: LogItem) => item.id === id);
-      if (!existing) return;
-      // Editing updates the body only: importance/colorTag/category may carry
-      // metadata set on another device and must survive a local text edit.
-      // The `!!` importance syntax is parsed at creation time only.
+      if (!existing) throw new Error('这条记录已不存在');
       const updated: LogItem = {
-        id: existing.id, content: trimmed, colorTag: existing.colorTag, category: existing.category,
-        importance: existing.importance, createdAt: existing.createdAt, recordDate: existing.recordDate
+        id: existing.id, content: trimmed, colorTag: colorTag ?? existing.colorTag, category: category ?? existing.category,
+        importance: existing.importance, createdAt: existing.createdAt, recordDate: recordDate ?? existing.recordDate
       };
       await this.upsert(LOGS_TABLE, updated.id, updated.createdAt, JSON.stringify(updated));
       this.logs = this.logs.map((item: LogItem) => item.id === id ? updated : item);
@@ -542,6 +610,23 @@ export class FlashStore {
       this.logs = logs.slice(); this.emotions = emotions.slice(); this.tasks = tasks.slice();
       this.sortAll();
       this.changes.publish(StorePartition.ALL);
+    });
+  }
+
+  /** Destructive overwrite with the staleness check inside the write queue:
+   * the snapshot comparison and the database replace are one atomic step, so
+   * a record written between preview and confirmation either appears in
+   * `expected` (then the replace proceeds) or aborts it. Returns false when
+   * the store changed and nothing was replaced. */
+  async replaceAllIfCurrent(logs: LogItem[], emotions: EmotionRecord[], tasks: TaskItem[] = [],
+    expected: BackupData): Promise<boolean> {
+    return this.enqueue(async () => {
+      if (!BackupDiff.sameData(expected, this.snapshot())) return false;
+      await this.replaceDatabase(logs, emotions, tasks);
+      this.logs = logs.slice(); this.emotions = emotions.slice(); this.tasks = tasks.slice();
+      this.sortAll();
+      this.changes.publish(StorePartition.ALL);
+      return true;
     });
   }
 
