@@ -24,6 +24,11 @@ const mutations = {
   'blank-title': d => d.data.tasks[0].title = ' \t\n\uFEFF',
   'unknown-zone': d => d.data.tasks[0].due.timeZone = 'Flash/Unknown',
   'offset-not-named-zone': d => d.data.tasks[0].due.timeZone = '+08:00',
+  'alias-utc': d => d.data.tasks[0].due.timeZone = 'utc',
+  'alias-zulu': d => d.data.tasks[0].due.timeZone = 'Zulu',
+  'alias-gmt0': d => d.data.tasks[0].due.timeZone = 'GMT0',
+  'alias-us-eastern': d => d.data.tasks[0].due.timeZone = 'US/Eastern',
+  'alias-est': d => d.data.tasks[0].due.timeZone = 'EST',
   'mixed-due': d => d.data.tasks[0].due.date = '2026-09-06',
   'time-order': d => d.data.tasks[0].updatedAt = '2026-09-03T23:59:59Z',
   'duplicate-id': d => d.data.logs.push({...d.data.logs[0], content: 'duplicate'}),
@@ -57,7 +62,7 @@ d.data.tasks[0].updatedAt = '2026-09-05T00:00:00.000000001Z';
 d.data.logs[0].createdAt = '2026-09-05T23:59:00+23:59';
 write('valid-boundaries', d, true);
 const zones = structuredClone(full);
-zones.data.tasks = ['Asia/Shanghai', 'America/New_York', 'Europe/Berlin', 'Asia/Tokyo', 'Australia/Sydney'].map((timeZone, i) => ({
+zones.data.tasks = ['Asia/Shanghai', 'America/New_York', 'Europe/Berlin', 'Asia/Tokyo', 'Australia/Sydney', 'UTC'].map((timeZone, i) => ({
   ...full.data.tasks[0], id: `55555555-5555-4555-8555-${String(i).padStart(12, '0')}`,
   due: {kind: 'dateTime', at: '2026-11-01T01:30:00-04:00', timeZone}
 }));

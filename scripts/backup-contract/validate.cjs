@@ -78,9 +78,10 @@ function validInstant(value) {
 
 // Exact whitelist of canonical IANA identifiers. Deliberately NOT an
 // Intl.DateTimeFormat probe: ICU accepts aliases (utc, Zulu, GMT0, GMT,
-// US/Eastern, ...) which must not round-trip into backup files. Note that
-// V8's supportedValuesOf('timeZone') excludes UTC and the Etc/* family.
-const SUPPORTED_IANA_ZONES = new Set(Intl.supportedValuesOf('timeZone'));
+// US/Eastern, ...) which must not round-trip into backup files.
+// The stable list is committed as canonical-timezones.json; it starts from
+// Intl.supportedValuesOf('timeZone') and explicitly includes UTC and Etc/UTC.
+const SUPPORTED_IANA_ZONES = new Set(require('./canonical-timezones.json'));
 function isSupportedIANAZone(value) {
   return typeof value === 'string' && SUPPORTED_IANA_ZONES.has(value);
 }

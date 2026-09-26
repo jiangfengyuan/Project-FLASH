@@ -61,8 +61,8 @@ test('real Gregorian dates, offset timestamps and rejected ambiguous instants', 
   }
 });
 
-test('due.timeZone matches Intl.supportedValuesOf exactly (no ICU aliases)', () => {
-  const listed = new Set(Intl.supportedValuesOf('timeZone'));
+test('due.timeZone matches canonical-timezones.json exactly (no ICU aliases)', () => {
+  const listed = new Set(require('./canonical-timezones.json'));
   const probe = ['Asia/Shanghai', 'America/New_York', 'Europe/Berlin', 'Asia/Tokyo', 'Australia/Sydney',
     'utc', 'Zulu', 'GMT0', 'GMT', 'US/Eastern', 'Etc/UTC', 'UTC', 'Etc/GMT+1', 'CET',
     'GMT+08:00', '+08:00', 'Flash/Unknown', 'asia/shanghai'];

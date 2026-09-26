@@ -80,6 +80,26 @@
     "valid": false
   },
   {
+    "file": "invalid-alias-utc.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-alias-zulu.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-alias-gmt0.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-alias-us-eastern.json",
+    "valid": false
+  },
+  {
+    "file": "invalid-alias-est.json",
+    "valid": false
+  },
+  {
     "file": "invalid-mixed-due.json",
     "valid": false
   },
