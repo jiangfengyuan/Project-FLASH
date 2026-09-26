@@ -542,10 +542,10 @@ enum BackupService {
             guard let rawDueAt = due["at"] as? String,
                   let normalizedDueAt = normalizeISODate(rawDueAt),
                   let zone = due["timeZone"] as? String,
-                  isSupportedTimeZone(zone) else { return nil }
+                  let canonicalZone = canonicalTimeZone(zone) else { return nil }
             dueDate = nil
             dueAt = normalizedDueAt
-            timeZone = zone
+            timeZone = canonicalZone
         }
 
         return TaskItem(
@@ -580,17 +580,11 @@ enum BackupService {
         return text.utf16.count <= maxTextLength
     }
 
-    /// 命名时区校验，对齐 Android `zone == "UTC" || zone in ZoneId.getAvailableZoneIds()`。
-    /// macOS 的 knownTimeZoneIdentifiers 在部分 ICU 版本下缺少 Etc/GMT±N 等合法 IANA 名称
-    /// （共享契约样例 valid-time-zones 覆盖此情形），因此用「形如 Area/Name、可解析且
-    /// 标识原样回读」兜底；缩写（PST）与偏移写法（GMT+8）不满足该形态，仍被拒绝。
-    private static func isSupportedTimeZone(_ zone: String) -> Bool {
-        if zone == "UTC" { return true }
-        if TimeZone.knownTimeZoneIdentifiers.contains(zone) { return true }
-        guard zone.contains("/"),
-              let timeZone = TimeZone(identifier: zone),
-              timeZone.identifier == zone else { return false }
-        return true
+    /// 命名时区校验：TimeZone(identifier:) 可解析且输入与规范化 identifier 完全一致。
+    /// 这样拒绝 ICU 别名（utc、Zulu、GMT0、US/Eastern 等），与契约校验器保持同一口径。
+    private static func canonicalTimeZone(_ zone: String) -> String? {
+        guard let timeZone = TimeZone(identifier: zone), timeZone.identifier == zone else { return nil }
+        return timeZone.identifier
     }
 
     private static func isUUID(_ value: String) -> Bool {
@@ -616,12 +610,6 @@ enum BackupService {
         let d = number.doubleValue
         guard d.isFinite, d >= Double(Int32.min), d <= Double(Int32.max), d.rounded(.towardZero) == d else { return nil }
         return Int(d)
-    }
-
-    private static func isNamedTimeZone(_ value: String) -> Bool {
-        // Foundation's knownTimeZoneIdentifiers omits valid IANA links such as Etc/GMT+1.
-        guard value.range(of: #"^(?:[+-]|GMT[+-]|UTC[+-])"#, options: .regularExpression) == nil else { return false }
-        return TimeZone(identifier: value) != nil
     }
 
     private static let minimumInstant = isoWholeSecondDate(from: "0001-01-01T00:00:00Z")!

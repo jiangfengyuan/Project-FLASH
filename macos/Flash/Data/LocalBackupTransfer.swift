@@ -22,8 +22,8 @@ enum LanHandshake {
     /// CHALLENGE/proof 行的缓冲上限：规格「≤ 64 字节」，两者实际 41/45 字节
     static let maxLineBytes = 64
     /// OK 行上限 = "OK "(3) + 8 位十进制 size（size ≤ 50MB）+ " "(1) + 64 位 hex mac。
-    /// 规格明确 OK 头行上限取 76 字节（内容 76 字符 + 换行）。
-    static let maxOKHeaderBytes = 76
+    /// 规格允许统一取 128 字节缓冲；与 Android/HarmonyOS 保持一致。
+    static let maxOKHeaderBytes = 128
     /// proof 消息前缀：msg = "flash-aero-handshake:" || nonceHex
     static let proofMessagePrefix = "flash-aero-handshake:"
     static let proofByteCount = 16   // proof 取 HMAC 前 16 字节（32 个 hex 字符）
