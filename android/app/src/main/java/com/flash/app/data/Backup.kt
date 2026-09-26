@@ -183,6 +183,17 @@ object Backup {
         }
     }
 
+    /**
+     * 任务时区只接受标准 IANA ID：ZoneId.of 可解析且输入与规范化后的 zone.id 完全一致。
+     * 这样拒绝 ICU 别名（utc、Zulu、GMT0、US/Eastern 等），与契约校验器保持同一口径。
+     */
+    private fun canonicalTimeZone(id: String): String? = try {
+        val zone = ZoneId.of(id)
+        zone.takeIf { it.id == id }?.id
+    } catch (_: Exception) {
+        null
+    }
+
     /** @throws BackupFormatException 文件整体不合法时抛出；单条非法数据跳过。 */
     fun parse(json: String): ImportResult {
         if (json.toByteArray(Charsets.UTF_8).size > MAX_FILE_BYTES) {
@@ -421,9 +432,7 @@ object Backup {
             }
             TaskDueKind.DATE_TIME -> {
                 dueAt = normalizeIsoDate(due.stringOrNull("at")) ?: return null
-                timeZone = due.stringOrNull("timeZone")?.takeIf { zone ->
-                    zone == "UTC" || zone in ZoneId.getAvailableZoneIds()
-                } ?: return null
+                timeZone = due.stringOrNull("timeZone")?.let(::canonicalTimeZone) ?: return null
             }
         }
         val createdAt = normalizeIsoDate(obj.stringOrNull("createdAt")) ?: return null
