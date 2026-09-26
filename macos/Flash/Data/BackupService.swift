@@ -580,11 +580,12 @@ enum BackupService {
         return text.utf16.count <= maxTextLength
     }
 
-    /// 命名时区校验：TimeZone(identifier:) 可解析且输入与规范化 identifier 完全一致。
-    /// 这样拒绝 ICU 别名（utc、Zulu、GMT0、US/Eastern 等），与契约校验器保持同一口径。
+    /// 命名时区校验：输入必须在契约白名单中，且 TimeZone(identifier:) 可解析。
+    /// 这样拒绝 ICU 别名（utc、Zulu、GMT0、US/Eastern 等）和偏移写法，与契约校验器保持同一口径。
+    /// 返回输入本身作为标准 ID（Foundation 会把 UTC 显示为 GMT，但契约以白名单为准）。
     private static func canonicalTimeZone(_ zone: String) -> String? {
-        guard let timeZone = TimeZone(identifier: zone), timeZone.identifier == zone else { return nil }
-        return timeZone.identifier
+        guard CanonicalTimeZones.all.contains(zone), TimeZone(identifier: zone) != nil else { return nil }
+        return zone
     }
 
     private static func isUUID(_ value: String) -> Bool {

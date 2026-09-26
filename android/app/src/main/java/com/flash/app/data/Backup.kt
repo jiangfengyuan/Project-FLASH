@@ -184,14 +184,17 @@ object Backup {
     }
 
     /**
-     * 任务时区只接受标准 IANA ID：ZoneId.of 可解析且输入与规范化后的 zone.id 完全一致。
-     * 这样拒绝 ICU 别名（utc、Zulu、GMT0、US/Eastern 等），与契约校验器保持同一口径。
+     * 任务时区只接受标准 IANA ID：必须在契约白名单中，且 ZoneId.of 可解析、输入与 zone.id 完全一致。
+     * 这样拒绝 ICU 别名（utc、Zulu、GMT0、US/Eastern 等）和偏移写法（+08:00），与契约校验器保持同一口径。
      */
-    private fun canonicalTimeZone(id: String): String? = try {
-        val zone = ZoneId.of(id)
-        zone.takeIf { it.id == id }?.id
-    } catch (_: Exception) {
-        null
+    private fun canonicalTimeZone(id: String): String? {
+        if (id !in CanonicalTimeZones.ALL) return null
+        return try {
+            val zone = ZoneId.of(id)
+            zone.takeIf { it.id == id }?.id
+        } catch (_: Exception) {
+            null
+        }
     }
 
     /** @throws BackupFormatException 文件整体不合法时抛出；单条非法数据跳过。 */

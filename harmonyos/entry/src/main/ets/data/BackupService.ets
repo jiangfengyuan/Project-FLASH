@@ -9,6 +9,7 @@ import {
   TaskDueKind,
   TaskItem
 } from '../models/Models';
+import { CANONICAL_TIME_ZONES } from './CanonicalTimeZones';
 import { util } from '@kit.ArkTS';
 import { isoNow } from './DateUtils';
 
@@ -471,16 +472,18 @@ export class BackupService {
   }
 
   private static canonicalTimeZone(value: string): string | null {
+    if (!CANONICAL_TIME_ZONES.includes(value)) return null;
     try {
-      return new Intl.DateTimeFormat(undefined, { timeZone: value }).resolvedOptions().timeZone;
+      // Verify the identifier is parseable on this device; keep the contract canonical ID.
+      new Intl.DateTimeFormat(undefined, { timeZone: value }).format(new Date(0));
+      return value;
     } catch (_) {
       return null;
     }
   }
 
   private static validTimeZone(value: string): boolean {
-    const canonical = BackupService.canonicalTimeZone(value);
-    return canonical !== null && canonical === value;
+    return BackupService.canonicalTimeZone(value) !== null;
   }
 
   private static validDate(createdAt: string, recordDate: string): boolean {
