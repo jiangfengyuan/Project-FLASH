@@ -3,7 +3,7 @@ import { dayString, shortDay } from '../data/DateUtils';
 import { NavigationState, ThemeState, HomeState, LogsState, FeedbackState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
 import {
-  PageHeader, RecordCard, SegmentedControl, DOCK_CLEARANCE, RADIUS_CARD, BRAND
+  PageHeader, RecordCard, SegmentedControl, DOCK_CLEARANCE, RADIUS_CARD, BRAND, brandText
 } from '../components/CommonBuilders';
 
 @Component
@@ -31,15 +31,17 @@ export struct HomePage {
           Column() {
             PageHeader(this.theme, '此刻', this.dateSubtitle())
             Row({ space: 12 }) {
-              SymbolGlyph($r('sys.symbol.magnifyingglass')).fontSize(20).fontColor([BRAND])
+              SymbolGlyph($r('sys.symbol.magnifyingglass')).fontSize(20).fontColor([brandText(this.theme)])
               Text('搜索或筛选记录').fontSize(14).fontColor(this.theme.themeMuted).layoutWeight(1)
-              SymbolGlyph($r('sys.symbol.slider_vertical_3')).fontSize(18).fontColor([BRAND])
+              SymbolGlyph($r('sys.symbol.slider_vertical_3')).fontSize(18).fontColor([brandText(this.theme)])
             }
             .width('100%')
             .height(52)
             .padding({ left: 16, right: 16 })
             .backgroundColor(this.theme.themeSurface)
             .borderRadius(26)
+            .accessibilityGroup(true)
+            .accessibilityText('搜索或筛选记录')
             .onClick(() => requireActions(this.actions).switchTab(1))
             .animation({ duration: 180, curve: Curve.EaseOut })
             .margin({ left: 20, right: 20 })
@@ -55,7 +57,8 @@ export struct HomePage {
               Row() {
                 Text('最近闪念').fontSize(17).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)
                 Blank()
-                Text('全部').fontSize(12).fontColor(BRAND)
+                Text('全部').fontSize(12).fontColor(brandText(this.theme))
+                  .height(44).padding({ left: 12 })
                   .onClick(() => requireActions(this.actions).switchTab(1))
               }.width('100%')
               ForEach(this.home.recentLogs, (item: LogItem) => {
@@ -96,14 +99,14 @@ export struct HomePage {
       Row() {
         Text('今天的片段').fontSize(17).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)
         Blank()
-        Text(shortDay(dayString())).fontSize(11).fontColor(BRAND)
+        Text(shortDay(dayString())).fontSize(11).fontColor(brandText(this.theme))
           .padding({ left: 12, right: 12, top: 4, bottom: 4 })
           .backgroundColor(this.theme.themeTint).borderRadius(12)
       }.width('100%')
 
       if (!this.hasTodayData()) {
         Row({ space: 8 }) {
-          SymbolGlyph($r('sys.symbol.lightbulb')).fontSize(18).fontColor([BRAND])
+          SymbolGlyph($r('sys.symbol.lightbulb')).fontSize(18).fontColor([brandText(this.theme)])
           Text('今天可以从一个念头开始').fontSize(13).fontColor(this.theme.themeMuted)
         }.width('100%')
       } else {
@@ -112,10 +115,10 @@ export struct HomePage {
           this.todayStat($r('sys.symbol.checkmark_circle'), '待办', `${this.home.todayTaskCount}`)
         }.width('100%')
         Row({ space: 8 }) {
-          SymbolGlyph($r('sys.symbol.face_smiling')).fontSize(16).fontColor(['#FF6B9D'])
+          SymbolGlyph($r('sys.symbol.face_smiling')).fontSize(16).fontColor(['#E35A90'])
           Text(`情绪 ${this.home.todayEmotionCount}`).fontSize(12).fontColor(this.theme.themeText)
           Blank()
-          SymbolGlyph($r('sys.symbol.checkmark_circle')).fontSize(16).fontColor(['#22B573'])
+          SymbolGlyph($r('sys.symbol.checkmark_circle')).fontSize(16).fontColor(['#1E9E62'])
           Text(`已完成任务 ${this.home.todayTaskDoneCount}/${this.home.todayTaskCount}`)
             .fontSize(12).fontColor(this.theme.themeText)
         }
@@ -135,7 +138,7 @@ export struct HomePage {
   @Builder
   private todayStat(icon: Resource, label: string, value: string) {
     Row({ space: 8 }) {
-      SymbolGlyph(icon).fontSize(16).fontColor([BRAND])
+      SymbolGlyph(icon).fontSize(16).fontColor([brandText(this.theme)])
       Text(label).fontSize(12).fontColor(this.theme.themeMuted)
       Text(value).fontSize(16).fontWeight(FontWeight.Bold).fontColor(this.theme.themeText)
     }

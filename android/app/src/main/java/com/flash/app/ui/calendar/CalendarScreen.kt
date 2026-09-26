@@ -323,8 +323,8 @@ private fun DayCell(
             style = MaterialTheme.typography.labelMedium,
             fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
             color = when {
-                // 非当月日期：比当月弱但在浅渐变背景上仍可辨
-                !inMonth -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                // 非当月日期：用语义次文字色保持 ≥4.5:1，与当月主文字色区分
+                !inMonth -> MaterialTheme.colorScheme.onSurfaceVariant
                 isToday -> MaterialTheme.colorScheme.primary
                 else -> MaterialTheme.colorScheme.onSurface
             },

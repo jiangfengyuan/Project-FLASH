@@ -140,7 +140,6 @@ private fun TrendChart(
 ) {
     val lineColor = MaterialTheme.colorScheme.primary
     val gridColor = MaterialTheme.colorScheme.outlineVariant
-    val pointColor = MaterialTheme.colorScheme.tertiary
 
     val description = averages.filter { it.second != null }
         .joinToString("；") { "${it.first}：${it.second}" }
@@ -174,7 +173,7 @@ private fun TrendChart(
             drawPath(path, color = lineColor, style = Stroke(width = 2.dp.toPx()))
         }
         points.forEach { p ->
-            drawCircle(color = pointColor, radius = 3.dp.toPx(), center = p)
+            drawCircle(color = lineColor, radius = 3.dp.toPx(), center = p)
         }
     }
 }

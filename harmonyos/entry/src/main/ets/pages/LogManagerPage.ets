@@ -1,8 +1,7 @@
 import { LogItem } from '../models/Models';
 import { ThemeState, LogsState, FeedbackState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
-import { RecordRow } from '../components/CommonBuilders';
-const BRAND = '#6C5CE7';
+import { RecordRow, brandText } from '../components/CommonBuilders';
 
 @Component
 export struct LogManagerPage {
@@ -29,7 +28,7 @@ export struct LogManagerPage {
         if (requireActions(this.actions).logsController.hasMoreLogs()) {
           ListItem() {
             Button(`加载更多（剩余 ${requireActions(this.actions).logsController.filteredLogCount() - requireActions(this.actions).logsController.displayedLogs().length} 条）`)
-              .width('100%').height(42).fontColor(BRAND).backgroundColor(this.theme.themeTint)
+              .width('100%').height(44).fontColor(brandText(this.theme)).backgroundColor(this.theme.themeTint)
               .onClick(() => this.logs.logDisplayLimit += 50)
           }
         }

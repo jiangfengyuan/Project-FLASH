@@ -193,6 +193,8 @@ struct CalendarView: View {
                 Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(task.isCompleted ? "标记为未完成" : "标记为完成")
+            .help(task.isCompleted ? "标记为未完成" : "标记为完成")
             VStack(alignment: .leading, spacing: 2) {
                 Text(task.title).strikethrough(task.isCompleted)
                 if let notes = task.notes, !notes.isEmpty {
@@ -203,6 +205,8 @@ struct CalendarView: View {
             Button("编辑") { editingTask = task; showingTaskEditor = true }
             Button(role: .destructive) { delete(task) } label: { Image(systemName: "trash") }
                 .buttonStyle(.borderless)
+                .accessibilityLabel("删除任务")
+                .help("删除任务")
         }
         .padding(10)
         .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 10))
@@ -280,7 +284,7 @@ private struct DayCell: View {
                         Label("\(taskCount)", systemImage: "checklist")
                             .labelStyle(.titleAndIcon)
                             .font(.caption2)
-                            .foregroundStyle(isSelected ? Color.white : Color.green)
+                            .foregroundStyle(isSelected ? Color.white : BrandColors.accessibleGreen)
                     }
                     if let emotionEmoji {
                         Text(emotionEmoji).font(.caption2)

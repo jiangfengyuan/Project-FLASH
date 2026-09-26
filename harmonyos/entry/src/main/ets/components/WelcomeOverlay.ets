@@ -12,7 +12,7 @@ export struct WelcomeOverlay {
     Stack({ alignContent: Alignment.Center }) {
       Column().width('100%').height('100%').backgroundColor('#99000000')
       Column({ space: 16 }) {
-        Text('⚡').fontSize(56)
+        Text('⚡').fontSize(56).accessibilityLevel('no')
         Text('欢迎来到 Flash Aero').fontSize(24).fontWeight(FontWeight.Bold).fontColor(this.theme.themeText)
         Text('捕捉日志、灵感与情绪，让每一次闪念都有落点。')
           .fontSize(14).fontColor(this.theme.themeMuted).textAlign(TextAlign.Center).lineHeight(22)

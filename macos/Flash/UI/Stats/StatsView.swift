@@ -8,7 +8,8 @@ import SwiftUI
 import SwiftData
 import Charts
 
-/// 统计页：KPI + 情绪趋势/子情绪分布（对齐 Android StatsViewModel + EmotionStatsSection）
+/// 统计页：洞察结论（ReviewInsights 窗口对比）+ 活跃度/KPI + 情绪趋势/子情绪分布
+/// （对齐 Android StatsViewModel + EmotionStatsSection）
 struct StatsView: View {
     @Query(sort: \LogEntity.createdAt, order: .reverse) private var logEntities: [LogEntity]
     @Query(sort: \EmotionEntity.createdAt, order: .reverse) private var emotionEntities: [EmotionEntity]
@@ -52,12 +53,16 @@ struct StatsView: View {
 
                     let periodLogs = logs.filter { $0.recordDate >= start && $0.recordDate <= end }
                     let periodEmotions = emotions.filter { $0.recordDate >= start && $0.recordDate <= end }
-                    let periodDays = Set(periodLogs.map(\.recordDate) + periodEmotions.map(\.recordDate)).count
+                    // 洞察结论：当前窗口 vs 前一等长窗口（Domain/ReviewInsights，含数据量下限）
+                    let comparison = ReviewInsights.compare(logs: logs, emotions: emotions,
+                                                            window: window, today: today)
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(periodDays == 0 ? "继续记录，回顾会慢慢清晰" : "这段时间，你留下了 \(periodDays) 天的记录")
+                        Text(comparison.conclusion)
                             .font(.headline)
                         Text("\(start) — \(end)").font(.caption).foregroundStyle(.secondary)
-                        Text("\(periodLogs.count) 条记录 · \(periodEmotions.count) 次情绪")
+                        Text(insightDataLine(comparison: comparison,
+                                             logs: periodLogs.count,
+                                             emotions: periodEmotions.count))
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(20).background(BrandColors.cardSurface)
@@ -105,19 +110,26 @@ struct StatsView: View {
                             .animation(Motion.soft(reduceMotion), value: windowDays)
                         }
 
-                        // 负面子情绪分布
+                        // 负面子情绪分布（次数降序，稳定次序便于对照）
                         let distribution = EmotionStats.subEmotionDistribution(emotions,
                                                                                days: windowDays, today: today)
+                            .sorted { $0.count != $1.count ? $0.count > $1.count : $0.name < $1.name }
                         if !distribution.isEmpty {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("负面情绪构成").font(.headline)
+                                Text("伤心 / 生气 / 难受的出现次数，次数见条形末端数值")
+                                    .font(.caption).foregroundStyle(.secondary)
                                 Chart(distribution, id: \.name) { item in
                                     BarMark(
                                         x: .value("次数", item.count),
                                         y: .value("类型", item.name)
                                     )
-                                    .foregroundStyle(barColor(for: item.name))
+                                    .foregroundStyle(BrandColors.brandPrimary)
                                     .cornerRadius(4)
+                                    .annotation(position: .trailing) {
+                                        Text("\(item.count) 次")
+                                            .font(.caption2).foregroundStyle(.secondary)
+                                    }
                                 }
                                 .frame(height: 140)
                                 .animation(Motion.soft(reduceMotion), value: windowDays)
@@ -179,10 +191,20 @@ struct StatsView: View {
         .clipShape(RoundedRectangle(cornerRadius: 24))
     }
 
-    private func barColor(for name: String) -> Color {
-        // 与 SubEmotion 配色一致（伤心/生气/难受）
-        SubEmotion.allCases.first { $0.displayName == name }
-            .map { $0.color } ?? .secondary
+    /// 洞察卡数据行：记录数 + 情绪均值（有情绪记录时）
+    private func insightDataLine(comparison: ReviewInsights.Comparison,
+                                 logs: Int, emotions: Int) -> String {
+        var line = "\(logs) 条记录 · \(emotions) 次情绪"
+        if let average = comparison.currentEmotionAverage {
+            line += " · 情绪均值 \(formatAverage(average))"
+        }
+        return line
+    }
+
+    /// 均值已由领域层保留两位小数；整数档只显示一位（2 而非 2.00）
+    private func formatAverage(_ value: Double) -> String {
+        value.truncatingRemainder(dividingBy: 1) == 0
+            ? String(format: "%.1f", value) : String(format: "%.2f", value)
     }
 
     private func kpiCard(_ title: String, _ value: Int, _ icon: String, index: Int) -> some View {
@@ -190,6 +212,7 @@ struct StatsView: View {
             Image(systemName: icon)
                 .font(.title3)
                 .foregroundStyle(Color(nsColor: .controlAccentColor))
+                .accessibilityHidden(true) // 装饰图标，读屏由数值+标题承载
             Text("\(value)")
                 .font(.title2).bold()
                 .contentTransition(.opacity) // 数字变化淡变
@@ -197,6 +220,7 @@ struct StatsView: View {
             Text(title).font(.caption).foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
         .padding(.vertical, 16)
         .background(Color(nsColor: .controlBackgroundColor))
         .clipShape(RoundedRectangle(cornerRadius: 24))

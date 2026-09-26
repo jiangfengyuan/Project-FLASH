@@ -2,7 +2,7 @@ import { shortDay } from '../data/DateUtils';
 import { EmotionRecord, emotionName, SubEmotion, subEmotionName } from '../models/Models';
 import { ThemeState, EmotionState, FeedbackState, DeleteKind } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
-import { BRAND, RADIUS_CARD } from '../components/CommonBuilders';
+import { BRAND, RADIUS_CARD, brandText, dangerText } from '../components/CommonBuilders';
 
 @Component
 export struct EmotionPage {
@@ -18,8 +18,8 @@ export struct EmotionPage {
   }
 
   private emotionColor(level: number): string {
-    if (level < 0) return '#E15B64';
-    if (level > 0) return '#22B573';
+    if (level < 0) return '#E36570';
+    if (level > 0) return '#1E9E62';
     return '#8A94A6';
   }
 
@@ -33,17 +33,17 @@ export struct EmotionPage {
             .fontColor([this.emotionColor(this.emotion.emotionLevel)])
           Text(emotionName(this.emotion.emotionLevel)).fontSize(20).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)
           Slider({ value: this.emotion.emotionLevel, min: -3, max: 3, step: 1, style: SliderStyle.OutSet })
-            .blockColor(BRAND).selectedColor(BRAND).trackColor(this.theme.themeControl)
+            .blockColor(brandText(this.theme)).selectedColor(brandText(this.theme)).trackColor(this.theme.themeControl)
             .onChange((value: number) => this.emotion.emotionLevel = Math.round(value))
           Row() {
             Row() {
-              SymbolGlyph($r('sys.symbol.face_sading')).fontSize(18).fontColor(['#E15B64'])
+              SymbolGlyph($r('sys.symbol.face_sading')).fontSize(18).fontColor(['#E36570'])
             }.layoutWeight(1).justifyContent(FlexAlign.Start)
             Row() {
               SymbolGlyph($r('sys.symbol.face_smiling')).fontSize(18).fontColor(['#8A94A6'])
             }.layoutWeight(1).justifyContent(FlexAlign.Center)
             Row() {
-              SymbolGlyph($r('sys.symbol.face_laughing')).fontSize(18).fontColor(['#22B573'])
+              SymbolGlyph($r('sys.symbol.face_laughing')).fontSize(18).fontColor(['#1E9E62'])
             }.layoutWeight(1).justifyContent(FlexAlign.End)
           }.width('100%')
         }.width('100%').padding(20).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
@@ -77,7 +77,7 @@ export struct EmotionPage {
                   Text(`${emotionName(item.level)} ${subEmotionName(item.subEmotion)}`).fontSize(14).fontColor(this.theme.themeText)
                   Text(`${shortDay(item.recordDate)} ${item.note ?? ''}`).fontSize(11).fontColor(this.theme.themeMuted).maxLines(1)
                 }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-                Button('删除', { type: ButtonType.Normal }).fontSize(11).fontColor('#B42318')
+                Button('删除', { type: ButtonType.Normal }).fontSize(11).fontColor(dangerText(this.theme))
                   .backgroundColor(this.theme.themeDanger).onClick(() => this.feedback.destructive = { kind: DeleteKind.EMOTION, id: item.id })
               }.width('100%').padding({ top: 8, bottom: 8 })
             }, (item: EmotionRecord) => item.id)

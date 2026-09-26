@@ -1,5 +1,5 @@
 import { shortDay } from '../data/DateUtils';
-import { Category, colorTagColor, colorTagName, LogItem } from '../models/Models';
+import { Category, ColorTag, colorTagColor, colorTagName, LogItem } from '../models/Models';
 import { NavigationState, ThemeState, FeedbackState, DeleteKind } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
 
@@ -28,6 +28,33 @@ export const DOCK_HEIGHT = 64;
 export const MOTION_PRESS = 120;
 // 悬浮 Dock 高度 + 底部外边距 + 一档间距，页面内容底部留白统一使用，避免被 Dock/手势区遮挡。
 export const DOCK_CLEARANCE = 104;
+
+// 语义色双模式适配：图标/色点在浅底（#FFFFFF）与深色卡片（#3A3D5C）上均需 ≥3:1，
+// 文字用途需 ≥4.5:1。按钮底色（白字）仍用 BRAND，文字/图标用途用 brandText。
+export function brandText(theme: ThemeState): string {
+  return theme.themeMode === 'dark' ? '#C3BBFF' : BRAND;
+}
+
+export function dangerText(theme: ThemeState): string {
+  return theme.themeMode === 'dark' ? '#FF8A80' : '#B42318';
+}
+
+export function importanceText(theme: ThemeState): string {
+  return theme.themeMode === 'dark' ? '#FFB020' : '#B45309';
+}
+
+// 记录卡色条保留高饱和装饰色（colorTagColor），文字标签改用深浅模式均 ≥4.5:1 的变体。
+export function colorTagLabelColor(theme: ThemeState, tag: string): string {
+  const dark = theme.themeMode === 'dark';
+  switch (tag) {
+    case ColorTag.URGENT: return dark ? '#FF8A80' : '#D92D20';
+    case ColorTag.INSPIRATION: return dark ? '#F5B841' : '#8A6600';
+    case ColorTag.MEMO: return dark ? '#6BCB77' : '#1E7B34';
+    case ColorTag.EMOTION: return dark ? '#CDA4DC' : '#8E44AD';
+    case ColorTag.IDEA: return dark ? '#FFB020' : '#A85F00';
+    default: return dark ? '#8FB2F0' : '#2F66C4';
+  }
+}
 
 @Builder
 export function PageHeader(theme: ThemeState, title: string, subtitle: string) {
@@ -129,10 +156,10 @@ export function DockItem(theme: ThemeState, icon: Resource, activeIcon: Resource
     Column({ space: 4 }) {
       SymbolGlyph(selected ? activeIcon : icon)
         .fontSize(22)
-        .fontColor([selected ? BRAND : theme.themeMuted])
+        .fontColor([selected ? brandText(theme) : theme.themeMuted])
       Text(label)
         .fontSize(11)
-        .fontColor(selected ? BRAND : theme.themeMuted)
+        .fontColor(selected ? brandText(theme) : theme.themeMuted)
         .fontWeight(selected ? FontWeight.Medium : FontWeight.Regular)
     }
     .stateStyles({
@@ -146,6 +173,8 @@ export function DockItem(theme: ThemeState, icon: Resource, activeIcon: Resource
   .justifyContent(FlexAlign.Center)
   .backgroundColor(selected ? theme.themeTint : Color.Transparent)
   .borderRadius(26)
+  .accessibilityGroup(true)
+  .accessibilityText(label + (selected ? '，已选中' : ''))
   .onClick(onSelect)
   .animation({ duration: 200, curve: Curve.EaseOut })
 }
@@ -177,6 +206,7 @@ export function FabButton(navigation: NavigationState, onToggle: () => void) {
   .borderRadius(FAB_SIZE / 2)
   .backgroundColor(BRAND)
   .rotate({ angle: 45 * navigation.fabProgress })
+  .accessibilityText('快速记录')
   .shadow({ radius: 16, color: '#336C5CE7', offsetY: 6 })
   .stateStyles({
     normal: { .scale({ x: 1, y: 1 }) },
@@ -214,9 +244,9 @@ export function RecordRow(theme: ThemeState, feedback: FeedbackState, actions: P
       Column({ space: 4 }) {
         Row({ space: 8 }) {
           Text(item.category === Category.IDEA ? '灵感' : colorTagName(item.colorTag))
-            .fontSize(11).fontColor(colorTagColor(item.colorTag))
+            .fontSize(11).fontColor(colorTagLabelColor(theme, item.colorTag))
           if (item.importance > 0) {
-            Text(`重要度 ${item.importance}`).fontSize(10).fontColor('#D97706')
+            Text(`重要度 ${item.importance}`).fontSize(10).fontColor(importanceText(theme))
           }
         }.width('100%')
         Text(item.content).fontSize(15).fontColor(theme.themeText).maxLines(3).textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -224,10 +254,10 @@ export function RecordRow(theme: ThemeState, feedback: FeedbackState, actions: P
       }.layoutWeight(1).alignItems(HorizontalAlign.Start)
       Column({ space: 4 }) {
         Button('编辑', { type: ButtonType.Normal })
-          .fontSize(11).fontColor(BRAND).backgroundColor(theme.themeTint).height(44)
+          .fontSize(11).fontColor(brandText(theme)).backgroundColor(theme.themeTint).height(44)
           .onClick(() => actions.logsController.startEditLog(item))
         Button('删除', { type: ButtonType.Normal })
-          .fontSize(11).fontColor('#B42318').backgroundColor(theme.themeDanger).height(44)
+          .fontSize(11).fontColor(dangerText(theme)).backgroundColor(theme.themeDanger).height(44)
           .onClick(() => feedback.destructive = { kind: DeleteKind.LOG, id: item.id })
       }
     }.width('100%').padding({ top: 8, bottom: 8 })
@@ -251,11 +281,11 @@ export struct RecordCard {
         Row({ space: 8 }) {
           SymbolGlyph(this.item.category === Category.IDEA ? $r('sys.symbol.lightbulb') : $r('sys.symbol.doc_text'))
             .fontSize(12)
-            .fontColor([colorTagColor(this.item.colorTag)])
+            .fontColor([colorTagLabelColor(this.theme, this.item.colorTag)])
           Text(this.item.category === Category.IDEA ? '灵感' : colorTagName(this.item.colorTag))
-            .fontSize(11).fontColor(colorTagColor(this.item.colorTag))
+            .fontSize(11).fontColor(colorTagLabelColor(this.theme, this.item.colorTag))
           if (this.item.importance > 0) {
-            Text(`重要度 ${this.item.importance}`).fontSize(10).fontColor('#D97706')
+            Text(`重要度 ${this.item.importance}`).fontSize(10).fontColor(importanceText(this.theme))
           }
         }.width('100%')
         Text(this.item.content)
@@ -269,6 +299,7 @@ export struct RecordCard {
         .fontColor([this.theme.themeMuted])
         .width(TOUCH_MIN)
         .height(TOUCH_MIN)
+        .accessibilityText('更多操作：编辑或删除此记录')
         .onClick(() => this.menuOpen = true)
         .bindMenu(this.menuOpen, [
           { value: '编辑', action: () => requireActions(this.actions).logsController.startEditLog(this.item) },

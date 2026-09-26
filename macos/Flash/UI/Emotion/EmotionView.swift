@@ -76,7 +76,7 @@ struct EmotionView: View {
 
                     Text(selectedLevel.displayName)
                         .font(.title3.weight(.semibold))
-                        .foregroundStyle(EmotionPalette.color(for: sliderValue))
+                        .foregroundStyle(EmotionPalette.textColor(for: sliderValue))
                         .id(selectedLevel)
                         .transition(.pop(reduceMotion: reduceMotion))
                 }
@@ -260,7 +260,7 @@ private struct EmotionWeekView: View {
             }
             Text(weekdayLabel(item.date))
                 .font(.caption2)
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
         .opacity(contentAppeared ? 1 : 0)
@@ -370,7 +370,7 @@ private struct EmotionHistoryView: View {
                 }
             }
             Spacer()
-            Text(record.recordDate).font(.caption).foregroundStyle(.tertiary)
+            Text(record.recordDate).font(.caption).foregroundStyle(.secondary)
         }
         .padding(10)
         .background(Color(nsColor: .controlBackgroundColor))
@@ -396,16 +396,28 @@ private struct EmotionHistoryView: View {
 private enum EmotionPalette {
     /// value 连续（1...7），返回相邻两级之间的插值色
     static func color(for value: Double) -> Color {
+        let (light, dark) = pair(for: value)
+        return BrandColors.dynamic(light: light, dark: dark)
+    }
+
+    /// 文字用变体：情绪浅色（如 #90EE90/#B0E0E6）在浅色卡片上作文字远低于 3:1，
+    /// 浅色外观下向主文字色 #2D3436 插值 55% 提升可读性（仍保留同色相）；
+    /// 深色变体本身为浅粉彩色，深底可读，保持原值。
+    static func textColor(for value: Double) -> Color {
+        let (light, dark) = pair(for: value)
+        return BrandColors.dynamic(light: lerpHex(light, "#2D3436", 0.55), dark: dark)
+    }
+
+    /// value 连续（1...7），返回相邻两级插值后的 (light, dark) hex
+    private static func pair(for value: Double) -> (String, String) {
         let clamped = max(1, min(7, value))
         let scaled = clamped - 1 // 0...6
         let index = min(5, Int(scaled))
         let fraction = scaled - Double(index)
         let a = EmotionLevel.allCases[index]
         let b = EmotionLevel.allCases[index + 1]
-        return BrandColors.dynamic(
-            light: lerpHex(a.colorHex, b.colorHex, fraction),
-            dark: lerpHex(a.darkColorHex, b.darkColorHex, fraction)
-        )
+        return (lerpHex(a.colorHex, b.colorHex, fraction),
+                lerpHex(a.darkColorHex, b.darkColorHex, fraction))
     }
 
     /// `#RRGGBB` 之间按 fraction (0...1) 做 RGB 线性插值

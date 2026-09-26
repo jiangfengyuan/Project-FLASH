@@ -1,6 +1,6 @@
 import { DailyActivity } from '../data/ReviewWindow';
 import { ThemeState } from '../state/FeatureStates';
-import { BRAND, RADIUS_CARD } from './CommonBuilders';
+import { RADIUS_CARD, brandText } from './CommonBuilders';
 
 @Component
 export struct ActivityChart {
@@ -27,7 +27,7 @@ export struct ActivityChart {
       Row({ space: 1 }) {
         ForEach(this.days, (day: DailyActivity) => {
           Column() {
-            Row().width('75%').height(128 * day.total / this.maximum()).backgroundColor(BRAND)
+            Row().width('75%').height(128 * day.total / this.maximum()).backgroundColor(brandText(this.theme))
           }.layoutWeight(1).height(128).justifyContent(FlexAlign.End)
         }, (day: DailyActivity) => day.date)
       }.width('100%').height(128).border({ width: { bottom: 1 }, color: this.theme.themeMuted })
@@ -39,7 +39,7 @@ export struct ActivityChart {
         Text(this.days[this.days.length - 1]?.date ?? '').fontSize(11).fontColor(this.theme.themeMuted)
       }.width('100%')
       Button(this.expanded ? '收起每日明细' : '查看每日明细').height(44)
-        .fontColor(BRAND).backgroundColor(this.theme.themeTint).onClick(() => this.expanded = !this.expanded)
+        .fontColor(brandText(this.theme)).backgroundColor(this.theme.themeTint).onClick(() => this.expanded = !this.expanded)
       if (this.expanded) {
         ForEach(this.days, (day: DailyActivity) => {
           Text(`${day.date}：${day.records} 条记录 · ${day.emotions} 次情绪`)

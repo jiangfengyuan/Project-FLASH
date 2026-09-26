@@ -82,18 +82,18 @@ fun WelcomeScreen(onStart: () -> Unit) {
                 "Flash",
                 style = MaterialTheme.typography.displayMedium,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = GlassPalette.InkLight,
             )
             Text(
                 "一闪",
                 style = MaterialTheme.typography.titleLarge,
-                color = Color.White.copy(alpha = 0.9f),
+                color = GlassPalette.InkLight.copy(alpha = 0.9f),
             )
             Spacer(Modifier.height(16.dp))
             Text(
                 "记录此刻，闪现灵感",
                 style = MaterialTheme.typography.bodyLarge,
-                color = Color.White.copy(alpha = 0.85f),
+                color = GlassPalette.InkLight.copy(alpha = 0.85f),
                 letterSpacing = 2.sp,
             )
             Spacer(Modifier.height(48.dp))

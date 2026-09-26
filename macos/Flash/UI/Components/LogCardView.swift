@@ -34,12 +34,12 @@ struct LogCardView: View {
                 if log.importance > 0 {
                     Text(String(repeating: "!", count: log.importance))
                         .font(.caption).bold()
-                        .foregroundStyle(ColorTag.urgent.color)
+                        .foregroundStyle(ColorTag.urgent.textColor)
                 }
                 Spacer()
                 Text(timestamp)
                     .font(.caption)
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(.secondary)
                 if hasActions {
                     actionButtons
                         .opacity(showActions ? 1 : 0)
@@ -66,14 +66,15 @@ struct LogCardView: View {
         .onHover { hovering = $0 }
     }
 
-    /// 标签徽章：标签色淡底胶囊，替代原先的色点+灰字
+    /// 标签徽章：标签色淡底胶囊，替代原先的色点+灰字。
+    /// 文案用 textColor（同色系加深变体），浅色模式下达到正文对比度
     private var tagBadge: some View {
         Text(log.colorTag.displayName)
             .font(.caption)
             .padding(.horizontal, 8)
             .padding(.vertical, 2)
             .background(log.colorTag.color.opacity(0.15), in: Capsule())
-            .foregroundStyle(log.colorTag.color)
+            .foregroundStyle(log.colorTag.textColor)
     }
 
     private var actionButtons: some View {
@@ -81,7 +82,7 @@ struct LogCardView: View {
             if let onEdit {
                 Button(action: onEdit) {
                     Image(systemName: "pencil")
-                        .frame(width: 20, height: 20)
+                        .frame(width: 28, height: 28)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
@@ -92,7 +93,7 @@ struct LogCardView: View {
             if onDelete != nil {
                 Button(action: deleteTapped) {
                     Image(systemName: "trash")
-                        .frame(width: 20, height: 20)
+                        .frame(width: 28, height: 28)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)

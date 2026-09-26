@@ -140,6 +140,7 @@ struct ExploreView: View {
                 }
                 .buttonStyle(.plain)
                 .help("清除搜索")
+                .accessibilityLabel("清除搜索")
                 .transition(.scale(scale: 0.8).combined(with: .opacity))
             }
             Text("⌘K")
@@ -185,6 +186,7 @@ struct ExploreView: View {
             }
             .buttonStyle(.plain)
             .help("筛选")
+            .accessibilityLabel(criteria.isActive ? "筛选（已启用条件）" : "筛选")
             .popover(isPresented: $showFilterPanel, arrowEdge: .bottom) {
                 ExploreFilterPanel(criteria: $criteria, onClear: clearFilters)
             }

@@ -2,7 +2,7 @@ import { dayString, monthTitle, shortDay, calendarWeeks } from '../data/DateUtil
 import { EmotionRecord, emotionEmoji, emotionName, LogItem, TaskDueKind, TaskItem } from '../models/Models';
 import { ThemeState, CalendarState, FeedbackState, DeleteKind } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
-import { EmptyState, RecordRow, RADIUS_CARD, BRAND, DOCK_CLEARANCE } from '../components/CommonBuilders';
+import { EmptyState, RecordRow, RADIUS_CARD, BRAND, DOCK_CLEARANCE, brandText, dangerText } from '../components/CommonBuilders';
 
 @Component
 export struct CalendarPage {
@@ -17,15 +17,15 @@ export struct CalendarPage {
     Scroll() {
       Column({ space: 12 }) {
         Row({ space: 4 }) {
-          Button('‹').height(44).width(44).fontColor(BRAND).backgroundColor(this.theme.themeTint)
+          Button('‹').height(44).width(44).fontColor(brandText(this.theme)).backgroundColor(this.theme.themeTint)
             .accessibilityText('上一月').onClick(() => requireActions(this.actions).calendarController.shiftMonth(-1))
           Text(monthTitle(this.calendar.displayedMonth)).fontSize(18).fontWeight(FontWeight.Bold)
             .fontColor(this.theme.themeText).layoutWeight(1).textAlign(TextAlign.Center)
-          Button('›').height(44).width(44).fontColor(BRAND).backgroundColor(this.theme.themeTint)
+          Button('›').height(44).width(44).fontColor(brandText(this.theme)).backgroundColor(this.theme.themeTint)
             .accessibilityText('下一月').onClick(() => requireActions(this.actions).calendarController.shiftMonth(1))
         }.width('100%')
         Row({ space: 12 }) {
-          Button('今天').height(44).fontColor(BRAND).backgroundColor(this.theme.themeTint)
+          Button('今天').height(44).fontColor(brandText(this.theme)).backgroundColor(this.theme.themeTint)
             .onClick(() => requireActions(this.actions).calendarController.backToToday())
           Button('新建任务').height(44).fontColor(Color.White).backgroundColor(BRAND)
             .onClick(() => requireActions(this.actions).calendarController.openTaskEditor(undefined, this.calendar.selectedDay))
@@ -49,7 +49,7 @@ export struct CalendarPage {
             Row() {
               Text(day + ' 详情').fontSize(15).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).layoutWeight(1)
               Button('添加任务', { type: ButtonType.Normal }).height(44).fontSize(11)
-                .fontColor(BRAND).backgroundColor(this.theme.themeTint).onClick(() => requireActions(this.actions).calendarController.openTaskEditor(undefined, day))
+                .fontColor(brandText(this.theme)).backgroundColor(this.theme.themeTint).onClick(() => requireActions(this.actions).calendarController.openTaskEditor(undefined, day))
             }.width('100%')
             if (this.dayCount(day) === 0) {
               Text('这一天还没有计划或记录').fontSize(14).fontColor(this.theme.themeMuted).width('100%')
@@ -99,8 +99,8 @@ export struct CalendarPage {
     Row({ space: 10 }) {
       Button(item.completedAt ? '✓' : '○', { type: ButtonType.Circle })
         .width(44).height(44).fontSize(18)
-        .fontColor(item.completedAt ? Color.White : BRAND)
-        .backgroundColor(item.completedAt ? '#22B573' : this.theme.themeTint)
+        .fontColor(item.completedAt ? Color.White : brandText(this.theme))
+        .backgroundColor(item.completedAt ? '#1E9E62' : this.theme.themeTint)
         .onClick(() => requireActions(this.actions).calendarController.toggleTask(item))
       Column({ space: 3 }) {
         Text(item.title).fontSize(14).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)
@@ -110,9 +110,9 @@ export struct CalendarPage {
           .fontSize(11).fontColor(this.theme.themeMuted).width('100%')
       }.layoutWeight(1).alignItems(HorizontalAlign.Start)
       Button('编辑', { type: ButtonType.Normal }).height(44).fontSize(11)
-        .fontColor(BRAND).backgroundColor(this.theme.themeTint).onClick(() => requireActions(this.actions).calendarController.openTaskEditor(item))
+        .fontColor(brandText(this.theme)).backgroundColor(this.theme.themeTint).onClick(() => requireActions(this.actions).calendarController.openTaskEditor(item))
       Button('删除', { type: ButtonType.Normal }).height(44).fontSize(11)
-        .fontColor('#B42318').backgroundColor(this.theme.themeDanger).onClick(() => this.feedback.destructive = { kind: DeleteKind.TASK, id: item.id })
+        .fontColor(dangerText(this.theme)).backgroundColor(this.theme.themeDanger).onClick(() => this.feedback.destructive = { kind: DeleteKind.TASK, id: item.id })
     }.width('100%').padding(10).backgroundColor(this.theme.themeControl).borderRadius(14)
   }
 

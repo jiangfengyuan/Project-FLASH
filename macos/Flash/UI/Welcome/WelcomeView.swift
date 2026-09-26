@@ -7,15 +7,16 @@
 import SwiftUI
 
 /// 首次启动欢迎页（对应 Android WelcomeScreen）。完成后 setWelcomed。
-/// 翻页：旧页以 .appear 反向过渡淡出；新页 emoji/标题/副标题按 50ms 级联
-/// stagger 入场（emoji 附带 .card 式微缩放）。所有动效尊重 Reduce Motion。
+/// 翻页：旧页以 .appear 反向过渡淡出；新页图标/标题/副标题按 50ms 级联
+/// stagger 入场（图标附带 .card 式微缩放）。所有动效尊重 Reduce Motion。
 struct WelcomeView: View {
     let onFinish: () -> Void
 
-    private let pages: [(emoji: String, title: String, subtitle: String)] = [
-        ("⚡️", "欢迎来到 Flash", "一闪而过的想法，值得被记住"),
-        ("📝", "随手记录", "日志与灵感，一键即达"),
-        ("😊", "情绪觉察", "七级情绪记录，看见自己的变化"),
+    /// 功能图标用 SF Symbols + 模块令牌色（不用 emoji 作功能图标）
+    private let pages: [(symbol: String, tint: Color, title: String, subtitle: String)] = [
+        ("bolt.fill", BrandColors.brandPrimary, "欢迎来到 Flash", "一闪而过的想法，值得被记住"),
+        ("square.and.pencil", BrandColors.logPurple, "随手记录", "日志与灵感，一键即达"),
+        ("face.smiling", BrandColors.emotionPink, "情绪觉察", "七级情绪记录，看见自己的变化"),
     ]
 
     @State private var page = 0
@@ -30,12 +31,15 @@ struct WelcomeView: View {
         VStack(spacing: 24) {
             Spacer()
             VStack(spacing: 12) {
-                Text(pages[page].emoji)
-                    .font(.system(size: 64))
+                // 图标有标题文字承载信息，对读屏标记为装饰
+                Image(systemName: pages[page].symbol)
+                    .font(.system(size: 56))
+                    .foregroundStyle(pages[page].tint)
                     .padding(.bottom, 8)
                     .opacity(shown ? 1 : 0)
                     .scaleEffect(shown || reduceMotion ? 1 : 0.96)
                     .animation(entrance(0), value: shownPage)
+                    .accessibilityHidden(true)
                 Text(pages[page].title)
                     .font(.title).bold()
                     .opacity(shown ? 1 : 0)

@@ -60,7 +60,7 @@ fun LogCard(
                     Text(
                         log.colorTag.displayName,
                         style = MaterialTheme.typography.bodySmall,
-                        color = tagColor,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = FontWeight.Medium,
                     )
                     Text(
@@ -70,7 +70,7 @@ fun LogCard(
                     )
                     if (log.category == Category.IDEA) {
                         Text(
-                            " · IDEA",
+                            " · 灵感",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.tertiary,
                         )

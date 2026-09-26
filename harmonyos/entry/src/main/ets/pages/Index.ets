@@ -12,7 +12,6 @@ import { ProfilePage } from '../pages/ProfilePage';
 import { EmotionPage } from '../pages/EmotionPage';
 import { CalendarPage } from '../pages/CalendarPage';
 import { LogManagerPage } from '../pages/LogManagerPage';
-import { SettingsPage } from '../pages/SettingsPage';
 import { HarmonyFeaturesPage } from '../pages/HarmonyFeaturesPage';
 import { QuickInputDialog } from '../components/QuickInputDialog';
 import { EditLogDialog } from '../components/EditLogDialog';
@@ -20,7 +19,7 @@ import { TaskEditorDialog } from '../components/TaskEditorDialog';
 import { DestructiveConfirmDialog } from '../components/DestructiveConfirmDialog';
 import { WelcomeOverlay } from '../components/WelcomeOverlay';
 import {
-  BRAND, FabButton, FabOption, FlashDockBar, FAB_SIZE,
+  FabButton, FabOption, FlashDockBar, FAB_SIZE, brandText,
   PAGE_BACKGROUND_LIGHT, PAGE_BACKGROUND_DARK, CARD_SURFACE_LIGHT, CARD_SURFACE_DARK,
   TEXT_PRIMARY_LIGHT, TEXT_PRIMARY_DARK, TEXT_MUTED_LIGHT, TEXT_MUTED_DARK,
   WEAK_SURFACE_LIGHT, CONTROL_SURFACE_DARK, TINT_SURFACE_LIGHT, TINT_SURFACE_DARK
@@ -227,7 +226,7 @@ struct Index {
     } else if (this.navigation.activeTab === 2) {
       StatsPage({ theme: this.theme, logs: this.logs, emotion: this.emotion, calendar: this.calendar, feedback: this.feedback, actions: this.actions })
     } else {
-      ProfilePage({ theme: this.theme, actions: this.actions })
+      ProfilePage({ theme: this.theme, backup: this.backup, feedback: this.feedback, actions: this.actions })
     }
   }
 
@@ -235,7 +234,7 @@ struct Index {
   private detailPage() {
     Column() {
       Row({ space: 10 }) {
-        Button('‹ 返回', { type: ButtonType.Normal }).fontColor(BRAND).backgroundColor(Color.Transparent)
+        Button('‹ 返回', { type: ButtonType.Normal }).height(44).fontColor(brandText(this.theme)).backgroundColor(Color.Transparent)
           .onClick(() => this.closeDetail())
         Text(this.detailTitle()).fontSize(20).fontWeight(FontWeight.Bold).fontColor(this.theme.themeText)
       }.width('100%').height(60).padding({ left: 8, right: 16 })
@@ -243,7 +242,6 @@ struct Index {
       else if (this.navigation.detail === 'calendar') CalendarPage({ theme: this.theme, calendar: this.calendar, feedback: this.feedback, actions: this.actions })
       else if (this.navigation.detail === 'logs') LogManagerPage({ theme: this.theme, logs: this.logs, feedback: this.feedback, actions: this.actions })
       else if (this.navigation.detail === 'harmony') HarmonyFeaturesPage({ navigation: this.navigation, theme: this.theme, settings: this.settings, actions: this.actions })
-      else SettingsPage({ theme: this.theme, backup: this.backup, feedback: this.feedback, actions: this.actions })
     }.width('100%').height('100%').backgroundColor(this.theme.themeBackground)
   }
 
@@ -279,8 +277,8 @@ struct Index {
     Column({ space: 5 }) {
       SymbolGlyph(this.navigation.activeTab === index ? activeIcon : icon)
         .fontSize(22)
-        .fontColor([this.navigation.activeTab === index ? BRAND : this.theme.themeMuted])
-      Text(label).fontSize(11).fontColor(this.navigation.activeTab === index ? BRAND : this.theme.themeMuted)
+        .fontColor([this.navigation.activeTab === index ? brandText(this.theme) : this.theme.themeMuted])
+      Text(label).fontSize(11).fontColor(this.navigation.activeTab === index ? brandText(this.theme) : this.theme.themeMuted)
         .fontWeight(this.navigation.activeTab === index ? FontWeight.Medium : FontWeight.Regular)
     }
     .width(78)
@@ -288,6 +286,8 @@ struct Index {
     .justifyContent(FlexAlign.Center)
     .backgroundColor(this.navigation.activeTab === index ? this.theme.themeTint : Color.Transparent)
     .borderRadius(18)
+    .accessibilityGroup(true)
+    .accessibilityText(label + (this.navigation.activeTab === index ? '，已选中' : ''))
     .onClick(() => this.switchTab(index))
     .animation({ duration: 200, curve: Curve.EaseOut })
   }
@@ -304,22 +304,22 @@ struct Index {
           .opacity(this.navigation.fabProgress)
           .onClick(() => this.dismissFab())
         Column({ space: 12 }) {
-          FabOption(this.theme, '记录', $r('sys.symbol.square_and_pencil'), '#8B5CF6', () => {
+          FabOption(this.theme, '记录', $r('sys.symbol.square_and_pencil'), '#9A74EA', () => {
             this.navigation.fabExpanded = false;
             this.navigation.fabProgress = 0;
             this.logs.quickCategory = Category.LOG;
           })
-          FabOption(this.theme, '灵感', $r('sys.symbol.lightbulb'), '#F5B800', () => {
+          FabOption(this.theme, '灵感', $r('sys.symbol.lightbulb'), '#B08400', () => {
             this.navigation.fabExpanded = false;
             this.navigation.fabProgress = 0;
             this.logs.quickCategory = Category.IDEA;
           })
-          FabOption(this.theme, '情绪', $r('sys.symbol.face_smiling'), '#FF6B9D', () => {
+          FabOption(this.theme, '情绪', $r('sys.symbol.face_smiling'), '#E35A90', () => {
             this.navigation.fabExpanded = false;
             this.navigation.fabProgress = 0;
             this.openDetail('emotion');
           })
-          FabOption(this.theme, '任务', $r('sys.symbol.checkmark_circle'), '#22B573', () => {
+          FabOption(this.theme, '任务', $r('sys.symbol.checkmark_circle'), '#1E9E62', () => {
             this.navigation.fabExpanded = false;
             this.navigation.fabProgress = 0;
             this.actions.calendarController.openTaskEditor(undefined, dayString());

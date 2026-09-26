@@ -8,7 +8,10 @@ import SwiftUI
 import AppKit // NSSavePanel / NSOpenPanel
 import UniformTypeIdentifiers
 
-/// 设置页：外观 / 数据备份 / 关于（对齐 Android SettingsViewModel）
+/// 设置页：外观与使用 / 数据与安全 / 危险操作 / 关于（对齐 Android SettingsViewModel）
+///
+/// macOS 无分类/标签/提醒管理界面与界面风格（UiStyle）设置，
+/// 故不设「记录与提醒」组、不加动态效果/字体设置项，仅暴露已有功能入口。
 struct SettingsView: View {
     @EnvironmentObject private var settings: SettingsStore
     @Environment(\.flashRepository) private var repository
@@ -41,70 +44,111 @@ struct SettingsView: View {
     @State private var aboutAppeared = false
 
     var body: some View {
-        Form {
-            Section {
-                Label("数据默认保存在此设备", systemImage: "internaldrive")
-                    .font(.headline)
-                Text("可导出备份或在可信局域网内传输")
-                    .font(.caption).foregroundStyle(.secondary)
+        VStack(spacing: 0) {
+            HStack {
+                Text("设置")
+                    .font(.largeTitle.bold())
+                Spacer()
             }
-            Section("外观与使用") {
-                Picker("主题", selection: themeBinding) {
-                    ForEach(ThemeMode.allCases, id: \.self) {
-                        Text($0.displayName).tag($0)
+            .padding(.horizontal, Spacing.lg)
+            .padding(.top, Spacing.lg)
+
+            Form {
+                Section {
+                    Label {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("数据默认保存在此设备")
+                                .font(.headline)
+                            Text("可导出备份或在可信局域网内传输")
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
+                    } icon: {
+                        Image(systemName: "internaldrive")
+                            .foregroundStyle(BrandColors.brandPrimary)
                     }
                 }
-                .pickerStyle(.segmented)
-            }
-            .opacity(appearanceAppeared ? 1 : 0)
-            .offset(y: !appearanceAppeared && !reduceMotion ? 6 : 0)
 
-            Section("数据与安全") {
-                Button("通过系统分享…") { transferBackup() }
-                    .hoverFeedback(reduceMotion: reduceMotion)
-                HStack {
-                    Button("局域网发送…") { startLanSend() }
-                    Button("局域网接收…") { lanTransfer.startReceiving() }
-                }
-                Button("导出备份…") { exportBackup() }
-                    .hoverFeedback(reduceMotion: reduceMotion)
-                Button("标准导入…") { chooseImportFile() }
-                Button("恢复损坏或旧版备份…") { chooseImportFile(recovery: true) }
-                    .hoverFeedback(reduceMotion: reduceMotion)
-                Text("通过系统分享传输明文 JSON；可选择 AirDrop、信息、邮件或云盘。")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-                if isBusy {
-                    HStack(spacing: 8) {
-                        ProgressView().controlSize(.small)
-                        Text("正在处理…")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                Section("外观与使用") {
+                    Picker(selection: themeBinding) {
+                        ForEach(ThemeMode.allCases, id: \.self) {
+                            Text($0.displayName).tag($0)
+                        }
+                    } label: {
+                        rowLabel("主题", systemImage: "circle.lefthalf.filled", color: .blue)
                     }
-                    .transition(.appear(reduceMotion: reduceMotion))
+                    .pickerStyle(.segmented)
                 }
-            }
-            .disabled(isBusy)
-            .animation(reduceMotion ? Motion.reducedFade(true) : Motion.soft(), value: isBusy)
-            .opacity(dataAppeared ? 1 : 0)
-            .offset(y: !dataAppeared && !reduceMotion ? 6 : 0)
+                .opacity(appearanceAppeared ? 1 : 0)
+                .offset(y: !appearanceAppeared && !reduceMotion ? 6 : 0)
 
-            Section("危险操作") {
-                Text("清空后无法撤销，建议先导出备份。").font(.caption).foregroundStyle(.secondary)
-                Button("清空全部数据…", role: .destructive) { showClearConfirm = true }
-            }.disabled(isBusy || lanTransfer.mode != .idle)
+                Section("数据与安全") {
+                    Button { transferBackup() } label: {
+                        rowLabel("通过系统分享…", systemImage: "square.and.arrow.up", color: BrandColors.accessibleGreen)
+                    }
+                    .hoverFeedback(reduceMotion: reduceMotion)
+                    Button { startLanSend() } label: {
+                        rowLabel("局域网发送…", systemImage: "paperplane", color: BrandColors.accessibleGreen)
+                    }
+                    Button { lanTransfer.startReceiving() } label: {
+                        rowLabel("局域网接收…", systemImage: "antenna.radiowaves.left.and.right", color: BrandColors.accessibleGreen)
+                    }
+                    Button { exportBackup() } label: {
+                        rowLabel("导出备份…", systemImage: "tray.and.arrow.up", color: BrandColors.accessibleGreen)
+                    }
+                    .hoverFeedback(reduceMotion: reduceMotion)
+                    Button { chooseImportFile() } label: {
+                        rowLabel("标准导入…", systemImage: "tray.and.arrow.down", color: BrandColors.accessibleGreen)
+                    }
+                    Button { chooseImportFile(recovery: true) } label: {
+                        rowLabel("恢复损坏或旧版备份…", systemImage: "bandage", color: BrandColors.accessibleGreen)
+                    }
+                    .hoverFeedback(reduceMotion: reduceMotion)
+                    Text("通过系统分享传输明文 JSON；可选择 AirDrop、信息、邮件或云盘。")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    if isBusy {
+                        HStack(spacing: 8) {
+                            ProgressView().controlSize(.small)
+                            Text("正在处理…")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .transition(.appear(reduceMotion: reduceMotion))
+                    }
+                }
+                .disabled(isBusy)
+                .animation(reduceMotion ? Motion.reducedFade(true) : Motion.soft(), value: isBusy)
+                .opacity(dataAppeared ? 1 : 0)
+                .offset(y: !dataAppeared && !reduceMotion ? 6 : 0)
 
-            Section("关于 Flash") {
-                LabeledContent("版本", value: appVersion)
-                Label("无云端账号，备份与传输由你主动发起。", systemImage: "lock.shield")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Section("危险操作") {
+                    Text("将删除本机全部日志、灵感、情绪与任务，清空后无法撤销，建议先导出备份。")
+                        .font(.caption).foregroundStyle(.secondary)
+                    Button(role: .destructive) { showClearConfirm = true } label: {
+                        rowLabel("清空全部数据…", systemImage: "trash", color: .red)
+                    }
+                }.disabled(isBusy || lanTransfer.mode != .idle)
+
+                Section("关于 Flash") {
+                    LabeledContent {
+                        Text(appVersion)
+                    } label: {
+                        rowLabel("版本", systemImage: "info.circle", color: .secondary)
+                    }
+                    Label("无云端账号，备份与传输由你主动发起。", systemImage: "lock.shield")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .opacity(aboutAppeared ? 1 : 0)
+                .offset(y: !aboutAppeared && !reduceMotion ? 6 : 0)
             }
-            .opacity(aboutAppeared ? 1 : 0)
-            .offset(y: !aboutAppeared && !reduceMotion ? 6 : 0)
+            .formStyle(.grouped)
+            .scrollContentBackground(.hidden)
+            .padding()
+            .frame(maxWidth: Metrics.readingMaxWidth)
         }
-        .formStyle(.grouped)
-        .padding()
+        .frame(maxWidth: .infinity)
+        .background(BrandColors.pageBackground)
         .onAppear {
             flushExportRequest()
             flushLanTransferResults()
@@ -164,11 +208,24 @@ struct SettingsView: View {
         .alert("清空全部数据？此操作不可撤销。", isPresented: $showClearConfirm) {
             Button("清空", role: .destructive) { clearAll() }
             Button("取消", role: .cancel) {}
+        } message: {
+            Text("将删除本机全部日志、灵感、情绪与任务。如未导出备份，数据将无法找回。")
         }
         .alert("提示", isPresented: messagePresented) {
             Button("好") { message = nil }
         } message: {
             Text(message ?? "")
+        }
+    }
+
+    /// 分组清单行：彩色语义图标 + 标题。图标色仅作分组语义点缀（蓝=外观、绿=安全、红=危险），
+    /// 信息由标题文字承载，色彩不是唯一通道
+    private func rowLabel(_ title: String, systemImage: String, color: Color) -> some View {
+        Label {
+            Text(title)
+        } icon: {
+            Image(systemName: systemImage)
+                .foregroundStyle(color)
         }
     }
 

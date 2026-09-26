@@ -32,12 +32,12 @@ export struct TaskEditorDialog {
           }.width('100%')
           Row({ space: 8 }) {
             TextInput({ placeholder: 'YYYY-MM-DD', text: this.calendar.taskDate })
-              .layoutWeight(1).height(42).maxLength(10).fontColor(this.theme.themeText).placeholderColor(this.theme.themeMuted)
+              .layoutWeight(1).height(44).maxLength(10).fontColor(this.theme.themeText).placeholderColor(this.theme.themeMuted)
               .backgroundColor(this.theme.themeControl).borderRadius(12)
               .onChange((value: string) => this.calendar.taskDate = value.slice(0, 10))
             if (!this.calendar.taskAllDay) {
               TextInput({ placeholder: 'HH:mm', text: this.calendar.taskTime })
-                .width(100).height(42).maxLength(5).fontColor(this.theme.themeText).placeholderColor(this.theme.themeMuted)
+                .width(100).height(44).maxLength(5).fontColor(this.theme.themeText).placeholderColor(this.theme.themeMuted)
                 .backgroundColor(this.theme.themeControl).borderRadius(12)
                 .onChange((value: string) => this.calendar.taskTime = value.slice(0, 5))
             }
@@ -60,9 +60,9 @@ export struct TaskEditorDialog {
           Text('提醒由 HarmonyOS 系统后台托管；首次启用会请求通知权限。')
             .fontSize(11).fontColor(this.theme.themeMuted).width('100%')
           Row({ space: 10 }) {
-            Button('取消').layoutWeight(1).height(42).fontColor(this.theme.themeMuted).backgroundColor(this.theme.themeControl)
+            Button('取消').layoutWeight(1).height(44).fontColor(this.theme.themeMuted).backgroundColor(this.theme.themeControl)
               .onClick(() => requireActions(this.actions).calendarController.closeTaskEditor())
-            Button('保存').layoutWeight(1).height(42).backgroundColor(BRAND)
+            Button('保存').layoutWeight(1).height(44).backgroundColor(BRAND)
               .enabled(this.calendar.taskTitle.trim().length > 0).onClick(() => requireActions(this.actions).calendarController.saveTaskEditor())
           }.width('100%')
         }.width('100%').padding(22)
@@ -76,7 +76,7 @@ export struct TaskEditorDialog {
 
   @Builder
   private reminderChip(minutes: number, label: string) {
-    Button(label, { type: ButtonType.Normal }).height(34).fontSize(11)
+    Button(label, { type: ButtonType.Normal }).height(44).fontSize(11)
       .fontColor(this.calendar.taskReminderMinutes === minutes ? Color.White : this.theme.themeText)
       .backgroundColor(this.calendar.taskReminderMinutes === minutes ? BRAND : this.theme.themeControl)
       .onClick(() => this.calendar.taskReminderMinutes = minutes)

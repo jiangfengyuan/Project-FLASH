@@ -6,6 +6,7 @@ import {
   EmotionRecord,
   LogItem,
   SUB_EMOTIONS,
+  TaskDue,
   TaskDueKind,
   TaskItem
 } from '../models/Models';
@@ -423,16 +424,25 @@ export class BackupService {
   }
 
   private static normalizedTask(item: TaskItem): TaskItem {
+    const due = item.due;
+    let normalizedDue: TaskDue;
+    if (due.kind === TaskDueKind.ALL_DAY) {
+      normalizedDue = { kind: TaskDueKind.ALL_DAY, date: due.date };
+    } else {
+      const canonicalZone = BackupService.canonicalTimeZone(due.timeZone ?? '');
+      normalizedDue = {
+        kind: TaskDueKind.DATE_TIME,
+        at: BackupService.normalizedISO(due.at),
+        timeZone: canonicalZone === null ? undefined : canonicalZone
+      };
+    }
     return {
       id: item.id,
       title: item.title.trim(),
       notes: item.notes ?? undefined,
       colorTag: item.colorTag,
       importance: item.importance,
-      due: item.due.kind === TaskDueKind.ALL_DAY ?
-        { kind: TaskDueKind.ALL_DAY, date: item.due.date } :
-        { kind: TaskDueKind.DATE_TIME, at: BackupService.normalizedISO(item.due.at),
-          timeZone: BackupService.canonicalTimeZone(item.due.timeZone) },
+      due: normalizedDue,
       reminderAt: item.reminderAt ? BackupService.normalizedISO(item.reminderAt) : undefined,
       completedAt: item.completedAt ? BackupService.normalizedISO(item.completedAt) : undefined,
       createdAt: BackupService.normalizedISO(item.createdAt),

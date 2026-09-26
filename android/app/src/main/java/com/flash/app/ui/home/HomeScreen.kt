@@ -238,7 +238,7 @@ fun HomeScreen(
                             Text(
                                 "${ui.unviewedIdeaCount}",
                                 style = MaterialTheme.typography.titleMedium,
-                                color = ModuleColors.Idea,
+                                color = MaterialTheme.colorScheme.onSurface,
                             )
                         }
                     }

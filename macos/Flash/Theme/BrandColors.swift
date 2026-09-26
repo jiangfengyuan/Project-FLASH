@@ -72,4 +72,9 @@ enum BrandColors {
     /// 品牌主操作色：蓝紫语义 #6C5CE7（禁止硬编码荧光绿）；
     /// 深色下略提亮保证可读性
     static let brandPrimary = dynamic(light: "#6C5CE7", dark: "#8B80F0")
+
+    /// 可访问绿：任务/数据安全等「绿色语义」场景的文字与图标色。
+    /// 系统 .green 浅色下在白底仅约 2.1:1，不满足图标/文字对比度；
+    /// 此令牌浅色取深绿（白底 ≥ 4.5:1），深色取浅绿（深底 ≥ 4.5:1）。
+    static let accessibleGreen = dynamic(light: "#3A8545", dark: "#8FCE9F")
 }

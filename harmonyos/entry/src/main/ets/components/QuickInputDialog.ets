@@ -30,12 +30,12 @@ export struct QuickInputDialog {
           .onChange((value: string) => this.logs.quickText = value.slice(0, 140))
         Text(`${this.logs.quickText.length}/140`).fontSize(11).fontColor(this.theme.themeMuted).width('100%').textAlign(TextAlign.End)
         Row({ space: 10 }) {
-          Button('取消').layoutWeight(1).height(42).fontColor(this.theme.themeMuted).backgroundColor(this.theme.themeControl)
+          Button('取消').layoutWeight(1).height(44).fontColor(this.theme.themeMuted).backgroundColor(this.theme.themeControl)
             .onClick(() => {
               this.logs.quickCategory = '';
               this.logs.quickText = '';
             })
-          Button('保存').layoutWeight(1).height(42).backgroundColor(BRAND)
+          Button('保存').layoutWeight(1).height(44).backgroundColor(BRAND)
             .enabled(this.logs.quickText.trim().length > 0).onClick(() => requireActions(this.actions).logsController.saveQuickCategory())
         }.width('100%')
       }.width(this.navigation.isMediumWindow ? 460 : '84%').padding(22).backgroundColor(this.theme.themeSurface).borderRadius(24)

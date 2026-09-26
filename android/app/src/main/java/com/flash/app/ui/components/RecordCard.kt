@@ -148,7 +148,7 @@ fun RecordCard(
             Text(
                 log.colorTag.displayName,
                 style = MaterialTheme.typography.bodySmall,
-                color = tagColor,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontWeight = FontWeight.Medium,
             )
             if (log.category == Category.IDEA) {

@@ -33,7 +33,9 @@ import com.flash.app.ui.calendar.CalendarScreen
 import com.flash.app.ui.components.FlashSegmentedControl
 import com.flash.app.domain.dailyActivity
 import androidx.compose.material3.TextButton
+import com.flash.app.domain.ReviewInsight
 import com.flash.app.domain.ReviewWindow
+import com.flash.app.domain.reviewInsight
 import com.flash.app.ui.components.FlashFilterChipRow
 import com.flash.app.ui.components.FlashFilterChipItem
 import androidx.compose.ui.Alignment
@@ -62,11 +64,13 @@ fun StatsScreen(onOpenSettings: () -> Unit, onOpenRecord: (String) -> Unit) {
     val activity = remember(ui.logs, ui.emotions, window, ui.today) {
         dailyActivity(ui.logs, ui.emotions, window.start(ui.today), ui.today)
     }
+    val insight = remember(ui.logs, ui.emotions, window, ui.today) {
+        reviewInsight(ui.logs, ui.emotions, window, ui.today)
+    }
     val start = window.start(ui.today).toString()
     val end = ui.today.toString()
     val logs = ui.logs.filter { it.recordDate in start..end }
     val emotions = ui.emotions.filter { it.recordDate in start..end }
-    val activeDays = (logs.map { it.recordDate } + emotions.map { it.recordDate }).distinct().size
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -102,10 +106,21 @@ fun StatsScreen(onOpenSettings: () -> Unit, onOpenRecord: (String) -> Unit) {
             }
             item(key = "insight") {
                 FlashCard(modifier = Modifier.fillMaxWidth()) {
-                    Text(if (activeDays == 0) "继续记录，回顾会慢慢清晰" else "这段时间，你留下了 $activeDays 天的记录",
+                    Text(insightHeadline(insight, window),
                         style = MaterialTheme.typography.titleMedium)
-                    Text("$start — $end", style = MaterialTheme.typography.bodySmall)
-                    Text("${logs.size} 条记录 · ${emotions.size} 次情绪", style = MaterialTheme.typography.bodyMedium)
+                    Text("$start — $end", style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    if (insight.hasEnoughData) {
+                        Text("${window.currentName} ${insight.currentCount} 条 · ${window.previousName} ${insight.previousCount} 条",
+                            style = MaterialTheme.typography.bodyMedium)
+                        insight.currentEmotionMean?.let { mean ->
+                            Text("情绪均值 ${formatEmotionMean(mean)}（-3 至 +3）",
+                                style = MaterialTheme.typography.bodyMedium)
+                        }
+                    } else {
+                        Text("${logs.size} 条记录 · ${emotions.size} 次情绪",
+                            style = MaterialTheme.typography.bodyMedium)
+                    }
                 }
             }
             item(key = "activity") { ActivityChart(activity) }
@@ -145,4 +160,25 @@ private fun StatItem(value: String, label: String) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
+}
+
+/** 洞察卡首行结论：数据不足时不强行给趋势判断。 */
+private fun insightHeadline(insight: ReviewInsight, window: ReviewWindow): String {
+    if (!insight.hasEnoughData) return "继续记录，回顾会慢慢清晰"
+    val base = when (insight.trend) {
+        ReviewInsight.Trend.MORE -> "${window.currentName}你记录得比${window.previousName}更频繁"
+        ReviewInsight.Trend.LESS -> "${window.currentName}不如${window.previousName}活跃"
+        ReviewInsight.Trend.SAME -> "${window.currentName}与${window.previousName}持平"
+    }
+    return when (insight.emotionShift) {
+        ReviewInsight.Trend.MORE -> "$base，情绪整体更积极"
+        ReviewInsight.Trend.LESS -> "$base，情绪略偏低落"
+        else -> base
+    }
+}
+
+private fun formatEmotionMean(mean: Double): String {
+    val sign = if (mean > 0) "+" else ""
+    val body = if (mean % 1.0 == 0.0) mean.toInt().toString() else mean.toString()
+    return sign + body
 }

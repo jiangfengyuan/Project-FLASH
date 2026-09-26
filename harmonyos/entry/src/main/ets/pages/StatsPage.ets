@@ -1,11 +1,11 @@
 import { ActivityChart } from '../components/ActivityChart';
 import { CalendarPage } from './CalendarPage';
-import { reviewDays, dailyActivity } from '../data/ReviewWindow';
+import { reviewDays, dailyActivity, reviewComparison, emotionDistribution, ReviewComparison, EmotionDistribution, SubEmotionSlice } from '../data/ReviewWindow';
 import { shortDay } from '../data/DateUtils';
 import { Category, LogItem, EmotionRecord } from '../models/Models';
 import { ThemeState, LogsState, EmotionState, CalendarState, FeedbackState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
-import { PageHeader, DOCK_CLEARANCE, RADIUS_CARD, BRAND, FilterChip } from '../components/CommonBuilders';
+import { PageHeader, DOCK_CLEARANCE, RADIUS_CARD, FilterChip, brandText } from '../components/CommonBuilders';
 
 @Component
 export struct StatsPage {
@@ -37,6 +37,12 @@ export struct StatsPage {
     return items.length === 0 ? '—' :
       (items.reduce((sum: number, item: EmotionRecord) => sum + item.level, 0) / items.length).toFixed(1);
   }
+  private comparison(): ReviewComparison {
+    return reviewComparison(this.logs.logs, this.emotion.emotions, this.window);
+  }
+  private distribution(): EmotionDistribution {
+    return emotionDistribution(this.emotion.emotions, this.days());
+  }
 
   @Builder
   private statsPage() {
@@ -51,12 +57,19 @@ export struct StatsPage {
           }
         }.scrollable(ScrollDirection.Horizontal).scrollBar(BarState.Off).width('100%')
         Column({ space: 8 }) {
-          Text(this.activeDays() === 0 ? '继续记录，回顾会慢慢清晰' : `这段时间，你留下了 ${this.activeDays()} 天的记录`)
+          Text(this.comparison().conclusion)
             .fontSize(17).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).width('100%')
           Text(`${this.days()[0]} — ${this.days()[this.days().length - 1]}`)
             .fontSize(12).fontColor(this.theme.themeMuted).width('100%')
-          Text(`${this.periodLogs().length} 条记录 · ${this.periodEmotions().length} 次情绪`)
-            .fontSize(14).fontColor(this.theme.themeText).width('100%')
+          if (this.comparison().insufficient) {
+            Text(`这段时间有 ${this.periodLogs().length} 条记录 · ${this.periodEmotions().length} 次情绪`)
+              .fontSize(14).fontColor(this.theme.themeText).width('100%')
+          } else {
+            Text(`${this.comparison().currentLabel} ${this.comparison().currentCount} 条 · ${this.comparison().previousLabel} ${this.comparison().previousCount} 条`)
+              .fontSize(14).fontColor(this.theme.themeText).width('100%')
+            Text(`活跃 ${this.activeDays()} 天 · 平均情绪 ${this.periodAverage()}`)
+              .fontSize(14).fontColor(this.theme.themeText).width('100%')
+          }
         }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
         ActivityChart({ theme: this.theme, days: dailyActivity(this.logs.logs, this.emotion.emotions, this.days()) })
         Row({ space: 10 }) {
@@ -75,18 +88,37 @@ export struct StatsPage {
               Text(shortDay(day)).fontSize(12).fontColor(this.theme.themeMuted).width(58)
               Stack({ alignContent: Alignment.Start }) {
                 Row().height(10).width('100%').backgroundColor(this.theme.themeControl).borderRadius(5)
-                Row().height(10).width(`${requireActions(this.actions).emotionController.dayBar(day)}%`).backgroundColor(BRAND).borderRadius(5)
+                Row().height(10).width(`${requireActions(this.actions).emotionController.dayBar(day)}%`).backgroundColor(brandText(this.theme)).borderRadius(5)
               }.layoutWeight(1).height(12)
               Text(requireActions(this.actions).emotionController.dayEmotionLabel(day)).fontSize(12).fontColor(this.theme.themeText).width(34)
             }.width('100%')
           }, (day: string) => day)
         }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
 
+        Column({ space: 12 }) {
+          Text('情绪分布').fontSize(17).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).width('100%')
+          Text('时间范围内开心 / 中性 / 不开心的次数，条形长度按比例')
+            .fontSize(12).fontColor(this.theme.themeMuted).width('100%')
+          if (this.distribution().total === 0) {
+            Text('时间范围内暂无情绪记录，分布会慢慢成形').fontSize(14).fontColor(this.theme.themeMuted).width('100%')
+          } else {
+            this.distributionRow('开心', this.distribution().positive, this.distribution().total)
+            this.distributionRow('中性', this.distribution().neutral, this.distribution().total)
+            this.distributionRow('不开心', this.distribution().negative, this.distribution().total)
+            if (this.distribution().subEmotions.length > 0) {
+              Text('不开心时的具体感受').fontSize(12).fontColor(this.theme.themeMuted).width('100%')
+              ForEach(this.distribution().subEmotions, (slice: SubEmotionSlice) => {
+                this.distributionRow(slice.name, slice.count, this.distribution().negative)
+              }, (slice: SubEmotionSlice) => slice.key)
+            }
+          }
+        }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
+
         Column({ space: 10 }) {
           Text('累计构成 · 全部时间').fontSize(17).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).width('100%')
-          this.statLine('日志', this.logs.logs.filter((item: LogItem) => item.category === Category.LOG).length, '#4D96FF')
-          this.statLine('灵感', this.logs.logs.filter((item: LogItem) => item.category === Category.IDEA).length, '#FF9F43')
-          this.statLine('情绪', this.emotion.emotions.length, '#9B59B6')
+          this.statLine('日志', this.logs.logs.filter((item: LogItem) => item.category === Category.LOG).length, '#5A88E8')
+          this.statLine('灵感', this.logs.logs.filter((item: LogItem) => item.category === Category.IDEA).length, '#C87D2A')
+          this.statLine('情绪', this.emotion.emotions.length, '#9A74EA')
         }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
       }.width('100%').padding({ left: 20, right: 20, bottom: DOCK_CLEARANCE })
     }.width('100%').layoutWeight(1).backgroundColor(this.theme.themeBackground)
@@ -106,6 +138,20 @@ export struct StatsPage {
       Row().width(10).height(10).borderRadius(5).backgroundColor(color)
       Text(label).fontSize(14).fontColor(this.theme.themeText).layoutWeight(1)
       Text(`${value}`).fontSize(15).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)
+    }.width('100%')
+  }
+
+  @Builder
+  private distributionRow(label: string, count: number, total: number) {
+    Row({ space: 10 }) {
+      Text(label).fontSize(12).fontColor(this.theme.themeMuted).width(58)
+      Stack({ alignContent: Alignment.Start }) {
+        Row().height(10).width('100%').backgroundColor(this.theme.themeControl).borderRadius(5)
+        if (count > 0 && total > 0) {
+          Row().height(10).width(`${Math.max(4, Math.round(100 * count / total))}%`).backgroundColor(brandText(this.theme)).borderRadius(5)
+        }
+      }.layoutWeight(1).height(12)
+      Text(`${count} 次`).fontSize(12).fontColor(this.theme.themeText).width(48).textAlign(TextAlign.End)
     }.width('100%')
   }
 

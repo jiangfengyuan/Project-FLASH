@@ -12,6 +12,23 @@ import SwiftUI
 extension ColorTag {
     /// 跟随系统外观的动态色（light/dark 双变体）
     var color: Color { BrandColors.dynamic(light: colorHex, dark: darkColorHex) }
+
+    /// 标签色用于小号文字（徽章文案、重要度标记）时的可读变体：
+    /// 存储色多为高亮点缀色（如 #FFD93D），浅色模式下直接作文字远低于 4.5:1，
+    /// 故浅色取同色系加深值，深色沿用 darkColorHex（深底下本身可读）。
+    var textColor: Color { BrandColors.dynamic(light: textColorHex, dark: darkColorHex) }
+
+    /// 浅色外观下的文字用色（同色相加深，白底 ≥ 4.5:1）
+    private var textColorHex: String {
+        switch self {
+        case .urgent: "#C43D3D"
+        case .inspiration: "#8A6D00"
+        case .daily: "#2F6BD0"
+        case .memo: "#3A8545"
+        case .emotion: "#7A3E93"
+        case .idea: "#B46300"
+        }
+    }
 }
 
 extension EmotionLevel {

@@ -13,47 +13,59 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.Build
+import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.DeleteForever
+import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.FileDownload
+import androidx.compose.material.icons.outlined.FileUpload
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.Shield
+import androidx.compose.material.icons.outlined.Wifi
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import com.flash.app.ui.components.FlashCard
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
@@ -65,11 +77,13 @@ import com.flash.app.FlashApplication
 import com.flash.app.data.ThemeMode
 import com.flash.app.data.UiStyle
 import com.flash.app.data.LocalBackupTransfer
+import com.flash.app.ui.components.FlashCard
+import com.flash.app.ui.components.FlashSegmentedControl
+import com.flash.app.ui.theme.FlashTokens
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-/** 设置/我的 页：外观 / 界面风格 / 数据备份 / 关于。作为「我的」Tab 时 onBack 传 null */
-@OptIn(ExperimentalMaterial3Api::class)
+/** 设置/我的 页：本地存储提示 + 外观 / 数据与安全 / 危险操作 / 关于。作为「我的」Tab 时 onBack 传 null */
 @Composable
 fun SettingsScreen(onBack: (() -> Unit)? = null) {
     val context = LocalContext.current
@@ -145,19 +159,6 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
 
     Scaffold(
         containerColor = Color.Transparent,
-        topBar = {
-            TopAppBar(
-                title = { Text("设置") },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
-                navigationIcon = {
-                    if (onBack != null) {
-                        IconButton(onClick = onBack) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
-                        }
-                    }
-                },
-            )
-        },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
         Column(
@@ -165,151 +166,172 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
                 .padding(innerPadding)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .padding(
+                    horizontal = FlashTokens.Spacing.PageHorizontal,
+                    vertical = FlashTokens.Spacing.XS,
+                ),
+            verticalArrangement = Arrangement.spacedBy(FlashTokens.Spacing.LG),
         ) {
-            FlashCard(modifier = Modifier.fillMaxWidth()) {
-                Text("数据默认保存在此设备", style = MaterialTheme.typography.titleMedium)
-                Text("可导出备份或在可信局域网内传输", style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (onBack != null) {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+                    }
+                    Spacer(Modifier.width(FlashTokens.Spacing.XS))
+                }
+                Text("设置", style = MaterialTheme.typography.headlineMedium)
             }
-            FlashCard(modifier = Modifier.fillMaxWidth()) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    SectionTitle("外观与使用")
-                    Text("界面风格", style = MaterialTheme.typography.bodyMedium)
-                    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                        UiStyle.entries.forEachIndexed { index, style ->
-                            SegmentedButton(
-                                selected = uiStyle == style,
-                                onClick = { viewModel.setUiStyle(style) },
-                                shape = SegmentedButtonDefaults.itemShape(
-                                    index = index,
-                                    count = UiStyle.entries.size,
-                                ),
-                                colors = segmentedBrandColors(),
-                            ) {
-                                Text(style.displayName)
-                            }
-                        }
-                    }
-                    Text(
-                        if (uiStyle == UiStyle.GLASS) {
-                            "柔和渐变与轻盈玻璃质感"
-                        } else {
-                            "清晰实色与系统原生控件"
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Text("主题模式", style = MaterialTheme.typography.bodyMedium)
-                    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                        ThemeMode.entries.forEachIndexed { index, mode ->
-                            SegmentedButton(
-                                selected = themeMode == mode,
-                                onClick = { viewModel.setThemeMode(mode) },
-                                shape = SegmentedButtonDefaults.itemShape(
-                                    index = index,
-                                    count = ThemeMode.entries.size,
-                                ),
-                                colors = segmentedBrandColors(),
-                            ) {
-                                Text(
-                                    when (mode) {
-                                        ThemeMode.SYSTEM -> "跟随系统"
-                                        ThemeMode.LIGHT -> "浅色"
-                                        ThemeMode.DARK -> "深色"
-                                    }
-                                )
-                            }
-                        }
-                    }
 
+            FlashCard(modifier = Modifier.fillMaxWidth()) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Outlined.Shield,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(22.dp),
+                    )
+                    Spacer(Modifier.width(FlashTokens.Spacing.SM))
+                    Column {
+                        Text("数据默认保存在此设备", style = MaterialTheme.typography.titleSmall)
+                        Text(
+                            "可导出备份或在可信局域网内传输",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
             }
-            FlashCard(modifier = Modifier.fillMaxWidth()) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    SectionTitle("数据与安全")
-                    Text(
-                        "备份为明文 JSON，包含日志、情绪和任务内容；请只保存或分享至可信位置",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    FilledTonalButton(
-                        onClick = viewModel::prepareBackupTransfer,
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = !transferInProgress,
-                        colors = ButtonDefaults.filledTonalButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        ),
-                    ) { Text(if (transferInProgress) "正在准备…" else "传输到其他设备") }
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        FilledTonalButton(
-                            onClick = { runWithLanPermission(viewModel::startLanSend) },
-                            modifier = Modifier.weight(1f),
-                        ) { Text("局域网发送") }
-                        FilledTonalButton(
-                            onClick = { runWithLanPermission {
-                                selectedLanDevice = null
-                                lanPin = ""
-                                viewModel.startLanReceive()
-                            } },
-                            modifier = Modifier.weight(1f),
-                        ) { Text("局域网接收") }
-                    }
-                    Text(
-                        "局域网传输内容为明文，请在可信的 Wi-Fi 网络下使用",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        FilledTonalButton(
-                            onClick = {
-                                val timestamp = LocalDateTime.now()
-                                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HHmmss"))
-                                exportLauncher.launch("flash-backup-$timestamp.json")
-                            },
-                            modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.filledTonalButtonColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            ),
-                        ) { Text("导出备份") }
-                        FilledTonalButton(
-                            onClick = { importLauncher.launch(arrayOf("application/json", "text/*")) },
-                            modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.filledTonalButtonColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            ),
-                        ) { Text("标准导入") }
-                    }
-                    OutlinedButton(onClick = { recoveryLauncher.launch(arrayOf("application/json", "text/*")) }, modifier = Modifier.fillMaxWidth()) {
-                        Text("恢复损坏或旧版备份")
-                    }
-                    Text("恢复模式会跳过非法、重复和超限记录；原文件不会修改。导入前请核对预览。", style = MaterialTheme.typography.bodySmall)
-                }
-            }
-            FlashCard(modifier = Modifier.fillMaxWidth()) {
-                SectionTitle("危险操作")
-                Text("清空后无法撤销，建议先导出备份。", style = MaterialTheme.typography.bodySmall)
-                OutlinedButton(
-                    onClick = { showClearConfirm = true },
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text("清空全部数据", color = MaterialTheme.colorScheme.error)
-                }
 
-            }
-            FlashCard(modifier = Modifier.fillMaxWidth()) {
-                SectionTitle("关于 Flash")
-                Text("Flash Aero v${BuildConfig.VERSION_NAME}", style = MaterialTheme.typography.bodyMedium)
+            SettingsGroup(title = "外观与使用") {
+                SettingsRow(
+                    icon = Icons.Outlined.DarkMode,
+                    iconTint = MaterialTheme.colorScheme.primary,
+                    title = "主题模式",
+                    value = themeMode.displayName(),
+                    showChevron = false,
+                )
+                FlashSegmentedControl(
+                    options = ThemeMode.entries.map { it to it.displayName() },
+                    selected = themeMode,
+                    onSelect = viewModel::setThemeMode,
+                )
+                RowDivider()
+                SettingsRow(
+                    icon = Icons.Outlined.Palette,
+                    iconTint = MaterialTheme.colorScheme.primary,
+                    title = "界面风格",
+                    value = uiStyle.displayName,
+                    showChevron = false,
+                )
+                FlashSegmentedControl(
+                    options = UiStyle.entries.map { it to it.displayName },
+                    selected = uiStyle,
+                    onSelect = viewModel::setUiStyle,
+                )
                 Text(
-                    "让每一次闪念都有落点 · Android 版",
+                    if (uiStyle == UiStyle.GLASS) {
+                        "柔和渐变与轻盈玻璃质感"
+                    } else {
+                        "清晰实色与系统原生控件"
+                    },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = FlashTokens.Spacing.XS),
                 )
             }
+
+            SettingsGroup(
+                title = "数据与安全",
+                note = "备份为明文 JSON，包含日志、情绪和任务内容；请只保存或分享至可信位置",
+                footnote = "局域网传输内容为明文，请在可信的 Wi-Fi 网络下使用",
+            ) {
+                SettingsRow(
+                    icon = Icons.Outlined.FileUpload,
+                    iconTint = MaterialTheme.colorScheme.primary,
+                    title = "导出备份",
+                    subtitle = "保存为 JSON 文件",
+                    onClick = {
+                        val timestamp = LocalDateTime.now()
+                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HHmmss"))
+                        exportLauncher.launch("flash-backup-$timestamp.json")
+                    },
+                )
+                RowDivider()
+                SettingsRow(
+                    icon = Icons.Outlined.FileDownload,
+                    iconTint = MaterialTheme.colorScheme.primary,
+                    title = "标准导入",
+                    subtitle = "导入前预览与本地数据的差异",
+                    onClick = { importLauncher.launch(arrayOf("application/json", "text/*")) },
+                )
+                RowDivider()
+                SettingsRow(
+                    icon = Icons.Outlined.Build,
+                    iconTint = MaterialTheme.colorScheme.tertiary,
+                    title = "恢复损坏或旧版备份",
+                    subtitle = "跳过异常与重复数据，不修改原文件",
+                    onClick = { recoveryLauncher.launch(arrayOf("application/json", "text/*")) },
+                )
+                RowDivider()
+                SettingsRow(
+                    icon = Icons.Outlined.Share,
+                    iconTint = MaterialTheme.colorScheme.secondary,
+                    title = "传输到其他设备",
+                    subtitle = "通过系统分享发送备份",
+                    value = if (transferInProgress) "准备中…" else null,
+                    enabled = !transferInProgress,
+                    onClick = viewModel::prepareBackupTransfer,
+                )
+                RowDivider()
+                SettingsRow(
+                    icon = Icons.Outlined.Wifi,
+                    iconTint = MaterialTheme.colorScheme.secondary,
+                    title = "局域网发送",
+                    subtitle = "生成六位配对 PIN，等待对方接收",
+                    onClick = { runWithLanPermission(viewModel::startLanSend) },
+                )
+                RowDivider()
+                SettingsRow(
+                    icon = Icons.Outlined.Download,
+                    iconTint = MaterialTheme.colorScheme.secondary,
+                    title = "局域网接收",
+                    subtitle = "选择发送设备并输入配对 PIN",
+                    onClick = {
+                        runWithLanPermission {
+                            selectedLanDevice = null
+                            lanPin = ""
+                            viewModel.startLanReceive()
+                        }
+                    },
+                )
+            }
+
+            SettingsGroup(title = "危险操作") {
+                SettingsRow(
+                    icon = Icons.Outlined.DeleteForever,
+                    iconTint = MaterialTheme.colorScheme.error,
+                    title = "清空全部数据",
+                    titleColor = MaterialTheme.colorScheme.error,
+                    subtitle = "删除所有日志、情绪记录与任务，且无法恢复；建议先导出备份",
+                    onClick = { showClearConfirm = true },
+                )
+            }
+
+            SettingsGroup(title = "关于 Flash") {
+                SettingsRow(
+                    icon = Icons.Outlined.Info,
+                    iconTint = MaterialTheme.colorScheme.primary,
+                    title = "Flash Aero",
+                    subtitle = "让每一次闪念都有落点 · Android 版",
+                    value = "v${BuildConfig.VERSION_NAME}",
+                    showChevron = false,
+                )
+            }
+
+            Spacer(Modifier.width(1.dp))
         }
     }
 
@@ -453,15 +475,125 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
     }
 }
 
+/** 分组：弱化标题 + 可选说明文字 + 大圆角分组卡片 + 可选脚注 */
 @Composable
-private fun SectionTitle(text: String) {
-    Text(text, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+private fun SettingsGroup(
+    title: String,
+    modifier: Modifier = Modifier,
+    note: String? = null,
+    footnote: String? = null,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(FlashTokens.Spacing.XS)) {
+        Text(
+            title,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 4.dp),
+        )
+        if (note != null) {
+            Text(
+                note,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 4.dp),
+            )
+        }
+        FlashCard(modifier = Modifier.fillMaxWidth(), content = content)
+        if (footnote != null) {
+            Text(
+                footnote,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 4.dp),
+            )
+        }
+    }
 }
 
-/** 分段按钮选中态统一品牌紫（默认 secondaryContainer 橙系与整体色调不协调） */
+/**
+ * 设置清单行：语义色图标 + 标题（可选副标题）+ 可选当前值 + 弱化箭头。
+ * 色彩不是唯一信息通道：每行都有标题文字，危险行另有副标题说明后果。
+ */
 @Composable
-private fun segmentedBrandColors() = SegmentedButtonDefaults.colors(
-    activeContainerColor = MaterialTheme.colorScheme.primaryContainer,
-    activeContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-    activeBorderColor = MaterialTheme.colorScheme.primary,
-)
+private fun SettingsRow(
+    icon: ImageVector,
+    iconTint: Color,
+    title: String,
+    modifier: Modifier = Modifier,
+    subtitle: String? = null,
+    value: String? = null,
+    enabled: Boolean = true,
+    titleColor: Color = Color.Unspecified,
+    showChevron: Boolean = true,
+    onClick: (() -> Unit)? = null,
+) {
+    val contentColor = if (enabled) {
+        if (titleColor != Color.Unspecified) titleColor else MaterialTheme.colorScheme.onSurface
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = FlashTokens.Touch.IconButtonMin)
+            .then(
+                if (onClick != null) {
+                    Modifier.clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+                } else {
+                    Modifier
+                },
+            )
+            .padding(vertical = FlashTokens.Spacing.XS),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = if (enabled) iconTint else MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(22.dp),
+        )
+        Spacer(Modifier.width(FlashTokens.Spacing.SM))
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge, color = contentColor)
+            if (subtitle != null) {
+                Text(
+                    subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        if (value != null) {
+            Text(
+                value,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (showChevron) Spacer(Modifier.width(4.dp))
+        }
+        if (showChevron) {
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(18.dp),
+            )
+        }
+    }
+}
+
+/** 行间分隔线，起点对齐标题文字（图标 22 + 间距 12） */
+@Composable
+private fun RowDivider() {
+    HorizontalDivider(
+        modifier = Modifier.padding(start = 22.dp + FlashTokens.Spacing.SM),
+        color = MaterialTheme.colorScheme.outlineVariant,
+    )
+}
+
+private fun ThemeMode.displayName(): String = when (this) {
+    ThemeMode.SYSTEM -> "跟随系统"
+    ThemeMode.LIGHT -> "浅色"
+    ThemeMode.DARK -> "深色"
+}

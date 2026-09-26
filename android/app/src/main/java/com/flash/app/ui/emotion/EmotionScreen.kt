@@ -173,7 +173,10 @@ fun EmotionScreen(onBack: () -> Unit) {
             Button(
                 onClick = viewModel::save,
                 enabled = !viewModel.saving,
-                colors = ButtonDefaults.buttonColors(containerColor = ModuleColors.Emotion),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = ModuleColors.Emotion,
+                    contentColor = ModuleColors.contentOn(ModuleColors.Emotion),
+                ),
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("记录当下")

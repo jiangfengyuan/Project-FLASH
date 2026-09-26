@@ -1,7 +1,7 @@
 import { Category, COLOR_TAGS, colorTagName, LogItem } from '../models/Models';
 import { NavigationState, ThemeState, LogsState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
-import { BRAND, FilterChip, FormGroup, FormRow, RADIUS_CARD, SegmentedControl } from './CommonBuilders';
+import { BRAND, FilterChip, FormGroup, FormRow, RADIUS_CARD, SegmentedControl, dangerText } from './CommonBuilders';
 
 @Component
 export struct EditLogDialog {
@@ -22,7 +22,7 @@ export struct EditLogDialog {
         Column({ space: 14 }) {
           Row() {
             Button('关闭', { type: ButtonType.Normal })
-              .fontSize(14).fontColor(this.theme.themeMuted).backgroundColor(Color.Transparent)
+              .fontSize(14).fontColor(this.theme.themeMuted).backgroundColor(Color.Transparent).height(44)
               .onClick(() => this.close())
             Blank()
             Text('编辑记录').fontSize(17).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)
@@ -36,13 +36,13 @@ export struct EditLogDialog {
           if (this.logs.editDiscard) {
             Text('放弃未保存的修改？').fontSize(14).fontColor(this.theme.themeText)
             Row({ space: 12 }) {
-              Button('继续编辑').onClick(() => this.logs.editDiscard = false)
-              Button('放弃修改').onClick(() => requireActions(this.actions).logsController.closeEdit())
+              Button('继续编辑').height(44).onClick(() => this.logs.editDiscard = false)
+              Button('放弃修改').height(44).onClick(() => requireActions(this.actions).logsController.closeEdit())
             }
           }
           if (this.logs.editError || requireActions(this.actions).logsController.editValidation()) {
             Text(this.logs.editError || requireActions(this.actions).logsController.editValidation())
-              .fontSize(12).fontColor('#B42318').width('100%')
+              .fontSize(12).fontColor(dangerText(this.theme)).width('100%')
           }
 
           FormGroup(this.theme, '正文与类型')

@@ -53,7 +53,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.flash.app.data.model.Category
@@ -151,8 +150,8 @@ private fun FabOption(
                 .padding(horizontal = 12.dp, vertical = 6.dp),
         )
         Spacer(Modifier.width(10.dp))
-        // 浅色功能色（如灵感黄）上白字对比不足，按亮度选内容色
-        val onColor = if (color.luminance() > 0.5f) FlashTokens.Palette.InkPrimary else Color.White
+        // 按 WCAG 对比度选内容色：粉/绿等中亮模块色上白字不足 3:1，回落深墨
+        val onColor = ModuleColors.contentOn(color)
         SmallFloatingActionButton(
             onClick = onClick,
             containerColor = color,
