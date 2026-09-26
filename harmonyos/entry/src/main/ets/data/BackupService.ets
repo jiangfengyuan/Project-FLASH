@@ -431,7 +431,7 @@ export class BackupService {
       due: item.due.kind === TaskDueKind.ALL_DAY ?
         { kind: TaskDueKind.ALL_DAY, date: item.due.date } :
         { kind: TaskDueKind.DATE_TIME, at: BackupService.normalizedISO(item.due.at),
-          timeZone: item.due.timeZone },
+          timeZone: BackupService.canonicalTimeZone(item.due.timeZone) },
       reminderAt: item.reminderAt ? BackupService.normalizedISO(item.reminderAt) : undefined,
       completedAt: item.completedAt ? BackupService.normalizedISO(item.completedAt) : undefined,
       createdAt: BackupService.normalizedISO(item.createdAt),
@@ -470,14 +470,17 @@ export class BackupService {
     return new Date(value ?? 0).toISOString();
   }
 
-  private static validTimeZone(value: string): boolean {
-    if (/^(?:[+-]|GMT[+-]|UTC[+-])/.test(value)) return false;
+  private static canonicalTimeZone(value: string): string | null {
     try {
-      new Intl.DateTimeFormat('en-US', { timeZone: value }).format(new Date(0));
-      return true;
+      return new Intl.DateTimeFormat(undefined, { timeZone: value }).resolvedOptions().timeZone;
     } catch (_) {
-      return false;
+      return null;
     }
+  }
+
+  private static validTimeZone(value: string): boolean {
+    const canonical = BackupService.canonicalTimeZone(value);
+    return canonical !== null && canonical === value;
   }
 
   private static validDate(createdAt: string, recordDate: string): boolean {
