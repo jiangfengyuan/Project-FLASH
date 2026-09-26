@@ -9,7 +9,9 @@ package com.flash.app.ui.components
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,6 +45,7 @@ fun <T> FlashSegmentedControl(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .selectableGroup()
             .clip(RoundedCornerShape(50))
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(4.dp),
@@ -73,7 +76,7 @@ fun <T> FlashSegmentedControl(
                     .heightIn(min = FlashTokens.Touch.IconButtonMin)
                     .clip(RoundedCornerShape(50))
                     .background(segmentColor)
-                    .clickable { onSelect(value) },
+                    .selectable(selected = isSelected, role = Role.Tab, onClick = { onSelect(value) }),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(label, style = MaterialTheme.typography.labelLarge, color = textColor)

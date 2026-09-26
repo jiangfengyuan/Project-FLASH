@@ -46,6 +46,33 @@ struct FlashRepositoryTests {
         #expect(try repo.allLogs().isEmpty)
     }
 
+    @Test func editedDateAndMetadataRollbackTogether() throws {
+        enum SaveFailure: Error { case disk }
+        var fail = false
+        let repo = makeRepo(beforeSave: { if fail { throw SaveFailure.disk } })
+        try repo.addLog(content: "原文", colorTag: .daily)
+        let original = try repo.allLogs()[0]
+        var draft = original
+        draft.content = "编辑正文"
+        draft.category = .idea
+        draft.colorTag = .memo
+        draft.recordDate = "2024-02-29"
+        fail = true
+        #expect(throws: SaveFailure.self) { try repo.updateLog(draft) }
+        let unchanged = try repo.allLogs()[0]
+        #expect(unchanged.content == original.content)
+        #expect(unchanged.recordDate == original.recordDate)
+        #expect(unchanged.category == original.category)
+        fail = false
+        try repo.updateLog(draft)
+        let saved = try repo.allLogs()[0]
+        #expect(saved.content == draft.content)
+        #expect(saved.recordDate == draft.recordDate)
+        #expect(saved.createdAt == original.createdAt)
+        #expect(saved.colorTag == .memo)
+        #expect(saved.category == .idea)
+    }
+
     @Test func addAndDeleteEmotion() throws {
         let repo = makeRepo()
         try repo.addEmotion(level: .unhappy, subEmotion: .sad, note: "下雨")

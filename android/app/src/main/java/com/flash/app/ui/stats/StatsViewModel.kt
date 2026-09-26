@@ -12,6 +12,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.flash.app.data.FlashRepository
+import com.flash.app.domain.todayFlow
+import com.flash.app.data.model.LogItem
+import java.time.LocalDate
 import com.flash.app.data.model.Category
 import com.flash.app.data.model.EmotionRecord
 import kotlinx.coroutines.flow.SharingStarted
@@ -20,6 +23,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
 data class StatsUiState(
+    val logs: List<LogItem> = emptyList(),
+    val today: LocalDate = LocalDate.now(),
     val totalLogs: Int = 0,
     val totalIdeas: Int = 0,
     val totalEmotions: Int = 0,
@@ -32,8 +37,11 @@ class StatsViewModel(repository: FlashRepository) : ViewModel() {
     val uiState: StateFlow<StatsUiState> = combine(
         repository.logs,
         repository.emotions,
-    ) { logs, emotions ->
+        todayFlow(),
+    ) { logs, emotions, today ->
         StatsUiState(
+            logs = logs,
+            today = today,
             totalLogs = logs.count { it.category == Category.LOG },
             totalIdeas = logs.count { it.category == Category.IDEA },
             totalEmotions = emotions.size,

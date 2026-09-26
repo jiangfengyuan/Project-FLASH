@@ -166,6 +166,7 @@ struct CalendarView: View {
             logCount: aggregate?.logs.count ?? 0,
             taskCount: aggregate?.tasks.count ?? 0,
             emotionEmoji: aggregate?.emotions.first?.level.emoji,
+            emotionCount: aggregate?.emotions.count ?? 0,
             reduceMotion: reduceMotion
         ) {
             selectedDate = date
@@ -256,6 +257,7 @@ private struct DayCell: View {
     let logCount: Int
     let taskCount: Int
     let emotionEmoji: String?
+    let emotionCount: Int
     let reduceMotion: Bool
     let action: () -> Void
 
@@ -272,13 +274,13 @@ private struct DayCell: View {
                     if logCount > 0 {
                         Text("\(logCount)")
                             .font(.caption2)
-                            .foregroundStyle(Color(nsColor: .controlAccentColor))
+                            .foregroundStyle(isSelected ? Color.white : Color(nsColor: .controlAccentColor))
                     }
                     if taskCount > 0 {
                         Label("\(taskCount)", systemImage: "checklist")
                             .labelStyle(.titleAndIcon)
                             .font(.caption2)
-                            .foregroundStyle(.green)
+                            .foregroundStyle(isSelected ? Color.white : Color.green)
                     }
                     if let emotionEmoji {
                         Text(emotionEmoji).font(.caption2)
@@ -304,5 +306,7 @@ private struct DayCell: View {
         .animation(Motion.quick(reduceMotion), value: hovering)
         .animation(Motion.quick(reduceMotion), value: isSelected)
         .accessibilityLabel(key)
+        .accessibilityValue("\(logCount) 条记录，\(emotionCount) 次情绪，\(taskCount) 项任务")
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }

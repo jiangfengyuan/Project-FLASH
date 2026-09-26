@@ -1,7 +1,7 @@
 import { common } from '@kit.AbilityKit';
 import { util } from '@kit.ArkTS';
 import { i18n } from '@kit.LocalizationKit';
-import { dayString } from '../data/DateUtils';
+import { dayString, shiftCalendarMonth } from '../data/DateUtils';
 import { ColorTag, TaskDueKind, TaskItem } from '../models/Models';
 import { CalendarState } from '../state/FeatureStates';
 import { FlashStore } from '../data/FlashStore';
@@ -17,6 +17,17 @@ export class CalendarController {
     this.store = store;
     this.runtime = runtime;
   }
+  selectCalendarDay(day: string): void {
+    this.state.selectedDay = day;
+    this.state.displayedMonth = day.slice(0, 7) + '-01';
+  }
+
+  shiftMonth(delta: number): void {
+    this.state.displayedMonth = shiftCalendarMonth(this.state.displayedMonth, delta);
+  }
+
+  backToToday(): void { this.selectCalendarDay(dayString()); }
+
   taskCalendarDay(task: TaskItem): string {
     if (task.due.kind === TaskDueKind.ALL_DAY) return task.due.date ?? '';
     if (!task.due.at || !task.due.timeZone) return '';

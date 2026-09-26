@@ -27,6 +27,7 @@ struct LogEditSheet: View {
     @State private var appeared = false
     /// 保存成功后的勾选反馈（闪现后自动关闭，不阻塞）
     @State private var saved = false
+    @State private var showDiscard = false
     /// 保存中的加载态与错误提示
     @State private var isSaving = false
     @State private var errorMessage: String? = nil
@@ -45,6 +46,16 @@ struct LogEditSheet: View {
 
     /// 契约上限（UTF-16 单元）：超限禁用保存并显示计数，不静默截断
     private var contentExceedsLimit: Bool { !TextLimits.fits(content) }
+
+    private var dirty: Bool {
+        content != log.content || category != log.category || colorTag != log.colorTag ||
+        importance != log.importance || DateFormatting.dayString(recordDate) != log.recordDate
+    }
+
+    private func close() {
+        guard !isSaving && !saved else { return }
+        if dirty { showDiscard = true } else { dismiss() }
+    }
 
     var body: some View {
         ScrollView {
@@ -122,7 +133,8 @@ struct LogEditSheet: View {
                             .foregroundStyle(BrandColors.accent)
                             .transition(.scale(scale: 0.5).combined(with: .opacity))
                     } else {
-                        Button("取消") { dismiss() }
+                        Button("取消") { close() }
+                            .disabled(isSaving)
                             .keyboardShortcut(.cancelAction)
                         Button(isSaving ? "保存中…" : "保存") { save() }
                             .buttonStyle(.borderedProminent)
@@ -138,6 +150,12 @@ struct LogEditSheet: View {
             }
             .padding(Spacing.lg)
         }
+        .disabled(isSaving || saved)
+        .interactiveDismissDisabled(dirty || isSaving || saved)
+        .confirmationDialog("放弃未保存的修改？", isPresented: $showDiscard) {
+            Button("放弃修改", role: .destructive) { dismiss() }
+            Button("继续编辑", role: .cancel) {}
+        }
         .frame(width: 480)
         .background(BrandColors.pageBackground)
         .onAppear {
@@ -152,6 +170,7 @@ struct LogEditSheet: View {
     }
 
     private func save() {
+        guard !isSaving && !saved && !contentExceedsLimit && !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         isSaving = true
         var updated = log
         updated.content = content

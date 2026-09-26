@@ -125,13 +125,8 @@ class LogFlowViewModel(private val repository: FlashRepository) : ViewModel() {
         updateFilter { it.copy(startDate = normalized.first, endDate = normalized.second) }
     }
 
-    fun updateLog(log: LogItem) {
-        viewModelScope.launch {
-            runCatching { repository.updateLog(log) }
-                .onFailure {
-                    eventChannel.send(LogFlowEvent.Failed(it.message ?: "保存失败，请重试"))
-                }
-        }
+    suspend fun updateLog(log: LogItem) {
+        repository.updateLog(log)
     }
 
     fun deleteLog(log: LogItem) {

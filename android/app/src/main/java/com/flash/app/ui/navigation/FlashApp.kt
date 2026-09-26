@@ -161,7 +161,10 @@ fun FlashApp(darkTheme: Boolean, uiStyle: UiStyle) {
                         )
                     }
                     composable(Routes.STATS) {
-                        StatsScreen()
+                        StatsScreen(
+                            onOpenSettings = { navController.navigate(Routes.PROFILE) },
+                            onOpenRecord = { navController.navigate(Routes.recordDetail(it)) },
+                        )
                     }
                     composable(Routes.PROFILE) {
                         SettingsScreen()

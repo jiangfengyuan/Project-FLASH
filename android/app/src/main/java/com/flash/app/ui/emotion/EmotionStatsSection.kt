@@ -9,6 +9,9 @@ package com.flash.app.ui.emotion
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import java.time.LocalDate
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -41,7 +44,8 @@ import com.flash.app.ui.components.StyleCard
  * 情绪统计卡片：日均走势 + 负面子情绪分布，对应 Web 版 StatsPanel。
  * 短档口径由 [weekAligned] 决定：
  * - true：「本周」，周一对齐自然周（对应 macOS 情绪页「本周趋势」）；
- * - false：「7天」，滚动近 7 天（对应 macOS 统计页「近 7 天」）。
+ * - false：「7天」，滚动近 7 天。
+ * 回顾页传入 window 时由页面范围统一控制，隐藏卡片内的独立选择器。
  * 长档两端均为滚动近 30 天。
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,10 +53,11 @@ import com.flash.app.ui.components.StyleCard
 fun EmotionStatsSection(
     emotions: List<EmotionRecord>,
     weekAligned: Boolean,
+    window: Pair<LocalDate, LocalDate>? = null,
 ) {
     var selection by remember { mutableIntStateOf(0) }
-    val (start, end) = remember(emotions, selection, weekAligned) {
-        when {
+    val (start, end) = remember(emotions, selection, weekAligned, window) {
+        window ?: when {
             selection == 1 -> EmotionStats.rollingWindow(30)
             weekAligned -> EmotionStats.currentWeek()
             else -> EmotionStats.rollingWindow(7)
@@ -69,7 +74,7 @@ fun EmotionStatsSection(
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.weight(1f),
             )
-            SingleChoiceSegmentedButtonRow {
+            if (window == null) SingleChoiceSegmentedButtonRow {
                 listOf(if (weekAligned) "本周" else "7天", "30天").forEachIndexed { index, label ->
                     SegmentedButton(
                         selected = selection == index,
@@ -89,7 +94,9 @@ fun EmotionStatsSection(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         } else {
+            Text("日均情绪 · -3 至 +3（0 为中性）", style = MaterialTheme.typography.bodySmall)
             TrendChart(averages, modifier = Modifier.fillMaxWidth().height(120.dp))
+            Text("$start — $end · 无记录日期不计入均值", style = MaterialTheme.typography.bodySmall)
         }
         if (distribution.isNotEmpty()) {
             Spacer(Modifier.height(12.dp))
@@ -106,6 +113,7 @@ fun EmotionStatsSection(
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.width(40.dp),
                     )
+                    Box(Modifier.weight(1f)) {
                     Box(
                         Modifier
                             .height(8.dp)
@@ -115,6 +123,7 @@ fun EmotionStatsSection(
                                 RoundedCornerShape(4.dp),
                             )
                     )
+                    }
                     Spacer(Modifier.width(8.dp))
                     Text("$count", style = MaterialTheme.typography.bodySmall)
                 }
@@ -133,7 +142,9 @@ private fun TrendChart(
     val gridColor = MaterialTheme.colorScheme.outlineVariant
     val pointColor = MaterialTheme.colorScheme.tertiary
 
-    Canvas(modifier = modifier) {
+    val description = averages.filter { it.second != null }
+        .joinToString("；") { "${it.first}：${it.second}" }
+    Canvas(modifier = modifier.semantics { contentDescription = "每日情绪均值：$description" }) {
         if (averages.isEmpty()) return@Canvas
         val width = size.width
         val height = size.height

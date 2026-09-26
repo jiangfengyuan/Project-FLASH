@@ -13,103 +13,170 @@ struct StatsView: View {
     @Query(sort: \LogEntity.createdAt, order: .reverse) private var logEntities: [LogEntity]
     @Query(sort: \EmotionEntity.createdAt, order: .reverse) private var emotionEntities: [EmotionEntity]
 
-    @State private var windowDays = 7
+    @State private var window: ReviewWindow = .week
+    @State private var showsCalendar = false
+    @State private var showActivityDetails = false
     /// KPI 卡片入场开关（配合逐项 delay 做 stagger）
     @State private var cardsShown = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        // 实体 → 模型只映射一次，KPI 与图表统计复用同一结果
-        let logs = logEntities.map { $0.toModel() }
-        let emotions = emotionEntities.map { $0.toModel() }
-        let totalLogs = logs.filter { $0.category == .log }.count
-        let totalIdeas = logs.filter { $0.category == .idea }.count
-        let activeDays = Set(logs.map(\.recordDate) + emotions.map(\.recordDate)).count
+        VStack(spacing: 0) {
+            HStack {
+                Text("回顾").font(.largeTitle.bold())
+                Spacer()
+                Picker("回顾视图", selection: $showsCalendar) {
+                    Text("趋势").tag(false)
+                    Text("日历").tag(true)
+                }.pickerStyle(.segmented).frame(width: 180)
+            }.padding(24)
+            ZStack {
+        TimelineView(.periodic(from: .now, by: 60)) { context in
+            let today = context.date
+            let windowDays = window.days(today: today)
+            // 实体 → 模型只映射一次，KPI 与图表统计复用同一结果
+            let logs = logEntities.map { $0.toModel() }
+            let emotions = emotionEntities.map { $0.toModel() }
+            let daily = EmotionStats.dailyAverages(emotions, days: windowDays, today: today)
+            let start = daily.first!.date
+            let end = daily.last!.date
+            let totalLogs = logs.filter { $0.category == .log }.count
+            let totalIdeas = logs.filter { $0.category == .idea }.count
+            let activeDays = Set(logs.map(\.recordDate) + emotions.map(\.recordDate)).count
 
-        ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                // KPI
-                HStack(spacing: 12) {
-                    kpiCard("累计日志", totalLogs, "note.text", index: 0)
-                    kpiCard("累计灵感", totalIdeas, "lightbulb", index: 1)
-                    kpiCard("累计情绪", emotions.count, "face.smiling", index: 2)
-                    kpiCard("活跃天数", activeDays, "calendar", index: 3)
-                }
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    Picker("时间范围", selection: $window) {
+                        ForEach(ReviewWindow.allCases) { Text($0.rawValue).tag($0) }
+                    }.pickerStyle(.segmented).frame(maxWidth: 400)
 
-                // 时间窗
-                Picker("时间范围", selection: $windowDays) {
-                    Text("近 7 天").tag(7)
-                    Text("近 30 天").tag(30)
-                }
-                .pickerStyle(.segmented)
-                .frame(width: 220)
-
-                if EmotionStats.hasEmotionData(emotions, days: windowDays) {
-                    // 日均情绪趋势
+                    let periodLogs = logs.filter { $0.recordDate >= start && $0.recordDate <= end }
+                    let periodEmotions = emotions.filter { $0.recordDate >= start && $0.recordDate <= end }
+                    let periodDays = Set(periodLogs.map(\.recordDate) + periodEmotions.map(\.recordDate)).count
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("情绪趋势").font(.headline)
-                        Chart {
-                            RuleMark(y: .value("中性", 0))
-                                .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
-                                .foregroundStyle(Color(nsColor: .separatorColor))
-                            ForEach(Array(EmotionStats.dailyAverages(emotions, days: windowDays)
-                                .enumerated()), id: \.offset) { _, item in
-                                if let average = item.average {
-                                    LineMark(
-                                        x: .value("日期", item.date),
-                                        y: .value("均值", average)
-                                    )
-                                    .foregroundStyle(Color(nsColor: .controlAccentColor))
-                                    PointMark(
-                                        x: .value("日期", item.date),
-                                        y: .value("均值", average)
-                                    )
-                                    .foregroundStyle(Color(nsColor: .controlAccentColor))
+                        Text(periodDays == 0 ? "继续记录，回顾会慢慢清晰" : "这段时间，你留下了 \(periodDays) 天的记录")
+                            .font(.headline)
+                        Text("\(start) — \(end)").font(.caption).foregroundStyle(.secondary)
+                        Text("\(periodLogs.count) 条记录 · \(periodEmotions.count) 次情绪")
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(20).background(BrandColors.cardSurface)
+                    .clipShape(RoundedRectangle(cornerRadius: 24))
+
+                    activityChart(ActivityStats.daily(logs: logs, emotions: emotions, days: windowDays, today: today))
+                    Text("累计概览 · 全部时间").font(.headline)
+                    // KPI
+                    HStack(spacing: 12) {
+                        kpiCard("累计日志", totalLogs, "note.text", index: 0)
+                        kpiCard("累计灵感", totalIdeas, "lightbulb", index: 1)
+                        kpiCard("累计情绪", emotions.count, "face.smiling", index: 2)
+                        kpiCard("活跃天数", activeDays, "calendar", index: 3)
+                    }
+
+                    if EmotionStats.hasEmotionData(emotions, days: windowDays, today: today) {
+                        // 日均情绪趋势
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("情绪趋势 · 日均值").font(.headline)
+                            Text("-3 至 +3，0 为中性；无记录日期不计入均值").font(.caption).foregroundStyle(.secondary)
+                            Chart {
+                                RuleMark(y: .value("中性", 0))
+                                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
+                                    .foregroundStyle(Color(nsColor: .separatorColor))
+                                ForEach(Array(daily.enumerated()), id: \.offset) { _, item in
+                                    if let average = item.average {
+                                        LineMark(
+                                            x: .value("日期", item.date),
+                                            y: .value("均值", average)
+                                        )
+                                        .foregroundStyle(Color(nsColor: .controlAccentColor))
+                                        PointMark(
+                                            x: .value("日期", item.date),
+                                            y: .value("均值", average)
+                                        )
+                                        .foregroundStyle(Color(nsColor: .controlAccentColor))
+                                    }
                                 }
                             }
-                        }
-                        .chartYScale(domain: -3...3)
-                        .chartYAxis {
-                            AxisMarks(values: [-3, -2, -1, 0, 1, 2, 3])
-                        }
-                        .frame(height: 220)
-                        .animation(Motion.soft(reduceMotion), value: windowDays)
-                    }
-
-                    // 负面子情绪分布
-                    let distribution = EmotionStats.subEmotionDistribution(emotions,
-                                                                           days: windowDays)
-                    if !distribution.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("负面情绪构成").font(.headline)
-                            Chart(distribution, id: \.name) { item in
-                                BarMark(
-                                    x: .value("次数", item.count),
-                                    y: .value("类型", item.name)
-                                )
-                                .foregroundStyle(barColor(for: item.name))
-                                .cornerRadius(4)
+                            .chartYScale(domain: -3...3)
+                            .chartYAxis {
+                                AxisMarks(values: [-3, -2, -1, 0, 1, 2, 3])
                             }
-                            .frame(height: 140)
+                            .frame(height: 220)
                             .animation(Motion.soft(reduceMotion), value: windowDays)
                         }
+
+                        // 负面子情绪分布
+                        let distribution = EmotionStats.subEmotionDistribution(emotions,
+                                                                               days: windowDays, today: today)
+                        if !distribution.isEmpty {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("负面情绪构成").font(.headline)
+                                Chart(distribution, id: \.name) { item in
+                                    BarMark(
+                                        x: .value("次数", item.count),
+                                        y: .value("类型", item.name)
+                                    )
+                                    .foregroundStyle(barColor(for: item.name))
+                                    .cornerRadius(4)
+                                }
+                                .frame(height: 140)
+                                .animation(Motion.soft(reduceMotion), value: windowDays)
+                            }
+                        }
+                    } else {
+                        ContentUnavailableView("暂无情绪数据",
+                                               systemImage: "chart.line.uptrend.xyaxis",
+                                               description: Text("先在「情绪」页记录几天吧"))
                     }
+                }
+                .padding(24)
+            }
+            .background(BrandColors.pageBackground)
+            .onAppear {
+                if reduceMotion {
+                    cardsShown = true
                 } else {
-                    ContentUnavailableView("暂无情绪数据",
-                                           systemImage: "chart.line.uptrend.xyaxis",
-                                           description: Text("先在「情绪」页记录几天吧"))
+                    withAnimation(Motion.softOut()) { cardsShown = true }
                 }
             }
-            .padding(24)
         }
-        .background(Color(nsColor: .windowBackgroundColor))
-        .onAppear {
-            if reduceMotion {
-                cardsShown = true
-            } else {
-                withAnimation(Motion.softOut()) { cardsShown = true }
+        .opacity(showsCalendar ? 0 : 1)
+        .allowsHitTesting(!showsCalendar)
+        .accessibilityHidden(showsCalendar)
+        CalendarView()
+            .opacity(showsCalendar ? 1 : 0)
+            .allowsHitTesting(showsCalendar)
+            .accessibilityHidden(!showsCalendar)
+            }
+        }.background(BrandColors.pageBackground)
+    }
+
+    private func activityChart(_ days: [DailyActivity]) -> some View {
+        let maximum = max(1, days.map(\.total).max() ?? 0)
+        let active = days.filter { $0.total > 0 }.count
+        return VStack(alignment: .leading, spacing: 12) {
+            Text("记录活跃度").font(.headline)
+            Text("每天的日志、灵感与情绪次数 · 不含任务").font(.caption).foregroundStyle(.secondary)
+            Text("\(active) 个活跃日 · 共 \(days.reduce(0) { $0 + $1.total }) 次")
+            Chart(days) { day in
+                BarMark(x: .value("日期", day.date), y: .value("次数", day.total))
+                    .foregroundStyle(BrandColors.brandPrimary)
+                    .accessibilityLabel(day.date)
+                    .accessibilityValue("\(day.records) 条记录，\(day.emotions) 次情绪")
+            }
+            .chartYScale(domain: 0...maximum)
+            .chartYAxis { AxisMarks(values: [0, maximum]) }
+            .frame(height: 160)
+            if active == 0 { Text("这段时间还没有记录，空白日期按 0 次显示。").font(.caption) }
+            DisclosureGroup("每日明细", isExpanded: $showActivityDetails) {
+                ForEach(days) { day in
+                    Text("\(day.date)：\(day.records) 条记录 · \(day.emotions) 次情绪")
+                        .font(.caption).frame(maxWidth: .infinity, alignment: .leading)
+                }
             }
         }
+        .padding(20).background(BrandColors.cardSurface)
+        .clipShape(RoundedRectangle(cornerRadius: 24))
     }
 
     private func barColor(for name: String) -> Color {
@@ -132,9 +199,9 @@ struct StatsView: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 16)
         .background(Color(nsColor: .controlBackgroundColor))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .clipShape(RoundedRectangle(cornerRadius: 24))
         .overlay {
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: 24)
                 .stroke(Color(nsColor: .separatorColor), lineWidth: 0.5)
         }
         .shadow(color: .black.opacity(0.05), radius: 8, y: 3)

@@ -1,3 +1,4 @@
+import { dayString } from '../data/DateUtils';
 import { Category, EmotionRecord, LogItem, SubEmotion, TaskItem } from '../models/Models';
 import { LanDevice } from '../data/LocalBackupTransfer';
 // 与 components/CommonBuilders.ets 的浅色令牌保持一致（CommonBuilders 反向依赖
@@ -56,6 +57,9 @@ export class LogsState {
   editText: string = '';
   editCategory: string = '';
   editTag: string = '';
+  editDate: string = '';
+  editError: string = '';
+  editDiscard: boolean = false;
   captureText: string = '';
   captureCategory: string = Category.LOG;
   // 记录页筛选：filterCategory 为 all/log/idea/inbox，filterDate 为 all/today/week/month，
@@ -80,6 +84,8 @@ export class EmotionState {
 
 @Observed
 export class CalendarState {
+  displayedMonth: string = dayString().slice(0, 7) + '-01';
+  selectedDay: string = dayString();
   tasks: TaskItem[] = [];
   editingTaskId: string = '';
   taskTitle: string = '';

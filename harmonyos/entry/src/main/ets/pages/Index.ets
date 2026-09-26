@@ -90,6 +90,10 @@ struct Index {
   // stack, so the system back gesture must be routed manually: back closes
   // the detail page first, and only exits the app from the home page.
   onBackPress(): boolean {
+    if (this.logs.editingLogId !== '') {
+      this.actions?.logsController.requestCloseEdit();
+      return true;
+    }
     if (this.navigation.fabExpanded) {
       this.dismissFab();
       return true;
@@ -221,7 +225,7 @@ struct Index {
     } else if (this.navigation.activeTab === 1) {
       ExplorePage({ theme: this.theme, logs: this.logs, feedback: this.feedback, actions: this.actions })
     } else if (this.navigation.activeTab === 2) {
-      StatsPage({ theme: this.theme, logs: this.logs, emotion: this.emotion, actions: this.actions })
+      StatsPage({ theme: this.theme, logs: this.logs, emotion: this.emotion, calendar: this.calendar, feedback: this.feedback, actions: this.actions })
     } else {
       ProfilePage({ theme: this.theme, actions: this.actions })
     }

@@ -26,6 +26,30 @@ struct DomainTests {
                 createdAt: createdAt ?? "\(day)T08:00:00.000Z", recordDate: day)
     }
 
+    @Test func reviewRangesUseCalendarBoundaries() {
+        #expect(ReviewWindow.week.days(today: DateFormatting.parseDay("2026-09-14")!) == 1)
+        #expect(ReviewWindow.week.days(today: DateFormatting.parseDay("2026-09-20")!) == 7)
+        #expect(ReviewWindow.month.days(today: DateFormatting.parseDay("2024-02-29")!) == 29)
+        #expect(ReviewWindow.days30.days(today: today) == 30)
+        #expect(ReviewWindow.days90.days(today: today) == 90)
+        let future = emotion("2026-08-14", .happy)
+        #expect(!EmotionStats.hasEmotionData([future], days: ReviewWindow.week.days(today: today), today: today))
+    }
+
+    @Test func activityCountsIncludeZeroDaysAndFollowEditedDates() {
+        let today = DateFormatting.parseDay("2024-03-01")!
+        let logs = [log("2024-02-29"), log("2024-02-29", category: .idea), log("2024-03-02")]
+        let result = ActivityStats.daily(logs: logs, emotions: [emotion("2024-03-01", .happy)], days: 3, today: today)
+        #expect(result.map(\.date) == ["2024-02-28", "2024-02-29", "2024-03-01"])
+        #expect(result.map(\.total) == [0, 2, 1])
+        #expect(result.map(\.records) == [0, 2, 0])
+        #expect(result.map(\.emotions) == [0, 0, 1])
+        var edited = logs[0]
+        edited.recordDate = "2024-02-28"
+        #expect(ActivityStats.daily(logs: [edited], emotions: [], days: 3, today: today).map(\.total) == [1, 0, 0])
+        #expect(ActivityStats.daily(logs: [], emotions: [], days: 90, today: today).allSatisfy { $0.total == 0 })
+    }
+
     // MARK: EmotionStats
 
     @Test func dailyAveragesWithGapDays() {

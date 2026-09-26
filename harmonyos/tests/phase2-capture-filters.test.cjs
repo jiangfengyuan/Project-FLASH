@@ -160,15 +160,14 @@ test('saveEditedLog persists text and category/tag meta together, then clears th
   const state = new LogsState(), r = runtime();
   const calls = [];
   const controller = new LogsController(state, r, {
-    updateLog: async (id, content) => calls.push(['text', id, content]),
-    updateLogMeta: async (id, category, colorTag) => calls.push(['meta', id, category, colorTag])
+    updateLog: async (...args) => calls.push(args)
   });
   controller.startEditLog(log('a', '正文', { category: 'log', colorTag: 'daily' }));
   state.editText = '改写正文';
   state.editCategory = 'idea';
   state.editTag = 'idea';
   await controller.saveEditedLog();
-  assert.deepEqual(calls, [['text', 'a', '改写正文'], ['meta', 'a', 'idea', 'idea']]);
+  assert.deepEqual(calls, [['a', '改写正文', 'idea', 'idea', '2026-09-05']]);
   assert.equal(state.editingLogId, '');
   assert.equal(state.editCategory, '');
   assert.ok(r.messages.includes('记录已更新'));

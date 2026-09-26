@@ -109,7 +109,7 @@ export function SegmentedControl(theme: ThemeState, options: string[], selectedI
           .textAlign(TextAlign.Center)
       }
       .layoutWeight(1)
-      .height(36)
+      .height(44)
       .justifyContent(FlexAlign.Center)
       .backgroundColor(index === selectedIndex ? theme.themeSurface : Color.Transparent)
       .borderRadius(18)
@@ -224,10 +224,10 @@ export function RecordRow(theme: ThemeState, feedback: FeedbackState, actions: P
       }.layoutWeight(1).alignItems(HorizontalAlign.Start)
       Column({ space: 4 }) {
         Button('编辑', { type: ButtonType.Normal })
-          .fontSize(11).fontColor(BRAND).backgroundColor(theme.themeTint).height(28)
+          .fontSize(11).fontColor(BRAND).backgroundColor(theme.themeTint).height(44)
           .onClick(() => actions.logsController.startEditLog(item))
         Button('删除', { type: ButtonType.Normal })
-          .fontSize(11).fontColor('#B42318').backgroundColor(theme.themeDanger).height(28)
+          .fontSize(11).fontColor('#B42318').backgroundColor(theme.themeDanger).height(44)
           .onClick(() => feedback.destructive = { kind: DeleteKind.LOG, id: item.id })
       }
     }.width('100%').padding({ top: 8, bottom: 8 })

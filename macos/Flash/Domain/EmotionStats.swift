@@ -77,3 +77,41 @@ enum EmotionStats {
         return counts.map { (name: $0.key, count: $0.value) }
     }
 }
+
+/// Calendar-aligned ranges end today; rolling ranges include today.
+enum ReviewWindow: String, CaseIterable, Identifiable {
+    case week = "本周", month = "本月", days30 = "近30天", days90 = "近90天"
+    var id: String { rawValue }
+    func days(today: Date) -> Int {
+        let calendar = Calendar(identifier: .gregorian)
+        switch self {
+        case .week: return (calendar.component(.weekday, from: today) + 5) % 7 + 1
+        case .month: return calendar.component(.day, from: today)
+        case .days30: return 30
+        case .days90: return 90
+        }
+    }
+}
+
+struct DailyActivity: Identifiable, Equatable {
+    let date: String
+    let records: Int
+    let emotions: Int
+    var id: String { date }
+    var total: Int { records + emotions }
+}
+
+enum ActivityStats {
+    static func daily(logs: [LogItem], emotions: [EmotionRecord], days: Int,
+                      today: Date = Date()) -> [DailyActivity] {
+        guard days > 0 else { return [] }
+        let recordsByDay = Dictionary(grouping: logs, by: \.recordDate).mapValues(\.count)
+        let emotionsByDay = Dictionary(grouping: emotions, by: \.recordDate).mapValues(\.count)
+        let calendar = Calendar(identifier: .gregorian)
+        return (0..<days).map { index in
+            let date = calendar.date(byAdding: .day, value: index - days + 1, to: today)!
+            let key = DateFormatting.dayString(date)
+            return DailyActivity(date: key, records: recordsByDay[key] ?? 0, emotions: emotionsByDay[key] ?? 0)
+        }
+    }
+}

@@ -24,6 +24,18 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.foundation.lazy.rememberLazyListState
+import com.flash.app.ui.calendar.CalendarScreen
+import com.flash.app.ui.components.FlashSegmentedControl
+import com.flash.app.domain.dailyActivity
+import androidx.compose.material3.TextButton
+import com.flash.app.domain.ReviewWindow
+import com.flash.app.ui.components.FlashFilterChipRow
+import com.flash.app.ui.components.FlashFilterChipItem
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,36 +44,74 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.flash.app.FlashApplication
-import com.flash.app.ui.components.StyleCard
+import com.flash.app.ui.components.FlashCard
 import com.flash.app.ui.emotion.EmotionStatsSection
 
 /** 统计 Tab：数据概览 + 情绪走势（对应 PRD Insights） */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StatsScreen() {
+fun StatsScreen(onOpenSettings: () -> Unit, onOpenRecord: (String) -> Unit) {
     val app = LocalContext.current.applicationContext as FlashApplication
     val viewModel: StatsViewModel = viewModel(factory = StatsViewModel.factory(app.repository))
     val ui by viewModel.uiState.collectAsStateWithLifecycle()
+
+    var window by rememberSaveable { mutableStateOf(ReviewWindow.WEEK) }
+    var calendar by rememberSaveable { mutableStateOf(false) }
+    val trendScroll = rememberLazyListState()
+    val calendarScroll = rememberLazyListState()
+    val activity = remember(ui.logs, ui.emotions, window, ui.today) {
+        dailyActivity(ui.logs, ui.emotions, window.start(ui.today), ui.today)
+    }
+    val start = window.start(ui.today).toString()
+    val end = ui.today.toString()
+    val logs = ui.logs.filter { it.recordDate in start..end }
+    val emotions = ui.emotions.filter { it.recordDate in start..end }
+    val activeDays = (logs.map { it.recordDate } + emotions.map { it.recordDate }).distinct().size
 
     Scaffold(
         containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
-                title = { Text("统计") },
+                title = { Text("回顾") },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
             )
         },
     ) { innerPadding ->
+        Column(Modifier.padding(innerPadding).fillMaxSize()) {
+            FlashSegmentedControl(
+                options = listOf(false to "趋势", true to "日历"),
+                selected = calendar,
+                onSelect = { calendar = it },
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            )
+            if (calendar) {
+                CalendarScreen(onOpenSettings, onOpenRecord, embedded = true, listState = calendarScroll)
+            } else {
         LazyColumn(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize(),
+            state = trendScroll,
+            modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            item(key = "range") {
+                FlashFilterChipRow(
+                    items = ReviewWindow.entries.map { FlashFilterChipItem(it.name, it.label) },
+                    selectedKey = window.name,
+                    onSelect = { window = ReviewWindow.valueOf(it) },
+                )
+            }
+            item(key = "insight") {
+                FlashCard(modifier = Modifier.fillMaxWidth()) {
+                    Text(if (activeDays == 0) "继续记录，回顾会慢慢清晰" else "这段时间，你留下了 $activeDays 天的记录",
+                        style = MaterialTheme.typography.titleMedium)
+                    Text("$start — $end", style = MaterialTheme.typography.bodySmall)
+                    Text("${logs.size} 条记录 · ${emotions.size} 次情绪", style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+            item(key = "activity") { ActivityChart(activity) }
             item(key = "overview") {
-                StyleCard(modifier = Modifier.fillMaxWidth()) {
-                    Text("数据概览", style = MaterialTheme.typography.titleSmall)
+                FlashCard(modifier = Modifier.fillMaxWidth()) {
+                    Text("累计概览 · 全部时间", style = MaterialTheme.typography.titleSmall)
                     Spacer(Modifier.height(8.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -76,7 +126,10 @@ fun StatsScreen() {
             }
             item(key = "emotion-stats") {
                 // 统计页对应 macOS StatsView「近 7 天/近 30 天」：滚动窗口
-                EmotionStatsSection(emotions = ui.emotions, weekAligned = false)
+                EmotionStatsSection(emotions = ui.emotions, weekAligned = false,
+                    window = window.start(ui.today) to ui.today)
+            }
+        }
             }
         }
     }

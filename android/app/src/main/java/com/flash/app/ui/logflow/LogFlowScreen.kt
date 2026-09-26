@@ -6,6 +6,12 @@
 
 package com.flash.app.ui.logflow
 
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.rememberCoroutineScope
+import com.flash.app.ui.components.RecordDateField
+import com.flash.app.data.model.Category
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -260,7 +266,6 @@ fun LogFlowScreen(onBack: () -> Unit, onOpenRecord: (String) -> Unit) {
             onDismiss = { editingLog = null },
             onSave = { updated ->
                 viewModel.updateLog(updated)
-                editingLog = null
             },
         )
     }
@@ -308,21 +313,31 @@ fun LogFlowScreen(onBack: () -> Unit, onOpenRecord: (String) -> Unit) {
 }
 
 @Composable
-private fun EditLogDialog(log: LogItem, onDismiss: () -> Unit, onSave: (LogItem) -> Unit) {
+private fun EditLogDialog(log: LogItem, onDismiss: () -> Unit, onSave: suspend (LogItem) -> Unit) {
     var content by remember(log.id) { mutableStateOf(log.content) }
     var tag by remember(log.id) { mutableStateOf(log.colorTag) }
     var importance by remember(log.id) { mutableIntStateOf(log.importance) }
+    var category by remember(log.id) { mutableStateOf(log.category) }
+    var date by remember(log.id) { mutableStateOf(log.recordDate) }
+    var saving by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    var discard by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val dirty = content != log.content || tag != log.colorTag || importance != log.importance ||
+        category != log.category || date != log.recordDate
+    val close: () -> Unit = { if (!saving) { if (dirty) discard = true else onDismiss() } }
     // 超限不静默截断：给出可见错误态并阻止保存（对齐 macOS TextLimits 行为）
     val overLimit = !TextLimits.fits(content, MAX_CONTENT_LENGTH)
 
     AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("编辑日志") },
+        onDismissRequest = close,
+        title = { Text("编辑记录") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                if (error != null) Text(error!!, color = MaterialTheme.colorScheme.error)
                 OutlinedTextField(
                     value = content,
-                    onValueChange = { content = it },
+                    onValueChange = { if (!saving) content = it },
                     label = { Text("内容") },
                     isError = overLimit,
                     supportingText = {
@@ -340,12 +355,20 @@ private fun EditLogDialog(log: LogItem, onDismiss: () -> Unit, onSave: (LogItem)
                     ColorTag.entries.forEach { t ->
                         FilterChip(
                             selected = tag == t,
-                            onClick = { tag = t },
+                            onClick = { if (!saving) tag = t },
                             label = { Text(t.displayName) },
                         )
                     }
                 }
+                Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                    Category.entries.forEach { value ->
+                        FilterChip(selected = category == value, enabled = !saving,
+                            onClick = { category = value }, label = { Text(if (value == Category.IDEA) "灵感" else "日志") })
+                    }
+                }
+                RecordDateField(date, { date = it }, !saving)
                 Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -353,7 +376,7 @@ private fun EditLogDialog(log: LogItem, onDismiss: () -> Unit, onSave: (LogItem)
                     IMPORTANCE_OPTIONS.forEach { (value, label) ->
                         FilterChip(
                             selected = importance == value,
-                            onClick = { importance = value },
+                            onClick = { if (!saving) importance = value },
                             label = { Text(label.ifEmpty { "无" }) },
                         )
                     }
@@ -362,16 +385,33 @@ private fun EditLogDialog(log: LogItem, onDismiss: () -> Unit, onSave: (LogItem)
         },
         confirmButton = {
             TextButton(
-                enabled = content.isNotBlank() && !overLimit,
+                enabled = content.isNotBlank() && !overLimit && !saving,
                 onClick = {
-                    onSave(log.copy(content = content.trim(), colorTag = tag, importance = importance))
+                    if (!saving) {
+                        saving = true
+                        error = null
+                        val updated = log.copy(content = content.trim(), colorTag = tag,
+                            category = category, importance = importance, recordDate = date)
+                        scope.launch {
+                            try { onSave(updated); onDismiss() }
+                            catch (e: CancellationException) { throw e }
+                            catch (e: Exception) { error = e.message ?: "保存失败，请重试" }
+                            finally { saving = false }
+                        }
+                    }
                 },
-            ) { Text("保存") }
+            ) { Text(if (saving) "保存中…" else "保存") }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("取消") }
+            TextButton(onClick = close, enabled = !saving) { Text("取消") }
         },
     )
+    if (discard) {
+        AlertDialog(onDismissRequest = { discard = false },
+            title = { Text("放弃未保存的修改？") },
+            confirmButton = { TextButton(onClick = onDismiss) { Text("放弃修改") } },
+            dismissButton = { TextButton(onClick = { discard = false }) { Text("继续编辑") } })
+    }
 }
 
 private val IMPORTANCE_OPTIONS = listOf(0 to "", 2 to "!!", 3 to "!!!", 4 to "!!!!")

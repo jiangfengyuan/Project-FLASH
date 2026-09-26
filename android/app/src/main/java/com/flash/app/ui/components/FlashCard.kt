@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
@@ -38,6 +39,7 @@ fun FlashCard(
             modifier = modifier,
             shape = shape,
             color = color,
+            contentColor = MaterialTheme.colorScheme.onSurface,
             shadowElevation = 2.dp,
         ) {
             Column(Modifier.padding(contentPadding), content = content)
@@ -47,6 +49,7 @@ fun FlashCard(
             modifier = modifier,
             shape = shape,
             color = color,
+            contentColor = MaterialTheme.colorScheme.onSurface,
             shadowElevation = 2.dp,
         ) {
             Column(Modifier.padding(contentPadding), content = content)

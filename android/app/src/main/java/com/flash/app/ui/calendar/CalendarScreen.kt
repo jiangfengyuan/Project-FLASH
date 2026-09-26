@@ -17,6 +17,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -47,6 +48,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -120,6 +122,7 @@ fun CalendarScreen(
 
     Scaffold(
         containerColor = Color.Transparent,
+        contentWindowInsets = if (embedded) WindowInsets(0, 0, 0, 0) else ScaffoldDefaults.contentWindowInsets,
         topBar = {
             if (!embedded) TopAppBar(
                 title = { Text("日历") },
@@ -184,6 +187,7 @@ fun CalendarScreen(
                 Text(
                     "${uiState.selectedDate} 详情",
                     style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
             item(key = "detail") {
@@ -247,10 +251,11 @@ private fun MonthHeader(
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = onPrev) {
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "上一月")
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "上一月", tint = MaterialTheme.colorScheme.onSurface)
         }
         Text(
             "${month.year} 年 ${month.monthValue} 月",
+            color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1f),
@@ -258,7 +263,7 @@ private fun MonthHeader(
         )
         TextButton(onClick = onToday) { Text("今天") }
         IconButton(onClick = onNext) {
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "下一月")
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "下一月", tint = MaterialTheme.colorScheme.onSurface)
         }
     }
 }
@@ -297,7 +302,7 @@ private fun DayCell(
     val borderColor = when {
         isSelected -> MaterialTheme.colorScheme.primary
         isToday -> MaterialTheme.colorScheme.outline
-        else -> MaterialTheme.colorScheme.surface
+        else -> MaterialTheme.colorScheme.outlineVariant
     }
     Column(
         modifier = modifier

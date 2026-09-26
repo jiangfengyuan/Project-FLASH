@@ -1,5 +1,5 @@
 import { Category, ColorTag, colorTagName, LogItem } from '../models/Models';
-import { dayOffset, dayString } from '../data/DateUtils';
+import { dayOffset, dayString, isValidRecordDay } from '../data/DateUtils';
 import { LogsState } from '../state/FeatureStates';
 import { FlashStore } from '../data/FlashStore';
 import { ControllerRuntime } from './ControllerRuntime';
@@ -59,22 +59,58 @@ export class LogsController {
     this.state.editText = item.content;
     this.state.editCategory = item.category;
     this.state.editTag = item.colorTag;
+    this.state.editDate = item.recordDate;
+    this.state.editError = '';
+    this.state.editDiscard = false;
+  }
+
+  closeEdit(): void {
+    if (this.state.busy) return;
+    this.state.editingLogId = '';
+    this.state.editText = '';
+    this.state.editCategory = '';
+    this.state.editTag = '';
+    this.state.editDate = '';
+    this.state.editError = '';
+    this.state.editDiscard = false;
+  }
+
+  requestCloseEdit(): void {
+    if (this.state.busy) return;
+    const item = this.state.logs.find((log: LogItem) => log.id === this.state.editingLogId);
+    if (!item || item.content !== this.state.editText || item.category !== this.state.editCategory ||
+      item.colorTag !== this.state.editTag || item.recordDate !== this.state.editDate) {
+      this.state.editDiscard = true;
+    } else {
+      this.closeEdit();
+    }
+  }
+
+  editValidation(): string {
+    if (!this.state.editText.trim()) return '内容不能为空，请输入后再保存';
+    if (this.state.editText.length > 100000) return '内容超过 100000 字符，请删减后保存';
+    if (!isValidRecordDay(this.state.editDate)) return '请输入有效日期（YYYY-MM-DD）';
+    return '';
   }
 
   async saveEditedLog(): Promise<void> {
     if (!this.state.editingLogId || !this.state.editText.trim() || this.state.busy) return;
+    this.state.editError = this.editValidation();
+    if (this.state.editError) return;
     this.state.busy = true;
     try {
       const id = this.state.editingLogId;
-      await this.store.updateLog(id, this.state.editText.slice(0, 10000));
-      await this.store.updateLogMeta(id, this.state.editCategory, this.state.editTag);
+      await this.store.updateLog(id, this.state.editText, this.state.editCategory, this.state.editTag, this.state.editDate);
       this.state.editingLogId = '';
       this.state.editText = '';
       this.state.editCategory = '';
       this.state.editTag = '';
+      this.state.editDate = '';
+      this.state.editError = '';
       this.runtime.notify('记录已更新');
     } catch (error) {
-      this.runtime.notify(this.runtime.errorMessage(error as Error));
+      this.state.editError = this.runtime.errorMessage(error as Error);
+      this.runtime.notify(this.state.editError);
     } finally {
       this.state.busy = false;
     }

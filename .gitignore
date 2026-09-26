@@ -16,3 +16,6 @@ logs
 # Android 签名密钥（严禁入库；曾发生泄露，密钥需轮换）
 *.keystore
 android/release-signing.env
+
+# Superpowers 临时工作区
+.superpowers/

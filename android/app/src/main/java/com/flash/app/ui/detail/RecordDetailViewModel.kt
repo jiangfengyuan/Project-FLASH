@@ -57,7 +57,7 @@ class RecordDetailViewModel(
         viewModelScope.launch { repository.markIdeaViewed(recordId) }
     }
 
-    fun save(content: String, colorTag: ColorTag, category: Category, importance: Int) {
+    fun save(content: String, colorTag: ColorTag, category: Category, importance: Int, recordDate: String) {
         val current = uiState.value.record ?: return
         // 超限不静默截断：repository.updateLog 会拒绝并抛出带可读信息的异常，
         // 由 Failed 事件提示；编辑框自身也已禁用超限保存。
@@ -72,10 +72,10 @@ class RecordDetailViewModel(
                         colorTag = colorTag,
                         category = category,
                         importance = importance.coerceIn(0, 4),
-                    )
+                        recordDate = recordDate,
+                    ),
+                    markViewed = true,
                 )
-                // 从日志切换为 Idea 也属于一次主动处理，不应重新进入“待梳理”。
-                if (category == Category.IDEA) repository.markIdeaViewed(current.id)
             }.onSuccess {
                 eventChannel.send(RecordDetailEvent.Saved)
             }.onFailure {

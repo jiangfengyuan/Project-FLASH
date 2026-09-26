@@ -12,12 +12,21 @@ export struct ProfilePage {
     Scroll() {
       Column({ space: 14 }) {
         PageHeader(this.theme, '设置', '数据、备份与应用设置')
+        Column({ space: 8 }) {
+          SymbolGlyph($r('sys.symbol.doc_text')).fontSize(24).fontColor([BRAND])
+          Text('数据默认保存在此设备').fontSize(17).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)
+          Text('可导出备份或在可信局域网内传输').fontSize(12).fontColor(this.theme.themeMuted)
+        }.width('100%').padding(20).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
+        Text('记录与回顾').fontSize(13).fontColor(this.theme.themeMuted).width('100%')
         Column({ space: 2 }) {
           this.menuRow($r('sys.symbol.calendar'), '日历', '按日期回看日志与情绪', 'calendar')
           this.menuRow($r('sys.symbol.face_smiling'), '情绪记录', '七级情绪与子情绪', 'emotion')
           this.menuRow($r('sys.symbol.doc_text'), '记录管理', '搜索、查看和删除记录', 'logs')
+        }.width('100%').backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD).padding({ left: 14, right: 14 })
+        Text('外观、数据与安全').fontSize(13).fontColor(this.theme.themeMuted).width('100%')
+        Column({ space: 2 }) {
           this.menuRow($r('sys.symbol.bolt'), '鸿蒙体验', '星闪、实况窗、智慧服务与多设备', 'harmony')
-          this.menuRow($r('sys.symbol.gearshape'), '设置与备份', '跨设备 JSON 与版本信息', 'settings')
+          this.menuRow($r('sys.symbol.gearshape'), '外观与备份', '主题、备份恢复与局域网传输', 'settings')
         }.width('100%').backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD).padding({ left: 14, right: 14 })
         Column({ space: 6 }) {
           Text('Flash Aero').fontSize(22).fontWeight(FontWeight.Bold).fontColor(this.theme.themeText)
@@ -36,7 +45,7 @@ export struct ProfilePage {
         Text(title).fontSize(16).fontColor(this.theme.themeText).width('100%')
         Text(subtitle).fontSize(11).fontColor(this.theme.themeMuted).width('100%')
       }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-      Text('›').fontSize(26).fontColor('#98A2B3')
+      Text('›').fontSize(26).fontColor(this.theme.themeMuted)
     }.width('100%').height(70).onClick(() => requireActions(this.actions).openDetail(destination))
   }
 

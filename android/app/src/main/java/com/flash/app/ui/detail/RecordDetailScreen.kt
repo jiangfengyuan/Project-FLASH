@@ -50,6 +50,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.activity.compose.BackHandler
+import com.flash.app.ui.components.RecordDateField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -107,6 +109,16 @@ fun RecordDetailScreen(recordId: String, onBack: () -> Unit) {
     var editImportance by remember(record?.id, editing) {
         mutableIntStateOf(record?.importance ?: 0)
     }
+    var editDate by remember(record?.id, editing) { mutableStateOf(record?.recordDate.orEmpty()) }
+    var discard by remember { mutableStateOf(false) }
+    val dirty = record != null && (editContent != record.content || editTag != record.colorTag ||
+        editCategory != record.category || editImportance != record.importance || editDate != record.recordDate)
+    val closeEditor: () -> Unit = {
+        if (!uiState.busy) {
+            if (dirty) discard = true else editing = false
+        }
+    }
+    BackHandler(enabled = editing) { closeEditor() }
     // 超限不静默截断：允许继续输入，给出可见错误态并阻止保存（对齐 macOS TextLimits 行为）
     val editOverLimit = !TextLimits.fits(editContent)
     val editBlank = editContent.isBlank()
@@ -134,14 +146,14 @@ fun RecordDetailScreen(recordId: String, onBack: () -> Unit) {
                     title = { Text(if (record.category == Category.IDEA) "编辑灵感" else "编辑记录") },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                     navigationIcon = {
-                        CircularIconButton(onClick = { editing = false }) {
+                        CircularIconButton(onClick = closeEditor, enabled = !uiState.busy) {
                             Icon(Icons.Filled.Close, contentDescription = "关闭")
                         }
                     },
                     actions = {
                         CircularIconButton(
                             onClick = {
-                                viewModel.save(editContent, editTag, editCategory, editImportance)
+                                viewModel.save(editContent, editTag, editCategory, editImportance, editDate)
                             },
                             enabled = !editBlank && !editOverLimit && !uiState.busy,
                             emphasis = true,
@@ -217,17 +229,19 @@ fun RecordDetailScreen(recordId: String, onBack: () -> Unit) {
             ) { isEditing ->
                 if (isEditing) {
                     RecordEditor(
-                        record = record,
+                        recordDate = editDate,
+                        onDateChange = { editDate = it },
+                        enabled = !uiState.busy,
                         content = editContent,
-                        onContentChange = { editContent = it },
+                        onContentChange = { if (!uiState.busy) editContent = it },
                         overLimit = editOverLimit,
                         blank = editBlank,
                         tag = editTag,
-                        onTagChange = { editTag = it },
+                        onTagChange = { if (!uiState.busy) editTag = it },
                         category = editCategory,
-                        onCategoryChange = { editCategory = it },
+                        onCategoryChange = { if (!uiState.busy) editCategory = it },
                         importance = editImportance,
-                        onImportanceChange = { editImportance = it },
+                        onImportanceChange = { if (!uiState.busy) editImportance = it },
                     )
                 } else {
                     RecordViewer(record)
@@ -236,6 +250,14 @@ fun RecordDetailScreen(recordId: String, onBack: () -> Unit) {
         }
     }
 
+    if (discard) {
+        AlertDialog(
+            onDismissRequest = { discard = false },
+            title = { Text("放弃未保存的修改？") },
+            confirmButton = { TextButton(onClick = { discard = false; editing = false }) { Text("放弃修改") } },
+            dismissButton = { TextButton(onClick = { discard = false }) { Text("继续编辑") } },
+        )
+    }
     if (deleting && record != null) {
         AlertDialog(
             onDismissRequest = { deleting = false },
@@ -337,7 +359,9 @@ private fun MetadataChip(label: String) {
 /** 编辑表单：分组白卡（第一组正文与类型 / 第二组标签、重要度、日期） */
 @Composable
 private fun RecordEditor(
-    record: LogItem,
+    recordDate: String,
+    onDateChange: (String) -> Unit,
+    enabled: Boolean,
     content: String,
     onContentChange: (String) -> Unit,
     overLimit: Boolean,
@@ -362,6 +386,7 @@ private fun RecordEditor(
                 StyleCard(modifier = Modifier.fillMaxWidth()) {
                     OutlinedTextField(
                         value = content,
+                        enabled = enabled,
                         onValueChange = onContentChange,
                         placeholder = { Text("记录此刻……") },
                         isError = overLimit || blank,
@@ -415,11 +440,8 @@ private fun RecordEditor(
                     )
                     Spacer(Modifier.height(FlashTokens.Spacing.SM))
                     Text("日期", style = MaterialTheme.typography.labelLarge)
-                    Text(
-                        record.recordDate,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    RecordDateField(recordDate, onDateChange, enabled)
+                    Text("更改日期会同步调整日历归属与回顾统计。", style = MaterialTheme.typography.bodySmall)
                 }
             }
         }

@@ -1,9 +1,8 @@
-import { dayString, monthTitle, shortDay } from '../data/DateUtils';
+import { dayString, monthTitle, shortDay, calendarWeeks } from '../data/DateUtils';
 import { EmotionRecord, emotionEmoji, emotionName, LogItem, TaskDueKind, TaskItem } from '../models/Models';
 import { ThemeState, CalendarState, FeedbackState, DeleteKind } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
-import { EmptyState, RecordRow } from '../components/CommonBuilders';
-const BRAND = '#6C5CE7';
+import { EmptyState, RecordRow, RADIUS_CARD, BRAND, DOCK_CLEARANCE } from '../components/CommonBuilders';
 
 @Component
 export struct CalendarPage {
@@ -11,23 +10,50 @@ export struct CalendarPage {
   @ObjectLink calendar: CalendarState;
   @ObjectLink feedback: FeedbackState;
   actions?: PageActions;
+  @Prop embedded: boolean = false;
 
   @Builder
   private calendarPage() {
     Scroll() {
       Column({ space: 12 }) {
-        Row({ space: 10 }) {
-          Text(monthTitle(dayString())).fontSize(22).fontWeight(FontWeight.Bold).fontColor(this.theme.themeText).layoutWeight(1)
-          Button('＋ 新建任务').height(38).fontColor(Color.White).backgroundColor(BRAND)
-            .onClick(() => requireActions(this.actions).calendarController.openTaskEditor(undefined, dayString()))
+        Row({ space: 4 }) {
+          Button('‹').height(44).width(44).fontColor(BRAND).backgroundColor(this.theme.themeTint)
+            .accessibilityText('上一月').onClick(() => requireActions(this.actions).calendarController.shiftMonth(-1))
+          Text(monthTitle(this.calendar.displayedMonth)).fontSize(18).fontWeight(FontWeight.Bold)
+            .fontColor(this.theme.themeText).layoutWeight(1).textAlign(TextAlign.Center)
+          Button('›').height(44).width(44).fontColor(BRAND).backgroundColor(this.theme.themeTint)
+            .accessibilityText('下一月').onClick(() => requireActions(this.actions).calendarController.shiftMonth(1))
         }.width('100%')
-        ForEach(requireActions(this.actions).calendarController.displayedActivityDays(), (day: string) => {
+        Row({ space: 12 }) {
+          Button('今天').height(44).fontColor(BRAND).backgroundColor(this.theme.themeTint)
+            .onClick(() => requireActions(this.actions).calendarController.backToToday())
+          Button('新建任务').height(44).fontColor(Color.White).backgroundColor(BRAND)
+            .onClick(() => requireActions(this.actions).calendarController.openTaskEditor(undefined, this.calendar.selectedDay))
+        }.width('100%')
+        Row() {
+          ForEach(['一', '二', '三', '四', '五', '六', '日'], (day: string) => {
+            Text(day).fontSize(12).fontColor(this.theme.themeMuted).layoutWeight(1).textAlign(TextAlign.Center)
+          }, (day: string) => day)
+        }.width('100%')
+        Column({ space: 4 }) {
+          ForEach(calendarWeeks(this.calendar.displayedMonth), (week: string[]) => {
+            Row({ space: 2 }) {
+              ForEach(week, (day: string) => { this.dayCell(day) }, (day: string) => day)
+            }.width('100%')
+          }, (week: string[]) => week[0])
+        }.width('100%')
+        Text('日期下数字为记录、情绪与任务总数；点选查看详情。')
+          .fontSize(12).fontColor(this.theme.themeMuted).width('100%')
+        ForEach([this.calendar.selectedDay], (day: string) => {
           Column({ space: 8 }) {
             Row() {
-              Text(shortDay(day)).fontSize(15).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).layoutWeight(1)
-              Button('添加任务', { type: ButtonType.Normal }).height(30).fontSize(11)
+              Text(day + ' 详情').fontSize(15).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).layoutWeight(1)
+              Button('添加任务', { type: ButtonType.Normal }).height(44).fontSize(11)
                 .fontColor(BRAND).backgroundColor(this.theme.themeTint).onClick(() => requireActions(this.actions).calendarController.openTaskEditor(undefined, day))
             }.width('100%')
+            if (this.dayCount(day) === 0) {
+              Text('这一天还没有计划或记录').fontSize(14).fontColor(this.theme.themeMuted).width('100%')
+            }
             ForEach(this.calendar.tasksByDay.get(day) ?? [],
               (item: TaskItem) => this.taskRow(item), (item: TaskItem) => item.id)
             ForEach(this.calendar.logsByDay.get(day) ?? [],
@@ -39,23 +65,40 @@ export struct CalendarPage {
                   Text(`${emotionName(item.level)} ${item.note ?? ''}`).fontSize(14).fontColor(this.theme.themeText).layoutWeight(1)
                 }.width('100%')
               }, (item: EmotionRecord) => item.id)
-          }.width('100%').padding(14).backgroundColor(this.theme.themeSurface).borderRadius(18)
+          }.width('100%').padding(14).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
         }, (day: string) => day)
-        if (this.calendar.activityDays.length === 0) EmptyState(this.theme, '📅', '还没有记录或任务')
-        if (this.calendar.activityDays.length > this.calendar.calendarDayLimit) {
-          Button(`加载更早日期（剩余 ${this.calendar.activityDays.length - this.calendar.calendarDayLimit} 天）`)
-            .width('100%').height(42).fontColor(BRAND).backgroundColor(this.theme.themeTint)
-            .onClick(() => this.calendar.calendarDayLimit += 30)
-        }
-      }.width('100%').padding({ left: 16, right: 16, bottom: 30 })
+
+      }.width('100%').padding({ left: 16, right: 16, bottom: this.embedded ? DOCK_CLEARANCE : 30 })
     }.width('100%').layoutWeight(1)
+  }
+
+  private dayCount(day: string): number {
+    return (this.calendar.logsByDay.get(day)?.length ?? 0) +
+      (this.calendar.emotionsByDay.get(day)?.length ?? 0) + (this.calendar.tasksByDay.get(day)?.length ?? 0);
+  }
+
+  @Builder
+  private dayCell(day: string) {
+    Column({ space: 2 }) {
+      Text(`${Number(day.slice(8, 10))}`).fontSize(14)
+        .fontWeight(day === dayString() ? FontWeight.Bold : FontWeight.Normal)
+        .fontColor(day === this.calendar.selectedDay ? Color.White : this.theme.themeText)
+      Text(this.dayCount(day) > 0 ? `${this.dayCount(day)}` : ' ')
+        .fontSize(10).fontColor(day === this.calendar.selectedDay ? Color.White : this.theme.themeMuted)
+    }
+    .layoutWeight(1).constraintSize({ minHeight: 48 }).justifyContent(FlexAlign.Center)
+    .borderRadius(10)
+    .backgroundColor(day === this.calendar.selectedDay ? BRAND : this.theme.themeSurface)
+    .opacity(day.slice(0, 7) === this.calendar.displayedMonth.slice(0, 7) ? 1 : 0.55)
+    .accessibilityText(`${day}，${this.dayCount(day)} 项${day === this.calendar.selectedDay ? '，已选中' : ''}`)
+    .onClick(() => requireActions(this.actions).calendarController.selectCalendarDay(day))
   }
 
   @Builder
   private taskRow(item: TaskItem) {
     Row({ space: 10 }) {
       Button(item.completedAt ? '✓' : '○', { type: ButtonType.Circle })
-        .width(34).height(34).fontSize(18)
+        .width(44).height(44).fontSize(18)
         .fontColor(item.completedAt ? Color.White : BRAND)
         .backgroundColor(item.completedAt ? '#22B573' : this.theme.themeTint)
         .onClick(() => requireActions(this.actions).calendarController.toggleTask(item))
@@ -66,9 +109,9 @@ export struct CalendarPage {
         Text(item.due.kind === TaskDueKind.ALL_DAY ? '全天' : `${item.due.at?.slice(11, 16) ?? ''} · ${item.due.timeZone ?? ''}`)
           .fontSize(11).fontColor(this.theme.themeMuted).width('100%')
       }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-      Button('编辑', { type: ButtonType.Normal }).height(28).fontSize(11)
+      Button('编辑', { type: ButtonType.Normal }).height(44).fontSize(11)
         .fontColor(BRAND).backgroundColor(this.theme.themeTint).onClick(() => requireActions(this.actions).calendarController.openTaskEditor(item))
-      Button('删除', { type: ButtonType.Normal }).height(28).fontSize(11)
+      Button('删除', { type: ButtonType.Normal }).height(44).fontSize(11)
         .fontColor('#B42318').backgroundColor(this.theme.themeDanger).onClick(() => this.feedback.destructive = { kind: DeleteKind.TASK, id: item.id })
     }.width('100%').padding(10).backgroundColor(this.theme.themeControl).borderRadius(14)
   }
