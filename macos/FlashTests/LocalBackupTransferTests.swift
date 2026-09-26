@@ -530,7 +530,8 @@ struct LocalBackupTransferIntegrationTests {
                 connection.send(content: response, completion: .idempotent)
             case .oversizedHeaderNoNewline:
                 var response = Data(proofLine.utf8)
-                response.append(Data("OK 99999999 \(String(repeating: "ab", count: 40))".utf8))
+                // OK 头行上限已统一为 128 字节；构造超过该上限的无换行头行。
+                response.append(Data("OK 99999999 \(String(repeating: "ab", count: 70))".utf8))
                 connection.send(content: response, completion: .idempotent)
             case .drip(let json, let chunkDelay):
                 let payload = Data(json.utf8)
@@ -575,7 +576,7 @@ struct LocalBackupTransferIntegrationTests {
     }
 
     @Test func oversizedOKHeaderWithoutNewlineIsRejected() throws {
-        // proof 通过后的 OK 阶段：头行无换行且超过 76 字节上限，按 buffer.count 拒绝
+        // proof 通过后的 OK 阶段：头行无换行且超过 128 字节上限，按 buffer.count 拒绝
         let fake = try startFakeServer(pin: "123456", behavior: .oversizedHeaderNoNewline)
         defer { fake.cancel() }
         let result = try runReceiver(device: makeLoopbackDevice(port: fake.port!), pin: "123456")
