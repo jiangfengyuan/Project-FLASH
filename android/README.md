@@ -5,7 +5,7 @@ Android 端原生实现。Kotlin + Jetpack Compose，严格遵循 Material Desig
 当前发布身份为 **Flash Aero v0.1.0**；`Aero` 为 v0 Alpha 阶段的版本代号。
 首个正式版将统一命名为 **Flash Pulse v1.0.0**。
 
-- applicationId：发布前改回 `com.flash.app`
+- applicationId：Release 为 `com.flash.app`；Debug 使用 `.native` 后缀（`com.flash.app.native`）
 - minSdk 26 / targetSdk 36
 
 ## 技术栈
@@ -54,7 +54,7 @@ APK 输出：`app/build/outputs/apk/debug/app-debug.apk`
 云盘。
 
 「局域网发送 / 接收」使用 Android NSD 自动发现同一网络内的 Android 或 macOS
-设备。发送方随机生成四位 PIN；PIN 60 秒失效、最多尝试五次，正确配对并完成
+设备。发送方随机生成六位 PIN；PIN 60 秒失效、最多尝试五次，正确配对并完成
 一次传输后服务立即关闭。App 仅申请局域网发现与连接所需权限，不连接 Flash
 服务器；接收内容会执行格式校验并分析新增、修改、相同与仅本机数据，再选择差异
 合并或覆盖。
@@ -113,3 +113,7 @@ app/src/main/java/com/flash/app/
   海外环境可删除。
 - 首次同步若提示 SDK 路径，新建 `local.properties` 写入 `sdk.dir=<本机 SDK 路径>`
   （已 gitignore）。
+
+## 验收与发布状态（2026-09-26）
+
+设备品质结果与未验项目见 [品质矩阵](../docs/quality/device-matrix.md)，跨端互传状态见 [契约验收](../docs/contracts/acceptance.md)。局域网使用 [握手 v1.1](../docs/contracts/lan-handshake-v1.1.md)：六位 PIN、挑战应答与 payload HMAC；内容未做端到端加密。历史明文 PIN 首包不兼容，双方需使用同代构建，旧数据经 JSON 文件迁移。

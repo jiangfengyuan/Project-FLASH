@@ -18,7 +18,7 @@
 | 日志流（次级） | 搜索、标签 / 日期筛选、排序、编辑、删除 |
 | 情绪（次级） | 七级滑块 + 子情绪 + 备注，周趋势，近期记录 |
 | 日历（次级） | 日志与情绪按日聚合的月历；任务支持截止时间、完成状态与本地提醒 |
-| 回顾（一级） | KPI、情绪趋势、子情绪分布 |
+| 回顾（一级） | 四种时间窗口、活跃度、趋势洞察、情绪分布与页内日历 |
 | 设置（一级） | 主题、备份导入导出、系统分享、PIN 配对局域网直传、清空数据 |
 | 菜单栏伴侣 | MenuBarExtra：快速记录（回车即存）、今日概览、一键跳转主窗口 |
 
@@ -65,8 +65,8 @@ DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer \
 xcodebuild test -scheme Flash -destination 'platform=macOS'
 ```
 
-当前 67 个用例（@Test），覆盖模型 / Repository / BackupService / BackupTransfer / BackupDiff /
-LocalBackupTransfer / SettingsStore / Domain 纯函数 / 主题色。
+测试覆盖模型 / Repository / BackupService / BackupTransfer / BackupDiff /
+LocalBackupTransfer / SettingsStore / Domain 纯函数 / 主题色。测试数量以当次执行汇总为准。
 
 ## 备份格式
 
@@ -78,12 +78,12 @@ LocalBackupTransfer / SettingsStore / Domain 纯函数 / 主题色。
   "data": { "logs": [...], "emotions": [...], "tasks": [...] } }
 ```
 
-- `version` 不匹配拒绝导入；非法条目逐条跳过；单文件上限 50 MB。
+- 标准入口严格校验 v2，任何非法条目整体拒绝；独立恢复入口用于 v1 或旧/损坏备份，逐条跳过可恢复范围内的非法记录。未知版本/分区拒绝导入；单文件上限 50 MB。
 - 读写走 App Sandbox 的用户择定文件授权，导出文件权限 0600。
 - 「通过系统分享」会创建沙箱缓存副本并调用系统分享服务，可选择 AirDrop、
   信息、邮件或云盘；Flash 不会自行上传文件。
 - 「局域网发送 / 接收」通过 Bonjour 自动发现 Android 或 macOS 设备。发送方生成
-  随机四位 PIN，PIN 60 秒失效、最多尝试五次；正确配对并完成一次传输后监听立即
+  随机六位 PIN，PIN 60 秒失效、最多尝试五次；正确配对并完成一次传输后监听立即
   关闭。接收后会分析新增、修改、相同与仅本机数据，再选择差异合并或覆盖。仅启用
   App Sandbox 的客户端 / 服务端网络能力，数据不经过 Flash 服务器；
   建议只在可信的家庭或办公局域网使用。
@@ -107,3 +107,7 @@ LocalBackupTransfer / SettingsStore / Domain 纯函数 / 主题色。
 - adhoc 签名未公证，仅限本机使用。
 - universal2 的 x86_64 切片只在 Apple Silicon 上交叉编译验证过，未做 Intel 实机测试。
 - iCloud 同步、原生 iOS 版（可共享 SwiftData 模型）是后续候选，不在本版本。
+
+## 验收与发布状态（2026-09-26）
+
+设备品质结果与未验项目见 [品质矩阵](../docs/quality/device-matrix.md)，跨端互传状态见 [契约验收](../docs/contracts/acceptance.md)。局域网使用 [握手 v1.1](../docs/contracts/lan-handshake-v1.1.md)：六位 PIN、挑战应答与 payload HMAC；内容未做端到端加密。历史明文 PIN 首包不兼容，双方需使用同代构建，旧数据经 JSON 文件迁移。
