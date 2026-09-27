@@ -56,6 +56,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -93,6 +95,7 @@ fun HomeScreen(
     var captureCategory by remember { mutableStateOf(Category.LOG) }
     var deletingId by remember { mutableStateOf<String?>(null) }
     val captureOverLimit = captureText.length > MAX_QUICK_INPUT_LENGTH
+    val stackHeaderActions = LocalDensity.current.fontScale > 1.2f
 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
@@ -115,8 +118,10 @@ fun HomeScreen(
                 .padding(innerPadding)
                 .fillMaxSize(),
             contentPadding = PaddingValues(
-                horizontal = FlashTokens.Spacing.PageHorizontal,
-                vertical = FlashTokens.Spacing.XS,
+                start = FlashTokens.Spacing.PageHorizontal,
+                end = FlashTokens.Spacing.PageHorizontal,
+                top = FlashTokens.Spacing.XS,
+                bottom = FlashTokens.Spacing.XS + com.flash.app.ui.navigation.LocalPageBottomPadding.current,
             ),
             verticalArrangement = Arrangement.spacedBy(FlashTokens.Spacing.SM),
         ) {
@@ -125,6 +130,7 @@ fun HomeScreen(
                 Box(
                     Modifier
                         .fillMaxWidth()
+                        .clip(RoundedCornerShape(FlashTokens.Radius.Card))
                         .background(
                             Brush.verticalGradient(
                                 listOf(
@@ -136,6 +142,7 @@ fun HomeScreen(
                         )
                         .padding(vertical = FlashTokens.Spacing.SM),
                 ) {
+                    Column {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
@@ -153,9 +160,20 @@ fun HomeScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
-                        HeaderCapsule("搜索", Icons.Filled.Search, onOpenSearch)
-                        Spacer(Modifier.width(FlashTokens.Spacing.XS))
-                        HeaderCapsule("筛选", Icons.Filled.Tune, onOpenSearch)
+                        if (!stackHeaderActions) {
+                            HeaderCapsule("搜索", Icons.Filled.Search, onOpenSearch)
+                            Spacer(Modifier.width(FlashTokens.Spacing.XS))
+                            HeaderCapsule("筛选", Icons.Filled.Tune, onOpenSearch)
+                        }
+                    }
+                    if (stackHeaderActions) {
+                        Spacer(Modifier.height(FlashTokens.Spacing.XS))
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                            HeaderCapsule("搜索", Icons.Filled.Search, onOpenSearch)
+                            Spacer(Modifier.width(FlashTokens.Spacing.XS))
+                            HeaderCapsule("筛选", Icons.Filled.Tune, onOpenSearch)
+                        }
+                    }
                     }
                 }
             }
@@ -180,6 +198,7 @@ fun HomeScreen(
                             }
                         },
                         minLines = 2,
+                        shape = RoundedCornerShape(FlashTokens.Radius.Card),
                         modifier = Modifier
                             .fillMaxWidth()
                             .focusRequester(captureFocus),
@@ -249,6 +268,7 @@ fun HomeScreen(
                 Text(
                     "最近闪念",
                     style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(top = FlashTokens.Spacing.XS),
                 )
             }

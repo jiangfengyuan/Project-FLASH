@@ -18,11 +18,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -40,7 +39,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -95,17 +93,18 @@ fun FlashApp(darkTheme: Boolean, uiStyle: UiStyle) {
     var taskEditorOpen by rememberSaveable { mutableStateOf(false) }
 
     // Dock 悬浮于内容之上：为一级页面预留底部空间，内容不被 Dock 或系统手势区遮挡
-    val density = LocalDensity.current
-    val dockReserve = WindowInsets.navigationBars.getBottom(density).let {
-        with(density) { it.toDp() }
-    } + FlashTokens.Dock.BottomMargin + FlashTokens.Dock.Height
+    val dockReserve = FlashTokens.Dock.BottomMargin * 2 + FlashTokens.Dock.Height
 
     // 离开一级页面（Dock 隐藏）时收起展开菜单
     LaunchedEffect(showBottomBar) {
         if (!showBottomBar) fabExpanded = false
     }
 
-    CompositionLocalProvider(LocalHazeState provides hazeState, LocalUiStyle provides uiStyle) {
+    CompositionLocalProvider(
+        LocalHazeState provides hazeState,
+        LocalUiStyle provides uiStyle,
+        LocalPageBottomPadding provides if (showBottomBar) dockReserve else 0.dp,
+    ) {
         Box(Modifier.fillMaxSize()) {
             // 玻璃风格：渐变天空作为模糊源；MD3 风格：纯色背景即可
             if (isGlass) {
@@ -114,6 +113,7 @@ fun FlashApp(darkTheme: Boolean, uiStyle: UiStyle) {
 
             Scaffold(
                 containerColor = if (isGlass) Color.Transparent else MaterialTheme.colorScheme.background,
+                contentColor = MaterialTheme.colorScheme.onSurface,
                 snackbarHost = { SnackbarHost(snackbar) },
             ) { innerPadding ->
                 NavHost(
@@ -121,7 +121,7 @@ fun FlashApp(darkTheme: Boolean, uiStyle: UiStyle) {
                     startDestination = if (welcomed) Routes.HOME else Routes.WELCOME,
                     modifier = Modifier
                         .padding(innerPadding)
-                        .padding(bottom = if (showBottomBar) dockReserve else 0.dp),
+                        .consumeWindowInsets(innerPadding),
                     // 轻微横移配合淡入淡出，保留页面连续性并避免纯交叉淡化的闪屏感。
                     enterTransition = {
                         fadeIn(animationSpec = tween(240)) +

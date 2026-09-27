@@ -82,7 +82,7 @@ object FlashTokens {
 
     /** 悬浮 Dock 布局尺寸 */
     object Dock {
-        val Height = 64.dp
+        val Height = Touch.FabMain
         val BottomMargin = 16.dp
     }
 }

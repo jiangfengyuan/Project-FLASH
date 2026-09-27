@@ -9,6 +9,8 @@ package com.flash.app.ui.components
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import com.flash.app.ui.theme.FlashTokens
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +37,7 @@ fun StyleCard(
     } else if (onClick == null) {
         Card(
             modifier = modifier,
+            shape = RoundedCornerShape(FlashTokens.Radius.Card),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         ) {
             Column(Modifier.padding(12.dp), content = content)
@@ -42,6 +45,7 @@ fun StyleCard(
     } else {
         Card(
             modifier = modifier,
+            shape = RoundedCornerShape(FlashTokens.Radius.Card),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
             onClick = onClick,
         ) {

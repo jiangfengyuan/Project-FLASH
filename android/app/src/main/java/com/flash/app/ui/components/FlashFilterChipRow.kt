@@ -11,6 +11,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -94,14 +95,16 @@ private fun FlashFilterChip(
         },
         modifier = Modifier.heightIn(min = FlashTokens.Touch.IconButtonMin),
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge,
-            color = contentColor,
-            modifier = Modifier.padding(
-                horizontal = FlashTokens.Spacing.MD,
-                vertical = FlashTokens.Spacing.XS,
-            ),
-        )
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                color = contentColor,
+                modifier = Modifier.padding(
+                    horizontal = FlashTokens.Spacing.MD,
+                    vertical = FlashTokens.Spacing.XS,
+                ),
+            )
+        }
     }
 }

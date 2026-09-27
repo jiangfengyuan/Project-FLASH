@@ -7,20 +7,17 @@
 package com.flash.app.ui.navigation
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -36,7 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.flash.app.data.UiStyle
 import com.flash.app.ui.theme.FlashTokens
@@ -45,9 +42,9 @@ import com.flash.app.ui.theme.LocalUiStyle
 import com.flash.app.ui.theme.glass.glass
 
 /**
- * 悬浮 Flash Dock：大圆角 32 胶囊，悬浮于内容之上。
+ * 悬浮 Flash Dock：与 56dp FAB 等高的图标胶囊，悬浮于内容之上。
  * GLASS → 强玻璃面（模糊+半透+描边）；MD3 → 实体白卡 + 柔和投影。
- * 选中态：品牌 primaryContainer 胶囊指示 200ms 淡入 + 4dp 轻位移。
+ * 选中态：品牌 primaryContainer 圆形指示淡入，图标始终居中。
  */
 @Composable
 fun FlashDock(
@@ -61,6 +58,7 @@ fun FlashDock(
     val shape = RoundedCornerShape(FlashTokens.Radius.Focus)
     val container = if (isGlass) {
         modifier.glass(shape = shape, strong = true)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.92f))
     } else {
         modifier
             .shadow(12.dp, shape)
@@ -77,6 +75,7 @@ fun FlashDock(
         modifier = container
             .fillMaxWidth()
             .height(FlashTokens.Dock.Height)
+            .selectableGroup()
             .padding(horizontal = FlashTokens.Spacing.XS),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -98,15 +97,10 @@ private fun RowScope.DockItem(
     badge: Int,
     onClick: () -> Unit,
 ) {
-    val indicatorAlpha by animateFloatAsState(
-        targetValue = if (selected) 1f else 0f,
+    val indicatorColor by animateColorAsState(
+        targetValue = if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
         animationSpec = tween(FlashTokens.Motion.SelectionMs),
         label = "Dock indicator",
-    )
-    val lift by animateDpAsState(
-        targetValue = if (selected) -FlashTokens.Motion.SelectionShift else 0.dp,
-        animationSpec = tween(FlashTokens.Motion.SelectionMs),
-        label = "Dock lift",
     )
     val iconColor by animateColorAsState(
         targetValue = if (selected) {
@@ -117,33 +111,23 @@ private fun RowScope.DockItem(
         animationSpec = tween(FlashTokens.Motion.SelectionMs),
         label = "Dock icon color",
     )
-    val labelColor by animateColorAsState(
-        targetValue = if (selected) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        },
-        animationSpec = tween(FlashTokens.Motion.SelectionMs),
-        label = "Dock label color",
-    )
 
-    Column(
+    Box(
         modifier = Modifier
             .weight(1f)
-            .fillMaxHeight()
-            .clip(RoundedCornerShape(FlashTokens.Spacing.MD))
-            .clickable(onClick = onClick)
-            .offset(y = lift),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+            .fillMaxHeight(),
+        contentAlignment = Alignment.Center,
     ) {
-        Box(contentAlignment = Alignment.Center) {
-            Box(
-                Modifier
-                    .size(width = 56.dp, height = 32.dp)
-                    .graphicsLayer { alpha = indicatorAlpha }
-                    .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
-            )
+        // The hit target, ripple clip and selected surface share one circle.
+        // Applying selectable to the weighted slot creates a wider oval ripple.
+        Box(
+            modifier = Modifier
+                .size(FlashTokens.Touch.IconButtonMin)
+                .clip(CircleShape)
+                .background(indicatorColor)
+                .selectable(selected = selected, role = Role.Tab, onClick = onClick),
+            contentAlignment = Alignment.Center,
+        ) {
             BadgedBox(
                 badge = {
                     if (badge > 0) {
@@ -154,6 +138,5 @@ private fun RowScope.DockItem(
                 Icon(tab.icon, contentDescription = tab.label, tint = iconColor)
             }
         }
-        Text(tab.label, style = MaterialTheme.typography.labelSmall, color = labelColor)
     }
 }

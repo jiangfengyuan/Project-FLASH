@@ -167,8 +167,10 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(
-                    horizontal = FlashTokens.Spacing.PageHorizontal,
-                    vertical = FlashTokens.Spacing.XS,
+                    start = FlashTokens.Spacing.PageHorizontal,
+                    end = FlashTokens.Spacing.PageHorizontal,
+                    top = FlashTokens.Spacing.XS,
+                    bottom = FlashTokens.Spacing.XS + com.flash.app.ui.navigation.LocalPageBottomPadding.current,
                 ),
             verticalArrangement = Arrangement.spacedBy(FlashTokens.Spacing.LG),
         ) {
