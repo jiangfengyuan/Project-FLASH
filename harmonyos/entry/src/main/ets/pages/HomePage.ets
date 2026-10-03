@@ -3,7 +3,8 @@ import { dayString, shortDay } from '../data/DateUtils';
 import { NavigationState, ThemeState, HomeState, LogsState, FeedbackState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
 import {
-  PageHeader, RecordCard, SegmentedControl, DOCK_CLEARANCE, RADIUS_CARD, BRAND, brandText
+  PageHeader, RecordCard, SegmentedControl, DOCK_CLEARANCE, RADIUS_CARD, BRAND, brandText,
+  cardShadowColor, floatingSurface, hairlineColor, supportsBlurMaterial
 } from '../components/CommonBuilders';
 
 @Component
@@ -38,8 +39,14 @@ export struct HomePage {
             .width('100%')
             .height(52)
             .padding({ left: 16, right: 16 })
-            .backgroundColor(this.theme.themeSurface)
+            .backgroundColor(floatingSurface(this.theme))
+            .backgroundBlurStyle(supportsBlurMaterial() ? BlurStyle.COMPONENT_THIN : BlurStyle.NONE)
             .borderRadius(26)
+            .border({ width: 0.5, color: hairlineColor(this.theme) })
+            .stateStyles({
+              normal: { .opacity(1) },
+              pressed: { .opacity(0.85) }
+            })
             .accessibilityGroup(true)
             .accessibilityText('搜索或筛选记录')
             .onClick(() => requireActions(this.actions).switchTab(1))
@@ -76,6 +83,8 @@ export struct HomePage {
             .justifyContent(FlexAlign.Center)
             .backgroundColor(this.theme.themeSurface)
             .borderRadius(RADIUS_CARD)
+            .border({ width: 0.5, color: hairlineColor(this.theme) })
+            .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
           }
         }.padding({ left: 20, right: 20, top: 12, bottom: DOCK_CLEARANCE }).width('100%')
       }.width('100%')
@@ -133,6 +142,8 @@ export struct HomePage {
     .padding(16)
     .backgroundColor(this.theme.themeSurface)
     .borderRadius(RADIUS_CARD)
+    .border({ width: 0.5, color: hairlineColor(this.theme) })
+    .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
   }
 
   @Builder
@@ -162,6 +173,8 @@ export struct HomePage {
     .padding(16)
     .backgroundColor(this.theme.themeSurface)
     .borderRadius(RADIUS_CARD)
+    .border({ width: 0.5, color: hairlineColor(this.theme) })
+    .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
   }
 
   build() {

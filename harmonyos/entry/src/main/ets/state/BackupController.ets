@@ -5,7 +5,7 @@ import { FlashStore } from '../data/FlashStore';
 import { TaskReminderScheduler } from '../data/TaskReminderScheduler';
 import { ControllerRuntime } from './ControllerRuntime';
 import { BackupDiff } from '../data/BackupDiff';
-import { BackupFiles } from '../data/BackupFiles';
+import { BackupFiles, SharedExportStatus } from '../data/BackupFiles';
 import { BackupImport, BackupService } from '../data/BackupService';
 import { LanDevice, LocalBackupDiscovery, LocalBackupReceiver, LocalBackupSender } from '../data/LocalBackupTransfer';
 
@@ -57,6 +57,37 @@ export class BackupController {
       const json = BackupService.exportJSON(snapshot.logs, snapshot.emotions, snapshot.tasks);
       await BackupFiles.exportJSON(context, json);
       if (generation === this.generation) this.runtime.notify('备份已导出');
+    } catch (error) {
+      if (generation === this.generation) this.runtime.notify(this.runtime.errorMessage(error as Error));
+    } finally {
+      if (generation === this.generation) this.state.fileBusy = false;
+    }
+  }
+
+  sharedExportAvailable(): boolean {
+    return BackupFiles.sharedExportStatus() === SharedExportStatus.READY;
+  }
+
+  async exportBackupToSharedDir(): Promise<void> {
+    if (this.state.fileBusy) return;
+    if (!this.store.ready) {
+      this.runtime.notify('本地数据尚未加载完成，无法导出备份');
+      return;
+    }
+    const generation = this.generation;
+    this.state.fileBusy = true;
+    try {
+      const snapshot = this.store.snapshot();
+      const json = BackupService.exportJSON(snapshot.logs, snapshot.emotions, snapshot.tasks);
+      const result = await BackupFiles.exportToSharedDir(json);
+      if (generation !== this.generation) return;
+      if (result.status === SharedExportStatus.EXPORTED) {
+        this.runtime.notify('备份已导出到「文件管理」应用的下载目录');
+      } else if (result.status === SharedExportStatus.DENIED) {
+        this.runtime.notify('共享目录暂不可用，请改用「选择位置导出」');
+      } else {
+        this.runtime.notify('当前设备不支持共享目录导出，请改用「选择位置导出」');
+      }
     } catch (error) {
       if (generation === this.generation) this.runtime.notify(this.runtime.errorMessage(error as Error));
     } finally {

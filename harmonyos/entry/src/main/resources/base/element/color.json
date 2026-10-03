@@ -1,5 +1,8 @@
 {
   "color": [
-    { "name": "start_window_background", "value": "#F7F9FA" }
+    { "name": "start_window_background", "value": "#F7F9FA" },
+    { "name": "form_accent_records", "value": "#6C5CE7" },
+    { "name": "form_accent_ideas", "value": "#FF9F43" },
+    { "name": "form_accent_tasks", "value": "#4D96FF" }
   ]
 }

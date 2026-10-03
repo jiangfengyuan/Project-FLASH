@@ -29,6 +29,21 @@
           }
         ]
       }
+    ],
+    "extensionAbilities": [
+      {
+        "name": "EntryFormAbility",
+        "srcEntry": "./ets/formability/EntryFormAbility.ets",
+        "description": "$string:EntryFormAbility_desc",
+        "label": "$string:EntryFormAbility_label",
+        "type": "form",
+        "metadata": [
+          {
+            "name": "ohos.extension.form",
+            "resource": "$profile:form_config"
+          }
+        ]
+      }
     ]
   }
 }

@@ -1,7 +1,7 @@
 import { Category, COLOR_TAGS, colorTagName, LogItem } from '../models/Models';
 import { NavigationState, ThemeState, LogsState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
-import { BRAND, FilterChip, FormGroup, FormRow, RADIUS_CARD, SegmentedControl, dangerText } from './CommonBuilders';
+import { BRAND, FilterChip, FormGroup, FormRow, RADIUS_CARD, SegmentedControl, cardShadowColor, dangerText, floatingSurface, hairlineColor, supportsBlurMaterial } from './CommonBuilders';
 
 @Component
 export struct EditLogDialog {
@@ -17,7 +17,9 @@ export struct EditLogDialog {
   @Builder
   private editLogDialog() {
     Stack({ alignContent: Alignment.Center }) {
-      Column().width('100%').height('100%').backgroundColor('#66000000').onClick(() => this.close())
+      Column().width('100%').height('100%').backgroundColor('#66000000')
+        .backdropBlur(supportsBlurMaterial() ? 12 : 0)
+        .onClick(() => this.close())
       Scroll() {
         Column({ space: 14 }) {
           Row() {
@@ -81,9 +83,12 @@ export struct EditLogDialog {
         .width('100%')
         .enabled(!this.logs.busy)
         .padding(22)
-        .backgroundColor(this.theme.themeSurface)
-        .borderRadius(RADIUS_CARD)
       }.width(this.navigation.isMediumWindow ? 520 : '88%').constraintSize({ maxHeight: '90%' })
+        .backgroundColor(floatingSurface(this.theme))
+        .backgroundBlurStyle(supportsBlurMaterial() ? BlurStyle.COMPONENT_ULTRA_THICK : BlurStyle.NONE)
+        .borderRadius(RADIUS_CARD)
+        .border({ width: 0.5, color: hairlineColor(this.theme) })
+        .shadow({ radius: 24, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 10 })
     }.width('100%').height('100%')
   }
 

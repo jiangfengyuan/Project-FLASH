@@ -1,7 +1,7 @@
-import { ThemeState, BackupState, FeedbackState, TransferPhase, ImportPhase, DeleteKind } from '../state/FeatureStates';
+import { ThemeState, BackupState, FeedbackState, SettingsState, TransferPhase, ImportPhase, DeleteKind } from '../state/FeatureStates';
 import { LanDevice } from '../data/LocalBackupTransfer';
 import { PageActions, requireActions } from '../state/PageActions';
-import { PageHeader, DOCK_CLEARANCE, RADIUS_CARD, BRAND, SegmentedControl, brandText, dangerText } from '../components/CommonBuilders';
+import { PageHeader, DOCK_CLEARANCE, RADIUS_CARD, BRAND, SegmentedControl, brandText, cardShadowColor, dangerText, hairlineColor } from '../components/CommonBuilders';
 
 // 语义图标色：在浅色卡片（#FFFFFF）与深色卡片（#3A3D5C）上对比度均 ≥3:1。
 const ICON_APPEARANCE = '#5A88E8';
@@ -16,6 +16,7 @@ export struct ProfilePage {
   @ObjectLink theme: ThemeState;
   @ObjectLink backup: BackupState;
   @ObjectLink feedback: FeedbackState;
+  @ObjectLink settings: SettingsState;
   actions?: PageActions;
 
   @Builder
@@ -29,17 +30,36 @@ export struct ProfilePage {
           Text('数据默认保存在此设备').fontSize(17).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)
           Text('可导出备份或在可信局域网内传输').fontSize(12).fontColor(this.theme.themeMuted)
         }.width('100%').padding(20).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
+          .border({ width: 0.5, color: hairlineColor(this.theme) })
+          .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
 
         this.groupLabel('外观与使用')
         Column({ space: 12 }) {
           Row({ space: 12 }) {
             SymbolGlyph($r('sys.symbol.slider_vertical_3')).fontSize(20).fontColor([ICON_APPEARANCE]).width(28)
             Text('主题').fontSize(15).fontColor(this.theme.themeText).layoutWeight(1)
-            Text(this.theme.themeMode === 'dark' ? '深色' : '浅色').fontSize(13).fontColor(this.theme.themeMuted)
+            Text(this.themeModeLabel()).fontSize(13).fontColor(this.theme.themeMuted)
           }.width('100%').height(32)
-          SegmentedControl(this.theme, ['浅色', '深色'], this.theme.themeMode === 'dark' ? 1 : 0,
-            (index: number) => requireActions(this.actions).setThemeMode(index === 1 ? 'dark' : 'light'))
+          SegmentedControl(this.theme, ['浅色', '深色', '跟随系统'], this.themeModeIndex(),
+            (index: number) => requireActions(this.actions).setThemeMode(['light', 'dark', 'system'][index]))
+          if (this.settings.notificationSettingsSupported) {
+            Row({ space: 12 }) {
+              SymbolGlyph($r('sys.symbol.bell')).fontSize(20).fontColor([ICON_APPEARANCE]).width(28)
+              Text('通知设置').fontSize(15).fontColor(this.theme.themeText).layoutWeight(1)
+              Text('›').fontSize(22).fontColor(this.theme.themeMuted)
+            }.width('100%').height(44)
+              .accessibilityGroup(true)
+              .accessibilityText('通知设置')
+              .stateStyles({
+                normal: { .opacity(1) },
+                pressed: { .opacity(0.6) }
+              })
+              .animation({ duration: 120, curve: Curve.EaseOut })
+              .onClick(() => requireActions(this.actions).controller.openNotificationSettings())
+          }
         }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
+          .border({ width: 0.5, color: hairlineColor(this.theme) })
+          .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
 
         this.groupLabel('记录与回顾')
         Column({ space: 2 }) {
@@ -47,11 +67,15 @@ export struct ProfilePage {
           this.navRow($r('sys.symbol.face_smiling'), ICON_EMOTION, '情绪记录', '七级情绪与子情绪', 'emotion')
           this.navRow($r('sys.symbol.doc_text'), ICON_LOGS, '记录管理', '搜索、查看和删除记录', 'logs')
         }.width('100%').backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD).padding({ left: 14, right: 14 })
+          .border({ width: 0.5, color: hairlineColor(this.theme) })
+          .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
 
         this.groupLabel('平台能力')
         Column({ space: 2 }) {
           this.navRow($r('sys.symbol.bolt'), brandText(this.theme), '鸿蒙体验', '星闪、实况窗、智慧服务与多设备', 'harmony')
         }.width('100%').backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD).padding({ left: 14, right: 14 })
+          .border({ width: 0.5, color: hairlineColor(this.theme) })
+          .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
 
         this.groupLabel('数据与安全')
         Column({ space: 2 }) {
@@ -59,6 +83,10 @@ export struct ProfilePage {
             .fontSize(12).fontColor(this.theme.themeMuted).lineHeight(19).width('100%').padding({ top: 12, bottom: 6 })
           this.actionRow($r('sys.symbol.doc_text'), ICON_SAFE, '导出备份 JSON', '生成 flash-backup-v2 备份文件',
             !this.backup.fileBusy, () => requireActions(this.actions).backupController.exportBackup())
+          if (requireActions(this.actions).backupController.sharedExportAvailable()) {
+            this.actionRow($r('sys.symbol.folder'), ICON_SAFE, '导出到下载目录', '在系统文件管理中可见（下载/Flash）',
+              !this.backup.fileBusy, () => requireActions(this.actions).backupController.exportBackupToSharedDir())
+          }
           this.actionRow($r('sys.symbol.magnifyingglass'), ICON_SAFE, '标准导入并分析差异', '导入前先看合并与新增明细',
             !this.backup.fileBusy && !this.backup.busy, () => requireActions(this.actions).backupController.chooseBackup())
           this.actionRow($r('sys.symbol.clock_arrow_2_circlepath'), ICON_SAFE, '恢复损坏或旧版备份', '尝试修复无法直接导入的备份',
@@ -87,6 +115,8 @@ export struct ProfilePage {
             }.width('100%').padding(12).backgroundColor(this.theme.themeControl).borderRadius(14)
           }
         }.width('100%').padding({ left: 16, right: 16, bottom: 6 }).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
+          .border({ width: 0.5, color: hairlineColor(this.theme) })
+          .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
 
         this.groupLabel('局域网传输')
         Column({ space: 2 }) {
@@ -130,6 +160,8 @@ export struct ProfilePage {
             }.width('100%').padding(12).backgroundColor(this.theme.themeControl).borderRadius(14).margin({ bottom: 8 })
           }
         }.width('100%').padding({ left: 16, right: 16, bottom: 6 }).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
+          .border({ width: 0.5, color: hairlineColor(this.theme) })
+          .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
 
         this.groupLabel('危险操作')
         Column({ space: 2 }) {
@@ -154,6 +186,8 @@ export struct ProfilePage {
             }
           })
         }.width('100%').padding({ left: 16, right: 16, bottom: 6 }).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
+          .border({ width: 0.5, color: hairlineColor(this.theme) })
+          .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
 
         this.groupLabel('关于 Flash')
         Column({ space: 6 }) {
@@ -161,13 +195,27 @@ export struct ProfilePage {
           Text('v0.1.0 · HarmonyOS 原生版 · com.flash.app.harmonyos').fontSize(13).fontColor(this.theme.themeMuted)
           Text('让每一次闪念都有落点').fontSize(12).fontColor(this.theme.themeMuted)
         }.width('100%').height(130).justifyContent(FlexAlign.Center).backgroundColor(this.theme.themeTint).borderRadius(RADIUS_CARD)
+          .border({ width: 0.5, color: hairlineColor(this.theme) })
+          .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
       }.width('100%').padding({ left: 20, right: 20, bottom: DOCK_CLEARANCE })
     }.width('100%').height('100%').backgroundColor(this.theme.themeBackground)
   }
 
   @Builder
   private groupLabel(title: string) {
-    Text(title).fontSize(13).fontColor(this.theme.themeMuted).width('100%')
+    Text(title).fontSize(13).fontColor(this.theme.themeMuted).width('100%').padding({ left: 4 })
+  }
+
+  private themeModeIndex(): number {
+    if (this.theme.themeMode === 'dark') return 1;
+    if (this.theme.themeMode === 'system') return 2;
+    return 0;
+  }
+
+  private themeModeLabel(): string {
+    if (this.theme.themeMode === 'dark') return '深色';
+    if (this.theme.themeMode === 'system') return '跟随系统';
+    return '浅色';
   }
 
   @Builder
@@ -184,6 +232,11 @@ export struct ProfilePage {
     .height(64)
     .accessibilityGroup(true)
     .accessibilityText(`${title}，${subtitle}`)
+    .stateStyles({
+      normal: { .opacity(1) },
+      pressed: { .opacity(0.6) }
+    })
+    .animation({ duration: 120, curve: Curve.EaseOut })
     .onClick(() => requireActions(this.actions).openDetail(destination))
   }
 
@@ -202,6 +255,11 @@ export struct ProfilePage {
     .accessibilityText(`${title}，${subtitle}` + (enabled ? '' : '，当前不可用'))
     .enabled(enabled)
     .opacity(enabled ? 1 : 0.5)
+    .stateStyles({
+      normal: { .opacity(enabled ? 1 : 0.5) },
+      pressed: { .opacity(0.6) }
+    })
+    .animation({ duration: 120, curve: Curve.EaseOut })
     .onClick(() => {
       if (enabled) onTap();
     })

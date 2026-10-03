@@ -1,3 +1,9 @@
+// Copyright (c) 2026 Fengyuan Jiang
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 import { floatingBall } from '@kit.ArkUI';
 import { liveViewManager } from '@kit.LiveViewKit';
 import { manager } from '@kit.NearLinkKit';
@@ -6,6 +12,18 @@ export interface HarmonyCapabilitySnapshot {
   nearLinkSupported: boolean;
   floatingBallSupported: boolean;
   liveViewEnabled: boolean;
+  agentFrameworkSupported: boolean;
+  agentRuntimeSupported: boolean;
+  fileSandboxShareSupported: boolean;
+  notificationSettingsSupported: boolean;
+}
+
+function hasSystemCapability(syscap: string): boolean {
+  try {
+    return typeof canIUse === 'function' && canIUse(syscap);
+  } catch (_) {
+    return false;
+  }
 }
 
 /**
@@ -37,11 +55,14 @@ export class HarmonyCapabilities {
       liveViewEnabled = false;
     }
 
-    return { nearLinkSupported, floatingBallSupported, liveViewEnabled };
+    return {
+      nearLinkSupported,
+      floatingBallSupported,
+      liveViewEnabled,
+      agentFrameworkSupported: hasSystemCapability('SystemCapability.AI.Agent.AgentKit'),
+      agentRuntimeSupported: hasSystemCapability('SystemCapability.Ability.AgentRuntime.Core'),
+      fileSandboxShareSupported: hasSystemCapability('SystemCapability.FileManagement.AppFileService'),
+      notificationSettingsSupported: hasSystemCapability('SystemCapability.Notification.NotificationSettings')
+    };
   }
 }
-// Copyright (c) 2026 Fengyuan Jiang
-//
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at https://mozilla.org/MPL/2.0/.

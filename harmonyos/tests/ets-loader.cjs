@@ -73,6 +73,16 @@ function createLoader(overrides = {}) {
     } },
     'data/LocalBackupTransfer': {},
     'data/TaskReminderScheduler': { TaskReminderScheduler: { rebuild: async () => {} } },
+    '@kit.NotificationKit': { notificationManager: {
+      SlotType: { UNKNOWN_TYPE: 0, SOCIAL_COMMUNICATION: 1, SERVICE_INFORMATION: 2 },
+      getSlot: async () => null,
+      addSlot: async () => {},
+      requestEnableNotification: async () => {},
+      openNotificationSettings: async () => {} } },
+    '@kit.FormKit': {
+      formBindingData: { createFormBindingData: (obj) => ({ data: obj }) },
+      formProvider: { updateForm: async () => {} },
+      formInfo: { FormParam: { IDENTITY_KEY: 'ohos.extra.param.key.form_identity' } } },
     'data/HarmonyCapabilities': { HarmonyCapabilities: { inspect: async () => ({
       nearLinkSupported: false, floatingBallSupported: false, liveViewEnabled: false
     }) } }

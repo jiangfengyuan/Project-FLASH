@@ -5,7 +5,7 @@ import { shortDay } from '../data/DateUtils';
 import { Category, LogItem, EmotionRecord } from '../models/Models';
 import { ThemeState, LogsState, EmotionState, CalendarState, FeedbackState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
-import { PageHeader, DOCK_CLEARANCE, RADIUS_CARD, FilterChip, brandText } from '../components/CommonBuilders';
+import { PageHeader, DOCK_CLEARANCE, RADIUS_CARD, FilterChip, brandText, cardShadowColor, hairlineColor } from '../components/CommonBuilders';
 
 @Component
 export struct StatsPage {
@@ -71,6 +71,8 @@ export struct StatsPage {
               .fontSize(14).fontColor(this.theme.themeText).width('100%')
           }
         }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
+          .border({ width: 0.5, color: hairlineColor(this.theme) })
+          .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
         ActivityChart({ theme: this.theme, days: dailyActivity(this.logs.logs, this.emotion.emotions, this.days()) })
         Row({ space: 10 }) {
           this.metric(`${this.periodLogs().length}`, '范围内记录', this.theme.themeTint)
@@ -94,6 +96,8 @@ export struct StatsPage {
             }.width('100%')
           }, (day: string) => day)
         }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
+          .border({ width: 0.5, color: hairlineColor(this.theme) })
+          .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
 
         Column({ space: 12 }) {
           Text('情绪分布').fontSize(17).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).width('100%')
@@ -113,6 +117,8 @@ export struct StatsPage {
             }
           }
         }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
+          .border({ width: 0.5, color: hairlineColor(this.theme) })
+          .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
 
         Column({ space: 10 }) {
           Text('累计构成 · 全部时间').fontSize(17).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).width('100%')
@@ -120,6 +126,8 @@ export struct StatsPage {
           this.statLine('灵感', this.logs.logs.filter((item: LogItem) => item.category === Category.IDEA).length, '#C87D2A')
           this.statLine('情绪', this.emotion.emotions.length, '#9A74EA')
         }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
+          .border({ width: 0.5, color: hairlineColor(this.theme) })
+          .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
       }.width('100%').padding({ left: 20, right: 20, bottom: DOCK_CLEARANCE })
     }.width('100%').layoutWeight(1).backgroundColor(this.theme.themeBackground)
   }
@@ -130,6 +138,7 @@ export struct StatsPage {
       Text(value).fontSize(28).fontWeight(FontWeight.Bold).fontColor(this.theme.themeText)
       Text(label).fontSize(12).fontColor(this.theme.themeMuted)
     }.layoutWeight(1).height(88).justifyContent(FlexAlign.Center).backgroundColor(background).borderRadius(18)
+      .border({ width: 0.5, color: hairlineColor(this.theme) })
   }
 
   @Builder

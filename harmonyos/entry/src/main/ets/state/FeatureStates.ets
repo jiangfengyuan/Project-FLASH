@@ -8,12 +8,25 @@ const LIGHT_SURFACE = '#FFFFFFFF';
 const LIGHT_TEXT = '#FF2D3436';
 const LIGHT_MUTED = '#FF636E72';
 
+export function normalizeThemeMode(mode: string): string {
+  return mode === 'dark' || mode === 'system' ? mode : 'light';
+}
+
+export function resolveThemeDark(mode: string, systemDark: boolean): boolean {
+  const normalized = normalizeThemeMode(mode);
+  return normalized === 'dark' || (normalized === 'system' && systemDark);
+}
+
 @Observed
 export class NavigationState {
   activeTab: number = 0;
   detail: string = '';
   isMediumWindow: boolean = false;
   isExpandedWindow: boolean = false;
+  statusBarHeight: number = 0;
+  navigationBarHeight: number = 0;
+  foldable: boolean = false;
+  foldStatus: number = 0;
   contentOpacity: number = 1;
   contentOffset: number = 0;
   fabExpanded: boolean = false;
@@ -23,6 +36,7 @@ export class NavigationState {
 @Observed
 export class ThemeState {
   themeMode: string = 'light';
+  systemDark: boolean = false;
   themeBackground: string = LIGHT_BACKGROUND;
   themeSurface: string = LIGHT_SURFACE;
   themeText: string = LIGHT_TEXT;
@@ -34,7 +48,22 @@ export class ThemeState {
   themeGradientStart: string = '#FFF7F9FA';
   themeGradientMiddle: string = '#FFF7F9FA';
   themeGradientEnd: string = '#FFF7F9FA';
+
+  isDark(): boolean {
+    return resolveThemeDark(this.themeMode, this.systemDark);
+  }
 }
+
+@Observed
+export class SystemEnvironment {
+  systemDark: boolean = false;
+  statusBarHeightPx: number = 0;
+  navigationBarHeightPx: number = 0;
+  foldable: boolean = false;
+  foldStatus: number = 0;
+}
+
+export const systemEnvironment: SystemEnvironment = new SystemEnvironment();
 
 @Observed
 export class HomeState {
@@ -136,6 +165,10 @@ export class SettingsState {
   nearLinkSupported: boolean = false;
   floatingBallSupported: boolean = false;
   liveViewEnabled: boolean = false;
+  agentFrameworkSupported: boolean = false;
+  agentRuntimeSupported: boolean = false;
+  fileSandboxShareSupported: boolean = false;
+  notificationSettingsSupported: boolean = false;
 }
 
 export enum DeleteKind {

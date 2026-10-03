@@ -2,6 +2,14 @@
   "string": [
     { "name": "module_desc", "value": "Flash Aero HarmonyOS 原生版本" },
     { "name": "EntryAbility_desc", "value": "Flash Aero 主窗口" },
-    { "name": "EntryAbility_label", "value": "Flash Aero" }
+    { "name": "EntryAbility_label", "value": "Flash Aero" },
+    { "name": "EntryFormAbility_label", "value": "今日概览" },
+    { "name": "EntryFormAbility_desc", "value": "Flash Aero 今日概览服务卡片" },
+    { "name": "form_today_summary_display_name", "value": "今日概览" },
+    { "name": "form_today_summary_desc", "value": "一览今日记录、灵感与待办任务" },
+    { "name": "form_today_title", "value": "今日概览" },
+    { "name": "form_stat_records", "value": "记录" },
+    { "name": "form_stat_ideas", "value": "灵感" },
+    { "name": "form_stat_tasks", "value": "待办" }
   ]
 }

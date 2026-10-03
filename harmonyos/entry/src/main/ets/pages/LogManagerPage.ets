@@ -1,7 +1,7 @@
 import { LogItem } from '../models/Models';
 import { ThemeState, LogsState, FeedbackState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
-import { RecordRow, brandText } from '../components/CommonBuilders';
+import { RecordRow, brandText, hairlineColor } from '../components/CommonBuilders';
 
 @Component
 export struct LogManagerPage {
@@ -16,14 +16,17 @@ export struct LogManagerPage {
       TextInput({ placeholder: '搜索记录', text: this.logs.searchText })
         .height(44).fontColor(this.theme.themeText).placeholderColor(this.theme.themeMuted)
         .backgroundColor(this.theme.themeSurface).borderRadius(14)
+        .border({ width: 0.5, color: hairlineColor(this.theme) })
         .onChange((value: string) => {
           this.logs.searchText = value;
           this.logs.logDisplayLimit = 50;
           requireActions(this.actions).logsController.scheduleSearch();
         })
-      List({ space: 6 }) {
+      List({ space: 8 }) {
         ForEach(requireActions(this.actions).logsController.displayedLogs(), (item: LogItem) => {
-          ListItem() { RecordRow(this.theme, this.feedback, requireActions(this.actions), item) }.padding({ left: 14, right: 14 }).backgroundColor(this.theme.themeSurface).borderRadius(14)
+          ListItem() { RecordRow(this.theme, this.feedback, requireActions(this.actions), item) }
+            .padding({ left: 14, right: 14 }).backgroundColor(this.theme.themeSurface).borderRadius(14)
+            .border({ width: 0.5, color: hairlineColor(this.theme) })
         }, (item: LogItem) => item.id)
         if (requireActions(this.actions).logsController.hasMoreLogs()) {
           ListItem() {

@@ -1,5 +1,6 @@
 import { NavigationState, ThemeState, CalendarState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
+import { cardShadowColor, floatingSurface, hairlineColor, supportsBlurMaterial } from './CommonBuilders';
 const BRAND = '#6C5CE7';
 
 @Component
@@ -12,7 +13,9 @@ export struct TaskEditorDialog {
   @Builder
   private taskEditorDialog() {
     Stack({ alignContent: Alignment.Center }) {
-      Column().width('100%').height('100%').backgroundColor('#66000000').onClick(() => requireActions(this.actions).calendarController.closeTaskEditor())
+      Column().width('100%').height('100%').backgroundColor('#66000000')
+        .backdropBlur(supportsBlurMaterial() ? 12 : 0)
+        .onClick(() => requireActions(this.actions).calendarController.closeTaskEditor())
       Scroll() {
         Column({ space: 12 }) {
           Text(this.calendar.editingTaskId === 'new' ? '新建任务' : '编辑任务')
@@ -69,8 +72,11 @@ export struct TaskEditorDialog {
       }
       .width(this.navigation.isMediumWindow ? 540 : '90%')
       .constraintSize({ maxHeight: '86%' })
-      .backgroundColor(this.theme.themeSurface)
+      .backgroundColor(floatingSurface(this.theme))
+      .backgroundBlurStyle(supportsBlurMaterial() ? BlurStyle.COMPONENT_ULTRA_THICK : BlurStyle.NONE)
       .borderRadius(24)
+      .border({ width: 0.5, color: hairlineColor(this.theme) })
+      .shadow({ radius: 24, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 10 })
     }.width('100%').height('100%')
   }
 

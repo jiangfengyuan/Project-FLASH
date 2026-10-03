@@ -1,9 +1,24 @@
 import { common } from '@kit.AbilityKit';
 import { util } from '@kit.ArkTS';
-import { fileIo, picker } from '@kit.CoreFileKit';
+import { Environment, fileIo, picker } from '@kit.CoreFileKit';
 import { BackupService } from './BackupService';
 
+export enum SharedExportStatus {
+  READY = 'ready',
+  EXPORTED = 'exported',
+  UNSUPPORTED = 'unsupported',
+  DENIED = 'denied'
+}
+
+export interface SharedExportResult {
+  status: SharedExportStatus;
+  path?: string;
+}
+
 export class BackupFiles {
+  private static readonly SHARED_EXPORT_DIR: string = 'Flash';
+  private static readonly SHARED_EXPORT_SYSCAP: string =
+    'SystemCapability.FileManagement.File.Environment.FolderObtain';
   static async exportJSON(
     context: common.UIAbilityContext,
     json: string,
@@ -54,6 +69,66 @@ export class BackupFiles {
     } finally {
       fileIo.closeSync(file);
     }
+  }
+
+  static sharedExportName(filePrefix: string, day: string): string {
+    return `${filePrefix}-${day}.json`;
+  }
+
+  static sharedExportStatus(): SharedExportStatus {
+    try {
+      if (!canIUse(BackupFiles.SHARED_EXPORT_SYSCAP)) return SharedExportStatus.UNSUPPORTED;
+    } catch (_) {
+      return SharedExportStatus.UNSUPPORTED;
+    }
+    try {
+      Environment.getUserDownloadDir();
+    } catch (_) {
+      return SharedExportStatus.DENIED;
+    }
+    return SharedExportStatus.READY;
+  }
+
+  static async exportToSharedDir(
+    json: string,
+    filePrefix: string = 'flash-aero-backup'
+  ): Promise<SharedExportResult> {
+    const status = BackupFiles.sharedExportStatus();
+    if (status !== SharedExportStatus.READY) return { status };
+    let baseDir: string = '';
+    try {
+      baseDir = Environment.getUserDownloadDir();
+    } catch (_) {
+      return { status: SharedExportStatus.DENIED };
+    }
+    let dir = BackupFiles.joinPath(baseDir, BackupFiles.SHARED_EXPORT_DIR);
+    try {
+      if (!fileIo.accessSync(dir)) fileIo.mkdirSync(dir);
+    } catch (_) {
+      dir = baseDir;
+    }
+    const day = new Date().toISOString().slice(0, 10);
+    const target = BackupFiles.joinPath(dir, BackupFiles.sharedExportName(filePrefix, day));
+    const temp = `${target}.tmp`;
+    try { fileIo.unlinkSync(temp); } catch (_) {}
+    const file = fileIo.openSync(temp, fileIo.OpenMode.READ_WRITE | fileIo.OpenMode.CREATE | fileIo.OpenMode.TRUNC);
+    let written: number = 0;
+    try {
+      written = fileIo.writeSync(file.fd, json, { encoding: 'utf-8' });
+    } finally {
+      fileIo.closeSync(file);
+    }
+    const expected = new util.TextEncoder().encodeInto(json).length;
+    if (written !== expected) {
+      try { fileIo.unlinkSync(temp); } catch (_) {}
+      throw new Error('备份写入不完整，导出失败');
+    }
+    fileIo.renameSync(temp, target);
+    return { status: SharedExportStatus.EXPORTED, path: target };
+  }
+
+  private static joinPath(base: string, child: string): string {
+    return base.endsWith('/') ? base + child : `${base}/${child}`;
   }
 }
 // Copyright (c) 2026 Fengyuan Jiang

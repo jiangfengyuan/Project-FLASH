@@ -2,7 +2,7 @@ import { shortDay } from '../data/DateUtils';
 import { EmotionRecord, emotionName, SubEmotion, subEmotionName } from '../models/Models';
 import { ThemeState, EmotionState, FeedbackState, DeleteKind } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
-import { BRAND, RADIUS_CARD, brandText, dangerText } from '../components/CommonBuilders';
+import { BRAND, RADIUS_CARD, brandText, cardShadowColor, dangerText, hairlineColor } from '../components/CommonBuilders';
 
 @Component
 export struct EmotionPage {
@@ -47,6 +47,8 @@ export struct EmotionPage {
             }.layoutWeight(1).justifyContent(FlexAlign.End)
           }.width('100%')
         }.width('100%').padding(20).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
+          .border({ width: 0.5, color: hairlineColor(this.theme) })
+          .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
 
         if (this.emotion.emotionLevel < 0) {
           Column({ space: 12 }) {
@@ -57,11 +59,14 @@ export struct EmotionPage {
               this.subEmotionChip(SubEmotion.UNCOMFORTABLE)
             }.width('100%')
           }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
+          .border({ width: 0.5, color: hairlineColor(this.theme) })
+          .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
         }
 
         TextArea({ placeholder: '想补充些什么？（可选）', text: this.emotion.emotionNote })
           .height(90).maxLength(2000).fontColor(this.theme.themeText).placeholderColor(this.theme.themeMuted)
           .backgroundColor(this.theme.themeSurface).borderRadius(16)
+          .border({ width: 0.5, color: hairlineColor(this.theme) })
           .onChange((value: string) => this.emotion.emotionNote = value.slice(0, 2000))
         Button('保存情绪').width('100%').height(46).backgroundColor(BRAND).onClick(() => requireActions(this.actions).emotionController.saveEmotion())
 
@@ -82,6 +87,8 @@ export struct EmotionPage {
               }.width('100%').padding({ top: 8, bottom: 8 })
             }, (item: EmotionRecord) => item.id)
           }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
+          .border({ width: 0.5, color: hairlineColor(this.theme) })
+          .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
         }
       }.width('100%').padding({ left: 16, right: 16, bottom: 30 })
     }.width('100%').layoutWeight(1)
@@ -93,6 +100,11 @@ export struct EmotionPage {
       .fontColor(this.emotion.selectedSubEmotion === value ? Color.White : this.theme.themeText)
       .textAlign(TextAlign.Center).layoutWeight(1).height(44)
       .backgroundColor(this.emotion.selectedSubEmotion === value ? BRAND : this.theme.themeControl).borderRadius(22)
+      .stateStyles({
+        normal: { .opacity(1) },
+        pressed: { .opacity(0.7) }
+      })
+      .animation({ duration: 120, curve: Curve.EaseOut })
       .onClick(() => this.emotion.selectedSubEmotion = value)
   }
 

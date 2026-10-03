@@ -9,6 +9,7 @@ import { preferences } from '@kit.ArkData';
 import { reminderAgentManager } from '@kit.BackgroundTasksKit';
 import { notificationManager } from '@kit.NotificationKit';
 import { TaskItem } from '../models/Models';
+import { NotificationChannels } from './NotificationChannels';
 
 const TASK_GROUP = 'flash-aero-tasks';
 const ID_STORE_NAME = 'flash-task-reminder-ids';
@@ -31,6 +32,7 @@ export class TaskReminderScheduler {
   private static async performRebuild(context: common.UIAbilityContext, tasks: TaskItem[],
     requestPermission: boolean): Promise<void> {
     if (requestPermission) await notificationManager.requestEnableNotification(context);
+    await NotificationChannels.ensureReminderSlot(context);
     const previous = (await reminderAgentManager.getAllValidReminders())
       .filter((item: reminderAgentManager.ReminderInfo) => item.reminderReq.groupId === TASK_GROUP);
     const idStore = await preferences.getPreferences(context, ID_STORE_NAME);
@@ -50,6 +52,7 @@ export class TaskReminderScheduler {
       return next;
     };
     const now = Date.now();
+    const slotType = NotificationChannels.reminderSlotType();
     const pending = tasks.filter((task: TaskItem) => {
       if (!task.reminderAt || task.completedAt) return false;
       const reminderDate = new Date(task.reminderAt);
@@ -74,6 +77,7 @@ export class TaskReminderScheduler {
         ringDuration: 0,
         tapDismissed: true
       };
+      if (slotType !== undefined) request.slotType = slotType;
       await reminderAgentManager.publishReminder(request);
     }
     for (const item of previous) {

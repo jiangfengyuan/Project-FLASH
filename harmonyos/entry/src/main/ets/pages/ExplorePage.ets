@@ -2,7 +2,8 @@ import { Category, COLOR_TAGS, ColorTag, colorTagName, LogItem } from '../models
 import { ThemeState, LogsState, FeedbackState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
 import {
-  PageHeader, FilterChip, RecordCard, DOCK_CLEARANCE, RADIUS_CARD, RADIUS_FOCUS, BRAND, brandText
+  PageHeader, FilterChip, RecordCard, DOCK_CLEARANCE, RADIUS_CARD, RADIUS_FOCUS, BRAND, brandText,
+  cardShadowColor, floatingSurface, hairlineColor, supportsBlurMaterial
 } from '../components/CommonBuilders';
 
 @Component
@@ -43,8 +44,10 @@ export struct ExplorePage {
             .width('100%')
             .height(52)
             .padding({ left: 16, right: 12 })
-            .backgroundColor(this.theme.themeSurface)
+            .backgroundColor(floatingSurface(this.theme))
+            .backgroundBlurStyle(supportsBlurMaterial() ? BlurStyle.COMPONENT_THIN : BlurStyle.NONE)
             .borderRadius(26)
+            .border({ width: 0.5, color: hairlineColor(this.theme) })
             .animation({ duration: 180, curve: Curve.EaseOut })
 
             Text(this.summaryText()).fontSize(12).fontColor(this.theme.themeMuted).width('100%')
@@ -109,6 +112,7 @@ export struct ExplorePage {
               .padding(12)
               .backgroundColor(this.theme.themeSurface)
               .borderRadius(16)
+              .border({ width: 0.5, color: hairlineColor(this.theme) })
             }
 
             Column({ space: 12 }) {
@@ -128,6 +132,8 @@ export struct ExplorePage {
               .justifyContent(FlexAlign.Center)
               .backgroundColor(this.theme.themeSurface)
               .borderRadius(RADIUS_CARD)
+              .border({ width: 0.5, color: hairlineColor(this.theme) })
+              .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
             }
             if (requireActions(this.actions).logsController.hasMoreLogs()) {
               Button(`加载更多（剩余 ${requireActions(this.actions).logsController.filteredLogCount() - requireActions(this.actions).logsController.displayedLogs().length} 条）`)
@@ -140,6 +146,7 @@ export struct ExplorePage {
 
       if (this.filterPanelOpen) {
         Column().width('100%').height('100%').backgroundColor('#66000000')
+          .backdropBlur(supportsBlurMaterial() ? 10 : 0)
           .onClick(() => this.filterPanelOpen = false)
         this.filterPanel()
       }
@@ -207,8 +214,11 @@ export struct ExplorePage {
     }
     .width('100%')
     .padding(20)
-    .backgroundColor(this.theme.themeSurface)
+    .backgroundColor(floatingSurface(this.theme))
+    .backgroundBlurStyle(supportsBlurMaterial() ? BlurStyle.COMPONENT_ULTRA_THICK : BlurStyle.NONE)
     .borderRadius({ topLeft: RADIUS_FOCUS, topRight: RADIUS_FOCUS })
+    .border({ width: { top: 0.5 }, color: hairlineColor(this.theme) })
+    .shadow({ radius: 24, color: cardShadowColor(this.theme), offsetX: 0, offsetY: -6 })
   }
 
   private applyTag(value: string): void {

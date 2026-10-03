@@ -1,11 +1,14 @@
 import { bundleManager, common } from '@kit.AbilityKit';
+import { preferences } from '@kit.ArkData';
 import { dayString } from '../data/DateUtils';
 import { TaskItem } from '../models/Models';
-import { AppSession, DeleteKind } from '../state/FeatureStates';
+import { AppSession, DeleteKind, normalizeThemeMode } from '../state/FeatureStates';
 import { BackupService } from '../data/BackupService';
 import { FlashStore } from '../data/FlashStore';
 import { TaskReminderScheduler } from '../data/TaskReminderScheduler';
 import { HarmonyCapabilities } from '../data/HarmonyCapabilities';
+import { NotificationChannels } from '../data/NotificationChannels';
+import { FormUpdateHelper } from '../data/FormUpdateHelper';
 import { LogsController } from './LogsController';
 import { EmotionController } from './EmotionController';
 import { CalendarController } from './CalendarController';
@@ -13,6 +16,11 @@ import { BackupController } from './BackupController';
 import { ControllerRuntime } from './ControllerRuntime';
 import { FeatureProjection } from './FeatureProjection';
 import { StorePartition } from '../data/StoreChanges';
+
+// 与 FlashStore 的偏好存储同名同键：FlashStore 只识别 light/dark，
+// 这里直接读写原始值以保留 system 三态。
+const THEME_PREFERENCES_STORE = 'flash-aero-data';
+const THEME_MODE_KEY = 'theme-mode';
 
 export class AppController {
   readonly session: AppSession = new AppSession();
@@ -43,12 +51,14 @@ export class AppController {
       const store = FlashStore.instance;
       await store.initialize(context);
       if (generation !== this.generation) return;
-      this.session.theme.themeMode = store.themeMode;
-      themeLoaded(store.themeMode);
+      const themeMode = await this.loadThemeMode(context, store.themeMode);
+      this.session.theme.themeMode = themeMode;
+      themeLoaded(themeMode);
       this.session.settings.showWelcome = !store.welcomed;
       this.session.backup.recoveryAvailable = store.hasRecoveryData;
       this.unsubscribe = store.changes.subscribe((partition: StorePartition) => {
         this.projection.update(partition, { logs: store.logs, emotions: store.emotions, tasks: store.tasks });
+        FormUpdateHelper.updateForms(context).catch(() => {});
       });
       this.projection.update(StorePartition.ALL, { logs: store.logs, emotions: store.emotions, tasks: store.tasks });
       let observedDay = dayString();
@@ -57,6 +67,7 @@ export class AppController {
         if (current !== observedDay) {
           observedDay = current;
           this.projection.updateDay();
+          FormUpdateHelper.updateForms(context).catch(() => {});
         }
       }, 60000);
       try {
@@ -71,12 +82,47 @@ export class AppController {
       this.session.settings.nearLinkSupported = capability.nearLinkSupported;
       this.session.settings.floatingBallSupported = capability.floatingBallSupported;
       this.session.settings.liveViewEnabled = capability.liveViewEnabled;
+      this.session.settings.agentFrameworkSupported = capability.agentFrameworkSupported;
+      this.session.settings.agentRuntimeSupported = capability.agentRuntimeSupported;
+      this.session.settings.fileSandboxShareSupported = capability.fileSandboxShareSupported;
+      this.session.settings.notificationSettingsSupported = capability.notificationSettingsSupported;
     } catch (error) {
       if (generation === this.generation) this.runtime.notify(`本地数据加载失败：${this.runtime.errorMessage(error as Error)}`);
     }
   }
 
   saveTheme(mode: string): Promise<void> { return FlashStore.instance.setThemeMode(mode); }
+
+  async openNotificationSettings(): Promise<void> {
+    try {
+      const opened = await NotificationChannels.openAppNotificationSettings(this.runtime.context());
+      if (!opened) this.runtime.notify('当前设备不支持应用内通知设置');
+    } catch (error) {
+      this.runtime.notify(this.runtime.errorMessage(error as Error));
+    }
+  }
+
+  async setThemeMode(mode: string): Promise<void> {
+    const normalized = normalizeThemeMode(mode);
+    this.session.theme.themeMode = normalized;
+    if (normalized === 'system') {
+      const settings = await preferences.getPreferences(this.runtime.context(), THEME_PREFERENCES_STORE);
+      await settings.put(THEME_MODE_KEY, normalized);
+      await settings.flush();
+    } else {
+      await FlashStore.instance.setThemeMode(normalized);
+    }
+  }
+
+  private async loadThemeMode(context: common.UIAbilityContext, fallback: string): Promise<string> {
+    try {
+      const settings = await preferences.getPreferences(context, THEME_PREFERENCES_STORE);
+      const stored = await settings.get(THEME_MODE_KEY, fallback);
+      return normalizeThemeMode(typeof stored === 'string' ? stored : fallback);
+    } catch (_) {
+      return normalizeThemeMode(fallback);
+    }
+  }
 
   dispose(): void {
     this.generation++;

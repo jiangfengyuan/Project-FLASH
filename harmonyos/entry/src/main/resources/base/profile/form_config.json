@@ -1,0 +1,24 @@
+{
+  "forms": [
+    {
+      "name": "todaySummary",
+      "displayName": "$string:form_today_summary_display_name",
+      "description": "$string:form_today_summary_desc",
+      "src": "./ets/formability/pages/TodaySummaryCard.ets",
+      "uiSyntax": "arkts",
+      "window": {
+        "designWidth": 720,
+        "autoDesignWidth": true
+      },
+      "colorMode": "auto",
+      "isDefault": true,
+      "updateEnabled": true,
+      "scheduledUpdateTime": "07:30",
+      "updateDuration": 1,
+      "defaultDimension": "2*2",
+      "supportDimensions": [
+        "2*2"
+      ]
+    }
+  ]
+}

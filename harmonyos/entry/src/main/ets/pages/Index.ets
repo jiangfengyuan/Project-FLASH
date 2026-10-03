@@ -4,7 +4,7 @@ import { Category } from '../models/Models';
 import { dayString } from '../data/DateUtils';
 import { AppController } from '../state/AppController';
 import { PageActions } from '../state/PageActions';
-import { NavigationState, ThemeState, HomeState, LogsState, EmotionState, CalendarState, BackupState, SettingsState, FeedbackState } from '../state/FeatureStates';
+import { NavigationState, ThemeState, HomeState, LogsState, EmotionState, CalendarState, BackupState, SettingsState, FeedbackState, SystemEnvironment, normalizeThemeMode, resolveThemeDark, systemEnvironment } from '../state/FeatureStates';
 import { HomePage } from '../pages/HomePage';
 import { ExplorePage } from '../pages/ExplorePage';
 import { StatsPage } from '../pages/StatsPage';
@@ -53,6 +53,7 @@ struct Index {
   @State private backup: BackupState = this.controller.session.backup;
   @State private settings: SettingsState = this.controller.session.settings;
   @State private feedback: FeedbackState = this.controller.session.feedback;
+  @State @Watch('onSystemEnvironmentChange') private systemEnv: SystemEnvironment = systemEnvironment;
   private actions: PageActions = new PageActions(this.controller,
     (index: number) => this.switchTab(index), (destination: string) => this.openDetail(destination),
     (mode: string) => this.setThemeMode(mode));
@@ -74,7 +75,8 @@ struct Index {
       this.navigation.isExpandedWindow = result.matches;
     });
     const context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    this.controller.prepare(context, (mode: string) => this.applyThemePalette(mode === 'dark'));
+    this.onSystemEnvironmentChange();
+    this.controller.prepare(context, (mode: string) => this.applyThemePalette(mode));
   }
 
   aboutToDisappear(): void {
@@ -190,7 +192,8 @@ struct Index {
     return '设置与备份';
   }
 
-  private applyThemePalette(dark: boolean): void {
+  private applyThemePalette(mode: string): void {
+    const dark = resolveThemeDark(mode, this.systemEnv.systemDark);
     this.theme.themeBackground = dark ? DARK_BACKGROUND : LIGHT_BACKGROUND;
     this.theme.themeSurface = dark ? DARK_SURFACE : LIGHT_SURFACE;
     this.theme.themeText = dark ? DARK_TEXT : LIGHT_TEXT;
@@ -205,14 +208,26 @@ struct Index {
   }
 
   private setThemeMode(mode: string): void {
-    if (mode === this.theme.themeMode) return;
-    this.theme.themeMode = mode;
+    const normalized = normalizeThemeMode(mode);
+    if (normalized === this.theme.themeMode) return;
+    this.theme.themeMode = normalized;
     this.getUIContext().animateTo({ duration: 320, curve: Curve.EaseInOut }, () => {
-      this.applyThemePalette(mode === 'dark');
+      this.applyThemePalette(normalized);
     });
-    this.controller.saveTheme(mode).catch((error: Error) => {
+    this.controller.setThemeMode(normalized).catch((error: Error) => {
       this.controller.runtime.notify(`主题设置保存失败：${this.controller.runtime.errorMessage(error)}`);
     });
+  }
+
+  private onSystemEnvironmentChange(): void {
+    this.navigation.statusBarHeight = this.getUIContext().px2vp(this.systemEnv.statusBarHeightPx);
+    this.navigation.navigationBarHeight = this.getUIContext().px2vp(this.systemEnv.navigationBarHeightPx);
+    this.navigation.foldable = this.systemEnv.foldable;
+    this.navigation.foldStatus = this.systemEnv.foldStatus;
+    if (this.theme.systemDark !== this.systemEnv.systemDark) {
+      this.theme.systemDark = this.systemEnv.systemDark;
+      if (this.theme.themeMode === 'system') this.applyThemePalette('system');
+    }
   }
 
   @Builder
@@ -226,7 +241,7 @@ struct Index {
     } else if (this.navigation.activeTab === 2) {
       StatsPage({ theme: this.theme, logs: this.logs, emotion: this.emotion, calendar: this.calendar, feedback: this.feedback, actions: this.actions })
     } else {
-      ProfilePage({ theme: this.theme, backup: this.backup, feedback: this.feedback, actions: this.actions })
+      ProfilePage({ theme: this.theme, backup: this.backup, feedback: this.feedback, settings: this.settings, actions: this.actions })
     }
   }
 
@@ -252,7 +267,7 @@ struct Index {
       FabButton(this.navigation, () => this.toggleFab())
     }
     .width('100%')
-    .padding({ left: 20, right: 20, bottom: 16 })
+    .padding({ left: 20, right: 20, bottom: 16 + this.navigation.navigationBarHeight })
   }
 
   @Builder
@@ -293,7 +308,7 @@ struct Index {
   }
 
   private fabBottomGap(): number {
-    return (this.navigation.isExpandedWindow ? 22 : 16) + FAB_SIZE + 12;
+    return (this.navigation.isExpandedWindow ? 22 : 16) + FAB_SIZE + 12 + this.navigation.navigationBarHeight;
   }
 
   @Builder
@@ -333,7 +348,7 @@ struct Index {
       if (this.navigation.isExpandedWindow) {
         Column() {
           FabButton(this.navigation, () => this.toggleFab())
-        }.margin({ right: 24, bottom: 22 })
+        }.margin({ right: 24, bottom: 22 + this.navigation.navigationBarHeight })
       }
     }.width('100%').height('100%')
   }
@@ -371,7 +386,7 @@ struct Index {
 
       if (this.feedback.notice !== undefined) {
         Text(this.feedback.notice?.message ?? '').fontSize(13).fontColor(Color.White).padding({ left: 18, right: 18, top: 10, bottom: 10 })
-          .backgroundColor('#DD172033').borderRadius(18).margin({ bottom: this.navigation.isExpandedWindow ? 32 : 96 })
+          .backgroundColor('#DD172033').borderRadius(18).margin({ bottom: (this.navigation.isExpandedWindow ? 32 : 96) + this.navigation.navigationBarHeight })
       }
 
       if (!this.settings.showWelcome && this.navigation.detail === '') this.fabOverlay()
@@ -387,5 +402,6 @@ struct Index {
     .width('100%')
     .height('100%')
     .backgroundColor(this.theme.themeBackground)
+    .padding({ top: this.navigation.statusBarHeight })
   }
 }

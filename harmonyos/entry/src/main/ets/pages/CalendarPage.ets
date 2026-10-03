@@ -2,7 +2,7 @@ import { dayString, monthTitle, shortDay, calendarWeeks } from '../data/DateUtil
 import { EmotionRecord, emotionEmoji, emotionName, LogItem, TaskDueKind, TaskItem } from '../models/Models';
 import { ThemeState, CalendarState, FeedbackState, DeleteKind } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
-import { EmptyState, RecordRow, RADIUS_CARD, BRAND, DOCK_CLEARANCE, brandText, dangerText } from '../components/CommonBuilders';
+import { EmptyState, RecordRow, RADIUS_CARD, BRAND, DOCK_CLEARANCE, brandText, cardShadowColor, dangerText, hairlineColor } from '../components/CommonBuilders';
 
 @Component
 export struct CalendarPage {
@@ -66,6 +66,8 @@ export struct CalendarPage {
                 }.width('100%')
               }, (item: EmotionRecord) => item.id)
           }.width('100%').padding(14).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
+            .border({ width: 0.5, color: hairlineColor(this.theme) })
+            .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
         }, (day: string) => day)
 
       }.width('100%').padding({ left: 16, right: 16, bottom: this.embedded ? DOCK_CLEARANCE : 30 })
@@ -89,7 +91,13 @@ export struct CalendarPage {
     .layoutWeight(1).constraintSize({ minHeight: 48 }).justifyContent(FlexAlign.Center)
     .borderRadius(10)
     .backgroundColor(day === this.calendar.selectedDay ? BRAND : this.theme.themeSurface)
+    .border({ width: day === this.calendar.selectedDay ? 0 : 0.5, color: hairlineColor(this.theme) })
     .opacity(day.slice(0, 7) === this.calendar.displayedMonth.slice(0, 7) ? 1 : 0.55)
+    .stateStyles({
+      normal: { .scale({ x: 1, y: 1 }) },
+      pressed: { .scale({ x: 0.94, y: 0.94 }) }
+    })
+    .animation({ duration: 120, curve: Curve.EaseOut })
     .accessibilityText(`${day}，${this.dayCount(day)} 项${day === this.calendar.selectedDay ? '，已选中' : ''}`)
     .onClick(() => requireActions(this.actions).calendarController.selectCalendarDay(day))
   }
@@ -114,6 +122,7 @@ export struct CalendarPage {
       Button('删除', { type: ButtonType.Normal }).height(44).fontSize(11)
         .fontColor(dangerText(this.theme)).backgroundColor(this.theme.themeDanger).onClick(() => this.feedback.destructive = { kind: DeleteKind.TASK, id: item.id })
     }.width('100%').padding(10).backgroundColor(this.theme.themeControl).borderRadius(14)
+      .border({ width: 0.5, color: hairlineColor(this.theme) })
   }
 
   build() {

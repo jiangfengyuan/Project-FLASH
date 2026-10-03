@@ -1,7 +1,7 @@
 import { Category } from '../models/Models';
 import { NavigationState, ThemeState, LogsState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
-import { BRAND } from './CommonBuilders';
+import { BRAND, cardShadowColor, floatingSurface, hairlineColor, supportsBlurMaterial } from './CommonBuilders';
 
 @Component
 export struct QuickInputDialog {
@@ -14,6 +14,7 @@ export struct QuickInputDialog {
   private quickInputDialog() {
     Stack({ alignContent: Alignment.Center }) {
       Column().width('100%').height('100%').backgroundColor('#66000000')
+        .backdropBlur(supportsBlurMaterial() ? 12 : 0)
         .onClick(() => {
           this.logs.quickCategory = '';
           this.logs.quickText = '';
@@ -38,7 +39,10 @@ export struct QuickInputDialog {
           Button('保存').layoutWeight(1).height(44).backgroundColor(BRAND)
             .enabled(this.logs.quickText.trim().length > 0).onClick(() => requireActions(this.actions).logsController.saveQuickCategory())
         }.width('100%')
-      }.width(this.navigation.isMediumWindow ? 460 : '84%').padding(22).backgroundColor(this.theme.themeSurface).borderRadius(24)
+      }.width(this.navigation.isMediumWindow ? 460 : '84%').padding(22).backgroundColor(floatingSurface(this.theme)).borderRadius(24)
+        .backgroundBlurStyle(supportsBlurMaterial() ? BlurStyle.COMPONENT_ULTRA_THICK : BlurStyle.NONE)
+        .border({ width: 0.5, color: hairlineColor(this.theme) })
+        .shadow({ radius: 24, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 10 })
     }.width('100%').height('100%')
   }
 

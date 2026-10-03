@@ -1,6 +1,6 @@
 import { DailyActivity } from '../data/ReviewWindow';
 import { ThemeState } from '../state/FeatureStates';
-import { RADIUS_CARD, brandText } from './CommonBuilders';
+import { RADIUS_CARD, brandText, cardShadowColor, hairlineColor } from './CommonBuilders';
 
 @Component
 export struct ActivityChart {
@@ -47,5 +47,7 @@ export struct ActivityChart {
         }, (day: DailyActivity) => day.date)
       }
     }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
+      .border({ width: 0.5, color: hairlineColor(this.theme) })
+      .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
   }
 }

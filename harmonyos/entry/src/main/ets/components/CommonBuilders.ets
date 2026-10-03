@@ -29,23 +29,49 @@ export const MOTION_PRESS = 120;
 // 悬浮 Dock 高度 + 底部外边距 + 一档间距，页面内容底部留白统一使用，避免被 Dock/手势区遮挡。
 export const DOCK_CLEARANCE = 104;
 
+// 浮层材质：背景模糊能力存在时浮层用半透明面 + ArkUI 材质模糊，
+// 低能力设备回落为现有不透明卡片色，对比度不受影响。
+let blurCapableCache: boolean | undefined = undefined;
+
+export function supportsBlurMaterial(): boolean {
+  if (blurCapableCache === undefined) {
+    blurCapableCache = canIUse('SystemCapability.ArkUI.ArkUI.Full');
+  }
+  return blurCapableCache;
+}
+
+export function floatingSurface(theme: ThemeState): string {
+  if (supportsBlurMaterial()) {
+    return theme.isDark() ? '#D93A3D5C' : '#E8FFFFFF';
+  }
+  return theme.themeSurface;
+}
+
+export function hairlineColor(theme: ThemeState): string {
+  return theme.isDark() ? '#26FFFFFF' : '#0F2D3436';
+}
+
+export function cardShadowColor(theme: ThemeState): string {
+  return theme.isDark() ? '#59000000' : '#142D3436';
+}
+
 // 语义色双模式适配：图标/色点在浅底（#FFFFFF）与深色卡片（#3A3D5C）上均需 ≥3:1，
 // 文字用途需 ≥4.5:1。按钮底色（白字）仍用 BRAND，文字/图标用途用 brandText。
 export function brandText(theme: ThemeState): string {
-  return theme.themeMode === 'dark' ? '#C3BBFF' : BRAND;
+  return theme.isDark() ? '#C3BBFF' : BRAND;
 }
 
 export function dangerText(theme: ThemeState): string {
-  return theme.themeMode === 'dark' ? '#FF8A80' : '#B42318';
+  return theme.isDark() ? '#FF8A80' : '#B42318';
 }
 
 export function importanceText(theme: ThemeState): string {
-  return theme.themeMode === 'dark' ? '#FFB020' : '#B45309';
+  return theme.isDark() ? '#FFB020' : '#B45309';
 }
 
 // 记录卡色条保留高饱和装饰色（colorTagColor），文字标签改用深浅模式均 ≥4.5:1 的变体。
 export function colorTagLabelColor(theme: ThemeState, tag: string): string {
-  const dark = theme.themeMode === 'dark';
+  const dark = theme.isDark();
   switch (tag) {
     case ColorTag.URGENT: return dark ? '#FF8A80' : '#D92D20';
     case ColorTag.INSPIRATION: return dark ? '#F5B841' : '#8A6600';
@@ -60,7 +86,7 @@ export function colorTagLabelColor(theme: ThemeState, tag: string): string {
 export function PageHeader(theme: ThemeState, title: string, subtitle: string) {
     Column({ space: 4 }) {
       Text(title).fontSize(28).fontWeight(FontWeight.Bold).fontColor(theme.themeText).width('100%')
-      Text(subtitle).fontSize(13).fontColor(theme.themeMuted).width('100%')
+      Text(subtitle).fontSize(13).fontColor(theme.themeMuted).lineHeight(19).width('100%')
     }
     .width('100%')
     .alignItems(HorizontalAlign.Start)
@@ -73,6 +99,7 @@ export function EmptyState(theme: ThemeState, emoji: string, text: string) {
       Text(emoji).fontSize(34)
       Text(text).fontSize(14).fontColor(theme.themeMuted)
     }.width('100%').height(130).justifyContent(FlexAlign.Center).backgroundColor(theme.themeSurface).borderRadius(RADIUS_CARD)
+      .border({ width: 0.5, color: hairlineColor(theme) })
   }
 
 @Component
@@ -92,6 +119,8 @@ export struct FlashCard {
     .padding(16)
     .backgroundColor(this.theme.themeSurface)
     .borderRadius(this.radius)
+    .border({ width: 0.5, color: hairlineColor(this.theme) })
+    .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
   }
 }
 
@@ -120,8 +149,12 @@ export function FilterChip(theme: ThemeState, label: string, selected: boolean, 
     .height(TOUCH_MIN)
     .backgroundColor(selected ? CHIP_SELECTED : theme.themeControl)
     .borderRadius(TOUCH_MIN / 2)
+    .stateStyles({
+      normal: { .opacity(1) },
+      pressed: { .opacity(0.7) }
+    })
     .onClick(onSelect)
-    .animation({ duration: 200, curve: Curve.EaseOut })
+    .animation({ duration: MOTION_PRESS, curve: Curve.EaseOut })
 }
 
 @Builder
@@ -147,6 +180,7 @@ export function SegmentedControl(theme: ThemeState, options: string[], selectedI
   .padding(4)
   .backgroundColor(theme.themeControl)
   .borderRadius(22)
+  .border({ width: 0.5, color: hairlineColor(theme) })
   .animation({ duration: 200, curve: Curve.EaseOut })
 }
 
@@ -190,9 +224,11 @@ export function FlashDockBar(theme: ThemeState, navigation: NavigationState, onS
   .layoutWeight(1)
   .height(DOCK_HEIGHT)
   .padding({ left: 8, right: 8 })
-  .backgroundColor(theme.themeNavigation)
+  .backgroundColor(floatingSurface(theme))
+  .backgroundBlurStyle(supportsBlurMaterial() ? BlurStyle.COMPONENT_ULTRA_THICK : BlurStyle.NONE)
   .borderRadius(RADIUS_FOCUS)
-  .shadow({ radius: 24, color: '#1F2D3436', offsetY: 8 })
+  .border({ width: 0.5, color: hairlineColor(theme) })
+  .shadow({ radius: 24, color: theme.isDark() ? '#73000000' : '#1F2D3436', offsetY: 8 })
 }
 
 @Builder
@@ -220,7 +256,9 @@ export function FabButton(navigation: NavigationState, onToggle: () => void) {
 export function FabOption(theme: ThemeState, label: string, icon: Resource, color: string, action: () => void) {
   Row({ space: 8 }) {
     Text(label).fontSize(13).fontColor(theme.themeText).padding({ left: 12, right: 12, top: 7, bottom: 7 })
-      .backgroundColor(theme.themeSurface).borderRadius(18)
+      .backgroundColor(floatingSurface(theme)).borderRadius(18)
+      .backgroundBlurStyle(supportsBlurMaterial() ? BlurStyle.COMPONENT_THIN : BlurStyle.NONE)
+      .border({ width: 0.5, color: hairlineColor(theme) })
     Stack() {
       SymbolGlyph(icon).fontSize(20).fontColor([Color.White])
     }
@@ -249,7 +287,7 @@ export function RecordRow(theme: ThemeState, feedback: FeedbackState, actions: P
             Text(`重要度 ${item.importance}`).fontSize(10).fontColor(importanceText(theme))
           }
         }.width('100%')
-        Text(item.content).fontSize(15).fontColor(theme.themeText).maxLines(3).textOverflow({ overflow: TextOverflow.Ellipsis })
+        Text(item.content).fontSize(15).fontColor(theme.themeText).lineHeight(22).maxLines(3).textOverflow({ overflow: TextOverflow.Ellipsis })
         Text(`${shortDay(item.recordDate)} · ${item.createdAt.slice(11, 16)}`).fontSize(11).fontColor(theme.themeMuted)
       }.layoutWeight(1).alignItems(HorizontalAlign.Start)
       Column({ space: 4 }) {
@@ -289,7 +327,7 @@ export struct RecordCard {
           }
         }.width('100%')
         Text(this.item.content)
-          .fontSize(15).fontColor(this.theme.themeText).width('100%')
+          .fontSize(15).fontColor(this.theme.themeText).lineHeight(22).width('100%')
           .maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
         Text(`${shortDay(this.item.recordDate)} · ${this.item.createdAt.slice(11, 16)}`)
           .fontSize(11).fontColor(this.theme.themeMuted)
@@ -310,6 +348,13 @@ export struct RecordCard {
     .padding(16)
     .backgroundColor(this.theme.themeSurface)
     .borderRadius(RADIUS_CARD)
+    .border({ width: 0.5, color: hairlineColor(this.theme) })
+    .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
+    .stateStyles({
+      normal: { .opacity(1) },
+      pressed: { .opacity(0.85) }
+    })
+    .animation({ duration: MOTION_PRESS, curve: Curve.EaseOut })
     .onClick(() => requireActions(this.actions).logsController.startEditLog(this.item))
   }
 }
