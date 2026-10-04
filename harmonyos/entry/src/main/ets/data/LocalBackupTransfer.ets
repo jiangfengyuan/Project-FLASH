@@ -392,6 +392,10 @@ export class LocalBackupReceiver {
         // Re-read the entered PIN when the next proof arrives: the user may
         // correct it while the backoff window runs.
         rechallengePending = true;
+        // An empty backoff table would index -1 (undefined → 0 ms) and retry
+        // instantly; fall back to the default ladder instead.
+        const ladder = backoffMillis.length > 0 ? backoffMillis : PROOF_BACKOFF_MILLIS;
+        const delay = ladder[Math.min(failedProofs, ladder.length) - 1];
         backoffTimer = setTimeout(() => {
           backoffTimer = 0;
           if (this.finished) return;
@@ -399,7 +403,7 @@ export class LocalBackupReceiver {
             sendChallenge();
             process();
           }
-        }, backoffMillis[Math.min(failedProofs, backoffMillis.length) - 1]);
+        }, delay);
       };
       const rejectProof = (): void => {
         failedProofs++;

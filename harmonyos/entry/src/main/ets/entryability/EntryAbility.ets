@@ -7,6 +7,11 @@ import { systemEnvironment } from '../state/FeatureStates';
 const DOMAIN = 0x0000;
 
 export default class EntryAbility extends UIAbility {
+  private mainWindow?: window.Window;
+  private avoidAreaChangeCallback?: () => void;
+  private windowSizeChangeCallback?: () => void;
+  private foldStatusChangeCallback?: (status: display.FoldStatus) => void;
+
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     hilog.info(DOMAIN, 'FlashAero', 'EntryAbility created');
     this.syncSystemColorMode(this.context.config.colorMode);
@@ -29,19 +34,54 @@ export default class EntryAbility extends UIAbility {
     }
     if (mainWindow) {
       const host = mainWindow;
+      this.mainWindow = host;
       host.setWindowLayoutFullScreen(true).then(() => {
         this.updateAvoidAreas(host);
       }).catch((error: Error) => {
         hilog.error(DOMAIN, 'FlashAero', 'Failed to enable immersive layout: %{public}s', error.message);
       });
-      host.on('avoidAreaChange', () => this.updateAvoidAreas(host));
-      host.on('windowSizeChange', () => this.updateAvoidAreas(host));
+      this.avoidAreaChangeCallback = () => this.updateAvoidAreas(host);
+      this.windowSizeChangeCallback = () => this.updateAvoidAreas(host);
+      host.on('avoidAreaChange', this.avoidAreaChangeCallback);
+      host.on('windowSizeChange', this.windowSizeChangeCallback);
     }
     windowStage.loadContent('pages/Index', (error) => {
       if (error.code) {
         hilog.error(DOMAIN, 'FlashAero', 'Failed to load content: %{public}s', JSON.stringify(error));
       }
     });
+  }
+
+  onWindowStageDestroy(): void {
+    const host = this.mainWindow;
+    if (host) {
+      if (this.avoidAreaChangeCallback) {
+        try {
+          host.off('avoidAreaChange', this.avoidAreaChangeCallback);
+        } catch (_) {
+        }
+      }
+      if (this.windowSizeChangeCallback) {
+        try {
+          host.off('windowSizeChange', this.windowSizeChangeCallback);
+        } catch (_) {
+        }
+      }
+    }
+    this.mainWindow = undefined;
+    this.avoidAreaChangeCallback = undefined;
+    this.windowSizeChangeCallback = undefined;
+  }
+
+  onDestroy(): void {
+    this.onWindowStageDestroy();
+    if (this.foldStatusChangeCallback) {
+      try {
+        display.off('foldStatusChange', this.foldStatusChangeCallback);
+      } catch (_) {
+      }
+      this.foldStatusChangeCallback = undefined;
+    }
   }
 
   private syncSystemColorMode(mode?: ConfigurationConstant.ColorMode): void {
@@ -53,9 +93,10 @@ export default class EntryAbility extends UIAbility {
       if (!canIUse('SystemCapability.Window.SessionManager') || !display.isFoldable()) return;
       systemEnvironment.foldable = true;
       systemEnvironment.foldStatus = display.getFoldStatus();
-      display.on('foldStatusChange', (status: display.FoldStatus) => {
+      this.foldStatusChangeCallback = (status: display.FoldStatus) => {
         systemEnvironment.foldStatus = status;
-      });
+      };
+      display.on('foldStatusChange', this.foldStatusChangeCallback);
     } catch (error) {
       hilog.error(DOMAIN, 'FlashAero', 'Failed to watch fold status: %{public}s', (error as Error).message);
     }

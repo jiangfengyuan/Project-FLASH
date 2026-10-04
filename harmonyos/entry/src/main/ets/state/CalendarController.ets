@@ -104,7 +104,16 @@ export class CalendarController {
       let instant = localMillis - zone.getOffset(localMillis);
       instant = localMillis - zone.getOffset(instant);
       const result = new Date(instant);
-      return Number.isFinite(result.getTime()) ? result : undefined;
+      if (!Number.isFinite(result.getTime())) return undefined;
+      // Round-trip the probed instant: across a DST gap the two-pass offset
+      // probe can land on an instant whose local wall clock differs from the
+      // requested day/time (e.g. a nonexistent 02:30 on spring-forward). Hold
+      // the result to the same strict standard as the wall check above.
+      const back = new Date(instant + zone.getOffset(instant));
+      if (back.getUTCFullYear() !== dateParts[0] || back.getUTCMonth() !== dateParts[1] - 1 ||
+          back.getUTCDate() !== dateParts[2] || back.getUTCHours() !== timeParts[0] ||
+          back.getUTCMinutes() !== timeParts[1]) return undefined;
+      return result;
     } catch (_) {
       return undefined;
     }

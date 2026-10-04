@@ -2,6 +2,7 @@ import { common } from '@kit.AbilityKit';
 import { util } from '@kit.ArkTS';
 import { Environment, fileIo, picker } from '@kit.CoreFileKit';
 import { BackupService } from './BackupService';
+import { dayString } from './DateUtils';
 
 export enum SharedExportStatus {
   READY = 'ready',
@@ -25,7 +26,7 @@ export class BackupFiles {
     filePrefix: string = 'flash-aero-backup'
   ): Promise<void> {
     const options = new picker.DocumentSaveOptions();
-    const day = new Date().toISOString().slice(0, 10);
+    const day = dayString();
     options.newFileNames = [`${filePrefix}-${day}.json`];
     options.fileSuffixChoices = ['JSON 备份|.json'];
     const viewPicker = new picker.DocumentViewPicker(context);
@@ -107,7 +108,7 @@ export class BackupFiles {
     } catch (_) {
       dir = baseDir;
     }
-    const day = new Date().toISOString().slice(0, 10);
+    const day = dayString();
     const target = BackupFiles.joinPath(dir, BackupFiles.sharedExportName(filePrefix, day));
     const temp = `${target}.tmp`;
     try { fileIo.unlinkSync(temp); } catch (_) {}

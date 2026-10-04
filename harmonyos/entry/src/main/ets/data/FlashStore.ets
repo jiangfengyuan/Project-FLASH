@@ -376,9 +376,12 @@ export class FlashStore {
         const file = fileIo.openSync(path, fileIo.OpenMode.READ_ONLY);
         let expired = false;
         try {
-          // HarmonyOS Stat.mtime is seconds since the epoch.
+          // HarmonyOS Stat.mtime is documented as seconds since the epoch,
+          // but some API levels report milliseconds; normalize by magnitude
+          // so the TTL comparison holds in either unit.
           const mtime = fileIo.statSync(file.fd).mtime;
-          expired = Number.isFinite(mtime) && (Date.now() - mtime * 1000) > QUARANTINE_TTL_MILLIS;
+          const mtimeMillis = mtime > 1e12 ? mtime : mtime * 1000;
+          expired = Number.isFinite(mtimeMillis) && (Date.now() - mtimeMillis) > QUARANTINE_TTL_MILLIS;
         } finally {
           fileIo.closeSync(file);
         }

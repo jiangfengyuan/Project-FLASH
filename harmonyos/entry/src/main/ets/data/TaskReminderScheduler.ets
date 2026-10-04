@@ -47,9 +47,19 @@ export class TaskReminderScheduler {
     const allocate = (taskId: string): number => {
       const existing = ids.get(taskId);
       if (existing !== undefined) return existing;
-      next = next >= MAX_NOTIFICATION_ID ? TaskReminderScheduler.firstFree(ids, next) : next + 1;
+      next = next >= MAX_NOTIFICATION_ID ? TaskReminderScheduler.firstFree(ids, stored, next) : next + 1;
       ids.set(taskId, next);
       return next;
+    };
+    // A corrupted Preferences value (wrong type, non-integer, out of range)
+    // must behave as if no id was stored: using it as a notificationId could
+    // throw mid-publish and leave a half-replaced reminder set.
+    const storedId = (taskId: string): number | undefined => {
+      const value = stored[taskId];
+      if (typeof value !== 'number' || !Number.isInteger(value) || value < 1 || value > MAX_NOTIFICATION_ID) {
+        return undefined;
+      }
+      return value;
     };
     const now = Date.now();
     const slotType = NotificationChannels.reminderSlotType();
@@ -71,7 +81,7 @@ export class TaskReminderScheduler {
         title: task.title.slice(0, 200),
         content: task.notes?.slice(0, 500) || '任务即将到期',
         expiredContent: task.title.slice(0, 200),
-        notificationId: stored[task.id] ?? allocate(task.id),
+        notificationId: storedId(task.id) ?? allocate(task.id),
         groupId: TASK_GROUP,
         wantAgent: { pkgName: 'com.flash.app.harmonyos', abilityName: 'EntryAbility' },
         ringDuration: 0,
@@ -90,14 +100,21 @@ export class TaskReminderScheduler {
       if (key !== COUNTER_KEY && !keep.has(key)) await idStore.delete(key);
     }
     for (const task of pending) {
-      await idStore.put(task.id, stored[task.id] ?? allocate(task.id));
+      await idStore.put(task.id, storedId(task.id) ?? allocate(task.id));
     }
     await idStore.put(COUNTER_KEY, next);
     await idStore.flush();
   }
 
-  private static firstFree(ids: Map<string, number>, counter: number): number {
+  private static firstFree(ids: Map<string, number>, stored: Record<string, number>, counter: number): number {
     const used = new Set<number>(ids.values());
+    // Ids persisted for other tasks are occupied too: reusing one here would
+    // make two reminders share a notificationId and overwrite each other.
+    for (const key of Object.keys(stored)) {
+      if (key === COUNTER_KEY) continue;
+      const value = stored[key];
+      if (typeof value === 'number' && Number.isInteger(value)) used.add(value);
+    }
     for (let candidate = 1; candidate <= counter; candidate++) {
       if (!used.has(candidate)) return candidate;
     }
