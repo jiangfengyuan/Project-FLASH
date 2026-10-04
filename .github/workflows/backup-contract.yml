@@ -29,7 +29,8 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+      # ubuntu-latest 已预装 Android SDK 且许可已接受；setup-android v3 在 2026-09 后的
+      # runner 镜像上安装 tools 即失败，故移除。
       - run: ./gradlew :app:testDebugUnitTest :app:assembleDebugAndroidTest --console=plain
         working-directory: android
   android-database:
@@ -52,7 +53,9 @@ jobs:
           working-directory: android
           script: ./gradlew :app:connectedDebugAndroidTest --console=plain
   macos:
-    runs-on: macos-15
+    # 代码使用 Xcode 27（Swift 6.2 工具链）编译，本地验证环境同为 Xcode 27.0 beta；
+    # macos-15 默认 Xcode 16 会报并发编译错误。xcode-27 镜像默认 Xcode 27.0（build 27A5218g）。
+    runs-on: xcode-27
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - run: xcodebuild test -scheme Flash -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
