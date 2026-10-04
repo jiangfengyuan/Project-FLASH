@@ -37,7 +37,9 @@ export class TaskReminderScheduler {
       .filter((item: reminderAgentManager.ReminderInfo) => item.reminderReq.groupId === TASK_GROUP);
     const idStore = await preferences.getPreferences(context, ID_STORE_NAME);
     const stored = (await idStore.getAll()) as Record<string, number>;
-    const counter = typeof stored[COUNTER_KEY] === 'number' ? stored[COUNTER_KEY] : 0;
+    const counterValue = stored[COUNTER_KEY];
+    const counter = typeof counterValue === 'number' && Number.isInteger(counterValue) &&
+      counterValue >= 0 && counterValue <= MAX_NOTIFICATION_ID ? counterValue : 0;
     // Stable per-task notification ids backed by persistent storage: a hash
     // can collide for two task ids, which would make the second reminder
     // overwrite or fail. The mapping also survives restarts, so a rebuild

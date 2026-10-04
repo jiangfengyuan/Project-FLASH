@@ -80,6 +80,17 @@ test('rebuild treats corrupted stored ids as no record and publishes valid ids',
   }
 });
 
+test('a corrupted id counter resets to zero instead of leaking into published ids', async () => {
+  for (const corrupted of [2.5, -3, 2147483647, 'bogus']) {
+    const { published, kits } = reminderKits({ '__counter__': corrupted });
+    const load = createLoader({ 'data/TaskReminderScheduler': null, ...kits });
+    const { TaskReminderScheduler } = load('data/TaskReminderScheduler');
+    await TaskReminderScheduler.rebuild({}, [futureTask(`t-${corrupted}`)], false);
+    assert.equal(published.length, 1);
+    assert.equal(published[0].notificationId, 1, `counter ${corrupted} must not reach the publish request`);
+  }
+});
+
 // --- A5: empty proof backoff table -------------------------------------------
 
 function deterministicRandom() {
