@@ -33,6 +33,17 @@ export class NavigationState {
   fabProgress: number = 0;
 }
 
+// display.FoldStatus 原值桥接：0 未知 / 1 展开 / 2 折叠 / 3 半折叠。
+export const FOLD_STATUS_EXPANDED = 1;
+export const FOLD_STATUS_HALF_FOLDED = 3;
+
+// 宽屏布局裁决：半折叠强制单栏居中限宽；展开态折叠屏视同 840vp 双栏。
+export function contentLayout(isExpandedWindow: boolean, foldable: boolean, foldStatus: number): string {
+  if (foldable && foldStatus === FOLD_STATUS_HALF_FOLDED) return 'centered';
+  if (isExpandedWindow || (foldable && foldStatus === FOLD_STATUS_EXPANDED)) return 'dual';
+  return 'single';
+}
+
 @Observed
 export class ThemeState {
   themeMode: string = 'light';
@@ -45,9 +56,6 @@ export class ThemeState {
   themeTint: string = '#FFEAF2FF';
   themeDanger: string = '#FFFFF1F0';
   themeNavigation: string = '#FFFFFFFF';
-  themeGradientStart: string = '#FFF7F9FA';
-  themeGradientMiddle: string = '#FFF7F9FA';
-  themeGradientEnd: string = '#FFF7F9FA';
 
   isDark(): boolean {
     return resolveThemeDark(this.themeMode, this.systemDark);
@@ -172,6 +180,20 @@ export class SettingsState {
   agentRuntimeSupported: boolean = false;
   fileSandboxShareSupported: boolean = false;
   notificationSettingsSupported: boolean = false;
+  // 减少动态效果：系统无公开查询接口，此为应用内设置（Preferences 持久化）。
+  reduceMotion: boolean = false;
+}
+
+// 减少动态效果的全局生效标记：由 AppController 随设置读写，
+// components/DesignTokens 的 motionDuration 据此把动效时长归零。
+let reduceMotionFlag: boolean = false;
+
+export function setReduceMotionEnabled(enabled: boolean): void {
+  reduceMotionFlag = enabled;
+}
+
+export function isReduceMotionEnabled(): boolean {
+  return reduceMotionFlag;
 }
 
 export enum DeleteKind {
@@ -188,12 +210,21 @@ export interface DeleteRequest {
 
 export interface ToastNotice {
   message: string;
+  level: string;
+}
+
+// Toast 级别归一：success/error/info，未知值按 info 处理。
+export function normalizeToastLevel(level: string): string {
+  return level === 'success' || level === 'error' ? level : 'info';
 }
 
 @Observed
 export class FeedbackState {
   notice?: ToastNotice;
   destructive?: DeleteRequest;
+  // 启动加载三态：loading/ready/error；error 时 startupError 携带原因，全页错误+重试。
+  startup: string = 'loading';
+  startupError: string = '';
 }
 
 export class AppSession {

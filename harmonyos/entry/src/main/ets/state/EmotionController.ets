@@ -22,9 +22,9 @@ export class EmotionController {
       await this.store.addEmotion(this.state.emotionLevel,
         this.state.emotionLevel < 0 ? this.state.selectedSubEmotion : undefined, this.state.emotionNote);
       this.state.emotionNote = '';
-      this.runtime.notify('情绪已记录');
+      this.runtime.notify('情绪已记录', 'success');
     } catch (error) {
-      this.runtime.notify(this.runtime.errorMessage(error as Error));
+      this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     } finally {
       this.state.busy = false;
     }

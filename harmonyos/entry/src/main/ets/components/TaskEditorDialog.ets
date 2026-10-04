@@ -1,7 +1,9 @@
 import { NavigationState, ThemeState, CalendarState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
-import { cardShadowColor, floatingSurface, hairlineColor, supportsBlurMaterial } from './CommonBuilders';
-const BRAND = '#6C5CE7';
+import {
+  BRAND, cardShadowColor, floatingSurface, hairlineColor, supportsBlurMaterial, scrimColor,
+  DIALOG_WIDTH_FORM, DIALOG_WIDTH_PERCENT, TYPE_SECTION, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION
+} from './CommonBuilders';
 
 @Component
 export struct TaskEditorDialog {
@@ -13,13 +15,13 @@ export struct TaskEditorDialog {
   @Builder
   private taskEditorDialog() {
     Stack({ alignContent: Alignment.Center }) {
-      Column().width('100%').height('100%').backgroundColor('#66000000')
+      Column().width('100%').height('100%').backgroundColor(scrimColor(this.theme))
         .backdropBlur(supportsBlurMaterial() ? 12 : 0)
         .onClick(() => requireActions(this.actions).calendarController.closeTaskEditor())
       Scroll() {
         Column({ space: 12 }) {
           Text(this.calendar.editingTaskId === 'new' ? '新建任务' : '编辑任务')
-            .fontSize(20).fontWeight(FontWeight.Bold).fontColor(this.theme.themeText).width('100%')
+            .fontSize(TYPE_SECTION).fontWeight(FontWeight.Bold).fontColor(this.theme.themeText).width('100%')
           TextInput({ placeholder: '任务标题', text: this.calendar.taskTitle })
             .height(44).maxLength(200).fontColor(this.theme.themeText).placeholderColor(this.theme.themeMuted)
             .backgroundColor(this.theme.themeControl).borderRadius(12)
@@ -29,7 +31,7 @@ export struct TaskEditorDialog {
             .backgroundColor(this.theme.themeControl).borderRadius(12)
             .onChange((value: string) => this.calendar.taskNotes = value.slice(0, 100000))
           Row() {
-            Text('全天任务').fontSize(14).fontColor(this.theme.themeText).layoutWeight(1)
+            Text('全天任务').fontSize(TYPE_BODY).fontColor(this.theme.themeText).layoutWeight(1)
             Toggle({ type: ToggleType.Switch, isOn: this.calendar.taskAllDay })
               .onChange((value: boolean) => this.calendar.taskAllDay = value)
           }.width('100%')
@@ -45,7 +47,7 @@ export struct TaskEditorDialog {
                 .onChange((value: string) => this.calendar.taskTime = value.slice(0, 5))
             }
           }.width('100%')
-          Text('本地提醒').fontSize(13).fontColor(this.theme.themeText).width('100%')
+          Text('本地提醒').fontSize(TYPE_SECONDARY).fontColor(this.theme.themeText).width('100%')
           Column({ space: 7 }) {
             Row({ space: 7 }) {
               this.reminderChip(-1, '不提醒')
@@ -61,7 +63,7 @@ export struct TaskEditorDialog {
             }.width('100%')
           }.width('100%')
           Text('提醒由 HarmonyOS 系统后台托管；首次启用会请求通知权限。')
-            .fontSize(11).fontColor(this.theme.themeMuted).width('100%')
+            .fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%')
           Row({ space: 10 }) {
             Button('取消').layoutWeight(1).height(44).fontColor(this.theme.themeMuted).backgroundColor(this.theme.themeControl)
               .onClick(() => requireActions(this.actions).calendarController.closeTaskEditor())
@@ -70,7 +72,7 @@ export struct TaskEditorDialog {
           }.width('100%')
         }.width('100%').padding(22)
       }
-      .width(this.navigation.isMediumWindow ? 540 : '90%')
+      .width(this.navigation.isMediumWindow ? DIALOG_WIDTH_FORM : DIALOG_WIDTH_PERCENT)
       .constraintSize({ maxHeight: '86%' })
       .backgroundColor(floatingSurface(this.theme))
       .backgroundBlurStyle(supportsBlurMaterial() ? BlurStyle.COMPONENT_ULTRA_THICK : BlurStyle.NONE)
@@ -82,7 +84,7 @@ export struct TaskEditorDialog {
 
   @Builder
   private reminderChip(minutes: number, label: string) {
-    Button(label, { type: ButtonType.Normal }).height(44).fontSize(11)
+    Button(label, { type: ButtonType.Normal }).height(44).fontSize(TYPE_CAPTION)
       .fontColor(this.calendar.taskReminderMinutes === minutes ? Color.White : this.theme.themeText)
       .backgroundColor(this.calendar.taskReminderMinutes === minutes ? BRAND : this.theme.themeControl)
       .onClick(() => this.calendar.taskReminderMinutes = minutes)
@@ -106,4 +108,3 @@ export struct TaskEditorDialog {
     this.taskEditorDialog()
   }
 }
-

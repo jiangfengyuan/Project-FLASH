@@ -1,7 +1,7 @@
 import { LogItem } from '../models/Models';
 import { ThemeState, LogsState, FeedbackState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
-import { RecordRow, brandText, hairlineColor } from '../components/CommonBuilders';
+import { RecordRow, EmptyState, brandText, hairlineColor } from '../components/CommonBuilders';
 
 @Component
 export struct LogManagerPage {
@@ -22,6 +22,9 @@ export struct LogManagerPage {
           this.logs.logDisplayLimit = 50;
           requireActions(this.actions).logsController.scheduleSearch();
         })
+      if (requireActions(this.actions).logsController.filteredLogCount() === 0) {
+        EmptyState(this.theme, '🔍', '没有找到相关记录')
+      }
       List({ space: 8 }) {
         ForEach(requireActions(this.actions).logsController.displayedLogs(), (item: LogItem) => {
           ListItem() { RecordRow(this.theme, this.feedback, requireActions(this.actions), item) }
@@ -43,4 +46,3 @@ export struct LogManagerPage {
     this.logManagerPage()
   }
 }
-

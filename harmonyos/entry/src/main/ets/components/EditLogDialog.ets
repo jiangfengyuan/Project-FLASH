@@ -1,7 +1,11 @@
 import { Category, COLOR_TAGS, colorTagName, LogItem } from '../models/Models';
 import { NavigationState, ThemeState, LogsState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
-import { BRAND, FilterChip, FormGroup, FormRow, RADIUS_CARD, SegmentedControl, cardShadowColor, dangerText, floatingSurface, hairlineColor, supportsBlurMaterial } from './CommonBuilders';
+import {
+  BRAND, FilterChip, FormGroup, FormRow, RADIUS_CARD, SegmentedControl, cardShadowColor, dangerText,
+  floatingSurface, hairlineColor, supportsBlurMaterial, scrimColor,
+  DIALOG_WIDTH_FORM, DIALOG_WIDTH_PERCENT, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION
+} from './CommonBuilders';
 
 @Component
 export struct EditLogDialog {
@@ -17,26 +21,26 @@ export struct EditLogDialog {
   @Builder
   private editLogDialog() {
     Stack({ alignContent: Alignment.Center }) {
-      Column().width('100%').height('100%').backgroundColor('#66000000')
+      Column().width('100%').height('100%').backgroundColor(scrimColor(this.theme))
         .backdropBlur(supportsBlurMaterial() ? 12 : 0)
         .onClick(() => this.close())
       Scroll() {
         Column({ space: 14 }) {
           Row() {
             Button('关闭', { type: ButtonType.Normal })
-              .fontSize(14).fontColor(this.theme.themeMuted).backgroundColor(Color.Transparent).height(44)
+              .fontSize(TYPE_BODY).fontColor(this.theme.themeMuted).backgroundColor(Color.Transparent).height(44)
               .onClick(() => this.close())
             Blank()
-            Text('编辑记录').fontSize(17).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)
+            Text('编辑记录').fontSize(TYPE_GROUP).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)
             Blank()
             Button(this.logs.busy ? '保存中…' : '保存', { type: ButtonType.Normal })
-              .fontSize(14).fontColor(Color.White).backgroundColor(BRAND).height(44)
+              .fontSize(TYPE_BODY).fontColor(Color.White).backgroundColor(BRAND).height(44)
               .enabled(!this.logs.busy && requireActions(this.actions).logsController.editValidation() === '')
               .onClick(() => requireActions(this.actions).logsController.saveEditedLog())
           }.width('100%')
 
           if (this.logs.editDiscard) {
-            Text('放弃未保存的修改？').fontSize(14).fontColor(this.theme.themeText)
+            Text('放弃未保存的修改？').fontSize(TYPE_BODY).fontColor(this.theme.themeText)
             Row({ space: 12 }) {
               Button('继续编辑').height(44).onClick(() => this.logs.editDiscard = false)
               Button('放弃修改').height(44).onClick(() => requireActions(this.actions).logsController.closeEdit())
@@ -44,7 +48,7 @@ export struct EditLogDialog {
           }
           if (this.logs.editError || requireActions(this.actions).logsController.editValidation()) {
             Text(this.logs.editError || requireActions(this.actions).logsController.editValidation())
-              .fontSize(12).fontColor(dangerText(this.theme)).width('100%')
+              .fontSize(TYPE_SECONDARY).fontColor(dangerText(this.theme)).width('100%')
           }
 
           FormGroup(this.theme, '正文与类型')
@@ -52,7 +56,7 @@ export struct EditLogDialog {
             .height(130).fontColor(this.theme.themeText).placeholderColor(this.theme.themeMuted)
             .backgroundColor(this.theme.themeControl).borderRadius(14)
             .onChange((value: string) => this.logs.editText = value)
-          Text(`${this.logs.editText.length}/100000`).fontSize(11).fontColor(this.theme.themeMuted).width('100%').textAlign(TextAlign.End)
+          Text(`${this.logs.editText.length}/100000`).fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%').textAlign(TextAlign.End)
           SegmentedControl(this.theme, ['日志', '灵感'], this.logs.editCategory === Category.IDEA ? 1 : 0,
             (index: number) => this.logs.editCategory = index === 1 ? Category.IDEA : Category.LOG)
 
@@ -78,12 +82,12 @@ export struct EditLogDialog {
 
           }.width('100%')
           Text('日期决定日历归属与回顾统计；重要度沿用原值。')
-            .fontSize(11).fontColor(this.theme.themeMuted).width('100%')
+            .fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%')
         }
         .width('100%')
         .enabled(!this.logs.busy)
         .padding(22)
-      }.width(this.navigation.isMediumWindow ? 520 : '88%').constraintSize({ maxHeight: '90%' })
+      }.width(this.navigation.isMediumWindow ? DIALOG_WIDTH_FORM : DIALOG_WIDTH_PERCENT).constraintSize({ maxHeight: '90%' })
         .backgroundColor(floatingSurface(this.theme))
         .backgroundBlurStyle(supportsBlurMaterial() ? BlurStyle.COMPONENT_ULTRA_THICK : BlurStyle.NONE)
         .borderRadius(RADIUS_CARD)
@@ -100,4 +104,3 @@ export struct EditLogDialog {
     this.editLogDialog()
   }
 }
-

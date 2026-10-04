@@ -1,147 +1,108 @@
 import { shortDay } from '../data/DateUtils';
-import { Category, ColorTag, colorTagColor, colorTagName, LogItem } from '../models/Models';
+import { Category, colorTagColor, colorTagName, LogItem } from '../models/Models';
 import { NavigationState, ThemeState, FeedbackState, DeleteKind } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
+import {
+  BRAND, RADIUS_CARD, RADIUS_FOCUS, TOUCH_MIN, FAB_SIZE, DOCK_HEIGHT,
+  MOTION_PRESS, MOTION_FADE, CHIP_SELECTED,
+  TYPE_DISPLAY, TYPE_TITLE, TYPE_SECTION, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION,
+  motionDuration, supportsBlurMaterial, floatingSurface, hairlineColor, cardShadowColor, dockShadowColor, FAB_SHADOW,
+  brandText, dangerText, importanceText, colorTagLabelColor
+} from './DesignTokens';
 
-// 设计令牌与 docs/Design/Flash_品牌标准_v1.0.md 及三端重构简报保持一致。
-export const BRAND = '#6C5CE7';
-export const PAGE_BACKGROUND_LIGHT = '#F7F9FA';
-export const PAGE_BACKGROUND_DARK = '#191A38';
-export const CARD_SURFACE_LIGHT = '#FFFFFF';
-export const CARD_SURFACE_DARK = '#3A3D5C';
-export const TEXT_PRIMARY_LIGHT = '#2D3436';
-export const TEXT_PRIMARY_DARK = '#F5F6FA';
-export const TEXT_MUTED_LIGHT = '#636E72';
-export const TEXT_MUTED_DARK = '#B2BEC3';
-export const WEAK_SURFACE_LIGHT = '#EDF0F5';
-// 深色卡片面与弱表面已统一（D1 裁决），只保留 CARD_SURFACE_DARK 一个令牌。
-export const CONTROL_SURFACE_DARK = '#484C72';
-export const TINT_SURFACE_LIGHT = '#EAF2FF';
-export const TINT_SURFACE_DARK = '#4A4478';
-export const CHIP_SELECTED = '#2D3436';
-export const RADIUS_CARD = 24;
-export const RADIUS_FOCUS = 32;
-export const TOUCH_MIN = 44;
-export const FAB_SIZE = 56;
-export const DOCK_HEIGHT = 64;
-// 按压反馈时长（令牌区间 100–160ms），DockItem/FabButton/FabOption 共用。
-export const MOTION_PRESS = 120;
-// 悬浮 Dock 高度 + 底部外边距 + 一档间距，页面内容底部留白统一使用，避免被 Dock/手势区遮挡。
-export const DOCK_CLEARANCE = 104;
-
-// 浮层材质：背景模糊能力存在时浮层用半透明面 + ArkUI 材质模糊，
-// 低能力设备回落为现有不透明卡片色，对比度不受影响。
-let blurCapableCache: boolean | undefined = undefined;
-
-export function supportsBlurMaterial(): boolean {
-  if (blurCapableCache === undefined) {
-    blurCapableCache = canIUse('SystemCapability.ArkUI.ArkUI.Full');
-  }
-  return blurCapableCache;
-}
-
-export function floatingSurface(theme: ThemeState): string {
-  if (supportsBlurMaterial()) {
-    return theme.isDark() ? '#D93A3D5C' : '#E8FFFFFF';
-  }
-  return theme.themeSurface;
-}
-
-export function hairlineColor(theme: ThemeState): string {
-  return theme.isDark() ? '#26FFFFFF' : '#0F2D3436';
-}
-
-export function cardShadowColor(theme: ThemeState): string {
-  return theme.isDark() ? '#59000000' : '#142D3436';
-}
-
-// 语义色双模式适配：图标/色点在浅底（#FFFFFF）与深色卡片（#3A3D5C）上均需 ≥3:1，
-// 文字用途需 ≥4.5:1。按钮底色（白字）仍用 BRAND，文字/图标用途用 brandText。
-export function brandText(theme: ThemeState): string {
-  return theme.isDark() ? '#C3BBFF' : BRAND;
-}
-
-export function dangerText(theme: ThemeState): string {
-  return theme.isDark() ? '#FF8A80' : '#B42318';
-}
-
-export function importanceText(theme: ThemeState): string {
-  return theme.isDark() ? '#FFB020' : '#B45309';
-}
-
-// 记录卡色条保留高饱和装饰色（colorTagColor），文字标签改用深浅模式均 ≥4.5:1 的变体。
-export function colorTagLabelColor(theme: ThemeState, tag: string): string {
-  const dark = theme.isDark();
-  switch (tag) {
-    case ColorTag.URGENT: return dark ? '#FF8A80' : '#D92D20';
-    case ColorTag.INSPIRATION: return dark ? '#F5B841' : '#8A6600';
-    case ColorTag.MEMO: return dark ? '#6BCB77' : '#1E7B34';
-    case ColorTag.EMOTION: return dark ? '#CDA4DC' : '#8E44AD';
-    case ColorTag.IDEA: return dark ? '#FFB020' : '#A85F00';
-    default: return dark ? '#8FB2F0' : '#2F66C4';
-  }
-}
+// 设计令牌统一在 ./DesignTokens 维护，此处 re-export 保持既有 import 路径不变。
+export {
+  BRAND, PAGE_BACKGROUND_LIGHT, PAGE_BACKGROUND_DARK, CARD_SURFACE_LIGHT, CARD_SURFACE_DARK,
+  TEXT_PRIMARY_LIGHT, TEXT_PRIMARY_DARK, TEXT_MUTED_LIGHT, TEXT_MUTED_DARK,
+  WEAK_SURFACE_LIGHT, CONTROL_SURFACE_DARK, TINT_SURFACE_LIGHT, TINT_SURFACE_DARK,
+  DANGER_SURFACE_LIGHT, DANGER_SURFACE_DARK,
+  CHIP_SELECTED, RADIUS_CARD, RADIUS_FOCUS, TOUCH_MIN, FAB_SIZE, DOCK_HEIGHT, DOCK_CLEARANCE,
+  MOTION_PRESS, MOTION_FADE, MOTION_PAGE,
+  TYPE_DISPLAY, TYPE_TITLE, TYPE_SECTION, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION, TYPE_HERO,
+  DIALOG_WIDTH, DIALOG_WIDTH_FORM, DIALOG_WIDTH_PERCENT,
+  CONTENT_MAX_WIDE, CONTENT_MAX_MEDIUM, CONTENT_MAX_CENTERED,
+  HOME_HALO_TOP, HOME_HALO_MID, HOME_HALO_OUTER,
+  motionDuration,
+  supportsBlurMaterial, floatingSurface, hairlineColor, cardShadowColor, dockShadowColor, FAB_SHADOW,
+  brandText, dangerText, importanceText, dangerButtonColor, successText, successFill,
+  scrimColor, toastSurface, toastLevelColor, iconSemantic, fabOptionColor, statLineColor,
+  emotionColor, statusText, colorTagLabelColor
+} from './DesignTokens';
+export { setReduceMotionEnabled, isReduceMotionEnabled } from '../state/FeatureStates';
 
 @Builder
 export function PageHeader(theme: ThemeState, title: string, subtitle: string) {
     Column({ space: 4 }) {
-      Text(title).fontSize(28).fontWeight(FontWeight.Bold).fontColor(theme.themeText).width('100%')
-      Text(subtitle).fontSize(13).fontColor(theme.themeMuted).lineHeight(19).width('100%')
+      Text(title).fontSize(TYPE_TITLE).fontWeight(FontWeight.Bold).fontColor(theme.themeText).width('100%')
+      Text(subtitle).fontSize(TYPE_SECONDARY).fontColor(theme.themeMuted).lineHeight(19).width('100%')
     }
     .width('100%')
     .alignItems(HorizontalAlign.Start)
     .padding({ left: 20, right: 20, top: 18, bottom: 12 })
   }
 
+// 详情页页头：自绘返回栏的统一实现（Index 详情路由使用）。
 @Builder
-export function EmptyState(theme: ThemeState, emoji: string, text: string) {
+export function DetailHeader(theme: ThemeState, title: string, onBack: () => void) {
+    Row({ space: 10 }) {
+      Button('‹ 返回', { type: ButtonType.Normal }).height(TOUCH_MIN).fontColor(brandText(theme)).backgroundColor(Color.Transparent)
+        .onClick(onBack)
+      Text(title).fontSize(TYPE_SECTION).fontWeight(FontWeight.Bold).fontColor(theme.themeText)
+    }.width('100%').height(60).padding({ left: 8, right: 16 })
+  }
+
+// 三态套件：空态/加载/错误共用同一卡片容器语言。actionLabel 为空时不渲染操作按钮。
+@Builder
+export function EmptyState(theme: ThemeState, emoji: string, text: string, actionLabel: string = '', onAction: () => void = () => {}) {
     Column({ space: 8 }) {
-      Text(emoji).fontSize(34)
-      Text(text).fontSize(14).fontColor(theme.themeMuted)
-    }.width('100%').height(130).justifyContent(FlexAlign.Center).backgroundColor(theme.themeSurface).borderRadius(RADIUS_CARD)
+      Text(emoji).fontSize(TYPE_DISPLAY)
+      Text(text).fontSize(TYPE_BODY).fontColor(theme.themeMuted)
+      if (actionLabel !== '') {
+        Button(actionLabel).height(TOUCH_MIN).backgroundColor(BRAND).margin({ top: 4 })
+          .onClick(onAction)
+      }
+    }.width('100%').padding(24).justifyContent(FlexAlign.Center).backgroundColor(theme.themeSurface).borderRadius(RADIUS_CARD)
       .border({ width: 0.5, color: hairlineColor(theme) })
   }
 
-@Component
-export struct FlashCard {
-  @ObjectLink theme: ThemeState;
-  radius: number = RADIUS_CARD;
-  @BuilderParam content: () => void = this.emptyContent;
-
-  @Builder
-  emptyContent() {}
-
-  build() {
-    Column() {
-      this.content()
-    }
-    .width('100%')
-    .padding(16)
-    .backgroundColor(this.theme.themeSurface)
-    .borderRadius(this.radius)
-    .border({ width: 0.5, color: hairlineColor(this.theme) })
-    .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
+@Builder
+export function LoadingState(theme: ThemeState, text: string) {
+    Column({ space: 12 }) {
+      LoadingProgress().width(36).height(36).color(brandText(theme))
+      Text(text).fontSize(TYPE_BODY).fontColor(theme.themeMuted)
+    }.width('100%').padding(24).justifyContent(FlexAlign.Center).backgroundColor(theme.themeSurface).borderRadius(RADIUS_CARD)
+      .border({ width: 0.5, color: hairlineColor(theme) })
   }
-}
+
+@Builder
+export function ErrorState(theme: ThemeState, text: string, onRetry: () => void) {
+    Column({ space: 8 }) {
+      SymbolGlyph($r('sys.symbol.exclamationmark_circle')).fontSize(TYPE_DISPLAY).fontColor([dangerText(theme)])
+      Text(text).fontSize(TYPE_BODY).fontColor(theme.themeMuted).textAlign(TextAlign.Center)
+      Button('重试').height(TOUCH_MIN).backgroundColor(BRAND).margin({ top: 4 })
+        .onClick(onRetry)
+    }.width('100%').padding(24).justifyContent(FlexAlign.Center).backgroundColor(theme.themeSurface).borderRadius(RADIUS_CARD)
+      .border({ width: 0.5, color: hairlineColor(theme) })
+  }
 
 @Builder
 export function FormGroup(theme: ThemeState, title: string) {
-  Text(title).fontSize(17).fontWeight(FontWeight.Medium).fontColor(theme.themeText).width('100%')
+  Text(title).fontSize(TYPE_GROUP).fontWeight(FontWeight.Medium).fontColor(theme.themeText).width('100%')
 }
 
 @Builder
 export function FormRow(theme: ThemeState, label: string, value: string) {
   Row({ space: 12 }) {
-    Text(label).fontSize(14).fontColor(theme.themeMuted)
+    Text(label).fontSize(TYPE_BODY).fontColor(theme.themeMuted)
     Blank()
-    Text(value).fontSize(14).fontColor(theme.themeText).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
+    Text(value).fontSize(TYPE_BODY).fontColor(theme.themeText).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
   }.width('100%').height(TOUCH_MIN)
 }
 
 @Builder
 export function FilterChip(theme: ThemeState, label: string, selected: boolean, onSelect: () => void) {
   Text(label)
-    .fontSize(13)
+    .fontSize(TYPE_SECONDARY)
     .fontColor(selected ? Color.White : theme.themeText)
     .fontWeight(selected ? FontWeight.Medium : FontWeight.Regular)
     .textAlign(TextAlign.Center)
@@ -154,7 +115,7 @@ export function FilterChip(theme: ThemeState, label: string, selected: boolean, 
       pressed: { .opacity(0.7) }
     })
     .onClick(onSelect)
-    .animation({ duration: MOTION_PRESS, curve: Curve.EaseOut })
+    .animation({ duration: motionDuration(MOTION_PRESS), curve: Curve.EaseOut })
 }
 
 @Builder
@@ -163,7 +124,7 @@ export function SegmentedControl(theme: ThemeState, options: string[], selectedI
     ForEach(options, (option: string, index: number) => {
       Row() {
         Text(option)
-          .fontSize(13)
+          .fontSize(TYPE_SECONDARY)
           .fontColor(index === selectedIndex ? theme.themeText : theme.themeMuted)
           .fontWeight(index === selectedIndex ? FontWeight.Medium : FontWeight.Regular)
           .textAlign(TextAlign.Center)
@@ -173,6 +134,10 @@ export function SegmentedControl(theme: ThemeState, options: string[], selectedI
       .justifyContent(FlexAlign.Center)
       .backgroundColor(index === selectedIndex ? theme.themeSurface : Color.Transparent)
       .borderRadius(18)
+      .stateStyles({
+        normal: { .opacity(1) },
+        pressed: { .opacity(0.7) }
+      })
       .onClick(() => onSelect(index))
     }, (option: string) => option)
   }
@@ -181,7 +146,7 @@ export function SegmentedControl(theme: ThemeState, options: string[], selectedI
   .backgroundColor(theme.themeControl)
   .borderRadius(22)
   .border({ width: 0.5, color: hairlineColor(theme) })
-  .animation({ duration: 200, curve: Curve.EaseOut })
+  .animation({ duration: motionDuration(MOTION_FADE), curve: Curve.EaseOut })
 }
 
 @Builder
@@ -192,7 +157,7 @@ export function DockItem(theme: ThemeState, icon: Resource, activeIcon: Resource
         .fontSize(22)
         .fontColor([selected ? brandText(theme) : theme.themeMuted])
       Text(label)
-        .fontSize(11)
+        .fontSize(TYPE_CAPTION)
         .fontColor(selected ? brandText(theme) : theme.themeMuted)
         .fontWeight(selected ? FontWeight.Medium : FontWeight.Regular)
     }
@@ -200,7 +165,7 @@ export function DockItem(theme: ThemeState, icon: Resource, activeIcon: Resource
       normal: { .scale({ x: 1, y: 1 }) },
       pressed: { .scale({ x: 0.92, y: 0.92 }) }
     })
-    .animation({ duration: MOTION_PRESS, curve: Curve.EaseOut })
+    .animation({ duration: motionDuration(MOTION_PRESS), curve: Curve.EaseOut })
   }
   .layoutWeight(1)
   .height(52)
@@ -210,7 +175,7 @@ export function DockItem(theme: ThemeState, icon: Resource, activeIcon: Resource
   .accessibilityGroup(true)
   .accessibilityText(label + (selected ? '，已选中' : ''))
   .onClick(onSelect)
-  .animation({ duration: 200, curve: Curve.EaseOut })
+  .animation({ duration: motionDuration(MOTION_FADE), curve: Curve.EaseOut })
 }
 
 @Builder
@@ -228,7 +193,7 @@ export function FlashDockBar(theme: ThemeState, navigation: NavigationState, onS
   .backgroundBlurStyle(supportsBlurMaterial() ? BlurStyle.COMPONENT_ULTRA_THICK : BlurStyle.NONE)
   .borderRadius(RADIUS_FOCUS)
   .border({ width: 0.5, color: hairlineColor(theme) })
-  .shadow({ radius: 24, color: theme.isDark() ? '#73000000' : '#1F2D3436', offsetY: 8 })
+  .shadow({ radius: 24, color: dockShadowColor(theme), offsetY: 8 })
 }
 
 @Builder
@@ -243,19 +208,19 @@ export function FabButton(navigation: NavigationState, onToggle: () => void) {
   .backgroundColor(BRAND)
   .rotate({ angle: 45 * navigation.fabProgress })
   .accessibilityText('快速记录')
-  .shadow({ radius: 16, color: '#336C5CE7', offsetY: 6 })
+  .shadow({ radius: 16, color: FAB_SHADOW, offsetY: 6 })
   .stateStyles({
     normal: { .scale({ x: 1, y: 1 }) },
     pressed: { .scale({ x: 0.92, y: 0.92 }) }
   })
-  .animation({ duration: MOTION_PRESS, curve: Curve.EaseOut })
+  .animation({ duration: motionDuration(MOTION_PRESS), curve: Curve.EaseOut })
   .onClick(onToggle)
 }
 
 @Builder
 export function FabOption(theme: ThemeState, label: string, icon: Resource, color: string, action: () => void) {
   Row({ space: 8 }) {
-    Text(label).fontSize(13).fontColor(theme.themeText).padding({ left: 12, right: 12, top: 7, bottom: 7 })
+    Text(label).fontSize(TYPE_SECONDARY).fontColor(theme.themeText).padding({ left: 12, right: 12, top: 7, bottom: 7 })
       .backgroundColor(floatingSurface(theme)).borderRadius(18)
       .backgroundBlurStyle(supportsBlurMaterial() ? BlurStyle.COMPONENT_THIN : BlurStyle.NONE)
       .border({ width: 0.5, color: hairlineColor(theme) })
@@ -270,7 +235,7 @@ export function FabOption(theme: ThemeState, label: string, icon: Resource, colo
       normal: { .scale({ x: 1, y: 1 }) },
       pressed: { .scale({ x: 0.92, y: 0.92 }) }
     })
-    .animation({ duration: MOTION_PRESS, curve: Curve.EaseOut })
+    .animation({ duration: motionDuration(MOTION_PRESS), curve: Curve.EaseOut })
     .onClick(action)
   }
 }
@@ -282,23 +247,30 @@ export function RecordRow(theme: ThemeState, feedback: FeedbackState, actions: P
       Column({ space: 4 }) {
         Row({ space: 8 }) {
           Text(item.category === Category.IDEA ? '灵感' : colorTagName(item.colorTag))
-            .fontSize(11).fontColor(colorTagLabelColor(theme, item.colorTag))
+            .fontSize(TYPE_CAPTION).fontColor(colorTagLabelColor(theme, item.colorTag))
           if (item.importance > 0) {
-            Text(`重要度 ${item.importance}`).fontSize(10).fontColor(importanceText(theme))
+            Text(`重要度 ${item.importance}`).fontSize(TYPE_CAPTION).fontColor(importanceText(theme))
           }
         }.width('100%')
-        Text(item.content).fontSize(15).fontColor(theme.themeText).lineHeight(22).maxLines(3).textOverflow({ overflow: TextOverflow.Ellipsis })
-        Text(`${shortDay(item.recordDate)} · ${item.createdAt.slice(11, 16)}`).fontSize(11).fontColor(theme.themeMuted)
+        Text(item.content).fontSize(TYPE_BODY).fontColor(theme.themeText).lineHeight(22).maxLines(3).textOverflow({ overflow: TextOverflow.Ellipsis })
+        Text(`${shortDay(item.recordDate)} · ${item.createdAt.slice(11, 16)}`).fontSize(TYPE_CAPTION).fontColor(theme.themeMuted)
       }.layoutWeight(1).alignItems(HorizontalAlign.Start)
       Column({ space: 4 }) {
         Button('编辑', { type: ButtonType.Normal })
-          .fontSize(11).fontColor(brandText(theme)).backgroundColor(theme.themeTint).height(44)
+          .fontSize(TYPE_CAPTION).fontColor(brandText(theme)).backgroundColor(theme.themeTint).height(44)
           .onClick(() => actions.logsController.startEditLog(item))
         Button('删除', { type: ButtonType.Normal })
-          .fontSize(11).fontColor(dangerText(theme)).backgroundColor(theme.themeDanger).height(44)
+          .fontSize(TYPE_CAPTION).fontColor(dangerText(theme)).backgroundColor(theme.themeDanger).height(44)
           .onClick(() => feedback.destructive = { kind: DeleteKind.LOG, id: item.id })
       }
     }.width('100%').padding({ top: 8, bottom: 8 })
+      .hoverEffect(HoverEffect.Highlight)
+      .stateStyles({
+        normal: { .opacity(1) },
+        pressed: { .opacity(0.85) }
+      })
+      .animation({ duration: motionDuration(MOTION_PRESS), curve: Curve.EaseOut })
+      .onClick(() => actions.logsController.startEditLog(item))
   }
 
 // 全宽记录卡：此刻页「最近闪念」与记录页列表共用。点击进入编辑详情，
@@ -321,16 +293,16 @@ export struct RecordCard {
             .fontSize(12)
             .fontColor([colorTagLabelColor(this.theme, this.item.colorTag)])
           Text(this.item.category === Category.IDEA ? '灵感' : colorTagName(this.item.colorTag))
-            .fontSize(11).fontColor(colorTagLabelColor(this.theme, this.item.colorTag))
+            .fontSize(TYPE_CAPTION).fontColor(colorTagLabelColor(this.theme, this.item.colorTag))
           if (this.item.importance > 0) {
-            Text(`重要度 ${this.item.importance}`).fontSize(10).fontColor(importanceText(this.theme))
+            Text(`重要度 ${this.item.importance}`).fontSize(TYPE_CAPTION).fontColor(importanceText(this.theme))
           }
         }.width('100%')
         Text(this.item.content)
-          .fontSize(15).fontColor(this.theme.themeText).lineHeight(22).width('100%')
+          .fontSize(TYPE_BODY).fontColor(this.theme.themeText).lineHeight(22).width('100%')
           .maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
         Text(`${shortDay(this.item.recordDate)} · ${this.item.createdAt.slice(11, 16)}`)
-          .fontSize(11).fontColor(this.theme.themeMuted)
+          .fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted)
       }.layoutWeight(1).alignItems(HorizontalAlign.Start)
       SymbolGlyph($r('sys.symbol.ellipsis_circle'))
         .fontSize(18)
@@ -350,11 +322,37 @@ export struct RecordCard {
     .borderRadius(RADIUS_CARD)
     .border({ width: 0.5, color: hairlineColor(this.theme) })
     .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
+    .hoverEffect(HoverEffect.Highlight)
     .stateStyles({
       normal: { .opacity(1) },
       pressed: { .opacity(0.85) }
     })
-    .animation({ duration: MOTION_PRESS, curve: Curve.EaseOut })
+    .animation({ duration: motionDuration(MOTION_PRESS), curve: Curve.EaseOut })
     .onClick(() => requireActions(this.actions).logsController.startEditLog(this.item))
+  }
+}
+
+// 通用卡片容器：全站卡片四件套（圆角+发丝描边+投影+表面色）的唯一实现。
+@Component
+export struct FlashCard {
+  @ObjectLink theme: ThemeState;
+  radius: number = RADIUS_CARD;
+  contentPadding: number = 16;
+  space: number = 0;
+  @BuilderParam content: () => void = this.emptyContent;
+
+  @Builder
+  emptyContent() {}
+
+  build() {
+    Column({ space: this.space }) {
+      this.content()
+    }
+    .width('100%')
+    .padding(this.contentPadding)
+    .backgroundColor(this.theme.themeSurface)
+    .borderRadius(this.radius)
+    .border({ width: 0.5, color: hairlineColor(this.theme) })
+    .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
   }
 }

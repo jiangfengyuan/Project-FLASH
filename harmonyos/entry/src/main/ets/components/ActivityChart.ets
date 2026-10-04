@@ -1,6 +1,8 @@
 import { DailyActivity } from '../data/ReviewWindow';
 import { ThemeState } from '../state/FeatureStates';
-import { RADIUS_CARD, brandText, cardShadowColor, hairlineColor } from './CommonBuilders';
+import {
+  FlashCard, brandText, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION
+} from './CommonBuilders';
 
 @Component
 export struct ActivityChart {
@@ -19,11 +21,11 @@ export struct ActivityChart {
   }
 
   build() {
-    Column({ space: 8 }) {
-      Text('记录活跃度').fontSize(17).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).width('100%')
-      Text('每天的日志、灵感与情绪次数 · 不含任务').fontSize(12).fontColor(this.theme.themeMuted).width('100%')
-      Text(this.summary()).fontSize(14).fontColor(this.theme.themeText).width('100%')
-      Text(`${this.maximum()} 次`).fontSize(11).fontColor(this.theme.themeMuted).width('100%')
+    FlashCard({ theme: this.theme, space: 8 }) {
+      Text('记录活跃度').fontSize(TYPE_GROUP).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).width('100%')
+      Text('每天的日志、灵感与情绪次数 · 不含任务').fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width('100%')
+      Text(this.summary()).fontSize(TYPE_BODY).fontColor(this.theme.themeText).width('100%')
+      Text(`${this.maximum()} 次`).fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%')
       Row({ space: 1 }) {
         ForEach(this.days, (day: DailyActivity) => {
           Column() {
@@ -32,22 +34,20 @@ export struct ActivityChart {
         }, (day: DailyActivity) => day.date)
       }.width('100%').height(128).border({ width: { bottom: 1 }, color: this.theme.themeMuted })
         .accessibilityText('每日记录次数柱状图，' + this.summary() + '，可展开每日明细')
-      Text('0').fontSize(11).fontColor(this.theme.themeMuted).width('100%')
+      Text('0').fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%')
       Row() {
-        Text(this.days[0]?.date ?? '').fontSize(11).fontColor(this.theme.themeMuted)
+        Text(this.days[0]?.date ?? '').fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted)
         Blank()
-        Text(this.days[this.days.length - 1]?.date ?? '').fontSize(11).fontColor(this.theme.themeMuted)
+        Text(this.days[this.days.length - 1]?.date ?? '').fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted)
       }.width('100%')
       Button(this.expanded ? '收起每日明细' : '查看每日明细').height(44)
         .fontColor(brandText(this.theme)).backgroundColor(this.theme.themeTint).onClick(() => this.expanded = !this.expanded)
       if (this.expanded) {
         ForEach(this.days, (day: DailyActivity) => {
           Text(`${day.date}：${day.records} 条记录 · ${day.emotions} 次情绪`)
-            .fontSize(12).fontColor(this.theme.themeText).width('100%')
+            .fontSize(TYPE_SECONDARY).fontColor(this.theme.themeText).width('100%')
         }, (day: DailyActivity) => day.date)
       }
-    }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
-      .border({ width: 0.5, color: hairlineColor(this.theme) })
-      .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
+    }
   }
 }

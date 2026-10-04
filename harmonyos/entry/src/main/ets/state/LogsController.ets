@@ -24,9 +24,9 @@ export class LogsController {
         isIdea ? ColorTag.IDEA : ColorTag.DAILY);
       this.state.quickText = '';
       this.state.quickCategory = '';
-      this.runtime.notify(isIdea ? '灵感已保存' : '日志已记录');
+      this.runtime.notify(isIdea ? '灵感已保存' : '日志已记录', 'success');
     } catch (error) {
-      this.runtime.notify(this.runtime.errorMessage(error as Error));
+      this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     } finally {
       this.state.busy = false;
     }
@@ -42,9 +42,9 @@ export class LogsController {
       await this.store.addLog(this.state.captureText, isIdea ? Category.IDEA : Category.LOG,
         isIdea ? ColorTag.IDEA : ColorTag.DAILY);
       this.state.captureText = '';
-      this.runtime.notify(isIdea ? '灵感已保存' : '日志已记录');
+      this.runtime.notify(isIdea ? '灵感已保存' : '日志已记录', 'success');
     } catch (error) {
-      this.runtime.notify(this.runtime.errorMessage(error as Error));
+      this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     } finally {
       this.state.busy = false;
     }
@@ -107,10 +107,10 @@ export class LogsController {
       this.state.editTag = '';
       this.state.editDate = '';
       this.state.editError = '';
-      this.runtime.notify('记录已更新');
+      this.runtime.notify('记录已更新', 'success');
     } catch (error) {
       this.state.editError = this.runtime.errorMessage(error as Error);
-      this.runtime.notify(this.state.editError);
+      this.runtime.notify(this.state.editError, 'error');
     } finally {
       this.state.busy = false;
     }
@@ -131,9 +131,9 @@ export class LogsController {
         const edit: LogMetaEdit = { id: item.id, category: category, colorTag: colorTag };
         return edit;
       }));
-      this.runtime.notify(`已整理 ${targets.length} 条记录`);
+      this.runtime.notify(`已整理 ${targets.length} 条记录`, 'success');
     } catch (error) {
-      this.runtime.notify(this.runtime.errorMessage(error as Error));
+      this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     } finally {
       this.state.busy = false;
     }

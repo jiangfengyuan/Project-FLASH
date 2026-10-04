@@ -161,8 +161,8 @@ export class CalendarController {
     const title = this.state.taskTitle.trim().slice(0, 200);
     const anchor = this.localDateToInstant(this.state.taskDate, this.state.taskAllDay ? '09:00' : this.state.taskTime,
       this.state.taskTimeZone || i18n.getTimeZone().getID());
-    if (!title) { this.runtime.notify('请输入任务标题'); return; }
-    if (!anchor) { this.runtime.notify('请输入有效的日期和时间'); return; }
+    if (!title) { this.runtime.notify('请输入任务标题', 'error'); return; }
+    if (!anchor) { this.runtime.notify('请输入有效的日期和时间', 'error'); return; }
     const existing = this.state.tasks.find((item: TaskItem) => item.id === this.state.editingTaskId);
     const now = new Date().toISOString();
     const reminderAt = this.state.taskReminderMinutes < 0 ? undefined :
@@ -185,12 +185,12 @@ export class CalendarController {
       const context = this.runtime.context() as common.UIAbilityContext;
       try {
         await TaskReminderScheduler.rebuild(context, this.store.tasks.slice(), reminderAt !== undefined);
-        this.runtime.notify('任务已保存');
+        this.runtime.notify('任务已保存', 'success');
       } catch (_) {
         this.runtime.notify('任务已保存，但系统提醒未启用');
       }
     } catch (error) {
-      this.runtime.notify(this.runtime.errorMessage(error as Error));
+      this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     } finally {
       this.state.busy = false;
     }
@@ -211,10 +211,10 @@ export class CalendarController {
         const context = this.runtime.context();
         await TaskReminderScheduler.rebuild(context, this.store.tasks.slice(), false);
       } catch (_) {
-        this.runtime.notify('任务状态已更新，但系统提醒同步失败');
+        this.runtime.notify('任务状态已更新，但系统提醒同步失败', 'error');
       }
     } catch (error) {
-      this.runtime.notify(this.runtime.errorMessage(error as Error));
+      this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     } finally {
       this.state.busy = false;
     }
@@ -227,7 +227,7 @@ export class CalendarController {
       await TaskReminderScheduler.rebuild(context, this.store.tasks.slice(), false);
       return true;
     } catch (_) {
-      this.runtime.notify('任务已删除，但系统提醒同步失败');
+      this.runtime.notify('任务已删除，但系统提醒同步失败', 'error');
       return false;
     }
   }
