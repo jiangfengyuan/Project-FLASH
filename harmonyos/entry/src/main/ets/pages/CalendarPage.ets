@@ -1,4 +1,4 @@
-import { dayString, monthTitle, shortDay, calendarWeeks } from '../data/DateUtils';
+import { dayString, monthTitle } from '../data/DateUtils';
 import { EmotionRecord, emotionEmoji, emotionName, LogItem, TaskDueKind, TaskItem } from '../models/Models';
 import { ThemeState, CalendarState, FeedbackState, DeleteKind } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
@@ -36,7 +36,7 @@ export struct CalendarPage {
           }, (day: string) => day)
         }.width('100%')
         Column({ space: 4 }) {
-          ForEach(calendarWeeks(this.calendar.displayedMonth), (week: string[]) => {
+          ForEach(requireActions(this.actions).calendarController.monthWeeks(), (week: string[]) => {
             Row({ space: 2 }) {
               ForEach(week, (day: string) => { this.dayCell(day) }, (day: string) => day)
             }.width('100%')
@@ -75,8 +75,7 @@ export struct CalendarPage {
   }
 
   private dayCount(day: string): number {
-    return (this.calendar.logsByDay.get(day)?.length ?? 0) +
-      (this.calendar.emotionsByDay.get(day)?.length ?? 0) + (this.calendar.tasksByDay.get(day)?.length ?? 0);
+    return requireActions(this.actions).calendarController.dayCount(day);
   }
 
   @Builder

@@ -224,23 +224,23 @@ function fileIoWithMtime(unit) {
   const C = fs.constants;
   return {
     OpenMode: { READ_ONLY: C.O_RDONLY, READ_WRITE: C.O_RDWR, CREATE: C.O_CREAT, TRUNC: C.O_TRUNC },
-    accessSync: p => fs.existsSync(p),
-    mkdirSync: (p, recursive) => fs.mkdirSync(p, { recursive: !!recursive }),
-    unlinkSync: p => fs.unlinkSync(p),
-    openSync: (p, mode = C.O_RDONLY) => ({ fd: fs.openSync(p, mode) }),
-    writeSync: (fd, data, options) => fs.writeSync(fd, data, null, options?.encoding ?? 'utf-8'),
-    readSync: (fd, buffer, options) =>
+    access: async p => fs.existsSync(p),
+    mkdir: async (p, recursive) => { fs.mkdirSync(p, { recursive: !!recursive }); },
+    unlink: async p => fs.unlinkSync(p),
+    open: async (p, mode = C.O_RDONLY) => ({ fd: fs.openSync(p, mode) }),
+    write: async (fd, data, options) => fs.writeSync(fd, data, null, options?.encoding ?? 'utf-8'),
+    read: async (fd, buffer, options) =>
       fs.readSync(fd, Buffer.from(buffer), 0, options?.length ?? buffer.byteLength, 0),
-    statSync: fd => {
+    stat: async fd => {
       const stat = fs.fstatSync(fd);
       const millis = stat.mtime.getTime();
       return { size: stat.size, mtime: unit === 'millis' ? millis : Math.floor(millis / 1000) };
     },
-    closeSync: file => fs.closeSync(typeof file === 'object' ? file.fd : file)
+    close: async file => fs.closeSync(typeof file === 'object' ? file.fd : file)
   };
 }
 
-test('quarantine TTL cleanup works whether stat mtime arrives in seconds or milliseconds', () => {
+test('quarantine TTL cleanup works whether stat mtime arrives in seconds or milliseconds', async () => {
   for (const unit of ['seconds', 'millis']) {
     const filesDir = fs.mkdtempSync(path.join(os.tmpdir(), `flash-mtime-${unit}-`));
     const load = createLoader({ '@kit.CoreFileKit': { fileIo: fileIoWithMtime(unit) } });
@@ -255,7 +255,7 @@ test('quarantine TTL cleanup works whether stat mtime arrives in seconds or mill
     fs.writeFileSync(freshFile, 'fresh');
     const old = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000);
     fs.utimesSync(oldFile, old, old);
-    store.cleanupQuarantine();
+    await store.cleanupQuarantine();
     assert.equal(fs.existsSync(oldFile), false, `${unit}: expired quarantine file is removed`);
     assert.equal(fs.existsSync(freshFile), true, `${unit}: fresh quarantine file survives`);
   }

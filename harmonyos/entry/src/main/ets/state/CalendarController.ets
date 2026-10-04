@@ -1,8 +1,8 @@
 import { common } from '@kit.AbilityKit';
 import { util } from '@kit.ArkTS';
 import { i18n } from '@kit.LocalizationKit';
-import { dayString, shiftCalendarMonth } from '../data/DateUtils';
-import { ColorTag, TaskDueKind, TaskItem } from '../models/Models';
+import { dayString, shiftCalendarMonth, calendarWeeks } from '../data/DateUtils';
+import { ColorTag, EmotionRecord, LogItem, TaskDueKind, TaskItem } from '../models/Models';
 import { CalendarState } from '../state/FeatureStates';
 import { FlashStore } from '../data/FlashStore';
 import { TaskReminderScheduler } from '../data/TaskReminderScheduler';
@@ -12,11 +12,48 @@ export class CalendarController {
   private state: CalendarState;
   private store: FlashStore;
   private runtime: ControllerRuntime;
+  private weeksMonth: string = '';
+  private weeksVersion: number = -1;
+  private weeksCache: string[][] = [];
+  private countsVersion: number = -1;
+  private countsCache: Map<string, number> = new Map<string, number>();
   constructor(state: CalendarState, runtime: ControllerRuntime, store: FlashStore = FlashStore.instance) {
     this.state = state;
     this.store = store;
     this.runtime = runtime;
   }
+
+  /** Month grid memoized per (month, data version): 42 cells re-render on
+   * every state touch, and the grid only changes with the data or the month. */
+  monthWeeks(): string[][] {
+    if (this.weeksMonth !== this.state.displayedMonth || this.weeksVersion !== this.state.dataVersion) {
+      this.weeksCache = calendarWeeks(this.state.displayedMonth);
+      this.weeksMonth = this.state.displayedMonth;
+      this.weeksVersion = this.state.dataVersion;
+    }
+    return this.weeksCache;
+  }
+
+  /** Per-day record totals aggregated once per data version; each of the 42
+   * day cells asks for its count several times per render. */
+  dayCount(day: string): number {
+    if (this.countsVersion !== this.state.dataVersion) {
+      const counts = new Map<string, number>();
+      this.state.logsByDay.forEach((items: LogItem[], key: string) => {
+        counts.set(key, (counts.get(key) ?? 0) + items.length);
+      });
+      this.state.emotionsByDay.forEach((items: EmotionRecord[], key: string) => {
+        counts.set(key, (counts.get(key) ?? 0) + items.length);
+      });
+      this.state.tasksByDay.forEach((items: TaskItem[], key: string) => {
+        counts.set(key, (counts.get(key) ?? 0) + items.length);
+      });
+      this.countsCache = counts;
+      this.countsVersion = this.state.dataVersion;
+    }
+    return this.countsCache.get(day) ?? 0;
+  }
+
   selectCalendarDay(day: string): void {
     this.state.selectedDay = day;
     this.state.displayedMonth = day.slice(0, 7) + '-01';

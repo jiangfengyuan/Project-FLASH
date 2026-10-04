@@ -1,10 +1,11 @@
 import { ActivityChart } from '../components/ActivityChart';
 import { CalendarPage } from './CalendarPage';
-import { reviewDays, dailyActivity, reviewComparison, emotionDistribution, ReviewComparison, EmotionDistribution, SubEmotionSlice } from '../data/ReviewWindow';
+import { ReviewComparison, EmotionDistribution, SubEmotionSlice } from '../data/ReviewWindow';
 import { shortDay } from '../data/DateUtils';
 import { Category, LogItem, EmotionRecord } from '../models/Models';
 import { ThemeState, LogsState, EmotionState, CalendarState, FeedbackState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
+import { StatsController } from '../state/StatsController';
 import { PageHeader, DOCK_CLEARANCE, RADIUS_CARD, FilterChip, brandText, cardShadowColor, hairlineColor } from '../components/CommonBuilders';
 
 @Component
@@ -18,31 +19,14 @@ export struct StatsPage {
   @State showCalendar: boolean = false;
   @State window: string = 'week';
 
-  private days(): string[] { return reviewDays(this.window); }
-  private periodLogs(): LogItem[] {
-    const days = this.days();
-    return this.logs.logs.filter((item: LogItem) => days.includes(item.recordDate));
-  }
-  private periodEmotions(): EmotionRecord[] {
-    const days = this.days();
-    return this.emotion.emotions.filter((item: EmotionRecord) => days.includes(item.recordDate));
-  }
-  private activeDays(): number {
-    const days = this.periodLogs().map((item: LogItem) => item.recordDate)
-      .concat(this.periodEmotions().map((item: EmotionRecord) => item.recordDate));
-    return new Set<string>(days).size;
-  }
-  private periodAverage(): string {
-    const items = this.periodEmotions();
-    return items.length === 0 ? '—' :
-      (items.reduce((sum: number, item: EmotionRecord) => sum + item.level, 0) / items.length).toFixed(1);
-  }
-  private comparison(): ReviewComparison {
-    return reviewComparison(this.logs.logs, this.emotion.emotions, this.window);
-  }
-  private distribution(): EmotionDistribution {
-    return emotionDistribution(this.emotion.emotions, this.days());
-  }
+  private stats(): StatsController { return requireActions(this.actions).statsController; }
+  private days(): string[] { return this.stats().days(this.window); }
+  private periodLogs(): LogItem[] { return this.stats().periodLogs(this.window); }
+  private periodEmotions(): EmotionRecord[] { return this.stats().periodEmotions(this.window); }
+  private activeDays(): number { return this.stats().activeDays(this.window); }
+  private periodAverage(): string { return this.stats().periodAverage(this.window); }
+  private comparison(): ReviewComparison { return this.stats().comparison(this.window); }
+  private distribution(): EmotionDistribution { return this.stats().distribution(this.window); }
 
   @Builder
   private statsPage() {
@@ -73,7 +57,7 @@ export struct StatsPage {
         }.width('100%').padding(16).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
           .border({ width: 0.5, color: hairlineColor(this.theme) })
           .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
-        ActivityChart({ theme: this.theme, days: dailyActivity(this.logs.logs, this.emotion.emotions, this.days()) })
+        ActivityChart({ theme: this.theme, days: this.stats().activity(this.window) })
         Row({ space: 10 }) {
           this.metric(`${this.periodLogs().length}`, '范围内记录', this.theme.themeTint)
           this.metric(`${this.periodAverage()}`, '平均情绪', this.theme.themeTint)

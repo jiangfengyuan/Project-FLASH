@@ -213,24 +213,24 @@ function quarantineDir(filesDir) {
   return path.join(filesDir, 'quarantine');
 }
 
-test('quarantine write refuses a file over the single-file cap', () => {
+test('quarantine write refuses a file over the single-file cap', async () => {
   const { store, filesDir } = storeWithFiles();
   const under = 'x'.repeat(1024 * 1024);
-  assert.equal(store.writeQuarantineFile('legacy-logs.json', under), true, 'at the cap is allowed');
-  assert.equal(store.readQuarantineFile('legacy-logs.json'), under);
+  assert.equal(await store.writeQuarantineFile('legacy-logs.json', under), true, 'at the cap is allowed');
+  assert.equal(await store.readQuarantineFile('legacy-logs.json'), under);
   const over = 'x'.repeat(1024 * 1024 + 1);
-  assert.equal(store.writeQuarantineFile('legacy-emotions.json', over), false, 'over the cap is refused');
+  assert.equal(await store.writeQuarantineFile('legacy-emotions.json', over), false, 'over the cap is refused');
   assert.equal(fs.existsSync(path.join(quarantineDir(filesDir), 'legacy-emotions.json')), false);
 });
 
-test('quarantine read refuses a pre-existing oversized file', () => {
+test('quarantine read refuses a pre-existing oversized file', async () => {
   const { store, filesDir } = storeWithFiles();
   fs.mkdirSync(quarantineDir(filesDir));
   fs.writeFileSync(path.join(quarantineDir(filesDir), 'rdb-payloads.json'), 'x'.repeat(1024 * 1024 + 8));
-  assert.equal(store.readQuarantineFile('rdb-payloads.json'), '', 'oversized leftovers are not loaded');
+  assert.equal(await store.readQuarantineFile('rdb-payloads.json'), '', 'oversized leftovers are not loaded');
 });
 
-test('quarantine TTL cleanup removes files older than 30 days and keeps fresh ones', () => {
+test('quarantine TTL cleanup removes files older than 30 days and keeps fresh ones', async () => {
   const { store, filesDir } = storeWithFiles();
   fs.mkdirSync(quarantineDir(filesDir));
   const oldFile = path.join(quarantineDir(filesDir), 'legacy-logs.json');
@@ -239,18 +239,18 @@ test('quarantine TTL cleanup removes files older than 30 days and keeps fresh on
   fs.writeFileSync(freshFile, 'fresh');
   const old = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000);
   fs.utimesSync(oldFile, old, old);
-  store.cleanupQuarantine();
+  await store.cleanupQuarantine();
   assert.equal(fs.existsSync(oldFile), false, 'expired quarantine file is removed');
   assert.equal(fs.existsSync(freshFile), true, 'fresh quarantine file survives');
 });
 
-test('clearQuarantine removes every copy and resets recovery state', () => {
+test('clearQuarantine removes every copy and resets recovery state', async () => {
   const { store, filesDir } = storeWithFiles();
-  assert.equal(store.writeQuarantineFile('legacy-logs.json', 'data'), true);
-  assert.equal(store.writeQuarantineFile('rdb-payloads.json', '[]'), true);
+  assert.equal(await store.writeQuarantineFile('legacy-logs.json', 'data'), true);
+  assert.equal(await store.writeQuarantineFile('rdb-payloads.json', '[]'), true);
   store.hasRecoveryData = true;
   store.recoveryWarning = 'warning';
-  store.clearQuarantine();
+  await store.clearQuarantine();
   assert.equal(fs.readdirSync(quarantineDir(filesDir)).length, 0);
   assert.equal(store.hasRecoveryData, false);
   assert.equal(store.recoveryWarning, '');
@@ -367,10 +367,10 @@ test('importJSON keeps a BOM for parseStrict to reject', async () => {
   const C = fs.constants;
   const fileIo = {
     OpenMode: { READ_ONLY: C.O_RDONLY },
-    openSync: (p, mode) => ({ fd: fs.openSync(p, mode) }),
-    statSync: fd => ({ size: fs.fstatSync(fd).size, mtime: fs.fstatSync(fd).mtime }),
-    readSync: (fd, buffer, options) => fs.readSync(fd, Buffer.from(buffer), 0, options.length, 0),
-    closeSync: file => fs.closeSync(typeof file === 'object' ? file.fd : file)
+    open: async (p, mode) => ({ fd: fs.openSync(p, mode) }),
+    stat: async fd => ({ size: fs.fstatSync(fd).size, mtime: fs.fstatSync(fd).mtime }),
+    read: async (fd, buffer, options) => fs.readSync(fd, Buffer.from(buffer), 0, options.length, 0),
+    close: async file => fs.closeSync(typeof file === 'object' ? file.fd : file)
   };
   const picker = { picker: {
     DocumentSelectOptions: class {},

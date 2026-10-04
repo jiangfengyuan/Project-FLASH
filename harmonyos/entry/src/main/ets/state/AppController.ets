@@ -13,6 +13,7 @@ import { LogsController } from './LogsController';
 import { EmotionController } from './EmotionController';
 import { CalendarController } from './CalendarController';
 import { BackupController } from './BackupController';
+import { StatsController } from './StatsController';
 import { ControllerRuntime } from './ControllerRuntime';
 import { FeatureProjection } from './FeatureProjection';
 import { StorePartition } from '../data/StoreChanges';
@@ -29,6 +30,7 @@ export class AppController {
   readonly emotionController: EmotionController = new EmotionController(this.session.emotion, this.runtime);
   readonly calendarController: CalendarController = new CalendarController(this.session.calendar, this.runtime);
   readonly backupController: BackupController = new BackupController(this.session.backup, this.runtime);
+  readonly statsController: StatsController = new StatsController(this.session.logs, this.session.emotion);
   private projection: FeatureProjection = new FeatureProjection(this.session,
     (task: TaskItem) => this.calendarController.taskCalendarDay(task),
     () => this.logsController.updateSearchResults());

@@ -6,20 +6,69 @@ import {
   cardShadowColor, floatingSurface, hairlineColor, supportsBlurMaterial
 } from '../components/CommonBuilders';
 
+/** Lazy row source for the records list; reloaded only when the displayed
+ * slice inputs (search results, sort direction, display cap) actually change. */
+class DisplayedLogsSource implements IDataSource {
+  private listeners: DataChangeListener[] = [];
+  private items: LogItem[] = [];
+
+  totalCount(): number {
+    return this.items.length;
+  }
+
+  getData(index: number): LogItem {
+    return this.items[index];
+  }
+
+  registerDataChangeListener(listener: DataChangeListener): void {
+    if (this.listeners.indexOf(listener) < 0) this.listeners.push(listener);
+  }
+
+  unregisterDataChangeListener(listener: DataChangeListener): void {
+    const index = this.listeners.indexOf(listener);
+    if (index >= 0) this.listeners.splice(index, 1);
+  }
+
+  reload(items: LogItem[]): void {
+    this.items = items;
+    this.listeners.forEach((listener: DataChangeListener): void => listener.onDataReloaded());
+  }
+}
+
 @Component
 export struct ExplorePage {
+  @ObjectLink @Watch('syncLogSource') logs: LogsState;
   @ObjectLink theme: ThemeState;
-  @ObjectLink logs: LogsState;
   @ObjectLink feedback: FeedbackState;
   actions?: PageActions;
   @State private filterPanelOpen: boolean = false;
+  private logSource: DisplayedLogsSource = new DisplayedLogsSource();
+  private syncedResults?: LogItem[];
+  private syncedAscending: boolean = false;
+  private syncedLimit: number = -1;
+
+  aboutToAppear(): void {
+    this.syncLogSource();
+  }
+
+  private syncLogSource(): void {
+    const state = this.logs;
+    if (this.syncedResults === state.searchResults && this.syncedAscending === state.sortAscending &&
+      this.syncedLimit === state.logDisplayLimit) return;
+    this.syncedResults = state.searchResults;
+    this.syncedAscending = state.sortAscending;
+    this.syncedLimit = state.logDisplayLimit;
+    this.logSource.reload(requireActions(this.actions).logsController.displayedLogs());
+  }
 
   @Builder
   private explorePage() {
     Stack({ alignContent: Alignment.Bottom }) {
-      Scroll() {
-        Column({ space: 14 }) {
+      List({ space: 12 }) {
+        ListItem() {
           PageHeader(this.theme, '记录', '搜索、筛选与整理所有片段')
+        }
+        ListItem() {
           Column({ space: 12 }) {
             Row({ space: 8 }) {
               SymbolGlyph($r('sys.symbol.magnifyingglass')).fontSize(20).fontColor([brandText(this.theme)])
@@ -114,35 +163,43 @@ export struct ExplorePage {
               .borderRadius(16)
               .border({ width: 0.5, color: hairlineColor(this.theme) })
             }
+          }.width('100%')
+        }
 
+        LazyForEach(this.logSource, (item: LogItem) => {
+          ListItem() {
+            RecordCard({ theme: this.theme, feedback: this.feedback, actions: requireActions(this.actions), item: item })
+          }
+        }, (item: LogItem) => item.id)
+
+        if (requireActions(this.actions).logsController.filteredLogCount() === 0) {
+          ListItem() {
             Column({ space: 12 }) {
-              ForEach(requireActions(this.actions).logsController.displayedLogs(), (item: LogItem) => {
-                RecordCard({ theme: this.theme, feedback: this.feedback, actions: requireActions(this.actions), item: item })
-              }, (item: LogItem) => item.id)
-            }.width('100%')
-
-            if (requireActions(this.actions).logsController.filteredLogCount() === 0) {
-              Column({ space: 12 }) {
-                Text('没有找到相关记录').fontSize(14).fontColor(this.theme.themeMuted)
-                Button('清除筛选').height(44).backgroundColor(BRAND)
-                  .onClick(() => requireActions(this.actions).logsController.clearFilters())
-              }
-              .width('100%')
-              .padding(24)
-              .justifyContent(FlexAlign.Center)
-              .backgroundColor(this.theme.themeSurface)
-              .borderRadius(RADIUS_CARD)
-              .border({ width: 0.5, color: hairlineColor(this.theme) })
-              .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
+              Text('没有找到相关记录').fontSize(14).fontColor(this.theme.themeMuted)
+              Button('清除筛选').height(44).backgroundColor(BRAND)
+                .onClick(() => requireActions(this.actions).logsController.clearFilters())
             }
-            if (requireActions(this.actions).logsController.hasMoreLogs()) {
-              Button(`加载更多（剩余 ${requireActions(this.actions).logsController.filteredLogCount() - requireActions(this.actions).logsController.displayedLogs().length} 条）`)
-                .width('100%').height(44).fontColor(brandText(this.theme)).backgroundColor(this.theme.themeTint)
-                .onClick(() => this.logs.logDisplayLimit += 50)
-            }
-          }.width('100%').padding({ left: 20, right: 20, bottom: DOCK_CLEARANCE })
-        }.width('100%')
-      }.width('100%').height('100%')
+            .width('100%')
+            .padding(24)
+            .justifyContent(FlexAlign.Center)
+            .backgroundColor(this.theme.themeSurface)
+            .borderRadius(RADIUS_CARD)
+            .border({ width: 0.5, color: hairlineColor(this.theme) })
+            .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
+          }
+        }
+        if (requireActions(this.actions).logsController.hasMoreLogs()) {
+          ListItem() {
+            Button(`加载更多（剩余 ${requireActions(this.actions).logsController.filteredLogCount() - requireActions(this.actions).logsController.displayedLogs().length} 条）`)
+              .width('100%').height(44).fontColor(brandText(this.theme)).backgroundColor(this.theme.themeTint)
+              .onClick(() => this.logs.logDisplayLimit += 50)
+          }
+        }
+      }
+      .width('100%')
+      .height('100%')
+      .cachedCount(5)
+      .padding({ left: 20, right: 20, bottom: DOCK_CLEARANCE })
 
       if (this.filterPanelOpen) {
         Column().width('100%').height('100%').backgroundColor('#66000000')

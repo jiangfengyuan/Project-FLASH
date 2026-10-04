@@ -19,7 +19,7 @@ async function until(condition, tries = 1000) {
   for (let i = 0; i < tries && !condition(); i++) await flush();
 }
 
-// --- 1. export validates writeSync byte count --------------------------------
+// --- 1. export validates the write byte count --------------------------------
 
 function pickerOverride(target) {
   return { picker: {
@@ -37,10 +37,10 @@ test('export reports a short write and removes the truncated file', async () => 
   const target = path.join(dir, 'backup.json');
   const fileIo = {
     OpenMode: { READ_WRITE: fs.constants.O_RDWR, TRUNC: fs.constants.O_TRUNC },
-    openSync: (p, mode) => ({ fd: fs.openSync(p, mode | fs.constants.O_CREAT) }),
-    writeSync: () => 0, // disk full: nothing written, no error raised
-    unlinkSync: p => fs.unlinkSync(p),
-    closeSync: file => fs.closeSync(file.fd)
+    open: async (p, mode) => ({ fd: fs.openSync(p, mode | fs.constants.O_CREAT) }),
+    write: async () => 0, // disk full: nothing written, no error raised
+    unlink: async p => fs.unlinkSync(p),
+    close: async file => fs.closeSync(file.fd)
   };
   const load = createLoader({
     'data/BackupFiles': null,
@@ -51,15 +51,15 @@ test('export reports a short write and removes the truncated file', async () => 
   assert.equal(fs.existsSync(target), false, 'truncated export must not survive');
 });
 
-test('export succeeds when writeSync reports the full byte count', async () => {
+test('export succeeds when write reports the full byte count', async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'flash-export-'));
   const target = path.join(dir, 'backup.json');
   const fileIo = {
     OpenMode: { READ_WRITE: fs.constants.O_RDWR, TRUNC: fs.constants.O_TRUNC },
-    openSync: (p, mode) => ({ fd: fs.openSync(p, mode | fs.constants.O_CREAT) }),
-    writeSync: (fd, data, options) => fs.writeSync(fd, data, null, options?.encoding ?? 'utf-8'),
-    unlinkSync: p => fs.unlinkSync(p),
-    closeSync: file => fs.closeSync(file.fd)
+    open: async (p, mode) => ({ fd: fs.openSync(p, mode | fs.constants.O_CREAT) }),
+    write: async (fd, data, options) => fs.writeSync(fd, data, null, options?.encoding ?? 'utf-8'),
+    unlink: async p => fs.unlinkSync(p),
+    close: async file => fs.closeSync(file.fd)
   };
   const load = createLoader({
     'data/BackupFiles': null,

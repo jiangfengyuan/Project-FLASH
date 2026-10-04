@@ -349,7 +349,11 @@ function failingCoreFileKit() {
     accessSync: () => true, mkdirSync: () => {},
     openSync: () => ({ fd: 1 }),
     writeSync: () => { throw new Error('read-only filesystem'); },
-    readSync: () => 0, statSync: () => ({ size: 0 }), closeSync: () => {} } } };
+    readSync: () => 0, statSync: () => ({ size: 0 }), closeSync: () => {},
+    access: async () => true, mkdir: async () => {},
+    open: async () => ({ fd: 1 }),
+    write: async () => { throw new Error('read-only filesystem'); },
+    read: async () => 0, stat: async () => ({ size: 0 }), close: async () => {} } } };
 }
 
 test('oversized corrupt RDB payload is quarantined to a sandbox file and never blocks startup', async () => {

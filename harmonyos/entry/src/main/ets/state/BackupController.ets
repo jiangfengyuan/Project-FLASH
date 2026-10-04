@@ -111,7 +111,7 @@ export class BackupController {
       await BackupFiles.exportJSON(context, archive, 'flash-aero-recovery');
       // The originals are now in the user's hands; the plaintext quarantine
       // copies must not linger once a successful export exists.
-      this.store.clearQuarantine();
+      await this.store.clearQuarantine();
       this.state.recoveryAvailable = false;
       if (generation === this.generation) this.runtime.notify('恢复原始数据已导出，请妥善保管并联系支持人员处理');
     } catch (error) {
@@ -123,7 +123,7 @@ export class BackupController {
 
   async clearRecoveryData(): Promise<void> {
     if (this.state.fileBusy) return;
-    this.store.clearQuarantine();
+    await this.store.clearQuarantine();
     this.state.recoveryAvailable = false;
     this.runtime.notify('隔离区已清除');
   }

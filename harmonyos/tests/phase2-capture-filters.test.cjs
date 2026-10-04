@@ -118,7 +118,7 @@ test('batch inbox retag touches only default-tag logs and preserves content', as
   const state = new LogsState(), r = runtime();
   const calls = [];
   const controller = new LogsController(state, r, {
-    updateLogMeta: async (id, category, colorTag) => calls.push([id, category, colorTag])
+    updateLogsMetaBatch: async (edits) => edits.forEach(edit => calls.push([edit.id, edit.category, edit.colorTag]))
   });
   state.logs = [log('a'), log('b', '想法', { category: 'idea', colorTag: 'daily' }), log('c')];
   state.filterCategory = 'inbox';

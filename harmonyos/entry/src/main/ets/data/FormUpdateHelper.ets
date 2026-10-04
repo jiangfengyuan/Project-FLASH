@@ -71,14 +71,26 @@ async function registry(context: common.Context): Promise<preferences.Preference
   return preferences.getPreferences(context, { name: FORM_REGISTRY_PREFERENCES });
 }
 
+// The registry lives in Preferences behind an IPC. EntryFormAbility and the UI
+// ability share one process (module.json5 declares no isolation), so a
+// process-local "known empty" flag stays coherent as long as every mutation
+// below refreshes it. `undefined` means unknown and forces a real read.
+let registryKnownEmpty: boolean | undefined = undefined;
+
 export async function listTodaySummaryForms(context: common.Context): Promise<string[]> {
   const store = await registry(context);
   const raw = store.getSync(FORM_REGISTRY_KEY, '[]') as string;
   try {
     const parsed = JSON.parse(raw) as string[];
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter((id: string) => typeof id === 'string' && id.length > 0);
+    if (!Array.isArray(parsed)) {
+      registryKnownEmpty = true;
+      return [];
+    }
+    const ids = parsed.filter((id: string) => typeof id === 'string' && id.length > 0);
+    registryKnownEmpty = ids.length === 0;
+    return ids;
   } catch (_) {
+    registryKnownEmpty = true;
     return [];
   }
 }
@@ -90,6 +102,7 @@ export async function registerTodaySummaryForm(context: common.Context, formId: 
   const store = await registry(context);
   await store.put(FORM_REGISTRY_KEY, JSON.stringify(Array.from(ids)));
   await store.flush();
+  registryKnownEmpty = false;
 }
 
 export async function unregisterTodaySummaryForm(context: common.Context, formId: string): Promise<void> {
@@ -97,10 +110,12 @@ export async function unregisterTodaySummaryForm(context: common.Context, formId
   const store = await registry(context);
   await store.put(FORM_REGISTRY_KEY, JSON.stringify(ids));
   await store.flush();
+  registryKnownEmpty = ids.length === 0;
 }
 
 export class FormUpdateHelper {
   static async updateForms(context: common.Context): Promise<number> {
+    if (registryKnownEmpty === true) return 0;
     const formIds = await listTodaySummaryForms(context);
     if (formIds.length === 0) return 0;
     const store = FlashStore.instance;

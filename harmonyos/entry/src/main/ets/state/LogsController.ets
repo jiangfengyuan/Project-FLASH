@@ -1,7 +1,7 @@
 import { Category, ColorTag, colorTagName, LogItem } from '../models/Models';
 import { dayOffset, dayString, isValidRecordDay } from '../data/DateUtils';
 import { LogsState } from '../state/FeatureStates';
-import { FlashStore } from '../data/FlashStore';
+import { FlashStore, LogMetaEdit } from '../data/FlashStore';
 import { ControllerRuntime } from './ControllerRuntime';
 
 export class LogsController {
@@ -116,8 +116,8 @@ export class LogsController {
     }
   }
 
-  /** 待整理 = 分类为日志且仍为默认「日常」标签的记录。批量整理复用 updateLogMeta，
-   * 正文与重要度保持不变。 */
+  /** 待整理 = 分类为日志且仍为默认「日常」标签的记录。批量整理复用 updateLogMeta
+   * 的语义，正文与重要度保持不变；整批在 store 内一次落库、单次发布。 */
   inboxLogs(): LogItem[] {
     return this.state.logs.filter((item: LogItem) => item.category === Category.LOG && item.colorTag === ColorTag.DAILY);
   }
@@ -127,9 +127,10 @@ export class LogsController {
     if (targets.length === 0 || this.state.busy) return;
     this.state.busy = true;
     try {
-      for (const item of targets) {
-        await this.store.updateLogMeta(item.id, category, colorTag);
-      }
+      await this.store.updateLogsMetaBatch(targets.map((item: LogItem) => {
+        const edit: LogMetaEdit = { id: item.id, category: category, colorTag: colorTag };
+        return edit;
+      }));
       this.runtime.notify(`已整理 ${targets.length} 条记录`);
     } catch (error) {
       this.runtime.notify(this.runtime.errorMessage(error as Error));

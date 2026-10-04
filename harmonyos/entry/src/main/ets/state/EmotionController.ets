@@ -8,6 +8,8 @@ export class EmotionController {
   private state: EmotionState;
   private store: FlashStore;
   private runtime: ControllerRuntime;
+  private aggregatesVersion: number = -1;
+  private aggregates: Map<string, number[]> = new Map<string, number[]>();
   constructor(state: EmotionState, runtime: ControllerRuntime, store: FlashStore = FlashStore.instance) {
     this.state = state;
     this.store = store;
@@ -44,10 +46,26 @@ export class EmotionController {
     return days;
   }
 
+  /** Per-day [sum, count] aggregation built once per data version: the stats
+   * trend rows ask for every day in the window, so each lookup must not
+   * re-scan the whole emotion list. */
+  private dayAggregates(): Map<string, number[]> {
+    if (this.aggregatesVersion === this.state.emotionsVersion) return this.aggregates;
+    const map = new Map<string, number[]>();
+    this.state.emotions.forEach((item: EmotionRecord) => {
+      const entry = map.get(item.recordDate) ?? [0, 0];
+      entry[0] += item.level;
+      entry[1] += 1;
+      map.set(item.recordDate, entry);
+    });
+    this.aggregates = map;
+    this.aggregatesVersion = this.state.emotionsVersion;
+    return map;
+  }
+
   dayAverage(day: string): number | undefined {
-    const matches = this.state.emotions.filter((item: EmotionRecord) => item.recordDate === day);
-    if (matches.length === 0) return undefined;
-    return matches.reduce((sum: number, item: EmotionRecord) => sum + item.level, 0) / matches.length;
+    const entry = this.dayAggregates().get(day);
+    return entry === undefined ? undefined : entry[0] / entry[1];
   }
 
   dayBar(day: string): number {

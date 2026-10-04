@@ -3,6 +3,7 @@ import { LogsController } from './LogsController';
 import { EmotionController } from './EmotionController';
 import { CalendarController } from './CalendarController';
 import { BackupController } from './BackupController';
+import { StatsController } from './StatsController';
 
 /** Explicit event dependencies, separate from observable feature data. */
 export class PageActions {
@@ -10,6 +11,7 @@ export class PageActions {
   readonly emotionController: EmotionController;
   readonly calendarController: CalendarController;
   readonly backupController: BackupController;
+  readonly statsController: StatsController;
   readonly controller: AppController;
   readonly switchTab: (index: number) => void;
   readonly openDetail: (destination: string) => void;
@@ -26,6 +28,7 @@ export class PageActions {
     this.emotionController = controller.emotionController;
     this.calendarController = controller.calendarController;
     this.backupController = controller.backupController;
+    this.statsController = controller.statsController;
   }
 }
 

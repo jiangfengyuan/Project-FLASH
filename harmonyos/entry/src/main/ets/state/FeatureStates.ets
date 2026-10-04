@@ -78,6 +78,7 @@ export class HomeState {
 @Observed
 export class LogsState {
   logs: LogItem[] = [];
+  logsVersion: number = 0;
   searchResults: LogItem[] = [];
   quickText: string = '';
   searchText: string = '';
@@ -105,6 +106,7 @@ export class LogsState {
 @Observed
 export class EmotionState {
   emotions: EmotionRecord[] = [];
+  emotionsVersion: number = 0;
   emotionLevel: number = 0;
   emotionNote: string = '';
   selectedSubEmotion: string = SubEmotion.SAD;
@@ -126,6 +128,7 @@ export class CalendarState {
   taskReminderMinutes: number = -1;
   calendarDayLimit: number = 30;
   activityDays: string[] = [];
+  dataVersion: number = 0;
   logsByDay: Map<string, LogItem[]> = new Map<string, LogItem[]>();
   emotionsByDay: Map<string, EmotionRecord[]> = new Map<string, EmotionRecord[]>();
   tasksByDay: Map<string, TaskItem[]> = new Map<string, TaskItem[]>();

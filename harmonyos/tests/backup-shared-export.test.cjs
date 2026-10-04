@@ -18,6 +18,13 @@ function nodeFileIo(overrides = {}) {
     openSync: (p, mode = C.O_RDONLY) => ({ fd: fs.openSync(p, mode) }),
     writeSync: (fd, data, options) => fs.writeSync(fd, data, null, options?.encoding ?? 'utf-8'),
     closeSync: file => fs.closeSync(file.fd),
+    access: async p => fs.existsSync(p),
+    mkdir: async p => { fs.mkdirSync(p, { recursive: true }); },
+    rename: async (from, to) => fs.renameSync(from, to),
+    unlink: async p => fs.unlinkSync(p),
+    open: async (p, mode = C.O_RDONLY) => ({ fd: fs.openSync(p, mode) }),
+    write: async (fd, data, options) => fs.writeSync(fd, data, null, options?.encoding ?? 'utf-8'),
+    close: async file => fs.closeSync(file.fd),
     ...overrides
   };
 }
@@ -90,7 +97,10 @@ test('shared export writes contract bytes atomically into the visible directory'
       minimal.data.logs, minimal.data.emotions, minimal.data.tasks);
     const result = await BackupFiles.exportToSharedDir(json);
     assert.equal(result.status, SharedExportStatus.EXPORTED);
-    const day = new Date().toISOString().slice(0, 10);
+    // Export names follow the local calendar day (data/DateUtils.dayString).
+    const now = new Date();
+    const pad = value => `${value}`.padStart(2, '0');
+    const day = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
     const expected = path.join(base, 'Flash', `flash-aero-backup-${day}.json`);
     assert.equal(result.path, expected.split(path.sep).join('/'));
     assert.deepEqual(validateBytes(fs.readFileSync(expected)), { valid: true, errors: [] });
@@ -103,7 +113,7 @@ test('shared export writes contract bytes atomically into the visible directory'
 test('a short write removes the temporary file and fails the export', async () => {
   const base = fs.mkdtempSync(path.join(os.tmpdir(), 'flash-shared-export-'));
   const environment = { getUserDownloadDir: () => base };
-  const fileIo = nodeFileIo({ writeSync: () => 0 });
+  const fileIo = nodeFileIo({ write: async () => 0 });
   const { BackupFiles } = loadBackupFiles(environment, fileIo);
   await withCanIUse(() => true, async () => {
     await assert.rejects(BackupFiles.exportToSharedDir('{"ok":true}'), /写入不完整/);

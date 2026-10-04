@@ -20,6 +20,10 @@ const root = path.resolve(__dirname, '../entry/src/main/ets');
 // inject write failures.
 function nodeFileIo() {
   const C = fs.constants;
+  const statShape = stat => {
+    // HarmonyOS Stat.mtime is seconds since epoch; match that shape.
+    return { size: stat.size, mtime: Math.floor(stat.mtime.getTime() / 1000) };
+  };
   return {
     OpenMode: { READ_ONLY: C.O_RDONLY, READ_WRITE: C.O_RDWR, CREATE: C.O_CREAT, TRUNC: C.O_TRUNC },
     accessSync: p => fs.existsSync(p),
@@ -29,12 +33,18 @@ function nodeFileIo() {
     writeSync: (fd, data, options) => fs.writeSync(fd, data, null, options?.encoding ?? 'utf-8'),
     readSync: (fd, buffer, options) =>
       fs.readSync(fd, Buffer.from(buffer), 0, options?.length ?? buffer.byteLength, 0),
-    statSync: fd => {
-      const stat = fs.fstatSync(fd);
-      // HarmonyOS Stat.mtime is seconds since epoch; match that shape.
-      return { size: stat.size, mtime: Math.floor(stat.mtime.getTime() / 1000) };
-    },
-    closeSync: file => fs.closeSync(typeof file === 'object' ? file.fd : file)
+    statSync: fd => statShape(fs.fstatSync(fd)),
+    closeSync: file => fs.closeSync(typeof file === 'object' ? file.fd : file),
+    access: async p => fs.existsSync(p),
+    mkdir: async (p, recursive) => { fs.mkdirSync(p, { recursive: !!recursive }); },
+    unlink: async p => fs.unlinkSync(p),
+    open: async (p, mode = C.O_RDONLY) => ({ fd: fs.openSync(p, mode) }),
+    write: async (fd, data, options) => fs.writeSync(fd, data, null, options?.encoding ?? 'utf-8'),
+    read: async (fd, buffer, options) =>
+      fs.readSync(fd, Buffer.from(buffer), 0, options?.length ?? buffer.byteLength, 0),
+    stat: async fd => statShape(fs.fstatSync(fd)),
+    close: async file => fs.closeSync(typeof file === 'object' ? file.fd : file),
+    rename: async (from, to) => fs.renameSync(from, to)
   };
 }
 
