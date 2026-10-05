@@ -1,9 +1,10 @@
 import { dayString, monthTitle } from '../data/DateUtils';
-import { EmotionRecord, emotionEmoji, emotionName, LogItem, TaskDueKind, TaskItem } from '../models/Models';
+import { DayMarkers } from '../data/CalendarMarkers';
+import { ColorTag, colorTagColor, EmotionRecord, emotionEmoji, emotionName, LogItem, TaskDueKind, TaskItem } from '../models/Models';
 import { ThemeState, CalendarState, FeedbackState, DeleteKind } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
 import {
-  RecordRow, FlashCard, BRAND, DOCK_CLEARANCE, brandText, dangerText, hairlineColor, successFill,
+  RecordRow, FlashCard, BRAND, DOCK_CLEARANCE, brandText, dangerText, emotionColor, hairlineColor, successFill,
   motionDuration, MOTION_PRESS, TYPE_SECTION, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION
 } from '../components/CommonBuilders';
 
@@ -45,8 +46,19 @@ export struct CalendarPage {
             }.width('100%')
           }, (week: string[]) => week[0])
         }.width('100%')
-        Text('日期下数字为记录、情绪与任务总数；点选查看详情。')
-          .fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width('100%')
+        // 图例栏：色点＝记录标签（至多 3 个，+N 为更多）、底部色条＝当日主导情绪、数字＝条目总数。
+        Row({ space: 16 }) {
+          Row({ space: 4 }) {
+            Row().width(6).height(6).borderRadius(3).backgroundColor(colorTagColor(ColorTag.IDEA))
+            Row().width(6).height(6).borderRadius(3).backgroundColor(colorTagColor(ColorTag.DAILY))
+            Text('记录标签').fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted)
+          }
+          Row({ space: 4 }) {
+            Row().width(14).height(4).borderRadius(2).backgroundColor(emotionColor(this.theme, 2))
+            Text('当日情绪').fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted)
+          }
+          Text('数字＝条目总数').fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted)
+        }.width('100%')
         ForEach([this.calendar.selectedDay], (day: string) => {
           FlashCard({ theme: this.theme, contentPadding: 14, space: 8 }) {
             Row() {
@@ -82,13 +94,33 @@ export struct CalendarPage {
   @Builder
   private dayCell(day: string) {
     Column({ space: 2 }) {
-      Text(`${Number(day.slice(8, 10))}`).fontSize(TYPE_BODY)
-        .fontWeight(day === dayString() ? FontWeight.Bold : FontWeight.Normal)
-        .fontColor(day === this.calendar.selectedDay ? Color.White : this.theme.themeText)
-      Text(this.dayCount(day) > 0 ? `${this.dayCount(day)}` : ' ')
-        .fontSize(TYPE_CAPTION).fontColor(day === this.calendar.selectedDay ? Color.White : this.theme.themeMuted)
+      Row({ space: 3 }) {
+        Text(`${Number(day.slice(8, 10))}`).fontSize(TYPE_BODY)
+          .fontWeight(day === dayString() ? FontWeight.Bold : FontWeight.Normal)
+          .fontColor(day === this.calendar.selectedDay ? Color.White : this.theme.themeText)
+        if (this.dayCount(day) > 0) {
+          Text(`${this.dayCount(day)}`)
+            .fontSize(TYPE_CAPTION).fontColor(day === this.calendar.selectedDay ? Color.White : this.theme.themeMuted)
+        }
+      }.justifyContent(FlexAlign.Center)
+      // 记录标签色点（最新优先，至多 3 个，+N 表示更多记录）。
+      Row({ space: 2 }) {
+        ForEach(this.dayMarkers(day).tagDots, (tag: string, index: number) => {
+          Row().width(6).height(6).borderRadius(3).backgroundColor(colorTagColor(tag))
+        }, (tag: string, index: number) => `${day}-${index}-${tag}`)
+        if (this.dayMarkers(day).extraLogs > 0) {
+          Text(`+${this.dayMarkers(day).extraLogs}`).fontSize(TYPE_CAPTION).lineHeight(12)
+            .fontColor(day === this.calendar.selectedDay ? Color.White : this.theme.themeMuted)
+        }
+      }.justifyContent(FlexAlign.Center).height(12)
+      // 心情色条：当日主导情绪色；无情绪记录时占位透明，保持格子等高。
+      Row()
+        .width('55%')
+        .height(4)
+        .borderRadius(2)
+        .backgroundColor(this.dayEmotionBarColor(day))
     }
-    .layoutWeight(1).constraintSize({ minHeight: 48 }).justifyContent(FlexAlign.Center)
+    .layoutWeight(1).constraintSize({ minHeight: 64 }).justifyContent(FlexAlign.Center)
     .borderRadius(10)
     .backgroundColor(day === this.calendar.selectedDay ? BRAND : this.theme.themeSurface)
     .border({ width: day === this.calendar.selectedDay ? 0 : 0.5, color: hairlineColor(this.theme) })
@@ -98,8 +130,20 @@ export struct CalendarPage {
       pressed: { .scale({ x: 0.94, y: 0.94 }) }
     })
     .animation({ duration: motionDuration(MOTION_PRESS), curve: Curve.EaseOut })
-    .accessibilityText(`${day}，${this.dayCount(day)} 项${day === this.calendar.selectedDay ? '，已选中' : ''}`)
+    .accessibilityText(`${day}，${this.dayCount(day)} 项` +
+      (this.dayMarkers(day).emotionLevel !== undefined ? '，当日有情绪记录' : '') +
+      (day === this.calendar.selectedDay ? '，已选中' : ''))
     .onClick(() => requireActions(this.actions).calendarController.selectCalendarDay(day))
+  }
+
+  private dayMarkers(day: string): DayMarkers {
+    return requireActions(this.actions).calendarController.dayMarkers(day);
+  }
+
+  private dayEmotionBarColor(day: string): ResourceColor {
+    const level = this.dayMarkers(day).emotionLevel;
+    if (level === undefined) return Color.Transparent;
+    return day === this.calendar.selectedDay ? Color.White : emotionColor(this.theme, level);
   }
 
   @Builder

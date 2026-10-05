@@ -7,6 +7,8 @@ import { ControllerRuntime } from './ControllerRuntime';
 import { BackupDiff } from '../data/BackupDiff';
 import { BackupFiles, SharedExportStatus } from '../data/BackupFiles';
 import { BackupImport, BackupService } from '../data/BackupService';
+import { dayString } from '../data/DateUtils';
+import { shareBackupFile } from '../data/ShareService';
 import { LanDevice, LocalBackupDiscovery, LocalBackupReceiver, LocalBackupSender } from '../data/LocalBackupTransfer';
 
 export class BackupController {
@@ -66,6 +68,29 @@ export class BackupController {
 
   sharedExportAvailable(): boolean {
     return BackupFiles.sharedExportStatus() === SharedExportStatus.READY;
+  }
+
+  /** 分享导出：生成备份文件后调起系统分享面板（入口由 settings.systemShareSupported 守卫）。 */
+  async shareBackupExport(): Promise<void> {
+    if (this.state.fileBusy) return;
+    if (!this.store.ready) {
+      this.runtime.notify('本地数据尚未加载完成，无法导出备份', 'error');
+      return;
+    }
+    const generation = this.generation;
+    this.state.fileBusy = true;
+    try {
+      const context = this.runtime.context() as common.UIAbilityContext;
+      const snapshot = this.store.snapshot();
+      const json = BackupService.exportJSON(snapshot.logs, snapshot.emotions, snapshot.tasks);
+      const fileName = BackupFiles.sharedExportName('flash-aero-backup', dayString());
+      await shareBackupFile(context, json, fileName);
+      if (generation === this.generation) this.runtime.notify('已调起系统分享', 'success');
+    } catch (error) {
+      if (generation === this.generation) this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
+    } finally {
+      if (generation === this.generation) this.state.fileBusy = false;
+    }
   }
 
   async exportBackupToSharedDir(): Promise<void> {

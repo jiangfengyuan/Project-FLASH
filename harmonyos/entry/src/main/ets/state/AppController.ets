@@ -34,7 +34,12 @@ export class AppController {
   readonly statsController: StatsController = new StatsController(this.session.logs, this.session.emotion);
   private projection: FeatureProjection = new FeatureProjection(this.session,
     (task: TaskItem) => this.calendarController.taskCalendarDay(task),
-    () => this.logsController.updateSearchResults());
+    () => this.logsController.updateSearchResults(),
+    () => {
+      // 测试替身可能不含未读查询，按无未读处理。
+      const store = FlashStore.instance;
+      return typeof store.unviewedIdeas === 'function' ? store.unviewedIdeas().length : 0;
+    });
   private unsubscribe?: () => void;
   private dateTimer: number = 0;
   private generation: number = 0;
@@ -102,6 +107,7 @@ export class AppController {
       this.session.settings.agentRuntimeSupported = capability.agentRuntimeSupported;
       this.session.settings.fileSandboxShareSupported = capability.fileSandboxShareSupported;
       this.session.settings.notificationSettingsSupported = capability.notificationSettingsSupported;
+      this.session.settings.systemShareSupported = capability.systemShareSupported === true;
     } catch (_) {
       if (generation === this.generation) this.runtime.notify('系统能力检测失败，能力入口状态可能不准确', 'error');
     }

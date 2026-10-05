@@ -309,6 +309,8 @@ function memoryPreferences(seed = {}) {
 }
 
 function memoryRdb(tables = { logs: [], emotions: [], tasks: [] }) {
+  // The real schema always creates the local idea-view-state table too.
+  if (!tables.idea_view_state) tables.idea_view_state = [];
   return { tables,
     beginTransaction() {}, commit() {}, rollBack() {},
     executeSql: async (sql, args) => {

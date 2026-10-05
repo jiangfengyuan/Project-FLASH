@@ -2,6 +2,7 @@ import { common } from '@kit.AbilityKit';
 import { util } from '@kit.ArkTS';
 import { i18n } from '@kit.LocalizationKit';
 import { dayString, shiftCalendarMonth, calendarWeeks } from '../data/DateUtils';
+import { calendarDayMarkers, DayMarkers, EMPTY_DAY_MARKERS } from '../data/CalendarMarkers';
 import { ColorTag, EmotionRecord, LogItem, TaskDueKind, TaskItem } from '../models/Models';
 import { CalendarState } from '../state/FeatureStates';
 import { FlashStore } from '../data/FlashStore';
@@ -17,6 +18,8 @@ export class CalendarController {
   private weeksCache: string[][] = [];
   private countsVersion: number = -1;
   private countsCache: Map<string, number> = new Map<string, number>();
+  private markersVersion: number = -1;
+  private markersCache: Map<string, DayMarkers> = new Map<string, DayMarkers>();
   constructor(state: CalendarState, runtime: ControllerRuntime, store: FlashStore = FlashStore.instance) {
     this.state = state;
     this.store = store;
@@ -52,6 +55,23 @@ export class CalendarController {
       this.countsVersion = this.state.dataVersion;
     }
     return this.countsCache.get(day) ?? 0;
+  }
+
+  /** 日期格视觉编码聚合（色点 + 主导情绪），与 dayCount 同一数据版本节奏。 */
+  dayMarkers(day: string): DayMarkers {
+    if (this.markersVersion !== this.state.dataVersion) {
+      const markers = new Map<string, DayMarkers>();
+      const days = new Set<string>();
+      this.state.logsByDay.forEach((_, key: string) => { days.add(key); });
+      this.state.emotionsByDay.forEach((_, key: string) => { days.add(key); });
+      days.forEach((key: string) => {
+        markers.set(key, calendarDayMarkers(
+          this.state.logsByDay.get(key) ?? [], this.state.emotionsByDay.get(key) ?? []));
+      });
+      this.markersCache = markers;
+      this.markersVersion = this.state.dataVersion;
+    }
+    return this.markersCache.get(day) ?? EMPTY_DAY_MARKERS;
   }
 
   selectCalendarDay(day: string): void {

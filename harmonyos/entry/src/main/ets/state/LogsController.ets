@@ -54,12 +54,36 @@ export class LogsController {
     await this.store.deleteLog(id);
   }
 
+  /** 卡片点击进入详情；打开灵感详情即视为已读（对齐 Android RecordDetailViewModel）。 */
+  openLogDetail(item: LogItem): void {
+    this.state.detailLogId = item.id;
+    if (item.category === Category.IDEA) {
+      this.store.markIdeaViewed(item.id).catch(() => {});
+    }
+  }
+
+  closeLogDetail(): void {
+    this.state.detailLogId = '';
+  }
+
+  detailLog(): LogItem | undefined {
+    return this.state.logs.find((item: LogItem) => item.id === this.state.detailLogId);
+  }
+
+  /** 首页提醒行/灵感视图进入时的批量已读；失败仅表现为提醒保留，不打扰用户。 */
+  async markAllIdeasViewed(): Promise<void> {
+    try {
+      await this.store.markAllIdeasViewed();
+    } catch (_) {}
+  }
+
   startEditLog(item: LogItem): void {
     this.state.editingLogId = item.id;
     this.state.editText = item.content;
     this.state.editCategory = item.category;
     this.state.editTag = item.colorTag;
     this.state.editDate = item.recordDate;
+    this.state.editImportance = item.importance;
     this.state.editError = '';
     this.state.editDiscard = false;
   }
@@ -71,6 +95,7 @@ export class LogsController {
     this.state.editCategory = '';
     this.state.editTag = '';
     this.state.editDate = '';
+    this.state.editImportance = 0;
     this.state.editError = '';
     this.state.editDiscard = false;
   }
@@ -79,7 +104,8 @@ export class LogsController {
     if (this.state.busy) return;
     const item = this.state.logs.find((log: LogItem) => log.id === this.state.editingLogId);
     if (!item || item.content !== this.state.editText || item.category !== this.state.editCategory ||
-      item.colorTag !== this.state.editTag || item.recordDate !== this.state.editDate) {
+      item.colorTag !== this.state.editTag || item.recordDate !== this.state.editDate ||
+      item.importance !== this.state.editImportance) {
       this.state.editDiscard = true;
     } else {
       this.closeEdit();
@@ -100,12 +126,14 @@ export class LogsController {
     this.state.busy = true;
     try {
       const id = this.state.editingLogId;
-      await this.store.updateLog(id, this.state.editText, this.state.editCategory, this.state.editTag, this.state.editDate);
+      await this.store.updateLog(id, this.state.editText, this.state.editCategory, this.state.editTag,
+        this.state.editDate, this.state.editImportance);
       this.state.editingLogId = '';
       this.state.editText = '';
       this.state.editCategory = '';
       this.state.editTag = '';
       this.state.editDate = '';
+      this.state.editImportance = 0;
       this.state.editError = '';
       this.runtime.notify('记录已更新', 'success');
     } catch (error) {

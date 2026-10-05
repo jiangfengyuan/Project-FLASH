@@ -75,11 +75,27 @@ function createLoader(overrides = {}) {
       TextDecoder: NodeTextDecoder,
       TextEncoder: class { encodeInto(value) { return new TextEncoder().encode(value); } } } },
     '@kit.ArkData': { relationalStore: { ConflictResolution: { ON_CONFLICT_REPLACE: 1 } } },
-    '@kit.CoreFileKit': { fileIo: nodeFileIo() },
+    '@kit.CoreFileKit': { fileIo: nodeFileIo(), fileUri: {
+      FileUri: class { constructor(path) { this.path = path; } toString() { return 'file://' + this.path; } } } },
+    '@kit.ShareKit': { systemShare: {
+      SharedData: class {
+        constructor(record) { this.records = [record]; }
+        addRecord(record) { this.records.push(record); }
+        getRecords() { return this.records; }
+      },
+      ShareController: class {
+        constructor(data) { this.data = data; this.shown = []; }
+        async show(context, options) { this.shown.push({ context, options }); }
+        on() {}
+        off() {}
+      },
+      SelectionMode: { SINGLE: 0, BATCH: 1 },
+      SharePreviewMode: { DEFAULT: 0, DETAIL: 1 } } },
     '@kit.LocalizationKit': { i18n: { getTimeZone: () => ({ getID: () => 'UTC', getOffset: () => 0 }) } },
     'data/BackupFiles': { BackupFiles: {
       exportJSON: async () => {},
-      importJSON: async () => { throw new Error('Configure the file picker fake for this test'); }
+      importJSON: async () => { throw new Error('Configure the file picker fake for this test'); },
+      sharedExportName: (filePrefix, day) => `${filePrefix}-${day}.json`
     } },
     'data/LocalBackupTransfer': {},
     'data/TaskReminderScheduler': { TaskReminderScheduler: { rebuild: async () => {} } },

@@ -19,9 +19,14 @@ export class EmotionController {
     if (this.state.busy) return;
     this.state.busy = true;
     try {
-      await this.store.addEmotion(this.state.emotionLevel,
-        this.state.emotionLevel < 0 ? this.state.selectedSubEmotion : undefined, this.state.emotionNote);
+      const level = this.state.emotionLevel;
+      await this.store.addEmotion(level,
+        level < 0 ? this.state.selectedSubEmotion : undefined, this.state.emotionNote, this.state.emotionStatus);
       this.state.emotionNote = '';
+      this.state.emotionStatus = '';
+      // 保存成功动效信号：页面按 savedLevel 极性做差异化反馈，尊重减少动态效果。
+      this.state.savedLevel = level;
+      this.state.savedFlash++;
       this.runtime.notify('情绪已记录', 'success');
     } catch (error) {
       this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');

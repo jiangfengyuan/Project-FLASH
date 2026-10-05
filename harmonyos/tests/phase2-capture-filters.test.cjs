@@ -166,8 +166,9 @@ test('saveEditedLog persists text and category/tag meta together, then clears th
   state.editText = '改写正文';
   state.editCategory = 'idea';
   state.editTag = 'idea';
+  state.editImportance = 2;
   await controller.saveEditedLog();
-  assert.deepEqual(calls, [['a', '改写正文', 'idea', 'idea', '2026-09-05']]);
+  assert.deepEqual(calls, [['a', '改写正文', 'idea', 'idea', '2026-09-05', 2]]);
   assert.equal(state.editingLogId, '');
   assert.equal(state.editCategory, '');
   assert.ok(r.messages.includes('记录已更新'));

@@ -105,9 +105,13 @@ export struct ProfilePage {
   private recordsGroup() {
     this.groupLabel('记录与回顾')
     FlashCard({ theme: this.theme, contentPadding: 14, space: 2 }) {
-      this.navRow($r('sys.symbol.calendar'), iconSemantic(this.theme, 'calendar'), '日历', '按日期回看日志与情绪', 'calendar')
-      this.navRow($r('sys.symbol.face_smiling'), iconSemantic(this.theme, 'emotion'), '情绪记录', '七级情绪与子情绪', 'emotion')
-      this.navRow($r('sys.symbol.doc_text'), iconSemantic(this.theme, 'logs'), '记录管理', '搜索、查看和删除记录', 'logs')
+      this.navRow($r('sys.symbol.calendar'), iconSemantic(this.theme, 'calendar'), '日历', '按日期回看日志与情绪',
+        () => requireActions(this.actions).openDetail('calendar'))
+      this.navRow($r('sys.symbol.face_smiling'), iconSemantic(this.theme, 'emotion'), '情绪记录', '七级情绪与子情绪',
+        () => requireActions(this.actions).openDetail('emotion'))
+      // 记录管理直接路由到记录页（ExplorePage），不再保留重复的精简版页面。
+      this.navRow($r('sys.symbol.doc_text'), iconSemantic(this.theme, 'logs'), '记录管理', '搜索、筛选、整理与分享记录',
+        () => requireActions(this.actions).switchTab(1))
     }
   }
 
@@ -115,7 +119,8 @@ export struct ProfilePage {
   private platformGroup() {
     this.groupLabel('平台能力')
     FlashCard({ theme: this.theme, contentPadding: 14, space: 2 }) {
-      this.navRow($r('sys.symbol.bolt'), brandText(this.theme), '鸿蒙体验', '星闪、实况窗、智慧服务与多设备', 'harmony')
+      this.navRow($r('sys.symbol.bolt'), brandText(this.theme), '鸿蒙体验', '星闪、实况窗、智慧服务与多设备',
+        () => requireActions(this.actions).openDetail('harmony'))
     }
   }
 
@@ -130,6 +135,10 @@ export struct ProfilePage {
       if (requireActions(this.actions).backupController.sharedExportAvailable()) {
         this.actionRow($r('sys.symbol.folder'), iconSemantic(this.theme, 'safe'), '导出到下载目录', '在系统文件管理中可见（下载/Flash）',
           !this.backup.fileBusy, () => requireActions(this.actions).backupController.exportBackupToSharedDir())
+      }
+      if (this.settings.systemShareSupported) {
+        this.actionRow($r('sys.symbol.doc_text'), iconSemantic(this.theme, 'safe'), '分享导出', '生成备份文件并通过系统分享发送',
+          !this.backup.fileBusy, () => requireActions(this.actions).backupController.shareBackupExport())
       }
       this.actionRow($r('sys.symbol.magnifyingglass'), iconSemantic(this.theme, 'safe'), '标准导入并分析差异', '导入前先看合并与新增明细',
         !this.backup.fileBusy && !this.backup.busy, () => requireActions(this.actions).backupController.chooseBackup())
@@ -264,7 +273,7 @@ export struct ProfilePage {
   }
 
   @Builder
-  private navRow(icon: Resource, color: string, title: string, subtitle: string, destination: string) {
+  private navRow(icon: Resource, color: string, title: string, subtitle: string, onTap: () => void) {
     Row({ space: 12 }) {
       SymbolGlyph(icon).fontSize(20).fontColor([color]).width(28)
       Column({ space: 2 }) {
@@ -283,7 +292,7 @@ export struct ProfilePage {
       pressed: { .opacity(0.6) }
     })
     .animation({ duration: motionDuration(MOTION_PRESS), curve: Curve.EaseOut })
-    .onClick(() => requireActions(this.actions).openDetail(destination))
+    .onClick(onTap)
   }
 
   @Builder

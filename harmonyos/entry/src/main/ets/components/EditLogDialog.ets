@@ -1,11 +1,23 @@
-import { Category, COLOR_TAGS, colorTagName, LogItem } from '../models/Models';
+import { Category, COLOR_TAGS, colorTagName } from '../models/Models';
 import { NavigationState, ThemeState, LogsState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
 import {
-  BRAND, FilterChip, FormGroup, FormRow, RADIUS_CARD, SegmentedControl, cardShadowColor, dangerText,
+  BRAND, FilterChip, FormGroup, RADIUS_CARD, SegmentedControl, cardShadowColor, dangerText,
   floatingSurface, hairlineColor, supportsBlurMaterial, scrimColor,
   DIALOG_WIDTH_FORM, DIALOG_WIDTH_PERCENT, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION
 } from './CommonBuilders';
+
+interface ImportanceOption {
+  value: number;
+  label: string;
+}
+
+const IMPORTANCE_OPTIONS: ImportanceOption[] = [
+  { value: 0, label: '无' },
+  { value: 2, label: '!!' },
+  { value: 3, label: '!!!' },
+  { value: 4, label: '!!!!' }
+];
 
 @Component
 export struct EditLogDialog {
@@ -74,14 +86,19 @@ export struct EditLogDialog {
           .width('100%')
 
           FormGroup(this.theme, '重要度与日期')
-          Column() {
-            FormRow(this.theme, '重要度', `${this.editingImportance()}`)
+          Column({ space: 8 }) {
+            // 重要度选项对齐 Android RecordDetailScreen：无 / !! / !!! / !!!!（0/2/3/4）。
+            Row({ space: 8 }) {
+              ForEach(IMPORTANCE_OPTIONS, (option: ImportanceOption) => {
+                FilterChip(this.theme, option.label, this.logs.editImportance === option.value,
+                  () => this.logs.editImportance = option.value)
+              }, (option: ImportanceOption) => `${option.value}`)
+            }.width('100%')
             TextInput({ placeholder: '记录日期 YYYY-MM-DD', text: this.logs.editDate })
               .fontColor(this.theme.themeText).backgroundColor(this.theme.themeControl).height(44)
               .onChange((value: string) => this.logs.editDate = value)
-
           }.width('100%')
-          Text('日期决定日历归属与回顾统计；重要度沿用原值。')
+          Text('日期决定日历归属与回顾统计；重要度用于筛选与详情展示。')
             .fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%')
         }
         .width('100%')
@@ -94,10 +111,6 @@ export struct EditLogDialog {
         .border({ width: 0.5, color: hairlineColor(this.theme) })
         .shadow({ radius: 24, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 10 })
     }.width('100%').height('100%')
-  }
-
-  private editingImportance(): number {
-    return this.logs.logs.find((item: LogItem) => item.id === this.logs.editingLogId)?.importance ?? 0;
   }
 
   build() {

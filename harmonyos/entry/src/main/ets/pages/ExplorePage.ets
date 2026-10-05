@@ -50,6 +50,14 @@ export struct ExplorePage {
 
   aboutToAppear(): void {
     this.syncLogSource();
+    this.noteIdeaViewed();
+  }
+
+  // 进入灵感视图即把灵感标记为已读（Idea Reminder 消除路径之一）。
+  private noteIdeaViewed(): void {
+    if (this.logs.filterCategory === Category.IDEA) {
+      requireActions(this.actions).logsController.markAllIdeasViewed();
+    }
   }
 
   private syncLogSource(): void {
@@ -211,6 +219,7 @@ export struct ExplorePage {
     this.logs.filterCategory = value;
     this.logs.logDisplayLimit = 50;
     requireActions(this.actions).logsController.updateSearchResults();
+    this.noteIdeaViewed();
   }
 
   private summaryText(): string {

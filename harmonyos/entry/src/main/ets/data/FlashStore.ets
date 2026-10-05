@@ -3,7 +3,7 @@ import { preferences, relationalStore } from '@kit.ArkData';
 import { util } from '@kit.ArkTS';
 import { fileIo } from '@kit.CoreFileKit';
 import {
-  BackupData, Category, ColorTag, EmotionRecord, importanceFromContent, LogItem, TaskItem
+  BackupData, Category, ColorTag, EmotionRecord, importanceFromContent, isValidImportance, LogItem, TaskItem
 } from '../models/Models';
 import { BackupService } from './BackupService';
 import { BackupDiff } from './BackupDiff';
@@ -42,6 +42,9 @@ const QUARANTINE_TTL_MILLIS = 30 * 24 * 60 * 60 * 1000;
 const LOGS_TABLE = 'logs';
 const EMOTIONS_TABLE = 'emotions';
 const TASKS_TABLE = 'tasks';
+// Idea Reminder 的已读状态：本机界面状态（对齐 Android idea_view_state 表），
+// 不写入 flash-backup-v2 备份，与业务数据同库存储但独立于快照导出。
+const IDEA_VIEW_TABLE = 'idea_view_state';
 
 interface RecoveryRaw {
   logs: string;
@@ -71,6 +74,10 @@ export interface LogMetaEdit {
   id: string;
   category: string;
   colorTag: string;
+}
+
+interface IdeaViewPayload {
+  viewedAt?: string;
 }
 
 interface DatabaseRecoveryEntry {
@@ -108,6 +115,8 @@ export class FlashStore {
   themeMode: string = 'light';
   recoveryWarning: string = '';
   hasRecoveryData: boolean = false;
+  // 灵感已读状态（logId → viewedAt ISO），load 时从 idea_view_state 表加载。
+  private viewedIdeaIds: Map<string, string> = new Map<string, string>();
   private settings?: preferences.Preferences;
   private database?: relationalStore.RdbStore;
   private initializing?: Promise<void>;
@@ -154,6 +163,7 @@ export class FlashStore {
     await this.migratePreferencesQuarantine();
     await this.cleanupQuarantine();
     await this.loadRecoveryState();
+    await this.loadIdeaViewState();
     await this.loadBusinessData();
   }
 
@@ -165,6 +175,24 @@ export class FlashStore {
       'id TEXT PRIMARY KEY, sort_key TEXT NOT NULL, payload TEXT NOT NULL)');
     await database.executeSql(`CREATE TABLE IF NOT EXISTS ${TASKS_TABLE} (` +
       'id TEXT PRIMARY KEY, sort_key TEXT NOT NULL, payload TEXT NOT NULL)');
+    await database.executeSql(`CREATE TABLE IF NOT EXISTS ${IDEA_VIEW_TABLE} (` +
+      'id TEXT PRIMARY KEY, sort_key TEXT NOT NULL, payload TEXT NOT NULL)');
+  }
+
+  /** Load local idea read state. A corrupt row degrades to "unviewed", which
+   * only re-surfaces the reminder — never blocks startup. */
+  private async loadIdeaViewState(): Promise<void> {
+    const rows = await this.readPayloads(IDEA_VIEW_TABLE);
+    const viewed = new Map<string, string>();
+    for (const row of rows) {
+      let viewedAt = '';
+      try {
+        const parsed = JSON.parse(row.payload) as IdeaViewPayload;
+        viewedAt = typeof parsed.viewedAt === 'string' ? parsed.viewedAt : '';
+      } catch (_) {}
+      viewed.set(row.id, viewedAt);
+    }
+    this.viewedIdeaIds = viewed;
   }
 
   /** One-time, lossless migration from the former full-array Preferences storage. */
@@ -533,23 +561,80 @@ export class FlashStore {
   async deleteLog(id: string): Promise<void> {
     return this.enqueue(async () => {
       await this.requiredDatabase().executeSql(`DELETE FROM ${LOGS_TABLE} WHERE id = ?`, [id]);
+      // Android 靠外键级联清理 idea_view_state；这里手动同步删除本机已读状态。
+      await this.requiredDatabase().executeSql(`DELETE FROM ${IDEA_VIEW_TABLE} WHERE id = ?`, [id]);
+      this.viewedIdeaIds.delete(id);
       this.logs = this.logs.filter((item: LogItem) => item.id !== id);
       this.changes.publish(StorePartition.LOGS);
     });
   }
 
+  /** 未读灵感 = 从未在本机查看过的灵感。已读状态不进跨端备份。 */
+  unviewedIdeas(): LogItem[] {
+    return this.logs.filter((item: LogItem) =>
+      item.category === Category.IDEA && !this.viewedIdeaIds.has(item.id));
+  }
+
+  async markIdeaViewed(id: string): Promise<void> {
+    if (this.viewedIdeaIds.has(id)) return;
+    return this.enqueue(async () => {
+      await this.persistIdeaViewed(id, isoNow());
+      this.changes.publish(StorePartition.LOGS);
+    });
+  }
+
+  /** 批量已读（首页提醒行/灵感视图进入时）：一次队列写入、单次发布。 */
+  async markAllIdeasViewed(): Promise<void> {
+    const pending = this.unviewedIdeas();
+    if (pending.length === 0) return;
+    return this.enqueue(async () => {
+      const viewedAt = isoNow();
+      for (const item of pending) {
+        await this.persistIdeaViewed(item.id, viewedAt);
+      }
+      this.changes.publish(StorePartition.LOGS);
+    });
+  }
+
+  private async persistIdeaViewed(id: string, viewedAt: string): Promise<void> {
+    await this.upsert(IDEA_VIEW_TABLE, id, viewedAt, JSON.stringify({ viewedAt: viewedAt }));
+    this.viewedIdeaIds.set(id, viewedAt);
+  }
+
+  /** 覆盖导入/清空后修剪已读表，避免指向已删除记录的残留行。仅影响本地提醒，
+   * 最坏结果是灵感重新显示为未读，因此不与业务替换共用同一事务。 */
+  private async pruneIdeaViewState(surviving: Set<string>): Promise<void> {
+    let dirty = false;
+    this.viewedIdeaIds.forEach((viewedAt: string, id: string) => {
+      if (!surviving.has(id)) {
+        this.viewedIdeaIds.delete(id);
+        dirty = true;
+      }
+    });
+    if (!dirty) return;
+    const database = this.requiredDatabase();
+    await database.executeSql(`DELETE FROM ${IDEA_VIEW_TABLE}`);
+    const rows: relationalStore.ValuesBucket[] = [];
+    this.viewedIdeaIds.forEach((viewedAt: string, id: string) => {
+      rows.push({ 'id': id, 'sort_key': viewedAt, 'payload': JSON.stringify({ viewedAt: viewedAt }) });
+    });
+    if (rows.length > 0) await database.batchInsert(IDEA_VIEW_TABLE, rows);
+  }
+
   /** One queued row write publishes only after all edited fields are persisted. */
-  async updateLog(id: string, content: string, category?: string, colorTag?: string, recordDate?: string): Promise<void> {
+  async updateLog(id: string, content: string, category?: string, colorTag?: string, recordDate?: string,
+    importance?: number): Promise<void> {
     return this.enqueue(async () => {
       const trimmed = content.trim();
       if (!trimmed) throw new Error('内容不能为空');
       if (content.length > 100000) throw new Error('内容超过 100000 字符，请删减后保存');
       if (recordDate !== undefined && !isValidRecordDay(recordDate)) throw new Error('请输入有效日期（YYYY-MM-DD）');
+      if (importance !== undefined && !isValidImportance(importance)) throw new Error('重要度需在 0 到 4 之间');
       const existing = this.logs.find((item: LogItem) => item.id === id);
       if (!existing) throw new Error('这条记录已不存在');
       const updated: LogItem = {
         id: existing.id, content: trimmed, colorTag: colorTag ?? existing.colorTag, category: category ?? existing.category,
-        importance: existing.importance, createdAt: existing.createdAt, recordDate: recordDate ?? existing.recordDate
+        importance: importance ?? existing.importance, createdAt: existing.createdAt, recordDate: recordDate ?? existing.recordDate
       };
       await this.upsert(LOGS_TABLE, updated.id, updated.createdAt, JSON.stringify(updated));
       this.logs = this.logs.map((item: LogItem) => item.id === id ? updated : item);
@@ -609,11 +694,13 @@ export class FlashStore {
     });
   }
 
-  async addEmotion(level: number, subEmotion?: string, note?: string): Promise<void> {
+  async addEmotion(level: number, subEmotion?: string, note?: string, status?: string): Promise<void> {
     return this.enqueue(async () => {
       const record: EmotionRecord = {
         id: util.generateRandomUUID(true), level: Math.max(-3, Math.min(3, Math.round(level))),
-        subEmotion: level < 0 ? subEmotion : undefined, status: undefined,
+        subEmotion: level < 0 ? subEmotion : undefined,
+        // 具体心情状态：PRD 语义为短文本（≤50），契约上限远高于此。
+        status: status?.trim().slice(0, 50) || undefined,
         note: note?.trim().slice(0, 2000) || undefined, recordDate: dayString(), createdAt: isoNow()
       };
       await this.upsert(EMOTIONS_TABLE, record.id, record.createdAt, JSON.stringify(record));
@@ -651,6 +738,7 @@ export class FlashStore {
   async replaceAll(logs: LogItem[], emotions: EmotionRecord[], tasks: TaskItem[] = []): Promise<void> {
     return this.enqueue(async () => {
       await this.replaceDatabase(logs, emotions, tasks);
+      await this.pruneIdeaViewState(new Set<string>(logs.map((item: LogItem) => item.id)));
       this.logs = logs.slice(); this.emotions = emotions.slice(); this.tasks = tasks.slice();
       this.sortAll();
       this.changes.publish(StorePartition.ALL);
@@ -667,6 +755,7 @@ export class FlashStore {
     return this.enqueue(async () => {
       if (!BackupDiff.sameData(expected, this.snapshot())) return false;
       await this.replaceDatabase(logs, emotions, tasks);
+      await this.pruneIdeaViewState(new Set<string>(logs.map((item: LogItem) => item.id)));
       this.logs = logs.slice(); this.emotions = emotions.slice(); this.tasks = tasks.slice();
       this.sortAll();
       this.changes.publish(StorePartition.ALL);
@@ -701,6 +790,7 @@ export class FlashStore {
   async clearAll(): Promise<void> {
     return this.enqueue(async () => {
       await this.replaceDatabase([], [], []);
+      await this.pruneIdeaViewState(new Set<string>());
       this.logs = []; this.emotions = []; this.tasks = [];
       this.changes.publish(StorePartition.ALL);
     });

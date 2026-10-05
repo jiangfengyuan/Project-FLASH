@@ -150,16 +150,31 @@ export function SegmentedControl(theme: ThemeState, options: string[], selectedI
 }
 
 @Builder
-export function DockItem(theme: ThemeState, icon: Resource, activeIcon: Resource, label: string, selected: boolean, onSelect: () => void) {
+export function DockItem(theme: ThemeState, icon: Resource, activeIcon: Resource, label: string, selected: boolean, onSelect: () => void, badge: number = 0) {
   Column() {
-    Column({ space: 4 }) {
-      SymbolGlyph(selected ? activeIcon : icon)
-        .fontSize(22)
-        .fontColor([selected ? brandText(theme) : theme.themeMuted])
-      Text(label)
-        .fontSize(TYPE_CAPTION)
-        .fontColor(selected ? brandText(theme) : theme.themeMuted)
-        .fontWeight(selected ? FontWeight.Medium : FontWeight.Regular)
+    Stack({ alignContent: Alignment.TopEnd }) {
+      Column({ space: 4 }) {
+        SymbolGlyph(selected ? activeIcon : icon)
+          .fontSize(22)
+          .fontColor([selected ? brandText(theme) : theme.themeMuted])
+        Text(label)
+          .fontSize(TYPE_CAPTION)
+          .fontColor(selected ? brandText(theme) : theme.themeMuted)
+          .fontWeight(selected ? FontWeight.Medium : FontWeight.Regular)
+      }
+      // 未读角标（Idea Reminder）：BRAND 底白字深浅模式均 ≥4.5:1。
+      if (badge > 0) {
+        Text(badge > 99 ? '99+' : `${badge}`)
+          .fontSize(TYPE_CAPTION)
+          .fontColor(Color.White)
+          .textAlign(TextAlign.Center)
+          .constraintSize({ minWidth: 18 })
+          .height(18)
+          .padding({ left: 4, right: 4 })
+          .backgroundColor(BRAND)
+          .borderRadius(9)
+          .translate({ x: 14, y: -6 })
+      }
     }
     .stateStyles({
       normal: { .scale({ x: 1, y: 1 }) },
@@ -173,16 +188,16 @@ export function DockItem(theme: ThemeState, icon: Resource, activeIcon: Resource
   .backgroundColor(selected ? theme.themeTint : Color.Transparent)
   .borderRadius(26)
   .accessibilityGroup(true)
-  .accessibilityText(label + (selected ? '，已选中' : ''))
+  .accessibilityText(label + (selected ? '，已选中' : '') + (badge > 0 ? `，${badge} 条未读灵感` : ''))
   .onClick(onSelect)
   .animation({ duration: motionDuration(MOTION_FADE), curve: Curve.EaseOut })
 }
 
 @Builder
-export function FlashDockBar(theme: ThemeState, navigation: NavigationState, onSelect: (index: number) => void) {
+export function FlashDockBar(theme: ThemeState, navigation: NavigationState, onSelect: (index: number) => void, recordsBadge: number = 0) {
   Row({ space: 8 }) {
     DockItem(theme, $r('sys.symbol.house'), $r('sys.symbol.house_fill'), '此刻', navigation.activeTab === 0, () => onSelect(0))
-    DockItem(theme, $r('sys.symbol.doc_text'), $r('sys.symbol.doc_text_fill'), '记录', navigation.activeTab === 1, () => onSelect(1))
+    DockItem(theme, $r('sys.symbol.doc_text'), $r('sys.symbol.doc_text_fill'), '记录', navigation.activeTab === 1, () => onSelect(1), recordsBadge)
     DockItem(theme, $r('sys.symbol.clock_arrow_2_circlepath'), $r('sys.symbol.clock_arrow_2_circlepath_fill'), '回顾', navigation.activeTab === 2, () => onSelect(2))
     DockItem(theme, $r('sys.symbol.gearshape'), $r('sys.symbol.gearshape_fill'), '设置', navigation.activeTab === 3, () => onSelect(3))
   }
@@ -270,12 +285,12 @@ export function RecordRow(theme: ThemeState, feedback: FeedbackState, actions: P
         pressed: { .opacity(0.85) }
       })
       .animation({ duration: motionDuration(MOTION_PRESS), curve: Curve.EaseOut })
-      .onClick(() => actions.logsController.startEditLog(item))
+      .onClick(() => actions.logsController.openLogDetail(item))
   }
 
-// 全宽记录卡：此刻页「最近闪念」与记录页列表共用。点击进入编辑详情，
+// 全宽记录卡：此刻页「最近闪念」与记录页列表共用。点击进入详情页（详情内再编辑），
 // 右上角更多菜单提供编辑/删除。改为组件以持有菜单显隐状态：
-// bindMenu(isShow) 由省略号点按显式控制，避免长按触发/冒泡进编辑。
+// bindMenu(isShow) 由省略号点按显式控制，避免长按触发/冒泡进详情。
 @Component
 export struct RecordCard {
   @ObjectLink theme: ThemeState;
@@ -328,7 +343,7 @@ export struct RecordCard {
       pressed: { .opacity(0.85) }
     })
     .animation({ duration: motionDuration(MOTION_PRESS), curve: Curve.EaseOut })
-    .onClick(() => requireActions(this.actions).logsController.startEditLog(this.item))
+    .onClick(() => requireActions(this.actions).logsController.openLogDetail(this.item))
   }
 }
 

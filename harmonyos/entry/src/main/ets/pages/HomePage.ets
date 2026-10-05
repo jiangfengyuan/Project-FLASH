@@ -1,10 +1,12 @@
 import { Category, LogItem } from '../models/Models';
 import { dayString, shortDay } from '../data/DateUtils';
+import { shouldShowIdeaReminder } from '../data/IdeaReminder';
 import { NavigationState, ThemeState, HomeState, LogsState, FeedbackState, contentLayout } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
 import {
   PageHeader, RecordCard, SegmentedControl, FlashCard, EmptyState, DOCK_CLEARANCE, BRAND, brandText,
-  floatingSurface, hairlineColor, supportsBlurMaterial, iconSemantic, motionDuration, MOTION_FADE,
+  floatingSurface, hairlineColor, supportsBlurMaterial, iconSemantic, fabOptionColor, motionDuration,
+  MOTION_PRESS, MOTION_FADE,
   TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION,
   HOME_HALO_TOP, HOME_HALO_MID, HOME_HALO_OUTER
 } from '../components/CommonBuilders';
@@ -157,6 +159,34 @@ export struct HomePage {
         .height(44)
         .backgroundColor(this.theme.themeControl)
         .borderRadius(16)
+      }
+
+      // Idea Reminder：未读灵感达到阈值才出现；点击跳记录页并把灵感标记为已读。
+      if (shouldShowIdeaReminder(this.home.unviewedIdeaCount)) {
+        Row({ space: 8 }) {
+          SymbolGlyph($r('sys.symbol.lightbulb')).fontSize(18).fontColor([fabOptionColor('idea')])
+          Text(`还有 ${this.home.unviewedIdeaCount} 条灵感待查看`).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeText)
+            .layoutWeight(1)
+          Text('›').fontSize(TYPE_GROUP).fontColor(this.theme.themeMuted)
+        }
+        .width('100%')
+        .padding({ left: 12, right: 12 })
+        .height(44)
+        .backgroundColor(this.theme.themeTint)
+        .borderRadius(16)
+        .accessibilityGroup(true)
+        .accessibilityText(`${this.home.unviewedIdeaCount} 条灵感待查看，点击查看`)
+        .hoverEffect(HoverEffect.Highlight)
+        .stateStyles({
+          normal: { .opacity(1) },
+          pressed: { .opacity(0.6) }
+        })
+        .animation({ duration: motionDuration(MOTION_PRESS), curve: Curve.EaseOut })
+        .onClick(() => {
+          const actions = requireActions(this.actions);
+          actions.logsController.markAllIdeasViewed();
+          actions.switchTab(1);
+        })
       }
     }
   }

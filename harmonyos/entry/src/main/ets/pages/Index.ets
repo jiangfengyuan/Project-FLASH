@@ -2,6 +2,7 @@ import { common } from '@kit.AbilityKit';
 import { mediaquery } from '@kit.ArkUI';
 import { Category } from '../models/Models';
 import { dayString } from '../data/DateUtils';
+import { shouldShowIdeaReminder } from '../data/IdeaReminder';
 import { AppController } from '../state/AppController';
 import { PageActions } from '../state/PageActions';
 import { NavigationState, ThemeState, HomeState, LogsState, EmotionState, CalendarState, BackupState, SettingsState, FeedbackState, SystemEnvironment, normalizeThemeMode, resolveThemeDark, systemEnvironment, contentLayout } from '../state/FeatureStates';
@@ -11,15 +12,15 @@ import { StatsPage } from '../pages/StatsPage';
 import { ProfilePage } from '../pages/ProfilePage';
 import { EmotionPage } from '../pages/EmotionPage';
 import { CalendarPage } from '../pages/CalendarPage';
-import { LogManagerPage } from '../pages/LogManagerPage';
 import { HarmonyFeaturesPage } from '../pages/HarmonyFeaturesPage';
 import { QuickInputDialog } from '../components/QuickInputDialog';
 import { EditLogDialog } from '../components/EditLogDialog';
+import { RecordDetailDialog } from '../components/RecordDetailDialog';
 import { TaskEditorDialog } from '../components/TaskEditorDialog';
 import { DestructiveConfirmDialog } from '../components/DestructiveConfirmDialog';
 import { WelcomeOverlay } from '../components/WelcomeOverlay';
 import {
-  FabButton, FabOption, FlashDockBar, DetailHeader, LoadingState, ErrorState, FAB_SIZE, brandText,
+  FabButton, FabOption, FlashDockBar, DetailHeader, LoadingState, ErrorState, FAB_SIZE, BRAND, brandText,
   scrimColor, toastSurface, toastLevelColor, fabOptionColor, motionDuration,
   MOTION_PRESS, MOTION_FADE, MOTION_PAGE, TYPE_CAPTION, TYPE_SECONDARY,
   CONTENT_MAX_WIDE, CONTENT_MAX_MEDIUM, CONTENT_MAX_CENTERED,
@@ -106,6 +107,10 @@ struct Index {
   onBackPress(): boolean {
     if (this.logs.editingLogId !== '') {
       this.actions?.logsController.requestCloseEdit();
+      return true;
+    }
+    if (this.logs.detailLogId !== '') {
+      this.actions?.logsController.closeLogDetail();
       return true;
     }
     if (this.navigation.fabExpanded) {
@@ -205,7 +210,6 @@ struct Index {
   private detailTitle(): string {
     if (this.navigation.detail === 'emotion') return '记录情绪';
     if (this.navigation.detail === 'calendar') return '日历';
-    if (this.navigation.detail === 'logs') return '记录管理';
     if (this.navigation.detail === 'harmony') return '鸿蒙体验';
     return '设置与备份';
   }
@@ -276,15 +280,19 @@ struct Index {
       DetailHeader(this.theme, this.detailTitle(), () => this.closeDetail())
       if (this.navigation.detail === 'emotion') EmotionPage({ theme: this.theme, emotion: this.emotion, feedback: this.feedback, actions: this.actions })
       else if (this.navigation.detail === 'calendar') CalendarPage({ theme: this.theme, calendar: this.calendar, feedback: this.feedback, actions: this.actions })
-      else if (this.navigation.detail === 'logs') LogManagerPage({ theme: this.theme, logs: this.logs, feedback: this.feedback, actions: this.actions })
       else if (this.navigation.detail === 'harmony') HarmonyFeaturesPage({ navigation: this.navigation, theme: this.theme, settings: this.settings, actions: this.actions })
     }.width('100%').height('100%').backgroundColor(this.theme.themeBackground)
+  }
+
+  // Idea Reminder 角标：达到阈值才显示（对齐 Android shouldShowIdeaReminder）。
+  private ideaBadge(): number {
+    return shouldShowIdeaReminder(this.home.unviewedIdeaCount) ? this.home.unviewedIdeaCount : 0;
   }
 
   @Builder
   private dockBar() {
     Row({ space: 12 }) {
-      FlashDockBar(this.theme, this.navigation, (index: number) => this.switchTab(index))
+      FlashDockBar(this.theme, this.navigation, (index: number) => this.switchTab(index), this.ideaBadge())
       FabButton(this.navigation, () => this.toggleFab())
     }
     .width('100%')
@@ -296,7 +304,7 @@ struct Index {
     Column({ space: 10 }) {
       Image($r('app.media.icon')).width(40).height(40).borderRadius(10).margin({ top: 24, bottom: 18 })
       this.railButton(0, $r('sys.symbol.house'), $r('sys.symbol.house_fill'), '此刻')
-      this.railButton(1, $r('sys.symbol.doc_text'), $r('sys.symbol.doc_text_fill'), '记录')
+      this.railButton(1, $r('sys.symbol.doc_text'), $r('sys.symbol.doc_text_fill'), '记录', this.ideaBadge())
       this.railButton(2, $r('sys.symbol.clock_arrow_2_circlepath'), $r('sys.symbol.clock_arrow_2_circlepath_fill'), '回顾')
       this.railButton(3, $r('sys.symbol.gearshape'), $r('sys.symbol.gearshape_fill'), '设置')
       Blank()
@@ -309,21 +317,35 @@ struct Index {
   }
 
   @Builder
-  private railButton(index: number, icon: Resource, activeIcon: Resource, label: string) {
-    Column({ space: 5 }) {
-      SymbolGlyph(this.navigation.activeTab === index ? activeIcon : icon)
-        .fontSize(22)
-        .fontColor([this.navigation.activeTab === index ? brandText(this.theme) : this.theme.themeMuted])
-      Text(label).fontSize(TYPE_CAPTION).fontColor(this.navigation.activeTab === index ? brandText(this.theme) : this.theme.themeMuted)
-        .fontWeight(this.navigation.activeTab === index ? FontWeight.Medium : FontWeight.Regular)
+  private railButton(index: number, icon: Resource, activeIcon: Resource, label: string, badge: number = 0) {
+    Stack({ alignContent: Alignment.TopEnd }) {
+      Column({ space: 5 }) {
+        SymbolGlyph(this.navigation.activeTab === index ? activeIcon : icon)
+          .fontSize(22)
+          .fontColor([this.navigation.activeTab === index ? brandText(this.theme) : this.theme.themeMuted])
+        Text(label).fontSize(TYPE_CAPTION).fontColor(this.navigation.activeTab === index ? brandText(this.theme) : this.theme.themeMuted)
+          .fontWeight(this.navigation.activeTab === index ? FontWeight.Medium : FontWeight.Regular)
+      }
+      .width(78)
+      .height(68)
+      .justifyContent(FlexAlign.Center)
+      if (badge > 0) {
+        Text(badge > 99 ? '99+' : `${badge}`)
+          .fontSize(TYPE_CAPTION)
+          .fontColor(Color.White)
+          .textAlign(TextAlign.Center)
+          .constraintSize({ minWidth: 18 })
+          .height(18)
+          .padding({ left: 4, right: 4 })
+          .backgroundColor(BRAND)
+          .borderRadius(9)
+          .translate({ x: -6, y: 4 })
+      }
     }
-    .width(78)
-    .height(68)
-    .justifyContent(FlexAlign.Center)
     .backgroundColor(this.navigation.activeTab === index ? this.theme.themeTint : Color.Transparent)
     .borderRadius(18)
     .accessibilityGroup(true)
-    .accessibilityText(label + (this.navigation.activeTab === index ? '，已选中' : ''))
+    .accessibilityText(label + (this.navigation.activeTab === index ? '，已选中' : '') + (badge > 0 ? `，${badge} 条未读灵感` : ''))
     .stateStyles({
       normal: { .scale({ x: 1, y: 1 }) },
       pressed: { .scale({ x: 0.92, y: 0.92 }) }
@@ -449,6 +471,13 @@ struct Index {
       if (!this.settings.showWelcome && this.navigation.detail === '') this.fabOverlay()
       if (this.logs.quickCategory !== '') {
         QuickInputDialog({ navigation: this.navigation, theme: this.theme, logs: this.logs, actions: this.actions })
+          .transition(overlayTransition())
+      }
+      if (this.logs.detailLogId !== '') {
+        RecordDetailDialog({
+          navigation: this.navigation, theme: this.theme, logs: this.logs,
+          feedback: this.feedback, settings: this.settings, actions: this.actions
+        })
           .transition(overlayTransition())
       }
       if (this.logs.editingLogId !== '') {

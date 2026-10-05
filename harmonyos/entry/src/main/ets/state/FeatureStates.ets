@@ -81,6 +81,8 @@ export class HomeState {
   todayTaskCount: number = 0;
   todayTaskDoneCount: number = 0;
   recentLogs: LogItem[] = [];
+  // 未读灵感数（本地已读状态，不进备份）；提醒与角标按 IDEA_REMINDER_THRESHOLD 显示。
+  unviewedIdeaCount: number = 0;
 }
 
 @Observed
@@ -96,8 +98,11 @@ export class LogsState {
   editCategory: string = '';
   editTag: string = '';
   editDate: string = '';
+  editImportance: number = 0;
   editError: string = '';
   editDiscard: boolean = false;
+  // 记录详情弹层：卡片点击进入详情，详情内再编辑/删除/分享。
+  detailLogId: string = '';
   captureText: string = '';
   captureCategory: string = Category.LOG;
   // 记录页筛选：filterCategory 为 all/log/idea/inbox，filterDate 为 all/today/week/month，
@@ -117,8 +122,13 @@ export class EmotionState {
   emotionsVersion: number = 0;
   emotionLevel: number = 0;
   emotionNote: string = '';
+  // 当前状态（具体心情）：快捷 chip 或自由文本，随情绪记录保存。
+  emotionStatus: string = '';
   selectedSubEmotion: string = SubEmotion.SAD;
   busy: boolean = false;
+  // 保存成功动效信号：savedFlash 递增触发页面差异化反馈，savedLevel 记录情绪极性。
+  savedFlash: number = 0;
+  savedLevel: number = 0;
 }
 
 @Observed
@@ -180,6 +190,8 @@ export class SettingsState {
   agentRuntimeSupported: boolean = false;
   fileSandboxShareSupported: boolean = false;
   notificationSettingsSupported: boolean = false;
+  // 系统分享面板（ShareKit systemShare）能力探测；不可用时隐藏分享入口。
+  systemShareSupported: boolean = false;
   // 减少动态效果：系统无公开查询接口，此为应用内设置（Preferences 持久化）。
   reduceMotion: boolean = false;
 }

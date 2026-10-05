@@ -160,6 +160,11 @@ export function importanceFromContent(content: string): number {
   if (content.includes('!!')) return 2;
   return 0;
 }
+
+/** 契约口径：重要度为 0–4 的整数；编辑入口只允许这个范围内的值。 */
+export function isValidImportance(value: number): boolean {
+  return Number.isInteger(value) && value >= 0 && value <= 4;
+}
 // Copyright (c) 2026 Fengyuan Jiang
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
