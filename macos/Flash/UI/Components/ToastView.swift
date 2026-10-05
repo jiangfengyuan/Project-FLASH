@@ -6,7 +6,8 @@
 
 import SwiftUI
 
-/// 顶部轻提示（toast）：.regularMaterial 胶囊 + 细边框 + 轻阴影。
+/// 顶部轻提示（toast）：悬浮层玻璃胶囊（`flashGlassBackground`，macOS 26+ Liquid Glass /
+/// macOS 15 regularMaterial + 细边框）+ 悬浮层阴影令牌。
 /// 出现/消失过渡内置为 FlashMotion `.pop`（淡入 + 缩放 0.94，锚点顶部），
 /// 尊重 Reduce Motion。已实测：SwiftUI 会采用被插入视图 body 根部的 transition，
 /// 因此调用方只需用 `Motion.animate`/`withAnimation` 切换 message 即可，
@@ -19,26 +20,22 @@ struct ToastView: View {
 
     var body: some View {
         Text(message)
-            .font(.system(size: 13, weight: .medium))
+            .font(.body.weight(.medium))
             .foregroundStyle(Color.primary)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 8)
-            .background(.regularMaterial, in: Capsule())
-            .overlay {
-                Capsule()
-                    .strokeBorder(Color.primary.opacity(0.12), lineWidth: 0.5)
-            }
-            .shadow(color: .black.opacity(0.12), radius: 8, y: 3)
+            .padding(.horizontal, 14) // 胶囊横向呼吸：无对应间距令牌（sm 偏紧、md 偏宽）
+            .padding(.vertical, Spacing.xs)
+            .flashGlassBackground(in: Capsule())
+            .flashElevatedShadow()
             .accessibilityLabel(message)
             .transition(.pop(reduceMotion: reduceMotion))
     }
 }
 
 #Preview {
-    VStack(spacing: 16) {
+    VStack(spacing: Spacing.md) {
         ToastView(message: "✓ 已保存到日志")
         ToastView(message: "✓ 已保存到灵感")
     }
-    .padding(24)
+    .padding(Spacing.lg)
     .frame(width: 360, height: 160)
 }

@@ -31,7 +31,7 @@ struct ExploreFilterPanel: View {
         VStack(alignment: .leading, spacing: Spacing.md) {
             HStack {
                 Text("筛选")
-                    .font(.headline)
+                    .font(Typography.cardTitle)
                     .foregroundStyle(BrandColors.textPrimary)
                 Spacer()
                 Button("清除筛选") { onClear() }
@@ -44,7 +44,7 @@ struct ExploreFilterPanel: View {
             SolidCard {
                 VStack(alignment: .leading, spacing: Spacing.sm) {
                     Text("标签")
-                        .font(.callout)
+                        .font(Typography.secondary)
                         .foregroundStyle(BrandColors.textSecondary)
                     Picker("标签", selection: $criteria.tag) {
                         Text("不限").tag(ColorTag?.none)
@@ -55,7 +55,7 @@ struct ExploreFilterPanel: View {
                     .labelsHidden()
 
                     Text("重要度")
-                        .font(.callout)
+                        .font(Typography.secondary)
                         .foregroundStyle(BrandColors.textSecondary)
                     Picker("重要度", selection: $criteria.minImportance) {
                         Text("不限").tag(0)
@@ -66,7 +66,7 @@ struct ExploreFilterPanel: View {
                     .labelsHidden()
 
                     Text("日期范围")
-                        .font(.callout)
+                        .font(Typography.secondary)
                         .foregroundStyle(BrandColors.textSecondary)
                     OptionalDateRow(title: "开始日期", date: $criteria.startDate)
                     OptionalDateRow(title: "结束日期", date: $criteria.endDate)
@@ -75,8 +75,9 @@ struct ExploreFilterPanel: View {
             }
         }
         .padding(Spacing.md)
-        .frame(width: 280)
-        .background(BrandColors.pageBackground)
+        .frame(width: 280) // 浮层固有宽度（几何值）
+        // popover 浮层：玻璃背景（macOS 26+ Liquid Glass / 15 回退 regularMaterial + 细边框）
+        .flashGlassBackground(in: RoundedRectangle(cornerRadius: Radius.panel, style: .continuous))
     }
 }
 

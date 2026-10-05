@@ -30,7 +30,7 @@ struct MenuBarCompanionView: View {
     private static let panelWidth: CGFloat = 300
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
             header
             if appState.isDatabaseInMemoryFallback {
                 fallbackBanner
@@ -44,8 +44,10 @@ struct MenuBarCompanionView: View {
             Divider()
             footer
         }
-        .padding(14)
+        .padding(14) // 面板内边距：无对应令牌（sm 偏紧、md 偏宽）
         .frame(width: Self.panelWidth)
+        // 悬浮层：玻璃背景（macOS 26+ Liquid Glass / 15 回退 regularMaterial + 细边框）
+        .flashGlassBackground(in: RoundedRectangle(cornerRadius: Radius.panel, style: .continuous))
         .background { escCloser }
         .onAppear {
             today = DateFormatting.today()
@@ -57,16 +59,16 @@ struct MenuBarCompanionView: View {
     // MARK: - 区块
 
     private var header: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 6) { // 6：图标与标题的紧凑节奏（无对应令牌）
             Image(systemName: "sparkles")
                 .foregroundStyle(BrandColors.accent)
             Text("Flash")
-                .font(.headline)
+                .font(Typography.cardTitle)
             Spacer()
             if let feedback {
                 Label(feedback,
                       systemImage: feedbackIsError ? "exclamationmark.triangle" : "checkmark.circle.fill")
-                    .font(.caption)
+                    .font(Typography.caption)
                     .foregroundStyle(feedbackIsError ? Color(nsColor: .systemRed) : BrandColors.accent)
                     .transition(.pop(reduceMotion: reduceMotion))
             }
@@ -77,33 +79,33 @@ struct MenuBarCompanionView: View {
     /// 提示用户本次记录只写入易失内存库，退出即丢
     private var fallbackBanner: some View {
         Label("数据存储异常：本次记录不会被保存到磁盘", systemImage: "exclamationmark.triangle.fill")
-            .font(.caption)
+            .font(Typography.caption)
             .foregroundStyle(Color(nsColor: .systemRed))
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
+            .padding(.horizontal, 10) // 横幅紧凑内距（无对应令牌）
+            .padding(.vertical, 6)    // 同上
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color(nsColor: .systemRed).opacity(0.08),
-                        in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                        in: RoundedRectangle(cornerRadius: Radius.field, style: .continuous))
     }
 
     private var captureInput: some View {
         TextField("今天想记录什么？", text: $draft)
             .textFieldStyle(.plain)
-            .font(.body)
+            .font(Typography.body)
             .focused($inputFocused)
             .onSubmit(save)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 8)
+            .padding(.horizontal, 10) // 输入框横向内距（无对应令牌）
+            .padding(.vertical, Spacing.xs)
             .background(Color(nsColor: .textBackgroundColor),
-                        in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                        in: RoundedRectangle(cornerRadius: Radius.field, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .strokeBorder(Color(nsColor: .separatorColor).opacity(0.6), lineWidth: 0.5)
+                RoundedRectangle(cornerRadius: Radius.field, style: .continuous)
+                    .strokeBorder(BrandColors.weakBorder, lineWidth: 0.5)
             }
     }
 
     private var quickJumps: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: Spacing.xs) {
             JumpButton(title: "记录", systemImage: Module.logflow.systemImage,
                        reduceMotion: reduceMotion) { openMainWindow(.logflow) }
             JumpButton(title: "情绪", systemImage: Module.emotion.systemImage,
@@ -117,13 +119,13 @@ struct MenuBarCompanionView: View {
         HStack {
             Button { openMainWindow() } label: {
                 Label("打开 Flash", systemImage: "macwindow")
-                    .font(.callout)
+                    .font(Typography.secondary)
             }
             .buttonStyle(.borderless)
             Spacer()
             Button("退出") { NSApp.terminate(nil) }
                 .buttonStyle(.plain)
-                .font(.caption)
+                .font(Typography.caption)
                 .foregroundStyle(.secondary)
         }
     }
@@ -216,7 +218,7 @@ private struct TodaySummary: View {
     }
 
     var body: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: Spacing.xxs) {
             Image(systemName: "note.text")
             Text("今日 \(todayLogs.count) 条记录")
                 .monospacedDigit()
@@ -231,7 +233,7 @@ private struct TodaySummary: View {
                 Text("今天还没记录情绪")
             }
         }
-        .font(.caption)
+        .font(Typography.caption)
         .foregroundStyle(.secondary)
     }
 }
@@ -248,14 +250,15 @@ private struct JumpButton: View {
     var body: some View {
         Button(action: action) {
             Label(title, systemImage: systemImage)
-                .font(.callout)
+                .font(Typography.secondary)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 6)
-                .background(Color(nsColor: .controlBackgroundColor).opacity(hovering ? 1 : 0.6),
-                            in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .padding(.vertical, 6) // 小按钮纵向内距（无对应令牌）
+                .background(BrandColors.cardSurface.opacity(hovering ? 1 : 0.6),
+                            in: RoundedRectangle(cornerRadius: Radius.field, style: .continuous))
                 .overlay {
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .strokeBorder(Color(nsColor: .separatorColor).opacity(hovering ? 0.8 : 0.4),
+                    RoundedRectangle(cornerRadius: Radius.field, style: .continuous)
+                        .strokeBorder(hovering ? BrandColors.textSecondary.opacity(0.6)
+                                               : BrandColors.weakBorder,
                                       lineWidth: 0.5)
                 }
         }

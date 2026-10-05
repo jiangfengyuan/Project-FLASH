@@ -11,11 +11,11 @@ struct StorageBannerSection: View {
     var body: some View {
         Section {
             Label {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: Spacing.xxs) {
                     Text("数据默认保存在此设备")
-                        .font(.headline)
+                        .font(Typography.cardTitle)
                     Text("可导出备份或在可信局域网内传输")
-                        .font(.caption).foregroundStyle(.secondary)
+                        .font(Typography.caption).foregroundStyle(.secondary)
                 }
             } icon: {
                 Image(systemName: "internaldrive")

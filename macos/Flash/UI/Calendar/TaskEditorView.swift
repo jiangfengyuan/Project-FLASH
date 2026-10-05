@@ -33,18 +33,18 @@ struct TaskEditorView: View {
     private var notesExceedsLimit: Bool { !TextLimits.fits(notes) }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text(task == nil ? "新建任务" : "编辑任务").font(.title2.bold())
+        VStack(alignment: .leading, spacing: Spacing.md) {
+            Text(task == nil ? "新建任务" : "编辑任务").font(Typography.sectionTitle)
             TextField("任务标题", text: $title).textFieldStyle(.roundedBorder)
             if titleExceedsLimit {
                 Text("标题超出上限（\(title.utf16.count)/\(TextLimits.maxTaskTitleUTF16)）")
-                    .font(.caption)
+                    .font(Typography.caption)
                     .foregroundStyle(Color(nsColor: .systemRed))
             }
             TextField("备注（可选）", text: $notes, axis: .vertical).lineLimit(2...5)
             if notesExceedsLimit {
                 Text("备注超出上限（\(notes.utf16.count)/\(TextLimits.maxContentUTF16)）")
-                    .font(.caption)
+                    .font(Typography.caption)
                     .foregroundStyle(Color(nsColor: .systemRed))
             }
             Toggle("全天任务", isOn: $allDay)
@@ -66,8 +66,8 @@ struct TaskEditorView: View {
                               || titleExceedsLimit || notesExceedsLimit)
             }
         }
-        .padding(24)
-        .frame(width: 430)
+        .padding(Spacing.lg)
+        .frame(width: 430) // 编辑器固有宽度（几何值）
         .environment(\.timeZone, editorTimeZone)
     }
 

@@ -216,7 +216,8 @@ struct ExploreLogListView: View {
             EmptyStateView(
                 systemImage: isIdea ? "lightbulb" : "book",
                 title: isIdea ? "灵感还没出现，先给它留个位置。" : "今天还没有故事。",
-                message: isIdea ? "在「此刻」页记下第一束灵感" : "在「此刻」页写下第一条记录"
+                message: isIdea ? "在「此刻」页记下第一束灵感" : "在「此刻」页写下第一条记录",
+                iconTint: isIdea ? BrandColors.ideaYellow : BrandColors.logPurple
             )
         }
     }

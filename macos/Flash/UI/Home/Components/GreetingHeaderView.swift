@@ -20,13 +20,12 @@ struct GreetingHeaderView: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: Spacing.md) {
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 6) { // 6：问候语与副标题的紧凑节奏（无对应令牌）
                 Text(greeting)
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundStyle(Color.primary)
+                    .flashPageTitle()
 
                 Text("今天也记录一点什么吧。")
-                    .font(.callout)
+                    .font(Typography.secondary)
                     .foregroundStyle(Color.secondary)
             }
 
@@ -58,15 +57,15 @@ struct GreetingHeaderView: View {
             Button("记录情绪") { onNewEmotion() }
             Button("新建任务") { onNewTask() }
         } label: {
-            HStack(spacing: 4) {
+            HStack(spacing: Spacing.xxs) {
                 Image(systemName: "plus")
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(Typography.secondary.weight(.semibold))
                 Text("新建")
-                    .font(.callout.weight(.semibold))
+                    .font(Typography.secondary.weight(.semibold))
             }
             .foregroundStyle(Color.white)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 8)
+            .padding(.horizontal, 14) // 胶囊横向内距：无对应令牌（sm 偏紧、md 偏宽）
+            .padding(.vertical, Spacing.xs)
             .background(
                 Capsule()
                     .fill(BrandColors.accent.opacity(isNewHovered ? 0.85 : 1.0))

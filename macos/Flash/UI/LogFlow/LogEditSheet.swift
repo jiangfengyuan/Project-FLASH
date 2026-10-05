@@ -60,7 +60,7 @@ struct LogEditSheet: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.md) {
-                Text(title).font(.headline)
+                Text(title).font(Typography.cardTitle)
                     .foregroundStyle(BrandColors.textPrimary)
                     .staggeredIn(index: 0, appeared: appeared, reduceMotion: reduceMotion)
 
@@ -70,34 +70,37 @@ struct LogEditSheet: View {
                             .init(value: Category.log, title: "日志"),
                             .init(value: Category.idea, title: "灵感"),
                         ])
-                        .frame(maxWidth: 220)
+                        .frame(maxWidth: 220) // 分段控件固有宽度（几何值）
+                        // 四模块色：分段选中色跟随类别（日志紫 / 灵感黄）
+                        .tint(category == .idea ? BrandColors.ideaYellow : BrandColors.logPurple)
+                        .animation(Motion.quick(reduceMotion), value: category)
 
                         ZStack(alignment: .topLeading) {
                             TextEditor(text: $content)
-                                .font(.body)
-                                .frame(minHeight: 120)
-                                .padding(4)
+                                .font(Typography.body)
+                                .frame(minHeight: 120) // 正文编辑区最小高度（几何值）
+                                .padding(Spacing.xxs)
                                 .scrollContentBackground(.hidden)
                                 .background(BrandColors.weakSurface)
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                .clipShape(RoundedRectangle(cornerRadius: Radius.field))
                                 .overlay {
-                                    RoundedRectangle(cornerRadius: 8)
+                                    RoundedRectangle(cornerRadius: Radius.field)
                                         .stroke(BrandColors.weakBorder, lineWidth: 1)
                                 }
                                 .focused($contentFocused)
                             if content.isEmpty {
                                 Text("记录内容…")
-                                    .font(.body)
+                                    .font(Typography.body)
                                     .foregroundStyle(BrandColors.textSecondary)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 8)
+                                    .padding(.horizontal, Spacing.xs)
+                                    .padding(.vertical, Spacing.xs)
                                     .allowsHitTesting(false)
                             }
                         }
 
                         if contentExceedsLimit {
                             Text("已超出上限（\(content.utf16.count)/\(TextLimits.maxContentUTF16)），请删减后再保存")
-                                .font(.caption)
+                                .font(Typography.caption)
                                 .foregroundStyle(Color(nsColor: .systemRed))
                         }
                     }
@@ -156,7 +159,7 @@ struct LogEditSheet: View {
             Button("放弃修改", role: .destructive) { dismiss() }
             Button("继续编辑", role: .cancel) {}
         }
-        .frame(width: 480)
+        .frame(width: 480) // 编辑面板固有宽度（几何值）
         .background(BrandColors.pageBackground)
         .onAppear {
             appeared = true

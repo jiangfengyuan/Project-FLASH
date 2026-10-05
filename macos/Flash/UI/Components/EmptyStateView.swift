@@ -15,20 +15,22 @@ struct EmptyStateView: View {
     let systemImage: String
     let title: String
     var message: String? = nil
+    /// 图标模块色（nil 用次文字色）；仅作点缀，信息由标题文字承载
+    var iconTint: Color? = nil
     var actionTitle: String? = nil
     var action: (() -> Void)? = nil
 
     var body: some View {
         VStack(spacing: Spacing.sm) {
             Image(systemName: systemImage)
-                .font(.system(size: 32))
-                .foregroundStyle(BrandColors.textSecondary)
+                .scaledSystemFont(size: 32, relativeTo: .title)
+                .foregroundStyle(iconTint ?? BrandColors.textSecondary)
             Text(title)
-                .font(.headline)
+                .font(Typography.cardTitle)
                 .foregroundStyle(BrandColors.textPrimary)
             if let message {
                 Text(message)
-                    .font(.subheadline)
+                    .font(Typography.secondary)
                     .foregroundStyle(BrandColors.textSecondary)
                     .multilineTextAlignment(.center)
             }

@@ -17,6 +17,8 @@ struct LogCardView: View {
     @State private var hovering = false
     /// 删除确认前的极轻缩放反馈
     @State private var deletePulse = false
+    /// hover 浮现操作按钮的命中框：固定基准 28，随系统字体档位缩放（图标框场景）
+    @ScaledMetric(relativeTo: .body) private var actionButtonSize = 28
 
     private var hasActions: Bool { onEdit != nil || onDelete != nil }
     private var showActions: Bool { hovering && hasActions }
@@ -28,17 +30,17 @@ struct LogCardView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) { // 10：徽章行与正文的紧凑节奏（无对应令牌）
+            HStack(spacing: Spacing.xs) {
                 tagBadge
                 if log.importance > 0 {
                     Text(String(repeating: "!", count: log.importance))
-                        .font(.caption).bold()
+                        .font(Typography.caption).bold()
                         .foregroundStyle(ColorTag.urgent.textColor)
                 }
                 Spacer()
                 Text(timestamp)
-                    .font(.caption)
+                    .font(Typography.caption)
                     .foregroundStyle(.secondary)
                 if hasActions {
                     actionButtons
@@ -49,17 +51,17 @@ struct LogCardView: View {
                 }
             }
             Text(log.content)
-                .font(.body)
+                .font(Typography.body)
                 .foregroundStyle(.primary)
                 .textSelection(.enabled)
         }
-        .padding(14)
+        .padding(14) // 卡片内边距：sm 与 md 之间的特调值
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(nsColor: .controlBackgroundColor))
-        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .background(BrandColors.cardSurface)
+        .clipShape(RoundedRectangle(cornerRadius: Radius.row))
         .overlay {
-            RoundedRectangle(cornerRadius: 10)
-                .stroke(Color(nsColor: .separatorColor), lineWidth: 0.5)
+            RoundedRectangle(cornerRadius: Radius.row)
+                .stroke(BrandColors.weakBorder, lineWidth: 0.5)
         }
         .scaleEffect(deletePulse ? 0.97 : 1)
         .cardFloat(reduceMotion: reduceMotion)
@@ -70,19 +72,19 @@ struct LogCardView: View {
     /// 文案用 textColor（同色系加深变体），浅色模式下达到正文对比度
     private var tagBadge: some View {
         Text(log.colorTag.displayName)
-            .font(.caption)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 2)
+            .font(Typography.caption)
+            .padding(.horizontal, Spacing.xs)
+            .padding(.vertical, 2) // 徽章纵向内距：极小特调值
             .background(log.colorTag.color.opacity(0.15), in: Capsule())
             .foregroundStyle(log.colorTag.textColor)
     }
 
     private var actionButtons: some View {
-        HStack(spacing: 2) {
+        HStack(spacing: 2) { // 2：相邻图标按钮的极小间距
             if let onEdit {
                 Button(action: onEdit) {
                     Image(systemName: "pencil")
-                        .frame(width: 28, height: 28)
+                        .frame(width: actionButtonSize, height: actionButtonSize)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
@@ -93,7 +95,7 @@ struct LogCardView: View {
             if onDelete != nil {
                 Button(action: deleteTapped) {
                     Image(systemName: "trash")
-                        .frame(width: 28, height: 28)
+                        .frame(width: actionButtonSize, height: actionButtonSize)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
@@ -102,7 +104,7 @@ struct LogCardView: View {
                 .accessibilityLabel("删除")
             }
         }
-        .font(.caption)
+        .font(Typography.caption)
     }
 
     /// 点删除：卡片先做一个极轻缩放脉冲（Motion.bounce），同时立刻触发确认流程，不阻塞

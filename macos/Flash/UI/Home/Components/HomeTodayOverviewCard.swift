@@ -40,10 +40,10 @@ struct HomeTodayOverviewCard: View {
     private func item(icon: String, tint: Color, value: String, label: String) -> some View {
         HStack(spacing: Spacing.sm) {
             Image(systemName: icon)
-                .font(.system(size: 15, weight: .medium))
+                .scaledSystemFont(size: 15, weight: .medium, relativeTo: .body)
                 .foregroundStyle(tint)
-                .frame(width: 24)
-            VStack(alignment: .leading, spacing: 2) {
+                .frame(width: 24) // 图标列宽（几何值，对齐三段）
+            VStack(alignment: .leading, spacing: 2) { // 2：数值与标签的紧凑节奏
                 Text(value)
                     .font(.title3.bold())
                     .monospacedDigit()
@@ -51,7 +51,7 @@ struct HomeTodayOverviewCard: View {
                     .contentTransition(.numericText())
                     .animation(Motion.soft(reduceMotion), value: value)
                 Text(label)
-                    .font(.caption)
+                    .font(Typography.caption)
                     .foregroundStyle(BrandColors.textSecondary)
                     .lineLimit(1)
             }

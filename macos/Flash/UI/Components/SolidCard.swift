@@ -37,10 +37,10 @@ struct SolidCard<Content: View>: View {
     SolidCard {
         VStack(alignment: .leading, spacing: Spacing.xs) {
             Text("SolidCard")
-                .font(.headline)
+                .font(Typography.cardTitle)
                 .foregroundStyle(BrandColors.textPrimary)
             Text("表单与高密度列表的实色容器。")
-                .font(.subheadline)
+                .font(Typography.secondary)
                 .foregroundStyle(BrandColors.textSecondary)
         }
         .padding(Spacing.md)

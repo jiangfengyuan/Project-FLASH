@@ -23,7 +23,7 @@ struct AboutSection: View {
                 SettingsRowLabel(title: "版本", systemImage: "info.circle", color: .secondary)
             }
             Label("无云端账号，备份与传输由你主动发起。", systemImage: "lock.shield")
-                .font(.caption)
+                .font(Typography.caption)
                 .foregroundStyle(.secondary)
         }
         .opacity(appeared ? 1 : 0)

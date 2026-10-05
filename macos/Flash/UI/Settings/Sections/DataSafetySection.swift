@@ -6,7 +6,8 @@
 
 import SwiftUI
 
-/// 「数据与安全」分组：系统分享 / 局域网收发 / 导出 / 标准与恢复导入。
+/// 「数据与安全」分组：导出备份为主操作（.borderedProminent 强调），
+/// 系统分享 / 局域网收发 / 标准与恢复导入为普通行按钮（均带 hover 反馈）。
 /// 各动作通过闭包抛回 SettingsView（导出/导入状态机、LAN 控制器均由其持有）。
 struct DataSafetySection: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -24,6 +25,13 @@ struct DataSafetySection: View {
 
     var body: some View {
         Section("数据与安全") {
+            // 主操作：导出备份（ prominent 胶囊，图标/文字随按钮样式反白）
+            Button(action: onExport) {
+                Label("导出备份…", systemImage: "tray.and.arrow.up")
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(BrandColors.brandPrimary)
+
             Button(action: onShare) {
                 SettingsRowLabel(title: "通过系统分享…", systemImage: "square.and.arrow.up", color: BrandColors.accessibleGreen)
             }
@@ -31,28 +39,27 @@ struct DataSafetySection: View {
             Button(action: onLanSend) {
                 SettingsRowLabel(title: "局域网发送…", systemImage: "paperplane", color: BrandColors.accessibleGreen)
             }
+            .hoverFeedback(reduceMotion: reduceMotion)
             Button(action: onLanReceive) {
                 SettingsRowLabel(title: "局域网接收…", systemImage: "antenna.radiowaves.left.and.right", color: BrandColors.accessibleGreen)
-            }
-            Button(action: onExport) {
-                SettingsRowLabel(title: "导出备份…", systemImage: "tray.and.arrow.up", color: BrandColors.accessibleGreen)
             }
             .hoverFeedback(reduceMotion: reduceMotion)
             Button(action: onImport) {
                 SettingsRowLabel(title: "标准导入…", systemImage: "tray.and.arrow.down", color: BrandColors.accessibleGreen)
             }
+            .hoverFeedback(reduceMotion: reduceMotion)
             Button(action: onRecoveryImport) {
                 SettingsRowLabel(title: "恢复损坏或旧版备份…", systemImage: "bandage", color: BrandColors.accessibleGreen)
             }
             .hoverFeedback(reduceMotion: reduceMotion)
-            Text("通过系统分享传输明文 JSON；可选择 AirDrop、信息、邮件或云盘。")
-                .font(.caption)
+            Text("导出与传输均为明文 JSON，仅在可信设备与网络中使用。")
+                .font(Typography.caption)
                 .foregroundStyle(.secondary)
             if isBusy {
-                HStack(spacing: 8) {
+                HStack(spacing: Spacing.xs) {
                     ProgressView().controlSize(.small)
                     Text("正在处理…")
-                        .font(.caption)
+                        .font(Typography.caption)
                         .foregroundStyle(.secondary)
                 }
                 .transition(.appear(reduceMotion: reduceMotion))

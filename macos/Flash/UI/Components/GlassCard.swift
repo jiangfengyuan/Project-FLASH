@@ -20,7 +20,7 @@ struct GlassCard<Content: View>: View {
 
     @State private var hovering = false
 
-    init(cornerRadius: CGFloat = 20, hoverFeedback: Bool = false, @ViewBuilder content: () -> Content) {
+    init(cornerRadius: CGFloat = Radius.glass, hoverFeedback: Bool = false, @ViewBuilder content: () -> Content) {
         self.cornerRadius = cornerRadius
         self.hoverFeedback = hoverFeedback
         self.content = content()
@@ -71,15 +71,15 @@ struct GlassCard<Content: View>: View {
 
 #Preview {
     GlassCard {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Spacing.xs) {
             Text("GlassCard")
-                .font(.headline)
+                .font(Typography.cardTitle)
                 .foregroundStyle(Color.primary)
             Text("内容优先，玻璃效果只做点缀。")
-                .font(.subheadline)
+                .font(Typography.secondary)
                 .foregroundStyle(Color.secondary)
         }
-        .padding(16)
+        .padding(Spacing.md)
     }
-    .padding(24)
+    .padding(Spacing.lg)
 }

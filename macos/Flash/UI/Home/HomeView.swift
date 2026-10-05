@@ -99,7 +99,7 @@ struct HomeView: View {
         .overlay(alignment: .top) {
             if let toastMessage {
                 ToastView(message: toastMessage)
-                    .padding(.top, 12)
+                    .padding(.top, Spacing.sm)
             }
         }
         .animation(toastAnimation, value: toastMessage != nil)
@@ -164,7 +164,7 @@ struct HomeView: View {
         } else {
             VStack(alignment: .leading, spacing: Spacing.sm) {
                 Text("最近闪念")
-                    .font(.callout)
+                    .font(Typography.secondary)
                     .foregroundStyle(BrandColors.textSecondary)
                     .padding(.horizontal, Spacing.sm)
                 ViewThatFits(in: .horizontal) {

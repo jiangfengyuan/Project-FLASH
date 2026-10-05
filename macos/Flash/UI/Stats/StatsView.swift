@@ -29,13 +29,13 @@ struct StatsView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Text("回顾").font(.largeTitle.bold())
+                Text("回顾").flashPageTitle()
                 Spacer()
                 Picker("回顾视图", selection: $showsCalendar) {
                     Text("趋势").tag(false)
                     Text("日历").tag(true)
-                }.pickerStyle(.segmented).frame(width: 180)
-            }.padding(24)
+                }.pickerStyle(.segmented).frame(width: 180) // 分段控件固有宽度（几何值）
+            }.padding(Spacing.lg)
             ZStack {
                 trendsContent
                     .opacity(showsCalendar ? 0 : 1)
@@ -64,54 +64,55 @@ struct StatsView: View {
         let end = daily.last!.date
 
         return ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
+            VStack(alignment: .leading, spacing: Spacing.lg) {
                 Picker("时间范围", selection: $window) {
                     ForEach(ReviewWindow.allCases) { Text($0.rawValue).tag($0) }
-                }.pickerStyle(.segmented).frame(maxWidth: 400)
+                }.pickerStyle(.segmented).frame(maxWidth: 400) // 窗口选择器最大宽度（几何值）
 
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: Spacing.xs) {
                     Text(stats.comparison.conclusion)
-                        .font(.headline)
-                    Text("\(start) — \(end)").font(.caption).foregroundStyle(.secondary)
+                        .font(Typography.cardTitle)
+                    Text("\(start) — \(end)").font(Typography.caption).foregroundStyle(.secondary)
                     Text(insightDataLine(comparison: stats.comparison,
                                          logs: stats.periodLogCount,
                                          emotions: stats.periodEmotionCount))
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(20).background(BrandColors.cardSurface)
-                .clipShape(RoundedRectangle(cornerRadius: 24))
+                .padding(20) // 洞察卡内边距：md 与 lg 之间的特调值
+                .background(BrandColors.cardSurface)
+                .clipShape(RoundedRectangle(cornerRadius: Radius.card))
 
                 activityChart(stats.activity)
-                Text("累计概览 · 全部时间").font(.headline)
-                // KPI
-                HStack(spacing: 12) {
-                    kpiCard("累计日志", stats.totalLogs, "note.text", index: 0)
-                    kpiCard("累计灵感", stats.totalIdeas, "lightbulb", index: 1)
-                    kpiCard("累计情绪", stats.totalEmotions, "face.smiling", index: 2)
-                    kpiCard("活跃天数", stats.activeDays, "calendar", index: 3)
+                Text("累计概览 · 全部时间").font(Typography.cardTitle)
+                // KPI：图标走四模块色（日志紫 / 灵感黄 / 情绪粉 / 日历绿）
+                HStack(spacing: Spacing.sm) {
+                    kpiCard("累计日志", stats.totalLogs, "note.text", tint: BrandColors.logPurple, index: 0)
+                    kpiCard("累计灵感", stats.totalIdeas, "lightbulb", tint: BrandColors.ideaYellow, index: 1)
+                    kpiCard("累计情绪", stats.totalEmotions, "face.smiling", tint: BrandColors.emotionPink, index: 2)
+                    kpiCard("活跃天数", stats.activeDays, "calendar", tint: BrandColors.calendarGreen, index: 3)
                 }
 
                 if stats.hasEmotionData {
                     // 日均情绪趋势
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("情绪趋势 · 日均值").font(.headline)
-                        Text("-3 至 +3，0 为中性；无记录日期不计入均值").font(.caption).foregroundStyle(.secondary)
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
+                        Text("情绪趋势 · 日均值").font(Typography.cardTitle)
+                        Text("-3 至 +3，0 为中性；无记录日期不计入均值").font(Typography.caption).foregroundStyle(.secondary)
                         Chart {
                             RuleMark(y: .value("中性", 0))
                                 .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
-                                .foregroundStyle(Color(nsColor: .separatorColor))
+                                .foregroundStyle(BrandColors.weakBorder)
                             ForEach(Array(daily.enumerated()), id: \.offset) { _, item in
                                 if let average = item.average {
                                     LineMark(
                                         x: .value("日期", item.date),
                                         y: .value("均值", average)
                                     )
-                                    .foregroundStyle(Color(nsColor: .controlAccentColor))
+                                    .foregroundStyle(BrandColors.accent)
                                     PointMark(
                                         x: .value("日期", item.date),
                                         y: .value("均值", average)
                                     )
-                                    .foregroundStyle(Color(nsColor: .controlAccentColor))
+                                    .foregroundStyle(BrandColors.accent)
                                 }
                             }
                         }
@@ -124,33 +125,38 @@ struct StatsView: View {
                     }
 
                     if !stats.distribution.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("负面情绪构成").font(.headline)
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
+                            Text("负面情绪构成").font(Typography.cardTitle)
                             Text("伤心 / 生气 / 难受的出现次数，次数见条形末端数值")
-                                .font(.caption).foregroundStyle(.secondary)
+                                .font(Typography.caption).foregroundStyle(.secondary)
                             Chart(stats.distribution, id: \.name) { item in
                                 BarMark(
                                     x: .value("次数", item.count),
                                     y: .value("类型", item.name)
                                 )
                                 .foregroundStyle(BrandColors.brandPrimary)
-                                .cornerRadius(4)
+                                .cornerRadius(Radius.hairline)
                                 .annotation(position: .trailing) {
                                     Text("\(item.count) 次")
-                                        .font(.caption2).foregroundStyle(.secondary)
+                                        .font(Typography.fine).foregroundStyle(.secondary)
                                 }
                             }
-                            .frame(height: 140)
+                            .frame(height: 140) // 图表固有高度（几何值）
                             .animation(Motion.soft(reduceMotion), value: windowDays)
                         }
                     }
                 } else {
-                    ContentUnavailableView("暂无情绪数据",
-                                           systemImage: "chart.line.uptrend.xyaxis",
-                                           description: Text("先在「情绪」页记录几天吧"))
+                    // PRD §34：回顾页空态用品牌化 EmptyStateView（内置 .appear 过渡）
+                    EmptyStateView(
+                        systemImage: "chart.line.uptrend.xyaxis",
+                        title: "再记录一点，未来的你会看到。",
+                        message: "先在「情绪」页记录几天吧",
+                        iconTint: BrandColors.emotionPink
+                    )
+                    .frame(minHeight: 180) // 嵌入 ScrollView 内容流，给空态最小高度
                 }
             }
-            .padding(24)
+            .padding(Spacing.lg)
         }
         .background(BrandColors.pageBackground)
         .onAppear {
@@ -238,9 +244,9 @@ struct StatsView: View {
     private func activityChart(_ days: [DailyActivity]) -> some View {
         let maximum = max(1, days.map(\.total).max() ?? 0)
         let active = days.filter { $0.total > 0 }.count
-        return VStack(alignment: .leading, spacing: 12) {
-            Text("记录活跃度").font(.headline)
-            Text("每天的日志、灵感与情绪次数 · 不含任务").font(.caption).foregroundStyle(.secondary)
+        return VStack(alignment: .leading, spacing: Spacing.sm) {
+            Text("记录活跃度").font(Typography.cardTitle)
+            Text("每天的日志、灵感与情绪次数 · 不含任务").font(Typography.caption).foregroundStyle(.secondary)
             Text("\(active) 个活跃日 · 共 \(days.reduce(0) { $0 + $1.total }) 次")
             Chart(days) { day in
                 BarMark(x: .value("日期", day.date), y: .value("次数", day.total))
@@ -251,16 +257,17 @@ struct StatsView: View {
             .chartYScale(domain: 0...maximum)
             .chartYAxis { AxisMarks(values: [0, maximum]) }
             .frame(height: 160)
-            if active == 0 { Text("这段时间还没有记录，空白日期按 0 次显示。").font(.caption) }
+            if active == 0 { Text("这段时间还没有记录，空白日期按 0 次显示。").font(Typography.caption) }
             DisclosureGroup("每日明细", isExpanded: $showActivityDetails) {
                 ForEach(days) { day in
                     Text("\(day.date)：\(day.records) 条记录 · \(day.emotions) 次情绪")
-                        .font(.caption).frame(maxWidth: .infinity, alignment: .leading)
+                        .font(Typography.caption).frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
         }
-        .padding(20).background(BrandColors.cardSurface)
-        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .padding(20) // 图表卡内边距：md 与 lg 之间的特调值
+        .background(BrandColors.cardSurface)
+        .clipShape(RoundedRectangle(cornerRadius: Radius.card))
     }
 
     /// 洞察卡数据行：记录数 + 情绪均值（有情绪记录时）
@@ -279,28 +286,29 @@ struct StatsView: View {
             ? String(format: "%.1f", value) : String(format: "%.2f", value)
     }
 
-    private func kpiCard(_ title: String, _ value: Int, _ icon: String, index: Int) -> some View {
-        VStack(spacing: 6) {
+    private func kpiCard(_ title: String, _ value: Int, _ icon: String,
+                         tint: Color, index: Int) -> some View {
+        VStack(spacing: 6) { // 6：图标-数字-标题的紧凑节奏（无对应令牌）
             Image(systemName: icon)
                 .font(.title3)
-                .foregroundStyle(Color(nsColor: .controlAccentColor))
+                .foregroundStyle(tint)
                 .accessibilityHidden(true) // 装饰图标，读屏由数值+标题承载
             Text("\(value)")
                 .font(.title2).bold()
                 .contentTransition(.opacity) // 数字变化淡变
                 .animation(Motion.quick(reduceMotion), value: value)
-            Text(title).font(.caption).foregroundStyle(.secondary)
+            Text(title).font(Typography.caption).foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)
-        .padding(.vertical, 16)
-        .background(Color(nsColor: .controlBackgroundColor))
-        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .padding(.vertical, Spacing.md)
+        .background(BrandColors.cardSurface)
+        .clipShape(RoundedRectangle(cornerRadius: Radius.card))
         .overlay {
-            RoundedRectangle(cornerRadius: 24)
-                .stroke(Color(nsColor: .separatorColor), lineWidth: 0.5)
+            RoundedRectangle(cornerRadius: Radius.card)
+                .stroke(BrandColors.weakBorder, lineWidth: 0.5)
         }
-        .shadow(color: .black.opacity(0.05), radius: 8, y: 3)
+        .flashCardShadow()
         // 入场 stagger：淡入 + 微上移（对齐 AnyTransition.appear 语义）
         .opacity(cardsShown ? 1 : 0)
         .offset(y: cardsShown ? 0 : 6)

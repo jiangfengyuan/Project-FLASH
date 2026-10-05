@@ -30,7 +30,7 @@ struct EmotionView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: Spacing.lg) {
                 if heroAppeared {
                     heroCard
                         .transition(.appear(reduceMotion: reduceMotion))
@@ -44,11 +44,11 @@ struct EmotionView: View {
                         .transition(.appear(reduceMotion: reduceMotion))
                 }
             }
-            .padding(24)
-            .frame(maxWidth: 720)
+            .padding(Spacing.lg)
+            .frame(maxWidth: Metrics.readingMaxWidth)
             .frame(maxWidth: .infinity)
         }
-        .background(Color(nsColor: .windowBackgroundColor))
+        .background(BrandColors.pageBackground)
         .onAppear(perform: playEntranceAnimation)
         .alert("提示", isPresented: errorPresented) {
             Button("好") { errorMessage = nil }
@@ -60,16 +60,16 @@ struct EmotionView: View {
     // MARK: - 情绪选择卡片
 
     private var heroCard: some View {
-        GlassCard(cornerRadius: 20) {
-            VStack(spacing: 20) {
+        GlassCard(cornerRadius: Radius.glass) {
+            VStack(spacing: 20) { // 20：hero 卡内部件的宽松节奏（md 与 lg 之间）
                 Text("现在感觉怎么样？")
-                    .font(.headline)
+                    .font(Typography.cardTitle)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 // 主视觉：emoji 随等级切换 .pop 过渡，名称色彩沿七级调色板连续插值
-                VStack(spacing: 12) {
+                VStack(spacing: Spacing.sm) {
                     Text(selectedLevel.emoji)
-                        .font(.system(size: 64))
+                        .scaledSystemFont(size: 64, relativeTo: .largeTitle)
                         .id(selectedLevel)
                         .transition(.pop(reduceMotion: reduceMotion))
                         .accessibilityHidden(true)
@@ -89,7 +89,7 @@ struct EmotionView: View {
                 } maximumValueLabel: {
                     Text("😍")
                 }
-                .frame(maxWidth: 420)
+                .frame(maxWidth: 420) // 滑杆最大宽度（几何值）
                 .onChange(of: sliderValue) {
                     if !selectedLevel.isNegative { selectedSubEmotion = nil }
                 }
@@ -97,7 +97,7 @@ struct EmotionView: View {
 
                 // 子情绪（仅负面）
                 if selectedLevel.isNegative {
-                    HStack(spacing: 10) {
+                    HStack(spacing: 10) { // 10：胶囊间紧凑节奏（无对应令牌）
                         ForEach(SubEmotion.allCases, id: \.self) { sub in
                             subEmotionChip(sub)
                         }
@@ -106,16 +106,16 @@ struct EmotionView: View {
                     .transition(.pop(reduceMotion: reduceMotion))
                 }
 
-                HStack(spacing: 10) {
+                HStack(spacing: 10) { // 10：输入框与按钮的紧凑节奏（无对应令牌）
                     TextField("想说点什么？（可选）", text: $note)
                         .textFieldStyle(.roundedBorder)
                     Button("记录情绪") { save() }
                         .buttonStyle(.borderedProminent)
                         .controlSize(.large)
                 }
-                .frame(maxWidth: 420)
+                .frame(maxWidth: 420) // 输入行最大宽度（几何值）
             }
-            .padding(24)
+            .padding(Spacing.lg)
             .frame(maxWidth: .infinity)
         }
         .animation(Motion.soft(reduceMotion), value: selectedLevel)
@@ -127,15 +127,15 @@ struct EmotionView: View {
             selectedSubEmotion = isOn ? nil : sub
         } label: {
             Text(sub.displayName)
-                .font(.callout)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 6)
+                .font(Typography.secondary)
+                .padding(.horizontal, 14) // 胶囊横向内距（无对应令牌）
+                .padding(.vertical, 6)    // 胶囊纵向内距（无对应令牌）
                 .background(isOn ? sub.color.opacity(0.3)
-                                 : Color(nsColor: .controlBackgroundColor))
+                                 : BrandColors.cardSurface)
                 .clipShape(Capsule())
                 .overlay {
                     Capsule().stroke(isOn ? sub.color
-                                          : Color(nsColor: .separatorColor),
+                                          : BrandColors.weakBorder,
                                      lineWidth: 1)
                 }
         }
@@ -207,36 +207,36 @@ private struct EmotionWeekView: View {
     private static let weekdaySymbols = ["日", "一", "二", "三", "四", "五", "六"]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 10) { // 10：标题行与卡片的紧凑节奏（无对应令牌）
             HStack(alignment: .firstTextBaseline) {
-                Text("本周趋势").font(.headline)
+                Text("本周趋势").font(Typography.cardTitle)
                 Spacer()
                 Text(summary)
-                    .font(.caption)
+                    .font(Typography.caption)
                     .foregroundStyle(.secondary)
             }
 
             if EmotionStats.hasEmotionData(emotions, days: 7) {
-                GlassCard(cornerRadius: 16) {
-                    VStack(spacing: 14) {
+                GlassCard(cornerRadius: Radius.cardSmall) {
+                    VStack(spacing: 14) { // 14：emoji 条与折线的间距特调（无对应令牌）
                         HStack(spacing: 0) {
                             ForEach(Array(daily.enumerated()), id: \.offset) { index, item in
                                 dayCell(item, index: index)
                             }
                         }
                         TrendLineView(points: daily.map(\.average), color: BrandColors.emotionPink)
-                            .frame(height: 56)
+                            .frame(height: 56) // 折线图固有高度（几何值）
                             .opacity(contentAppeared ? 1 : 0)
                             .animation(
                                 Motion.softOut(reduceMotion)?.delay(Motion.staggerDelay(4)),
                                 value: contentAppeared
                             )
                     }
-                    .padding(16)
+                    .padding(Spacing.md)
                 }
             } else {
                 Text("本周还没有情绪记录，从上方开始吧")
-                    .font(.callout)
+                    .font(Typography.secondary)
                     .foregroundStyle(.secondary)
             }
         }
@@ -246,7 +246,7 @@ private struct EmotionWeekView: View {
     }
 
     private func dayCell(_ item: (date: String, average: Double?), index: Int) -> some View {
-        VStack(spacing: 4) {
+        VStack(spacing: Spacing.xxs) {
             if let average = item.average,
                let level = EmotionLevel(rawValue: max(-3, min(3, Int(average.rounded())))) {
                 Text(level.emoji).font(.title3)
@@ -255,11 +255,11 @@ private struct EmotionWeekView: View {
                 Circle()
                     .strokeBorder(Color.secondary.opacity(0.45),
                                   style: StrokeStyle(lineWidth: 1, dash: [3, 3]))
-                    .frame(width: 16, height: 16)
-                    .padding(.vertical, 2)
+                    .frame(width: 16, height: 16) // 占位圆点尺寸（几何值）
+                    .padding(.vertical, 2) // 与 emoji 行高对齐的极小内距
             }
             Text(weekdayLabel(item.date))
-                .font(.caption2)
+                .font(Typography.fine)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
@@ -308,19 +308,19 @@ private struct EmotionHistoryView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Spacing.xs) {
             HStack(alignment: .firstTextBaseline) {
-                Text("近期记录").font(.headline)
+                Text("近期记录").font(Typography.cardTitle)
                 Spacer()
                 if !emotionEntities.isEmpty {
                     Text("\(emotionEntities.count) 条")
-                        .font(.caption)
+                        .font(Typography.caption)
                         .foregroundStyle(.secondary)
                 }
             }
             if emotionEntities.isEmpty {
                 Text("还没有情绪记录，从上方开始吧")
-                    .font(.callout)
+                    .font(Typography.secondary)
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(emotionEntities.map { $0.toModel() }) { record in
@@ -351,30 +351,30 @@ private struct EmotionHistoryView: View {
     }
 
     private func emotionRow(_ record: EmotionRecord) -> some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 10) { // 10：emoji 与文字的紧凑节奏（无对应令牌）
             Text(record.level.emoji).font(.title3)
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 6) {
-                    Text(record.level.displayName).font(.callout.weight(.medium))
+            VStack(alignment: .leading, spacing: 2) { // 2：名称行与备注的极小间距
+                HStack(spacing: 6) { // 6：名称与子情绪徽章的紧凑间距
+                    Text(record.level.displayName).font(Typography.secondary.weight(.medium))
                     if let sub = record.subEmotion {
                         Text(sub.displayName)
-                            .font(.caption)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 2)
+                            .font(Typography.caption)
+                            .padding(.horizontal, Spacing.xs)
+                            .padding(.vertical, 2) // 徽章纵向内距：极小特调值
                             .background(sub.color.opacity(0.25))
                             .clipShape(Capsule())
                     }
                 }
                 if let note = record.note, !note.isEmpty {
-                    Text(note).font(.caption).foregroundStyle(.secondary)
+                    Text(note).font(Typography.caption).foregroundStyle(.secondary)
                 }
             }
             Spacer()
-            Text(record.recordDate).font(.caption).foregroundStyle(.secondary)
+            Text(record.recordDate).font(Typography.caption).foregroundStyle(.secondary)
         }
-        .padding(10)
-        .background(Color(nsColor: .controlBackgroundColor))
-        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .padding(10) // 行内边距：紧凑特调值（无对应令牌）
+        .background(BrandColors.cardSurface)
+        .clipShape(RoundedRectangle(cornerRadius: Radius.field))
         .contextMenu {
             Button("删除", role: .destructive) { deletingRecord = record }
         }

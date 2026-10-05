@@ -34,6 +34,10 @@ enum BrandColors {
     /// 灵感模块：暖黄
     static let ideaYellow = dynamic(light: "#D9B36A", dark: "#E3C584")
 
+    /// 灵感黄用于小号文字（选中胶囊文案等）的可读变体：
+    /// 浅色下同色系加深（白底 ≥ 4.5:1），深色沿用浅黄（深底可读）
+    static let ideaYellowText = dynamic(light: "#8C6A1D", dark: "#E3C584")
+
     /// 任务模块：柔绿
     static let calendarGreen = dynamic(light: "#7FB38E", dark: "#93C6A3")
 

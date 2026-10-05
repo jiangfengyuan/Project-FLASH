@@ -21,7 +21,7 @@ struct FormSection<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
             Text(title)
-                .font(.callout)
+                .font(Typography.secondary)
                 .foregroundStyle(BrandColors.textSecondary)
                 .padding(.horizontal, Spacing.sm)
             SolidCard {
@@ -36,7 +36,7 @@ struct FormSection<Content: View>: View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             Text("外观")
             Text("主题跟随系统")
-                .font(.subheadline)
+                .font(Typography.secondary)
                 .foregroundStyle(BrandColors.textSecondary)
         }
         .padding(Spacing.md)

@@ -56,7 +56,7 @@ struct ExploreView: View {
             chipsRow
             if filter == .unsorted {
                 Text("待整理：使用日常标签的日志。")
-                    .font(.caption)
+                    .font(Typography.caption)
                     .foregroundStyle(BrandColors.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, Spacing.md)
@@ -109,10 +109,9 @@ struct ExploreView: View {
     private var header: some View {
         HStack(alignment: .firstTextBaseline, spacing: Spacing.sm) {
             Text("记录")
-                .font(.title2.bold())
-                .foregroundStyle(BrandColors.textPrimary)
+                .flashSectionTitle()
             Text(statsSummary)
-                .font(.caption)
+                .font(Typography.caption)
                 .foregroundStyle(BrandColors.textSecondary)
             Spacer()
             Menu {
@@ -161,8 +160,8 @@ struct ExploreView: View {
                 .font(.caption.monospacedDigit())
                 .foregroundStyle(.secondary)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 11)
+        .padding(.horizontal, 14) // 搜索胶囊横向内距：无对应令牌（sm 偏紧、md 偏宽）
+        .padding(.vertical, 11)   // 搜索胶囊纵向内距：特调值，对齐输入框行高
         .background(
             Capsule().fill(Color.primary.opacity(searchFocused ? 0.09 : 0.06))
         )
@@ -182,7 +181,10 @@ struct ExploreView: View {
     private var chipsRow: some View {
         HStack(spacing: Spacing.xs) {
             ForEach(ExploreFilter.allCases, id: \.self) { item in
-                FilterChipView(title: item.displayName, isSelected: filter == item) {
+                // 「灵感」胶囊选中态走模块黄（四模块色），其余保持统一深墨选中
+                FilterChipView(title: item.displayName, isSelected: filter == item,
+                               accent: item == .idea ? BrandColors.ideaYellow : nil,
+                               accentText: item == .idea ? BrandColors.ideaYellowText : nil) {
                     filter = item
                 }
             }
@@ -193,7 +195,7 @@ struct ExploreView: View {
                 Image(systemName: criteria.isActive
                       ? "line.3.horizontal.decrease.circle.fill"
                       : "line.3.horizontal.decrease.circle")
-                    .font(.system(size: 16))
+                    .scaledSystemFont(size: 16, relativeTo: .body)
                     .foregroundStyle(criteria.isActive ? BrandColors.brandPrimary : BrandColors.textSecondary)
                     .frame(width: Metrics.minTouchTarget - 12, height: Metrics.minTouchTarget - 12)
                     .contentShape(Rectangle())
@@ -206,7 +208,7 @@ struct ExploreView: View {
             }
             // 排序状态标签：当前仅「按最新记录」（createdAt 倒序，由列表查询保证），不可点
             Label("按最新记录", systemImage: "arrow.down")
-                .font(.caption)
+                .font(Typography.caption)
                 .foregroundStyle(BrandColors.textSecondary)
         }
         .padding(.horizontal, Spacing.md)
@@ -221,7 +223,7 @@ struct ExploreView: View {
                 .toggleStyle(.checkbox)
             if batchMode {
                 Text("已选 \(selection.count) 条")
-                    .font(.caption)
+                    .font(Typography.caption)
                     .foregroundStyle(BrandColors.textSecondary)
                 Spacer()
                 Menu {
@@ -233,7 +235,7 @@ struct ExploreView: View {
                     }
                 } label: {
                     Text("批量修改分类或标签…")
-                        .font(.callout)
+                        .font(Typography.secondary)
                 }
                 .menuStyle(.borderlessButton)
                 .disabled(selection.isEmpty)

@@ -50,8 +50,8 @@ struct CalendarView: View {
                     .accessibilityLabel("上一月")
                     .help("上一月")
                 Text(monthTitle)
-                    .font(.headline)
-                    .frame(minWidth: 140)
+                    .font(Typography.cardTitle)
+                    .frame(minWidth: 140) // 月份标题最小宽度，切换月份不抖动（几何值）
                 Button { shiftMonth(1) } label: { Image(systemName: "chevron.right") }
                     .accessibilityLabel("下一月")
                     .help("下一月")
@@ -70,41 +70,41 @@ struct CalendarView: View {
                     selectedDate = today
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
+            .padding(.horizontal, Spacing.md)
+            .padding(.vertical, 10) // 头部纵向内距：紧凑特调值（无对应令牌）
 
             // 星期表头
             HStack {
                 ForEach(["一", "二", "三", "四", "五", "六", "日"], id: \.self) { day in
                     Text(day)
-                        .font(.caption)
+                        .font(Typography.caption)
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity)
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.bottom, 6)
+            .padding(.horizontal, Spacing.md)
+            .padding(.bottom, 6) // 表头与网格的紧凑间距
 
             // 月网格
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 7),
-                      spacing: 4) {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Spacing.xxs), count: 7),
+                      spacing: Spacing.xxs) {
                 ForEach(weeks.flatMap { $0 }, id: \.self) { date in
                     dayCell(date, aggregates: aggregates)
                 }
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, Spacing.md)
             .id(displayedMonth)
             .transition(monthTransition)
             .animation(reduceMotion ? Motion.reducedFade(true) : Motion.emphasize(false),
                        value: displayedMonth)
 
-            Divider().padding(.vertical, 8)
+            Divider().padding(.vertical, Spacing.xs)
 
             // 选中日详情
             ScrollView {
-                VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: 10) { // 10：详情行的紧凑节奏（无对应令牌）
                     Text("\(selectedKey) 详情")
-                        .font(.headline)
+                        .font(Typography.cardTitle)
                     if let aggregate = aggregates[selectedKey] {
                         if aggregate.emotions.isEmpty && aggregate.logs.isEmpty && aggregate.tasks.isEmpty {
                             Text("这一天没有记录").foregroundStyle(.secondary)
@@ -115,7 +115,7 @@ struct CalendarView: View {
                         ForEach(aggregate.emotions) { emotion in
                             Label("\(emotion.level.emoji) \(emotion.level.displayName)",
                                   systemImage: "face.smiling")
-                                .font(.callout)
+                                .font(Typography.secondary)
                         }
                         ForEach(aggregate.logs) { log in
                             LogCardView(log: log)
@@ -124,7 +124,7 @@ struct CalendarView: View {
                         Text("这一天没有记录").foregroundStyle(.secondary)
                     }
                 }
-                .padding(16)
+                .padding(Spacing.md)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
@@ -189,7 +189,7 @@ struct CalendarView: View {
     }
 
     @ViewBuilder private func taskRow(_ task: TaskItem) -> some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 10) { // 10：勾选钮与标题的紧凑节奏（无对应令牌）
             Button {
                 var updated = task
                 // 与 TaskEditorView 一致使用带毫秒的 ISO-8601：同秒内「创建+完成」
@@ -204,10 +204,10 @@ struct CalendarView: View {
             .buttonStyle(.plain)
             .accessibilityLabel(task.isCompleted ? "标记为未完成" : "标记为完成")
             .help(task.isCompleted ? "标记为未完成" : "标记为完成")
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 2) { // 2：标题与备注的极小间距
                 Text(task.title).strikethrough(task.isCompleted)
                 if let notes = task.notes, !notes.isEmpty {
-                    Text(notes).font(.caption).foregroundStyle(.secondary).lineLimit(2)
+                    Text(notes).font(Typography.caption).foregroundStyle(.secondary).lineLimit(2)
                 }
             }
             Spacer()
@@ -217,8 +217,12 @@ struct CalendarView: View {
                 .accessibilityLabel("删除任务")
                 .help("删除任务")
         }
-        .padding(10)
-        .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 10))
+        .padding(10) // 行内边距：紧凑特调值（无对应令牌）
+        .background(BrandColors.weakSurface, in: RoundedRectangle(cornerRadius: Radius.row))
+        .overlay {
+            RoundedRectangle(cornerRadius: Radius.row)
+                .strokeBorder(BrandColors.weakBorder, lineWidth: 0.5)
+        }
     }
 
     /// 保存任务并重建系统提醒。warnPastReminder 仅编辑器保存路径传 true：
@@ -278,39 +282,39 @@ private struct DayCell: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 2) {
+            VStack(spacing: 2) { // 2：日期数字与指示点的极小间距
                 Text("\(day)")
-                    .font(.callout)
+                    .font(Typography.secondary)
                     .foregroundStyle(isSelected ? Color.white
                                      : (inMonth ? Color.primary : Color.secondary.opacity(0.5)))
-                HStack(spacing: 3) {
+                HStack(spacing: 3) { // 3：指示标记的极小间距
                     if logCount > 0 {
                         Text("\(logCount)")
-                            .font(.caption2)
-                            .foregroundStyle(isSelected ? Color.white : Color(nsColor: .controlAccentColor))
+                            .font(Typography.fine)
+                            .foregroundStyle(isSelected ? Color.white : BrandColors.accent)
                     }
                     if taskCount > 0 {
                         Label("\(taskCount)", systemImage: "checklist")
                             .labelStyle(.titleAndIcon)
-                            .font(.caption2)
+                            .font(Typography.fine)
                             .foregroundStyle(isSelected ? Color.white : BrandColors.accessibleGreen)
                     }
                     if let emotionEmoji {
-                        Text(emotionEmoji).font(.caption2)
+                        Text(emotionEmoji).font(Typography.fine)
                     }
                 }
-                .frame(height: 14)
+                .frame(height: 14) // 指示行固定高度，保证无记录日格子等高（几何值）
             }
-            .frame(maxWidth: .infinity, minHeight: 44)
+            .frame(maxWidth: .infinity, minHeight: Metrics.minTouchTarget)
             .background {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                RoundedRectangle(cornerRadius: Radius.field, style: .continuous)
                     .fill(isSelected ? Color(nsColor: .selectedContentBackgroundColor)
                                     : Color.primary.opacity(hovering ? 0.05 : 0))
             }
             .overlay {
                 if isToday {
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .stroke(Color(nsColor: .controlAccentColor), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: Radius.field, style: .continuous)
+                        .stroke(BrandColors.accent, lineWidth: 1)
                 }
             }
         }

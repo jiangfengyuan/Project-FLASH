@@ -36,8 +36,8 @@ struct LogFlowView: View {
         }
         VStack(spacing: 0) {
             // 工具区
-            VStack(spacing: 10) {
-                HStack(spacing: 8) {
+            VStack(spacing: 10) { // 10：工具区行距特调（xs 偏紧、sm 偏松）
+                HStack(spacing: Spacing.xs) {
                     // 「想法」标签只挂在 category == .idea 的灵感上，而 LogFilter 只保留
                     // category == .log（LogFilter.apply），选中它永远无结果，故不出现在筛选 chips
                     ForEach(ColorTag.allCases.filter { $0 != .idea }, id: \.self) { tag in
@@ -52,7 +52,7 @@ struct LogFlowView: View {
                     .pickerStyle(.menu)
                     .frame(width: 110)
                 }
-                HStack(spacing: 8) {
+                HStack(spacing: Spacing.xs) {
                     DatePicker("开始", selection: startBinding, displayedComponents: .date)
                         .labelsHidden()
                         .opacity(filter.startDate == nil ? 0.45 : 1)
@@ -66,33 +66,37 @@ struct LogFlowView: View {
                             filter.endDate = nil
                         }
                         .buttonStyle(.plain)
-                        .foregroundStyle(Color(nsColor: .controlAccentColor))
+                        .foregroundStyle(BrandColors.accent)
                         .transition(.opacity)
                     }
                     Spacer()
                 }
-                .font(.caption)
+                .font(Typography.caption)
             }
-            .padding(12)
+            .padding(Spacing.sm)
 
             Divider()
 
             if filtered.isEmpty {
-                // PRD §34：空态用品牌化文案；筛选无结果时保留搜索语义
-                Group {
-                    if logEntities.isEmpty {
-                        ContentUnavailableView("今天还没有故事。",
-                                               systemImage: "square.and.pencil")
-                    } else {
-                        ContentUnavailableView("没有匹配的记录",
-                                               systemImage: "magnifyingglass",
-                                               description: Text("调整筛选条件试试"))
-                    }
+                // PRD §34：空态用品牌化 EmptyStateView（内置 .appear 过渡，不再叠加）；
+                // 筛选无结果时保留搜索语义
+                if logEntities.isEmpty {
+                    EmptyStateView(
+                        systemImage: "square.and.pencil",
+                        title: "今天还没有故事。",
+                        message: "在「此刻」页写下第一条记录",
+                        iconTint: BrandColors.logPurple
+                    )
+                } else {
+                    EmptyStateView(
+                        systemImage: "magnifyingglass",
+                        title: "没有匹配的记录",
+                        message: "换个关键词或调整筛选条件试试。"
+                    )
                 }
-                .transition(.appear(reduceMotion: reduceMotion))
             } else {
                 ScrollView {
-                    LazyVStack(spacing: 8) {
+                    LazyVStack(spacing: Spacing.xs) {
                         ForEach(filtered) { log in
                             LogCardView(log: log,
                                         onEdit: { editingLog = log },
@@ -103,7 +107,7 @@ struct LogFlowView: View {
                                 }
                         }
                     }
-                    .padding(16)
+                    .padding(Spacing.md)
                     // 列表插入/删除/筛选切换统一 Motion.soft；行重排走默认 move
                     .animation(Motion.soft(reduceMotion), value: filtered)
                 }
@@ -176,16 +180,16 @@ struct LogFlowView: View {
             if isOn { filter.tags.remove(tag) } else { filter.tags.insert(tag) }
         } label: {
             Text(tag.displayName)
-                .font(.caption)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 4)
+                .font(Typography.caption)
+                .padding(.horizontal, 10) // 紧凑胶囊横向内距（无对应令牌）
+                .padding(.vertical, Spacing.xxs)
                 .background(isOn ? tag.color.opacity(0.25)
-                                 : Color(nsColor: .controlBackgroundColor))
+                                 : BrandColors.cardSurface)
                 .foregroundStyle(.primary)
                 .clipShape(Capsule())
                 .overlay {
                     Capsule().stroke(isOn ? tag.color
-                                          : Color(nsColor: .separatorColor),
+                                          : BrandColors.weakBorder,
                                      lineWidth: 1)
                 }
                 .animation(Motion.quick(reduceMotion), value: isOn)
