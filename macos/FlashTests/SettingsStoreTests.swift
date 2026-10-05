@@ -51,4 +51,27 @@ struct SettingsStoreTests {
         #expect(ThemeMode.light.displayName == "浅色")
         #expect(ThemeMode.dark.displayName == "深色")
     }
+
+    // MARK: - Quick Capture 快捷键
+
+    @Test func quickCaptureHotkeyDefaultsToCmdShiftSpace() {
+        let (name, suite) = makeSuite()
+        defer { suite.removePersistentDomain(forName: name) }
+        #expect(SettingsStore(defaults: suite).quickCaptureHotkey == .defaultQuickCapture)
+    }
+
+    @Test func setQuickCaptureHotkeyPersists() {
+        let (name, suite) = makeSuite()
+        defer { suite.removePersistentDomain(forName: name) }
+        let chord = KeyChord(keyCode: 38, modifiers: CarbonKeyModifiers.option | CarbonKeyModifiers.command)
+        SettingsStore(defaults: suite).setQuickCaptureHotkey(chord)
+        #expect(SettingsStore(defaults: suite).quickCaptureHotkey == chord)
+    }
+
+    @Test func corruptQuickCaptureHotkeyFallsBackToDefault() {
+        let (name, suite) = makeSuite()
+        defer { suite.removePersistentDomain(forName: name) }
+        suite.set(Data("not json".utf8), forKey: "quickCaptureHotkey")
+        #expect(SettingsStore(defaults: suite).quickCaptureHotkey == .defaultQuickCapture)
+    }
 }

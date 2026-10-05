@@ -8,7 +8,7 @@ import SwiftUI
 import AppKit // NSSavePanel / NSOpenPanel
 import UniformTypeIdentifiers
 
-/// 设置页：外观与使用 / 数据与安全 / 危险操作 / 关于（对齐 Android SettingsViewModel）
+/// 设置页：外观与使用 / Quick Capture / 数据与安全 / 危险操作 / 关于（对齐 Android SettingsViewModel）
 ///
 /// macOS 无分类/标签/提醒管理界面与界面风格（UiStyle）设置，
 /// 故不设「记录与提醒」组、不加动态效果/字体设置项，仅暴露已有功能入口。
@@ -56,6 +56,8 @@ struct SettingsView: View {
                 StorageBannerSection()
 
                 AppearanceSection(appeared: appearanceAppeared)
+
+                QuickCaptureSection(appeared: appearanceAppeared)
 
                 DataSafetySection(isBusy: isBusy, appeared: dataAppeared,
                                   onShare: transferBackup,

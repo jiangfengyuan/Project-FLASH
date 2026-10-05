@@ -9,10 +9,13 @@ import SwiftData
 
 @main
 struct FlashApp: App {
+    /// Quick Capture（PRD §13/§14）：窗口关闭不退出（MenuBarExtra 驻留保热键可用）
+    /// + 启动后注册全局热键；实现见 App/AppDelegate.swift
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     /// 装配单一入口（债务 A6）：容器、仓储、内存降级标记三者同源
     private let assembly: RepositoryEnvironment.Assembly
     @State private var appState: AppState
-    @StateObject private var settings = SettingsStore()
+    @StateObject private var settings: SettingsStore
 
     init() {
         // 过期分享副本清理是纯沙箱文件 IO（FileManager 线程安全、无共享可变状态、
@@ -25,6 +28,11 @@ struct FlashApp: App {
         let appState = AppState()
         appState.checkDatabaseFallback(didFallbackToMemory: assembly.didFallbackToMemory)
         _appState = State(initialValue: appState)
+        let settings = SettingsStore()
+        _settings = StateObject(wrappedValue: settings)
+        // Quick Capture 面板与仓储/设置同源装配；热键注册推迟到
+        // AppDelegate.applicationDidFinishLaunching（QuickCaptureController.start()）
+        QuickCaptureController.shared.configure(repository: assembly.repository, settings: settings)
     }
 
     var body: some Scene {
@@ -88,6 +96,10 @@ struct FlashApp: App {
             // 模块切换 ⌘1…⌘6（对齐 PRD：⌘1 此刻 ⌘2 记录 ⌘3 日志流 ⌘4 日历 ⌘5 情绪 ⌘6 回顾；
             // ⌘7 留给后续模块。设置已有 ⌘,，不重复占用）；菜单文案跟随 Module.title，与侧栏命名同源
             CommandMenu("模块") {
+                // Quick Capture（PRD §13/§14）：与全局热键同一入口，不另占菜单快捷键，
+                // 避免与 RegisterEventHotKey 的注册形成双通道冲突
+                Button("Quick Capture") { QuickCaptureController.shared.toggle() }
+                Divider()
                 Button(Module.home.title) { appState.selectedModule = .home }
                     .keyboardShortcut("1", modifiers: .command)
                 Button(Module.explore.title) { appState.selectedModule = .explore }
@@ -178,12 +190,5 @@ private struct AppearanceTransitionModifier: ViewModifier {
     }
 }
 
-private extension ThemeMode {
-    var colorScheme: ColorScheme? {
-        switch self {
-        case .system: nil
-        case .light: .light
-        case .dark: .dark
-        }
-    }
-}
+// ThemeMode.colorScheme 已提升为 internal（UI/QuickCapture/QuickCaptureController.swift），
+// Quick Capture 面板与主窗口/菜单栏伴侣共用同一映射
