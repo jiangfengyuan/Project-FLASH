@@ -67,6 +67,7 @@ final class FlashRepository {
                                          colorTag: log.colorTag.rawValue,
                                          category: log.category.rawValue,
                                          importance: log.importance,
+                                         isFavorite: log.isFavorite,
                                          createdAt: log.createdAt,
                                          recordDate: log.recordDate))
             }
@@ -113,6 +114,17 @@ final class FlashRepository {
     }
 
     @MainActor
+    func updateEmotion(_ emotion: EmotionRecord) throws {
+        try commit {
+            if let entity = try fetchEmotion(id: emotion.id) {
+                entity.apply(emotion)
+            } else {
+                upsertEmotionEntity(emotion)
+            }
+        }
+    }
+
+    @MainActor
     func allEmotions() throws -> [EmotionRecord] {
         let descriptor = FetchDescriptor<EmotionEntity>(
             sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
@@ -146,6 +158,30 @@ final class FlashRepository {
             sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]
         )
         return try context.fetch(descriptor).map { $0.toModel() }
+    }
+
+    // MARK: - Favorites
+
+    /// 收藏切换：三分区统一入口；isFavorite 为可选三态（nil 视为未收藏），写入时收敛为 Bool
+    @MainActor
+    func setLogFavorite(id: String, _ isFavorite: Bool) throws {
+        if let entity = try fetchLog(id: id) {
+            try commit { entity.isFavorite = isFavorite }
+        }
+    }
+
+    @MainActor
+    func setEmotionFavorite(id: String, _ isFavorite: Bool) throws {
+        if let entity = try fetchEmotion(id: id) {
+            try commit { entity.isFavorite = isFavorite }
+        }
+    }
+
+    @MainActor
+    func setTaskFavorite(id: String, _ isFavorite: Bool) throws {
+        if let entity = try fetchTask(id: id) {
+            try commit { entity.isFavorite = isFavorite }
+        }
     }
 
     // MARK: - Import / Export
@@ -277,6 +313,7 @@ final class FlashRepository {
                                colorTag: log.colorTag.rawValue,
                                category: log.category.rawValue,
                                importance: log.importance,
+                               isFavorite: log.isFavorite,
                                createdAt: log.createdAt, recordDate: log.recordDate)
         context.insert(entity) // SwiftData 对 .unique id 冲突执行更新
     }
@@ -286,6 +323,8 @@ final class FlashRepository {
         let entity = EmotionEntity(id: emotion.id, level: emotion.level.rawValue,
                                    subEmotion: emotion.subEmotion?.rawValue,
                                    status: emotion.status, note: emotion.note,
+                                   intensity: emotion.intensity,
+                                   isFavorite: emotion.isFavorite,
                                    recordDate: emotion.recordDate,
                                    createdAt: emotion.createdAt)
         context.insert(entity)

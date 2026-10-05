@@ -12,6 +12,10 @@ struct EmotionRecord: Identifiable, Equatable {
     var subEmotion: SubEmotion?
     var status: String?
     var note: String?
+    /// 情绪强度 1–5（备份分区 schema 2，可空）
+    var intensity: Int? = nil
+    /// 收藏（备份分区 schema 2，可空）
+    var isFavorite: Bool? = nil
     var recordDate: String  // yyyy-MM-dd
     var createdAt: String   // ISO-8601
 }

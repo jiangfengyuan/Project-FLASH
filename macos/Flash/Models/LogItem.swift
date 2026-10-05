@@ -12,6 +12,8 @@ struct LogItem: Identifiable, Equatable {
     var colorTag: ColorTag
     var category: Category
     var importance: Int
+    /// 收藏（备份分区 schema 2，可空；缺省视为未收藏）
+    var isFavorite: Bool? = nil
     var createdAt: String   // ISO-8601
     var recordDate: String  // yyyy-MM-dd
 }

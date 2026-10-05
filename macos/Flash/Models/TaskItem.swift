@@ -24,6 +24,10 @@ struct TaskItem: Identifiable, Equatable {
     var timeZone: String?
     var reminderAt: String?
     var completedAt: String?
+    /// Idea→Task 来源关联：指向 logs 分区的一条记录 ID（备份分区 schema 2，可空）
+    var sourceLogId: String? = nil
+    /// 收藏（备份分区 schema 2，可空）
+    var isFavorite: Bool? = nil
     var createdAt: String
     var updatedAt: String
 

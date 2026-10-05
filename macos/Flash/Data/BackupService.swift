@@ -186,7 +186,10 @@ private struct StrictJSONScanner {
 enum BackupService {
     static let backupVersion = "flash-backup-v2"
     static let legacyBackupVersion = "flash-backup-v1"
-    private static let sectionSchemaVersion = 1
+    /// 导出写入的分区 schema 版本（2 = 收藏/情绪强度/任务来源关联，均为可选字段）
+    private static let sectionSchemaVersion = 2
+    /// 导入接受的分区 schema 版本范围；v1 文件按无新字段处理
+    private static let supportedSectionVersions = 1...2
     static let maxFileBytes = 50 * 1024 * 1024
     private static let maxEntryCount = 100_000
     private static let maxTextLength = 100_000
@@ -225,15 +228,21 @@ enum BackupService {
     static func exportJSON(logs: [LogItem], emotions: [EmotionRecord], tasks: [TaskItem] = [],
                            notes: String = "", appVersion: String) -> String {
         let logDicts: [[String: Any]] = logs.map { log in
-            ["id": log.id, "content": log.content, "colorTag": log.colorTag.rawValue,
-             "category": log.category.rawValue, "importance": log.importance,
-             "createdAt": normalizeISODate(log.createdAt) ?? log.createdAt, "recordDate": log.recordDate]
+            var dict: [String: Any] = ["id": log.id, "content": log.content, "colorTag": log.colorTag.rawValue,
+                                       "category": log.category.rawValue, "importance": log.importance,
+                                       "createdAt": normalizeISODate(log.createdAt) ?? log.createdAt, "recordDate": log.recordDate]
+            if let isFavorite = log.isFavorite { dict["isFavorite"] = isFavorite }
+            return dict
         }
         let emotionDicts: [[String: Any]] = emotions.map { e in
-            ["id": e.id, "level": e.level.rawValue,
-             "subEmotion": e.subEmotion?.rawValue ?? NSNull(),
-             "status": e.status ?? NSNull(), "note": e.note ?? NSNull(),
-             "recordDate": e.recordDate, "createdAt": normalizeISODate(e.createdAt) ?? e.createdAt]
+            var dict: [String: Any] = ["id": e.id, "level": e.level.rawValue,
+                                       "subEmotion": e.subEmotion?.rawValue ?? NSNull(),
+                                       "status": e.status ?? NSNull(), "note": e.note ?? NSNull(),
+                                       "recordDate": e.recordDate, "createdAt": normalizeISODate(e.createdAt) ?? e.createdAt]
+            // 新字段（分区 schema 2）缺省时省略，保持导出文件干净
+            if let intensity = e.intensity { dict["intensity"] = intensity }
+            if let isFavorite = e.isFavorite { dict["isFavorite"] = isFavorite }
+            return dict
         }
         let taskDicts: [[String: Any]] = tasks.map { task in
             let due: [String: Any]
@@ -245,7 +254,7 @@ enum BackupService {
                        "at": normalizedForExport(task.dueAt),
                        "timeZone": task.timeZone ?? NSNull()]
             }
-            return [
+            var dict: [String: Any] = [
                 "id": task.id, "title": task.title, "notes": task.notes ?? NSNull(),
                 "colorTag": task.colorTag.rawValue, "importance": task.importance,
                 "due": due,
@@ -254,6 +263,9 @@ enum BackupService {
                 "createdAt": normalizeISODate(task.createdAt) ?? task.createdAt,
                 "updatedAt": normalizeISODate(task.updatedAt) ?? task.updatedAt,
             ]
+            if let sourceLogId = task.sourceLogId { dict["sourceLogId"] = sourceLogId }
+            if let isFavorite = task.isFavorite { dict["isFavorite"] = isFavorite }
+            return dict
         }
         let root: [String: Any] = [
             "version": backupVersion,
@@ -323,7 +335,8 @@ enum BackupService {
                 throw BackupError.invalidObject("schemas")
             }
             for section in ["logs", "emotions", "tasks"] {
-                guard let schema = integer(schemas[section]), schema == sectionSchemaVersion else {
+                guard let schema = integer(schemas[section]),
+                      supportedSectionVersions.contains(schema) else {
                     throw BackupError.incompatibleVersion("\(section) schema")
                 }
             }
@@ -407,11 +420,14 @@ enum BackupService {
         }
         let sections: Set<String> = ["logs", "emotions", "tasks"]
         try checkFields(root["schemas"] as! [String: Any], required: sections, path: "/schemas")
+        // 分区版本声明记录结构（契约 0.2.0）：v2 分区允许收藏/强度/来源字段，v1 禁止
+        let schemaVersions = (root["schemas"] as! [String: Any]).compactMapValues(integer)
         let data = root["data"] as! [String: Any]
         try checkFields(data, required: sections, path: "/data")
         for section in sections {
             let array = data[section] as! [Any]
             guard array.count <= maxEntryCount else { throw BackupError.contract("/data/\(section)") }
+            let isV2 = schemaVersions[section] == 2
             for (i, value) in array.enumerated() {
                 let path = "/data/\(section)/\(i)"
                 guard let item = value as? [String: Any] else { throw BackupError.contract(path) }
@@ -420,13 +436,13 @@ enum BackupService {
                 switch section {
                 case "logs":
                     required = ["id", "content", "colorTag", "category", "importance", "createdAt", "recordDate"]
-                    optional = []
+                    optional = isV2 ? ["isFavorite"] : []
                 case "emotions":
                     required = ["id", "level", "createdAt", "recordDate"]
-                    optional = ["subEmotion", "note", "status"]
+                    optional = isV2 ? ["subEmotion", "note", "status", "intensity", "isFavorite"] : ["subEmotion", "note", "status"]
                 default:
                     required = ["id", "title", "colorTag", "importance", "due", "createdAt", "updatedAt"]
-                    optional = ["notes", "reminderAt", "completedAt"]
+                    optional = isV2 ? ["notes", "reminderAt", "completedAt", "sourceLogId", "isFavorite"] : ["notes", "reminderAt", "completedAt"]
                 }
                 try checkFields(item, required: required, optional: optional, path: path)
                 if section == "tasks" {
@@ -451,11 +467,18 @@ enum BackupService {
             try checkFields(data, required: ["logs", "emotions", "tasks"], path: "/data")
         }
         for section in legacy ? ["logs", "emotions"] : ["logs", "emotions", "tasks"] {
+            let isV2 = !legacy && integer((root["schemas"] as! [String: Any])[section]) == 2
             let allowed: Set<String>
             switch section {
-            case "logs": allowed = ["id", "content", "colorTag", "category", "importance", "createdAt", "recordDate"]
-            case "emotions": allowed = ["id", "level", "createdAt", "recordDate", "note", "status", "subEmotion"]
-            default: allowed = ["id", "title", "colorTag", "importance", "due", "createdAt", "updatedAt", "notes", "reminderAt", "completedAt"]
+            case "logs": allowed = isV2
+                ? ["id", "content", "colorTag", "category", "importance", "createdAt", "recordDate", "isFavorite"]
+                : ["id", "content", "colorTag", "category", "importance", "createdAt", "recordDate"]
+            case "emotions": allowed = isV2
+                ? ["id", "level", "createdAt", "recordDate", "note", "status", "subEmotion", "intensity", "isFavorite"]
+                : ["id", "level", "createdAt", "recordDate", "note", "status", "subEmotion"]
+            default: allowed = isV2
+                ? ["id", "title", "colorTag", "importance", "due", "createdAt", "updatedAt", "notes", "reminderAt", "completedAt", "sourceLogId", "isFavorite"]
+                : ["id", "title", "colorTag", "importance", "due", "createdAt", "updatedAt", "notes", "reminderAt", "completedAt"]
             }
             for (i, value) in (data[section] as! [Any]).enumerated() {
                 guard let item = value as? [String: Any] else { continue }
@@ -480,11 +503,13 @@ enum BackupService {
               let category = (dict["category"] as? String).flatMap(Category.init(rawValue:)),
               let createdAt = dict["createdAt"] as? String, let normalizedCreatedAt = normalizeISODate(createdAt),
               let recordDate = dict["recordDate"] as? String, isDay(recordDate),
-              let importance = integer(dict["importance"]), (0...4).contains(importance)
+              let importance = integer(dict["importance"]), (0...4).contains(importance),
+              let isFavorite = optionalBool(dict, key: "isFavorite")
         else { return nil }
         return LogItem(id: id, content: content,
                        colorTag: colorTag, category: category,
-                       importance: importance, createdAt: normalizedCreatedAt, recordDate: recordDate)
+                       importance: importance, isFavorite: isFavorite,
+                       createdAt: normalizedCreatedAt, recordDate: recordDate)
     }
 
     private static func parseEmotion(_ dict: [String: Any]) -> EmotionRecord? {
@@ -502,12 +527,22 @@ enum BackupService {
             subEmotion = nil
         }
         guard hasValidOptionalText(dict, key: "status"),
-              hasValidOptionalText(dict, key: "note") else { return nil }
+              hasValidOptionalText(dict, key: "note"),
+              let intensity = optionalIntensity(dict),
+              let isFavorite = optionalBool(dict, key: "isFavorite") else { return nil }
         let status = dict["status"] as? String
         let note = dict["note"] as? String
         return EmotionRecord(id: id, level: level, subEmotion: subEmotion,
                              status: status, note: note,
+                             intensity: intensity, isFavorite: isFavorite,
                              recordDate: recordDate, createdAt: normalizedCreatedAt)
+    }
+
+    /// 情绪强度：缺省/null → nil；否则必须为 1–5 整数（布尔与浮点经 integer() 排除）
+    private static func optionalIntensity(_ dict: [String: Any]) -> Int?? {
+        guard let value = dict["intensity"], !(value is NSNull) else { return .some(nil) }
+        guard let intensity = integer(value), (1...5).contains(intensity) else { return nil }
+        return .some(intensity)
     }
 
     private static func parseTask(_ dict: [String: Any]) -> TaskItem? {
@@ -526,8 +561,18 @@ enum BackupService {
               let updatedAt = normalizeISODate(rawUpdatedAt),
               updatedAt >= createdAt,
               let reminderAt = optionalNormalizedISO(dict, key: "reminderAt"),
-              let completedAt = optionalNormalizedISO(dict, key: "completedAt")
+              let completedAt = optionalNormalizedISO(dict, key: "completedAt"),
+              let isFavorite = optionalBool(dict, key: "isFavorite")
         else { return nil }
+
+        // sourceLogId：缺省/null → nil；否则必须为 UUID 外形字符串
+        let sourceLogId: String?
+        if let value = dict["sourceLogId"], !(value is NSNull) {
+            guard let raw = value as? String, isUUID(raw) else { return nil }
+            sourceLogId = raw
+        } else {
+            sourceLogId = nil
+        }
 
         let dueDate: String?
         let dueAt: String?
@@ -560,6 +605,8 @@ enum BackupService {
             timeZone: timeZone,
             reminderAt: reminderAt,
             completedAt: completedAt,
+            sourceLogId: sourceLogId,
+            isFavorite: isFavorite,
             createdAt: createdAt,
             updatedAt: updatedAt
         )
@@ -572,6 +619,14 @@ enum BackupService {
         guard let value = dict[key], !(value is NSNull) else { return .some(nil) }
         guard let raw = value as? String, let normalized = normalizeISODate(raw) else { return nil }
         return .some(normalized)
+    }
+
+    /// 契约布尔：JSONSerialization 的 true/false 桥接为 Boolean 型 NSNumber；
+    /// 整数 1/0 不能冒充布尔（与 integer() 的反向检查同口径）
+    private static func optionalBool(_ dict: [String: Any], key: String) -> Bool?? {
+        guard let value = dict[key], !(value is NSNull) else { return .some(nil) }
+        guard let number = value as? NSNumber, CFGetTypeID(number) == CFBooleanGetTypeID() else { return nil }
+        return .some(number.boolValue)
     }
 
     private static func hasValidOptionalText(_ dict: [String: Any], key: String) -> Bool {

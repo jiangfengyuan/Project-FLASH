@@ -16,15 +16,18 @@ enum FlashDatabase {
     }
 
     /// 持久化容器创建失败时降级为内存容器，不再 fatalError 导致启动即崩。
+    /// 版本化 schema + 迁移计划：V1→V2 轻量迁移（纯增可选列，见 Entities.swift）
     static func makeContainer(inMemory: Bool = false) -> ModelContainer {
         makeContainerWithFallback(inMemory: inMemory).container
     }
 
     static func makeContainerWithFallback(inMemory: Bool = false) -> ContainerResult {
-        let schema = Schema([LogEntity.self, EmotionEntity.self, TaskEntity.self])
+        let schema = Schema(versionedSchema: FlashSchemaV2.self)
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: inMemory)
         do {
-            return ContainerResult(container: try ModelContainer(for: schema, configurations: [config]),
+            return ContainerResult(container: try ModelContainer(for: schema,
+                                                                 migrationPlan: FlashMigrationPlan.self,
+                                                                 configurations: [config]),
                                    didFallbackToMemory: false)
         } catch {
             print("SwiftData 容器创建失败，尝试降级为内存容器: \(error)")
