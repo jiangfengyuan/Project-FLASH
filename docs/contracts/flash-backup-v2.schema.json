@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:flash:backup:v2:schema:0.1.0",
-  "title": "Flash 跨端备份 v2 — 契约草案 0.1.0",
-  "description": "严格互通文档；不是现有客户端容错导入算法。语义校验及兼容边界见 README.md。",
+  "$id": "urn:flash:backup:v2:schema:0.2.0",
+  "title": "Flash 跨端备份 v2 — 契约草案 0.2.0",
+  "description": "严格互通文档；不是现有客户端容错导入算法。语义校验及兼容边界见 README.md。分区版本声明结构：schemas 为 1 的分区禁止收藏/强度/来源字段，为 2 时允许（均可选）。",
   "type": "object",
   "additionalProperties": false,
   "required": ["version", "exportedAt", "appVersion", "notes", "schemas", "data"],
@@ -16,9 +16,9 @@
       "additionalProperties": false,
       "required": ["logs", "emotions", "tasks"],
       "properties": {
-        "logs": { "const": 1 },
-        "emotions": { "const": 1 },
-        "tasks": { "const": 1 }
+        "logs": { "enum": [1, 2] },
+        "emotions": { "enum": [1, 2] },
+        "tasks": { "enum": [1, 2] }
       }
     },
     "data": {
@@ -26,17 +26,40 @@
       "additionalProperties": false,
       "required": ["logs", "emotions", "tasks"],
       "properties": {
-        "logs": { "type": "array", "maxItems": 100000, "items": { "$ref": "#/$defs/log" } },
-        "emotions": { "type": "array", "maxItems": 100000, "items": { "$ref": "#/$defs/emotion" } },
-        "tasks": { "type": "array", "maxItems": 100000, "items": { "$ref": "#/$defs/task" } }
+        "logs": { "type": "array", "maxItems": 100000 },
+        "emotions": { "type": "array", "maxItems": 100000 },
+        "tasks": { "type": "array", "maxItems": 100000 }
       }
     }
   },
+  "allOf": [
+    {
+      "if": { "type": "object", "properties": { "schemas": { "type": "object", "properties": { "logs": { "const": 1 } }, "required": ["logs"] } }, "required": ["schemas"] },
+      "then": { "properties": { "data": { "type": "object", "properties": { "logs": { "type": "array", "items": { "$ref": "#/$defs/logV1" } } } } } },
+      "else": { "properties": { "data": { "type": "object", "properties": { "logs": { "type": "array", "items": { "$ref": "#/$defs/logV2" } } } } } }
+    },
+    {
+      "if": { "type": "object", "properties": { "schemas": { "type": "object", "properties": { "emotions": { "const": 1 } }, "required": ["emotions"] } }, "required": ["schemas"] },
+      "then": { "properties": { "data": { "type": "object", "properties": { "emotions": { "type": "array", "items": { "$ref": "#/$defs/emotionV1" } } } } } },
+      "else": { "properties": { "data": { "type": "object", "properties": { "emotions": { "type": "array", "items": { "$ref": "#/$defs/emotionV2" } } } } } }
+    },
+    {
+      "if": { "type": "object", "properties": { "schemas": { "type": "object", "properties": { "tasks": { "const": 1 } }, "required": ["tasks"] } }, "required": ["schemas"] },
+      "then": { "properties": { "data": { "type": "object", "properties": { "tasks": { "type": "array", "items": { "$ref": "#/$defs/taskV1" } } } } } },
+      "else": { "properties": { "data": { "type": "object", "properties": { "tasks": { "type": "array", "items": { "$ref": "#/$defs/taskV2" } } } } } }
+    }
+  ],
   "$defs": {
     "id": {
       "type": "string",
       "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
       "$comment": "沿用现有 UUID 外形校验，不追加 version/variant 位限制。分区内 ID 唯一性由语义校验负责。"
+    },
+    "optionalId": { "anyOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] },
+    "optionalBoolean": { "anyOf": [{ "type": "boolean" }, { "type": "null" }] },
+    "optionalIntensity": {
+      "anyOf": [{ "type": "integer", "minimum": 1, "maximum": 5 }, { "type": "null" }],
+      "$comment": "情绪强度 1–5，可缺省或 null；布尔值不能冒充整数（语义层已有惯例）。"
     },
     "day": {
       "type": "string",
@@ -55,7 +78,7 @@
     "optionalInstant": { "anyOf": [{ "$ref": "#/$defs/instant" }, { "type": "null" }] },
     "colorTag": { "enum": ["urgent", "inspiration", "daily", "memo", "emotion", "idea"] },
     "importance": { "type": "integer", "minimum": 0, "maximum": 4 },
-    "log": {
+    "logV1": {
       "type": "object",
       "additionalProperties": false,
       "required": ["id", "content", "colorTag", "category", "importance", "createdAt", "recordDate"],
@@ -69,7 +92,22 @@
         "recordDate": { "$ref": "#/$defs/day" }
       }
     },
-    "emotion": {
+    "logV2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "content", "colorTag", "category", "importance", "createdAt", "recordDate"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "content": { "$ref": "#/$defs/text" },
+        "colorTag": { "$ref": "#/$defs/colorTag" },
+        "category": { "enum": ["log", "idea"] },
+        "importance": { "$ref": "#/$defs/importance" },
+        "isFavorite": { "$ref": "#/$defs/optionalBoolean" },
+        "createdAt": { "$ref": "#/$defs/instant" },
+        "recordDate": { "$ref": "#/$defs/day" }
+      }
+    },
+    "emotionV1": {
       "type": "object",
       "additionalProperties": false,
       "required": ["id", "level", "createdAt", "recordDate"],
@@ -79,6 +117,22 @@
         "subEmotion": { "enum": ["sad", "angry", "uncomfortable", null] },
         "note": { "$ref": "#/$defs/optionalText" },
         "status": { "$ref": "#/$defs/optionalText" },
+        "createdAt": { "$ref": "#/$defs/instant" },
+        "recordDate": { "$ref": "#/$defs/day" }
+      }
+    },
+    "emotionV2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "level", "createdAt", "recordDate"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "level": { "type": "integer", "minimum": -3, "maximum": 3 },
+        "subEmotion": { "enum": ["sad", "angry", "uncomfortable", null] },
+        "note": { "$ref": "#/$defs/optionalText" },
+        "status": { "$ref": "#/$defs/optionalText" },
+        "intensity": { "$ref": "#/$defs/optionalIntensity" },
+        "isFavorite": { "$ref": "#/$defs/optionalBoolean" },
         "createdAt": { "$ref": "#/$defs/instant" },
         "recordDate": { "$ref": "#/$defs/day" }
       }
@@ -103,7 +157,7 @@
         }
       ]
     },
-    "task": {
+    "taskV1": {
       "type": "object",
       "additionalProperties": false,
       "required": ["id", "title", "colorTag", "importance", "due", "createdAt", "updatedAt"],
@@ -114,6 +168,25 @@
         "colorTag": { "$ref": "#/$defs/colorTag" },
         "importance": { "$ref": "#/$defs/importance" },
         "due": { "$ref": "#/$defs/due" },
+        "reminderAt": { "$ref": "#/$defs/optionalInstant" },
+        "completedAt": { "$ref": "#/$defs/optionalInstant" },
+        "createdAt": { "$ref": "#/$defs/instant" },
+        "updatedAt": { "$ref": "#/$defs/instant" }
+      }
+    },
+    "taskV2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "colorTag", "importance", "due", "createdAt", "updatedAt"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "title": { "type": "string", "maxLength": 200, "pattern": "\\S", "$comment": "原始 UTF-16 长度 <= 200；ECMAScript trim 后非空。" },
+        "notes": { "$ref": "#/$defs/optionalText" },
+        "colorTag": { "$ref": "#/$defs/colorTag" },
+        "importance": { "$ref": "#/$defs/importance" },
+        "due": { "$ref": "#/$defs/due" },
+        "sourceLogId": { "$ref": "#/$defs/optionalId", "$comment": "Idea→Task 来源关联：指向 logs 分区的一条记录 ID。" },
+        "isFavorite": { "$ref": "#/$defs/optionalBoolean" },
         "reminderAt": { "$ref": "#/$defs/optionalInstant" },
         "completedAt": { "$ref": "#/$defs/optionalInstant" },
         "createdAt": { "$ref": "#/$defs/instant" },

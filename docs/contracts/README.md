@@ -1,14 +1,14 @@
 # Flash 首版跨端数据契约
 
-> 契约修订：0.1.0（草案）｜日期：2026-09-05<br>
+> 契约修订：0.2.0（草案）｜日期：2026-10-05<br>
 > 范围：Android / macOS / HarmonyOS 的完整备份快照<br>
-> 状态：三端已接入共用样例、严格标准导入/导出与独立恢复入口；远端 CI 与 `main` 分支保护已确认，设备互传仍待真机验收。详见 [执行与验收记录](acceptance.md)。
+> 状态：分区 schema 2（收藏/情绪强度/任务来源关联）macOS 端已先行实现；Android/HarmonyOS 仍只接受分区 schema 1，对 schema 2 文件显式拒绝并提示升级，待后续版本跟进。三端共用样例、严格标准导入/导出与独立恢复入口的既有状态见 [执行与验收记录](acceptance.md)。
 
 给非技术读者的说明见 [经理版协议说明](../flash-backup-protocol-for-managers.md)。已有格式背景见 [backup v2](../flash-backup-v2.md)。本目录是面向工程实现与验收的首版规范。
 
 ## 1. 版本和边界
 
-- 继续使用现有文件版本 `flash-backup-v2`，三个分区仍为 `logs:1 / emotions:1 / tasks:1`。`0.1.0` 是本次契约草案修订号，不是新的文件版本，也不是客户端版本。
+- 文件版本仍为 `flash-backup-v2`；分区 schema 现支持 `1` 与 `2`：**分区版本声明该分区记录结构**，schema 2 仅新增可选字段（日志/情绪/任务 `isFavorite`，情绪 `intensity`，任务 `sourceLogId`），必填集不变。只实现 schema 1 的客户端读取 schema 2 文件时必须显式拒绝并提示升级。`0.2.0` 是本次契约草案修订号，不是新的文件版本，也不是客户端版本。
 - [flash-backup-v2.schema.json](flash-backup-v2.schema.json) 使用 JSON Schema Draft 2020-12；`$id` 是标识符，不是需要联网获取的地址。
 - 文件是完整快照，不是增量消息；支持文件、系统分享和现有可信局域网传输，不规定各端 UI、数据库表或通知 API。局域网传输的认证握手（PIN 不明文上链的挑战—应答）见 [lan-handshake-v1.1.md](lan-handshake-v1.1.md)，不属于本 Schema 范围。
 - 本次不定义账号、云端 API、自动同步、加密或删除传播。`flash-sync-v1` 仍只是预留设计，不能交给本 Schema 校验或现有备份导入器处理。
@@ -37,9 +37,16 @@
 
 | 分区 | 必填字段 | 可选字段 |
 | --- | --- | --- |
-| 日志/灵感 `logs` | `id`、`content`、`colorTag`、`category`、`importance`、`createdAt`、`recordDate` | 无 |
-| 情绪 `emotions` | `id`、`level`、`createdAt`、`recordDate` | `subEmotion`、`note`、`status` |
-| 任务 `tasks` | `id`、`title`、`colorTag`、`importance`、`due`、`createdAt`、`updatedAt` | `notes`、`reminderAt`、`completedAt` |
+| 日志/灵感 `logs` | `id`、`content`、`colorTag`、`category`、`importance`、`createdAt`、`recordDate` | `isFavorite`（schema 2 起） |
+| 情绪 `emotions` | `id`、`level`、`createdAt`、`recordDate` | `subEmotion`、`note`、`status`；`intensity`、`isFavorite`（schema 2 起） |
+| 任务 `tasks` | `id`、`title`、`colorTag`、`importance`、`due`、`createdAt`、`updatedAt` | `notes`、`reminderAt`、`completedAt`；`sourceLogId`、`isFavorite`（schema 2 起） |
+
+schema 2 新字段取值规则：
+
+- `isFavorite`：JSON 布尔或缺省/null；整数 1/0 不能冒充布尔。
+- `intensity`：整数 1–5 或缺省/null；布尔与浮点拒绝。
+- `sourceLogId`：UUID 外形字符串（同 `id` 规则）或缺省/null；软引用，指向的日志不在同一文件中也保留该字段。
+- 分区声明为 schema 1 时携带上述任一字段即为非法（版本声明结构，见 §5 演进规则）。
 
 取值规则：
 
@@ -97,12 +104,13 @@ JSON 对象不得包含重复键。三端严格入口与参考文件校验器都
 
 旧 `flash-backup-v1` 由独立兼容入口读取顶层 `logs/emotions`，映射出空 `tasks`，再做记录规范化；原始 v1 文件不应通过 v2 Schema。覆盖导入 v1 会清空现有任务；合并 v1 则保留任务。未知文件版本或已知分区的未知版本应拒绝。旧文件缺少的元信息属于迁移策略，不可伪造为已知的原始导出时间。
 
-新增字段、枚举值或分区都需要版本协商，不能因“只是加字段”就直接投放：当前严格对象不接受额外字段。记录结构变化升级对应分区版本；新增分区/改变信封语义升级文件版本；发布前定义旧客户端的拒绝提示与迁移路线。
+新增字段、枚举值或分区都需要版本协商，不能因“只是加字段”就直接投放：当前严格对象不接受额外字段。记录结构变化升级对应分区版本；新增分区/改变信封语义升级文件版本；发布前定义旧客户端的拒绝提示与迁移路线。2026-10-05 首次按此规则演进：三分区 schema 1→2 增加可选字段（`isFavorite`/`intensity`/`sourceLogId`），macOS 先行实现读写，旧端显式拒绝 schema 2 文件并提示升级，Android/HarmonyOS 跟进后此限制解除。
 
 ## 6. 样例和运行方式
 
 - [valid-minimal.json](fixtures/valid-minimal.json)：空的完整 v2 文件。
-- [valid-full.json](fixtures/valid-full.json)：三分区、全天/定时任务、可选空值，内容全部虚构。
+- [valid-full.json](fixtures/valid-full.json)：三分区、全天/定时任务、可选空值，内容全部虚构（分区 schema 1）。
+- [valid-schema2.json](fixtures/valid-schema2.json)：分区 schema 2 样例——收藏、情绪强度、任务来源关联（2026-10-05 起由 macOS 与参考校验器消费；Android/HarmonyOS 跟进前不接入其测试）。
 - [legacy-v1.json](fixtures/legacy-v1.json)：旧版兼容样例；严格 v2 校验应失败。
 - [contract.test.cjs](../../scripts/backup-contract/contract.test.cjs)：从有效样例变异产生非法日期、枚举、重复 ID、超限、版本和时间冲突等测试输入。负例同时落在 `fixtures/cases.json` 清单与独立 JSON 文件中，由三端共同消费。
 - [HarmonyOS codec 测试](../../harmonyos/tests/backup-contract.test.cjs)：使用实际 `.ets` 编解码源文件，平台能力由主机替身提供。

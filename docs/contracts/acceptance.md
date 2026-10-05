@@ -22,8 +22,14 @@
 - 用户仍需预览并选择合并/覆盖。数据提交失败保持数据库原状；提醒重建失败单独报告数据已提交但提醒恢复失败。
 - 三端严格入口统一拒绝 JSON 对象重复键；Android 标准入口还额外拒绝 org.json 宽松接受的非 JSON 语法。
 
-## 局域网握手 v1.1（2026-09-19 安全审计）
+## 分区 schema 2（2026-10-05，macOS 先行）
 
+- 新增可选字段：日志/情绪/任务 `isFavorite`，情绪 `intensity`（1–5），任务 `sourceLogId`（Idea→Task 来源）。分区版本声明结构：schema 1 分区携带新字段即非法。
+- 已落地：JSON Schema 0.2.0（`flash-backup-v2.schema.json`，if/then 按分区版本切换记录结构）、参考校验器与 npm 测试（67 项）、macOS 读写与 SwiftData V1→V2 迁移（含迁移测试）。macOS 导出写 schemas 2，读取接受 1 与 2。
+- 待跟进：Android/HarmonyOS 解析器接受 schema 2 并读写新字段；跟进前其对 schema 2 文件显式拒绝（符合「不静默丢弃」原则）。`valid-schema2.json` 暂未接入 Android/HarmonyOS 测试。
+- 互传提示：macOS 导出的文件在旧版 Android/HarmonyOS 上会收到“不兼容”提示，需等待两端跟进版本；macOS 读取旧端 schema 1 文件不受影响。
+
+## 局域网握手 v1.1（2026-09-19 安全审计）
 局域网备份传输的认证握手以 [lan-handshake-v1.1.md](lan-handshake-v1.1.md) 为三端统一实施规格：接收方先下发 16 字节随机 nonce，发送方以 `HMAC-SHA256(key=PIN ASCII, msg="flash-aero-handshake:"||nonce)` 前 16 字节应答证明 PIN 知识，payload 另附整包 HMAC 完整性校验。**PIN 从此不再明文出现在链路上**；旧版「首包明文 PIN」格式被本规格取代。
 
 兼容性：旧版（明文 PIN 首包）发送方/接收方与新版本均无法配对——握手第一步即不匹配。这是有意为之的断裂：旧格式把 PIN 明文上链、伪造 mDNS 服务即可注入数据、payload 无完整性校验。本应用三端同仓同发，接受此断裂，UI 文案无需兼容提示。协议版本字符串仍为 `FLASH-AERO/1`。
