@@ -16,7 +16,7 @@ struct FlashApp: App {
 
     init() {
         try? BackupTransfer.cleanupExpired()
-        let assembly = RepositoryEnvironment.makeDefault()
+        let assembly = Perf.measure("StartupAssembly") { RepositoryEnvironment.makeDefault() }
         self.assembly = assembly
         let appState = AppState()
         appState.checkDatabaseFallback(didFallbackToMemory: assembly.didFallbackToMemory)
@@ -40,8 +40,14 @@ struct FlashApp: App {
             .environmentObject(settings)
             .animatedPreferredColorScheme(settings.themeMode)
             .task {
+                #if DEBUG
+                DebugSeeder.seedIfRequested(repository: assembly.repository)
+                #endif
                 do {
-                    try await TaskReminderScheduler.shared.rebuild(try assembly.repository.snapshot().tasks)
+                    let tasks = try Perf.measure("SnapshotForReminderRebuild") {
+                        try assembly.repository.snapshot().tasks
+                    }
+                    try await TaskReminderScheduler.shared.rebuild(tasks)
                 } catch TaskReminderError.permissionDenied {
                     // 用户拒绝过通知权限：只影响系统提醒，与数据存储无关，
                     // 不写入 databaseFallbackMessage（避免误报存储故障）；设置页可重新引导权限

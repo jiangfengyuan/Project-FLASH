@@ -67,10 +67,12 @@ final class HomeViewModel {
     }
 
     private func recompute() {
-        todayRecordCount = todayLogs.count + todayIdeas.count
-        todayIdeaCount = todayIdeas.count
-        recentLogs = Array(logs.prefix(6))
-        emotionSnapshot = makeEmotionSnapshot()
+        Perf.measure("HomeDerive") {
+            todayRecordCount = todayLogs.count + todayIdeas.count
+            todayIdeaCount = todayIdeas.count
+            recentLogs = Array(logs.prefix(6))
+            emotionSnapshot = makeEmotionSnapshot()
+        }
     }
 
     // MARK: - 今日计数

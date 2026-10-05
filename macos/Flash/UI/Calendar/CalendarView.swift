@@ -31,9 +31,11 @@ struct CalendarView: View {
 
     var body: some View {
         // 每次 body 求值只聚合一次，42 个格子与选中行复用同一字典
-        let aggregates = aggregateDay(logs: logEntities.map { $0.toModel() },
-                                      emotions: emotionEntities.map { $0.toModel() },
-                                      tasks: taskEntities.map { $0.toModel() })
+        let aggregates = Perf.measure("CalendarAggregate") {
+            aggregateDay(logs: logEntities.map { $0.toModel() },
+                         emotions: emotionEntities.map { $0.toModel() },
+                         tasks: taskEntities.map { $0.toModel() })
+        }
         VStack(spacing: 0) {
             // 头部
             HStack {

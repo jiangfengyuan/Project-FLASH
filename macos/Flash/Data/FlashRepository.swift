@@ -14,6 +14,16 @@ struct FlashSnapshot: Equatable {
     let tasks: [TaskItem]
 }
 
+// MARK: - 调试灌注分批
+
+#if DEBUG
+private extension Array {
+    func chunked(into size: Int) -> [[Element]] {
+        stride(from: 0, to: count, by: size).map { Array(self[$0..<Swift.min($0 + size, count)]) }
+    }
+}
+#endif
+
 /// 对应 Web 版 StorageAdapter / Android FlashRepository。
 /// createdAt 使用 ISO-8601，recordDate 为 yyyy-MM-dd。
 final class FlashRepository {
@@ -139,6 +149,23 @@ final class FlashRepository {
     }
 
     // MARK: - Import / Export
+
+    #if DEBUG
+    /// 合成数据灌注（性能基线专用）：分批 commit，避免单次超大事务
+    @MainActor
+    func seedBulk(logs: [LogItem], emotions: [EmotionRecord], tasks: [TaskItem]) throws {
+        let batchSize = 2000
+        for batch in logs.chunked(into: batchSize) {
+            try commit { batch.forEach(upsertLogEntity) }
+        }
+        for batch in emotions.chunked(into: batchSize) {
+            try commit { batch.forEach(upsertEmotionEntity) }
+        }
+        for batch in tasks.chunked(into: batchSize) {
+            try commit { batch.forEach { context.insert(TaskEntity($0)) } }
+        }
+    }
+    #endif
 
     /// Capture all portable sections through one repository boundary. The
     /// synchronous MainActor read prevents app writes from interleaving between

@@ -36,14 +36,17 @@ struct StatsView: View {
             let today = context.date
             let windowDays = window.days(today: today)
             // 实体 → 模型只映射一次，KPI 与图表统计复用同一结果
-            let logs = logEntities.map { $0.toModel() }
-            let emotions = emotionEntities.map { $0.toModel() }
-            let daily = EmotionStats.dailyAverages(emotions, days: windowDays, today: today)
+            let (logs, emotions, daily, totalLogs, totalIdeas, activeDays) = Perf.measure("StatsAggregate") {
+                let logs = logEntities.map { $0.toModel() }
+                let emotions = emotionEntities.map { $0.toModel() }
+                let daily = EmotionStats.dailyAverages(emotions, days: windowDays, today: today)
+                let totalLogs = logs.filter { $0.category == .log }.count
+                let totalIdeas = logs.filter { $0.category == .idea }.count
+                let activeDays = Set(logs.map(\.recordDate) + emotions.map(\.recordDate)).count
+                return (logs, emotions, daily, totalLogs, totalIdeas, activeDays)
+            }
             let start = daily.first!.date
             let end = daily.last!.date
-            let totalLogs = logs.filter { $0.category == .log }.count
-            let totalIdeas = logs.filter { $0.category == .idea }.count
-            let activeDays = Set(logs.map(\.recordDate) + emotions.map(\.recordDate)).count
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {

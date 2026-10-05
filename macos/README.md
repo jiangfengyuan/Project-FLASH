@@ -90,6 +90,27 @@ LocalBackupTransfer / SettingsStore / Domain 纯函数 / 主题色。测试数�
 
 ## 性能基线
 
+### 观测设施（2026-10-05 起）
+
+- `Flash/Data/Perf.swift`：OSSignposter 封装（subsystem `com.flash.app.macos`），
+  插桩点 `StartupAssembly` / `SnapshotForReminderRebuild` / `StatsAggregate` /
+  `CalendarAggregate` / `HomeDerive`，Instruments 的 Points of Interest 模板按名过滤。
+- `Flash/Data/DebugSeeder.swift`（仅 DEBUG）：`FLASH_SEED_SYNTHETIC=10000` 启动时向空库
+  灌注确定性合成数据（1 万日志 / 5 千情绪 / 2 千任务，LCG 种子固定，多次运行数据集一致）。
+- `FlashTests/PerfBaselineTests.swift`：聚合/搜索管线微基准，结果写
+  `/tmp/flash-perf-baseline.txt`；断言为宽松上限，只拦截病态回归。
+
+### 微基准（Debug 构建，M3 Pro，2026-10-05 优化前）
+
+| 管线（10k 日志 / 5k 情绪 / 2k 任务） | 优化前 |
+| --- | --- |
+| `aggregateDay`（日历日聚合） | 11.0 ms |
+| `LogFilter.apply(query)` | 15.1 ms |
+| Stats 管线（日均值+子情绪+活跃度+洞察，90 天窗） | 18.4 ms |
+| `GlobalSearch` | 39.4 ms |
+
+### 实测基线（Release）
+
 2026-08-14 实测（M3 Pro / 36 GB，Release universal2，热缓存）：
 
 | 指标 | 实测 | 方法 |
