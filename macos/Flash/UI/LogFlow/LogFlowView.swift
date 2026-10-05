@@ -13,14 +13,27 @@ struct LogFlowView: View {
     @Query(sort: \LogEntity.createdAt, order: .reverse) private var logEntities: [LogEntity]
 
     @State private var filter = LogFilter()
+    /// .searchable 的原始输入；停顿 200ms 后才写入 filter.query 驱动全表过滤
+    @State private var searchInput = ""
+    /// 过滤结果缓存：键 = 写代际 + 完整过滤条件，无关重渲染命中缓存
+    @State private var filteredCache = ViewComputeCache<FilteredKey, [LogItem]>()
     @State private var editingLog: LogItem? = nil
     @State private var deletingLog: LogItem? = nil
     @State private var errorMessage: String? = nil
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
+    /// 缓存键：数据写代际 + 过滤条件（含搜索词/标签/日期/排序）
+    private struct FilteredKey: Equatable {
+        let revision: Int
+        let filter: LogFilter
+    }
+
     var body: some View {
-        // 每次 body 求值只过滤一次，空态与列表复用同一结果
-        let filtered = filter.apply(to: logEntities.map { $0.toModel() })
+        // 过滤条件或数据变化时才过滤一次，空态与列表复用同一结果
+        let filtered = filteredCache.value(for: FilteredKey(revision: repository?.revision ?? 0,
+                                                            filter: filter)) {
+            filter.apply(to: logEntities.map { $0.toModel() })
+        }
         VStack(spacing: 0) {
             // 工具区
             VStack(spacing: 10) {
@@ -99,7 +112,17 @@ struct LogFlowView: View {
         }
         // 空态 ↔ 列表切换的过渡动画
         .animation(Motion.soft(reduceMotion), value: filtered.isEmpty)
-        .searchable(text: $filter.query, placement: .toolbar, prompt: "搜索记录内容")
+        .searchable(text: $searchInput, placement: .toolbar, prompt: "搜索记录内容")
+        // 搜索防抖：清空立即生效（语义不变），输入停顿 200ms 后才驱动全表过滤排序
+        .task(id: searchInput) {
+            if searchInput.isEmpty {
+                if filter.query != searchInput { filter.query = searchInput }
+                return
+            }
+            try? await Task.sleep(for: .milliseconds(200))
+            guard !Task.isCancelled, filter.query != searchInput else { return }
+            filter.query = searchInput
+        }
         .sheet(item: $editingLog) { log in
             LogEditSheet(log: log) { updated in
                 try repository?.updateLog(updated)

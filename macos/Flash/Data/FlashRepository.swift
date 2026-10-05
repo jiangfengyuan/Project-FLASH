@@ -30,6 +30,12 @@ final class FlashRepository {
     private let container: ModelContainer
     private let beforeSave: () throws -> Void
 
+    /// 写代际号：每次 commit 成功 +1。视图用它做 O(1) 变更检测（onChange/缓存键），
+    /// 代替「每次 body 求值全表 toModel 后做值比较」。不能改用 @Query 实体数组的
+    /// 相等比较：PersistentModel 的相等走身份，漏掉就地属性更新（编辑/勾选完成）。
+    /// 仅在主线程读写（全部写路径经 @MainActor commit）。
+    private(set) var revision = 0
+
     init(container: ModelContainer, beforeSave: @escaping () throws -> Void = {}) {
         self.container = container
         self.beforeSave = beforeSave
@@ -154,6 +160,13 @@ final class FlashRepository {
 
     @MainActor
     func allTasks() throws -> [TaskItem] {
+        try tasksOnly()
+    }
+
+    /// 只取任务表（按 updatedAt 倒序）：启动时重建系统提醒等只需任务的场景使用，
+    /// 避免 snapshot() 连带映射日志/情绪两张全表
+    @MainActor
+    func tasksOnly() throws -> [TaskItem] {
         let descriptor = FetchDescriptor<TaskEntity>(
             sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]
         )
@@ -260,6 +273,7 @@ final class FlashRepository {
             try mutation()
             try beforeSave()
             try context.save()
+            revision += 1
         } catch {
             context.rollback()
             throw error

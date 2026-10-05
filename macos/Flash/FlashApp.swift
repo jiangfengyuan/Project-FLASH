@@ -15,7 +15,11 @@ struct FlashApp: App {
     @StateObject private var settings = SettingsStore()
 
     init() {
-        try? BackupTransfer.cleanupExpired()
+        // 过期分享副本清理是纯沙箱文件 IO（FileManager 线程安全、无共享可变状态、
+        // 不依赖 MainActor），移出启动同步路径后台执行
+        Task.detached(priority: .utility) {
+            try? BackupTransfer.cleanupExpired()
+        }
         let assembly = Perf.measure("StartupAssembly") { RepositoryEnvironment.makeDefault() }
         self.assembly = assembly
         let appState = AppState()
@@ -44,8 +48,10 @@ struct FlashApp: App {
                 DebugSeeder.seedIfRequested(repository: assembly.repository)
                 #endif
                 do {
-                    let tasks = try Perf.measure("SnapshotForReminderRebuild") {
-                        try assembly.repository.snapshot().tasks
+                    // 重建任务提醒只需任务表：tasksOnly() 代替 snapshot()，
+                    // 不再连带映射日志/情绪两张全表
+                    let tasks = try Perf.measure("TasksForReminderRebuild") {
+                        try assembly.repository.tasksOnly()
                     }
                     try await TaskReminderScheduler.shared.rebuild(tasks)
                 } catch TaskReminderError.permissionDenied {

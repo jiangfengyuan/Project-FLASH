@@ -31,6 +31,10 @@ struct ExploreView: View {
 
     @State private var filter: ExploreFilter = .all
     @State private var searchText = ""
+    /// 防抖后的搜索词：停顿 200ms 才驱动列表过滤，按键不再逐次触发全表过滤
+    @State private var appliedQuery = ""
+    /// 统计摘要缓存：键 = 写代际，数据变化才重新全量计数
+    @State private var statsSummaryCache = ViewComputeCache<Int, String>()
     /// 筛选面板状态（关闭 popover 后保留）
     @State private var criteria = ExploreCriteria()
     @State private var showFilterPanel = false
@@ -58,7 +62,7 @@ struct ExploreView: View {
                     .padding(.horizontal, Spacing.md)
                 batchBar
             }
-            ExploreLogListView(filter: filter, query: searchText, criteria: criteria,
+            ExploreLogListView(filter: filter, query: appliedQuery, criteria: criteria,
                                batchMode: batchMode, selection: $selection,
                                onClearFilters: clearFilters)
                 // 筛选切换时强制重建列表查询（@Query 谓词初始化后不随新实例更新）
@@ -76,6 +80,16 @@ struct ExploreView: View {
             // 离开「待整理」退出批量模式；清空选择避免误操作
             if filter != .unsorted { batchMode = false }
             selection = []
+        }
+        // 搜索防抖：清空立即生效（清除语义不变），输入停顿 200ms 后才驱动列表过滤
+        .task(id: searchText) {
+            if searchText.isEmpty {
+                if appliedQuery != searchText { appliedQuery = searchText }
+                return
+            }
+            try? await Task.sleep(for: .milliseconds(200))
+            guard !Task.isCancelled, appliedQuery != searchText else { return }
+            appliedQuery = searchText
         }
         .sheet(item: $newLogDraft) { draftItem in
             LogEditSheet(log: draftItem,
@@ -234,13 +248,16 @@ struct ExploreView: View {
 
     // MARK: - 数据 / 命令处理
 
-    /// 统计摘要：全量记录计数（日志 / 灵感 / 待整理），随数据实时刷新
+    /// 统计摘要：全量记录计数（日志 / 灵感 / 待整理），随数据实时刷新；
+    /// 按写代际缓存，搜索按键等无关 body 求值不再全量映射
     private var statsSummary: String {
-        let logs = allLogEntities.map { $0.toModel() }
-        let logCount = logs.filter { $0.category == .log }.count
-        let ideaCount = logs.filter { $0.category == .idea }.count
-        let unsortedCount = logs.filter { $0.category == .log && $0.colorTag == .daily }.count
-        return "共 \(logs.count) 条 · 日志 \(logCount) · 灵感 \(ideaCount) · 待整理 \(unsortedCount)"
+        statsSummaryCache.value(for: repository?.revision ?? 0) {
+            let logs = allLogEntities.map { $0.toModel() }
+            let logCount = logs.filter { $0.category == .log }.count
+            let ideaCount = logs.filter { $0.category == .idea }.count
+            let unsortedCount = logs.filter { $0.category == .log && $0.colorTag == .daily }.count
+            return "共 \(logs.count) 条 · 日志 \(logCount) · 灵感 \(ideaCount) · 待整理 \(unsortedCount)"
+        }
     }
 
     private var errorPresented: Binding<Bool> {

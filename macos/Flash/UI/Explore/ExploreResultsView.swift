@@ -149,31 +149,45 @@ struct ExploreLogListView: View {
         case repositoryUnavailable
     }
 
-    /// 内存过滤：搜索词（正文/标签名）+ 面板条件（标签/重要度/日期范围，recordDate 字典序即时间序）
+    /// displayedLogs 缓存：键 = 写代际 + 搜索词 + 面板条件。
+    /// 不能用 @Query 实体数组做键：PersistentModel 相等走身份，漏掉就地属性更新。
+    @State private var displayedCache = ViewComputeCache<DisplayedKey, [LogItem]>()
+
+    private struct DisplayedKey: Equatable {
+        let revision: Int
+        let query: String
+        let criteria: ExploreCriteria
+    }
+
+    /// 内存过滤：搜索词（正文/标签名）+ 面板条件（标签/重要度/日期范围，recordDate 字典序即时间序）。
+    /// 结果按缓存键 memo 化：无关重渲染与每次按键不再全表映射
     private var displayedLogs: [LogItem] {
-        var logs = logEntities.map { $0.toModel() }
-        let normalized = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        if !normalized.isEmpty {
-            logs = logs.filter { log in
-                log.content.lowercased().contains(normalized) ||
-                    log.colorTag.displayName.lowercased().contains(normalized)
+        displayedCache.value(for: DisplayedKey(revision: repository?.revision ?? 0,
+                                               query: query, criteria: criteria)) {
+            var logs = logEntities.map { $0.toModel() }
+            let normalized = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            if !normalized.isEmpty {
+                logs = logs.filter { log in
+                    log.content.lowercased().contains(normalized) ||
+                        log.colorTag.displayName.lowercased().contains(normalized)
+                }
             }
+            if let tag = criteria.tag {
+                logs = logs.filter { $0.colorTag == tag }
+            }
+            if criteria.minImportance > 0 {
+                logs = logs.filter { $0.importance >= criteria.minImportance }
+            }
+            if let start = criteria.startDate {
+                let startKey = DateFormatting.dayString(start)
+                logs = logs.filter { $0.recordDate >= startKey }
+            }
+            if let end = criteria.endDate {
+                let endKey = DateFormatting.dayString(end)
+                logs = logs.filter { $0.recordDate <= endKey }
+            }
+            return logs
         }
-        if let tag = criteria.tag {
-            logs = logs.filter { $0.colorTag == tag }
-        }
-        if criteria.minImportance > 0 {
-            logs = logs.filter { $0.importance >= criteria.minImportance }
-        }
-        if let start = criteria.startDate {
-            let startKey = DateFormatting.dayString(start)
-            logs = logs.filter { $0.recordDate >= startKey }
-        }
-        if let end = criteria.endDate {
-            let endKey = DateFormatting.dayString(end)
-            logs = logs.filter { $0.recordDate <= endKey }
-        }
-        return logs
     }
 
     private var hasActiveFilter: Bool {

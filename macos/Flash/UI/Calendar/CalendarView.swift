@@ -23,6 +23,11 @@ struct CalendarView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.flashRepository) private var repository
 
+    /// 聚合结果缓存：仅在数据写代际变化时重算；月份切换/选中日/hover 不再触发全表聚合。
+    /// 键不含 displayedMonth：aggregateDay 对全部日期产出字典，与展示月份无关。
+    /// 不能用 @Query 实体数组做键：PersistentModel 相等走身份，漏掉勾选完成等就地更新。
+    @State private var aggregateCache = ViewComputeCache<Int, [String: DayAggregate]>()
+
     /// 共享公历实例，避免每次渲染格子都新建 Calendar
     nonisolated(unsafe) private static let gregorian = Calendar(identifier: .gregorian)
 
@@ -30,11 +35,13 @@ struct CalendarView: View {
     private var selectedKey: String { DateFormatting.dayString(selectedDate) }
 
     var body: some View {
-        // 每次 body 求值只聚合一次，42 个格子与选中行复用同一字典
-        let aggregates = Perf.measure("CalendarAggregate") {
-            aggregateDay(logs: logEntities.map { $0.toModel() },
-                         emotions: emotionEntities.map { $0.toModel() },
-                         tasks: taskEntities.map { $0.toModel() })
+        // 数据变化才聚合一次，42 个格子与选中行复用同一字典
+        let aggregates = aggregateCache.value(for: repository?.revision ?? 0) {
+            Perf.measure("CalendarAggregate") {
+                aggregateDay(logs: logEntities.map { $0.toModel() },
+                             emotions: emotionEntities.map { $0.toModel() },
+                             tasks: taskEntities.map { $0.toModel() })
+            }
         }
         VStack(spacing: 0) {
             // 头部

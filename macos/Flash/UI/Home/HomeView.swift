@@ -41,10 +41,14 @@ struct HomeView: View {
     @State private var overviewAppeared = false
     @State private var bodyAppeared = false
 
-    private var logs: [LogItem] { logEntities.map { $0.toModel() } }
-    private var emotions: [EmotionRecord] { emotionEntities.map { $0.toModel() } }
-    /// 未完成待办数（不限今日）
-    private var openTaskCount: Int { taskEntities.filter { $0.completedAt == nil }.count }
+    /// 未完成待办数（不限今日）：按写代际缓存，body 求值不再逐次过滤
+    @State private var openTaskCountCache = ViewComputeCache<Int, Int>()
+
+    private var openTaskCount: Int {
+        openTaskCountCache.value(for: repository?.revision ?? 0) {
+            taskEntities.filter { $0.completedAt == nil }.count
+        }
+    }
 
     var body: some View {
         ScrollView {
@@ -88,8 +92,9 @@ struct HomeView: View {
             syncViewModel()
             playEntranceAnimation()
         }
-        .onChange(of: logs) { syncViewModel() }
-        .onChange(of: emotions) { syncViewModel() }
+        // 写代际变化 = 任一表有提交（插入/更新/删除/导入）；草稿按键等无关求值不再触发同步。
+        // 不直接观察实体数组：PersistentModel 相等走身份，漏掉编辑等就地属性更新
+        .onChange(of: repository?.revision ?? 0) { syncViewModel() }
         // 顶部 toast：过渡由 ToastView 内置 .pop 接管，调用点不再叠加 .transition
         .overlay(alignment: .top) {
             if let toastMessage {
@@ -212,9 +217,11 @@ struct HomeView: View {
 
     // MARK: - 数据注入 / ⌘N / 新建 / 保存
 
-    /// 把最新 logs/emotions 注入 ViewModel；内容未变时 VM 内部直接返回，不重算
+    /// 把最新 logs/emotions 注入 ViewModel；实体→模型映射只在此处发生（写代际变化时），
+    /// VM 内部按值比较，内容未变时直接返回不重算
     private func syncViewModel() {
-        viewModel.update(logs: logs, emotions: emotions)
+        viewModel.update(logs: logEntities.map { $0.toModel() },
+                         emotions: emotionEntities.map { $0.toModel() })
     }
 
     private var errorPresented: Binding<Bool> {
