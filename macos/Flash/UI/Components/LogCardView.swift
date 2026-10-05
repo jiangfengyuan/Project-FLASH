@@ -12,6 +12,8 @@ struct LogCardView: View {
     let log: LogItem
     var onEdit: (() -> Void)? = nil
     var onDelete: (() -> Void)? = nil
+    /// 收藏切换（nil 时不渲染星标按钮；已收藏星标常显不受此影响）
+    var onToggleFavorite: (() -> Void)? = nil
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var hovering = false
@@ -20,7 +22,8 @@ struct LogCardView: View {
     /// hover 浮现操作按钮的命中框：固定基准 28，随系统字体档位缩放（图标框场景）
     @ScaledMetric(relativeTo: .body) private var actionButtonSize = 28
 
-    private var hasActions: Bool { onEdit != nil || onDelete != nil }
+    private var isFavorite: Bool { log.isFavorite == true }
+    private var hasActions: Bool { onEdit != nil || onDelete != nil || onToggleFavorite != nil }
     private var showActions: Bool { hovering && hasActions }
 
     /// 时间戳：日期 + HH:mm，灰色小字（createdAt 解析失败时只显日期）
@@ -39,6 +42,13 @@ struct LogCardView: View {
                         .foregroundStyle(ColorTag.urgent.textColor)
                 }
                 Spacer()
+                // 已收藏星标常显（金色可读变体，深浅色均达标）；未收藏时星标按钮随 hover 浮现
+                if isFavorite {
+                    Image(systemName: "star.fill")
+                        .font(Typography.caption)
+                        .foregroundStyle(BrandColors.ideaYellowText)
+                        .accessibilityLabel("已收藏")
+                }
                 Text(timestamp)
                     .font(Typography.caption)
                     .foregroundStyle(.secondary)
@@ -81,6 +91,17 @@ struct LogCardView: View {
 
     private var actionButtons: some View {
         HStack(spacing: 2) { // 2：相邻图标按钮的极小间距
+            if let onToggleFavorite {
+                Button(action: onToggleFavorite) {
+                    Image(systemName: isFavorite ? "star.fill" : "star")
+                        .frame(width: actionButtonSize, height: actionButtonSize)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(isFavorite ? BrandColors.ideaYellowText : .secondary)
+                .help(isFavorite ? "取消收藏" : "收藏")
+                .accessibilityLabel(isFavorite ? "取消收藏" : "收藏")
+            }
             if let onEdit {
                 Button(action: onEdit) {
                     Image(systemName: "pencil")

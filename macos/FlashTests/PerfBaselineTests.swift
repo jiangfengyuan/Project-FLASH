@@ -65,9 +65,10 @@ struct PerfBaselineTests {
 
     @Test func globalSearchBaseline() {
         let elapsed = clock.measure {
-            _ = GlobalSearch.search(logs: dataset.logs, emotions: dataset.emotions, query: "设计")
+            _ = GlobalSearch.search(logs: dataset.logs, emotions: dataset.emotions,
+                                    tasks: dataset.tasks, query: "设计")
         }
-        record("GlobalSearch 10k/5k", elapsed)
+        record("GlobalSearch 10k/5k/2k", elapsed)
         #expect(elapsed < .seconds(2))
     }
 }

@@ -80,13 +80,13 @@ struct FlashApp: App {
                 Button("导出备份…") { appState.requestExport() }
                     .keyboardShortcut("e", modifiers: [.command, .shift])
             }
-            // ⌘K 搜索：token 递增，各页面监听并聚焦搜索框
+            // ⌘K 全局搜索：唤起 RootView 层浮层（不切模块；记录页内搜索是独立能力）
             CommandGroup(after: .sidebar) {
                 Button("搜索") { appState.requestSearch() }
                     .keyboardShortcut("k", modifiers: .command)
             }
-            // 模块切换 ⌘1…⌘6：快捷键与模块的绑定保持不变（设置已有 ⌘,，不重复占用）；
-            // 菜单文案跟随 Module.title，与侧栏一级/次级命名同源
+            // 模块切换 ⌘1…⌘6（对齐 PRD：⌘1 此刻 ⌘2 记录 ⌘3 日志流 ⌘4 日历 ⌘5 情绪 ⌘6 回顾；
+            // ⌘7 留给后续模块。设置已有 ⌘,，不重复占用）；菜单文案跟随 Module.title，与侧栏命名同源
             CommandMenu("模块") {
                 Button(Module.home.title) { appState.selectedModule = .home }
                     .keyboardShortcut("1", modifiers: .command)
@@ -94,9 +94,9 @@ struct FlashApp: App {
                     .keyboardShortcut("2", modifiers: .command)
                 Button(Module.logflow.title) { appState.selectedModule = .logflow }
                     .keyboardShortcut("3", modifiers: .command)
-                Button(Module.emotion.title) { appState.selectedModule = .emotion }
-                    .keyboardShortcut("4", modifiers: .command)
                 Button(Module.calendar.title) { appState.selectedModule = .calendar }
+                    .keyboardShortcut("4", modifiers: .command)
+                Button(Module.emotion.title) { appState.selectedModule = .emotion }
                     .keyboardShortcut("5", modifiers: .command)
                 Button(Module.stats.title) { appState.selectedModule = .stats }
                     .keyboardShortcut("6", modifiers: .command)

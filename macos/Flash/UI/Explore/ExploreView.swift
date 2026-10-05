@@ -20,10 +20,12 @@ enum ExploreFilter: String, CaseIterable {
     }
 }
 
-/// 记录页：标题「记录」+ 全局搜索 + 筛选胶囊（全部／日志／灵感／待整理）+
+/// 记录页：标题「记录」+ 页内搜索 + 筛选胶囊（全部／日志／灵感／待整理／已收藏）+
 /// 筛选面板（标签/重要度/日期范围，popover 承载、关闭后状态保留）+ 记录卡列表。
 /// 「待整理」= 未改过分拣的日常日志（category=log 且 colorTag=daily），支持批量修改分类或标签。
-/// ⌘K 聚焦搜索框；⌘N 弹「新建记录」面板；列表按最新记录排序。
+/// ⌘K 唤起全局搜索浮层（RootView 层，AppState.isGlobalSearchPresented）；页内搜索是独立的页内过滤能力。
+/// ⌘N 弹「新建记录」面板；列表按最新记录排序。
+/// 跨模块定位（全局搜索/日历「查看灵感」）：消费 AppState.focusTarget，打开该记录的编辑弹层。
 struct ExploreView: View {
     @Environment(\.flashRepository) private var repository
     @Environment(AppState.self) private var appState
@@ -33,6 +35,8 @@ struct ExploreView: View {
     @State private var searchText = ""
     /// 防抖后的搜索词：停顿 200ms 才驱动列表过滤，按键不再逐次触发全表过滤
     @State private var appliedQuery = ""
+    /// 只看收藏（筛选胶囊，与面板条件并列）
+    @State private var favoritesOnly = false
     /// 统计摘要缓存：键 = 写代际，数据变化才重新全量计数
     @State private var statsSummaryCache = ViewComputeCache<Int, String>()
     /// 筛选面板状态（关闭 popover 后保留）
@@ -41,6 +45,10 @@ struct ExploreView: View {
     @State private var errorMessage: String? = nil
     /// 「+ 新建」sheet 的草稿（nil 表示不展示）
     @State private var newLogDraft: LogItem? = nil
+    /// 跨模块定位：待打开编辑弹层的记录（nil 表示不展示）
+    @State private var focusedLog: LogItem? = nil
+    /// Idea→Task 转化草稿（nil 表示不展示任务编辑器）
+    @State private var ideaTaskDraft: IdeaTaskDraft? = nil
     /// 批量整理模式（仅「待整理」下可用）
     @State private var batchMode = false
     @State private var selection: Set<String> = []
@@ -63,6 +71,7 @@ struct ExploreView: View {
                 batchBar
             }
             ExploreLogListView(filter: filter, query: appliedQuery, criteria: criteria,
+                               favoritesOnly: favoritesOnly,
                                batchMode: batchMode, selection: $selection,
                                onClearFilters: clearFilters)
                 // 筛选切换时强制重建列表查询（@Query 谓词初始化后不随新实例更新）
@@ -73,9 +82,9 @@ struct ExploreView: View {
         .background(BrandColors.pageBackground)
         // 筛选切换：结果列表整体 soft 过渡
         .animation(Motion.soft(reduceMotion), value: filter)
-        .onAppear { flushSearchRequest(); flushNewLogRequest() }
-        .onChange(of: appState.searchRequestToken) { flushSearchRequest() }
+        .onAppear { flushNewLogRequest(); flushFocusTarget() }
         .onChange(of: appState.newLogRequestToken) { flushNewLogRequest() }
+        .onChange(of: appState.focusRequestToken) { flushFocusTarget() }
         .onChange(of: filter) {
             // 离开「待整理」退出批量模式；清空选择避免误操作
             if filter != .unsorted { batchMode = false }
@@ -95,6 +104,25 @@ struct ExploreView: View {
             LogEditSheet(log: draftItem,
                          title: draftItem.category == .idea ? "新建灵感" : "新建记录") { updated in
                 try saveNewLog(updated)
+            }
+        }
+        // 跨模块定位：直接打开目标记录的编辑弹层（记录可能不在当前筛选结果里，
+        // 弹层不依赖列表命中，最简可靠）
+        .sheet(item: $focusedLog) { log in
+            LogEditSheet(log: log,
+                         title: log.category == .idea ? "编辑灵感" : "编辑记录",
+                         onSave: { updated in
+                             guard let repository else { throw SaveError() }
+                             try repository.updateLog(updated)
+                         },
+                         onConvertToTask: { draft in
+                             ideaTaskDraft = IdeaTaskDraft(sourceLogId: draft.id, title: draft.content)
+                         })
+        }
+        .sheet(item: $ideaTaskDraft) { draft in
+            TaskEditorView(selectedDate: Date(), task: nil, ideaDraft: draft) { task in
+                // 入库成功才关闭编辑器（失败保留草稿，错误经 errorMessage 提示）
+                if saveTask(task) { ideaTaskDraft = nil }
             }
         }
         .alert("提示", isPresented: errorPresented) {
@@ -156,9 +184,6 @@ struct ExploreView: View {
                 .accessibilityLabel("清除搜索")
                 .transition(.scale(scale: 0.8).combined(with: .opacity))
             }
-            Text("⌘K")
-                .font(.caption.monospacedDigit())
-                .foregroundStyle(.secondary)
         }
         .padding(.horizontal, 14) // 搜索胶囊横向内距：无对应令牌（sm 偏紧、md 偏宽）
         .padding(.vertical, 11)   // 搜索胶囊纵向内距：特调值，对齐输入框行高
@@ -187,6 +212,11 @@ struct ExploreView: View {
                                accentText: item == .idea ? BrandColors.ideaYellowText : nil) {
                     filter = item
                 }
+            }
+            // 「已收藏」胶囊：星标语义用灵感金（与卡片星标同色），勾选后列表只显示收藏项
+            FilterChipView(title: "已收藏", isSelected: favoritesOnly,
+                           accent: BrandColors.ideaYellow, accentText: BrandColors.ideaYellowText) {
+                favoritesOnly.toggle()
             }
             Spacer()
             Button {
@@ -266,17 +296,22 @@ struct ExploreView: View {
         Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })
     }
 
-    /// 清除全部筛选：搜索词 + 筛选面板条件 + 胶囊回到「全部」
+    /// 清除全部筛选：搜索词 + 筛选面板条件 + 收藏胶囊 + 胶囊回到「全部」
     private func clearFilters() {
         searchText = ""
         criteria.clear()
+        favoritesOnly = false
         filter = .all
     }
 
-    private func flushSearchRequest() {
-        guard appState.searchRequestToken != appState.handledSearchToken else { return }
-        appState.markSearchHandled()
-        searchFocused = true
+    /// 跨模块定位（全局搜索跳转 / 日历「查看灵感」）：消费一次 focusTarget，
+    /// 取 logID 对应记录打开编辑弹层。onAppear 兜底：跨模块切换使本视图首次创建时
+    /// token 已递增，onChange 不会回放。记录已删时静默忽略（无弹层可开）。
+    private func flushFocusTarget() {
+        guard let target = appState.consumeFocusTarget(),
+              let logID = target.logID,
+              let repository else { return }
+        focusedLog = (try? repository.allLogs())?.first { $0.id == logID }
     }
 
     /// 菜单「新建记录」⌘N：在记录页直接弹「新建记录」面板（一次主操作）。
@@ -306,7 +341,33 @@ struct ExploreView: View {
         guard let repository else { throw SaveError() }
         try repository.addLog(content: item.content, colorTag: item.colorTag,
                               category: item.category, importance: item.importance,
+                              isFavorite: item.isFavorite,
                               recordDate: DateFormatting.parseDay(item.recordDate))
+    }
+
+    /// Idea→Task 保存：入库 + 重建系统提醒（与日历页同一契约；原灵感保留不动）。
+    /// 返回是否入库成功，供 item 型 sheet 决定何时关闭编辑器（失败保留草稿）
+    @discardableResult
+    private func saveTask(_ task: TaskItem) -> Bool {
+        guard let repository else { errorMessage = "内部错误：存储未就绪"; return false }
+        do {
+            try repository.saveTask(task)
+            Task {
+                do {
+                    try await TaskReminderScheduler.shared.schedule(task)
+                    if TaskReminderScheduler.hasPastReminder(task) {
+                        errorMessage = "任务已保存，但提醒时间已过，将不会提醒"
+                    }
+                } catch {
+                    errorMessage = "任务已保存，但系统提醒未启用"
+                }
+            }
+            return true
+        } catch {
+            print("[ExploreView] 任务保存失败: \(error)")
+            errorMessage = "任务保存失败，请重试"
+            return false
+        }
     }
 
     // MARK: - 批量操作

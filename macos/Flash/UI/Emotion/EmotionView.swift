@@ -16,6 +16,8 @@ struct EmotionView: View {
 
     @State private var sliderValue: Double = 5 // 1...7 → veryUnhappy...slightlyHappy 默认
     @State private var selectedSubEmotion: SubEmotion? = nil
+    /// 情绪强度 1–5（PRD §20 V1.1）：可选，nil = 未评；再点已选圆点取消
+    @State private var intensity: Int? = nil
     @State private var note = ""
     @State private var errorMessage: String? = nil
 
@@ -95,6 +97,37 @@ struct EmotionView: View {
                 }
                 .accessibilityValue(selectedLevel.displayName)
 
+                // 强度（可选，1–5 圆点行，再点一次取消；PRD §20 V1.1）
+                VStack(alignment: .leading, spacing: Spacing.xs) {
+                    Text("强度（可选）")
+                        .font(Typography.caption)
+                        .foregroundStyle(.secondary)
+                    HStack(spacing: Spacing.sm) {
+                        ForEach(1...5, id: \.self) { value in
+                            Button {
+                                intensity = (intensity == value) ? nil : value
+                            } label: {
+                                Circle()
+                                    .fill((intensity ?? 0) >= value
+                                          ? BrandColors.emotionPink
+                                          : Color.primary.opacity(0.15))
+                                    .frame(width: 14, height: 14) // 强度圆点尺寸（几何值）
+                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("强度 \(value)")
+                            .accessibilityAddTraits(intensity == value ? [.isSelected] : [])
+                        }
+                        if let intensity {
+                            Text("强度 \(intensity)")
+                                .font(Typography.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .animation(Motion.quick(reduceMotion), value: intensity)
+                }
+                .frame(maxWidth: 420, alignment: .leading) // 与滑杆同宽（几何值）
+
                 // 子情绪（仅负面）
                 if selectedLevel.isNegative {
                     HStack(spacing: 10) { // 10：胶囊间紧凑节奏（无对应令牌）
@@ -172,9 +205,11 @@ struct EmotionView: View {
         // 包一层动画，让下方历史列表对新增记录做柔和的插入过渡
         Motion.animate(Motion.soft(reduceMotion), reduceMotion: reduceMotion) {
             do {
-                try repository?.addEmotion(level: level, subEmotion: sub, note: noteValue)
+                try repository?.addEmotion(level: level, subEmotion: sub, note: noteValue,
+                                           intensity: intensity)
                 note = ""
                 selectedSubEmotion = nil
+                intensity = nil
             } catch {
                 // 固定文案，详情仅输出到控制台，避免向用户暴露内部路径
                 print("[EmotionView] 保存情绪记录失败: \(error)")
@@ -364,19 +399,56 @@ private struct EmotionHistoryView: View {
                             .background(sub.color.opacity(0.25))
                             .clipShape(Capsule())
                     }
+                    if let intensity = record.intensity {
+                        intensityDots(intensity)
+                    }
                 }
                 if let note = record.note, !note.isEmpty {
                     Text(note).font(Typography.caption).foregroundStyle(.secondary)
                 }
             }
             Spacer()
+            Button { toggleFavorite(record) } label: {
+                Image(systemName: record.isFavorite == true ? "star.fill" : "star")
+                    .font(Typography.caption)
+                    .foregroundStyle(record.isFavorite == true
+                                     ? BrandColors.ideaYellowText : .secondary)
+                    .frame(minWidth: 20, minHeight: 20) // 星标命中框下限（几何值）
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help(record.isFavorite == true ? "取消收藏" : "收藏")
+            .accessibilityLabel(record.isFavorite == true ? "取消收藏" : "收藏")
             Text(record.recordDate).font(Typography.caption).foregroundStyle(.secondary)
         }
         .padding(10) // 行内边距：紧凑特调值（无对应令牌）
         .background(BrandColors.cardSurface)
         .clipShape(RoundedRectangle(cornerRadius: Radius.field))
         .contextMenu {
+            Button(record.isFavorite == true ? "取消收藏" : "收藏") { toggleFavorite(record) }
             Button("删除", role: .destructive) { deletingRecord = record }
+        }
+    }
+
+    /// 强度展示：5 个小圆点，命中数着色（emotionPink），整体朗读为「强度 N」
+    private func intensityDots(_ intensity: Int) -> some View {
+        HStack(spacing: 3) { // 3：强度圆点的极小间距
+            ForEach(1...5, id: \.self) { index in
+                Circle()
+                    .fill(index <= intensity ? BrandColors.emotionPink
+                                             : Color.primary.opacity(0.15))
+                    .frame(width: 5, height: 5) // 强度圆点尺寸（几何值）
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("强度 \(intensity)")
+    }
+
+    private func toggleFavorite(_ record: EmotionRecord) {
+        do { try repository?.setEmotionFavorite(id: record.id, !(record.isFavorite ?? false)) }
+        catch {
+            print("[EmotionHistoryView] 收藏切换失败: \(error)")
+            errorMessage = "操作失败，请重试"
         }
     }
 

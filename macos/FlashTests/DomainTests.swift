@@ -20,10 +20,19 @@ struct DomainTests {
     }
 
     private func log(_ day: String, content: String = "x", tag: ColorTag = .daily,
-                     category: Flash.Category = .log, createdAt: String? = nil) -> LogItem {
+                     category: Flash.Category = .log, createdAt: String? = nil,
+                     isFavorite: Bool? = nil) -> LogItem {
         LogItem(id: UUID().uuidString, content: content, colorTag: tag,
-                category: category, importance: 0,
+                category: category, importance: 0, isFavorite: isFavorite,
                 createdAt: createdAt ?? "\(day)T08:00:00.000Z", recordDate: day)
+    }
+
+    private func task(_ title: String, notes: String? = nil,
+                      createdAt: String) -> TaskItem {
+        TaskItem(id: UUID().uuidString, title: title, notes: notes, colorTag: .memo,
+                 importance: 0, dueKind: .allDay, dueDate: "2026-08-13", dueAt: nil,
+                 timeZone: nil, reminderAt: nil, completedAt: nil,
+                 createdAt: createdAt, updatedAt: createdAt)
     }
 
     @Test func reviewRangesUseCalendarBoundaries() {
@@ -231,9 +240,9 @@ struct DomainTests {
         let result = GlobalSearch.search(logs: logs, emotions: emotions, query: "MILK")
         #expect(result.count == 2)
         // createdAt 倒序：情绪(10:00) 在日志(09:00) 前
-        #expect(result[0].isEmotion)
+        #expect(result[0].kind == .emotion)
         #expect(result[0].title == "😊 milk 心情")
-        #expect(!result[1].isEmotion)
+        #expect(result[1].kind == .log)
         #expect(result[1].title == "Buy Milk")
     }
 
@@ -273,5 +282,77 @@ struct DomainTests {
         let result = GlobalSearch.search(logs: logs, emotions: [], query: "紧急")
         #expect(result.count == 1)
         #expect(result[0].title == "写完了周报")
+    }
+
+    @Test func searchMatchesTaskTitleAndNotes() {
+        let tasks = [task("Buy milk 牛奶", createdAt: "2026-08-13T09:00:00.000Z"),
+                     task("写周报", notes: "记得附上 milk 数据", createdAt: "2026-08-13T10:00:00.000Z"),
+                     task("不相关", createdAt: "2026-08-13T11:00:00.000Z")]
+        let result = GlobalSearch.search(logs: [], emotions: [], tasks: tasks, query: "milk")
+        #expect(result.count == 2)
+        // createdAt 倒序：备注命中(10:00) 在标题命中(09:00) 前；类型徽章为任务
+        #expect(result[0].kind == .task)
+        #expect(result[0].title == "写周报")
+        #expect(result[1].kind == .task)
+        #expect(result[1].title == "Buy milk 牛奶")
+    }
+
+    @Test func searchMergesAllThreeKindsByCreatedAt() {
+        let logs = [log("2026-08-13", content: "设计稿", createdAt: "2026-08-13T09:00:00.000Z")]
+        let emotions = [EmotionRecord(id: "e3", level: .happy, subEmotion: nil, status: nil,
+                                      note: "设计顺利", recordDate: "2026-08-13",
+                                      createdAt: "2026-08-13T12:00:00.000Z")]
+        let tasks = [task("评审设计", createdAt: "2026-08-13T10:30:00.000Z")]
+        let result = GlobalSearch.search(logs: logs, emotions: emotions, tasks: tasks, query: "设计")
+        #expect(result.map(\.kind) == [.emotion, .task, .log])
+        #expect(SearchMatchKind.task.displayName == "任务")
+    }
+
+    // MARK: LogFilter 收藏
+
+    @Test func logFilterFavoritesOnly() {
+        let logs = [log("2026-08-13", content: "a", isFavorite: true),
+                    log("2026-08-13", content: "b", isFavorite: false),
+                    log("2026-08-13", content: "c")] // nil 视为未收藏
+        let filtered = LogFilter(favoritesOnly: true).apply(to: logs)
+        #expect(filtered.map(\.content) == ["a"])
+        // 默认关闭：三条全保留
+        #expect(LogFilter().apply(to: logs).count == 3)
+    }
+
+    // MARK: ExploreLogFilter
+
+    @Test func exploreFilterCategoriesSet() {
+        let logs = [log("2026-08-13", content: "日志"),
+                    log("2026-08-13", content: "灵感", category: .idea)]
+        #expect(ExploreLogFilter(categories: [.idea]).apply(to: logs).map(\.content) == ["灵感"])
+        #expect(ExploreLogFilter(categories: [.log, .idea]).apply(to: logs).count == 2)
+        // nil = 不限类别
+        #expect(ExploreLogFilter().apply(to: logs).count == 2)
+    }
+
+    @Test func exploreFilterFavoritesOnly() {
+        let logs = [log("2026-08-13", content: "a", category: .idea, isFavorite: true),
+                    log("2026-08-13", content: "b", category: .idea)]
+        let filtered = ExploreLogFilter(favoritesOnly: true).apply(to: logs)
+        #expect(filtered.map(\.content) == ["a"])
+    }
+
+    @Test func exploreFilterMatchesQueryTagImportanceAndDateRange() {
+        var important = log("2026-08-12", content: "写报告", tag: .memo)
+        important.importance = 3
+        let logs = [important,
+                    log("2026-08-13", content: "日常琐事", tag: .daily)]
+        // 标签中文名命中（正文不含「备忘」）
+        #expect(ExploreLogFilter(query: "备忘").apply(to: logs).map(\.content) == ["写报告"])
+        // 重要度下限
+        #expect(ExploreLogFilter(minImportance: 2).apply(to: logs).map(\.content) == ["写报告"])
+        // 日期范围（yyyy-MM-dd 字典序）
+        let ranged = ExploreLogFilter(startDate: "2026-08-13").apply(to: logs)
+        #expect(ranged.map(\.content) == ["日常琐事"])
+        // isActive 判定
+        #expect(!ExploreLogFilter().isActive)
+        #expect(ExploreLogFilter(favoritesOnly: true).isActive)
+        #expect(ExploreLogFilter(query: "  ").isActive == false)
     }
 }

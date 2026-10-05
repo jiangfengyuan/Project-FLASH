@@ -50,6 +50,7 @@ final class FlashRepository {
     @MainActor
     func addLog(content: String, colorTag: ColorTag,
                 category: Category = .log, importance: Int = 0,
+                isFavorite: Bool? = nil,
                 recordDate: Date? = nil) throws {
         let entity = LogEntity(
             id: UUID().uuidString,
@@ -57,6 +58,7 @@ final class FlashRepository {
             colorTag: colorTag.rawValue,
             category: category.rawValue,
             importance: min(max(importance, 0), 4),
+            isFavorite: isFavorite,
             createdAt: DateFormatting.isoNow(),
             recordDate: recordDate.map(DateFormatting.dayString) ?? DateFormatting.today()
         )
@@ -99,13 +101,16 @@ final class FlashRepository {
 
     @MainActor
     func addEmotion(level: EmotionLevel, subEmotion: SubEmotion?,
-                    status: String? = nil, note: String? = nil) throws {
+                    status: String? = nil, note: String? = nil,
+                    intensity: Int? = nil) throws {
         let entity = EmotionEntity(
             id: UUID().uuidString,
             level: level.rawValue,
             subEmotion: subEmotion?.rawValue,
             status: status,
             note: note,
+            // 强度限定 1–5（可选，nil = 未评）
+            intensity: intensity.map { min(max($0, 1), 5) },
             recordDate: DateFormatting.today(),
             createdAt: DateFormatting.isoNow()
         )

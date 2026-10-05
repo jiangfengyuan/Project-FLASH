@@ -8,7 +8,8 @@ import SwiftUI
 import SwiftData
 
 /// 信息流列表：自带 @Query（静态 category/tag 谓词），与搜索框/面板的 @State 隔离，
-/// 每敲一键不再触发全量查询。搜索词与面板条件（标签/重要度/日期范围）在内存中过滤。
+/// 每敲一键不再触发全量查询。搜索词与面板条件（标签/重要度/日期范围/收藏）在内存中过滤，
+/// 过滤逻辑由 Domain 的 ExploreLogFilter 承担（本视图只做装配与缓存键）。
 struct ExploreLogListView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.flashRepository) private var repository
@@ -17,6 +18,7 @@ struct ExploreLogListView: View {
     let filter: ExploreFilter
     let query: String
     let criteria: ExploreCriteria
+    let favoritesOnly: Bool
     let batchMode: Bool
     @Binding var selection: Set<String>
     let onClearFilters: () -> Void
@@ -24,12 +26,15 @@ struct ExploreLogListView: View {
     @State private var editingLog: LogItem? = nil
     @State private var deletingLog: LogItem? = nil
     @State private var errorMessage: String? = nil
+    /// Idea→Task 转化草稿（nil 表示不展示任务编辑器）
+    @State private var ideaTaskDraft: IdeaTaskDraft? = nil
 
-    init(filter: ExploreFilter, query: String, criteria: ExploreCriteria,
+    init(filter: ExploreFilter, query: String, criteria: ExploreCriteria, favoritesOnly: Bool,
          batchMode: Bool, selection: Binding<Set<String>>, onClearFilters: @escaping () -> Void) {
         self.filter = filter
         self.query = query
         self.criteria = criteria
+        self.favoritesOnly = favoritesOnly
         self.batchMode = batchMode
         self._selection = selection
         self.onClearFilters = onClearFilters
@@ -76,9 +81,19 @@ struct ExploreLogListView: View {
         .animation(Motion.soft(reduceMotion), value: displayedLogs.isEmpty)
         .sheet(item: $editingLog) { log in
             LogEditSheet(log: log,
-                         title: log.category == .idea ? "编辑灵感" : "编辑记录") { updated in
-                guard let repository else { throw ExploreSaveError.repositoryUnavailable }
-                try repository.updateLog(updated)
+                         title: log.category == .idea ? "编辑灵感" : "编辑记录",
+                         onSave: { updated in
+                             guard let repository else { throw ExploreSaveError.repositoryUnavailable }
+                             try repository.updateLog(updated)
+                         },
+                         onConvertToTask: { draft in
+                             ideaTaskDraft = IdeaTaskDraft(sourceLogId: draft.id, title: draft.content)
+                         })
+        }
+        .sheet(item: $ideaTaskDraft) { draft in
+            TaskEditorView(selectedDate: Date(), task: nil, ideaDraft: draft) { task in
+                // 入库成功才关闭编辑器（失败保留草稿，错误经 errorMessage 提示）
+                if saveTask(task) { ideaTaskDraft = nil }
             }
         }
         .alert(deleteTitle, isPresented: deletePresented) {
@@ -123,11 +138,18 @@ struct ExploreLogListView: View {
         } else {
             LogCardView(log: log,
                         onEdit: { editingLog = log },
-                        onDelete: { deletingLog = log })
+                        onDelete: { deletingLog = log },
+                        onToggleFavorite: { toggleFavorite(log) })
                 .cardFloat(reduceMotion: reduceMotion)
                 .transition(.card(reduceMotion: reduceMotion))
                 .contextMenu {
                     Button("编辑…") { editingLog = log }
+                    Button(log.isFavorite == true ? "取消收藏" : "收藏") { toggleFavorite(log) }
+                    if log.category == .idea {
+                        Button("转为任务") {
+                            ideaTaskDraft = IdeaTaskDraft(sourceLogId: log.id, title: log.content)
+                        }
+                    }
                     Button("删除", role: .destructive) { deletingLog = log }
                 }
         }
@@ -149,49 +171,67 @@ struct ExploreLogListView: View {
         case repositoryUnavailable
     }
 
-    /// displayedLogs 缓存：键 = 写代际 + 搜索词 + 面板条件。
+    /// displayedLogs 缓存：键 = 写代际 + Domain 过滤条件（搜索词/标签/重要度/日期范围/收藏）。
     /// 不能用 @Query 实体数组做键：PersistentModel 相等走身份，漏掉就地属性更新。
     @State private var displayedCache = ViewComputeCache<DisplayedKey, [LogItem]>()
 
     private struct DisplayedKey: Equatable {
         let revision: Int
-        let query: String
-        let criteria: ExploreCriteria
+        let filter: ExploreLogFilter
     }
 
-    /// 内存过滤：搜索词（正文/标签名）+ 面板条件（标签/重要度/日期范围，recordDate 字典序即时间序）。
-    /// 结果按缓存键 memo 化：无关重渲染与每次按键不再全表映射
+    /// 内存过滤：装配 ExploreLogFilter（Domain 纯函数）后按缓存键 memo 化；
+    /// 无关重渲染与每次按键不再全表映射。类别由 @Query 谓词在 DB 层先筛（categories 传 nil）
     private var displayedLogs: [LogItem] {
-        displayedCache.value(for: DisplayedKey(revision: repository?.revision ?? 0,
-                                               query: query, criteria: criteria)) {
-            var logs = logEntities.map { $0.toModel() }
-            let normalized = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-            if !normalized.isEmpty {
-                logs = logs.filter { log in
-                    log.content.lowercased().contains(normalized) ||
-                        log.colorTag.displayName.lowercased().contains(normalized)
-                }
-            }
-            if let tag = criteria.tag {
-                logs = logs.filter { $0.colorTag == tag }
-            }
-            if criteria.minImportance > 0 {
-                logs = logs.filter { $0.importance >= criteria.minImportance }
-            }
-            if let start = criteria.startDate {
-                let startKey = DateFormatting.dayString(start)
-                logs = logs.filter { $0.recordDate >= startKey }
-            }
-            if let end = criteria.endDate {
-                let endKey = DateFormatting.dayString(end)
-                logs = logs.filter { $0.recordDate <= endKey }
-            }
-            return logs
+        let domainFilter = ExploreLogFilter(
+            query: query,
+            tag: criteria.tag,
+            minImportance: criteria.minImportance,
+            startDate: criteria.startDate.map(DateFormatting.dayString),
+            endDate: criteria.endDate.map(DateFormatting.dayString),
+            favoritesOnly: favoritesOnly)
+        return displayedCache.value(for: DisplayedKey(revision: repository?.revision ?? 0,
+                                                      filter: domainFilter)) {
+            domainFilter.apply(to: logEntities.map { $0.toModel() })
         }
     }
 
     private var hasActiveFilter: Bool {
-        criteria.isActive || !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        criteria.isActive || favoritesOnly
+            || !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private func toggleFavorite(_ log: LogItem) {
+        do { try repository?.setLogFavorite(id: log.id, !(log.isFavorite ?? false)) }
+        catch {
+            print("[ExploreView] 收藏切换失败: \(error)")
+            errorMessage = "操作失败，请重试"
+        }
+    }
+
+    /// Idea→Task 保存：入库 + 重建系统提醒（与日历页同一契约；原灵感保留不动）。
+    /// 返回是否入库成功，供 item 型 sheet 决定何时关闭编辑器（失败保留草稿）
+    @discardableResult
+    private func saveTask(_ task: TaskItem) -> Bool {
+        do {
+            guard let repository else { throw ExploreSaveError.repositoryUnavailable }
+            try repository.saveTask(task)
+            Task {
+                do {
+                    try await TaskReminderScheduler.shared.schedule(task)
+                    if TaskReminderScheduler.hasPastReminder(task) {
+                        errorMessage = "任务已保存，但提醒时间已过，将不会提醒"
+                    }
+                } catch {
+                    errorMessage = "任务已保存，但系统提醒未启用"
+                }
+            }
+            return true
+        } catch {
+            print("[ExploreView] 任务保存失败: \(error)")
+            errorMessage = "任务保存失败，请重试"
+            return false
+        }
     }
 
     /// 空状态：有筛选条件时给「没有找到相关记录」+「清除筛选」行动；

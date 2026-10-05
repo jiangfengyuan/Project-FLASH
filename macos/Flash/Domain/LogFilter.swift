@@ -25,6 +25,8 @@ struct LogFilter: Equatable {
     var startDate: String? = nil // yyyy-MM-dd，含当天
     var endDate: String? = nil
     var sort: LogSort = .newest
+    /// 只看收藏（isFavorite 为可选三态，nil/false 均视为未收藏）
+    var favoritesOnly: Bool = false
 
     func apply(to logs: [LogItem]) -> [LogItem] {
         let lowercasedQuery = query.lowercased()
@@ -36,7 +38,8 @@ struct LogFilter: Equatable {
             // recordDate 为 yyyy-MM-dd，字典序即时间序
             let matchesStart = startDate == nil || log.recordDate >= startDate!
             let matchesEnd = endDate == nil || log.recordDate <= endDate!
-            return matchesSearch && matchesTags && matchesStart && matchesEnd
+            let matchesFavorite = !favoritesOnly || log.isFavorite == true
+            return matchesSearch && matchesTags && matchesStart && matchesEnd && matchesFavorite
         }
         switch sort {
         case .tag: return filtered.sorted { $0.colorTag.rawValue < $1.colorTag.rawValue }

@@ -211,9 +211,80 @@ struct FlashRepositoryTests {
         #expect(try repo.allTasks().map(\.title) == ["新"])
     }
 
-    private func task(title: String, updatedAt: String) -> TaskItem {
+    // MARK: - 收藏 / 强度 / Idea→Task 来源（schema 2 字段）
+
+    @Test func setLogFavoriteRoundtrip() throws {
+        let repo = makeRepo()
+        try repo.addLog(content: "x", colorTag: .daily)
+        let id = try repo.allLogs()[0].id
+        #expect(try repo.allLogs()[0].isFavorite == nil) // 缺省视为未收藏
+        try repo.setLogFavorite(id: id, true)
+        #expect(try repo.allLogs()[0].isFavorite == true)
+        try repo.setLogFavorite(id: id, false)
+        #expect(try repo.allLogs()[0].isFavorite == false)
+    }
+
+    @Test func addLogCarriesIsFavorite() throws {
+        let repo = makeRepo()
+        try repo.addLog(content: "x", colorTag: .idea, category: .idea, isFavorite: true)
+        #expect(try repo.allLogs()[0].isFavorite == true)
+    }
+
+    @Test func setEmotionFavoriteRoundtrip() throws {
+        let repo = makeRepo()
+        try repo.addEmotion(level: .happy, subEmotion: nil)
+        let id = try repo.allEmotions()[0].id
+        #expect(try repo.allEmotions()[0].isFavorite == nil)
+        try repo.setEmotionFavorite(id: id, true)
+        #expect(try repo.allEmotions()[0].isFavorite == true)
+        try repo.setEmotionFavorite(id: id, false)
+        #expect(try repo.allEmotions()[0].isFavorite == false)
+    }
+
+    @Test func setTaskFavoriteRoundtrip() throws {
+        let repo = makeRepo()
+        try repo.saveTask(task(title: "任务", updatedAt: "2026-08-31T01:00:00.000Z"))
+        let id = try repo.allTasks()[0].id
+        #expect(try repo.allTasks()[0].isFavorite == nil)
+        try repo.setTaskFavorite(id: id, true)
+        #expect(try repo.allTasks()[0].isFavorite == true)
+        try repo.setTaskFavorite(id: id, false)
+        #expect(try repo.allTasks()[0].isFavorite == false)
+    }
+
+    @Test func addEmotionCarriesIntensityAndClamps() throws {
+        let repo = makeRepo()
+        try repo.addEmotion(level: .happy, subEmotion: nil, intensity: 4)
+        try repo.addEmotion(level: .neutral, subEmotion: nil)
+        try repo.addEmotion(level: .unhappy, subEmotion: nil, intensity: 9)
+        let emotions = try repo.allEmotions()
+        #expect(emotions.count == 3)
+        #expect(emotions.first { $0.level == .happy }?.intensity == 4)
+        #expect(emotions.first { $0.level == .neutral }?.intensity == nil) // 旧调用兼容：默认 nil
+        #expect(emotions.first { $0.level == .unhappy }?.intensity == 5)   // 限定 1–5
+    }
+
+    @Test func taskSourceLogIdRoundtrip() throws {
+        let repo = makeRepo()
+        try repo.addLog(content: "灵感内容", colorTag: .idea, category: .idea)
+        let idea = try repo.allLogs()[0]
+        var converted = task(title: idea.content, updatedAt: "2026-08-31T01:00:00.000Z")
+        converted.sourceLogId = idea.id
+        try repo.saveTask(converted)
+        let readBack = try repo.allTasks()[0]
+        #expect(readBack.sourceLogId == idea.id)
+        // 原灵感保留
+        #expect(try repo.allLogs().count == 1)
+        // 无关任务的来源仍为 nil
+        try repo.saveTask(task(id: "44444444-4444-4444-4444-444444444444",
+                               title: "普通", updatedAt: "2026-08-31T02:00:00.000Z"))
+        #expect(try repo.allTasks().first { $0.title == "普通" }?.sourceLogId == nil)
+    }
+
+    private func task(id: String = "33333333-3333-3333-3333-333333333333",
+                      title: String, updatedAt: String) -> TaskItem {
         TaskItem(
-            id: "33333333-3333-3333-3333-333333333333",
+            id: id,
             title: title,
             notes: nil,
             colorTag: .memo,

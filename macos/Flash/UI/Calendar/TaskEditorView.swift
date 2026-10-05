@@ -1,8 +1,20 @@
 import SwiftUI
 
+/// Idea→Task 转化草稿（PRD §18）：灵感内容预填为任务标题，sourceLogId 回写任务来源关联；
+/// 原灵感保留不动。Identifiable 供 .sheet(item:) 承载。
+struct IdeaTaskDraft: Identifiable, Equatable {
+    /// 来源灵感 id（写入 TaskItem.sourceLogId）
+    let sourceLogId: String
+    /// 预填标题（灵感内容）
+    let title: String
+    var id: String { sourceLogId }
+}
+
 struct TaskEditorView: View {
     let selectedDate: Date
     let task: TaskItem?
+    /// 任务来源：编辑既有任务取 task.sourceLogId；Idea→Task 新建由 ideaDraft 带入
+    private let sourceLogId: String?
     let onSave: (TaskItem) -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -11,21 +23,25 @@ struct TaskEditorView: View {
     @State private var allDay: Bool
     @State private var dueDate: Date
     @State private var reminderMinutes: Int?
+    @State private var isFavorite: Bool
 
     private var editorTimeZone: TimeZone {
         task?.timeZone.flatMap(TimeZone.init(identifier:)) ?? .current
     }
 
-    init(selectedDate: Date, task: TaskItem?, onSave: @escaping (TaskItem) -> Void) {
+    init(selectedDate: Date, task: TaskItem?, ideaDraft: IdeaTaskDraft? = nil,
+         onSave: @escaping (TaskItem) -> Void) {
         self.selectedDate = selectedDate
         self.task = task
+        self.sourceLogId = task?.sourceLogId ?? ideaDraft?.sourceLogId
         self.onSave = onSave
         let initialDate = task.flatMap(Self.dateForTask) ?? selectedDate
-        _title = State(initialValue: task?.title ?? "")
+        _title = State(initialValue: task?.title ?? ideaDraft?.title ?? "")
         _notes = State(initialValue: task?.notes ?? "")
         _allDay = State(initialValue: task?.dueKind != .dateTime)
         _dueDate = State(initialValue: initialDate)
         _reminderMinutes = State(initialValue: Self.reminderOffset(task: task, dueDate: initialDate))
+        _isFavorite = State(initialValue: task?.isFavorite ?? false)
     }
 
     /// 契约上限（UTF-16 单元，见 TextLimits）：超限禁用保存并提示，不静默截断
@@ -35,6 +51,13 @@ struct TaskEditorView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
             Text(task == nil ? "新建任务" : "编辑任务").font(Typography.sectionTitle)
+            // Idea→Task 来源关联（只读）：新建由 ideaDraft 带入，编辑既有任务时同样可见
+            if sourceLogId != nil {
+                Label("来源：灵感", systemImage: "lightbulb")
+                    .font(Typography.caption)
+                    .foregroundStyle(BrandColors.ideaYellowText)
+                    .accessibilityLabel("此任务由灵感转化而来")
+            }
             TextField("任务标题", text: $title).textFieldStyle(.roundedBorder)
             if titleExceedsLimit {
                 Text("标题超出上限（\(title.utf16.count)/\(TextLimits.maxTaskTitleUTF16)）")
@@ -48,6 +71,7 @@ struct TaskEditorView: View {
                     .foregroundStyle(Color(nsColor: .systemRed))
             }
             Toggle("全天任务", isOn: $allDay)
+            Toggle("收藏", isOn: $isFavorite)
             DatePicker("截止时间", selection: $dueDate,
                        displayedComponents: allDay ? [.date] : [.date, .hourAndMinute])
             Picker("本地提醒", selection: $reminderMinutes) {
@@ -94,6 +118,8 @@ struct TaskEditorView: View {
             timeZone: allDay ? nil : editorTimeZone.identifier,
             reminderAt: reminderMinutes.map { Self.isoFractionString(from: anchor.addingTimeInterval(-Double($0 * 60))) },
             completedAt: task?.completedAt,
+            sourceLogId: sourceLogId,
+            isFavorite: isFavorite,
             createdAt: task?.createdAt ?? now,
             updatedAt: now
         )

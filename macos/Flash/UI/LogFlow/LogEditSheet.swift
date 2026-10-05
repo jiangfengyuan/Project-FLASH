@@ -7,7 +7,8 @@
 import SwiftUI
 
 /// 新建/编辑记录 sheet：FormSection 分组——「正文与类型」（内容编辑器 + 日志/灵感分段）、
-/// 「标签、重要度、日期」（标签分段 + 重要度 Stepper + 记录日期 DatePicker）。
+/// 「标签、重要度、日期」（标签分段 + 重要度 Stepper + 收藏开关 + 记录日期 DatePicker）。
+/// 编辑既有灵感时左下角提供「转为任务」（onConvertToTask，PRD §18）。
 /// 保存无效时说明原因：正文为空禁用保存；超出契约上限禁用保存并显示计数。
 struct LogEditSheet: View {
     @Environment(\.dismiss) private var dismiss
@@ -17,11 +18,15 @@ struct LogEditSheet: View {
     /// 标题（新建场景传「新建记录」/「新建灵感」，默认保持编辑语义）
     let title: String
     let onSave: (LogItem) async throws -> Void
+    /// Idea→Task 转化入口（PRD §18）：仅编辑既有灵感时由父视图传入；
+    /// 新建草稿尚未入库（sourceLogId 会悬空），不显示该入口
+    var onConvertToTask: ((LogItem) -> Void)? = nil
 
     @State private var content: String
     @State private var category: Category
     @State private var colorTag: ColorTag
     @State private var importance: Int
+    @State private var isFavorite: Bool
     @State private var recordDate: Date
     /// 分区入场 stagger 开关
     @State private var appeared = false
@@ -33,14 +38,18 @@ struct LogEditSheet: View {
     @State private var errorMessage: String? = nil
     @FocusState private var contentFocused: Bool
 
-    init(log: LogItem, title: String = "编辑记录", onSave: @escaping (LogItem) async throws -> Void) {
+    init(log: LogItem, title: String = "编辑记录",
+         onSave: @escaping (LogItem) async throws -> Void,
+         onConvertToTask: ((LogItem) -> Void)? = nil) {
         self.log = log
         self.title = title
         self.onSave = onSave
+        self.onConvertToTask = onConvertToTask
         _content = State(initialValue: log.content)
         _category = State(initialValue: log.category)
         _colorTag = State(initialValue: log.colorTag)
         _importance = State(initialValue: log.importance)
+        _isFavorite = State(initialValue: log.isFavorite ?? false)
         _recordDate = State(initialValue: DateFormatting.parseDay(log.recordDate) ?? Date())
     }
 
@@ -49,7 +58,8 @@ struct LogEditSheet: View {
 
     private var dirty: Bool {
         content != log.content || category != log.category || colorTag != log.colorTag ||
-        importance != log.importance || DateFormatting.dayString(recordDate) != log.recordDate
+        importance != log.importance || isFavorite != (log.isFavorite ?? false) ||
+        DateFormatting.dayString(recordDate) != log.recordDate
     }
 
     private func close() {
@@ -122,12 +132,21 @@ struct LogEditSheet: View {
                             DatePicker("记录日期", selection: $recordDate, displayedComponents: .date)
                                 .labelsHidden()
                         }
+
+                        Toggle("收藏", isOn: $isFavorite)
+                            .toggleStyle(.checkbox)
                     }
                     .padding(Spacing.md)
                 }
                 .staggeredIn(index: 2, appeared: appeared, reduceMotion: reduceMotion)
 
                 HStack {
+                    if !saved, category == .idea, onConvertToTask != nil {
+                        Button("转为任务") { convertToTask() }
+                            .disabled(isSaving
+                                      || content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                            .help("打开任务编辑器并预填灵感内容，原灵感保留")
+                    }
                     Spacer()
                     if saved {
                         // 保存成功：Motion.bounce 勾选反馈（0.45s 后自动关闭）
@@ -172,6 +191,21 @@ struct LogEditSheet: View {
         }
     }
 
+    /// Idea→Task：把当前草稿（含未保存修改）抛给父视图打开任务编辑器，随后关闭本 sheet；
+    /// 原灵感不入库修改（保留原样），草稿内容只作为任务标题预填
+    private func convertToTask() {
+        guard let onConvertToTask, !isSaving, !saved else { return }
+        var draft = log
+        draft.content = content
+        draft.category = category
+        draft.colorTag = colorTag
+        draft.importance = importance
+        draft.isFavorite = isFavorite
+        draft.recordDate = DateFormatting.dayString(recordDate)
+        onConvertToTask(draft)
+        dismiss()
+    }
+
     private func save() {
         guard !isSaving && !saved && !contentExceedsLimit && !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         isSaving = true
@@ -182,6 +216,7 @@ struct LogEditSheet: View {
         // 「!!」语法只在创建时解析（importanceFromContent）；编辑正文不重解析，
         // 重要性以 Stepper 的显式值为准，避免覆盖用户手动调整
         updated.importance = importance
+        updated.isFavorite = isFavorite
         updated.recordDate = DateFormatting.dayString(recordDate)
         Task {
             do {

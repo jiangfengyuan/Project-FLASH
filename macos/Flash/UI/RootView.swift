@@ -23,6 +23,14 @@ struct RootView: View {
                 .frame(minWidth: 560, minHeight: 480)
         }
         .frame(minWidth: 960, minHeight: 640)
+        // ⌘K 全局搜索浮层（PRD §23，Spotlight 风格）：RootView 层 overlay，跨模块可达
+        .overlay {
+            if appState.isGlobalSearchPresented {
+                GlobalSearchOverlay(close: { appState.isGlobalSearchPresented = false })
+                    .transition(.opacity)
+            }
+        }
+        .animation(Motion.quick(reduceMotion), value: appState.isGlobalSearchPresented)
         .alert("数据存储异常", isPresented: databaseFallbackAlertPresented) {
             Button("我知道了") { appState.databaseFallbackMessage = nil }
         } message: {

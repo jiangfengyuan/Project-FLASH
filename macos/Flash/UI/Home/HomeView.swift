@@ -11,7 +11,7 @@ import SwiftData
 /// → 快速捕捉卡（日志/灵感分段，保存后 toast 反馈并立即刷新一览）→ 最近闪念（全宽记录卡，
 /// 宽窗口两列、阅读优先）→ 空状态（EmptyStateView，行动按钮聚焦输入框）。
 /// 数据装配由 HomeViewModel 完成，仅在注入的 logs/emotions 变化时重算；
-/// ⌘N 聚焦快速记录输入框（⌘K 全局搜索走「记录」页）；情绪/任务经「+ 新建」直达。
+/// ⌘N 聚焦快速记录输入框（⌘K 全局搜索为 RootView 层浮层）；情绪/任务经「+ 新建」直达。
 struct HomeView: View {
     @Environment(\.flashRepository) private var repository
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -33,6 +33,8 @@ struct HomeView: View {
     /// 记录卡的编辑/删除目标
     @State private var editingLog: LogItem? = nil
     @State private var deletingLog: LogItem? = nil
+    /// Idea→Task 转化草稿（nil 表示不展示任务编辑器）
+    @State private var ideaTaskDraft: IdeaTaskDraft? = nil
     /// 顶部 toast 文案（nil 表示不展示）；toastID 用于相同文案连发时重置计时
     @State private var toastMessage: String? = nil
     @State private var toastID = 0
@@ -117,9 +119,19 @@ struct HomeView: View {
         }
         .sheet(item: $editingLog) { log in
             LogEditSheet(log: log,
-                         title: log.category == .idea ? "编辑灵感" : "编辑记录") { updated in
-                guard let repository else { throw SaveError() }
-                try repository.updateLog(updated)
+                         title: log.category == .idea ? "编辑灵感" : "编辑记录",
+                         onSave: { updated in
+                             guard let repository else { throw SaveError() }
+                             try repository.updateLog(updated)
+                         },
+                         onConvertToTask: { draft in
+                             ideaTaskDraft = IdeaTaskDraft(sourceLogId: draft.id, title: draft.content)
+                         })
+        }
+        .sheet(item: $ideaTaskDraft) { draft in
+            TaskEditorView(selectedDate: Date(), task: nil, ideaDraft: draft) { task in
+                // 入库成功才关闭编辑器（失败保留草稿，错误经 errorMessage 提示）
+                if saveTask(task) { ideaTaskDraft = nil }
             }
         }
         .sheet(isPresented: $showingTaskEditor) {
@@ -184,9 +196,16 @@ struct HomeView: View {
             ForEach(logs) { log in
                 LogCardView(log: log,
                             onEdit: { editingLog = log },
-                            onDelete: { deletingLog = log })
+                            onDelete: { deletingLog = log },
+                            onToggleFavorite: { toggleFavorite(log) })
                     .contextMenu {
                         Button("编辑…") { editingLog = log }
+                        Button(log.isFavorite == true ? "取消收藏" : "收藏") { toggleFavorite(log) }
+                        if log.category == .idea {
+                            Button("转为任务") {
+                                ideaTaskDraft = IdeaTaskDraft(sourceLogId: log.id, title: log.content)
+                            }
+                        }
                         Button("删除", role: .destructive) { deletingLog = log }
                     }
             }
@@ -236,6 +255,14 @@ struct HomeView: View {
         Binding(get: { deletingLog != nil }, set: { if !$0 { deletingLog = nil } })
     }
 
+    private func toggleFavorite(_ log: LogItem) {
+        do { try repository?.setLogFavorite(id: log.id, !(log.isFavorite ?? false)) }
+        catch {
+            print("HomeView: 收藏切换失败 - \(error)")
+            errorMessage = "操作失败，请重试"
+        }
+    }
+
     /// 菜单「新建记录」⌘N：token 递增时聚焦输入框。
     /// onAppear 兜底：跨模块命令使本视图首次创建时 token 已递增，onChange 不会回放。
     private func flushNewLogRequest() {
@@ -263,13 +290,16 @@ struct HomeView: View {
         guard let repository else { throw SaveError() }
         try repository.addLog(content: item.content, colorTag: item.colorTag,
                               category: item.category, importance: item.importance,
+                              isFavorite: item.isFavorite,
                               recordDate: DateFormatting.parseDay(item.recordDate))
         showToast(item.category == .idea ? "✓ 已保存到灵感" : "✓ 已保存到日志")
     }
 
-    /// 「+ 新建」任务直达编辑器后的保存：入库 + 重建系统提醒（与日历页同一契约）
-    private func saveTask(_ task: TaskItem) {
-        guard let repository else { errorMessage = "内部错误：存储未就绪"; return }
+    /// 「+ 新建」任务直达编辑器后的保存：入库 + 重建系统提醒（与日历页同一契约）。
+    /// 返回是否入库成功，供 item 型 sheet 决定何时关闭编辑器（失败保留草稿）
+    @discardableResult
+    private func saveTask(_ task: TaskItem) -> Bool {
+        guard let repository else { errorMessage = "内部错误：存储未就绪"; return false }
         do {
             try repository.saveTask(task)
             showingTaskEditor = false
@@ -284,9 +314,11 @@ struct HomeView: View {
                     errorMessage = "任务已保存，但系统提醒未启用"
                 }
             }
+            return true
         } catch {
             print("HomeView: 任务保存失败 - \(error)")
             errorMessage = "任务保存失败，请重试"
+            return false
         }
     }
 

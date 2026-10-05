@@ -22,6 +22,7 @@ struct CalendarView: View {
     @State private var monthDirection = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.flashRepository) private var repository
+    @Environment(AppState.self) private var appState
 
     /// 聚合结果缓存：仅在数据写代际变化时重算；月份切换/选中日/hover 不再触发全表聚合。
     /// 键不含 displayedMonth：aggregateDay 对全部日期产出字典，与展示月份无关。
@@ -118,7 +119,7 @@ struct CalendarView: View {
                                 .font(Typography.secondary)
                         }
                         ForEach(aggregate.logs) { log in
-                            LogCardView(log: log)
+                            LogCardView(log: log, onToggleFavorite: { toggleFavorite(log) })
                         }
                     } else {
                         Text("这一天没有记录").foregroundStyle(.secondary)
@@ -133,6 +134,10 @@ struct CalendarView: View {
                 save(task, warnPastReminder: true)
             }
         }
+        // 跨模块定位（全局搜索跳到任务）：消费一次 focusTarget，选中并翻到任务所在日期。
+        // onAppear 兜底：跨模块切换使本视图首次创建时 token 已递增，onChange 不会回放。
+        .onAppear { flushFocusTarget() }
+        .onChange(of: appState.focusRequestToken) { flushFocusTarget() }
         .alert("提示", isPresented: Binding(get: { message != nil }, set: { if !$0 { message = nil } })) {
             Button("好") { message = nil }
         } message: {
@@ -159,6 +164,17 @@ struct CalendarView: View {
     private func shiftMonth(_ delta: Int) {
         monthDirection = delta < 0 ? -1 : 1
         displayedMonth = Self.gregorian.date(byAdding: .month, value: delta, to: displayedMonth)!
+    }
+
+    /// 消费跨模块定位：任务搜索结果 → 选中其日历日并跟随翻月；无日期载荷时仅切页不动作
+    private func flushFocusTarget() {
+        guard let target = appState.consumeFocusTarget(),
+              let day = target.taskDate,
+              let date = DateFormatting.parseDay(day) else { return }
+        let order = Self.gregorian.compare(date, to: displayedMonth, toGranularity: .month)
+        monthDirection = order == .orderedAscending ? -1 : (order == .orderedDescending ? 1 : 0)
+        displayedMonth = date
+        selectedDate = date
     }
 
     private func dayCell(_ date: Date, aggregates: [String: DayAggregate]) -> some View {
@@ -209,6 +225,18 @@ struct CalendarView: View {
                 if let notes = task.notes, !notes.isEmpty {
                     Text(notes).font(Typography.caption).foregroundStyle(.secondary).lineLimit(2)
                 }
+                // Idea→Task 来源关联：跳回记录页并打开该灵感的编辑弹层
+                if let sourceLogId = task.sourceLogId {
+                    Button {
+                        appState.requestFocus(.log(sourceLogId))
+                    } label: {
+                        Label("查看灵感", systemImage: "lightbulb")
+                            .font(Typography.caption)
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(BrandColors.ideaYellowText)
+                    .help("跳转到来源灵感")
+                }
             }
             Spacer()
             Button("编辑") { editingTask = task; showingTaskEditor = true }
@@ -255,6 +283,14 @@ struct CalendarView: View {
             Task { await TaskReminderScheduler.shared.cancel(task.id) }
         } catch {
             message = "任务删除失败，请重试"
+        }
+    }
+
+    private func toggleFavorite(_ log: LogItem) {
+        do { try repository?.setLogFavorite(id: log.id, !(log.isFavorite ?? false)) }
+        catch {
+            print("[CalendarView] 收藏切换失败: \(error)")
+            message = "操作失败，请重试"
         }
     }
 

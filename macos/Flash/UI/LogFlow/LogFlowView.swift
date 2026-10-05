@@ -38,6 +38,12 @@ struct LogFlowView: View {
             // 工具区
             VStack(spacing: 10) { // 10：工具区行距特调（xs 偏紧、sm 偏松）
                 HStack(spacing: Spacing.xs) {
+                    // 「已收藏」胶囊：FilterChipView 标准样式（星标金点缀，与记录页一致）
+                    FilterChipView(title: "已收藏", isSelected: filter.favoritesOnly,
+                                   accent: BrandColors.ideaYellow,
+                                   accentText: BrandColors.ideaYellowText) {
+                        filter.favoritesOnly.toggle()
+                    }
                     // 「想法」标签只挂在 category == .idea 的灵感上，而 LogFilter 只保留
                     // category == .log（LogFilter.apply），选中它永远无结果，故不出现在筛选 chips
                     ForEach(ColorTag.allCases.filter { $0 != .idea }, id: \.self) { tag in
@@ -100,9 +106,13 @@ struct LogFlowView: View {
                         ForEach(filtered) { log in
                             LogCardView(log: log,
                                         onEdit: { editingLog = log },
-                                        onDelete: { deletingLog = log })
+                                        onDelete: { deletingLog = log },
+                                        onToggleFavorite: { toggleFavorite(log) })
                                 .contextMenu {
                                     Button("编辑…") { editingLog = log }
+                                    Button(log.isFavorite == true ? "取消收藏" : "收藏") {
+                                        toggleFavorite(log)
+                                    }
                                     Button("删除", role: .destructive) { deletingLog = log }
                                 }
                         }
@@ -172,6 +182,14 @@ struct LogFlowView: View {
 
     private var errorPresented: Binding<Bool> {
         Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })
+    }
+
+    private func toggleFavorite(_ log: LogItem) {
+        do { try repository?.setLogFavorite(id: log.id, !(log.isFavorite ?? false)) }
+        catch {
+            print("[LogFlowView] 收藏切换失败: \(error)")
+            errorMessage = "操作失败，请重试"
+        }
     }
 
     private func tagChip(_ tag: ColorTag) -> some View {
