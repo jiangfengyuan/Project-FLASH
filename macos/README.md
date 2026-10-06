@@ -14,17 +14,20 @@
 | 模块 | 说明 |
 | --- | --- |
 | 此刻（一级） | 当日概览、快速记录、最近动态、情绪快照、本周洞察、醒目的全宽搜索入口 |
-| 记录（一级） | 关键词/标签搜索、日志 + 灵感筛选、底部快速输入；⌘K 可直接聚焦 |
-| 日志流（次级） | 搜索、标签 / 日期筛选、排序、编辑、删除 |
-| 情绪（次级） | 七级滑块 + 子情绪 + 备注，周趋势，近期记录 |
-| 日历（次级） | 日志与情绪按日聚合的月历；任务支持截止时间、完成状态与本地提醒 |
+| 记录（一级） | 关键词/标签搜索、日志 + 灵感筛选、已收藏筛选、底部快速输入；灵感可「转为任务」并保留来源关联 |
+| 日志流（次级） | 搜索、标签 / 日期 / 收藏筛选、排序、编辑、删除 |
+| 情绪（次级） | 七级滑块 + 可选强度（1–5）+ 子情绪 + 备注，周趋势，近期记录 |
+| 日历（次级） | 日志与情绪按日聚合的月历；任务支持截止时间、完成状态、本地提醒与来源灵感回链 |
 | 回顾（一级） | 四种时间窗口、活跃度、趋势洞察、情绪分布与页内日历 |
+| Memory（一级） | 周报：四类计数、本周情绪基调、收藏优先的 Highlights、周导航（PRD §22 规则聚合版） |
+| 全局搜索 | ⌘K 唤起浮层，跨日志/灵感/情绪/任务搜索，↑↓ 选择、Enter 跳转定位、Esc 关闭 |
+| 收藏 | 日志/灵感/情绪/任务星标；记录页与日志流「已收藏」筛选；周报 Highlights 优先取收藏 |
 | 设置（一级） | 主题、Quick Capture 快捷键（录制改键/恢复默认）、备份导入导出、系统分享、PIN 配对局域网直传、清空数据 |
 | 菜单栏伴侣 | MenuBarExtra：快速记录（回车即存）、今日概览、一键跳转主窗口 |
 | 桌面小组件 | WidgetKit（small/medium）：✦ Flash、今日记录数、今日待办数、主导情绪 emoji，点击经 `flash://today` 回到此刻页；数据走 App Group 快照（见「安全与已知限制」） |
 | Quick Capture 面板 | 全局热键（默认 ⇧⌘Space，Carbon RegisterEventHotKey，沙盒可用）唤起浮动面板；Enter/⌘Enter 保存即关、Esc 放弃、未提交保留草稿；主窗口关闭后 App 驻留菜单栏，热键保持可用 |
 
-快捷键：⇧⌘Space 全局 Quick Capture、⌘N 新建、⌘K 搜索、⌘, 设置、⇧⌘E 导出备份、⌘1…⌘6 切换模块。
+快捷键：⇧⌘Space 全局 Quick Capture（可自定义）、⌘N 新建、⌘K 全局搜索、⌘, 设置、⇧⌘E 导出备份、⌘1…⌘7 切换模块（1 此刻 2 记录 3 日志流 4 日历 5 情绪 6 回顾 7 Memory）。
 
 动效统一走 `Flash/Theme/FlashMotion.swift`（Soft / Fast / Playful），
 全量尊重系统「减弱动态效果」。
@@ -68,7 +71,9 @@ xcodebuild test -scheme Flash -destination 'platform=macOS'
 ```
 
 测试覆盖模型 / Repository / BackupService / BackupTransfer / BackupDiff /
-LocalBackupTransfer / SettingsStore / Domain 纯函数 / 主题色。测试数量以当次执行汇总为准。
+LocalBackupTransfer / SettingsStore / Domain 纯函数 / 主题色 / Schema 迁移 /
+KeyChord 与 Quick Capture 草稿 / HomeViewModel / WeeklyMemory / WidgetSnapshot /
+任务提醒。测试数量以当次执行汇总为准。
 
 ## 备份格式
 
@@ -76,10 +81,11 @@ LocalBackupTransfer / SettingsStore / Domain 纯函数 / 主题色。测试数�
 
 ```json
 { "version": "flash-backup-v2", "exportedAt": "...", "appVersion": "...",
-  "schemas": { "logs": 1, "emotions": 1, "tasks": 1 },
+  "schemas": { "logs": 2, "emotions": 2, "tasks": 2 },
   "data": { "logs": [...], "emotions": [...], "tasks": [...] } }
 ```
 
+- 分区 schema 2（2026-10-05 起）：新增可选字段——三分区 `isFavorite`、情绪 `intensity`（1–5）、任务 `sourceLogId`（灵感转任务的来源关联）。macOS 导出写 2、读取接受 1 与 2；Android/HarmonyOS 跟进前会显式拒绝 schema 2 文件（不静默丢弃），详见 `app/docs/contracts/README.md`。
 - 标准入口严格校验 v2，任何非法条目整体拒绝；独立恢复入口用于 v1 或旧/损坏备份，逐条跳过可恢复范围内的非法记录。未知版本/分区拒绝导入；单文件上限 50 MB。
 - 读写走 App Sandbox 的用户择定文件授权，导出文件权限 0600。
 - 「通过系统分享」会创建沙箱缓存副本并调用系统分享服务，可选择 AirDrop、
@@ -116,6 +122,8 @@ LocalBackupTransfer / SettingsStore / Domain 纯函数 / 主题色。测试数�
 不再触发全表映射与聚合），领域函数本身未改。收益体现在交互期 CPU 占用而非微基准。
 
 ### 实测基线（Release）
+
+2026-10-06（M3 Pro / 36 GB，Release universal2，含 FlashWidget.appex）：包体 16 MB（`.app` 整体，`du -sh`；增量来自小组件、Quick Capture、Memory 等新功能与令牌资源）。
 
 2026-08-14 实测（M3 Pro / 36 GB，Release universal2，热缓存）：
 
