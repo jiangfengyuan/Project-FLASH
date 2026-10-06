@@ -6,7 +6,7 @@
 
 import SwiftUI
 
-/// 侧栏：三组分区（HOME 此刻 / RECORD 记录·日志流·日历·情绪 / INSIGHTS 回顾）+
+/// 侧栏：三组分区（HOME 此刻 / RECORD 记录·日志流·日历·情绪 / INSIGHTS 回顾·Memory）+
 /// 底部常驻「设置」（分隔线隔离，不随分组滚动；选中态与导航行一致）。
 /// 选中胶囊用 matchedGeometryEffect 随 Motion.spring 平滑滑动；hover 行高亮走
 /// Motion.quick；选中图标极轻 bounce。所有动效尊重 Reduce Motion。
@@ -34,6 +34,7 @@ struct Sidebar: View {
 
                     sectionHeader("INSIGHTS")
                     row(.stats)
+                    row(.memory)
                 }
                 .padding(Spacing.xs)
             }

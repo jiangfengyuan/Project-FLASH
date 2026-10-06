@@ -7,12 +7,12 @@
 import Observation
 
 enum Module: String, CaseIterable, Identifiable {
-    case home, explore, logflow, emotion, calendar, stats, settings
+    case home, explore, logflow, emotion, calendar, stats, memory, settings
 
     var id: String { rawValue }
 
     /// 一级导航：此刻 / 记录 / 回顾 / 设置；
-    /// 情绪、日历、日志流为次级入口（侧栏分组展示）
+    /// 情绪、日历、日志流、Memory 为次级入口（侧栏分组展示）
     var title: String {
         switch self {
         case .home: "此刻"
@@ -21,6 +21,7 @@ enum Module: String, CaseIterable, Identifiable {
         case .emotion: "情绪"
         case .calendar: "日历"
         case .stats: "回顾"
+        case .memory: "Memory"
         case .settings: "设置"
         }
     }
@@ -33,6 +34,9 @@ enum Module: String, CaseIterable, Identifiable {
         case .emotion: "face.smiling"
         case .calendar: "calendar"
         case .stats: "chart.line.uptrend.xyaxis"
+        // sparkles 已被菜单栏伴侣（MenuBarExtra）占用；周报是「回看过去一周」，
+        // 用回溯语义图标（PRD §32 建议方向之一）
+        case .memory: "clock.arrow.circlepath"
         case .settings: "gearshape"
         }
     }

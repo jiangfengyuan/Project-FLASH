@@ -93,8 +93,8 @@ struct FlashApp: App {
                 Button("搜索") { appState.requestSearch() }
                     .keyboardShortcut("k", modifiers: .command)
             }
-            // 模块切换 ⌘1…⌘6（对齐 PRD：⌘1 此刻 ⌘2 记录 ⌘3 日志流 ⌘4 日历 ⌘5 情绪 ⌘6 回顾；
-            // ⌘7 留给后续模块。设置已有 ⌘,，不重复占用）；菜单文案跟随 Module.title，与侧栏命名同源
+            // 模块切换 ⌘1…⌘7（对齐 PRD：⌘1 此刻 ⌘2 记录 ⌘3 日志流 ⌘4 日历 ⌘5 情绪 ⌘6 回顾
+            // ⌘7 Memory 周报。设置已有 ⌘,，不重复占用）；菜单文案跟随 Module.title，与侧栏命名同源
             CommandMenu("模块") {
                 // Quick Capture（PRD §13/§14）：与全局热键同一入口，不另占菜单快捷键，
                 // 避免与 RegisterEventHotKey 的注册形成双通道冲突
@@ -112,6 +112,8 @@ struct FlashApp: App {
                     .keyboardShortcut("5", modifiers: .command)
                 Button(Module.stats.title) { appState.selectedModule = .stats }
                     .keyboardShortcut("6", modifiers: .command)
+                Button(Module.memory.title) { appState.selectedModule = .memory }
+                    .keyboardShortcut("7", modifiers: .command)
             }
         }
 

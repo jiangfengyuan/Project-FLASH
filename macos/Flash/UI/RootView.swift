@@ -69,6 +69,7 @@ struct RootView: View {
         case .emotion: EmotionView()
         case .calendar: CalendarView()
         case .stats: StatsView()
+        case .memory: MemoryView()
         case .settings: SettingsView()
         }
     }
