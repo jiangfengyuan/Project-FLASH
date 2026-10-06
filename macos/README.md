@@ -21,6 +21,7 @@
 | 回顾（一级） | 四种时间窗口、活跃度、趋势洞察、情绪分布与页内日历 |
 | 设置（一级） | 主题、Quick Capture 快捷键（录制改键/恢复默认）、备份导入导出、系统分享、PIN 配对局域网直传、清空数据 |
 | 菜单栏伴侣 | MenuBarExtra：快速记录（回车即存）、今日概览、一键跳转主窗口 |
+| 桌面小组件 | WidgetKit（small/medium）：✦ Flash、今日记录数、今日待办数、主导情绪 emoji，点击经 `flash://today` 回到此刻页；数据走 App Group 快照（见「安全与已知限制」） |
 | Quick Capture 面板 | 全局热键（默认 ⇧⌘Space，Carbon RegisterEventHotKey，沙盒可用）唤起浮动面板；Enter/⌘Enter 保存即关、Esc 放弃、未提交保留草稿；主窗口关闭后 App 驻留菜单栏，热键保持可用 |
 
 快捷键：⇧⌘Space 全局 Quick Capture、⌘N 新建、⌘K 搜索、⌘, 设置、⇧⌘E 导出备份、⌘1…⌘6 切换模块。
@@ -131,6 +132,7 @@ LocalBackupTransfer / SettingsStore / Domain 纯函数 / 主题色。测试数�
 
 - 静态加密依赖系统 FileVault；未开 FileVault 的机器上数据库明文落盘。
 - adhoc 签名未公证，仅限本机使用。
+- **桌面小组件数据联通依赖 App Group，需 Developer ID 签名版本。** `com.apple.security.application-groups` 使用未注册组 ID 时进程启动即被 secinit 杀死，因此主 App 与 `FlashWidget` target 均不声明 App Group entitlement；当前 adhoc 构建中快照写入静默跳过，小组件恒显示「打开 Flash 开始记录今天」引导态。代码已按 App Group 协议（`widget-snapshot.json`）完整实现，签出 Developer ID 版本时只需为两个 target 加组 entitlement 即联通。
 - universal2 的 x86_64 切片只在 Apple Silicon 上交叉编译验证过，未做 Intel 实机测试。
 - iCloud 同步、原生 iOS 版（可共享 SwiftData 模型）是后续候选，不在本版本。
 

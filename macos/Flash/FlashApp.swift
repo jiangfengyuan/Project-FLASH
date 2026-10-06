@@ -51,7 +51,15 @@ struct FlashApp: App {
             .environment(\.flashRepository, assembly.repository)
             .environmentObject(settings)
             .animatedPreferredColorScheme(settings.themeMode)
+            .onOpenURL { url in
+                // 桌面小组件 deep link：flash://today → 切到此刻页
+                guard url.scheme == "flash", url.host == "today" else { return }
+                appState.selectedModule = .home
+            }
             .task {
+                // 桌面小组件（WidgetKit）共享快照：启动时刷新一次；
+                // 组容器不可用（adhoc 构建）时零成本 no-op
+                WidgetSnapshot.refresh(repository: assembly.repository)
                 #if DEBUG
                 DebugSeeder.seedIfRequested(repository: assembly.repository)
                 #endif

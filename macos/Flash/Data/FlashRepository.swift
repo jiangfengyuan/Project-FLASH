@@ -268,6 +268,37 @@ final class FlashRepository {
         }
     }
 
+    // MARK: - Widget Summary
+
+    /// 桌面小组件（WidgetKit）当日摘要：计数走 fetchCount、情绪只取当日行，
+    /// 避免快照刷新触发全表 toModel 映射。由 WidgetSnapshot.refresh 调用。
+    @MainActor
+    func widgetTodaySummary() throws -> (logCount: Int, openTaskCount: Int, dominantEmotion: EmotionLevel?) {
+        let today = DateFormatting.today()
+        let logPredicate = #Predicate<LogEntity> { $0.recordDate == today }
+        let logCount = try context.fetchCount(FetchDescriptor<LogEntity>(predicate: logPredicate))
+        // calendarDate 是计算属性无法进 #Predicate；任务表规模有限，全量过滤可接受
+        let openTaskCount = try tasksOnly().filter { !$0.isCompleted && $0.calendarDate == today }.count
+        let emotionPredicate = #Predicate<EmotionEntity> { $0.recordDate == today }
+        let emotions = try context.fetch(FetchDescriptor<EmotionEntity>(
+            predicate: emotionPredicate,
+            sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
+        ))
+        // 主导情绪 = 出现频次最高；并列时取 createdAt 最新（fetch 已按最新在前）
+        var counts: [Int: Int] = [:]
+        for entity in emotions { counts[entity.level, default: 0] += 1 }
+        var dominant: EmotionLevel?
+        var dominantCount = 0
+        for entity in emotions {
+            let count = counts[entity.level] ?? 0
+            if count > dominantCount {
+                dominantCount = count
+                dominant = EmotionLevel(rawValue: entity.level)
+            }
+        }
+        return (logCount, openTaskCount, dominant)
+    }
+
     // MARK: - Private
 
     /// A failed save must not leave destructive pending changes visible in the
@@ -279,6 +310,9 @@ final class FlashRepository {
             try beforeSave()
             try context.save()
             revision += 1
+            // 桌面小组件（WidgetKit）：每次提交成功后刷新共享快照；
+            // 组容器不可用（adhoc 构建）时零成本 no-op
+            WidgetSnapshot.refresh(repository: self)
         } catch {
             context.rollback()
             throw error
@@ -347,5 +381,27 @@ final class FlashRepository {
                                    recordDate: emotion.recordDate,
                                    createdAt: emotion.createdAt)
         context.insert(entity)
+    }
+}
+
+// MARK: - Widget Snapshot 刷新
+
+/// 本扩展依赖 FlashRepository，只在主 target（Flash）编译；
+/// Widget target 仅共享 WidgetSnapshot.swift 的协议与读写器。
+extension WidgetSnapshot {
+    /// 从仓储聚合当日摘要并写入快照。组不可用时（adhoc 构建）零成本直接返回。
+    /// 挂点：FlashApp 启动 `.task` 与 `FlashRepository.commit()` 成功后
+    /// （参照 TaskReminderScheduler.rebuild 的挂接方式；读取失败静默忽略）。
+    @MainActor
+    static func refresh(repository: FlashRepository) {
+        guard WidgetSnapshotStore.containerDirectory != nil else { return }
+        guard let summary = try? repository.widgetTodaySummary() else { return }
+        WidgetSnapshotWriter.write(WidgetSnapshot(
+            recordDate: DateFormatting.today(),
+            todayLogCount: summary.logCount,
+            openTaskCount: summary.openTaskCount,
+            dominantEmotionEmoji: summary.dominantEmotion?.emoji,
+            generatedAt: DateFormatting.isoNow()
+        ))
     }
 }
