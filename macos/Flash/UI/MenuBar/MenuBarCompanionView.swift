@@ -184,12 +184,14 @@ struct MenuBarCompanionView: View {
         }
     }
 
-    /// 打开（或唤起）主窗口并切到指定模块；nil 表示保持当前模块
+    /// 打开（或唤起）主窗口并切到指定模块；nil 表示保持当前模块。
+    /// 必须先关闭菜单栏伴侣面板再激活主窗口，否则 `NSApp.keyWindow` 会变成主窗口，
+    /// `closePanel()` 因 `level == .normal` 而直接返回，导致面板悬浮在主窗口之上。
     private func openMainWindow(_ module: Module? = nil) {
         if let module { appState.selectedModule = module }
+        closePanel()
         openWindow(id: "main")
         NSApp.activate()
-        closePanel()
     }
 
     /// MenuBarExtra(.window) 面板浮于普通窗口之上（level 高于 .normal），

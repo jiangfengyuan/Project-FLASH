@@ -108,6 +108,16 @@ struct DomainTests {
         #expect(filtered.count == 2)
     }
 
+    @Test func filterByTagExcludesOtherTags() {
+        // 记录流按 colorTag 筛选：选中「灵感」只应出现 inspiration 标签的记录，
+        // 不应因 displayName 相似或 category 相同而混入 daily 记录。
+        let logs = [log("2026-08-13", content: "a", tag: .daily),
+                    log("2026-08-13", content: "b", tag: .inspiration),
+                    log("2026-08-13", content: "c", tag: .memo)]
+        let filtered = LogFilter(tags: [.inspiration]).apply(to: logs)
+        #expect(filtered.map(\.content) == ["b"])
+    }
+
     @Test func sortOrders() {
         let logs = [log("2026-08-10", createdAt: "2026-08-10T01:00:00.000Z"),
                     log("2026-08-10", createdAt: "2026-08-10T03:00:00.000Z"),
