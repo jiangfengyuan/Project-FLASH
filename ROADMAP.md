@@ -35,7 +35,7 @@ LAN v1.1 与历史明文 PIN 首包不兼容；两端需使用同代构建。迁
 3. ~~改善 HarmonyOS 减弱动效降级机制~~（已完成：系统无公开查询接口，自建应用内 `reduceMotion` 开关并持久化，全站动画经 `motionDuration` 归零，情绪保存动效同样尊重该开关）。
 4. 根据实际反馈选择小步功能：~~全局快捷键、收藏、桌面小组件~~（macOS 已落地：⇧⌘Space Quick Capture 可改键、三分区收藏、WidgetKit 骨架待签名联通）；候选保留更细搜索、记录提醒。HarmonyOS 已落地未读灵感提醒（本地已读状态不进备份，今日概览提示行与记录入口未读角标，对齐 Android）。
 
-图片附件、原生 iOS、iCloud/WebDAV 和自动同步均是候选，未列入当前发布门槛。自动同步需要独立 `flash-sync-v1` 设计，不改变快照备份语义。
+原生 iOS 已开工（2026-10-18，`ios/`，iPhone、iOS 18）：数据层与设计语言抽为 macOS/iOS 共用的 `shared/FlashKit`，首个切片为此刻页快速记录，其余模块按 [iOS README](ios/README.md) 里程碑推进，不列入当前发布门槛。图片附件、iCloud/WebDAV 和自动同步仍是候选。自动同步需要独立 `flash-sync-v1` 设计，不改变快照备份语义。
 
 ## 工程原则
 

@@ -1,0 +1,61 @@
+// Copyright (c) 2026 Fengyuan Jiang
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+import SwiftUI
+import SwiftData
+import FlashCore
+import FlashDesign
+
+@main
+struct FlashApp: App {
+    /// 装配单一入口（与 macOS 同源：RepositoryEnvironment.makeDefault）：容器、仓储、内存降级标记
+    private let assembly: RepositoryEnvironment.Assembly
+    @State private var appState: AppState
+    @StateObject private var settings: SettingsStore
+
+    init() {
+        // 过期分享副本清理是纯沙箱文件 IO，移出启动同步路径后台执行（同 macOS）
+        Task.detached(priority: .utility) {
+            try? BackupTransfer.cleanupExpired()
+        }
+        let assembly = Perf.measure("StartupAssembly") { RepositoryEnvironment.makeDefault() }
+        self.assembly = assembly
+        let appState = AppState()
+        appState.checkDatabaseFallback(didFallbackToMemory: assembly.didFallbackToMemory)
+        _appState = State(initialValue: appState)
+        _settings = StateObject(wrappedValue: SettingsStore())
+    }
+
+    var body: some Scene {
+        WindowGroup {
+            RootView()
+                .environment(appState)
+                .environment(\.flashRepository, assembly.repository)
+                .environmentObject(settings)
+                .preferredColorScheme(settings.themeMode.colorScheme)
+                .tint(BrandColors.brandPrimary)
+                .task {
+                    // 小组件共享快照：启动时刷新一次；App Group 不可用（未签名构建）时零成本 no-op
+                    WidgetSnapshot.refresh(repository: assembly.repository)
+                    #if DEBUG
+                    DebugSeeder.seedIfRequested(repository: assembly.repository)
+                    #endif
+                    do {
+                        let tasks = try Perf.measure("TasksForReminderRebuild") {
+                            try assembly.repository.tasksOnly()
+                        }
+                        try await TaskReminderScheduler.shared.rebuild(tasks)
+                    } catch TaskReminderError.permissionDenied {
+                        // 用户拒绝通知权限只影响系统提醒，不误报存储故障
+                    } catch {
+                        appState.databaseFallbackMessage =
+                            "无法读取任务并恢复系统提醒；本地内容仍然安全，请稍后重启应用重试"
+                    }
+                }
+        }
+        .modelContainer(assembly.container)
+    }
+}

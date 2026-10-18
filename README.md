@@ -59,6 +59,20 @@ xcodebuild test -scheme Flash -destination 'platform=macOS'
 
 详见 [macos/README.md](macos/README.md)。
 
+### iOS（开发中）
+
+iPhone、iOS 18+，与 macOS 共用本地 Swift Package `shared/FlashKit`（数据层、领域逻辑、设计语言）。
+当前完成此刻页快速记录切片，其余模块按里程碑移植：
+
+```bash
+cd ios
+DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer \
+xcodebuild -scheme Flash -destination 'generic/platform=iOS Simulator' build CODE_SIGNING_ALLOWED=NO
+cd ../shared/FlashKit && DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer swift test
+```
+
+详见 [ios/README.md](ios/README.md) 与 [shared/FlashKit/README.md](shared/FlashKit/README.md)。
+
 ### HarmonyOS
 
 要求 DevEco Studio 与 HarmonyOS SDK。可直接用 DevEco Studio 打开 `harmonyos/`，
@@ -82,6 +96,8 @@ assembleHap --mode module -p product=default -p module=entry@default \
 ```
 ├── android/     # 原生 Android 工程
 ├── macos/       # 原生 macOS 工程（含单元测试）
+├── ios/         # 原生 iOS 工程（iPhone，开发中）
+├── shared/      # macOS / iOS 共用 Swift Package（FlashKit）
 ├── harmonyos/   # 原生 HarmonyOS 工程（ArkTS + ArkUI）
 ├── scripts/     # Android 发布签名脚本
 ├── ROADMAP.md   # 开发路线图
