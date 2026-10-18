@@ -1,4 +1,6 @@
 import SwiftUI
+import FlashCore
+import FlashDesign
 
 /// Idea→Task 转化草稿（PRD §18）：灵感内容预填为任务标题，sourceLogId 回写任务来源关联；
 /// 原灵感保留不动。Identifiable 供 .sheet(item:) 承载。

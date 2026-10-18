@@ -5,6 +5,8 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import SwiftUI
+import FlashCore
+import FlashDesign
 
 /// 「危险操作」分组：清空全部数据（确认 alert 由 SettingsView 承载）。
 /// 视觉独立：红色语义组头 + 说明文字 + destructive 按钮，与普通操作隔离。

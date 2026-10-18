@@ -6,6 +6,7 @@
 
 import SwiftUI
 import WidgetKit
+import FlashCore
 
 /// 今日条目：快照为 nil（组不可用 / 无快照 / JSON 损坏）时走引导态视图，
 /// 永不留白或报错。

@@ -7,6 +7,8 @@
 import SwiftUI
 import AppKit // NSSavePanel / NSOpenPanel
 import UniformTypeIdentifiers
+import FlashCore
+import FlashDesign
 
 /// 设置页：外观与使用 / Quick Capture / 数据与安全 / 危险操作 / 关于（对齐 Android SettingsViewModel）
 ///

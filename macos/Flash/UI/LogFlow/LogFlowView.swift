@@ -6,6 +6,8 @@
 
 import SwiftUI
 import SwiftData
+import FlashCore
+import FlashDesign
 
 /// 记录流：搜索 + 标签/日期/排序筛选 + 编辑删除（对齐 Android LogFlowViewModel）
 struct LogFlowView: View {

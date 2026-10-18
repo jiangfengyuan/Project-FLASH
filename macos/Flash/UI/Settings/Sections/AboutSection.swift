@@ -5,6 +5,8 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import SwiftUI
+import FlashCore
+import FlashDesign
 
 /// 「关于 Flash」分组：版本号 + 无云端账号说明
 struct AboutSection: View {

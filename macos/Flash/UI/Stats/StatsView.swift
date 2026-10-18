@@ -7,6 +7,8 @@
 import SwiftUI
 import SwiftData
 import Charts
+import FlashCore
+import FlashDesign
 
 /// 统计页：洞察结论（ReviewInsights 窗口对比）+ 活跃度/KPI + 情绪趋势/子情绪分布
 /// （对齐 Android StatsViewModel + EmotionStatsSection）

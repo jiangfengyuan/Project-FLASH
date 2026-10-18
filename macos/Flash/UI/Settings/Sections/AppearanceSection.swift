@@ -5,6 +5,8 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import SwiftUI
+import FlashCore
+import FlashDesign
 
 /// 「外观与使用」分组：主题模式分段选择
 struct AppearanceSection: View {

@@ -5,6 +5,8 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import SwiftUI
+import FlashCore
+import FlashDesign
 
 /// 记录页筛选条件（标签 / 重要度 / 日期范围；类型由筛选胶囊承担）。
 /// 空值表示不限；isActive 驱动「筛选」按钮高亮与空态「清除筛选」。

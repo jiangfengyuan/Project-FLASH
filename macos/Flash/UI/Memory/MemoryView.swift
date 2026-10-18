@@ -6,6 +6,8 @@
 
 import SwiftUI
 import SwiftData
+import FlashCore
+import FlashDesign
 
 /// Memory 周报页（PRD §22 V1.1 规则聚合版）：周导航 +「You recorded」四计数 +
 ///「This week felt...」情绪概览 +「Highlights」亮点列表 + 品牌收尾句。

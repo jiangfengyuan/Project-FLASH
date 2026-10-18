@@ -5,6 +5,8 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import SwiftUI
+import FlashCore
+import FlashDesign
 
 /// 「数据与安全」分组：导出备份为主操作（.borderedProminent 强调），
 /// 系统分享 / 局域网收发 / 标准与恢复导入为普通行按钮（均带 hover 反馈）。

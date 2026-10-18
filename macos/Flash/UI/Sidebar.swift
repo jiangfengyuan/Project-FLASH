@@ -5,6 +5,8 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import SwiftUI
+import FlashCore
+import FlashDesign
 
 /// 侧栏：三组分区（HOME 此刻 / RECORD 记录·日志流·日历·情绪 / INSIGHTS 回顾·Memory）+
 /// 底部常驻「设置」（分隔线隔离，不随分组滚动；选中态与导航行一致）。

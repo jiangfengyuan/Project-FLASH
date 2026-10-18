@@ -5,6 +5,8 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import AppKit
+import FlashCore
+import FlashDesign
 
 /// 轻 AppDelegate（Quick Capture PRD §13/§14 配套）：
 /// - 主窗口关闭后 App 不退出（配合 MenuBarExtra 驻留，全局热键才可用）；

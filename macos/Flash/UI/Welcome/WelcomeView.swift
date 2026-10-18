@@ -5,6 +5,8 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import SwiftUI
+import FlashCore
+import FlashDesign
 
 /// 首次启动欢迎页（对应 Android WelcomeScreen）。完成后 setWelcomed。
 /// 翻页：旧页以 .appear 反向过渡淡出；新页图标/标题/副标题按 50ms 级联

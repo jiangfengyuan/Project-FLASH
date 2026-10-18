@@ -6,6 +6,8 @@
 
 import AppKit
 import SwiftUI
+import FlashCore
+import FlashDesign
 
 /// 「Quick Capture」分组（PRD §13.2/§13.3）：全局快捷键展示 + 录制改键 + 冲突引导 + 恢复默认。
 /// 录制态用 NSEvent local monitor 捕获下一次按键组合（Esc 取消），保存经

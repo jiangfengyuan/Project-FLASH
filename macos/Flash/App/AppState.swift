@@ -5,6 +5,8 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import Observation
+import FlashCore
+import FlashDesign
 
 enum Module: String, CaseIterable, Identifiable {
     case home, explore, logflow, emotion, calendar, stats, memory, settings

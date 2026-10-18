@@ -6,6 +6,8 @@
 
 import SwiftUI
 import SwiftData
+import FlashCore
+import FlashDesign
 
 /// 情绪页：七级情绪记录（对齐 Android EmotionViewModel）。
 /// 主视觉为大 emoji：随等级 .pop 切换，名称色彩沿七级调色板连续插值（§33 Motion）。

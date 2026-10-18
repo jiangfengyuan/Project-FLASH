@@ -5,6 +5,8 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import SwiftUI
+import FlashCore
+import FlashDesign
 
 /// 本地存储说明横幅（Form 顶部无标题分组）
 struct StorageBannerSection: View {

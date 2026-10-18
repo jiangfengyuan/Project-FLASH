@@ -6,6 +6,7 @@
 
 import SwiftUI
 import WidgetKit
+import FlashCore
 
 @main
 struct FlashWidgetBundle: WidgetBundle {

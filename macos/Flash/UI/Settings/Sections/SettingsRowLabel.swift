@@ -5,6 +5,8 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import SwiftUI
+import FlashCore
+import FlashDesign
 
 /// 分组清单行：彩色语义图标 + 标题。图标色仅作分组语义点缀（蓝=外观、绿=安全、红=危险），
 /// 信息由标题文字承载，色彩不是唯一通道。

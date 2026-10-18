@@ -6,6 +6,8 @@
 
 import SwiftUI
 import SwiftData
+import FlashCore
+import FlashDesign
 
 /// 日历页：月视图网格 + 选中日详情（对齐 Android CalendarViewModel）
 struct CalendarView: View {

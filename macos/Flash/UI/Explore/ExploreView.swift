@@ -6,6 +6,8 @@
 
 import SwiftUI
 import SwiftData
+import FlashCore
+import FlashDesign
 
 enum ExploreFilter: String, CaseIterable {
     case all, log, idea, unsorted

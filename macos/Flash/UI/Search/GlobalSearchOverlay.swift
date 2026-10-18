@@ -6,6 +6,8 @@
 
 import SwiftUI
 import SwiftData
+import FlashCore
+import FlashDesign
 
 /// 全局搜索浮层（PRD §23）：⌘K 唤起，Spotlight 风格居中靠上面板。
 /// 悬浮层玻璃（.flashGlassBackground），输入 200ms 防抖即时搜索（Domain/GlobalSearch，

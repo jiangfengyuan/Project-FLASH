@@ -5,6 +5,8 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import SwiftUI
+import FlashCore
+import FlashDesign
 
 /// 新建/编辑记录 sheet：FormSection 分组——「正文与类型」（内容编辑器 + 日志/灵感分段）、
 /// 「标签、重要度、日期」（标签分段 + 重要度 Stepper + 收藏开关 + 记录日期 DatePicker）。

@@ -537,7 +537,7 @@ CI 中每端必须证明：
 - Android Repository：[FlashRepository.kt](../android/app/src/main/java/com/flash/app/data/FlashRepository.kt)
 - Android DAO：[Daos.kt](../android/app/src/main/java/com/flash/app/data/db/Daos.kt)
 - Android Room 配置：[FlashDatabase.kt](../android/app/src/main/java/com/flash/app/data/db/FlashDatabase.kt)
-- macOS 装配入口：[RepositoryEnvironment.swift](../macos/Flash/Data/RepositoryEnvironment.swift)
+- macOS 装配入口：[RepositoryEnvironment.swift](../shared/FlashKit/Sources/FlashCore/Data/RepositoryEnvironment.swift)
 - macOS Calendar 读路径：[CalendarView.swift](../macos/Flash/UI/Calendar/CalendarView.swift)
 - macOS Settings 编排：[SettingsView.swift](../macos/Flash/UI/Settings/SettingsView.swift)
 - HarmonyOS 页面状态与编排：[Index.ets](../harmonyos/entry/src/main/ets/pages/Index.ets)

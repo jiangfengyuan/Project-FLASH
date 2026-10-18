@@ -6,6 +6,8 @@
 
 import SwiftUI
 import SwiftData
+import FlashCore
+import FlashDesign
 
 /// 此刻页（核心记录闭环）：问候区 + 「+ 新建」→ 今日一览卡（记录数/待办数/情绪状态）
 /// → 快速捕捉卡（日志/灵感分段，保存后 toast 反馈并立即刷新一览）→ 最近闪念（全宽记录卡，
@@ -328,25 +330,20 @@ struct HomeView: View {
         toastID += 1
     }
 
+    /// 保存规则（去空白 / 契约上限 / 标签与重要度）在 FlashKit 的 QuickCaptureCommit，与 iOS 共用
     private func quickAdd(as category: Category) {
-        let content = draft.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !content.isEmpty else { return }
-        // 契约上限（UTF-16 单元）：超限不静默截断，保留草稿并弹提示说明原因
-        guard TextLimits.fits(content) else {
-            errorMessage = "内容超出 \(TextLimits.maxContentUTF16) 字上限，请删减后再保存"
-            return
-        }
         guard let repository else { errorMessage = "内部错误：存储未就绪"; return }
         do {
-            switch category {
-            case .log:
-                try repository.addLog(content: content, colorTag: .daily, category: .log)
-            case .idea:
-                try repository.addLog(content: content, colorTag: .idea, category: .idea,
-                                      importance: importanceFromContent(content))
+            switch try QuickCaptureCommit.commit(draft, as: category, repository: repository) {
+            case .saved(let toast):
+                draft = ""
+                showToast(toast)
+            case .empty:
+                return
+            case .tooLong(let message):
+                // 超限不静默截断，保留草稿并弹提示说明原因
+                errorMessage = message
             }
-            draft = ""
-            showToast(category == .idea ? "✓ 已保存到灵感" : "✓ 已保存到日志")
         } catch {
             // 弹窗文案固定，详细错误只进控制台（localizedDescription 可能含本机路径）
             print("HomeView: 快速记录保存失败 - \(error)")

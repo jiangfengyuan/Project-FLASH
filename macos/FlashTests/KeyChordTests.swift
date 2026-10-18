@@ -7,6 +7,8 @@
 import Testing
 import AppKit
 @testable import Flash
+import FlashCore
+import FlashDesign
 
 @Suite("KeyChord")
 struct KeyChordTests {

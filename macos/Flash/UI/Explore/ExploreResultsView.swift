@@ -6,6 +6,8 @@
 
 import SwiftUI
 import SwiftData
+import FlashCore
+import FlashDesign
 
 /// 信息流列表：自带 @Query（静态 category/tag 谓词），与搜索框/面板的 @State 隔离，
 /// 每敲一键不再触发全量查询。搜索词与面板条件（标签/重要度/日期范围/收藏）在内存中过滤，
