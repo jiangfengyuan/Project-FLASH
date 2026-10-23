@@ -27,6 +27,9 @@ struct FlashApp: App {
         appState.checkDatabaseFallback(didFallbackToMemory: assembly.didFallbackToMemory)
         _appState = State(initialValue: appState)
         _settings = StateObject(wrappedValue: SettingsStore())
+        // App Intents 在本进程执行：注入同一仓储与应用状态（快捷指令 / 控制中心直接写库或唤起面板）
+        IntentBridge.repository = assembly.repository
+        IntentBridge.appState = appState
     }
 
     var body: some Scene {
@@ -37,6 +40,8 @@ struct FlashApp: App {
                 .environmentObject(settings)
                 .preferredColorScheme(settings.themeMode.colorScheme)
                 .tint(BrandColors.brandPrimary)
+                // 深链：flash://capture、flash://today、flash://ideas（小组件 / 通知 / 控制中心）
+                .onOpenURL { appState.handle(url: $0) }
                 .task {
                     // 小组件共享快照：启动时刷新一次；App Group 不可用（未签名构建）时零成本 no-op
                     WidgetSnapshot.refresh(repository: assembly.repository)

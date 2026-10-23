@@ -46,11 +46,17 @@ struct RootView: View {
                 }
             }
         }
+        // 快速记录常驻入口（iOS 26+ 标签栏底部配件；更早系统为悬浮按钮）
+        .quickCaptureEntry { appState.presentQuickCapture() }
         // 共享页面隐藏自绘大标题，标题交给系统导航栏
         .environment(\.flashUsesSystemNavigationTitle, true)
         .environment(appState.focusRouter)
         .sheet(isPresented: $appState.isSearchPresented) {
             SearchScreen()
+        }
+        .sheet(item: $appState.quickCapture) { request in
+            QuickCaptureSheet(initialCategory: request.category)
+                .id(request.id)
         }
         .fullScreenCover(isPresented: welcomePresented) {
             WelcomeScreen { settings.setWelcomed() }

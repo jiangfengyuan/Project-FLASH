@@ -70,8 +70,9 @@ struct ExploreScreen: View {
             guard !Task.isCancelled, appliedQuery != searchText else { return }
             appliedQuery = searchText
         }
-        .onAppear { flushFocusTarget() }
+        .onAppear { flushFocusTarget(); flushFilterRequest() }
         .onChange(of: focusRouter.requestToken) { flushFocusTarget() }
+        .onChange(of: appState.exploreFilterRequest) { flushFilterRequest() }
         .sheet(isPresented: $showFilterSheet) {
             NavigationStack {
                 ScrollView {
@@ -226,6 +227,14 @@ struct ExploreScreen: View {
         guard case .log(let logID)? = focusRouter.consume(matching: { if case .log = $0 { true } else { false } }),
               let repository else { return }
         focusedLog = (try? repository.allLogs())?.first { $0.id == logID }
+    }
+
+    /// 深链 / 灵感提醒指定的筛选（如 flash://ideas → 灵感），消费一次
+    private func flushFilterRequest() {
+        guard let request = appState.exploreFilterRequest else { return }
+        appState.exploreFilterRequest = nil
+        clearFilters()
+        filter = request
     }
 
     private func presentNewLog(category: Category) {

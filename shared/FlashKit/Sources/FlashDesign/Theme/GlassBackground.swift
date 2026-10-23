@@ -43,3 +43,25 @@ extension View {
     }
     .padding(Spacing.xl)
 }
+
+/// 玻璃按钮（PRD v3 §3.4：取消/返回走 Glass，保存/记录/确认走 Glass Prominent）。
+/// 双轨：macOS 26+ / iOS 26+ 用 Liquid Glass 按钮样式；更早系统回退 bordered / borderedProminent。
+public extension View {
+    @ViewBuilder
+    func flashGlassButtonStyle() -> some View {
+        if #available(macOS 26.0, iOS 26.0, *) {
+            buttonStyle(.glass)
+        } else {
+            buttonStyle(.bordered)
+        }
+    }
+
+    @ViewBuilder
+    func flashGlassProminentButtonStyle(tint: Color) -> some View {
+        if #available(macOS 26.0, iOS 26.0, *) {
+            buttonStyle(.glassProminent).tint(tint)
+        } else {
+            buttonStyle(.borderedProminent).tint(tint)
+        }
+    }
+}

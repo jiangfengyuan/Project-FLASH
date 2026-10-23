@@ -4,6 +4,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import Foundation
 import Observation
 import FlashCore
 
@@ -50,6 +51,13 @@ enum AppRoute: Hashable {
     }
 }
 
+/// 快速记录弹层请求（sheet(item:) 承载）：携带外部指定的初始类型
+struct QuickCaptureRequest: Identifiable, Equatable {
+    let id = UUID()
+    /// nil = 沿用草稿类型或默认灵感
+    var category: Category?
+}
+
 /// 全局应用状态：Tab 选中、各 Tab 导航路径、跨模块定位、全局弹层与存储降级提示
 /// （语义与 macOS AppState 对齐）。
 @Observable
@@ -62,6 +70,10 @@ final class AppState {
 
     /// 全局搜索弹层（各 Tab 根页工具栏的放大镜唤起）
     var isSearchPresented = false
+    /// 快速记录弹层（常驻入口 / flash://capture / 快捷指令 / 控制中心）
+    var quickCapture: QuickCaptureRequest? = nil
+    /// 记录页筛选请求（flash://ideas、灵感提醒）：记录页出现时消费
+    var exploreFilterRequest: ExploreFilter? = nil
 
     /// 跨模块定位：共享视图（日历「查看灵感」等）与 iOS 页面共用同一路由
     let focusRouter = FocusRouter()
@@ -105,6 +117,38 @@ final class AppState {
             homePath = [route]
             selectedTab = .home
         }
+    }
+
+    /// 唤起快速记录（已打开时只更新类型，不重复弹出）
+    func presentQuickCapture(category: Category? = nil) {
+        isSearchPresented = false
+        quickCapture = QuickCaptureRequest(category: category)
+    }
+
+    /// 深链：
+    /// - flash://capture[?category=idea|log] → 快速记录
+    /// - flash://today → 此刻
+    /// - flash://ideas → 记录页「灵感」筛选（灵感提醒通知 / 小组件）
+    /// 返回是否识别；未知链接忽略
+    @discardableResult
+    func handle(url: URL) -> Bool {
+        guard url.scheme == "flash", let host = url.host() else { return false }
+        switch host {
+        case "capture":
+            let value = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+                .queryItems?.first(where: { $0.name == "category" })?.value
+            presentQuickCapture(category: value.flatMap(Category.init(rawValue:)))
+        case "today":
+            homePath = []
+            selectedTab = .home
+        case "ideas":
+            explorePath = []
+            exploreFilterRequest = .idea
+            selectedTab = .explore
+        default:
+            return false
+        }
+        return true
     }
 
     /// 启动时检测数据库回退标记（App 装配层在容器创建后调用）；文案与 macOS 一致
