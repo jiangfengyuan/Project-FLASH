@@ -28,6 +28,15 @@ struct HomeView: View {
     /// 顶部 toast 文案（nil 表示不展示）；toastID 用于相同文案连发时重置计时
     @State private var toastMessage: String? = nil
     @State private var toastID = 0
+    /// 可用宽度（随折叠/展开、窗口缩放实时更新）。不读屏幕尺寸、方向或机型：
+    /// iPhone Duo 内屏、iPhone 镜像等场景下窗口尺寸会在运行中变化
+    @State private var availableWidth: CGFloat = 0
+
+    /// 宽于此值时改为双栏（左：今日一览 + 快速捕捉；右：最近闪念）。
+    /// iPhone 竖屏约 400pt 为单栏；iPhone Duo 展开横置约 880pt（扣除竖向标签栏）为双栏
+    private static let twoColumnMinWidth: CGFloat = 700
+
+    private var isTwoColumn: Bool { availableWidth >= Self.twoColumnMinWidth }
 
     private var openTaskCount: Int {
         taskEntities.filter { $0.completedAt == nil }.count
@@ -44,22 +53,32 @@ struct HomeView: View {
                     onNewTask: { showToast("任务即将在 iOS 上线") }
                 )
 
-                HomeTodayOverviewCard(
-                    recordCount: viewModel.todayRecordCount,
-                    openTaskCount: openTaskCount,
-                    emotionEmoji: viewModel.emotionSnapshot.emoji,
-                    emotionTitle: viewModel.emotionSnapshot.title
-                )
-
-                QuickCaptureCard(draft: $draft, category: $captureCategory,
-                                 focus: $inputFocused) {
-                    quickAdd()
+                if isTwoColumn {
+                    HStack(alignment: .top, spacing: Spacing.lg) {
+                        VStack(alignment: .leading, spacing: Spacing.lg) {
+                            overviewCard
+                            captureCard
+                        }
+                        .frame(maxWidth: .infinity)
+                        recentSection
+                            .frame(maxWidth: .infinity)
+                    }
+                } else {
+                    overviewCard
+                    captureCard
+                    recentSection
                 }
-
-                recentSection
             }
             .padding(.horizontal, Spacing.md)
             .padding(.vertical, Spacing.lg)
+            // 与 macOS 此刻页同一上限：超宽窗口不把卡片拉成细长条
+            .frame(maxWidth: Metrics.toolMaxWidth)
+            .frame(maxWidth: .infinity)
+        }
+        .onGeometryChange(for: CGFloat.self) { proxy in
+            proxy.size.width
+        } action: { width in
+            availableWidth = width
         }
         .scrollDismissesKeyboard(.interactively)
         .background(BrandColors.pageBackground)
@@ -88,6 +107,22 @@ struct HomeView: View {
             Button("好") { errorMessage = nil }
         } message: {
             Text(errorMessage ?? "")
+        }
+    }
+
+    private var overviewCard: some View {
+        HomeTodayOverviewCard(
+            recordCount: viewModel.todayRecordCount,
+            openTaskCount: openTaskCount,
+            emotionEmoji: viewModel.emotionSnapshot.emoji,
+            emotionTitle: viewModel.emotionSnapshot.title
+        )
+    }
+
+    private var captureCard: some View {
+        QuickCaptureCard(draft: $draft, category: $captureCategory,
+                         focus: $inputFocused) {
+            quickAdd()
         }
     }
 

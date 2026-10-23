@@ -37,6 +37,9 @@ iPhone 原生实现（开发中）。SwiftUI + SwiftData，零第三方依赖；
 - UIKit 仅一处：`FlashDesign/Theme/BrandColors.swift` 的 `UIColor(dynamicProvider:)`
   （SwiftUI 无代码内 light/dark 双值 Color API）及两个系统语义色。其余全部 SwiftUI。
 - Liquid Glass 双轨：iOS 26+ `.glassEffect`，iOS 18–25 回退 `.regularMaterial`。
+- iPhone Duo（iOS 27.1+ SDK）：同一时间只用一块屏，折叠/展开时窗口实时缩放，无跨屏拼接 API。
+  布局只按可用宽度决策（`onGeometryChange`），不读屏幕、方向或机型；此刻页 ≥700pt 双栏。
+  展开内屏需在 Device Hub 操作，`simctl io <device> screenshot --display=<UUID>` 可分屏截图。
 - 无悬停：共享 `LogCardView` 的悬停操作按钮在 iOS 不出现，操作走长按菜单。
 - App Group `group.com.flash.app.ios`（小组件数据）需团队签名；未签名构建自动跳过快照写入。
 - App 图标未配置：`assets/logo.png` 是带留白的 macOS 风格图标，iOS 需要满版 1024² 无透明图。
