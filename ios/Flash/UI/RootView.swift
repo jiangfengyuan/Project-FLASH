@@ -13,6 +13,8 @@ import FlashDesign
 struct RootView: View {
     @Environment(AppState.self) private var appState
     @EnvironmentObject private var settings: SettingsStore
+    @Environment(IdeaReminderCenter.self) private var ideaReminders
+    @Environment(\.flashRepository) private var repository
 
     var body: some View {
         @Bindable var appState = appState
@@ -29,6 +31,8 @@ struct RootView: View {
                         .navigationDestination(for: AppRoute.self, destination: routeView)
                 }
             }
+            // 灵感提醒：未读灵感达到阈值时在记录 Tab 显示数量角标
+            .badge(ideaReminders.badgeCount)
             Tab(AppTab.stats.title, systemImage: AppTab.stats.systemImage, value: AppTab.stats) {
                 NavigationStack(path: $appState.statsPath) {
                     StatsScreen()
@@ -51,6 +55,16 @@ struct RootView: View {
         // 共享页面隐藏自绘大标题，标题交给系统导航栏
         .environment(\.flashUsesSystemNavigationTitle, true)
         .environment(appState.focusRouter)
+        // 灵感提醒接入共享列表：未读标记与「打开即已读」
+        .environment(\.flashUnreadIdeaIDs, ideaReminders.unreadIDs)
+        .environment(\.flashMarkIdeaViewed, FlashMarkIdeaViewedAction { id in
+            ideaReminders.markViewed(id, repository: repository, settings: settings)
+        })
+        // 任一写入 / 启动 / 提醒设置变化：重算未读并重排通知
+        .task { refreshIdeaReminders() }
+        .onChange(of: repository?.revision ?? 0) { refreshIdeaReminders() }
+        .onChange(of: settings.ideaReminderEnabled) { refreshIdeaReminders() }
+        .onChange(of: settings.ideaReminderFrequency) { refreshIdeaReminders() }
         .sheet(isPresented: $appState.isSearchPresented) {
             SearchScreen()
         }
@@ -80,6 +94,10 @@ struct RootView: View {
         .background(BrandColors.pageBackground)
         .navigationTitle(route.title)
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func refreshIdeaReminders() {
+        ideaReminders.refresh(repository: repository, settings: settings)
     }
 
     private var welcomePresented: Binding<Bool> {

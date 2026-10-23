@@ -25,11 +25,18 @@ public final class SettingsStore: ObservableObject {
     /// Quick Capture 全局快捷键（PRD §13.2），缺省 ⌘⇧Space；
     /// setter 发布 @Published，QuickCaptureController 订阅后通知 GlobalHotKeyService 重注册
     @Published public private(set) var quickCaptureHotkey: KeyChord
+    /// 灵感提醒推送开关与频率（iOS 设置页；默认开启、每天）
+    @Published public private(set) var ideaReminderEnabled: Bool
+    @Published public private(set) var ideaReminderFrequency: IdeaReminder.Frequency
 
     private let defaults: UserDefaults
 
     public init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
+        // 灵感提醒推送：默认开启、每天（PRD v3 §6.3）
+        self.ideaReminderEnabled = defaults.object(forKey: Keys.ideaReminderEnabled) as? Bool ?? true
+        self.ideaReminderFrequency = defaults.string(forKey: Keys.ideaReminderFrequency)
+            .flatMap(IdeaReminder.Frequency.init(rawValue:)) ?? .daily
         let stored = defaults.string(forKey: Keys.themeMode)
         self.themeMode = stored.flatMap(ThemeMode.init(rawValue:)) ?? .system
         self.welcomed = defaults.bool(forKey: Keys.welcomed)
@@ -40,6 +47,16 @@ public final class SettingsStore: ObservableObject {
         } else {
             self.quickCaptureHotkey = .defaultQuickCapture
         }
+    }
+
+    public func setIdeaReminderEnabled(_ enabled: Bool) {
+        ideaReminderEnabled = enabled
+        defaults.set(enabled, forKey: Keys.ideaReminderEnabled)
+    }
+
+    public func setIdeaReminderFrequency(_ frequency: IdeaReminder.Frequency) {
+        ideaReminderFrequency = frequency
+        defaults.set(frequency.rawValue, forKey: Keys.ideaReminderFrequency)
     }
 
     public func setThemeMode(_ mode: ThemeMode) {
@@ -60,6 +77,8 @@ public final class SettingsStore: ObservableObject {
     }
 
     private enum Keys {
+        static let ideaReminderEnabled = "ideaReminderEnabled"
+        static let ideaReminderFrequency = "ideaReminderFrequency"
         static let themeMode = "themeMode"
         static let welcomed = "welcomed"
         static let quickCaptureHotkey = "quickCaptureHotkey"

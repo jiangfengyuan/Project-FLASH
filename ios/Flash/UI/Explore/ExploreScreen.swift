@@ -17,6 +17,7 @@ struct ExploreScreen: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(FocusRouter.self) private var focusRouter
     @Environment(AppState.self) private var appState
+    @Environment(\.flashMarkIdeaViewed) private var markIdeaViewed
 
     @State private var filter: ExploreFilter = .all
     @State private var searchText = ""
@@ -227,6 +228,8 @@ struct ExploreScreen: View {
         guard case .log(let logID)? = focusRouter.consume(matching: { if case .log = $0 { true } else { false } }),
               let repository else { return }
         focusedLog = (try? repository.allLogs())?.first { $0.id == logID }
+        // 灵感经定位打开（此刻提示行 / 搜索 / 日历「查看灵感」）即视为已读
+        if focusedLog?.category == .idea { markIdeaViewed?(logID) }
     }
 
     /// 深链 / 灵感提醒指定的筛选（如 flash://ideas → 灵感），消费一次

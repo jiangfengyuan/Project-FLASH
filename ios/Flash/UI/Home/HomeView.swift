@@ -16,6 +16,9 @@ struct HomeView: View {
     @Environment(\.flashRepository) private var repository
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(AppState.self) private var appState
+    @Environment(IdeaReminderCenter.self) private var ideaReminders
+    @Environment(FocusRouter.self) private var focusRouter
+    @Environment(\.flashMarkIdeaViewed) private var markIdeaViewed
     @Query(sort: \LogEntity.createdAt, order: .reverse) private var logEntities: [LogEntity]
     @Query(sort: \EmotionEntity.createdAt, order: .reverse) private var emotionEntities: [EmotionEntity]
     @Query(sort: \TaskEntity.updatedAt, order: .reverse) private var taskEntities: [TaskEntity]
@@ -57,6 +60,11 @@ struct HomeView: View {
                     onNewEmotion: { appState.push(.emotion) },
                     onNewTask: { showingTaskEditor = true }
                 )
+
+                if ideaReminders.shouldRemind {
+                    ideaReminderRow
+                        .transition(.appear(reduceMotion: reduceMotion))
+                }
 
                 if isTwoColumn {
                     HStack(alignment: .top, spacing: Spacing.lg) {
@@ -139,6 +147,56 @@ struct HomeView: View {
         }
     }
 
+    /// 灵感提醒提示行（PRD v3 §6.3，对齐 Android）：未读灵感 ≥ 3 时出现，
+    /// 点按打开最早的一条未读灵感（经 FocusRouter 跳到记录页编辑弹层，打开即已读）
+    private var ideaReminderRow: some View {
+        Button {
+            if let oldest = ideaReminders.oldestUnread {
+                focusRouter.request(.log(oldest.id))
+            }
+        } label: {
+            HStack(spacing: Spacing.sm) {
+                Image(systemName: "lightbulb.max")
+                    .scaledSystemFont(size: 18, weight: .medium, relativeTo: .body)
+                    .foregroundStyle(BrandColors.ideaYellowText)
+                    .frame(width: 36, height: 36) // 图标底尺寸（几何值）
+                    .background(BrandColors.ideaYellow.opacity(0.18), in: Circle())
+                VStack(alignment: .leading, spacing: 2) { // 2：标题与副标题的紧凑节奏
+                    Text("想法等待梳理")
+                        .font(Typography.cardTitle)
+                        .foregroundStyle(BrandColors.textPrimary)
+                    Text("你还有 \(ideaReminders.unreadCount) 个想法，先看看最早的一条")
+                        .font(Typography.caption)
+                        .foregroundStyle(BrandColors.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: Spacing.xs)
+                Text("\(ideaReminders.unreadCount)")
+                    .font(Typography.cardTitle.monospacedDigit())
+                    .foregroundStyle(BrandColors.ideaYellowText)
+                    .contentTransition(.numericText())
+                Image(systemName: "chevron.right")
+                    .font(Typography.caption)
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(Spacing.md)
+            .background(BrandColors.cardSurface, in: RoundedRectangle(cornerRadius: Radius.cardSmall))
+            .overlay {
+                RoundedRectangle(cornerRadius: Radius.cardSmall)
+                    .stroke(BrandColors.weakBorder, lineWidth: 0.5)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(ideaReminders.unreadCount) 个想法等待梳理，打开最早的一条")
+        .animation(Motion.soft(reduceMotion), value: ideaReminders.unreadCount)
+    }
+
+    private func openEditor(_ log: LogItem) {
+        if log.category == .idea { markIdeaViewed?(log.id) }
+        editingLog = log
+    }
+
     private var overviewCard: some View {
         HomeTodayOverviewCard(
             recordCount: viewModel.todayRecordCount,
@@ -177,12 +235,13 @@ struct HomeView: View {
                 // 无悬停：卡片内操作按钮不出现；点按编辑，收藏 / 删除走长按菜单
                 VStack(spacing: Spacing.sm) {
                     ForEach(viewModel.recentLogs) { log in
-                        LogCardView(log: log, actionsVisibility: .hidden)
+                        LogCardView(log: log, actionsVisibility: .hidden,
+                                    isUnread: ideaReminders.unreadIDs.contains(log.id))
                             .contentShape(Rectangle())
-                            .onTapGesture { editingLog = log }
+                            .onTapGesture { openEditor(log) }
                             .accessibilityAddTraits(.isButton)
                             .contextMenu {
-                                Button("编辑", systemImage: "pencil") { editingLog = log }
+                                Button("编辑", systemImage: "pencil") { openEditor(log) }
                                 Button(log.isFavorite == true ? "取消收藏" : "收藏",
                                        systemImage: log.isFavorite == true ? "star.slash" : "star") {
                                     toggleFavorite(log)

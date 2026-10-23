@@ -41,6 +41,7 @@ struct SettingsScreen: View {
         Form {
             StorageBannerSection()
             AppearanceSection(appeared: true)
+            IdeaReminderSection()
             DataSafetySection(isBusy: isBusy, appeared: true,
                               onShare: prepareShare,
                               onLanSend: startLanSend,

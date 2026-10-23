@@ -103,6 +103,17 @@ public final class FlashRepository {
         return try context.fetch(descriptor).map { $0.toModel() }
     }
 
+    /// 只取灵感（灵感提醒计算未读用，按创建时间倒序）
+    @MainActor
+    public func allIdeas() throws -> [LogItem] {
+        let idea = Category.idea.rawValue
+        let descriptor = FetchDescriptor<LogEntity>(
+            predicate: #Predicate { $0.category == idea },
+            sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
+        )
+        return try context.fetch(descriptor).map { $0.toModel() }
+    }
+
     // MARK: - Emotions
 
     @MainActor
