@@ -145,6 +145,7 @@ public struct StatsView: View {
                         .chartYAxis {
                             AxisMarks(values: [-3, -2, -1, 0, 1, 2, 3])
                         }
+                        .chartXAxis { Self.sparseDateAxis(daily.map(\.date)) }
                         .frame(height: 220)
                         .animation(Motion.soft(reduceMotion), value: windowDays)
                     }
@@ -266,6 +267,20 @@ public struct StatsView: View {
     /// 动画观测值：窗口天数（与原实现一致，窗口切换驱动图表过渡）
     private var windowDays: Int { window.days(today: baseDate) }
 
+    /// 横轴日期刻度：最多约 5 个均匀分布的刻度，标签只显示 MM-dd（窄屏下完整 yyyy-MM-dd 会被截断）
+    static func sparseDateAxis(_ dates: [String]) -> some AxisContent {
+        let step = max(1, Int((Double(dates.count) / 5).rounded(.up)))
+        let ticks = dates.enumerated().filter { $0.offset % step == 0 }.map(\.element)
+        return AxisMarks(values: ticks) { value in
+            AxisGridLine()
+            AxisValueLabel {
+                if let date = value.as(String.self) {
+                    Text(date.count >= 10 ? String(date.suffix(5)) : date)
+                }
+            }
+        }
+    }
+
     private func activityChart(_ days: [DailyActivity]) -> some View {
         let maximum = max(1, days.map(\.total).max() ?? 0)
         let active = days.filter { $0.total > 0 }.count
@@ -281,6 +296,7 @@ public struct StatsView: View {
             }
             .chartYScale(domain: 0...maximum)
             .chartYAxis { AxisMarks(values: [0, maximum]) }
+            .chartXAxis { Self.sparseDateAxis(days.map(\.date)) }
             .frame(height: 160)
             if active == 0 { Text("这段时间还没有记录，空白日期按 0 次显示。").font(Typography.caption) }
             DisclosureGroup("每日明细", isExpanded: $showActivityDetails) {

@@ -35,6 +35,8 @@ struct FlashApp: App {
         IntentBridge.appState = appState
         // 通知点按（灵感提醒等）走深链；前台也展示横幅
         UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
+        // 任务提醒通知上的「完成 / 稍后 10 分钟」
+        TaskReminderScheduler.registerCategories()
     }
 
     var body: some Scene {

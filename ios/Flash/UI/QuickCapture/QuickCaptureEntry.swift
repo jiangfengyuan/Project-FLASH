@@ -11,6 +11,7 @@ import FlashDesign
 /// - iOS 26+：标签栏上方的系统底部配件（Liquid Glass，随标签栏收起而内联）；
 /// - iOS 18–25：右下角悬浮按钮（材质背景），位于标签栏之上。
 struct QuickCaptureEntryModifier: ViewModifier {
+    let zoomNamespace: Namespace.ID
     let action: () -> Void
 
     func body(content: Content) -> some View {
@@ -29,6 +30,7 @@ struct QuickCaptureEntryModifier: ViewModifier {
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
+                    .flashZoomSource(id: "quickCapture", in: zoomNamespace)
                     .accessibilityLabel("快速记录")
                 }
                 .tabBarMinimizeBehavior(.onScrollDown)
@@ -43,6 +45,7 @@ struct QuickCaptureEntryModifier: ViewModifier {
                             .background(BrandColors.brandPrimary, in: Circle())
                             .flashElevatedShadow()
                     }
+                    .flashZoomSource(id: "quickCapture", in: zoomNamespace)
                     .accessibilityLabel("快速记录")
                     .padding(.trailing, Spacing.md)
                     .padding(.bottom, 64) // 让出标签栏高度（几何值）
@@ -52,7 +55,7 @@ struct QuickCaptureEntryModifier: ViewModifier {
 }
 
 extension View {
-    func quickCaptureEntry(action: @escaping () -> Void) -> some View {
-        modifier(QuickCaptureEntryModifier(action: action))
+    func quickCaptureEntry(zoomNamespace: Namespace.ID, action: @escaping () -> Void) -> some View {
+        modifier(QuickCaptureEntryModifier(zoomNamespace: zoomNamespace, action: action))
     }
 }

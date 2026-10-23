@@ -31,6 +31,9 @@ struct HomeView: View {
     @State private var deletingLog: LogItem? = nil
     /// 最近闪念点按编辑
     @State private var editingLog: LogItem? = nil
+    /// 卡片 → 编辑弹层的缩放转场
+    @Namespace private var zoomNamespace
+    @State private var deleteCount = 0
     /// 「+ 新建 → 任务」与「灵感转任务」的任务编辑器
     @State private var showingTaskEditor = false
     @State private var ideaTaskDraft: IdeaTaskDraft? = nil
@@ -94,6 +97,7 @@ struct HomeView: View {
             availableWidth = width
         }
         .scrollDismissesKeyboard(.interactively)
+        .flashHaptic(.impact(weight: .light), trigger: deleteCount)
         .background(BrandColors.pageBackground)
         // 问候区即页标题：导航栏只承载全局搜索按钮
         .navigationTitle("")
@@ -125,6 +129,7 @@ struct HomeView: View {
                          onConvertToTask: { draft in
                              ideaTaskDraft = IdeaTaskDraft(sourceLogId: draft.id, title: draft.content)
                          })
+                .flashZoomTransition(sourceID: log.id, in: zoomNamespace)
         }
         .sheet(isPresented: $showingTaskEditor) {
             TaskEditorView(selectedDate: Date(), task: nil) { task in
@@ -237,6 +242,7 @@ struct HomeView: View {
                     ForEach(viewModel.recentLogs) { log in
                         LogCardView(log: log, actionsVisibility: .hidden,
                                     isUnread: ideaReminders.unreadIDs.contains(log.id))
+                            .flashZoomSource(id: log.id, in: zoomNamespace)
                             .contentShape(Rectangle())
                             .onTapGesture { openEditor(log) }
                             .accessibilityAddTraits(.isButton)
@@ -299,7 +305,7 @@ struct HomeView: View {
 
     private func deleteConfirmed() {
         guard let log = deletingLog else { return }
-        do { try repository?.deleteLog(id: log.id) }
+        do { try repository?.deleteLog(id: log.id); deleteCount += 1 }
         catch {
             print("HomeView: 删除记录失败 - \(error)")
             errorMessage = "删除失败，请重试"

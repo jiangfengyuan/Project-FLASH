@@ -215,7 +215,7 @@
 				};
 			};
 			buildConfigurationList = FB0000000000000000000062 /* Build configuration list for PBXProject "Flash" */;
-			developmentRegion = en;
+			developmentRegion = "zh-Hans";
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
@@ -351,6 +351,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Flash.entitlements;
 				INFOPLIST_FILE = FlashInfo.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Flash Aero";
@@ -382,6 +383,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Flash.entitlements;
 				INFOPLIST_FILE = FlashInfo.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Flash Aero";

@@ -19,6 +19,8 @@ public struct EmotionView: View {
     @State private var selectedSubEmotion: SubEmotion? = nil
     /// 情绪强度 1–5（PRD §20 V1.1）：可选，nil = 未评；再点已选圆点取消
     @State private var intensity: Int? = nil
+    /// 保存成功计数：驱动 Success 触感（PRD v3 §3.5.3）
+    @State private var savedCount = 0
     @State private var note = ""
     @State private var errorMessage: String? = nil
 
@@ -104,6 +106,9 @@ public struct EmotionView: View {
                     Text("😍")
                 }
                 .frame(maxWidth: 420) // 滑杆最大宽度（几何值）
+                // 每档切换一次轻触感（触屏）
+                .flashHaptic(.selection, trigger: sliderValue)
+                .flashHaptic(.success, trigger: savedCount)
                 .onChange(of: sliderValue) {
                     if !selectedLevel.isNegative { selectedSubEmotion = nil }
                 }
@@ -223,6 +228,7 @@ public struct EmotionView: View {
                 note = ""
                 selectedSubEmotion = nil
                 intensity = nil
+                savedCount += 1
             } catch {
                 // 固定文案，详情仅输出到控制台，避免向用户暴露内部路径
                 print("[EmotionView] 保存情绪记录失败: \(error)")

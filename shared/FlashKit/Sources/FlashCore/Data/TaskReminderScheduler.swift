@@ -3,6 +3,24 @@ import UserNotifications
 
 public actor TaskReminderScheduler {
     public static let shared = TaskReminderScheduler()
+
+    /// 任务提醒通知类别与操作（「完成」「稍后 10 分钟」）
+    public static let categoryIdentifier = "flash-task-reminder"
+    public static let completeActionIdentifier = "flash.task.complete"
+    public static let snoozeActionIdentifier = "flash.task.snooze"
+    public static let taskIDKey = "taskId"
+    public static let snoozeMinutes = 10
+
+    /// 注册任务提醒的通知类别（App 启动时调用一次）
+    public nonisolated static func registerCategories() {
+        let complete = UNNotificationAction(identifier: completeActionIdentifier, title: "完成",
+                                            options: [], icon: UNNotificationActionIcon(systemImageName: "checkmark"))
+        let snooze = UNNotificationAction(identifier: snoozeActionIdentifier, title: "稍后 \(snoozeMinutes) 分钟",
+                                          options: [], icon: UNNotificationActionIcon(systemImageName: "clock"))
+        let category = UNNotificationCategory(identifier: categoryIdentifier, actions: [complete, snooze],
+                                              intentIdentifiers: [], options: [])
+        UNUserNotificationCenter.current().setNotificationCategories([category])
+    }
     private let center = UNUserNotificationCenter.current()
     private let prefix = "flash-task-reminder-"
 
@@ -43,6 +61,9 @@ public actor TaskReminderScheduler {
         content.title = "Flash 任务提醒"
         content.body = task.title
         content.sound = .default
+        // 通知操作（iOS 注册「完成 / 稍后」；未注册类别的平台只显示普通通知）
+        content.categoryIdentifier = Self.categoryIdentifier
+        content.userInfo = [Self.taskIDKey: task.id]
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(1, date.timeIntervalSinceNow), repeats: false)
         return UNNotificationRequest(identifier: prefix + task.id, content: content, trigger: trigger)
     }

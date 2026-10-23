@@ -26,6 +26,10 @@ public struct ExploreLogListView: View {
 
     @State private var editingLog: LogItem? = nil
     @State private var deletingLog: LogItem? = nil
+    /// 卡片 → 编辑弹层的缩放转场（iOS）
+    @Namespace private var zoomNamespace
+    /// 删除成功计数：驱动 Light 触感（PRD v3 §3.5.3）
+    @State private var deleteCount = 0
     @State private var errorMessage: String? = nil
     /// Idea→Task 转化草稿（nil 表示不展示任务编辑器）
     @State private var ideaTaskDraft: IdeaTaskDraft? = nil
@@ -95,6 +99,7 @@ public struct ExploreLogListView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .flashHaptic(.impact(weight: .light), trigger: deleteCount)
         // 新增/删除条目、空态切换均走 soft 过渡
         .animation(Motion.soft(reduceMotion), value: displayedLogs.count)
         .animation(Motion.soft(reduceMotion), value: displayedLogs.isEmpty)
@@ -108,6 +113,7 @@ public struct ExploreLogListView: View {
                          onConvertToTask: { draft in
                              ideaTaskDraft = IdeaTaskDraft(sourceLogId: draft.id, title: draft.content)
                          })
+                .flashZoomTransition(sourceID: log.id, in: zoomNamespace)
         }
         .sheet(item: $ideaTaskDraft) { draft in
             TaskEditorView(selectedDate: Date(), task: nil, ideaDraft: draft) { task in
@@ -118,7 +124,7 @@ public struct ExploreLogListView: View {
         .alert(deleteTitle, isPresented: deletePresented) {
             Button("删除", role: .destructive) {
                 if let log = deletingLog {
-                    do { try repository?.deleteLog(id: log.id) }
+                    do { try repository?.deleteLog(id: log.id); deleteCount += 1 }
                     catch {
                         print("[ExploreView] 删除记录失败: \(error)")
                         errorMessage = "删除失败，请重试"
@@ -176,6 +182,7 @@ public struct ExploreLogListView: View {
         #if os(iOS)
         LogCardView(log: log, actionsVisibility: .hidden,
                     isUnread: unreadIdeaIDs.contains(log.id))
+            .flashZoomSource(id: log.id, in: zoomNamespace)
             .contentShape(Rectangle())
             .onTapGesture { openEditor(log) }
             .accessibilityAddTraits(.isButton)

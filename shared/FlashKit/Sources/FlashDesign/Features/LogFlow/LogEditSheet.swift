@@ -71,9 +71,12 @@ public struct LogEditSheet: View {
     public var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.md) {
+                #if os(macOS)
+                // iOS 的标题在导航栏（flashEditorChrome）
                 Text(title).font(Typography.cardTitle)
                     .foregroundStyle(BrandColors.textPrimary)
                     .staggeredIn(index: 0, appeared: appeared, reduceMotion: reduceMotion)
+                #endif
 
                 FormSection("正文与类型") {
                     VStack(alignment: .leading, spacing: Spacing.sm) {
@@ -127,11 +130,17 @@ public struct LogEditSheet: View {
                         .pickerStyle(.segmented)
                         .labelsHidden()
 
-                        HStack {
-                            Stepper("重要度：\(importance)", value: $importance, in: 0...4)
-                            Spacer()
-                            DatePicker("记录日期", selection: $recordDate, displayedComponents: .date)
-                                .labelsHidden()
+                        // 一行放不下（iPhone 竖屏）时重要度与日期上下排列，标签不被挤成两行
+                        ViewThatFits(in: .horizontal) {
+                            HStack {
+                                importanceStepper
+                                Spacer()
+                                datePicker
+                            }
+                            VStack(alignment: .leading, spacing: Spacing.sm) {
+                                importanceStepper
+                                datePicker
+                            }
                         }
 
                         Toggle("收藏", isOn: $isFavorite)
@@ -156,6 +165,8 @@ public struct LogEditSheet: View {
                             .foregroundStyle(BrandColors.accent)
                             .transition(.scale(scale: 0.5).combined(with: .opacity))
                     } else {
+                        #if os(macOS)
+                        // iOS 的取消 / 保存在导航栏（flashEditorChrome），键盘弹出时仍可点
                         Button("取消") { close() }
                             .disabled(isSaving)
                             .keyboardShortcut(.cancelAction)
@@ -167,6 +178,7 @@ public struct LogEditSheet: View {
                                       || contentExceedsLimit || isSaving)
                             .help(content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                                   ? "正文为空，无法保存" : "")
+                        #endif
                     }
                 }
                 .staggeredIn(index: 3, appeared: appeared, reduceMotion: reduceMotion)
@@ -181,6 +193,11 @@ public struct LogEditSheet: View {
         }
         .flashPanelWidth(480) // 编辑面板固有宽度（几何值，仅 macOS）
         .background(BrandColors.pageBackground)
+        .flashEditorChrome(title: title, saveTitle: isSaving ? "保存中…" : "保存",
+                           saveDisabled: content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                               || contentExceedsLimit || isSaving || saved,
+                           onCancel: close, onSave: save)
+        .flashHaptic(.success, trigger: saved)
         .onAppear {
             appeared = true
             contentFocused = true
@@ -190,6 +207,18 @@ public struct LogEditSheet: View {
         } message: {
             Text(errorMessage ?? "")
         }
+    }
+
+    private var importanceStepper: some View {
+        Stepper(value: $importance, in: 0...4) {
+            Text("重要度：\(importance)")
+                .fixedSize()
+        }
+    }
+
+    private var datePicker: some View {
+        DatePicker("记录日期", selection: $recordDate, displayedComponents: .date)
+            .labelsHidden()
     }
 
     /// Idea→Task：把当前草稿（含未保存修改）抛给父视图打开任务编辑器，随后关闭本 sheet；

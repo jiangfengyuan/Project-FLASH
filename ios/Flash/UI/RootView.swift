@@ -15,6 +15,8 @@ struct RootView: View {
     @EnvironmentObject private var settings: SettingsStore
     @Environment(IdeaReminderCenter.self) private var ideaReminders
     @Environment(\.flashRepository) private var repository
+    /// 快速记录入口 → 面板的缩放转场
+    @Namespace private var captureNamespace
 
     var body: some View {
         @Bindable var appState = appState
@@ -51,7 +53,7 @@ struct RootView: View {
             }
         }
         // 快速记录常驻入口（iOS 26+ 标签栏底部配件；更早系统为悬浮按钮）
-        .quickCaptureEntry { appState.presentQuickCapture() }
+        .quickCaptureEntry(zoomNamespace: captureNamespace) { appState.presentQuickCapture() }
         // 共享页面隐藏自绘大标题，标题交给系统导航栏
         .environment(\.flashUsesSystemNavigationTitle, true)
         .environment(appState.focusRouter)
@@ -71,6 +73,7 @@ struct RootView: View {
         .sheet(item: $appState.quickCapture) { request in
             QuickCaptureSheet(initialCategory: request.category)
                 .id(request.id)
+                .flashZoomTransition(sourceID: "quickCapture", in: captureNamespace)
         }
         .fullScreenCover(isPresented: welcomePresented) {
             WelcomeScreen { settings.setWelcomed() }

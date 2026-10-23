@@ -55,7 +55,9 @@ struct ExploreScreen: View {
         .background(BrandColors.pageBackground)
         .navigationTitle("记录")
         .navigationSubtitleIfAvailable(statsSummary)
-        .searchable(text: $searchText, prompt: "输入关键词或标签")
+        // 搜索栏常显（不必下拉才出现）
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always),
+                    prompt: "输入关键词或标签")
         .toolbar { toolbarContent }
         .animation(Motion.soft(reduceMotion), value: filter)
         .onChange(of: filter) {

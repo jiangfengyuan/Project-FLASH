@@ -39,51 +39,71 @@ public struct TaskEditorView: View {
     private var titleExceedsLimit: Bool { !TextLimits.fits(title, limit: TextLimits.maxTaskTitleUTF16) }
     private var notesExceedsLimit: Bool { !TextLimits.fits(notes) }
 
+    private var saveDisabled: Bool {
+        title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || titleExceedsLimit || notesExceedsLimit
+    }
+
     public var body: some View {
+        #if os(iOS)
+        // 触屏：系统表单 + 导航栏取消/保存（键盘弹出时仍可点）
+        Form {
+            Section { fields }
+        }
+        .scrollContentBackground(.hidden)
+        .background(BrandColors.pageBackground)
+        .flashEditorChrome(title: task == nil ? "新建任务" : "编辑任务", saveDisabled: saveDisabled,
+                           onCancel: { dismiss() }, onSave: { onSave(makeTask()) })
+        .environment(\.timeZone, editorTimeZone)
+        #else
         VStack(alignment: .leading, spacing: Spacing.md) {
             Text(task == nil ? "新建任务" : "编辑任务").font(Typography.sectionTitle)
-            // Idea→Task 来源关联（只读）：新建由 ideaDraft 带入，编辑既有任务时同样可见
-            if sourceLogId != nil {
-                Label("来源：灵感", systemImage: "lightbulb")
-                    .font(Typography.caption)
-                    .foregroundStyle(BrandColors.ideaYellowText)
-                    .accessibilityLabel("此任务由灵感转化而来")
-            }
-            TextField("任务标题", text: $title).textFieldStyle(.roundedBorder)
-            if titleExceedsLimit {
-                Text("标题超出上限（\(title.utf16.count)/\(TextLimits.maxTaskTitleUTF16)）")
-                    .font(Typography.caption)
-                    .foregroundStyle(BrandColors.destructive)
-            }
-            TextField("备注（可选）", text: $notes, axis: .vertical).lineLimit(2...5)
-            if notesExceedsLimit {
-                Text("备注超出上限（\(notes.utf16.count)/\(TextLimits.maxContentUTF16)）")
-                    .font(Typography.caption)
-                    .foregroundStyle(BrandColors.destructive)
-            }
-            Toggle("全天任务", isOn: $allDay)
-            Toggle("收藏", isOn: $isFavorite)
-            DatePicker("截止时间", selection: $dueDate,
-                       displayedComponents: allDay ? [.date] : [.date, .hourAndMinute])
-            Picker("本地提醒", selection: $reminderMinutes) {
-                Text("不提醒").tag(Int?.none)
-                Text("截止时").tag(Int?.some(0))
-                Text("提前 15 分钟").tag(Int?.some(15))
-                Text("提前 1 小时").tag(Int?.some(60))
-                Text("提前 1 天").tag(Int?.some(1440))
-            }
+            fields
             HStack {
                 Button("取消") { dismiss() }
                 Spacer()
                 Button("保存") { onSave(makeTask()) }
                     .buttonStyle(.borderedProminent)
-                    .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                              || titleExceedsLimit || notesExceedsLimit)
+                    .disabled(saveDisabled)
             }
         }
         .padding(Spacing.lg)
         .flashPanelWidth(430) // 编辑器固有宽度（几何值，仅 macOS）
         .environment(\.timeZone, editorTimeZone)
+        #endif
+    }
+
+    @ViewBuilder
+    private var fields: some View {
+        // Idea→Task 来源关联（只读）：新建由 ideaDraft 带入，编辑既有任务时同样可见
+        if sourceLogId != nil {
+            Label("来源：灵感", systemImage: "lightbulb")
+                .font(Typography.caption)
+                .foregroundStyle(BrandColors.ideaYellowText)
+                .accessibilityLabel("此任务由灵感转化而来")
+        }
+        TextField("任务标题", text: $title).flashRoundedFieldStyle()
+        if titleExceedsLimit {
+            Text("标题超出上限（\(title.utf16.count)/\(TextLimits.maxTaskTitleUTF16)）")
+                .font(Typography.caption)
+                .foregroundStyle(BrandColors.destructive)
+        }
+        TextField("备注（可选）", text: $notes, axis: .vertical).lineLimit(2...5)
+        if notesExceedsLimit {
+            Text("备注超出上限（\(notes.utf16.count)/\(TextLimits.maxContentUTF16)）")
+                .font(Typography.caption)
+                .foregroundStyle(BrandColors.destructive)
+        }
+        Toggle("全天任务", isOn: $allDay)
+        Toggle("收藏", isOn: $isFavorite)
+        DatePicker("截止时间", selection: $dueDate,
+                   displayedComponents: allDay ? [.date] : [.date, .hourAndMinute])
+        Picker("本地提醒", selection: $reminderMinutes) {
+            Text("不提醒").tag(Int?.none)
+            Text("截止时").tag(Int?.some(0))
+            Text("提前 15 分钟").tag(Int?.some(15))
+            Text("提前 1 小时").tag(Int?.some(60))
+            Text("提前 1 天").tag(Int?.some(1440))
+        }
     }
 
     private func makeTask() -> TaskItem {
