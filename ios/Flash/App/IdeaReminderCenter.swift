@@ -40,6 +40,8 @@ final class IdeaReminderCenter {
         store.prune(keeping: Set(ids))
         unreadIdeas = IdeaReminder.unreadIdeas(in: ideas, viewed: store.viewedIDs)
         let count = unreadCount
+        // 小组件快照带上未读灵感数（写库路径不知道已读状态，由这里补齐）
+        WidgetSnapshot.refresh(repository: repository, unreadIdeaCount: count)
         let enabled = settings.ideaReminderEnabled
         let frequency = settings.ideaReminderFrequency
         Task { await scheduler.reschedule(unreadCount: count, enabled: enabled, frequency: frequency) }

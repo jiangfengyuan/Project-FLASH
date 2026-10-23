@@ -94,4 +94,21 @@ struct WidgetSnapshotTests {
         WidgetSnapshotWriter.write(sample())
         #expect(WidgetSnapshotReader.read() == sample())
     }
+
+    /// 旧快照（无 unreadIdeaCount 字段，macOS 与 iOS 早期版本写入）仍可解码
+    @Test func decodesLegacySnapshotWithoutUnreadCount() throws {
+        let legacy = #"{"generatedAt":"2026-10-23T08:00:00.000Z","openTaskCount":2,"recordDate":"2026-10-23","todayLogCount":5}"#
+        let snapshot = try JSONDecoder().decode(WidgetSnapshot.self, from: Data(legacy.utf8))
+        #expect(snapshot.unreadIdeaCount == nil)
+        #expect(snapshot.todayLogCount == 5)
+        #expect(snapshot.isCurrent(today: "2026-10-23"))
+        #expect(!snapshot.isCurrent(today: "2026-10-24"))
+    }
+
+    @Test func unreadCountRoundtrips() throws {
+        var snapshot = sample()
+        snapshot.unreadIdeaCount = 4
+        let data = try JSONEncoder().encode(snapshot)
+        #expect(try JSONDecoder().decode(WidgetSnapshot.self, from: data).unreadIdeaCount == 4)
+    }
 }

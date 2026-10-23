@@ -9,7 +9,24 @@
 /* Begin PBXBuildFile section */
 		FB00000000000000000000A3 /* FlashCore in Frameworks */ = {isa = PBXBuildFile; productRef = FB00000000000000000000A1 /* FlashCore */; };
 		FB00000000000000000000A4 /* FlashDesign in Frameworks */ = {isa = PBXBuildFile; productRef = FB00000000000000000000A2 /* FlashDesign */; };
+		FB00000000000000000000B3 /* FlashCore in Frameworks */ = {isa = PBXBuildFile; productRef = FB00000000000000000000B1 /* FlashCore */; };
+		FB00000000000000000000B4 /* FlashDesign in Frameworks */ = {isa = PBXBuildFile; productRef = FB00000000000000000000B2 /* FlashDesign */; };
+		FB00000000000000000000B5 /* FlashWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FB0000000000000000000032 /* FlashWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		FB0000000000000000000056 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				FB00000000000000000000B5 /* FlashWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXContainerItemProxy section */
 		FB0000000000000000000071 /* PBXContainerItemProxy */ = {
@@ -19,11 +36,19 @@
 			remoteGlobalIDString = FB0000000000000000000040;
 			remoteInfo = Flash;
 		};
+		FB0000000000000000000073 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FB0000000000000000000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FB0000000000000000000042;
+			remoteInfo = FlashWidgetExtension;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		FB0000000000000000000030 /* Flash.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flash.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB0000000000000000000031 /* FlashTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlashTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		FB0000000000000000000032 /* FlashWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FlashWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -35,6 +60,11 @@
 		FB0000000000000000000011 /* FlashTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = FlashTests;
+			sourceTree = "<group>";
+		};
+		FB0000000000000000000012 /* FlashWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = FlashWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -56,6 +86,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FB0000000000000000000022 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FB00000000000000000000B3 /* FlashCore in Frameworks */,
+				FB00000000000000000000B4 /* FlashDesign in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -64,6 +103,7 @@
 			children = (
 				FB0000000000000000000010 /* Flash */,
 				FB0000000000000000000011 /* FlashTests */,
+				FB0000000000000000000012 /* FlashWidget */,
 				FB0000000000000000000002 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -73,6 +113,7 @@
 			children = (
 				FB0000000000000000000030 /* Flash.app */,
 				FB0000000000000000000031 /* FlashTests.xctest */,
+				FB0000000000000000000032 /* FlashWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -87,10 +128,12 @@
 				FB0000000000000000000050 /* Sources */,
 				FB0000000000000000000020 /* Frameworks */,
 				FB0000000000000000000051 /* Resources */,
+				FB0000000000000000000056 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				FB0000000000000000000074 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				FB0000000000000000000010 /* Flash */,
@@ -125,6 +168,30 @@
 			productReference = FB0000000000000000000031 /* FlashTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		FB0000000000000000000042 /* FlashWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FB0000000000000000000063 /* Build configuration list for PBXNativeTarget "FlashWidgetExtension" */;
+			buildPhases = (
+				FB0000000000000000000054 /* Sources */,
+				FB0000000000000000000022 /* Frameworks */,
+				FB0000000000000000000055 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				FB0000000000000000000012 /* FlashWidget */,
+			);
+			name = FlashWidgetExtension;
+			packageProductDependencies = (
+				FB00000000000000000000B1 /* FlashCore */,
+				FB00000000000000000000B2 /* FlashDesign */,
+			);
+			productName = FlashWidgetExtension;
+			productReference = FB0000000000000000000032 /* FlashWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -141,6 +208,9 @@
 					FB0000000000000000000041 = {
 						CreatedOnToolsVersion = 26.0;
 						TestTargetID = FB0000000000000000000040;
+					};
+					FB0000000000000000000042 = {
+						CreatedOnToolsVersion = 26.0;
 					};
 				};
 			};
@@ -164,6 +234,7 @@
 			targets = (
 				FB0000000000000000000040 /* Flash */,
 				FB0000000000000000000041 /* FlashTests */,
+				FB0000000000000000000042 /* FlashWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -177,6 +248,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		FB0000000000000000000053 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FB0000000000000000000055 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -200,6 +278,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FB0000000000000000000054 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -207,6 +292,11 @@
 			isa = PBXTargetDependency;
 			target = FB0000000000000000000040 /* Flash */;
 			targetProxy = FB0000000000000000000071 /* PBXContainerItemProxy */;
+		};
+		FB0000000000000000000074 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FB0000000000000000000042 /* FlashWidgetExtension */;
+			targetProxy = FB0000000000000000000073 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -261,6 +351,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				CODE_SIGN_ENTITLEMENTS = Flash.entitlements;
 				INFOPLIST_FILE = FlashInfo.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Flash Aero";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
@@ -291,6 +382,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				CODE_SIGN_ENTITLEMENTS = Flash.entitlements;
 				INFOPLIST_FILE = FlashInfo.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Flash Aero";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
@@ -347,6 +439,58 @@
 			};
 			name = Release;
 		};
+		FB0000000000000000000086 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = FlashWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FlashWidgetInfo.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Flash Aero";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.flash.app.ios.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		FB0000000000000000000087 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = FlashWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FlashWidgetInfo.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Flash Aero";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.flash.app.ios.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -377,6 +521,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		FB0000000000000000000063 /* Build configuration list for PBXNativeTarget "FlashWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FB0000000000000000000086 /* Debug */,
+				FB0000000000000000000087 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
@@ -392,6 +545,14 @@
 			productName = FlashCore;
 		};
 		FB00000000000000000000A2 /* FlashDesign */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = FlashDesign;
+		};
+		FB00000000000000000000B1 /* FlashCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = FlashCore;
+		};
+		FB00000000000000000000B2 /* FlashDesign */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = FlashDesign;
 		};

@@ -6,6 +6,9 @@
 
 import Foundation
 import SwiftData
+#if canImport(WidgetKit)
+import WidgetKit
+#endif
 
 /// 三分区完整快照；Equatable 供覆盖导入前做 TOCTOU 重校验（预览快照 vs 当前数据）
 public struct FlashSnapshot: Equatable, Sendable {
@@ -410,15 +413,22 @@ extension WidgetSnapshot {
     /// 挂点：FlashApp 启动 `.task` 与 `FlashRepository.commit()` 成功后
     /// （参照 TaskReminderScheduler.rebuild 的挂接方式；读取失败静默忽略）。
     @MainActor
-    public static func refresh(repository: FlashRepository) {
-        guard WidgetSnapshotStore.containerDirectory != nil else { return }
+    public static func refresh(repository: FlashRepository, unreadIdeaCount: Int? = nil) {
+        guard let directory = WidgetSnapshotStore.containerDirectory else { return }
         guard let summary = try? repository.widgetTodaySummary() else { return }
+        // 未读灵感数由宿主（iOS 灵感提醒）提供；写库路径不知道已读状态，沿用上一份快照的值
+        let unread = unreadIdeaCount ?? WidgetSnapshotReader.read(from: directory)?.unreadIdeaCount
         WidgetSnapshotWriter.write(WidgetSnapshot(
             recordDate: DateFormatting.today(),
             todayLogCount: summary.logCount,
             openTaskCount: summary.openTaskCount,
             dominantEmotionEmoji: summary.dominantEmotion?.emoji,
-            generatedAt: DateFormatting.isoNow()
+            generatedAt: DateFormatting.isoNow(),
+            unreadIdeaCount: unread
         ))
+        // 通知系统重载时间线（此前只写快照、从不重载，小组件要等下一次整点刷新）
+        #if canImport(WidgetKit)
+        WidgetCenter.shared.reloadAllTimelines()
+        #endif
     }
 }

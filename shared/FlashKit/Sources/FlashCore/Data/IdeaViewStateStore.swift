@@ -72,7 +72,7 @@ public final class IdeaViewStateStore {
             try FileManager.default.createDirectory(at: fileURL.deletingLastPathComponent(),
                                                     withIntermediateDirectories: true)
             let data = try JSONEncoder().encode(Payload(viewed: viewedIDs.sorted(), baseline: hasBaseline))
-            try data.write(to: fileURL, options: [.atomic, .completeFileProtection])
+            try data.write(to: fileURL, options: .atomic)
         } catch {
             // 已读状态是增强能力：写失败只影响提醒精度，不影响记录数据
             print("IdeaViewStateStore: 写入失败 - \(error)")

@@ -28,14 +28,21 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
     public var dominantEmotionEmoji: String?
     /// 生成时间（ISO-8601）
     public var generatedAt: String
+    /// 未读灵感数（灵感提醒；iOS 写入，旧快照与 macOS 为 nil，向后兼容）
+    public var unreadIdeaCount: Int? = nil
 
-    public init(recordDate: String, todayLogCount: Int, openTaskCount: Int, dominantEmotionEmoji: String? = nil, generatedAt: String) {
+    public init(recordDate: String, todayLogCount: Int, openTaskCount: Int, dominantEmotionEmoji: String? = nil,
+                generatedAt: String, unreadIdeaCount: Int? = nil) {
         self.recordDate = recordDate
         self.todayLogCount = todayLogCount
         self.openTaskCount = openTaskCount
         self.dominantEmotionEmoji = dominantEmotionEmoji
         self.generatedAt = generatedAt
+        self.unreadIdeaCount = unreadIdeaCount
     }
+
+    /// 快照是否属于今天：跨日后小组件不再展示昨日计数（计数归零，未读灵感不受日期影响）
+    public func isCurrent(today: String) -> Bool { recordDate == today }
 }
 
 public enum WidgetSnapshotStore: Sendable {
