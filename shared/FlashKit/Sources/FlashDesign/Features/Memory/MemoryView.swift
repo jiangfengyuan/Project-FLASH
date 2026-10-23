@@ -24,6 +24,7 @@ public struct MemoryView: View {
     /// 映射/聚合缓存：仅在数据写代际、周偏移或基准日变化时重算
     @State private var aggregateCache = ViewComputeCache<MemoryKey, WeeklyMemory.Report>()
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.flashUsesSystemNavigationTitle) private var usesSystemNavigationTitle
 
     public init() {}
 
@@ -63,7 +64,9 @@ public struct MemoryView: View {
     /// 标题 + 周导航（上一周 / 回到本周 / 下一周，下一周不超过当前周）+ 周范围
     private func header(_ report: WeeklyMemory.Report) -> some View {
         HStack(spacing: Spacing.sm) {
-            Text("Memory").flashPageTitle()
+            if !usesSystemNavigationTitle {
+                Text("Memory").flashPageTitle()
+            }
             Spacer()
             Button {
                 Motion.animate(Motion.quick(), reduceMotion: reduceMotion) { weekOffset -= 1 }
@@ -88,7 +91,7 @@ public struct MemoryView: View {
                 .contentTransition(.opacity)
                 .animation(Motion.quick(reduceMotion), value: report.weekStart)
         }
-        .padding(Spacing.lg)
+        .padding(usesSystemNavigationTitle ? Spacing.md : Spacing.lg)
     }
 
     /// 周报内容：四计数卡片 + 情绪概览 + 亮点 + 品牌收尾句

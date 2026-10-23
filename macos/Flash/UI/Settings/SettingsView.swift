@@ -163,66 +163,8 @@ struct SettingsView: View {
         Binding(get: { lanTransfer.mode != .idle }, set: { if !$0 { lanTransfer.cancel() } })
     }
 
-    @ViewBuilder private var lanTransferSheet: some View {
-        VStack(alignment: .leading, spacing: Spacing.md) {
-            switch lanTransfer.mode {
-            case .sending:
-                Text("等待接收设备").font(Typography.sectionTitle)
-                Text("在另一台设备选择“局域网接收”，然后输入配对 PIN：")
-                Text(lanTransfer.pin)
-                    .scaledSystemFont(size: 48, weight: .semibold, design: .rounded, relativeTo: .largeTitle)
-                    .foregroundStyle(.tint)
-                    .textSelection(.enabled)
-                Text("PIN 仅本次有效，60 秒后自动失效。")
-                    .font(Typography.caption).foregroundStyle(.secondary)
-                Button("取消发送") { lanTransfer.cancel() }
-
-            case .receiving:
-                Text("从局域网接收").font(Typography.sectionTitle)
-                if lanTransfer.devices.isEmpty {
-                    HStack { ProgressView(); Text("正在查找附近的 Flash Aero…") }
-                } else {
-                    Text("选择发送设备：")
-                    ForEach(lanTransfer.devices) { device in
-                        Button {
-                            lanTransfer.selectedDevice = device
-                        } label: {
-                            HStack {
-                                Image(systemName: lanTransfer.selectedDevice == device ? "checkmark.circle.fill" : "circle")
-                                Text(device.name)
-                            }
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-                TextField("六位配对 PIN", text: $lanTransfer.enteredPIN)
-                    .textFieldStyle(.roundedBorder)
-                    .onChange(of: lanTransfer.enteredPIN) { _, value in
-                        lanTransfer.enteredPIN = String(value.filter(\.isNumber).prefix(6))
-                    }
-                HStack {
-                    Button("取消") { lanTransfer.cancel() }
-                    Spacer()
-                    Button("配对并接收") { lanTransfer.connect() }
-                        .buttonStyle(.borderedProminent)
-                        .disabled(lanTransfer.selectedDevice == nil || lanTransfer.enteredPIN.count != 6)
-                }
-
-            case .connecting:
-                Text("正在配对").font(Typography.sectionTitle)
-                HStack { ProgressView(); Text("正在验证 PIN 并接收备份…") }
-                Button("取消") { lanTransfer.cancel() }
-
-            case .idle:
-                EmptyView()
-            }
-            Divider()
-            Text("备份内容未做端到端加密，请仅在可信的家庭或办公局域网使用。")
-                .font(Typography.caption)
-                .foregroundStyle(.secondary)
-        }
-        .padding(Spacing.lg)
-        .frame(width: 420) // 传输面板固有宽度（几何值）
+    private var lanTransferSheet: some View {
+        LanTransferSheet(controller: lanTransfer)
     }
 
     private var appVersion: String { BackupImportCoordinator.appVersion }

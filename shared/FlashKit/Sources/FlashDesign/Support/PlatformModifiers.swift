@@ -28,3 +28,9 @@ public extension View {
         #endif
     }
 }
+
+public extension EnvironmentValues {
+    /// 宿主用系统导航栏承载页标题（iOS NavigationStack）时置 true：
+    /// 共享页面隐藏自绘大标题，仅保留页内控件（分段、周导航等）
+    @Entry var flashUsesSystemNavigationTitle: Bool = false
+}

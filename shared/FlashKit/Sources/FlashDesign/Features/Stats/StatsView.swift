@@ -26,19 +26,27 @@ public struct StatsView: View {
     /// 映射/聚合缓存：仅在数据写代际、时间窗口或基准日变化时重算
     @State private var aggregateCache = ViewComputeCache<StatsKey, StatsValues>()
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.flashUsesSystemNavigationTitle) private var usesSystemNavigationTitle
 
     public init() {}
 
     public var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Text("回顾").flashPageTitle()
-                Spacer()
+                if !usesSystemNavigationTitle {
+                    Text("回顾").flashPageTitle()
+                    Spacer()
+                }
                 Picker("回顾视图", selection: $showsCalendar) {
                     Text("趋势").tag(false)
                     Text("日历").tag(true)
-                }.pickerStyle(.segmented).frame(width: 180) // 分段控件固有宽度（几何值）
-            }.padding(Spacing.lg)
+                }
+                .pickerStyle(.segmented)
+                // 系统导航栏承载标题时分段占满一行；否则固有宽度 180（几何值）
+                .frame(maxWidth: usesSystemNavigationTitle ? .infinity : 180)
+            }
+            .padding(.horizontal, usesSystemNavigationTitle ? Spacing.md : Spacing.lg)
+            .padding(.vertical, usesSystemNavigationTitle ? Spacing.sm : Spacing.lg)
             ZStack {
                 trendsContent
                     .opacity(showsCalendar ? 0 : 1)

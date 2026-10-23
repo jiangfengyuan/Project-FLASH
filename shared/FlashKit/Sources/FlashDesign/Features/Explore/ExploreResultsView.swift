@@ -29,6 +29,9 @@ public struct ExploreLogListView: View {
     @State private var errorMessage: String? = nil
     /// Idea→Task 转化草稿（nil 表示不展示任务编辑器）
     @State private var ideaTaskDraft: IdeaTaskDraft? = nil
+    /// 灵感提醒：未读灵感 id 集与「已读」回调，由宿主经环境注入（未注入时不标未读）
+    @Environment(\.flashUnreadIdeaIDs) private var unreadIdeaIDs
+    @Environment(\.flashMarkIdeaViewed) private var markIdeaViewed
 
     public init(filter: ExploreFilter, query: String, criteria: ExploreCriteria, favoritesOnly: Bool,
          batchMode: Bool, selection: Binding<Set<String>>, onClearFilters: @escaping () -> Void) {
@@ -65,6 +68,20 @@ public struct ExploreLogListView: View {
                 emptyState
                     .transition(.appear(reduceMotion: reduceMotion))
             } else {
+                #if os(iOS)
+                // 触屏：List 承载以获得轻扫操作（左滑收藏 / 右滑删除）；卡片外观不变
+                List {
+                    ForEach(displayedLogs) { log in
+                        row(log)
+                            .listRowInsets(EdgeInsets(top: Spacing.xxs, leading: Spacing.md,
+                                                      bottom: Spacing.xxs, trailing: Spacing.md))
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
+                    }
+                }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                #else
                 ScrollView {
                     LazyVStack(spacing: Spacing.sm) {
                         ForEach(displayedLogs) { log in
@@ -74,6 +91,7 @@ public struct ExploreLogListView: View {
                     .padding(.horizontal, Spacing.md)
                     .padding(.vertical, Spacing.sm)
                 }
+                #endif
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -137,14 +155,10 @@ public struct ExploreLogListView: View {
             .buttonStyle(.plain)
             .accessibilityAddTraits(selection.contains(log.id) ? [.isSelected] : [])
         } else {
-            LogCardView(log: log,
-                        onEdit: { editingLog = log },
-                        onDelete: { deletingLog = log },
-                        onToggleFavorite: { toggleFavorite(log) })
-                .cardFloat(reduceMotion: reduceMotion)
+            card(log)
                 .transition(.card(reduceMotion: reduceMotion))
                 .contextMenu {
-                    Button("编辑…") { editingLog = log }
+                    Button("编辑…") { openEditor(log) }
                     Button(log.isFavorite == true ? "取消收藏" : "收藏") { toggleFavorite(log) }
                     if log.category == .idea {
                         Button("转为任务") {
@@ -154,6 +168,48 @@ public struct ExploreLogListView: View {
                     Button("删除", role: .destructive) { deletingLog = log }
                 }
         }
+    }
+
+    /// macOS：hover 浮现卡内操作；触屏：点按编辑 + 轻扫收藏/删除（卡内按钮不渲染）
+    @ViewBuilder
+    private func card(_ log: LogItem) -> some View {
+        #if os(iOS)
+        LogCardView(log: log, actionsVisibility: .hidden,
+                    isUnread: unreadIdeaIDs.contains(log.id))
+            .contentShape(Rectangle())
+            .onTapGesture { openEditor(log) }
+            .accessibilityAddTraits(.isButton)
+            .accessibilityAction(named: "编辑") { openEditor(log) }
+            .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                Button {
+                    toggleFavorite(log)
+                } label: {
+                    Label(log.isFavorite == true ? "取消收藏" : "收藏",
+                          systemImage: log.isFavorite == true ? "star.slash" : "star")
+                }
+                .tint(BrandColors.ideaYellow)
+            }
+            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                Button(role: .destructive) {
+                    deletingLog = log
+                } label: {
+                    Label("删除", systemImage: "trash")
+                }
+            }
+        #else
+        LogCardView(log: log,
+                    onEdit: { openEditor(log) },
+                    onDelete: { deletingLog = log },
+                    onToggleFavorite: { toggleFavorite(log) },
+                    isUnread: unreadIdeaIDs.contains(log.id))
+            .cardFloat(reduceMotion: reduceMotion)
+        #endif
+    }
+
+    /// 打开编辑弹层；灵感被打开即视为已读（灵感提醒，宿主未注入时为空操作）
+    private func openEditor(_ log: LogItem) {
+        if log.category == .idea { markIdeaViewed?(log.id) }
+        editingLog = log
     }
 
     private var deleteTitle: String {

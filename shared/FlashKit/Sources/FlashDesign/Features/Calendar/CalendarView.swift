@@ -171,7 +171,7 @@ public struct CalendarView: View {
 
     /// 消费跨模块定位：任务搜索结果 → 选中其日历日并跟随翻月；无日期载荷时仅切页不动作
     private func flushFocusTarget() {
-        guard case .task(let day?)? = focusRouter.consume(),
+        guard case .task(let day?)? = focusRouter.consume(matching: { if case .task = $0 { true } else { false } }),
               let date = DateFormatting.parseDay(day) else { return }
         let order = Self.gregorian.compare(date, to: displayedMonth, toGranularity: .month)
         monthDirection = order == .orderedAscending ? -1 : (order == .orderedDescending ? 1 : 0)

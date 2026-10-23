@@ -32,6 +32,12 @@ public enum SyntheticDataset: Sendable {
     private static let sampleLevels = EmotionLevel.allCases
 
     /// 生成 spreadDays 天内的合成数据；数量按比例 logs:emotions:tasks = 10:5:2
+    /// 确定性 UUID 形式的 id（v4 版本位 + 变体位），保证合成数据能通过 flash-backup-v2 严格导出校验；
+    /// kind 写入变体段首位区分日志 / 情绪 / 任务，同一序号在三分区间不冲突
+    static func seedID(kind: Int, _ index: Int) -> String {
+        String(format: "00000000-0000-4000-%X000-%012X", kind, index)
+    }
+
     public static func generate(logs logCount: Int, spreadDays: Int = 540
     ) -> (logs: [LogItem], emotions: [EmotionRecord], tasks: [TaskItem]) {
         var rng = Lcg(state: 0xF1A5)
@@ -56,7 +62,7 @@ public enum SyntheticDataset: Sendable {
         let logs: [LogItem] = (0..<logCount).map { i in
             let offset = Int(rng.next() % UInt64(spreadDays))
             return LogItem(
-                id: "seed-log-\(i)",
+                id: seedID(kind: 0x8, i),
                 content: sampleContents[Int(rng.next()) % sampleContents.count] + " #\(i % 97)",
                 colorTag: sampleTags[Int(rng.next()) % sampleTags.count],
                 category: rng.next() % 4 == 0 ? .idea : .log,
@@ -68,7 +74,7 @@ public enum SyntheticDataset: Sendable {
         let emotions: [EmotionRecord] = (0..<emotionCount).map { i in
             let offset = Int(rng.next() % UInt64(spreadDays))
             return EmotionRecord(
-                id: "seed-emotion-\(i)",
+                id: seedID(kind: 0x9, i),
                 level: sampleLevels[Int(rng.next()) % sampleLevels.count],
                 subEmotion: nil,
                 status: nil,
@@ -81,7 +87,7 @@ public enum SyntheticDataset: Sendable {
             let offset = Int(rng.next() % UInt64(spreadDays / 2))
             let done = rng.next() % 2 == 0
             return TaskItem(
-                id: "seed-task-\(i)",
+                id: seedID(kind: 0xA, i),
                 title: "合成任务 #\(i)",
                 notes: nil,
                 colorTag: sampleTags[Int(rng.next()) % sampleTags.count],

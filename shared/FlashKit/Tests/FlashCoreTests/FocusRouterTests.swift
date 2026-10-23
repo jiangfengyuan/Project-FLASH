@@ -32,4 +32,13 @@ struct FocusRouterTests {
     @Test func nothingPendingReturnsNil() {
         #expect(FocusRouter().consume() == nil)
     }
+
+    @Test func matchingConsumeLeavesOtherDestinationsPending() {
+        let router = FocusRouter()
+        router.request(.task("2026-10-23"))
+        // 记录页同时存活：不是它的目标，不得吞掉
+        #expect(router.consume(matching: { if case .log = $0 { true } else { false } }) == nil)
+        #expect(router.consume(matching: { if case .task = $0 { true } else { false } }) == .task("2026-10-23"))
+        #expect(router.consume(matching: { _ in true }) == nil)
+    }
 }

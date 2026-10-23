@@ -38,6 +38,13 @@ public final class FocusRouter {
         requestToken += 1
     }
 
+    /// 只交付符合条件的目标：不符合时不标记已处理，留给对应页面消费。
+    /// 多个页面同时存活（iOS 各 Tab 常驻）时必须用此方法，避免误吞别的页面的定位请求。
+    public func consume(matching predicate: (FocusDestination) -> Bool) -> FocusDestination? {
+        guard requestToken != handledToken, let pending, predicate(pending) else { return nil }
+        return consume()
+    }
+
     @discardableResult
     public func consume() -> FocusDestination? {
         guard requestToken != handledToken else { return nil }

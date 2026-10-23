@@ -15,6 +15,7 @@ import FlashDesign
 struct HomeView: View {
     @Environment(\.flashRepository) private var repository
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(AppState.self) private var appState
     @Query(sort: \LogEntity.createdAt, order: .reverse) private var logEntities: [LogEntity]
     @Query(sort: \EmotionEntity.createdAt, order: .reverse) private var emotionEntities: [EmotionEntity]
     @Query(sort: \TaskEntity.updatedAt, order: .reverse) private var taskEntities: [TaskEntity]
@@ -25,6 +26,11 @@ struct HomeView: View {
     @FocusState private var inputFocused: Bool
     @State private var errorMessage: String? = nil
     @State private var deletingLog: LogItem? = nil
+    /// 最近闪念点按编辑
+    @State private var editingLog: LogItem? = nil
+    /// 「+ 新建 → 任务」与「灵感转任务」的任务编辑器
+    @State private var showingTaskEditor = false
+    @State private var ideaTaskDraft: IdeaTaskDraft? = nil
     /// 顶部 toast 文案（nil 表示不展示）；toastID 用于相同文案连发时重置计时
     @State private var toastMessage: String? = nil
     @State private var toastID = 0
@@ -48,9 +54,8 @@ struct HomeView: View {
                 GreetingHeaderView(
                     onNewLog: { startCapture(.log) },
                     onNewIdea: { startCapture(.idea) },
-                    // 情绪 / 任务模块尚未移植（M3 / M4）：先给出明确提示，不跳空页
-                    onNewEmotion: { showToast("情绪记录即将在 iOS 上线") },
-                    onNewTask: { showToast("任务即将在 iOS 上线") }
+                    onNewEmotion: { appState.push(.emotion) },
+                    onNewTask: { showingTaskEditor = true }
                 )
 
                 if isTwoColumn {
@@ -82,7 +87,10 @@ struct HomeView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .background(BrandColors.pageBackground)
-        .toolbar(.hidden, for: .navigationBar)
+        // 问候区即页标题：导航栏只承载全局搜索按钮
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar { GlobalSearchToolbarItem() }
         .onAppear { syncViewModel() }
         // 写代际变化 = 任一表有提交；不直接观察实体数组（PersistentModel 相等走身份，漏掉就地更新）
         .onChange(of: repository?.revision ?? 0) { syncViewModel() }
@@ -98,6 +106,27 @@ struct HomeView: View {
             try? await Task.sleep(for: .seconds(1.6))
             guard !Task.isCancelled else { return }
             toastMessage = nil
+        }
+        .sheet(item: $editingLog) { log in
+            LogEditSheet(log: log,
+                         title: log.category == .idea ? "编辑灵感" : "编辑记录",
+                         onSave: { updated in
+                             guard let repository else { throw SaveError() }
+                             try repository.updateLog(updated)
+                         },
+                         onConvertToTask: { draft in
+                             ideaTaskDraft = IdeaTaskDraft(sourceLogId: draft.id, title: draft.content)
+                         })
+        }
+        .sheet(isPresented: $showingTaskEditor) {
+            TaskEditorView(selectedDate: Date(), task: nil) { task in
+                if saveTask(task) { showingTaskEditor = false }
+            }
+        }
+        .sheet(item: $ideaTaskDraft) { draft in
+            TaskEditorView(selectedDate: Date(), task: nil, ideaDraft: draft) { task in
+                if saveTask(task) { ideaTaskDraft = nil }
+            }
         }
         .alert(deleteTitle, isPresented: deletePresented) {
             Button("删除", role: .destructive) { deleteConfirmed() }
@@ -145,11 +174,15 @@ struct HomeView: View {
                     .font(Typography.secondary)
                     .foregroundStyle(BrandColors.textSecondary)
                     .padding(.horizontal, Spacing.sm)
-                // iPhone 单列；无悬停，卡片内操作按钮不出现，收藏 / 删除走长按菜单
+                // 无悬停：卡片内操作按钮不出现；点按编辑，收藏 / 删除走长按菜单
                 VStack(spacing: Spacing.sm) {
                     ForEach(viewModel.recentLogs) { log in
-                        LogCardView(log: log)
+                        LogCardView(log: log, actionsVisibility: .hidden)
+                            .contentShape(Rectangle())
+                            .onTapGesture { editingLog = log }
+                            .accessibilityAddTraits(.isButton)
                             .contextMenu {
+                                Button("编辑", systemImage: "pencil") { editingLog = log }
                                 Button(log.isFavorite == true ? "取消收藏" : "收藏",
                                        systemImage: log.isFavorite == true ? "star.slash" : "star") {
                                     toggleFavorite(log)
@@ -211,6 +244,26 @@ struct HomeView: View {
         catch {
             print("HomeView: 删除记录失败 - \(error)")
             errorMessage = "删除失败，请重试"
+        }
+    }
+
+    private struct SaveError: Error {}
+
+    /// 任务入库 + 异步安排系统提醒（TaskSaving 与记录页、日历页同一契约）
+    @discardableResult
+    private func saveTask(_ task: TaskItem) -> Bool {
+        guard let repository else { errorMessage = "内部错误：存储未就绪"; return false }
+        do {
+            try repository.saveTask(task)
+            showToast("✓ 已保存任务")
+            Task {
+                if let warning = await TaskSaving.scheduleReminder(for: task) { errorMessage = warning }
+            }
+            return true
+        } catch {
+            print("HomeView: 任务保存失败 - \(error)")
+            errorMessage = "任务保存失败，请重试"
+            return false
         }
     }
 
