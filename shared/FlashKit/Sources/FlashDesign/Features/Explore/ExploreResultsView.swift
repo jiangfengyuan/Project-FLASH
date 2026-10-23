@@ -7,23 +7,22 @@
 import SwiftUI
 import SwiftData
 import FlashCore
-import FlashDesign
 
 /// 信息流列表：自带 @Query（静态 category/tag 谓词），与搜索框/面板的 @State 隔离，
 /// 每敲一键不再触发全量查询。搜索词与面板条件（标签/重要度/日期范围/收藏）在内存中过滤，
 /// 过滤逻辑由 Domain 的 ExploreLogFilter 承担（本视图只做装配与缓存键）。
-struct ExploreLogListView: View {
+public struct ExploreLogListView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.flashRepository) private var repository
     @Query private var logEntities: [LogEntity]
 
-    let filter: ExploreFilter
-    let query: String
-    let criteria: ExploreCriteria
-    let favoritesOnly: Bool
-    let batchMode: Bool
-    @Binding var selection: Set<String>
-    let onClearFilters: () -> Void
+    public let filter: ExploreFilter
+    public let query: String
+    public let criteria: ExploreCriteria
+    public let favoritesOnly: Bool
+    public let batchMode: Bool
+    @Binding public var selection: Set<String>
+    public let onClearFilters: () -> Void
 
     @State private var editingLog: LogItem? = nil
     @State private var deletingLog: LogItem? = nil
@@ -31,7 +30,7 @@ struct ExploreLogListView: View {
     /// Idea→Task 转化草稿（nil 表示不展示任务编辑器）
     @State private var ideaTaskDraft: IdeaTaskDraft? = nil
 
-    init(filter: ExploreFilter, query: String, criteria: ExploreCriteria, favoritesOnly: Bool,
+    public init(filter: ExploreFilter, query: String, criteria: ExploreCriteria, favoritesOnly: Bool,
          batchMode: Bool, selection: Binding<Set<String>>, onClearFilters: @escaping () -> Void) {
         self.filter = filter
         self.query = query
@@ -60,7 +59,7 @@ struct ExploreLogListView: View {
         }
     }
 
-    var body: some View {
+    public var body: some View {
         Group {
             if displayedLogs.isEmpty {
                 emptyState

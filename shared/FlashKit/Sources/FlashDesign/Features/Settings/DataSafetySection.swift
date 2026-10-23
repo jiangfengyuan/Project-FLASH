@@ -6,26 +6,39 @@
 
 import SwiftUI
 import FlashCore
-import FlashDesign
 
 /// 「数据与安全」分组：导出备份为主操作（.borderedProminent 强调），
 /// 系统分享 / 局域网收发 / 标准与恢复导入为普通行按钮（均带 hover 反馈）。
 /// 各动作通过闭包抛回 SettingsView（导出/导入状态机、LAN 控制器均由其持有）。
-struct DataSafetySection: View {
+public struct DataSafetySection: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// 导入/导出进行中（期间禁用整组并显示进度行）
-    let isBusy: Bool
+    public let isBusy: Bool
     /// 分组入场标记（stagger 淡入上移），由 SettingsView 驱动
-    let appeared: Bool
-    let onShare: () -> Void
-    let onLanSend: () -> Void
-    let onLanReceive: () -> Void
-    let onExport: () -> Void
-    let onImport: () -> Void
-    let onRecoveryImport: () -> Void
+    public let appeared: Bool
+    public let onShare: () -> Void
+    public let onLanSend: () -> Void
+    public let onLanReceive: () -> Void
+    public let onExport: () -> Void
+    public let onImport: () -> Void
+    public let onRecoveryImport: () -> Void
 
-    var body: some View {
+    public init(isBusy: Bool, appeared: Bool, onShare: @escaping () -> Void,
+                onLanSend: @escaping () -> Void, onLanReceive: @escaping () -> Void,
+                onExport: @escaping () -> Void, onImport: @escaping () -> Void,
+                onRecoveryImport: @escaping () -> Void) {
+        self.isBusy = isBusy
+        self.appeared = appeared
+        self.onShare = onShare
+        self.onLanSend = onLanSend
+        self.onLanReceive = onLanReceive
+        self.onExport = onExport
+        self.onImport = onImport
+        self.onRecoveryImport = onRecoveryImport
+    }
+
+    public var body: some View {
         Section("数据与安全") {
             // 主操作：导出备份（ prominent 胶囊，图标/文字随按钮样式反白）
             Button(action: onExport) {

@@ -8,11 +8,10 @@ import SwiftUI
 import SwiftData
 import Charts
 import FlashCore
-import FlashDesign
 
 /// 统计页：洞察结论（ReviewInsights 窗口对比）+ 活跃度/KPI + 情绪趋势/子情绪分布
 /// （对齐 Android StatsViewModel + EmotionStatsSection）
-struct StatsView: View {
+public struct StatsView: View {
     @Query(sort: \LogEntity.createdAt, order: .reverse) private var logEntities: [LogEntity]
     @Query(sort: \EmotionEntity.createdAt, order: .reverse) private var emotionEntities: [EmotionEntity]
     @Environment(\.flashRepository) private var repository
@@ -28,7 +27,9 @@ struct StatsView: View {
     @State private var aggregateCache = ViewComputeCache<StatsKey, StatsValues>()
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    var body: some View {
+    public init() {}
+
+    public var body: some View {
         VStack(spacing: 0) {
             HStack {
                 Text("回顾").flashPageTitle()
@@ -87,11 +88,25 @@ struct StatsView: View {
                 activityChart(stats.activity)
                 Text("累计概览 · 全部时间").font(Typography.cardTitle)
                 // KPI：图标走四模块色（日志紫 / 灵感黄 / 情绪粉 / 日历绿）
-                HStack(spacing: Spacing.sm) {
-                    kpiCard("累计日志", stats.totalLogs, "note.text", tint: BrandColors.logPurple, index: 0)
-                    kpiCard("累计灵感", stats.totalIdeas, "lightbulb", tint: BrandColors.ideaYellow, index: 1)
-                    kpiCard("累计情绪", stats.totalEmotions, "face.smiling", tint: BrandColors.emotionPink, index: 2)
-                    kpiCard("活跃天数", stats.activeDays, "calendar", tint: BrandColors.calendarGreen, index: 3)
+                // 一行四列放不下（iPhone 竖屏）时退为 2×2，数字与标签不被挤压截断
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: Spacing.sm) {
+                        kpiCard("累计日志", stats.totalLogs, "note.text", tint: BrandColors.logPurple, index: 0)
+                        kpiCard("累计灵感", stats.totalIdeas, "lightbulb", tint: BrandColors.ideaYellow, index: 1)
+                        kpiCard("累计情绪", stats.totalEmotions, "face.smiling", tint: BrandColors.emotionPink, index: 2)
+                        kpiCard("活跃天数", stats.activeDays, "calendar", tint: BrandColors.calendarGreen, index: 3)
+                    }
+                    .frame(minWidth: 520) // 四列各约 120pt 才不挤压（几何值）
+                    Grid(horizontalSpacing: Spacing.sm, verticalSpacing: Spacing.sm) {
+                        GridRow {
+                            kpiCard("累计日志", stats.totalLogs, "note.text", tint: BrandColors.logPurple, index: 0)
+                            kpiCard("累计灵感", stats.totalIdeas, "lightbulb", tint: BrandColors.ideaYellow, index: 1)
+                        }
+                        GridRow {
+                            kpiCard("累计情绪", stats.totalEmotions, "face.smiling", tint: BrandColors.emotionPink, index: 2)
+                            kpiCard("活跃天数", stats.activeDays, "calendar", tint: BrandColors.calendarGreen, index: 3)
+                        }
+                    }
                 }
 
                 if stats.hasEmotionData {

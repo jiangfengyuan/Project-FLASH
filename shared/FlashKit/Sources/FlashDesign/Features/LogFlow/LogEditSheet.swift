@@ -6,23 +6,22 @@
 
 import SwiftUI
 import FlashCore
-import FlashDesign
 
 /// 新建/编辑记录 sheet：FormSection 分组——「正文与类型」（内容编辑器 + 日志/灵感分段）、
 /// 「标签、重要度、日期」（标签分段 + 重要度 Stepper + 收藏开关 + 记录日期 DatePicker）。
 /// 编辑既有灵感时左下角提供「转为任务」（onConvertToTask，PRD §18）。
 /// 保存无效时说明原因：正文为空禁用保存；超出契约上限禁用保存并显示计数。
-struct LogEditSheet: View {
+public struct LogEditSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    let log: LogItem
+    public let log: LogItem
     /// 标题（新建场景传「新建记录」/「新建灵感」，默认保持编辑语义）
-    let title: String
-    let onSave: (LogItem) async throws -> Void
+    public let title: String
+    public let onSave: (LogItem) async throws -> Void
     /// Idea→Task 转化入口（PRD §18）：仅编辑既有灵感时由父视图传入；
     /// 新建草稿尚未入库（sourceLogId 会悬空），不显示该入口
-    var onConvertToTask: ((LogItem) -> Void)? = nil
+    public var onConvertToTask: ((LogItem) -> Void)? = nil
 
     @State private var content: String
     @State private var category: Category
@@ -40,7 +39,7 @@ struct LogEditSheet: View {
     @State private var errorMessage: String? = nil
     @FocusState private var contentFocused: Bool
 
-    init(log: LogItem, title: String = "编辑记录",
+    public init(log: LogItem, title: String = "编辑记录",
          onSave: @escaping (LogItem) async throws -> Void,
          onConvertToTask: ((LogItem) -> Void)? = nil) {
         self.log = log
@@ -69,7 +68,7 @@ struct LogEditSheet: View {
         if dirty { showDiscard = true } else { dismiss() }
     }
 
-    var body: some View {
+    public var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.md) {
                 Text(title).font(Typography.cardTitle)
@@ -113,7 +112,7 @@ struct LogEditSheet: View {
                         if contentExceedsLimit {
                             Text("已超出上限（\(content.utf16.count)/\(TextLimits.maxContentUTF16)），请删减后再保存")
                                 .font(Typography.caption)
-                                .foregroundStyle(Color(nsColor: .systemRed))
+                                .foregroundStyle(BrandColors.destructive)
                         }
                     }
                     .padding(Spacing.md)
@@ -136,7 +135,7 @@ struct LogEditSheet: View {
                         }
 
                         Toggle("收藏", isOn: $isFavorite)
-                            .toggleStyle(.checkbox)
+                            .flashCheckboxToggleStyle()
                     }
                     .padding(Spacing.md)
                 }
@@ -180,7 +179,7 @@ struct LogEditSheet: View {
             Button("放弃修改", role: .destructive) { dismiss() }
             Button("继续编辑", role: .cancel) {}
         }
-        .frame(width: 480) // 编辑面板固有宽度（几何值）
+        .flashPanelWidth(480) // 编辑面板固有宽度（几何值，仅 macOS）
         .background(BrandColors.pageBackground)
         .onAppear {
             appeared = true

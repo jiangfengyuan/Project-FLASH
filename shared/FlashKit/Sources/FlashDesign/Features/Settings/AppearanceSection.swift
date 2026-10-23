@@ -6,17 +6,20 @@
 
 import SwiftUI
 import FlashCore
-import FlashDesign
 
 /// 「外观与使用」分组：主题模式分段选择
-struct AppearanceSection: View {
+public struct AppearanceSection: View {
     @EnvironmentObject private var settings: SettingsStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// 分组入场标记（stagger 淡入上移），由 SettingsView 驱动
-    let appeared: Bool
+    public let appeared: Bool
 
-    var body: some View {
+    public init(appeared: Bool) {
+        self.appeared = appeared
+    }
+
+    public var body: some View {
         Section("外观与使用") {
             Picker(selection: themeBinding) {
                 ForEach(ThemeMode.allCases, id: \.self) {

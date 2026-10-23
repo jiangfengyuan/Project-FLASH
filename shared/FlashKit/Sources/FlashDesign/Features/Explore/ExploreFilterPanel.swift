@@ -6,30 +6,19 @@
 
 import SwiftUI
 import FlashCore
-import FlashDesign
-
-/// 记录页筛选条件（标签 / 重要度 / 日期范围；类型由筛选胶囊承担）。
-/// 空值表示不限；isActive 驱动「筛选」按钮高亮与空态「清除筛选」。
-struct ExploreCriteria: Equatable {
-    var tag: ColorTag? = nil
-    var minImportance: Int = 0
-    var startDate: Date? = nil
-    var endDate: Date? = nil
-
-    var isActive: Bool {
-        tag != nil || minImportance > 0 || startDate != nil || endDate != nil
-    }
-
-    mutating func clear() { self = ExploreCriteria() }
-}
 
 /// 记录页筛选面板（popover 承载，关闭后状态保留在 ExploreView 的 @State 中）。
 /// 控件用实色卡片分组（FormSection 语义），可选日期用 Toggle + DatePicker 组合。
-struct ExploreFilterPanel: View {
-    @Binding var criteria: ExploreCriteria
-    let onClear: () -> Void
+public struct ExploreFilterPanel: View {
+    @Binding public var criteria: ExploreCriteria
+    public let onClear: () -> Void
 
-    var body: some View {
+    public init(criteria: Binding<ExploreCriteria>, onClear: @escaping () -> Void) {
+        self._criteria = criteria
+        self.onClear = onClear
+    }
+
+    public var body: some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
             HStack {
                 Text("筛选")
@@ -77,7 +66,7 @@ struct ExploreFilterPanel: View {
             }
         }
         .padding(Spacing.md)
-        .frame(width: 280) // 浮层固有宽度（几何值）
+        .flashPanelWidth(280) // 浮层固有宽度（几何值，仅 macOS）
         // popover 浮层：玻璃背景（macOS 26+ Liquid Glass / 15 回退 regularMaterial + 细边框）
         .flashGlassBackground(in: RoundedRectangle(cornerRadius: Radius.panel, style: .continuous))
     }
@@ -106,7 +95,7 @@ private struct OptionalDateRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
             Toggle(title, isOn: enabled)
-                .toggleStyle(.checkbox)
+                .flashCheckboxToggleStyle()
             if date != nil {
                 DatePicker(title, selection: dateValue, displayedComponents: .date)
                     .labelsHidden()

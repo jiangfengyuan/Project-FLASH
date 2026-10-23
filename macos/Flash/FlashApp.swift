@@ -50,6 +50,7 @@ struct FlashApp: App {
                 }
             }
             .environment(appState)
+            .environment(appState.focusRouter)
             .environment(\.flashRepository, assembly.repository)
             .environmentObject(settings)
             .animatedPreferredColorScheme(settings.themeMode)

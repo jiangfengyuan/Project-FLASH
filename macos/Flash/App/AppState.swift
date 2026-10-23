@@ -59,6 +59,23 @@ struct FocusTarget: Equatable {
     static func task(on date: String?) -> FocusTarget { FocusTarget(module: .calendar, taskDate: date) }
 }
 
+extension FocusTarget {
+    /// macOS 模块化载荷 ↔ 共享路由目标
+    init(_ destination: FocusDestination) {
+        switch destination {
+        case .log(let id): self = .log(id)
+        case .emotion: self = .emotion
+        case .task(let date): self = .task(on: date)
+        }
+    }
+
+    var destination: FocusDestination {
+        if let logID { return .log(logID) }
+        if module == .calendar { return .task(taskDate) }
+        return .emotion
+    }
+}
+
 /// 全局应用状态：侧栏选中 + 菜单命令路由（spec §4）。
 @Observable
 final class AppState {
@@ -74,9 +91,10 @@ final class AppState {
     /// 跨模块定位：token + 载荷模式（同 requestSearch 旧 token 的消费语义），
     /// 目标页 onAppear 兜底 + onChange 消费，handled token 与请求 token 同存于此，
     /// 视图重建后不会归零，保证不回放旧 token。
-    private(set) var focusTarget: FocusTarget? = nil
-    private(set) var focusRequestToken = 0
-    private(set) var handledFocusToken = 0
+    /// 载荷与 token 存于共享 FocusRouter（FlashCore），共享视图（日历等）直接经环境读取；
+    /// 本类保留 FocusTarget API 作 macOS 侧适配。
+    let focusRouter = FocusRouter()
+    var focusRequestToken: Int { focusRouter.requestToken }
     /// 本地数据库回退提示；非 nil 时由 RootView 弹 alert。
     /// 持久化容器创建失败、降级为内存模式时本次运行数据不持久，必须告知用户。
     /// setter 开放：RootView「我知道了」直接置 nil 清除（亦可用 clearDatabaseFallbackMessage()）。
@@ -103,21 +121,23 @@ final class AppState {
         isGlobalSearchPresented = true
     }
 
+    init() {
+        // 路由先切模块再发 token（共享视图经 FocusRouter.request 发起的定位同样切模块）
+        focusRouter.onRequest = { [weak self] destination in
+            self?.selectedModule = FocusTarget(destination).module
+        }
+    }
+
     /// 跨模块定位：先切模块再发 token，目标页消费载荷后清除
     func requestFocus(_ target: FocusTarget) {
-        selectedModule = target.module
-        focusTarget = target
-        focusRequestToken += 1
+        focusRouter.request(target.destination)
     }
 
     /// 目标页消费一次：token 未消费过才返回载荷；无论载荷是否适用都标记已处理，
     /// 避免不适用载荷（如情绪跳转无 logID）滞留后被后续页面误消费
     @discardableResult
     func consumeFocusTarget() -> FocusTarget? {
-        guard focusRequestToken != handledFocusToken else { return nil }
-        handledFocusToken = focusRequestToken
-        defer { focusTarget = nil }
-        return focusTarget
+        focusRouter.consume().map(FocusTarget.init)
     }
 
     func markNewLogHandled() { handledNewLogToken = newLogRequestToken }

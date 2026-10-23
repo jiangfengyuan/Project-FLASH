@@ -7,12 +7,11 @@
 import SwiftUI
 import SwiftData
 import FlashCore
-import FlashDesign
 
 /// Memory 周报页（PRD §22 V1.1 规则聚合版）：周导航 +「You recorded」四计数 +
 ///「This week felt...」情绪概览 +「Highlights」亮点列表 + 品牌收尾句。
 /// 聚合逻辑在 Domain/WeeklyMemory（纯函数），本视图只做查询、缓存与呈现。
-struct MemoryView: View {
+public struct MemoryView: View {
     @Query(sort: \LogEntity.createdAt, order: .reverse) private var logEntities: [LogEntity]
     @Query(sort: \EmotionEntity.createdAt, order: .reverse) private var emotionEntities: [EmotionEntity]
     @Query(sort: \TaskEntity.updatedAt, order: .reverse) private var taskEntities: [TaskEntity]
@@ -26,7 +25,9 @@ struct MemoryView: View {
     @State private var aggregateCache = ViewComputeCache<MemoryKey, WeeklyMemory.Report>()
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    var body: some View {
+    public init() {}
+
+    public var body: some View {
         let report = aggregateCache.value(for: MemoryKey(revision: repository?.revision ?? 0,
                                                          weekOffset: weekOffset,
                                                          day: DateFormatting.dayString(baseDate))) {

@@ -225,27 +225,10 @@ struct SettingsView: View {
         .frame(width: 420) // 传输面板固有宽度（几何值）
     }
 
-    private var appVersion: String {
-        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
-        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?"
-        return "Flash Aero v\(version) (\(build))"
-    }
+    private var appVersion: String { BackupImportCoordinator.appVersion }
 
     private func importAnalysisText(_ preview: ImportPreview) -> String {
-        var text = "包含 \(preview.logCount) 条日志、\(preview.emotionCount) 条情绪、\(preview.taskCount) 个任务"
-        let skipped = preview.skippedLogs + preview.skippedEmotions + preview.skippedTasks
-        if skipped > 0 { text += "\n跳过异常数据 \(skipped) 条" }
-        if let difference = preview.difference {
-            text += "\n\n差异分析"
-            text += "\n日志：新增 \(difference.logs.added) · 修改 \(difference.logs.changed)" +
-                " · 相同 \(difference.logs.unchanged) · 仅本机 \(difference.logs.localOnly)"
-            text += "\n情绪：新增 \(difference.emotions.added) · 修改 \(difference.emotions.changed)" +
-                " · 相同 \(difference.emotions.unchanged) · 仅本机 \(difference.emotions.localOnly)"
-            text += "\n任务：新增 \(difference.tasks.added) · 修改 \(difference.tasks.changed)" +
-                " · 相同 \(difference.tasks.unchanged) · 仅本机 \(difference.tasks.localOnly)"
-            text += "\n\n差异合并会新增或更新接收数据，并保留仅本机数据；覆盖会先清空本机数据。"
-        }
-        return text
+        BackupImportCoordinator.analysisText(preview)
     }
 
     /// 入场动画：三分组 fade + 轻微上移（y 6→0，对齐 .appear 过渡），
@@ -272,12 +255,9 @@ struct SettingsView: View {
             do {
                 let snapshot = try currentSnapshot()
                 let version = appVersion
+                let json = try await BackupImportCoordinator.exportJSON(snapshot: snapshot, appVersion: version)
                 let url = try await Task.detached(priority: .userInitiated) {
-                    let json = try BackupService.exportStrictJSON(logs: snapshot.logs,
-                                                        emotions: snapshot.emotions,
-                                                        tasks: snapshot.tasks,
-                                                        appVersion: version)
-                    return try BackupTransfer.createShareFile(json: json)
+                    try BackupTransfer.createShareFile(json: json)
                 }.value
                 guard let view = NSApp.keyWindow?.contentView ?? NSApp.mainWindow?.contentView else {
                     throw TransferPresentationError.noWindow
@@ -327,14 +307,7 @@ struct SettingsView: View {
             defer { isBusy = false }
             do {
                 let snapshot = try currentSnapshot()
-                let preview = try await Task.detached(priority: .userInitiated) {
-                    var preview = try BackupService.parseStrict(json)
-                    preview.difference = BackupDiff.analyze(
-                        localLogs: snapshot.logs, localEmotions: snapshot.emotions,
-                        incomingLogs: preview.logs, incomingEmotions: preview.emotions,
-                        localTasks: snapshot.tasks, incomingTasks: preview.tasks)
-                    return preview
-                }.value
+                let preview = try await BackupImportCoordinator.preview(json: json, against: snapshot)
                 pendingImport = preview
                 pendingSnapshot = snapshot
                 importPreview = preview
@@ -372,11 +345,8 @@ struct SettingsView: View {
                 // repository 写库/读库方法均为 @MainActor，序列化与文件 IO 移出主线程
                 let snapshot = try currentSnapshot()
                 let version = appVersion
+                let json = try await BackupImportCoordinator.exportJSON(snapshot: snapshot, appVersion: version)
                 try await Task.detached(priority: .userInitiated) {
-                    let json = try BackupService.exportStrictJSON(logs: snapshot.logs,
-                                                        emotions: snapshot.emotions,
-                                                        tasks: snapshot.tasks,
-                                                        appVersion: version)
                     try BackupTransfer.writeExportFile(json: json, to: url)
                 }.value
                 showToast("✓ 备份已导出")
@@ -401,20 +371,9 @@ struct SettingsView: View {
             defer { isBusy = false }
             do {
                 let snapshot = try currentSnapshot()
-                let preview = try await Task.detached(priority: .userInitiated) {
-                    // 全量读入前先查文件大小，超 50MB 直接拒绝
-                    let values = try url.resourceValues(forKeys: [.fileSizeKey])
-                    if let size = values.fileSize, size > BackupService.maxFileBytes {
-                        throw BackupError.fileTooLarge
-                    }
-                    let json = try BackupService.readJSON(from: url)
-                    var preview = try recovery ? BackupService.parseRecovery(json) : BackupService.parseStrict(json)
-                    preview.difference = BackupDiff.analyze(
-                        localLogs: snapshot.logs, localEmotions: snapshot.emotions,
-                        incomingLogs: preview.logs, incomingEmotions: preview.emotions,
-                        localTasks: snapshot.tasks, incomingTasks: preview.tasks)
-                    return preview
-                }.value
+                // 全量读入前先查文件大小，超 50MB 直接拒绝（BackupImportCoordinator 内）
+                let preview = try await BackupImportCoordinator.preview(fileAt: url, recovery: recovery,
+                                                                        against: snapshot)
                 pendingImport = preview
                 pendingSnapshot = snapshot
                 importPreview = preview
@@ -434,45 +393,21 @@ struct SettingsView: View {
             defer { isBusy = false }
             do {
                 guard let repository else { throw SettingsDataError.repositoryUnavailable }
-                if overwrite {
-                    // TOCTOU 重校验（对齐 HarmonyOS BackupController.applyBackup）：覆盖会删除
-                    // 本地独有记录，预览后本地数据若已变化，必须按当前数据重算差异并回到
-                    // 预览让用户再次确认，不得静默删除预览后新增的记录
-                    let current = try currentSnapshot()
-                    guard pendingSnapshot == current else {
-                        pendingSnapshot = current
-                        pendingImport?.difference = BackupDiff.analyze(
-                            localLogs: current.logs, localEmotions: current.emotions,
-                            incomingLogs: preview.logs, incomingEmotions: preview.emotions,
-                            localTasks: current.tasks, incomingTasks: preview.tasks)
-                        importPreview = pendingImport
-                        showToast("本地数据在预览后有变化，差异已重新计算，请确认后再覆盖")
-                        return
-                    }
-                    try repository.replaceAll(logs: preview.logs, emotions: preview.emotions,
-                                              tasks: preview.tasks)
-                } else {
-                    try repository.mergeAll(logs: preview.logs, emotions: preview.emotions,
-                                            tasks: preview.tasks)
-                }
-                do {
-                    try await TaskReminderScheduler.shared.rebuild(try currentSnapshot().tasks)
-                } catch {
-                    message = "数据已导入，但系统提醒恢复失败，请稍后重试"
-                    pendingImport = nil
-                    pendingSnapshot = nil
-                    importPreview = nil
+                // 覆盖前 TOCTOU 重校验在 BackupImportCoordinator.apply 内（对齐 HarmonyOS applyBackup）
+                switch try await BackupImportCoordinator.apply(preview, overwrite: overwrite,
+                                                               previewSnapshot: pendingSnapshot,
+                                                               repository: repository) {
+                case .changedSincePreview(let refreshed, let current):
+                    pendingSnapshot = current
+                    pendingImport = refreshed
+                    importPreview = refreshed
+                    showToast("本地数据在预览后有变化，差异已重新计算，请确认后再覆盖")
                     return
-                }
-                let skipped = preview.skippedLogs + preview.skippedEmotions + preview.skippedTasks
-                if skipped > 0 {
+                case .importedRemindersFailed:
+                    message = "数据已导入，但系统提醒恢复失败，请稍后重试"
+                case .imported(let text, let hasSkipped):
                     // 有跳过条目时保留 alert，把异常明细告知用户
-                    message = "已导入 \(preview.logCount) 条日志、\(preview.emotionCount) 条情绪、" +
-                        "\(preview.taskCount) 个任务" +
-                        "（跳过异常数据 \(skipped) 条）"
-                } else {
-                    showToast("✓ 已导入 \(preview.logCount) 条日志、\(preview.emotionCount) 条情绪、" +
-                              "\(preview.taskCount) 个任务")
+                    if hasSkipped { message = text } else { showToast("✓ " + text) }
                 }
             } catch {
                 print("导入写库失败: \(error)")

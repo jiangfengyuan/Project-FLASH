@@ -7,12 +7,11 @@
 import SwiftUI
 import SwiftData
 import FlashCore
-import FlashDesign
 
 /// 情绪页：七级情绪记录（对齐 Android EmotionViewModel）。
 /// 主视觉为大 emoji：随等级 .pop 切换，名称色彩沿七级调色板连续插值（§33 Motion）。
 /// 区块结构：情绪选择卡片 → 本周趋势 → 近期记录，入场按 50ms 级联错开。
-struct EmotionView: View {
+public struct EmotionView: View {
     @Environment(\.flashRepository) private var repository
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -32,7 +31,18 @@ struct EmotionView: View {
         EmotionLevel.allCases[Int(sliderValue) - 1]
     }
 
-    var body: some View {
+    public init() {}
+
+    /// 强度圆点：触屏命中框 44pt（Metrics.minTouchTarget），macOS 保持原 14pt 圆点 + 12pt 间距
+    #if os(iOS)
+    private let intensityHitSize: CGFloat = Metrics.minTouchTarget
+    private let intensityDotSpacing: CGFloat = 0
+    #else
+    private let intensityHitSize: CGFloat = 14
+    private let intensityDotSpacing: CGFloat = Spacing.sm
+    #endif
+
+    public var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.lg) {
                 if heroAppeared {
@@ -104,7 +114,7 @@ struct EmotionView: View {
                     Text("强度（可选）")
                         .font(Typography.caption)
                         .foregroundStyle(.secondary)
-                    HStack(spacing: Spacing.sm) {
+                    HStack(spacing: intensityDotSpacing) {
                         ForEach(1...5, id: \.self) { value in
                             Button {
                                 intensity = (intensity == value) ? nil : value
@@ -114,6 +124,7 @@ struct EmotionView: View {
                                           ? BrandColors.emotionPink
                                           : Color.primary.opacity(0.15))
                                     .frame(width: 14, height: 14) // 强度圆点尺寸（几何值）
+                                    .frame(width: intensityHitSize, height: intensityHitSize)
                                     .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)

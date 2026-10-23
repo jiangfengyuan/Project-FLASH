@@ -1,23 +1,12 @@
 import SwiftUI
 import FlashCore
-import FlashDesign
 
-/// Idea→Task 转化草稿（PRD §18）：灵感内容预填为任务标题，sourceLogId 回写任务来源关联；
-/// 原灵感保留不动。Identifiable 供 .sheet(item:) 承载。
-struct IdeaTaskDraft: Identifiable, Equatable {
-    /// 来源灵感 id（写入 TaskItem.sourceLogId）
-    let sourceLogId: String
-    /// 预填标题（灵感内容）
-    let title: String
-    var id: String { sourceLogId }
-}
-
-struct TaskEditorView: View {
-    let selectedDate: Date
-    let task: TaskItem?
+public struct TaskEditorView: View {
+    public let selectedDate: Date
+    public let task: TaskItem?
     /// 任务来源：编辑既有任务取 task.sourceLogId；Idea→Task 新建由 ideaDraft 带入
     private let sourceLogId: String?
-    let onSave: (TaskItem) -> Void
+    public let onSave: (TaskItem) -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var title: String
@@ -31,7 +20,7 @@ struct TaskEditorView: View {
         task?.timeZone.flatMap(TimeZone.init(identifier:)) ?? .current
     }
 
-    init(selectedDate: Date, task: TaskItem?, ideaDraft: IdeaTaskDraft? = nil,
+    public init(selectedDate: Date, task: TaskItem?, ideaDraft: IdeaTaskDraft? = nil,
          onSave: @escaping (TaskItem) -> Void) {
         self.selectedDate = selectedDate
         self.task = task
@@ -50,7 +39,7 @@ struct TaskEditorView: View {
     private var titleExceedsLimit: Bool { !TextLimits.fits(title, limit: TextLimits.maxTaskTitleUTF16) }
     private var notesExceedsLimit: Bool { !TextLimits.fits(notes) }
 
-    var body: some View {
+    public var body: some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
             Text(task == nil ? "新建任务" : "编辑任务").font(Typography.sectionTitle)
             // Idea→Task 来源关联（只读）：新建由 ideaDraft 带入，编辑既有任务时同样可见
@@ -64,13 +53,13 @@ struct TaskEditorView: View {
             if titleExceedsLimit {
                 Text("标题超出上限（\(title.utf16.count)/\(TextLimits.maxTaskTitleUTF16)）")
                     .font(Typography.caption)
-                    .foregroundStyle(Color(nsColor: .systemRed))
+                    .foregroundStyle(BrandColors.destructive)
             }
             TextField("备注（可选）", text: $notes, axis: .vertical).lineLimit(2...5)
             if notesExceedsLimit {
                 Text("备注超出上限（\(notes.utf16.count)/\(TextLimits.maxContentUTF16)）")
                     .font(Typography.caption)
-                    .foregroundStyle(Color(nsColor: .systemRed))
+                    .foregroundStyle(BrandColors.destructive)
             }
             Toggle("全天任务", isOn: $allDay)
             Toggle("收藏", isOn: $isFavorite)
@@ -93,7 +82,7 @@ struct TaskEditorView: View {
             }
         }
         .padding(Spacing.lg)
-        .frame(width: 430) // 编辑器固有宽度（几何值）
+        .flashPanelWidth(430) // 编辑器固有宽度（几何值，仅 macOS）
         .environment(\.timeZone, editorTimeZone)
     }
 

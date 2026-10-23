@@ -31,6 +31,20 @@ public enum BrandColors {
     public static let systemControlBackground = Color(uiColor: .secondarySystemBackground)
     #endif
 
+    /// 平台语义色：破坏性/错误提示红。macOS systemRed ↔ iOS systemRed
+    #if canImport(AppKit)
+    public static let destructive = Color(nsColor: .systemRed)
+    #else
+    public static let destructive = Color(uiColor: .systemRed)
+    #endif
+
+    /// 平台语义色：选中内容底（日历选中日）。macOS selectedContentBackgroundColor ↔ iOS tintColor 同系
+    #if canImport(AppKit)
+    public static let selectedContentBackground = Color(nsColor: .selectedContentBackgroundColor)
+    #else
+    public static let selectedContentBackground = Color.accentColor
+    #endif
+
     /// 平台语义色：分隔线。macOS separatorColor ↔ iOS separator
     #if canImport(AppKit)
     public static let systemSeparator = Color(nsColor: .separatorColor)

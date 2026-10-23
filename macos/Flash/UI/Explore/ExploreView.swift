@@ -9,19 +9,6 @@ import SwiftData
 import FlashCore
 import FlashDesign
 
-enum ExploreFilter: String, CaseIterable {
-    case all, log, idea, unsorted
-
-    var displayName: String {
-        switch self {
-        case .all: "全部"
-        case .log: "日志"
-        case .idea: "灵感"
-        case .unsorted: "待整理"
-        }
-    }
-}
-
 /// 记录页：标题「记录」+ 页内搜索 + 筛选胶囊（全部／日志／灵感／待整理／已收藏）+
 /// 筛选面板（标签/重要度/日期范围，popover 承载、关闭后状态保留）+ 记录卡列表。
 /// 「待整理」= 未改过分拣的日常日志（category=log 且 colorTag=daily），支持批量修改分类或标签。

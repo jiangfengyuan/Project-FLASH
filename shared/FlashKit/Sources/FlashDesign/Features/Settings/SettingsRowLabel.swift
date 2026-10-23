@@ -6,20 +6,25 @@
 
 import SwiftUI
 import FlashCore
-import FlashDesign
 
 /// 分组清单行：彩色语义图标 + 标题。图标色仅作分组语义点缀（蓝=外观、绿=安全、红=危险），
 /// 信息由标题文字承载，色彩不是唯一通道。
 /// 图标列宽固定基准 20、随系统字体档位缩放，保证各行标题左对齐。
-struct SettingsRowLabel: View {
-    let title: String
-    let systemImage: String
-    let color: Color
+public struct SettingsRowLabel: View {
+    public let title: String
+    public let systemImage: String
+    public let color: Color
 
     /// 图标列宽（图标框场景：固定基准 + @ScaledMetric）
     @ScaledMetric(relativeTo: .body) private var iconColumnWidth = 20
 
-    var body: some View {
+    public init(title: String, systemImage: String, color: Color) {
+        self.title = title
+        self.systemImage = systemImage
+        self.color = color
+    }
+
+    public var body: some View {
         Label {
             Text(title)
         } icon: {

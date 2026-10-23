@@ -7,10 +7,9 @@
 import SwiftUI
 import SwiftData
 import FlashCore
-import FlashDesign
 
 /// 日历页：月视图网格 + 选中日详情（对齐 Android CalendarViewModel）
-struct CalendarView: View {
+public struct CalendarView: View {
     @Query(sort: \LogEntity.createdAt, order: .reverse) private var logEntities: [LogEntity]
     @Query(sort: \EmotionEntity.createdAt, order: .reverse) private var emotionEntities: [EmotionEntity]
     @Query(sort: \TaskEntity.updatedAt, order: .reverse) private var taskEntities: [TaskEntity]
@@ -24,7 +23,7 @@ struct CalendarView: View {
     @State private var monthDirection = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.flashRepository) private var repository
-    @Environment(AppState.self) private var appState
+    @Environment(FocusRouter.self) private var focusRouter
 
     /// 聚合结果缓存：仅在数据写代际变化时重算；月份切换/选中日/hover 不再触发全表聚合。
     /// 键不含 displayedMonth：aggregateDay 对全部日期产出字典，与展示月份无关。
@@ -32,12 +31,14 @@ struct CalendarView: View {
     @State private var aggregateCache = ViewComputeCache<Int, [String: DayAggregate]>()
 
     /// 共享公历实例，避免每次渲染格子都新建 Calendar
-    nonisolated(unsafe) private static let gregorian = Calendar(identifier: .gregorian)
+    private static let gregorian = Calendar(identifier: .gregorian)
 
     private var weeks: [[Date]] { CalendarGrid.weeks(containing: displayedMonth) }
     private var selectedKey: String { DateFormatting.dayString(selectedDate) }
 
-    var body: some View {
+    public init() {}
+
+    public var body: some View {
         // 数据变化才聚合一次，42 个格子与选中行复用同一字典
         let aggregates = aggregateCache.value(for: repository?.revision ?? 0) {
             Perf.measure("CalendarAggregate") {
@@ -139,7 +140,7 @@ struct CalendarView: View {
         // 跨模块定位（全局搜索跳到任务）：消费一次 focusTarget，选中并翻到任务所在日期。
         // onAppear 兜底：跨模块切换使本视图首次创建时 token 已递增，onChange 不会回放。
         .onAppear { flushFocusTarget() }
-        .onChange(of: appState.focusRequestToken) { flushFocusTarget() }
+        .onChange(of: focusRouter.requestToken) { flushFocusTarget() }
         .alert("提示", isPresented: Binding(get: { message != nil }, set: { if !$0 { message = nil } })) {
             Button("好") { message = nil }
         } message: {
@@ -170,8 +171,7 @@ struct CalendarView: View {
 
     /// 消费跨模块定位：任务搜索结果 → 选中其日历日并跟随翻月；无日期载荷时仅切页不动作
     private func flushFocusTarget() {
-        guard let target = appState.consumeFocusTarget(),
-              let day = target.taskDate,
+        guard case .task(let day?)? = focusRouter.consume(),
               let date = DateFormatting.parseDay(day) else { return }
         let order = Self.gregorian.compare(date, to: displayedMonth, toGranularity: .month)
         monthDirection = order == .orderedAscending ? -1 : (order == .orderedDescending ? 1 : 0)
@@ -230,7 +230,7 @@ struct CalendarView: View {
                 // Idea→Task 来源关联：跳回记录页并打开该灵感的编辑弹层
                 if let sourceLogId = task.sourceLogId {
                     Button {
-                        appState.requestFocus(.log(sourceLogId))
+                        focusRouter.request(.log(sourceLogId))
                     } label: {
                         Label("查看灵感", systemImage: "lightbulb")
                             .font(Typography.caption)
@@ -346,7 +346,7 @@ private struct DayCell: View {
             .frame(maxWidth: .infinity, minHeight: Metrics.minTouchTarget)
             .background {
                 RoundedRectangle(cornerRadius: Radius.field, style: .continuous)
-                    .fill(isSelected ? Color(nsColor: .selectedContentBackgroundColor)
+                    .fill(isSelected ? BrandColors.selectedContentBackground
                                     : Color.primary.opacity(hovering ? 0.05 : 0))
             }
             .overlay {

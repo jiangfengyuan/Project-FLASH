@@ -6,18 +6,22 @@
 
 import SwiftUI
 import FlashCore
-import FlashDesign
 
 /// 「关于 Flash」分组：版本号 + 无云端账号说明
-struct AboutSection: View {
+public struct AboutSection: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// 形如 "Flash Aero v1.0 (1)" 的版本串，由 SettingsView 从 Bundle 读取
-    let version: String
+    public let version: String
     /// 分组入场标记（stagger 淡入上移），由 SettingsView 驱动
-    let appeared: Bool
+    public let appeared: Bool
 
-    var body: some View {
+    public init(version: String, appeared: Bool) {
+        self.version = version
+        self.appeared = appeared
+    }
+
+    public var body: some View {
         Section("关于 Flash") {
             LabeledContent {
                 Text(version)

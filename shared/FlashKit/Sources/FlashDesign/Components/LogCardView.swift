@@ -9,12 +9,26 @@ import FlashCore
 
 /// 日志卡片（Home/LogFlow/Explore/Calendar 复用）。内容层：纯色卡片，无玻璃（spec §10.3）。
 /// 传入 onEdit/onDelete 后，hover 浮现操作按钮（LogFlow 场景）；不传则行为与之前一致。
+/// 触屏（iOS）无 hover：传 `actionsVisibility: .hidden`，操作改由调用方的轻扫/长按菜单承载。
 public struct LogCardView: View {
+    /// 卡内操作按钮的显示策略
+    public enum ActionsVisibility: Sendable {
+        /// 指针悬停时浮现（macOS 默认）
+        case onHover
+        /// 常显
+        case always
+        /// 不渲染（触屏改用轻扫操作与上下文菜单）
+        case hidden
+    }
+
     public let log: LogItem
     public var onEdit: (() -> Void)? = nil
     public var onDelete: (() -> Void)? = nil
     /// 收藏切换（nil 时不渲染星标按钮；已收藏星标常显不受此影响）
     public var onToggleFavorite: (() -> Void)? = nil
+    public var actionsVisibility: ActionsVisibility = .onHover
+    /// 灵感提醒：未查看过的灵感在徽章旁标「未读」（默认关，macOS 不变）
+    public var isUnread: Bool = false
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var hovering = false
@@ -24,8 +38,16 @@ public struct LogCardView: View {
     @ScaledMetric(relativeTo: .body) private var actionButtonSize = 28
 
     private var isFavorite: Bool { log.isFavorite == true }
-    private var hasActions: Bool { onEdit != nil || onDelete != nil || onToggleFavorite != nil }
-    private var showActions: Bool { hovering && hasActions }
+    private var hasActions: Bool {
+        actionsVisibility != .hidden && (onEdit != nil || onDelete != nil || onToggleFavorite != nil)
+    }
+    private var showActions: Bool {
+        switch actionsVisibility {
+        case .onHover: hovering && hasActions
+        case .always: hasActions
+        case .hidden: false
+        }
+    }
 
     /// 时间戳：日期 + HH:mm，灰色小字（createdAt 解析失败时只显日期）
     private var timestamp: String {
@@ -34,17 +56,27 @@ public struct LogCardView: View {
     }
 
     public init(log: LogItem, onEdit: (() -> Void)? = nil, onDelete: (() -> Void)? = nil,
-                onToggleFavorite: (() -> Void)? = nil) {
+                onToggleFavorite: (() -> Void)? = nil,
+                actionsVisibility: ActionsVisibility = .onHover,
+                isUnread: Bool = false) {
         self.log = log
         self.onEdit = onEdit
         self.onDelete = onDelete
         self.onToggleFavorite = onToggleFavorite
+        self.actionsVisibility = actionsVisibility
+        self.isUnread = isUnread
     }
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 10) { // 10：徽章行与正文的紧凑节奏（无对应令牌）
             HStack(spacing: Spacing.xs) {
                 tagBadge
+                if isUnread {
+                    Text("未读")
+                        .font(Typography.caption).bold()
+                        .foregroundStyle(BrandColors.ideaYellowText)
+                        .accessibilityLabel("未读灵感")
+                }
                 if log.importance > 0 {
                     Text(String(repeating: "!", count: log.importance))
                         .font(Typography.caption).bold()

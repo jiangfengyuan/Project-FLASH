@@ -7,10 +7,9 @@
 import SwiftUI
 import SwiftData
 import FlashCore
-import FlashDesign
 
 /// 记录流：搜索 + 标签/日期/排序筛选 + 编辑删除（对齐 Android LogFlowViewModel）
-struct LogFlowView: View {
+public struct LogFlowView: View {
     @Environment(\.flashRepository) private var repository
     @Query(sort: \LogEntity.createdAt, order: .reverse) private var logEntities: [LogEntity]
 
@@ -30,7 +29,9 @@ struct LogFlowView: View {
         let filter: LogFilter
     }
 
-    var body: some View {
+    public init() {}
+
+    public var body: some View {
         // 过滤条件或数据变化时才过滤一次，空态与列表复用同一结果
         let filtered = filteredCache.value(for: FilteredKey(revision: repository?.revision ?? 0,
                                                             filter: filter)) {

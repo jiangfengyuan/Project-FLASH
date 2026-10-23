@@ -6,11 +6,12 @@
 
 import SwiftUI
 import FlashCore
-import FlashDesign
 
 /// 本地存储说明横幅（Form 顶部无标题分组）
-struct StorageBannerSection: View {
-    var body: some View {
+public struct StorageBannerSection: View {
+    public init() {}
+
+    public var body: some View {
         Section {
             Label {
                 VStack(alignment: .leading, spacing: Spacing.xxs) {
