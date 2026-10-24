@@ -693,7 +693,9 @@ public enum BackupService: Sendable {
 
     private static func normalizeISODate(_ value: String) -> String? {
         let range = NSRange(value.startIndex..., in: value)
-        guard let match = instantRegex.firstMatch(in: value, range: range), match.range == range else { return nil }
+        // Only the range is needed: avoid materializing a checking-result
+        // object for every timestamp in a large import/export operation.
+        guard instantRegex.rangeOfFirstMatch(in: value, range: range) == range else { return nil }
         let chars = Array(value)
         let day = String(chars[0..<10])
         guard isDay(day), let h = Int(String(chars[11..<13])), h <= 23,
