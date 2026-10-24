@@ -120,3 +120,15 @@ Logs: `m9-disable-parent-swift.log`, `m9-disable-parent-harmony.log`, `m9-flashk
 ### M9 native follow-up
 
 The retained pre-disable APK failed the new Android application-action regression (1test/1failure). With the same instrumentation APK, the candidate passed all10 native tests on the dedicated API36/Android16 emulator. iOS passed14 app tests on the task-owned iPhone18 Pro/iOS27.0 simulator; macOS remains13 passed. These are simulator/emulator results. The native Android settings UI displayed the disabled explanation and file-export guidance without a nearby-device prompt. Its screenshot exposed stale trusted-LAN wording in the settings summary/footer; the follow-up corrects those strings on Android/Harmony and the shared Apple footer. The archived Swift fixture's extra EOF blank line is removed without algorithm changes.
+
+## M10 — approved Android schema2 / additive Room4→5
+
+Models/entities/mappers now preserve nullable favorites, emotion intensity and soft task source links. Readers accept section1/2 independently and keep unknown versions/fields/type/range/UUID rejection; section1 cannot smuggle schema2 fields. Writers emit the existing schema2. The five nullable columns are added without replacing tables, indexes, read-state, store location or credentials; production registers the existing1→2→3→4 chain plus4→5. Old exported Room schemas3/4 remain alongside generated5. No destructive downgrade.
+
+Before: new compatibility tests ran against the unchanged old codec (3tests,2failures); an actual Apple exporter artifact was rejected. After: Debug/Release JVM **91 each passed**, app/test APK builds passed. The old writer test's schema1 expectation was updated to the owner-approved schema2 output; other contract assertions remain.
+
+Native API36/Android16: **12pass,1intentional manual-probe assumption skip** in the13-test suite. Populated4→5 retains content/read timestamps and NULL defaults; new true/false/intensity/dangling-link values survive save/close/reopen/re-export. Injecting failure after all additive DDL rolls back the schema columns, version4 and original records/read-state. Existing1/2→current migration chains and historical3→4 gate pass. Physical power-loss behavior is not verified.
+
+An explicit write invocation consumed the actual2,639-byte Apple production export into a separate fictional Room store. After `am force-stop`, a second read invocation verified every model field plus read-state, then exported schema2 through the production Android writer. Both phases passed1test each. Output2,564bytes, SHA256 `4fe48730cbbc3a14f15c2aa584b70a34442adc95b2de31173b6347e375b5951e`. This verifies a real emulator process boundary, not a physical-device or file-picker UI import.
+
+Logs: `m10-schema2-parent-android.log`/XML, `m10-android-gates.log`, `m10-android-instrumentation.log`, `m10-android-process-write.log`, `m10-android-process-read.log`. The initial unchanged Apple artifact and provenance are checked into androidTest assets; they are fictional production-exporter output, not real user data.

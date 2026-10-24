@@ -147,7 +147,7 @@ class BackupTest {
         val exported = root.getJSONObject("data").getJSONArray("tasks").getJSONObject(0)
 
         assertEquals(Backup.BACKUP_VERSION, root.getString("version"))
-        assertEquals(1, root.getJSONObject("schemas").getInt("tasks"))
+        assertEquals(2, root.getJSONObject("schemas").getInt("tasks"))
         assertEquals("2026-09-01T01:30:00.000Z", exported.getJSONObject("due").getString("at"))
     }
 

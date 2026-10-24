@@ -74,6 +74,7 @@ data class LogItem(
     val importance: Int,
     val createdAt: String,
     val recordDate: String,
+    val isFavorite: Boolean? = null,
 )
 
 data class EmotionRecord(
@@ -84,6 +85,8 @@ data class EmotionRecord(
     val note: String?,
     val recordDate: String,
     val createdAt: String,
+    val intensity: Int? = null,
+    val isFavorite: Boolean? = null,
 )
 
 enum class TaskDueKind(val storageKey: String) {
@@ -109,6 +112,8 @@ data class TaskItem(
     val completedAt: String?,
     val createdAt: String,
     val updatedAt: String,
+    val sourceLogId: String? = null,
+    val isFavorite: Boolean? = null,
 ) {
     val calendarDate: String
         get() = when (dueKind) {
