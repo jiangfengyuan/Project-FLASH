@@ -820,4 +820,3 @@ public final class LocalBackupReceiver: @unchecked Sendable {
         completion(result)
     }
 }
-

@@ -72,7 +72,7 @@ public struct DataSafetySection: View {
                 SettingsRowLabel(title: "恢复损坏或旧版备份…", systemImage: "bandage", color: BrandColors.accessibleGreen)
             }
             .hoverFeedback(reduceMotion: reduceMotion)
-            Text("导出与传输均为明文 JSON，仅在可信设备与网络中使用。")
+            Text("导出的 JSON 文件未加密，仅保存或分享给可信设备或联系人。旧版局域网传输暂时停用。")
                 .font(Typography.caption)
                 .foregroundStyle(.secondary)
             if isBusy {

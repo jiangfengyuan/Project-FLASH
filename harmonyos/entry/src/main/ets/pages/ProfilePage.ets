@@ -30,7 +30,7 @@ export struct ProfilePage {
         FlashCard({ theme: this.theme, contentPadding: 20, space: 8 }) {
           SymbolGlyph($r('sys.symbol.doc_text')).fontSize(24).fontColor([brandText(this.theme)])
           Text('数据默认保存在此设备').fontSize(TYPE_GROUP).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)
-          Text('可导出备份或在可信局域网内传输').fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
+          Text('可导出备份或通过系统分享传输').fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
         }
 
         if (this.isDual()) {

@@ -174,7 +174,7 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
                     Column {
                         Text("数据默认保存在此设备", style = MaterialTheme.typography.titleSmall)
                         Text(
-                            "可导出备份或在可信局域网内传输",
+                            "可导出备份或通过系统分享传输",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -223,7 +223,7 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
             SettingsGroup(
                 title = "数据与安全",
                 note = "备份为明文 JSON，包含日志、情绪和任务内容；请只保存或分享至可信位置",
-                footnote = "局域网传输内容为明文，请在可信的 Wi-Fi 网络下使用",
+                footnote = "旧版局域网传输暂时停用，请使用文件备份或系统分享",
             ) {
                 SettingsRow(
                     icon = Icons.Outlined.FileUpload,
