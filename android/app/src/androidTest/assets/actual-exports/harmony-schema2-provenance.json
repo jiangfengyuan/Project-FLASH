@@ -1,0 +1,9 @@
+{
+  "kind": "Actual Harmony production exporter executed on Node via repository loader, not installed-app export or native RDB",
+  "sourceCommit": "6914f04",
+  "input": "actual-exports/apple-schema2.json",
+  "outputSHA256": "cab6922ea6a3ea92f3d5642748cd0bcf4e4bf47076785e63123006947f6a893b",
+  "bytes": 2352,
+  "synthetic": true,
+  "metadataCompared": true
+}

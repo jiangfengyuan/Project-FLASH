@@ -1,0 +1,74 @@
+{
+  "kind": "backup compatibility diagnostic",
+  "native": false,
+  "commit": "e9a0aa6a2a147b8ebd9be81d1c298c5b4a2eab25",
+  "codecSHA256": "8ca261bd491cb9b9ca729cffd79e4228cba06ebd52b82cfba80975004a9f3cb4",
+  "host": {
+    "node": "v26.2.0",
+    "icu": "78.3",
+    "tz": "2026b"
+  },
+  "timezoneResults": [
+    {
+      "zone": "Europe/Kyiv",
+      "runtimeAccepted": true,
+      "resolvedZone": "Europe/Kiev",
+      "codecAccepted": false
+    },
+    {
+      "zone": "Europe/Kiev",
+      "runtimeAccepted": true,
+      "resolvedZone": "Europe/Kiev",
+      "codecAccepted": true
+    },
+    {
+      "zone": "Asia/Kolkata",
+      "runtimeAccepted": true,
+      "resolvedZone": "Asia/Calcutta",
+      "codecAccepted": false
+    },
+    {
+      "zone": "Asia/Calcutta",
+      "runtimeAccepted": true,
+      "resolvedZone": "Asia/Calcutta",
+      "codecAccepted": true
+    },
+    {
+      "zone": "UTC",
+      "runtimeAccepted": true,
+      "resolvedZone": "UTC",
+      "codecAccepted": true
+    },
+    {
+      "zone": "Invalid/Unknown",
+      "runtimeAccepted": false,
+      "resolvedZone": null,
+      "codecAccepted": false
+    }
+  ],
+  "actualExports": [
+    {
+      "sender": "HarmonyOS production codec on Node",
+      "receiver": "same codec on Node",
+      "schemas": {
+        "logs": 1,
+        "emotions": 1,
+        "tasks": 1
+      },
+      "status": "accepted",
+      "counts": {
+        "logs": 1,
+        "emotions": 1,
+        "tasks": 2
+      },
+      "bytes": 1689,
+      "sha256": "f0dc8f9cde0ea2ae07c14f6697959359aa302039ed6f2aab35b327935f8e29fa"
+    }
+  ],
+  "unverified": [
+    "Apple actual export -> Android",
+    "Apple actual export -> HarmonyOS",
+    "all native device imports and persistence",
+    "platform timezone alias equivalence"
+  ]
+}
