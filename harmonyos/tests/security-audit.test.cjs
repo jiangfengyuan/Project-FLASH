@@ -96,7 +96,7 @@ function transferModule(randomFn) {
     'data/LocalBackupTransfer': null,
     '@kit.CryptoArchitectureKit': cryptoKit(randomFn),
     ...net.kit
-  });
+  }, { legacyLan: true });
   return { ...load('data/LocalBackupTransfer'), client: net.client };
 }
 

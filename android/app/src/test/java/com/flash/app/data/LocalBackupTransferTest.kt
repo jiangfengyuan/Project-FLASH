@@ -35,8 +35,8 @@ class LocalBackupTransferTest {
             answer(output, pin, bytes, nonce, proofPin = "000000")
         }
         val executor = Executors.newSingleThreadExecutor()
-        val receiver = LocalBackupTransfer.Receiver(
-            LocalBackupTransfer.Device("test", "test", "127.0.0.1", server.localPort), { pin },
+        val receiver = LegacyLocalBackupTransfer.Receiver(
+            LegacyLocalBackupTransfer.Device("test", "test", "127.0.0.1", server.localPort), { pin },
             proofBackoffMillis = { inBackoff.countDown(); 10_000 })
         try {
             val operation = executor.submit<String> { receiver.run() }
@@ -61,8 +61,8 @@ class LocalBackupTransferTest {
                     runCatching { while (socket.getInputStream().read() >= 0) Unit }
                 }
             }
-            val receiver = LocalBackupTransfer.Receiver(
-                LocalBackupTransfer.Device("test", "test", "127.0.0.1", server.localPort),
+            val receiver = LegacyLocalBackupTransfer.Receiver(
+                LegacyLocalBackupTransfer.Device("test", "test", "127.0.0.1", server.localPort),
                 { pin }, proofBackoffMillis = { 0 }, transferMillis = 300)
             val failure = assertThrows(Exception::class.java) { receiver.run() }
             assertTrue(failure.message.orEmpty().contains("传输超时"))
@@ -74,7 +74,7 @@ class LocalBackupTransferTest {
     @Test
     fun `receiver rejects noncanonical leading zero payload lengths`() {
         val bytes = "{}".toByteArray(Charsets.UTF_8)
-        val mac = with(LocalBackupTransfer) { computePayloadMac(pin, bytes).toHex() }
+        val mac = with(LegacyLocalBackupTransfer) { computePayloadMac(pin, bytes).toHex() }
         val (server, _) = scriptedSender(pin, bytes) { nonce, _, output ->
             answer(output, pin, bytes, nonce, okLine = "OK 02 $mac")
         }
@@ -86,7 +86,7 @@ class LocalBackupTransferTest {
 
     @Test
     fun `discovery labels rotate without personal or model data`() {
-        val names = List(100) { LocalBackupTransfer.generateServiceName() }
+        val names = List(100) { LegacyLocalBackupTransfer.generateServiceName() }
         assertEquals(names.size, names.toSet().size)
         names.forEach { assertTrue(it.matches(Regex("Flash Aero-[0-9a-f]{8}"))) }
     }
@@ -116,7 +116,7 @@ class LocalBackupTransferTest {
         try {
             val session = executor.submit<Boolean> {
                 runBlocking {
-                    LocalBackupTransfer.serveSession(server, pin,
+                    LegacyLocalBackupTransfer.serveSession(server, pin,
                         if (blockWrite) "x".repeat(8 * 1024 * 1024) else "{}",
                         isStopped = { stopped.get() })
                 }
@@ -151,7 +151,7 @@ class LocalBackupTransferTest {
         try {
             val session = executor.submit<Boolean> {
                 runBlocking {
-                    LocalBackupTransfer.serveSession(server, pin, "{}", { false }, sessionMillis = 300)
+                    LegacyLocalBackupTransfer.serveSession(server, pin, "{}", { false }, sessionMillis = 300)
                 }
             }
             Socket("127.0.0.1", server.localPort).use { client ->
@@ -197,20 +197,20 @@ class LocalBackupTransferTest {
     @Test
     fun `generated PIN is always six digits`() {
         repeat(200) {
-            assertTrue(LocalBackupTransfer.generatePin().matches(Regex("\\d{6}")))
+            assertTrue(LegacyLocalBackupTransfer.generatePin().matches(Regex("\\d{6}")))
         }
     }
 
     @Test
     fun `proof matches spec test vector`() {
         // lan-handshake-v1.1: msg = ASCII("flash-aero-handshake:" + nonceHex 字符串本身)
-        val proof = with(LocalBackupTransfer) { computeProof("123456", "00112233445566778899aabbccddeeff").toHex() }
+        val proof = with(LegacyLocalBackupTransfer) { computeProof("123456", "00112233445566778899aabbccddeeff").toHex() }
         assertEquals("bc2889b1353c82a918d17c6ba785ed3e", proof)
     }
 
     @Test
     fun `payload mac matches spec test vector`() {
-        val mac = with(LocalBackupTransfer) {
+        val mac = with(LegacyLocalBackupTransfer) {
             computePayloadMac("123456", "{}".toByteArray(Charsets.UTF_8)).toHex()
         }
         assertEquals("eb95f4b6e98d2c8f6484947d07b70cd726474ca9dda165359f7b6546406a7e42", mac)
@@ -218,13 +218,13 @@ class LocalBackupTransferTest {
 
     @Test
     fun `service type matches regardless of trailing dot`() {
-        assertTrue(LocalBackupTransfer.isFlashBackupServiceType("_flashbackup._tcp."))
+        assertTrue(LegacyLocalBackupTransfer.isFlashBackupServiceType("_flashbackup._tcp."))
         // 部分 Android 版本回调不带末尾 "."
-        assertTrue(LocalBackupTransfer.isFlashBackupServiceType("_flashbackup._tcp"))
-        assertTrue(LocalBackupTransfer.isFlashBackupServiceType(LocalBackupTransfer.SERVICE_TYPE))
-        assertFalse(LocalBackupTransfer.isFlashBackupServiceType("_other._tcp."))
-        assertFalse(LocalBackupTransfer.isFlashBackupServiceType("_flashbackup._udp."))
-        assertFalse(LocalBackupTransfer.isFlashBackupServiceType(null))
+        assertTrue(LegacyLocalBackupTransfer.isFlashBackupServiceType("_flashbackup._tcp"))
+        assertTrue(LegacyLocalBackupTransfer.isFlashBackupServiceType(LegacyLocalBackupTransfer.SERVICE_TYPE))
+        assertFalse(LegacyLocalBackupTransfer.isFlashBackupServiceType("_other._tcp."))
+        assertFalse(LegacyLocalBackupTransfer.isFlashBackupServiceType("_flashbackup._udp."))
+        assertFalse(LegacyLocalBackupTransfer.isFlashBackupServiceType(null))
     }
 
     // ---------- 发送方（server 侧）：应答 CHALLENGE ----------
@@ -405,7 +405,7 @@ class LocalBackupTransferTest {
     @Test
     fun `receiver rejects malformed OK lines strictly`() {
         val payloadBytes = "{}".toByteArray(Charsets.UTF_8)
-        val mac = with(LocalBackupTransfer) { computePayloadMac(pin, payloadBytes).toHex() }
+        val mac = with(LegacyLocalBackupTransfer) { computePayloadMac(pin, payloadBytes).toHex() }
         // OK 行必须严格为 "OK <纯十进制 size> <64 位小写 hex mac>"
         val malformedLines = listOf(
             "OK 123abc $mac",              // size 含尾随字符
@@ -432,7 +432,7 @@ class LocalBackupTransferTest {
     @Test
     fun `receiver rejects oversized size`() {
         val payloadBytes = "{}".toByteArray(Charsets.UTF_8)
-        val mac = with(LocalBackupTransfer) { computePayloadMac(pin, payloadBytes).toHex() }
+        val mac = with(LegacyLocalBackupTransfer) { computePayloadMac(pin, payloadBytes).toHex() }
         val (server, _) = scriptedSender(pin, payloadBytes) { nonce, _, output ->
             answer(output, pin, payloadBytes, nonce, okLine = "OK 99999999999999999999 $mac")
         }
@@ -477,8 +477,8 @@ class LocalBackupTransferTest {
 
     @Test
     fun `receiver requires a six digit pin`() {
-        val receiver = LocalBackupTransfer.Receiver(
-            LocalBackupTransfer.Device("test", "test", "127.0.0.1", 1),
+        val receiver = LegacyLocalBackupTransfer.Receiver(
+            LegacyLocalBackupTransfer.Device("test", "test", "127.0.0.1", 1),
             { "1234" },
         )
         assertThrows(IllegalArgumentException::class.java) { receiver.run() }
@@ -516,8 +516,8 @@ class LocalBackupTransferTest {
 
     // ---------- 测试辅助 ----------
 
-    private fun receiverFor(server: ServerSocket) = LocalBackupTransfer.Receiver(
-        LocalBackupTransfer.Device("test", "test", "127.0.0.1", server.localPort),
+    private fun receiverFor(server: ServerSocket) = LegacyLocalBackupTransfer.Receiver(
+        LegacyLocalBackupTransfer.Device("test", "test", "127.0.0.1", server.localPort),
         { pin },
         proofBackoffMillis = { 0 },
     )
@@ -528,7 +528,7 @@ class LocalBackupTransferTest {
         json: String = "{}",
     ): Future<Boolean> = submit<Boolean> {
         runBlocking {
-            LocalBackupTransfer.serveSession(server, pin, json, isStopped = { false })
+            LegacyLocalBackupTransfer.serveSession(server, pin, json, isStopped = { false })
         }
     }
 
@@ -544,9 +544,9 @@ class LocalBackupTransferTest {
         }
         val input = socket.getInputStream()
         val proofLine = readLineRaw(input)
-        val expectedProof = with(LocalBackupTransfer) { computeProof(expectedPin, nonceHex).toHex() }
+        val expectedProof = with(LegacyLocalBackupTransfer) { computeProof(expectedPin, nonceHex).toHex() }
         assertEquals("FLASH-AERO/1 $expectedProof", proofLine)
-        val expectedMac = with(LocalBackupTransfer) {
+        val expectedMac = with(LegacyLocalBackupTransfer) {
             computePayloadMac(expectedPin, payload.toByteArray(Charsets.UTF_8)).toHex()
         }
         assertEquals("OK ${payload.toByteArray(Charsets.UTF_8).size} $expectedMac", readLineRaw(input))
@@ -618,8 +618,8 @@ class LocalBackupTransferTest {
         okLine: String? = null,
         proofPin: String? = null,
     ) {
-        val proof = with(LocalBackupTransfer) { computeProof(proofPin ?: pin, nonceHex).toHex() }
-        val mac = with(LocalBackupTransfer) { computePayloadMac(pin, payload).toHex() }
+        val proof = with(LegacyLocalBackupTransfer) { computeProof(proofPin ?: pin, nonceHex).toHex() }
+        val mac = with(LegacyLocalBackupTransfer) { computePayloadMac(pin, payload).toHex() }
         output.write("FLASH-AERO/1 $proof\n".toByteArray(Charsets.US_ASCII))
         output.write("${okLine ?: "OK ${payload.size} $mac"}\n".toByteArray(Charsets.US_ASCII))
         output.write(payload)

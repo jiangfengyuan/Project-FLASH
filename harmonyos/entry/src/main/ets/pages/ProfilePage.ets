@@ -174,12 +174,12 @@ export struct ProfilePage {
   private lanGroup() {
     this.groupLabel('局域网传输')
     FlashCard({ theme: this.theme, space: 2 }) {
-      Text('与 Android、macOS 共用协议：六位 PIN、60 秒有效、最多尝试五次。备份内容未做端到端加密，请仅在可信的家庭或办公局域网使用。')
+      Text('局域网传输因旧协议安全风险暂时停用。请使用导出备份或系统分享，通过可信渠道传输 JSON 文件。')
         .fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).lineHeight(19).width('100%').padding({ top: 12, bottom: 6 })
       if (this.backup.lanMode === TransferPhase.IDLE) {
-        this.actionRow($r('sys.symbol.house'), iconSemantic(this.theme, 'lan'), '发送备份', '生成六位 PIN，等待对方接收',
+        this.actionRow($r('sys.symbol.house'), iconSemantic(this.theme, 'lan'), '发送备份', '暂时停用，点击查看替代方式',
           true, () => requireActions(this.actions).backupController.startLanSend())
-        this.actionRow($r('sys.symbol.house'), iconSemantic(this.theme, 'lan'), '接收备份', '搜索发送设备并输入 PIN',
+        this.actionRow($r('sys.symbol.house'), iconSemantic(this.theme, 'lan'), '接收备份', '暂时停用，点击查看替代方式',
           true, () => requireActions(this.actions).backupController.startLanReceive())
       } else if (this.backup.lanMode === TransferPhase.SENDING) {
         Column({ space: 8 }) {

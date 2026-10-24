@@ -215,16 +215,7 @@ struct SettingsView: View {
     }
 
     private func startLanSend() {
-        do {
-            let snapshot = try currentSnapshot()
-            let json = try BackupService.exportStrictJSON(logs: snapshot.logs,
-                                                emotions: snapshot.emotions,
-                                                tasks: snapshot.tasks,
-                                                appVersion: appVersion)
-            lanTransfer.startSending(json: json)
-        } catch {
-            message = "无法生成局域网备份，请重试"
-        }
+        lanTransfer.startSending()
     }
 
     private func flushLanTransferResults() {

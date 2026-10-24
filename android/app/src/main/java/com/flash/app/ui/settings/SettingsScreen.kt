@@ -6,11 +6,8 @@
 
 package com.flash.app.ui.settings
 
-import android.Manifest
 import android.content.ClipData
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -71,7 +68,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.core.content.ContextCompat
 import com.flash.app.BuildConfig
 import com.flash.app.FlashApplication
 import com.flash.app.data.ThemeMode
@@ -100,7 +96,6 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
     var showClearConfirm by remember { mutableStateOf(false) }
     var selectedLanDevice by remember { mutableStateOf<LocalBackupTransfer.Device?>(null) }
     var lanPin by remember { mutableStateOf("") }
-    var pendingLanAction by remember { mutableStateOf<(() -> Unit)?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     val exportLauncher = rememberLauncherForActivityResult(
@@ -113,26 +108,6 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
     val importLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument(),
     ) { uri -> uri?.let { viewModel.loadImport(it) } }
-
-    val nearbyPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission(),
-    ) { granted ->
-        val action = pendingLanAction
-        pendingLanAction = null
-        if (granted) action?.invoke() else viewModel.reportLanPermissionDenied()
-    }
-
-    val runWithLanPermission: (() -> Unit) -> Unit = { action ->
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-            ContextCompat.checkSelfPermission(context, Manifest.permission.NEARBY_WIFI_DEVICES) ==
-            PackageManager.PERMISSION_GRANTED
-        ) {
-            action()
-        } else {
-            pendingLanAction = action
-            nearbyPermissionLauncher.launch(Manifest.permission.NEARBY_WIFI_DEVICES)
-        }
-    }
 
     LaunchedEffect(message) {
         message?.let {
@@ -292,21 +267,19 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
                     icon = Icons.Outlined.Wifi,
                     iconTint = MaterialTheme.colorScheme.secondary,
                     title = "局域网发送",
-                    subtitle = "生成六位配对 PIN，等待对方接收",
-                    onClick = { runWithLanPermission(viewModel::startLanSend) },
+                    subtitle = "暂时停用，请使用文件备份或系统分享",
+                    onClick = viewModel::startLanSend,
                 )
                 RowDivider()
                 SettingsRow(
                     icon = Icons.Outlined.Download,
                     iconTint = MaterialTheme.colorScheme.secondary,
                     title = "局域网接收",
-                    subtitle = "选择发送设备并输入配对 PIN",
+                    subtitle = "暂时停用，点击查看替代方式",
                     onClick = {
-                        runWithLanPermission {
-                            selectedLanDevice = null
-                            lanPin = ""
-                            viewModel.startLanReceive()
-                        }
+                        selectedLanDevice = null
+                        lanPin = ""
+                        viewModel.startLanReceive()
                     },
                 )
             }

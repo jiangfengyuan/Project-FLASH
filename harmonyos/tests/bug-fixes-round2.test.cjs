@@ -166,7 +166,7 @@ function networkOverride(randomFn = deterministicRandom()) {
 }
 
 function transferLoader(net) {
-  return createLoader({ 'data/LocalBackupTransfer': null, ...net.kit });
+  return createLoader({ 'data/LocalBackupTransfer': null, ...net.kit }, { legacyLan: true });
 }
 
 function challengeCount(client) {

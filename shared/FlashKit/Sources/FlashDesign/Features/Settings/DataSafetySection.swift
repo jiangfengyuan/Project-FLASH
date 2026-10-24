@@ -57,11 +57,11 @@ public struct DataSafetySection: View {
             }
             .hoverFeedback(reduceMotion: reduceMotion)
             Button(action: onLanSend) {
-                SettingsRowLabel(title: "局域网发送…", systemImage: "paperplane", color: BrandColors.accessibleGreen)
+                SettingsRowLabel(title: "局域网发送（暂时停用）…", systemImage: "paperplane", color: BrandColors.accessibleGreen)
             }
             .hoverFeedback(reduceMotion: reduceMotion)
             Button(action: onLanReceive) {
-                SettingsRowLabel(title: "局域网接收…", systemImage: "antenna.radiowaves.left.and.right", color: BrandColors.accessibleGreen)
+                SettingsRowLabel(title: "局域网接收（暂时停用）…", systemImage: "antenna.radiowaves.left.and.right", color: BrandColors.accessibleGreen)
             }
             .hoverFeedback(reduceMotion: reduceMotion)
             Button(action: onImport) {
