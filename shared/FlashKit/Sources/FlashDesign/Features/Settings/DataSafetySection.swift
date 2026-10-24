@@ -40,9 +40,14 @@ public struct DataSafetySection: View {
 
     public var body: some View {
         Section("数据与安全") {
-            // 主操作：导出备份（ prominent 胶囊，图标/文字随按钮样式反白）
+            // 主操作：导出备份（ prominent 胶囊，图标/文字反白）。
+            // 图标显式白色：iOS 表单行会把 Label 图标染成强调色，与胶囊同色而看不见
             Button(action: onExport) {
-                Label("导出备份…", systemImage: "tray.and.arrow.up")
+                Label {
+                    Text("导出备份…")
+                } icon: {
+                    Image(systemName: "tray.and.arrow.up").foregroundStyle(.white)
+                }
             }
             .buttonStyle(.borderedProminent)
             .tint(BrandColors.brandPrimary)
