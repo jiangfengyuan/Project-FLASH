@@ -8,6 +8,7 @@
 | --- | --- | --- |
 | Android | Kotlin / Compose / Room，Material 与玻璃双风格 | Debug 可构建；正式签名与设备品质验收待收口 |
 | macOS | SwiftUI / SwiftData，全局热键 Quick Capture、菜单栏伴侣、桌面小组件骨架，universal2 | 本机可运行；小组件数据联通与对外分发待 Developer ID 签名 + 公证 |
+| iOS | SwiftUI / SwiftData，iPhone、iOS 18+，与 macOS 共用 FlashKit；快速记录、灵感提醒、主屏/锁屏小组件、控制中心控件 | 模拟器可运行；真机小组件数据与分发待团队签名；设备品质矩阵未开始 |
 | HarmonyOS | ArkTS / ArkUI / 加密 RDB | 主机测试与未签名 HAP 构建通过；真机、签名和受限能力准入待完成 |
 
 已实现：此刻、记录、回顾、Memory、设置五个一级入口；日志/灵感搜索与编辑；七级情绪与可选强度；日历任务与提醒、灵感转任务（保留来源关联）；收藏与已收藏筛选；⌘K 全局搜索浮层；记录日期编辑和保存失败保护；四种回顾窗口、每日活跃度、情绪分布和趋势洞察；Memory 周报（规则聚合）；JSON 备份、差异预览、合并/覆盖及 LAN 直传。
@@ -35,7 +36,7 @@ LAN v1.1 与历史明文 PIN 首包不兼容；两端需使用同代构建。迁
 3. ~~改善 HarmonyOS 减弱动效降级机制~~（已完成：系统无公开查询接口，自建应用内 `reduceMotion` 开关并持久化，全站动画经 `motionDuration` 归零，情绪保存动效同样尊重该开关）。
 4. 根据实际反馈选择小步功能：~~全局快捷键、收藏、桌面小组件~~（macOS 已落地：⇧⌘Space Quick Capture 可改键、三分区收藏、WidgetKit 骨架待签名联通）；候选保留更细搜索、记录提醒。HarmonyOS 已落地未读灵感提醒（本地已读状态不进备份，今日概览提示行与记录入口未读角标，对齐 Android）。
 
-原生 iOS 已开工（2026-10-18，`ios/`，iPhone、iOS 18）：数据层与设计语言抽为 macOS/iOS 共用的 `shared/FlashKit`，首个切片为此刻页快速记录，其余模块按 [iOS README](ios/README.md) 里程碑推进，不列入当前发布门槛。图片附件、iCloud/WebDAV 和自动同步仍是候选。自动同步需要独立 `flash-sync-v1` 设计，不改变快照备份语义。
+原生 iOS（`ios/`，iPhone、iOS 18）功能已对齐 macOS 并完成 iOS 增强（2026-10-24，见 [iOS README](ios/README.md)）；macOS/iOS 共用 `shared/FlashKit`。iOS 的设备品质验收、签名与分发尚未开始，暂不列入当前发布门槛。灵感提醒推送（PRD v3 §6.3）目前只有 iOS 实现，Android / HarmonyOS 仍只有页面内提示。图片附件、iCloud/WebDAV 和自动同步仍是候选。自动同步需要独立 `flash-sync-v1` 设计，不改变快照备份语义。
 
 ## 工程原则
 
