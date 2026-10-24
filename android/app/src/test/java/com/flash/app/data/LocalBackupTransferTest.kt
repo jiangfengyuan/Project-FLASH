@@ -28,6 +28,63 @@ class LocalBackupTransferTest {
     private val pin = "123456"
 
     @Test
+    fun `receiver cancellation wakes PIN backoff immediately`() {
+        val inBackoff = CountDownLatch(1)
+        val bytes = "{}".toByteArray(Charsets.UTF_8)
+        val (server, _) = scriptedSender(pin, bytes) { nonce, _, output ->
+            answer(output, pin, bytes, nonce, proofPin = "000000")
+        }
+        val executor = Executors.newSingleThreadExecutor()
+        val receiver = LocalBackupTransfer.Receiver(
+            LocalBackupTransfer.Device("test", "test", "127.0.0.1", server.localPort), { pin },
+            proofBackoffMillis = { inBackoff.countDown(); 10_000 })
+        try {
+            val operation = executor.submit<String> { receiver.run() }
+            assertTrue(inBackoff.await(2, TimeUnit.SECONDS))
+            receiver.stop()
+            assertThrows(ExecutionException::class.java) { operation.get(2, TimeUnit.SECONDS) }
+        } finally { receiver.stop(); server.close(); executor.shutdownNow() }
+    }
+
+    @Test
+    fun `receiver hard deadline interrupts incomplete proof framing`() {
+        val server = ServerSocket(0)
+        val challenged = CountDownLatch(1)
+        val executor = Executors.newSingleThreadExecutor()
+        try {
+            val peer = executor.submit {
+                server.accept().use { socket ->
+                    readLineRaw(socket.getInputStream())
+                    challenged.countDown()
+                    socket.getOutputStream().write('F'.code)
+                    socket.getOutputStream().flush()
+                    runCatching { while (socket.getInputStream().read() >= 0) Unit }
+                }
+            }
+            val receiver = LocalBackupTransfer.Receiver(
+                LocalBackupTransfer.Device("test", "test", "127.0.0.1", server.localPort),
+                { pin }, proofBackoffMillis = { 0 }, transferMillis = 300)
+            val failure = assertThrows(Exception::class.java) { receiver.run() }
+            assertTrue(failure.message.orEmpty().contains("传输超时"))
+            assertEquals(0L, challenged.count)
+            peer.get(2, TimeUnit.SECONDS)
+        } finally { server.close(); executor.shutdownNow() }
+    }
+
+    @Test
+    fun `receiver rejects noncanonical leading zero payload lengths`() {
+        val bytes = "{}".toByteArray(Charsets.UTF_8)
+        val mac = with(LocalBackupTransfer) { computePayloadMac(pin, bytes).toHex() }
+        val (server, _) = scriptedSender(pin, bytes) { nonce, _, output ->
+            answer(output, pin, bytes, nonce, okLine = "OK 02 $mac")
+        }
+        try {
+            val error = assertThrows(Exception::class.java) { receiverFor(server).run() }
+            assertEquals("发送方返回了无效响应", error.message)
+        } finally { server.close() }
+    }
+
+    @Test
     fun `discovery labels rotate without personal or model data`() {
         val names = List(100) { LocalBackupTransfer.generateServiceName() }
         assertEquals(names.size, names.toSet().size)

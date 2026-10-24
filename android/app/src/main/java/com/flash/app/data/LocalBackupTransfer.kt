@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.CountDownLatch
 import java.net.SocketException
 
 /**
@@ -53,7 +54,7 @@ object LocalBackupTransfer {
     private const val OK_LINE_LIMIT = 128
     private val CHALLENGE_LINE_REGEX = Regex("^CHALLENGE ([0-9a-f]{${NONCE_BYTES * 2}})$")
     private val PROOF_LINE_REGEX = Regex("^$PROTOCOL ([0-9a-f]{32})$")
-    private val OK_LINE_REGEX = Regex("^OK (\\d+) ([0-9a-f]{64})$")
+    private val OK_LINE_REGEX = Regex("^OK ([1-9][0-9]*) ([0-9a-f]{64})$")
     private val secureRandom = SecureRandom()
 
     data class Device(val id: String, val name: String, val host: String, val port: Int)
@@ -375,13 +376,16 @@ object LocalBackupTransfer {
         private val pinProvider: () -> String,
         private val proofBackoffMillis: (attempt: Int) -> Long =
             { attempt -> 1000L shl (attempt - 1).coerceIn(0, 3) },
+        private val transferMillis: Long = TRANSFER_MILLIS,
     ) {
         constructor(device: Device, pin: String) : this(device, { pin })
 
         private val stopped = AtomicBoolean(false)
         @Volatile private var activeSocket: Socket? = null
+        @Volatile private var backoffWake: CountDownLatch? = null
 
         fun run(): String {
+            require(transferMillis in 1..TRANSFER_MILLIS)
             require(pinProvider().matches(Regex("\\d{6}"))) { "PIN 必须是六位数字" }
             check(!stopped.get()) { "接收已取消" }
             val socket = Socket()
@@ -390,11 +394,22 @@ object LocalBackupTransfer {
                 socket.close()
                 error("接收已取消")
             }
+            val transferDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(transferMillis)
+            val backoffSignal = CountDownLatch(1)
+            backoffWake = backoffSignal
+            val expired = AtomicBoolean(false)
+            val watchdog = Executors.newSingleThreadScheduledExecutor { work ->
+                Thread(work, "flash-lan-receive-deadline").apply { isDaemon = true }
+            }
+            val deadlineTask = watchdog.schedule({
+                expired.set(true)
+                backoffSignal.countDown()
+                runCatching { socket.close() }
+            }, transferMillis, TimeUnit.MILLISECONDS)
             return try {
                 socket.use {
                     socket.connect(InetSocketAddress(device.host, device.port), SOCKET_TIMEOUT)
                     socket.soTimeout = SOCKET_TIMEOUT
-                    val transferDeadline = System.currentTimeMillis() + TRANSFER_MILLIS
                     val input = socket.getInputStream()
                     val output = socket.getOutputStream()
 
@@ -428,8 +443,9 @@ object LocalBackupTransfer {
                             // 丢弃被否应答的流水线尾部（OK 头行 + size 字节）后重挑战。
                             drainRejectedAnswer(input, transferDeadline)
                             val backoff = proofBackoffMillis(failedProofs)
-                            if (backoff > 0) Thread.sleep(backoff)
-                            if (System.currentTimeMillis() > transferDeadline) {
+                            if (backoff > 0) backoffSignal.await(backoff, TimeUnit.MILLISECONDS)
+                            if (stopped.get()) error("接收已取消")
+                            if (System.nanoTime() - transferDeadline >= 0) {
                                 error("传输超时，备份未接收完整")
                             }
                             nonceHex = randomNonceHex()
@@ -455,7 +471,7 @@ object LocalBackupTransfer {
                         val bytes = ByteArray(size.toInt())
                         var offset = 0
                         while (offset < size) {
-                            if (System.currentTimeMillis() > transferDeadline) {
+                            if (System.nanoTime() - transferDeadline >= 0) {
                                 error("传输超时，备份未接收完整")
                             }
                             val count = input.read(bytes, offset, size.toInt() - offset)
@@ -474,8 +490,18 @@ object LocalBackupTransfer {
                     }
                     @Suppress("UNREACHABLE_CODE")
                     error("unreachable")
+                }.also {
+                    if (expired.get() || System.nanoTime() - transferDeadline >= 0) {
+                        throw IOException("传输超时，备份未接收完整")
+                    }
                 }
+            } catch (failure: Exception) {
+                if (expired.get()) throw IOException("传输超时，备份未接收完整", failure)
+                throw failure
             } finally {
+                deadlineTask.cancel(false)
+                watchdog.shutdownNow()
+                backoffWake = null
                 activeSocket = null
             }
         }
@@ -486,10 +512,11 @@ object LocalBackupTransfer {
                 ?: error("发送方返回了无效响应")
             val size = discarded.groupValues[1].toLongOrNull()
                 ?: error("接收的备份文件大小异常")
+            if (size < 1 || size > Backup.MAX_FILE_BYTES) error("接收的备份文件大小异常")
             var remaining = size
             val buffer = ByteArray(8192)
             while (remaining > 0) {
-                if (System.currentTimeMillis() > transferDeadline) {
+                if (System.nanoTime() - transferDeadline >= 0) {
                     error("传输超时，备份未接收完整")
                 }
                 val count = input.read(buffer, 0, minOf(buffer.size.toLong(), remaining).toInt())
@@ -500,6 +527,7 @@ object LocalBackupTransfer {
 
         fun stop() {
             if (!stopped.compareAndSet(false, true)) return
+            backoffWake?.countDown()
             runCatching { activeSocket?.close() }
             activeSocket = null
         }

@@ -31,7 +31,7 @@ const MAX_HEADER_BYTES = 64;
 const MAX_OK_HEADER_BYTES = 128;
 const CHALLENGE_LINE = new RegExp(`^CHALLENGE ([0-9a-f]{${NONCE_BYTES * 2}})$`);
 const PROOF_LINE = new RegExp(`^${PROTOCOL} ([0-9a-f]{${PROOF_HEX_CHARS}})$`);
-const OK_LINE = new RegExp(`^OK ([0-9]+) ([0-9a-f]{${MAC_HEX_CHARS}})$`);
+const OK_LINE = new RegExp(`^OK ([1-9][0-9]*) ([0-9a-f]{${MAC_HEX_CHARS}})$`);
 // Largest multiple of 10^6 below 2^32; rejecting draws above it keeps
 // value % 1000000 unbiased across the full 6-digit range.
 const PIN_DRAW_LIMIT = 4294000000;
@@ -441,6 +441,9 @@ export class LocalBackupReceiver {
               const discarded = OK_LINE.exec(line);
               if (!discarded) { this.fail('发送方返回了无效响应'); return; }
               discardRemaining = Number.parseInt(discarded[1]);
+              if (discardRemaining < 1 || discardRemaining > BackupService.MAX_BYTES) {
+                this.fail('接收的备份文件大小异常'); return;
+              }
               discardHeader = false;
               continue;
             }

@@ -149,6 +149,15 @@ test('receiver strictly parses the OK header and rejects OK 123abc', async () =>
   assert.ok(client.closed);
 });
 
+test('receiver rejects noncanonical leading-zero payload lengths', async () => {
+  const { receiver, client } = startReceiver(() => '123456');
+  const rejection = assert.rejects(receiver.result, /无效响应/);
+  await flush();
+  const nonce = lastChallenge(client);
+  client.emit(`FLASH-AERO/1 ${referenceProof('123456', nonce)}\nOK 02 ${referenceMac('123456', '{}')}\n{}`);
+  await rejection;
+});
+
 test('receiver rejects an over-size OK payload before buffering it', async () => {
   const { receiver, client } = startReceiver(() => '123456');
   const rejection = assert.rejects(receiver.result, /大小异常/);

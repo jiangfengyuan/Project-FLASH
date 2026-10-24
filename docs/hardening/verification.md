@@ -98,3 +98,11 @@ One generation owns the pending import job and input stream. Cancel/supersession
 Four JVM contracts cover a suspended queued write, stale result/attachment, input-stream closure, and superseded preview ownership. These test a new lifecycle helper; no claim that the new helper API compiles on the parent. Existing transactions/contract tests remain. A native Room regression exercises a local write after preview and subsequent reconfirmation; its APK compiled, execution still pending at this milestone.
 
 Gradle full gate: Debug/Release JVM **84 each passed**, Debug app and instrumentation APK build successful (`m7-android-gates.log`). New helper has no dependencies beyond existing coroutines/JDK and persists no state. Actual malicious provider shutdown and real-device cancellation remain unverified.
+
+## M8 — canonical framing, rejected-answer budgets and receiver lifecycle
+
+Android/Harmony receivers now reject noncanonical zero/leading-zero payload lengths and enforce the unchanged50MiB cap even while draining a rejected answer. Leading-zero regressions failed against parent production on both platforms. Android now has a monotonic total receiver deadline spanning connect/proof/OK/payload/backoff; a daemon timer closes blocked IO, and stop/expiry wakes the backoff latch immediately. Header/deadline tests passed in the first86-test gate; the cumulative gate including backoff cancellation now passes **87 JVM tests each in Debug/Release**, plus Debug app/test APK builds. Combined contract/Harmony host **272 passed**; unsigned native Harmony HAP build succeeded. Logs: `m8-final-android-gates.log`, `m8-host-gates.log`, `m8-harmony-native.log`.
+
+These changes preserve legitimate v1.1 bytes and do not repair F-01 or unauthenticated ERR PIN. The user has now approved temporary legacy LAN disablement, to be implemented in a separate milestone. F-02/F-03 remain compatibility blockers; lossless schema2/additive migration approval is separately recorded, not implemented by M8.
+
+After execution access was restored, cumulative FlashKit **201 passed**, including real host Bonjour discovery, persistence and strict-backup tests. Cumulative macOS native app gate succeeded; the test-count comparison is being extracted from xcresult. The earlier approval-review usage-limit failure did not execute the blocked command and was not bypassed.
