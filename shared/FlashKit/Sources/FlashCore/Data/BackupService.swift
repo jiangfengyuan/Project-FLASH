@@ -214,6 +214,8 @@ public enum BackupService: Sendable {
     private static let uuidRegex = try! NSRegularExpression(
         pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
     private static let dayRegex = try! NSRegularExpression(pattern: "^\\d{4}-\\d{2}-\\d{2}$")
+    private static let instantRegex = try! NSRegularExpression(
+        pattern: #"^([0-9]{4}-[0-9]{2}-[0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})(?:\.([0-9]{1,9}))?(Z|[+-][0-9]{2}:[0-9]{2})$"#)
 
     // ISO8601DateFormatter 共享实例经串行队列访问（安全审计项）：不再依赖
     // 「文档保证线程安全」的口径；nonisolated(unsafe) 仅为编译期标注
@@ -690,8 +692,8 @@ public enum BackupService: Sendable {
     private static let maximumInstant = isoWholeSecondDate(from: "9999-12-31T23:59:59Z")!
 
     private static func normalizeISODate(_ value: String) -> String? {
-        let pattern = #"^([0-9]{4}-[0-9]{2}-[0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})(?:\.([0-9]{1,9}))?(Z|[+-][0-9]{2}:[0-9]{2})$"#
-        guard let match = value.range(of: pattern, options: .regularExpression), match == value.startIndex..<value.endIndex else { return nil }
+        let range = NSRange(value.startIndex..., in: value)
+        guard let match = instantRegex.firstMatch(in: value, range: range), match.range == range else { return nil }
         let chars = Array(value)
         let day = String(chars[0..<10])
         guard isDay(day), let h = Int(String(chars[11..<13])), h <= 23,
@@ -699,6 +701,14 @@ public enum BackupService: Sendable {
               let s = Int(String(chars[17..<19])), s <= 59 else { return nil }
         let zone = value.hasSuffix("Z") ? "Z" : String(value.suffix(6))
         guard zone != "-00:00" else { return nil }
+        let fraction = chars.count > 19 && chars[19] == "." ? String(chars[20..<(chars.count - zone.count)]) : ""
+        let milliseconds = String((fraction + "000").prefix(3))
+        if zone == "Z" {
+            // ASCII syntax, real Gregorian date/year and time ranges were all
+            // validated above. Already-UTC input needs no calendar/formatter
+            // round trip; retain the exact contract's fractional truncation.
+            return String(chars[0..<19]) + "." + milliseconds + "Z"
+        }
         var offset = 0
         if zone != "Z" {
             let z = Array(zone)
@@ -713,8 +723,6 @@ public enum BackupService: Sendable {
         guard instant >= minimumInstant, instant <= maximumInstant else { return nil }
         let utc = isoWholeSecondString(from: instant)
         guard utc.count == 20, let year = Int(utc.prefix(4)), (1...9999).contains(year) else { return nil }
-        let fraction = chars.count > 19 && chars[19] == "." ? String(chars[20..<(chars.count - zone.count)]) : ""
-        let milliseconds = String((fraction + "000").prefix(3))
         return String(utc.dropLast()) + "." + milliseconds + "Z"
     }
 

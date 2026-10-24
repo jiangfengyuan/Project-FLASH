@@ -84,3 +84,9 @@ After: Android Debug/Release JVM80 each, app/test APK builds pass; combined cont
 Logs: `m6-android-budget-parent.log`, `m6-harmony-budget-parent.log`, `m6-android-gates.log`, `m6-contract-harmony.log`, `m6-harmony-native.log`, `m6-flashkit-fuzz.log`.
 
 The cumulative macOS candidate app gate after M5 passed13 app tests, equal to the freshly executed13-test baseline (`m5-macos.log`, `m5-macos.xcresult`). Subsequent shared changes still require a final cumulative gate.
+
+## P1 — profiled UTC normalization candidate
+
+Release baseline at `4e67c13` is retained as JSONL samples/conditions/resources for1k/10k/100k logs. Native `/usr/bin/sample` successfully captured the100k developer workload: the sampled export phase repeatedly enters `BackupService.normalizeISODate` and `NSISO8601DateFormatter.dateFromString`. The attempted xctrace Time Profiler bundle saved but its exported CPU table contains only blocked launch rows; do not claim useful Time Profiler CPU attribution from that trace. The trace hit its15s limit and terminated its synthetic target (exit54/SIGKILL); instrumented runs are excluded from timing tables.
+
+Candidate: compile the same instant regex once; after validating full ASCII syntax, real Gregorian date/year, hour/minute/second ranges and fraction syntax, normalize `Z` timestamps by exact millisecond truncation without redundant Foundation UTC parse/format. Offset timestamps retain the established conversion and UTC year-bound checks. No cache, schema change or validation relaxation was introduced.432 canonical UTC cases plus upper/lower bounds, invalid dates/times, unknown offset, trailing input and offset overflow pass **before and after** the change. Full FlashKit: **201 passed**. Before/after performance and cumulative native gates remain pending at this commit.
