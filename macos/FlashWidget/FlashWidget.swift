@@ -37,6 +37,7 @@ struct FlashTodayWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: FlashTodayProvider()) { entry in
             FlashTodayWidgetEntryView(entry: entry)
+                .privacySensitive()
                 .widgetURL(URL(string: "flash://today"))
         }
         .configurationDisplayName("Flash 此刻")

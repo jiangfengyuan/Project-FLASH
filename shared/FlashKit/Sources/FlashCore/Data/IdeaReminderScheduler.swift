@@ -64,7 +64,7 @@ public actor IdeaReminderScheduler {
             try await center.add(request)
             defaults.set(fireDate, forKey: lastScheduledKey)
         } catch {
-            print("IdeaReminderScheduler: 排提醒失败 - \(error)")
+            print("IdeaReminderScheduler: 排提醒失败 [reminder_schedule_failed]")
         }
     }
 

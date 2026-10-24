@@ -53,6 +53,7 @@ struct FlashTodayWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: FlashTodayProvider()) { entry in
             FlashTodayView(entry: entry)
+                .privacySensitive()
                 .containerBackground(for: .widget) { BrandColors.pageBackground }
                 .widgetURL(URL(string: "flash://today"))
         }
@@ -169,6 +170,7 @@ struct FlashLockScreenWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: FlashTodayProvider()) { entry in
             FlashLockScreenView(entry: entry)
+                .privacySensitive()
                 .containerBackground(for: .widget) { Color.clear }
                 .widgetURL(URL(string: "flash://today"))
         }

@@ -318,7 +318,7 @@ export class FlashStore {
       dirty = await this.moveLegacyQuarantine(settings, QUARANTINE_RDB_KEY, QUARANTINE_RDB_FILE) || dirty;
       if (dirty) await settings.flush();
     } catch (error) {
-      console.error(`Flash quarantine migration failed: ${(error as Error).message}`);
+      console.error('Flash quarantine migration failed');
     }
   }
 
@@ -363,7 +363,7 @@ export class FlashStore {
       }
       return true;
     } catch (error) {
-      console.error(`Flash quarantine write failed: ${(error as Error).message}`);
+      console.error('Flash quarantine write failed');
       return false;
     }
   }
@@ -417,7 +417,7 @@ export class FlashStore {
         }
         if (expired) await fileIo.unlink(path);
       } catch (error) {
-        console.error(`Flash quarantine cleanup failed: ${(error as Error).message}`);
+        console.error('Flash quarantine cleanup failed');
       }
     }
   }
@@ -432,7 +432,7 @@ export class FlashStore {
           const path = this.quarantinePath(name);
           if (await fileIo.access(path)) await fileIo.unlink(path);
         } catch (error) {
-          console.error(`Flash quarantine clear failed: ${(error as Error).message}`);
+          console.error('Flash quarantine clear failed');
         }
       }
     }
