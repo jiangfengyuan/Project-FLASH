@@ -28,6 +28,8 @@ struct QuickCaptureEntryModifier: ViewModifier {
                         }
                         .padding(.horizontal, Spacing.md)
                         .contentShape(Rectangle())
+                        // 底部配件高度固定（同标签栏）：字号封顶，超大字号下不溢出截断
+                        .dynamicTypeSize(...DynamicTypeSize.xxLarge)
                     }
                     .buttonStyle(.plain)
                     .flashZoomSource(id: "quickCapture", in: zoomNamespace)

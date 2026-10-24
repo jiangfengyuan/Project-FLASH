@@ -28,18 +28,28 @@ public struct GreetingHeaderView: View {
     }
 
     public var body: some View {
-        HStack(alignment: .center, spacing: Spacing.md) {
-            VStack(alignment: .leading, spacing: 6) { // 6：问候语与副标题的紧凑节奏（无对应令牌）
-                Text(greeting)
-                    .flashPageTitle()
-
-                Text("今天也记录一点什么吧。")
-                    .font(Typography.secondary)
-                    .foregroundStyle(Color.secondary)
+        // 一行放不下（窄屏 + 辅助功能大字号）时「+ 新建」移到问候语下方，胶囊不被挤成竖排
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .center, spacing: Spacing.md) {
+                greetingText
+                Spacer(minLength: Spacing.md)
+                newMenu
             }
+            VStack(alignment: .leading, spacing: Spacing.sm) {
+                greetingText
+                newMenu
+            }
+        }
+    }
 
-            Spacer(minLength: Spacing.md)
-            newMenu
+    private var greetingText: some View {
+        VStack(alignment: .leading, spacing: 6) { // 6：问候语与副标题的紧凑节奏（无对应令牌）
+            Text(greeting)
+                .flashPageTitle()
+
+            Text("今天也记录一点什么吧。")
+                .font(Typography.secondary)
+                .foregroundStyle(Color.secondary)
         }
     }
 
@@ -72,6 +82,7 @@ public struct GreetingHeaderView: View {
                 Text("新建")
                     .font(Typography.secondary.weight(.semibold))
             }
+            .fixedSize()
             .foregroundStyle(Color.white)
             .padding(.horizontal, 14) // 胶囊横向内距：无对应令牌（sm 偏紧、md 偏宽）
             .padding(.vertical, Spacing.xs)

@@ -69,36 +69,23 @@ public struct LogCardView: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 10) { // 10：徽章行与正文的紧凑节奏（无对应令牌）
-            HStack(spacing: Spacing.xs) {
-                tagBadge
-                if isUnread {
-                    Text("未读")
-                        .font(Typography.caption).bold()
-                        .foregroundStyle(BrandColors.ideaYellowText)
-                        .accessibilityLabel("未读灵感")
+            // 一行放不下（辅助功能大字号）时时间戳换到徽章下方，不在数字中间折行
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: Spacing.xs) {
+                    badges
+                    Spacer()
+                    favoriteMark
+                    timestampText
+                    actionsOverlay
                 }
-                if log.importance > 0 {
-                    Text(String(repeating: "!", count: log.importance))
-                        .font(Typography.caption).bold()
-                        .foregroundStyle(ColorTag.urgent.textColor)
-                }
-                Spacer()
-                // 已收藏星标常显（金色可读变体，深浅色均达标）；未收藏时星标按钮随 hover 浮现
-                if isFavorite {
-                    Image(systemName: "star.fill")
-                        .font(Typography.caption)
-                        .foregroundStyle(BrandColors.ideaYellowText)
-                        .accessibilityLabel("已收藏")
-                }
-                Text(timestamp)
-                    .font(Typography.caption)
-                    .foregroundStyle(.secondary)
-                if hasActions {
-                    actionButtons
-                        .opacity(showActions ? 1 : 0)
-                        .animation(Motion.quick(reduceMotion), value: showActions)
-                        // 不可见时不拦截点击/右键，保证 contextMenu 与文本选择可用
-                        .allowsHitTesting(showActions)
+                VStack(alignment: .leading, spacing: Spacing.xxs) {
+                    HStack(spacing: Spacing.xs) {
+                        badges
+                        Spacer()
+                        favoriteMark
+                        actionsOverlay
+                    }
+                    timestampText
                 }
             }
             Text(log.content)
@@ -117,6 +104,51 @@ public struct LogCardView: View {
         .scaleEffect(deletePulse ? 0.97 : 1)
         .cardFloat(reduceMotion: reduceMotion)
         .onHover { hovering = $0 }
+    }
+
+    @ViewBuilder
+    private var badges: some View {
+        tagBadge
+        if isUnread {
+            Text("未读")
+                .font(Typography.caption).bold()
+                .foregroundStyle(BrandColors.ideaYellowText)
+                .accessibilityLabel("未读灵感")
+        }
+        if log.importance > 0 {
+            Text(String(repeating: "!", count: log.importance))
+                .font(Typography.caption).bold()
+                .foregroundStyle(ColorTag.urgent.textColor)
+        }
+    }
+
+    /// 已收藏星标常显（金色可读变体，深浅色均达标）；未收藏时星标按钮随 hover 浮现
+    @ViewBuilder
+    private var favoriteMark: some View {
+        if isFavorite {
+            Image(systemName: "star.fill")
+                .font(Typography.caption)
+                .foregroundStyle(BrandColors.ideaYellowText)
+                .accessibilityLabel("已收藏")
+        }
+    }
+
+    private var timestampText: some View {
+        Text(timestamp)
+            .font(Typography.caption)
+            .foregroundStyle(.secondary)
+            .fixedSize()
+    }
+
+    @ViewBuilder
+    private var actionsOverlay: some View {
+        if hasActions {
+            actionButtons
+                .opacity(showActions ? 1 : 0)
+                .animation(Motion.quick(reduceMotion), value: showActions)
+                // 不可见时不拦截点击/右键，保证 contextMenu 与文本选择可用
+                .allowsHitTesting(showActions)
+        }
     }
 
     /// 标签徽章：标签色淡底胶囊，替代原先的色点+灰字。

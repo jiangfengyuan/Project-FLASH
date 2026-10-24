@@ -63,35 +63,56 @@ public struct MemoryView: View {
 
     /// 标题 + 周导航（上一周 / 回到本周 / 下一周，下一周不超过当前周）+ 周范围
     private func header(_ report: WeeklyMemory.Report) -> some View {
-        HStack(spacing: Spacing.sm) {
-            if !usesSystemNavigationTitle {
-                Text("Memory").flashPageTitle()
+        // 一行放不下（窄屏 + 大字号）时周导航与周范围上下排列，日期不被截断
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: Spacing.sm) {
+                if !usesSystemNavigationTitle {
+                    Text("Memory").flashPageTitle()
+                }
+                Spacer()
+                weekNavigation
+                weekRange(report)
             }
-            Spacer()
-            Button {
-                Motion.animate(Motion.quick(), reduceMotion: reduceMotion) { weekOffset -= 1 }
-            } label: {
-                Image(systemName: "chevron.left")
+            VStack(alignment: .leading, spacing: Spacing.xs) {
+                if !usesSystemNavigationTitle {
+                    Text("Memory").flashPageTitle()
+                }
+                HStack(spacing: Spacing.sm) { weekNavigation }
+                weekRange(report)
             }
-            .accessibilityLabel("上一周")
-            Button("回到本周") {
-                Motion.animate(Motion.quick(), reduceMotion: reduceMotion) { weekOffset = 0 }
-            }
-            .disabled(weekOffset == 0)
-            Button {
-                Motion.animate(Motion.quick(), reduceMotion: reduceMotion) { weekOffset += 1 }
-            } label: {
-                Image(systemName: "chevron.right")
-            }
-            .accessibilityLabel("下一周")
-            .disabled(weekOffset == 0) // 不允许进入未来周
-            Text("\(report.weekStart) — \(report.weekEnd)")
-                .font(Typography.caption)
-                .foregroundStyle(.secondary)
-                .contentTransition(.opacity)
-                .animation(Motion.quick(reduceMotion), value: report.weekStart)
         }
         .padding(usesSystemNavigationTitle ? Spacing.md : Spacing.lg)
+    }
+
+    @ViewBuilder
+    private var weekNavigation: some View {
+        Button {
+            Motion.animate(Motion.quick(), reduceMotion: reduceMotion) { weekOffset -= 1 }
+        } label: {
+            Image(systemName: "chevron.left")
+        }
+        .accessibilityLabel("上一周")
+        Button("回到本周") {
+            Motion.animate(Motion.quick(), reduceMotion: reduceMotion) { weekOffset = 0 }
+        }
+        .fixedSize()
+        .disabled(weekOffset == 0)
+        Button {
+            Motion.animate(Motion.quick(), reduceMotion: reduceMotion) { weekOffset += 1 }
+        } label: {
+            Image(systemName: "chevron.right")
+        }
+        .accessibilityLabel("下一周")
+        .disabled(weekOffset == 0) // 不允许进入未来周
+    }
+
+    private func weekRange(_ report: WeeklyMemory.Report) -> some View {
+        Text("\(report.weekStart) — \(report.weekEnd)")
+            .font(Typography.caption)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+            .contentTransition(.opacity)
+            .animation(Motion.quick(reduceMotion), value: report.weekStart)
     }
 
     /// 周报内容：四计数卡片 + 情绪概览 + 亮点 + 品牌收尾句
@@ -100,11 +121,25 @@ public struct MemoryView: View {
             VStack(alignment: .leading, spacing: Spacing.lg) {
                 VStack(alignment: .leading, spacing: Spacing.xs) {
                     Text("You recorded").font(Typography.cardTitle)
-                    HStack(spacing: Spacing.sm) {
-                        countCard("moments", report.moments, "note.text", tint: BrandColors.logPurple)
-                        countCard("ideas", report.ideas, "lightbulb", tint: BrandColors.ideaYellow)
-                        countCard("tasks", report.tasks, "checkmark.circle", tint: BrandColors.calendarGreen)
-                        countCard("emotions", report.emotions, "face.smiling", tint: BrandColors.emotionPink)
+                    // 一行四列放不下（窄屏 + 大字号）时退为 2×2，英文标签不被截断
+                    ViewThatFits(in: .horizontal) {
+                        HStack(spacing: Spacing.sm) {
+                            countCard("moments", report.moments, "note.text", tint: BrandColors.logPurple)
+                            countCard("ideas", report.ideas, "lightbulb", tint: BrandColors.ideaYellow)
+                            countCard("tasks", report.tasks, "checkmark.circle", tint: BrandColors.calendarGreen)
+                            countCard("emotions", report.emotions, "face.smiling", tint: BrandColors.emotionPink)
+                        }
+                        .fixedSize(horizontal: false, vertical: true)
+                        Grid(horizontalSpacing: Spacing.sm, verticalSpacing: Spacing.sm) {
+                            GridRow {
+                                countCard("moments", report.moments, "note.text", tint: BrandColors.logPurple)
+                                countCard("ideas", report.ideas, "lightbulb", tint: BrandColors.ideaYellow)
+                            }
+                            GridRow {
+                                countCard("tasks", report.tasks, "checkmark.circle", tint: BrandColors.calendarGreen)
+                                countCard("emotions", report.emotions, "face.smiling", tint: BrandColors.emotionPink)
+                            }
+                        }
                     }
                 }
 
@@ -160,11 +195,16 @@ public struct MemoryView: View {
                 .font(.title2).bold()
                 .contentTransition(.opacity)
                 .animation(Motion.quick(reduceMotion), value: value)
+            // 英文标签不在词中断行：单行，放不下时缩小
             Text(title).font(Typography.caption).foregroundStyle(.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
         }
-        .frame(maxWidth: .infinity)
-        .accessibilityElement(children: .combine)
+        .padding(.horizontal, Spacing.xs)
         .padding(.vertical, Spacing.md)
+        // 同行卡片等高（HStack 由 fixedSize 定高，Grid 由行高定高）
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .accessibilityElement(children: .combine)
         .background(BrandColors.cardSurface)
         .clipShape(RoundedRectangle(cornerRadius: Radius.card))
         .overlay {
