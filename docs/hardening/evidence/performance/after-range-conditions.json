@@ -1,0 +1,15 @@
+{
+  "label": "after-range",
+  "timestamp": "2026-10-24T16:44:54.521861+08:00",
+  "commit": "d6ce569b412290c0d05d4a03c1e1cd6c955e8406",
+  "flashcore_tree": "d045be304eea16a7d87cb8bb33e1a76905df66c1",
+  "dirty": "M android/app/src/androidTest/java/com/flash/app/data/BackupContractRepositoryTest.kt\n M android/app/src/main/java/com/flash/app/data/FlashRepository.kt\n M android/app/src/main/java/com/flash/app/ui/settings/SettingsViewModel.kt\n?? android/app/src/main/java/com/flash/app/data/BackupImportSession.kt\n?? android/app/src/test/java/com/flash/app/data/BackupImportSessionTest.kt\n?? docs/hardening/lan-v2-decision.md\n?? docs/hardening/next-beta-ui-plan.md",
+  "binary_sha256": "1c8aaa7dbc50a3dfb8a1233ffc33940c9ac39e63a74eaf4708ad0e503bc5cef5",
+  "device": "MacBook Pro Mac15,6 / M3 Pro11 cores /36GB",
+  "os": "ProductName:\t\tmacOS\nProductVersion:\t\t27.2\nBuildVersion:\t\t26B5101f",
+  "configuration": "Release / Swift6.4 / Xcode-beta27.2",
+  "samples": 7,
+  "warmups": 2,
+  "condition": "Machine reserved for Codex. Serial run. AC80%. Gradle daemon stopped, no running emulator/simulator/build. No pmset thermal/performance warning recorded. macOS host microbenchmark, not native app/device metrics.",
+  "dataset_reference": "2026-10-24 / deterministic IDs and dates;1/5/10 year spans; compact schema2 JSON under unchanged50MiB cap."
+}
