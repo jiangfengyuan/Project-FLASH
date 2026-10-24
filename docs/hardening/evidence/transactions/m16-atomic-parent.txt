@@ -1,0 +1,244 @@
+✖ overwrite: read-state IO failure leaves business rows, memory and viewed state unchanged (201.139375ms)
+✖ conditional: read-state IO failure leaves business rows, memory and viewed state unchanged (91.940209ms)
+✖ clear: read-state IO failure leaves business rows, memory and viewed state unchanged (74.173875ms)
+✖ deleteLog: read-state IO failure leaves business rows, memory and viewed state unchanged (76.529541ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 0
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 569.991292
+
+✖ failing tests:
+
+test at harmonyos/tests/atomic-read-state.test.cjs:32:3
+✖ overwrite: read-state IO failure leaves business rows, memory and viewed state unchanged (201.139375ms)
+  AssertionError [ERR_ASSERTION]: failed operation must roll back business and read-state rows
+  + actual - expected
+  ... Skipped lines
+  
+    {
+  +   emotions: [],
+  -   emotions: [
+  -     {
+  -       id: '22222222-2222-4222-8222-222222222222',
+  -       payload: '{"id":"22222222-2222-4222-8222-222222222222","level":-1,"subEmotion":"sad","note":"项目延期，调整计划后再出发","recordDate":"2026-09-04","createdAt":"2026-09-04T03:00:00.000Z","intensity":4,"isFavorite":false}',
+  -       sort_key: '2026-09-04T03:00:00.000Z'
+  -     },
+  -     {
+  -       id: '66666666-6666-4666-8666-666666666666',
+  -       payload: '{"id":"66666666-6666-4666-8666-666666666666","level":2,"recordDate":"2026-09-04","createdAt":"2026-09-04T05:00:00.000Z"}',
+  -       sort_key: '2026-09-04T05:00:00.000Z'
+  -     }
+  -   ],
+      idea_view_state: [
+        {
+          id: '11111111-1111-4111-8111-111111111111',
+          payload: '{"viewedAt":"2026-10-24T20:08:18.231Z"}',
+          sort_key: '2026-10-24T20:08:18.231Z'
+  ...
+        },
+  -     {
+  -       id: '55555555-5555-4555-8555-555555555555',
+  -       payload: '{"id":"55555555-5555-4555-8555-555555555555","content":"想做一个新的 App 概念","colorTag":"inspiration","category":"idea","importance":0,"createdAt":"2026-09-04T04:00:00.000Z","recordDate":"2026-09-04"}',
+  -       sort_key: '2026-09-04T04:00:00.000Z'
+  -     }
+      ],
+  +   tasks: []
+  -   tasks: [
+  -     {
+  -       id: '33333333-3333-4333-8333-333333333333',
+  -       payload: '{"id":"33333333-3333-4333-8333-333333333333","title":"提交协议首稿","notes":"包含经理说明和技术契约","colorTag":"urgent","importance":3,"due":{"kind":"dateTime","at":"2026-09-06T01:00:00.000Z","timeZone":"Asia/Shanghai"},"reminderAt":"2026-09-06T00:30:00.000Z","createdAt":"2026-09-04T00:00:00.000Z","updatedAt":"2026-09-05T00:00:00.000Z","sourceLogId":"55555555-5555-4555-8555-555555555555","isFavorite":true}',
+  -       sort_key: '2026-09-05T00:00:00.000Z'
+  -     },
+  -     {
+  -       id: '44444444-4444-4444-8444-444444444444',
+  -       payload: '{"id":"44444444-4444-4444-8444-444444444444","title":"整理验收意见","colorTag":"memo","importance":0,"due":{"kind":"allDay","date":"2026-09-07"},"createdAt":"2026-09-04T00:00:00.000Z","updatedAt":"2026-09-04T00:00:00.000Z"}',
+  -       sort_key: '2026-09-04T00:00:00.000Z'
+  -     }
+  -   ]
+    }
+  
+      at TestContext.<anonymous> (/Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/tests/atomic-read-state.test.cjs:48:12)
+      at async Test.run (node:internal/test_runner/test:1373:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { logs: [ [Object] ], emotions: [], tasks: [], idea_view_state: [ [Object], [Object] ] },
+    expected: { logs: [ [Object], [Object] ], emotions: [ [Object], [Object] ], tasks: [ [Object], [Object] ], idea_view_state: [ [Object], [Object] ] },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at harmonyos/tests/atomic-read-state.test.cjs:32:3
+✖ conditional: read-state IO failure leaves business rows, memory and viewed state unchanged (91.940209ms)
+  AssertionError [ERR_ASSERTION]: failed operation must roll back business and read-state rows
+  + actual - expected
+  
+    {
+  +   emotions: [],
+  +   idea_view_state: [],
+  -   emotions: [
+  -     {
+  -       id: '22222222-2222-4222-8222-222222222222',
+  -       payload: '{"id":"22222222-2222-4222-8222-222222222222","level":-1,"subEmotion":"sad","note":"项目延期，调整计划后再出发","recordDate":"2026-09-04","createdAt":"2026-09-04T03:00:00.000Z","intensity":4,"isFavorite":false}',
+  -       sort_key: '2026-09-04T03:00:00.000Z'
+  -     },
+  -     {
+  -       id: '66666666-6666-4666-8666-666666666666',
+  -       payload: '{"id":"66666666-6666-4666-8666-666666666666","level":2,"recordDate":"2026-09-04","createdAt":"2026-09-04T05:00:00.000Z"}',
+  -       sort_key: '2026-09-04T05:00:00.000Z'
+  -     }
+  -   ],
+  -   idea_view_state: [
+  -     {
+  -       id: '11111111-1111-4111-8111-111111111111',
+  -       payload: '{"viewedAt":"2026-10-24T20:08:18.324Z"}',
+  -       sort_key: '2026-10-24T20:08:18.324Z'
+  -     },
+  -     {
+  -       id: '55555555-5555-4555-8555-555555555555',
+  -       payload: '{"viewedAt":"2026-10-24T20:08:18.324Z"}',
+  -       sort_key: '2026-10-24T20:08:18.324Z'
+  -     }
+  -   ],
+      logs: [
+        {
+          id: '11111111-1111-4111-8111-111111111111',
+          payload: '{"id":"11111111-1111-4111-8111-111111111111","content":"完成跨端协议讨论","colorTag":"daily","category":"idea","importance":2,"createdAt":"2026-09-04T02:00:00.000Z","recordDate":"2026-09-04","isFavorite":true}',
+          sort_key: '2026-09-04T02:00:00.000Z'
+        },
+  -     {
+  -       id: '55555555-5555-4555-8555-555555555555',
+  -       payload: '{"id":"55555555-5555-4555-8555-555555555555","content":"想做一个新的 App 概念","colorTag":"inspiration","category":"idea","importance":0,"createdAt":"2026-09-04T04:00:00.000Z","recordDate":"2026-09-04"}',
+  -       sort_key: '2026-09-04T04:00:00.000Z'
+  -     }
+      ],
+  +   tasks: []
+  -   tasks: [
+  -     {
+  -       id: '33333333-3333-4333-8333-333333333333',
+  -       payload: '{"id":"33333333-3333-4333-8333-333333333333","title":"提交协议首稿","notes":"包含经理说明和技术契约","colorTag":"urgent","importance":3,"due":{"kind":"dateTime","at":"2026-09-06T01:00:00.000Z","timeZone":"Asia/Shanghai"},"reminderAt":"2026-09-06T00:30:00.000Z","createdAt":"2026-09-04T00:00:00.000Z","updatedAt":"2026-09-05T00:00:00.000Z","sourceLogId":"55555555-5555-4555-8555-555555555555","isFavorite":true}',
+  -       sort_key: '2026-09-05T00:00:00.000Z'
+  -     },
+  -     {
+  -       id: '44444444-4444-4444-8444-444444444444',
+  -       payload: '{"id":"44444444-4444-4444-8444-444444444444","title":"整理验收意见","colorTag":"memo","importance":0,"due":{"kind":"allDay","date":"2026-09-07"},"createdAt":"2026-09-04T00:00:00.000Z","updatedAt":"2026-09-04T00:00:00.000Z"}',
+  -       sort_key: '2026-09-04T00:00:00.000Z'
+  -     }
+  -   ]
+    }
+  
+      at TestContext.<anonymous> (/Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/tests/atomic-read-state.test.cjs:48:12)
+      at async Test.run (node:internal/test_runner/test:1373:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:946:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { logs: [ [Object] ], emotions: [], tasks: [], idea_view_state: [] },
+    expected: { logs: [ [Object], [Object] ], emotions: [ [Object], [Object] ], tasks: [ [Object], [Object] ], idea_view_state: [ [Object], [Object] ] },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at harmonyos/tests/atomic-read-state.test.cjs:32:3
+✖ clear: read-state IO failure leaves business rows, memory and viewed state unchanged (74.173875ms)
+  AssertionError [ERR_ASSERTION]: failed operation must roll back business and read-state rows
+  + actual - expected
+  ... Skipped lines
+  
+    {
+  +   emotions: [],
+  -   emotions: [
+  -     {
+  -       id: '22222222-2222-4222-8222-222222222222',
+  -       payload: '{"id":"22222222-2222-4222-8222-222222222222","level":-1,"subEmotion":"sad","note":"项目延期，调整计划后再出发","recordDate":"2026-09-04","createdAt":"2026-09-04T03:00:00.000Z","intensity":4,"isFavorite":false}',
+  -       sort_key: '2026-09-04T03:00:00.000Z'
+  -     },
+  -     {
+  -       id: '66666666-6666-4666-8666-666666666666',
+  -       payload: '{"id":"66666666-6666-4666-8666-666666666666","level":2,"recordDate":"2026-09-04","createdAt":"2026-09-04T05:00:00.000Z"}',
+  -       sort_key: '2026-09-04T05:00:00.000Z'
+  -     }
+  -   ],
+      idea_view_state: [
+        {
+          id: '11111111-1111-4111-8111-111111111111',
+          payload: '{"viewedAt":"2026-10-24T20:08:18.398Z"}',
+          sort_key: '2026-10-24T20:08:18.398Z'
+  ...
+      ],
+  +   logs: [],
+  +   tasks: []
+  -   logs: [
+  -     {
+  -       id: '11111111-1111-4111-8111-111111111111',
+  -       payload: '{"id":"11111111-1111-4111-8111-111111111111","content":"完成跨端协议讨论","colorTag":"daily","category":"idea","importance":2,"createdAt":"2026-09-04T02:00:00.000Z","recordDate":"2026-09-04","isFavorite":true}',
+  -       sort_key: '2026-09-04T02:00:00.000Z'
+  -     },
+  -     {
+  -       id: '55555555-5555-4555-8555-555555555555',
+  -       payload: '{"id":"55555555-5555-4555-8555-555555555555","content":"想做一个新的 App 概念","colorTag":"inspiration","category":"idea","importance":0,"createdAt":"2026-09-04T04:00:00.000Z","recordDate":"2026-09-04"}',
+  -       sort_key: '2026-09-04T04:00:00.000Z'
+  -     }
+  -   ],
+  -   tasks: [
+  -     {
+  -       id: '33333333-3333-4333-8333-333333333333',
+  -       payload: '{"id":"33333333-3333-4333-8333-333333333333","title":"提交协议首稿","notes":"包含经理说明和技术契约","colorTag":"urgent","importance":3,"due":{"kind":"dateTime","at":"2026-09-06T01:00:00.000Z","timeZone":"Asia/Shanghai"},"reminderAt":"2026-09-06T00:30:00.000Z","createdAt":"2026-09-04T00:00:00.000Z","updatedAt":"2026-09-05T00:00:00.000Z","sourceLogId":"55555555-5555-4555-8555-555555555555","isFavorite":true}',
+  -       sort_key: '2026-09-05T00:00:00.000Z'
+  -     },
+  -     {
+  -       id: '44444444-4444-4444-8444-444444444444',
+  -       payload: '{"id":"44444444-4444-4444-8444-444444444444","title":"整理验收意见","colorTag":"memo","importance":0,"due":{"kind":"allDay","date":"2026-09-07"},"createdAt":"2026-09-04T00:00:00.000Z","updatedAt":"2026-09-04T00:00:00.000Z"}',
+  -       sort_key: '2026-09-04T00:00:00.000Z'
+  -     }
+  -   ]
+    }
+  
+      at TestContext.<anonymous> (/Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/tests/atomic-read-state.test.cjs:48:12)
+      at async Test.run (node:internal/test_runner/test:1373:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:946:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { logs: [], emotions: [], tasks: [], idea_view_state: [ [Object], [Object] ] },
+    expected: { logs: [ [Object], [Object] ], emotions: [ [Object], [Object] ], tasks: [ [Object], [Object] ], idea_view_state: [ [Object], [Object] ] },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at harmonyos/tests/atomic-read-state.test.cjs:32:3
+✖ deleteLog: read-state IO failure leaves business rows, memory and viewed state unchanged (76.529541ms)
+  AssertionError [ERR_ASSERTION]: failed operation must roll back business and read-state rows
+  + actual - expected
+  ... Skipped lines
+  
+    {
+      emotions: [
+        {
+          id: '22222222-2222-4222-8222-222222222222',
+          payload: '{"id":"22222222-2222-4222-8222-222222222222","level":-1,"subEmotion":"sad","note":"项目延期，调整计划后再出发","recordDate":"2026-09-04","createdAt":"2026-09-04T03:00:00.000Z","intensity":4,"isFavorite":false}',
+  ...
+        },
+  -     {
+  -       id: '55555555-5555-4555-8555-555555555555',
+  -       payload: '{"id":"55555555-5555-4555-8555-555555555555","content":"想做一个新的 App 概念","colorTag":"inspiration","category":"idea","importance":0,"createdAt":"2026-09-04T04:00:00.000Z","recordDate":"2026-09-04"}',
+  -       sort_key: '2026-09-04T04:00:00.000Z'
+  -     }
+      ],
+      tasks: [
+        {
+          id: '33333333-3333-4333-8333-333333333333',
+          payload: '{"id":"33333333-3333-4333-8333-333333333333","title":"提交协议首稿","notes":"包含经理说明和技术契约","colorTag":"urgent","importance":3,"due":{"kind":"dateTime","at":"2026-09-06T01:00:00.000Z","timeZone":"Asia/Shanghai"},"reminderAt":"2026-09-06T00:30:00.000Z","createdAt":"2026-09-04T00:00:00.000Z","updatedAt":"2026-09-05T00:00:00.000Z","sourceLogId":"55555555-5555-4555-8555-555555555555","isFavorite":true}',
+  
+      at TestContext.<anonymous> (/Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/tests/atomic-read-state.test.cjs:48:12)
+      at async Test.run (node:internal/test_runner/test:1373:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:946:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { logs: [ [Object] ], emotions: [ [Object], [Object] ], tasks: [ [Object], [Object] ], idea_view_state: [ [Object], [Object] ] },
+    expected: { logs: [ [Object], [Object] ], emotions: [ [Object], [Object] ], tasks: [ [Object], [Object] ], idea_view_state: [ [Object], [Object] ] },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

@@ -164,3 +164,13 @@ Harmony injected private-data exception text reached the recovery IO log on the 
 Apple home/lock-screen widget content now carries native privacySensitive semantics. Snapshot schema, store location, timelines/reload paths, capture links, Control Center and unlocked layout are unchanged; no entitlement or protection-class flag added. Actual locked-device redaction/VoiceOver behavior remains unverified and depends on native policy/settings.
 
 Serial native gates: FlashKit **204 passed**; unsigned Harmony HAP build passed; macOS app/widget compile and behavior **13 passed**; iOS app/widget test build and simulator **14 passed**. No physical LAN/battery/thermal/widget/notification claim. Raw `m14-*` logs retained; parent failure is `m14-privacy-parent.log`. Broader source-review observations and gaps are in application-security-review.md.
+
+## M16 — Harmony business/read-state atomicity
+
+Four new failure-injection regressions reproduced committed business rows with stale memory/read-state on the parent: ordinary overwrite, preview-checked overwrite, clear, and log deletion all failed4/4. Previously read-state cleanup happened after the business commit (and mutated its map before successful IO); log deletion used two separate deletes.
+
+Those operations now include business and local read-state changes in the same existing RDB transaction. The pruned map is staged and published only after commit; SQL/row-insert failure rolls back all rows and leaves both memory projections unchanged. Successful retry preserves surviving read timestamps/schema2 metadata and publishes once; stale preview checks and merge behavior remain. No SQL schema/data migration, store relocation, credential change or new permission.
+
+Full contract/Harmony host gate **287 passed**; unsigned native ArkTS/HAP build passed. [Failing-parent, candidate and build receipts](evidence/transactions/) are committed. These tests execute actual store/controller sources with transactional RDB fakes; real Harmony RDB/power-loss/device behavior remains unverified. Apple/Android production source was unaffected, so their last cumulative gates remain204/13/14 and93-per-variant/native13pass+1manual skip respectively.
+
+M15 cached Gradle wrapper launch also reports8.14.3/JDK21.0.11 successfully; it is configuration sanity only, not a fresh-download checksum mismatch test.

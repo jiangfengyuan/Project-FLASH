@@ -1,0 +1,253 @@
+> hvigor [32mTYPE CHECK SUCCESSFUL in 295 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@PreBuild...  [39m
+> hvigor [32mFinished :entry:default@CreateModuleInfo... after 1 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@GenerateMetadata...  [39m
+> hvigor [32mFinished :entry:default@ConfigureCmake... after 1 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@MergeProfile...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@CreateBuildProfile...  [39m
+> hvigor [32mFinished :entry:default@PreCheckSyscap... after 1 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@GeneratePkgContextInfo...  [39m
+> hvigor [32mFinished :entry:default@GeneratePkgSdkInfo... after 2 ms [39m
+> hvigor [32mFinished :entry:default@ProcessIntegratedHsp... after 1 ms [39m
+> hvigor [32mFinished :entry:default@BuildNativeWithCmake... after 1 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@MakePackInfo...  [39m
+> hvigor [32mFinished :entry:default@SyscapTransform... after 20 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@ProcessProfile...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@ProcessRouterMap...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@ProcessShareConfig...  [39m
+> hvigor [32mFinished :entry:default@ProcessStartupConfig... after 2 ms [39m
+> hvigor [32mFinished :entry:default@BuildNativeWithNinja... after 1 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@ProcessResource...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@GenerateLoaderJson...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@ProcessLibs...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@CompileResource...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@DoNativeStrip...  [39m
+> hvigor [32mFinished :entry:default@BuildJS... after 1 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@CacheNativeLibs...  [39m
+> hvigor [33mWARN: [33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:152:39
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:153:41
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:154:45
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:156:43
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:172:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:174:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:176:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:178:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:201:37
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:202:37
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:203:41
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:204:38
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:244:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:245:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:246:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:247:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:248:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:326:34
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:329:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:444:50
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:447:21
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:447:61
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:447:91
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:449:14
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:532:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:533:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:541:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:542:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:620:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:805:35
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:813:14
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:827:16
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FlashStore.ets:839:22
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FormUpdateHelper.ets:74:22
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FormUpdateHelper.ets:85:21
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FormUpdateHelper.ets:106:15
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FormUpdateHelper.ets:107:15
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FormUpdateHelper.ets:114:15
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/FormUpdateHelper.ets:115:15
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/TaskReminderScheduler.ets:34:54
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/TaskReminderScheduler.ets:36:50
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/TaskReminderScheduler.ets:38:39
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/TaskReminderScheduler.ets:39:35
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/TaskReminderScheduler.ets:93:34
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/TaskReminderScheduler.ets:96:34
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/TaskReminderScheduler.ets:102:64
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/TaskReminderScheduler.ets:105:21
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/TaskReminderScheduler.ets:107:19
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/TaskReminderScheduler.ets:108:19
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/BackupFiles.ets:35:31
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/BackupFiles.ets:38:30
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/BackupFiles.ets:40:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/BackupFiles.ets:58:31
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/BackupFiles.ets:60:34
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/BackupFiles.ets:64:38
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/BackupFiles.ets:71:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/BackupFiles.ets:86:19
+ The system capacity of this api 'getUserDownloadDir' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/BackupFiles.ets:101:29
+ The system capacity of this api 'getUserDownloadDir' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/BackupFiles.ets:115:31
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/BackupFiles.ets:118:30
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/BackupFiles.ets:120:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/BackupFiles.ets:127:18
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/ShareService.ets:43:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/ShareService.ets:56:29
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/ShareService.ets:59:28
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/ShareService.ets:61:18
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/ShareService.ets:68:16
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/data/ShareService.ets:76:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/state/AppController.ets:155:42
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/state/AppController.ets:156:22
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/ets/state/AppController.ets:157:22
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[39m
+> hvigor [32mFinished :entry:default@CompileArkTS... after 17 min 44 s 112 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@GeneratePkgModuleJson...  [39m
+> hvigor [32mFinished :entry:default@ProcessCompiledResources... after 1 ms [39m
+> hvigor [32mFinished :entry:default@PackageHap... after 790 ms [39m
+> hvigor [32mFinished :entry:default@PackingCheck... after 2 ms [39m
+> hvigor [33mWARN: Will skip sign 'hos_hap'. No signingConfigs profile is configured in current project.
+             If needed, configure the signingConfigs in /Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/build-profile.json5.[39m
+> hvigor [32mFinished :entry:default@SignHap... after 1 ms [39m
+> hvigor [32mFinished :entry:default@CollectDebugSymbol... after 1 ms [39m
+> hvigor [32mFinished :entry:assembleHap... after 1 ms [39m
+> hvigor [32mBUILD SUCCESSFUL in 17 min 47 s 553 ms [39m
+
+33 tasks in total: 17 executed, 16 up-to-date
