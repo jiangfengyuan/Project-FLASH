@@ -33,6 +33,17 @@ export class NavigationState {
   fabProgress: number = 0;
 }
 
+// display.FoldStatus 原值桥接：0 未知 / 1 展开 / 2 折叠 / 3 半折叠。
+export const FOLD_STATUS_EXPANDED = 1;
+export const FOLD_STATUS_HALF_FOLDED = 3;
+
+// 宽屏布局裁决：半折叠强制单栏居中限宽；展开态折叠屏视同 840vp 双栏。
+export function contentLayout(isExpandedWindow: boolean, foldable: boolean, foldStatus: number): string {
+  if (foldable && foldStatus === FOLD_STATUS_HALF_FOLDED) return 'centered';
+  if (isExpandedWindow || (foldable && foldStatus === FOLD_STATUS_EXPANDED)) return 'dual';
+  return 'single';
+}
+
 @Observed
 export class ThemeState {
   themeMode: string = 'light';
@@ -45,9 +56,6 @@ export class ThemeState {
   themeTint: string = '#FFEAF2FF';
   themeDanger: string = '#FFFFF1F0';
   themeNavigation: string = '#FFFFFFFF';
-  themeGradientStart: string = '#FFF7F9FA';
-  themeGradientMiddle: string = '#FFF7F9FA';
-  themeGradientEnd: string = '#FFF7F9FA';
 
   isDark(): boolean {
     return resolveThemeDark(this.themeMode, this.systemDark);
@@ -73,11 +81,14 @@ export class HomeState {
   todayTaskCount: number = 0;
   todayTaskDoneCount: number = 0;
   recentLogs: LogItem[] = [];
+  // 未读灵感数（本地已读状态，不进备份）；提醒与角标按 IDEA_REMINDER_THRESHOLD 显示。
+  unviewedIdeaCount: number = 0;
 }
 
 @Observed
 export class LogsState {
   logs: LogItem[] = [];
+  logsVersion: number = 0;
   searchResults: LogItem[] = [];
   quickText: string = '';
   searchText: string = '';
@@ -87,8 +98,11 @@ export class LogsState {
   editCategory: string = '';
   editTag: string = '';
   editDate: string = '';
+  editImportance: number = 0;
   editError: string = '';
   editDiscard: boolean = false;
+  // 记录详情弹层：卡片点击进入详情，详情内再编辑/删除/分享。
+  detailLogId: string = '';
   captureText: string = '';
   captureCategory: string = Category.LOG;
   // 记录页筛选：filterCategory 为 all/log/idea/inbox，filterDate 为 all/today/week/month，
@@ -105,10 +119,16 @@ export class LogsState {
 @Observed
 export class EmotionState {
   emotions: EmotionRecord[] = [];
+  emotionsVersion: number = 0;
   emotionLevel: number = 0;
   emotionNote: string = '';
+  // 当前状态（具体心情）：快捷 chip 或自由文本，随情绪记录保存。
+  emotionStatus: string = '';
   selectedSubEmotion: string = SubEmotion.SAD;
   busy: boolean = false;
+  // 保存成功动效信号：savedFlash 递增触发页面差异化反馈，savedLevel 记录情绪极性。
+  savedFlash: number = 0;
+  savedLevel: number = 0;
 }
 
 @Observed
@@ -126,6 +146,7 @@ export class CalendarState {
   taskReminderMinutes: number = -1;
   calendarDayLimit: number = 30;
   activityDays: string[] = [];
+  dataVersion: number = 0;
   logsByDay: Map<string, LogItem[]> = new Map<string, LogItem[]>();
   emotionsByDay: Map<string, EmotionRecord[]> = new Map<string, EmotionRecord[]>();
   tasksByDay: Map<string, TaskItem[]> = new Map<string, TaskItem[]>();
@@ -169,6 +190,22 @@ export class SettingsState {
   agentRuntimeSupported: boolean = false;
   fileSandboxShareSupported: boolean = false;
   notificationSettingsSupported: boolean = false;
+  // 系统分享面板（ShareKit systemShare）能力探测；不可用时隐藏分享入口。
+  systemShareSupported: boolean = false;
+  // 减少动态效果：系统无公开查询接口，此为应用内设置（Preferences 持久化）。
+  reduceMotion: boolean = false;
+}
+
+// 减少动态效果的全局生效标记：由 AppController 随设置读写，
+// components/DesignTokens 的 motionDuration 据此把动效时长归零。
+let reduceMotionFlag: boolean = false;
+
+export function setReduceMotionEnabled(enabled: boolean): void {
+  reduceMotionFlag = enabled;
+}
+
+export function isReduceMotionEnabled(): boolean {
+  return reduceMotionFlag;
 }
 
 export enum DeleteKind {
@@ -185,12 +222,21 @@ export interface DeleteRequest {
 
 export interface ToastNotice {
   message: string;
+  level: string;
+}
+
+// Toast 级别归一：success/error/info，未知值按 info 处理。
+export function normalizeToastLevel(level: string): string {
+  return level === 'success' || level === 'error' ? level : 'info';
 }
 
 @Observed
 export class FeedbackState {
   notice?: ToastNotice;
   destructive?: DeleteRequest;
+  // 启动加载三态：loading/ready/error；error 时 startupError 携带原因，全页错误+重试。
+  startup: string = 'loading';
+  startupError: string = '';
 }
 
 export class AppSession {

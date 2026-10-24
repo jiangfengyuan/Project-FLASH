@@ -3,7 +3,7 @@ import { preferences, relationalStore } from '@kit.ArkData';
 import { util } from '@kit.ArkTS';
 import { fileIo } from '@kit.CoreFileKit';
 import {
-  BackupData, Category, ColorTag, EmotionRecord, importanceFromContent, LogItem, TaskItem
+  BackupData, Category, ColorTag, EmotionRecord, importanceFromContent, isValidImportance, LogItem, TaskItem
 } from '../models/Models';
 import { BackupService } from './BackupService';
 import { BackupDiff } from './BackupDiff';
@@ -42,6 +42,9 @@ const QUARANTINE_TTL_MILLIS = 30 * 24 * 60 * 60 * 1000;
 const LOGS_TABLE = 'logs';
 const EMOTIONS_TABLE = 'emotions';
 const TASKS_TABLE = 'tasks';
+// Idea Reminder 的已读状态：本机界面状态（对齐 Android idea_view_state 表），
+// 不写入 flash-backup-v2 备份，与业务数据同库存储但独立于快照导出。
+const IDEA_VIEW_TABLE = 'idea_view_state';
 
 interface RecoveryRaw {
   logs: string;
@@ -60,6 +63,21 @@ interface RecoveryArchive {
 interface RawPayloadRow {
   id: string;
   payload: string;
+}
+
+interface ParsedRowPayload {
+  ok: boolean;
+  value: Object | undefined;
+}
+
+export interface LogMetaEdit {
+  id: string;
+  category: string;
+  colorTag: string;
+}
+
+interface IdeaViewPayload {
+  viewedAt?: string;
 }
 
 interface DatabaseRecoveryEntry {
@@ -97,6 +115,8 @@ export class FlashStore {
   themeMode: string = 'light';
   recoveryWarning: string = '';
   hasRecoveryData: boolean = false;
+  // 灵感已读状态（logId → viewedAt ISO），load 时从 idea_view_state 表加载。
+  private viewedIdeaIds: Map<string, string> = new Map<string, string>();
   private settings?: preferences.Preferences;
   private database?: relationalStore.RdbStore;
   private initializing?: Promise<void>;
@@ -141,8 +161,9 @@ export class FlashStore {
     await this.createSchema();
     await this.migratePreferencesData();
     await this.migratePreferencesQuarantine();
-    this.cleanupQuarantine();
-    this.loadRecoveryState();
+    await this.cleanupQuarantine();
+    await this.loadRecoveryState();
+    await this.loadIdeaViewState();
     await this.loadBusinessData();
   }
 
@@ -154,6 +175,24 @@ export class FlashStore {
       'id TEXT PRIMARY KEY, sort_key TEXT NOT NULL, payload TEXT NOT NULL)');
     await database.executeSql(`CREATE TABLE IF NOT EXISTS ${TASKS_TABLE} (` +
       'id TEXT PRIMARY KEY, sort_key TEXT NOT NULL, payload TEXT NOT NULL)');
+    await database.executeSql(`CREATE TABLE IF NOT EXISTS ${IDEA_VIEW_TABLE} (` +
+      'id TEXT PRIMARY KEY, sort_key TEXT NOT NULL, payload TEXT NOT NULL)');
+  }
+
+  /** Load local idea read state. A corrupt row degrades to "unviewed", which
+   * only re-surfaces the reminder — never blocks startup. */
+  private async loadIdeaViewState(): Promise<void> {
+    const rows = await this.readPayloads(IDEA_VIEW_TABLE);
+    const viewed = new Map<string, string>();
+    for (const row of rows) {
+      let viewedAt = '';
+      try {
+        const parsed = JSON.parse(row.payload) as IdeaViewPayload;
+        viewedAt = typeof parsed.viewedAt === 'string' ? parsed.viewedAt : '';
+      } catch (_) {}
+      viewed.set(row.id, viewedAt);
+    }
+    this.viewedIdeaIds = viewed;
   }
 
   /** One-time, lossless migration from the former full-array Preferences storage. */
@@ -173,10 +212,10 @@ export class FlashStore {
       const parsed = BackupService.parse(document);
       migratedLogs = parsed.logs;
       if (parsed.skippedLogs > 0) {
-        this.keepLegacyRaw(QUARANTINE_LOGS_FILE, logsJson, '旧版日志有异常项目');
+        await this.keepLegacyRaw(QUARANTINE_LOGS_FILE, logsJson, '旧版日志有异常项目');
       }
     } catch (_) {
-      this.keepLegacyRaw(QUARANTINE_LOGS_FILE, logsJson, '旧版日志数据损坏');
+      await this.keepLegacyRaw(QUARANTINE_LOGS_FILE, logsJson, '旧版日志数据损坏');
     }
     try {
       const document = `{"version":"${BackupService.LEGACY_VERSION}","exportedAt":"${isoNow()}",` +
@@ -184,10 +223,10 @@ export class FlashStore {
       const parsed = BackupService.parse(document);
       migratedEmotions = parsed.emotions;
       if (parsed.skippedEmotions > 0) {
-        this.keepLegacyRaw(QUARANTINE_EMOTIONS_FILE, emotionsJson, '旧版情绪有异常项目');
+        await this.keepLegacyRaw(QUARANTINE_EMOTIONS_FILE, emotionsJson, '旧版情绪有异常项目');
       }
     } catch (_) {
-      this.keepLegacyRaw(QUARANTINE_EMOTIONS_FILE, emotionsJson, '旧版情绪数据损坏');
+      await this.keepLegacyRaw(QUARANTINE_EMOTIONS_FILE, emotionsJson, '旧版情绪数据损坏');
     }
     try {
       const document = `{"version":"${BackupService.VERSION}","exportedAt":"${isoNow()}",` +
@@ -196,10 +235,10 @@ export class FlashStore {
       const parsed = BackupService.parse(document);
       migratedTasks = parsed.tasks;
       if (parsed.skippedTasks > 0) {
-        this.keepLegacyRaw(QUARANTINE_TASKS_FILE, tasksJson, '旧版任务有异常项目');
+        await this.keepLegacyRaw(QUARANTINE_TASKS_FILE, tasksJson, '旧版任务有异常项目');
       }
     } catch (_) {
-      this.keepLegacyRaw(QUARANTINE_TASKS_FILE, tasksJson, '旧版任务数据损坏');
+      await this.keepLegacyRaw(QUARANTINE_TASKS_FILE, tasksJson, '旧版任务数据损坏');
     }
     await this.replaceDatabase(migratedLogs, migratedEmotions, migratedTasks);
     await settings.put(RDB_MIGRATED_KEY, true);
@@ -217,40 +256,31 @@ export class FlashStore {
     const emotions: EmotionRecord[] = [];
     const tasks: TaskItem[] = [];
     const rejected: DatabaseRecoveryEntry[] = [];
+    // Row-level validation: each payload is parsed once and checked with the
+    // same field validators BackupService.parse applies, instead of being
+    // string-wrapped into a single-use document and parsed twice more.
     for (const row of logValues) {
-      try {
-        JSON.parse(row.payload);
-        const parsed = BackupService.parse(this.singlePayloadDocument(LOGS_TABLE, row.payload));
-        if (parsed.logs.length === 1) logs.push(parsed.logs[0]);
-        else rejected.push(this.recoveryEntry(LOGS_TABLE, row, 'validation-rejected'));
-      } catch (_) {
-        rejected.push(this.recoveryEntry(LOGS_TABLE, row, 'malformed-json'));
-      }
+      const parsed = this.parseRowPayload(row.payload);
+      const item = parsed.ok ? BackupService.validatedLog(parsed.value as LogItem) : undefined;
+      if (item) logs.push(item);
+      else rejected.push(this.recoveryEntry(LOGS_TABLE, row, parsed.ok ? 'validation-rejected' : 'malformed-json'));
     }
     for (const row of emotionValues) {
-      try {
-        JSON.parse(row.payload);
-        const parsed = BackupService.parse(this.singlePayloadDocument(EMOTIONS_TABLE, row.payload));
-        if (parsed.emotions.length === 1) emotions.push(parsed.emotions[0]);
-        else rejected.push(this.recoveryEntry(EMOTIONS_TABLE, row, 'validation-rejected'));
-      } catch (_) {
-        rejected.push(this.recoveryEntry(EMOTIONS_TABLE, row, 'malformed-json'));
-      }
+      const parsed = this.parseRowPayload(row.payload);
+      const item = parsed.ok ? BackupService.validatedEmotion(parsed.value as EmotionRecord) : undefined;
+      if (item) emotions.push(item);
+      else rejected.push(this.recoveryEntry(EMOTIONS_TABLE, row, parsed.ok ? 'validation-rejected' : 'malformed-json'));
     }
     for (const row of taskValues) {
-      try {
-        JSON.parse(row.payload);
-        const parsed = BackupService.parse(this.singlePayloadDocument(TASKS_TABLE, row.payload));
-        if (parsed.tasks.length === 1) tasks.push(parsed.tasks[0]);
-        else rejected.push(this.recoveryEntry(TASKS_TABLE, row, 'validation-rejected'));
-      } catch (_) {
-        rejected.push(this.recoveryEntry(TASKS_TABLE, row, 'malformed-json'));
-      }
+      const parsed = this.parseRowPayload(row.payload);
+      const item = parsed.ok ? BackupService.validatedTask(parsed.value as TaskItem) : undefined;
+      if (item) tasks.push(item);
+      else rejected.push(this.recoveryEntry(TASKS_TABLE, row, parsed.ok ? 'validation-rejected' : 'malformed-json'));
     }
     // Persist the exact rejected bytes before hiding them from the normal view.
     // Quarantine persistence is best-effort: the originals stay in the database,
     // so a failed copy downgrades to a warning and must never fail initialization.
-    const quarantined = this.persistDatabaseRecovery(rejected);
+    const quarantined = await this.persistDatabaseRecovery(rejected);
     this.logs = logs;
     this.emotions = emotions;
     this.tasks = tasks;
@@ -263,11 +293,11 @@ export class FlashStore {
     }
   }
 
-  private loadRecoveryState(): void {
-    const logs = this.readQuarantineFile(QUARANTINE_LOGS_FILE);
-    const emotions = this.readQuarantineFile(QUARANTINE_EMOTIONS_FILE);
-    const tasks = this.readQuarantineFile(QUARANTINE_TASKS_FILE);
-    const databaseRaw = this.readQuarantineFile(QUARANTINE_RDB_FILE);
+  private async loadRecoveryState(): Promise<void> {
+    const logs = await this.readQuarantineFile(QUARANTINE_LOGS_FILE);
+    const emotions = await this.readQuarantineFile(QUARANTINE_EMOTIONS_FILE);
+    const tasks = await this.readQuarantineFile(QUARANTINE_TASKS_FILE);
+    const databaseRaw = await this.readQuarantineFile(QUARANTINE_RDB_FILE);
     this.hasRecoveryData = this.hasRecoveryData ||
       logs.length > 0 || emotions.length > 0 || tasks.length > 0 || databaseRaw.length > 0;
     if (this.hasRecoveryData && !this.recoveryWarning) {
@@ -295,23 +325,23 @@ export class FlashStore {
   private async moveLegacyQuarantine(settings: preferences.Preferences, key: string, file: string): Promise<boolean> {
     const value = await settings.get(key, '') as string;
     if (!value) return false;
-    if (!this.writeQuarantineFile(file, value)) return false;
+    if (!(await this.writeQuarantineFile(file, value))) return false;
     await settings.delete(key);
     return true;
   }
 
   /** A failed quarantine copy degrades to a warning. Losing the copy is
    * acceptable; blocking startup over it is not. */
-  private keepLegacyRaw(file: string, content: string, warning: string): void {
+  private async keepLegacyRaw(file: string, content: string, warning: string): Promise<void> {
     this.hasRecoveryData = true;
-    if (this.writeQuarantineFile(file, content)) {
+    if (await this.writeQuarantineFile(file, content)) {
       this.appendRecoveryWarning(`${warning}，原始数据已保留用于恢复`);
     } else {
       this.appendRecoveryWarning(`${warning}，但恢复副本写入失败，原始数据未能保留`);
     }
   }
 
-  private writeQuarantineFile(name: string, content: string): boolean {
+  private async writeQuarantineFile(name: string, content: string): Promise<boolean> {
     if (!this.filesDir) return false;
     try {
       if (new util.TextEncoder().encodeInto(content).length > QUARANTINE_MAX_FILE_BYTES) {
@@ -320,16 +350,16 @@ export class FlashStore {
       }
       const dir = `${this.filesDir}/quarantine`;
       try {
-        if (!fileIo.accessSync(dir)) fileIo.mkdirSync(dir, true);
+        if (!(await fileIo.access(dir))) await fileIo.mkdir(dir, true);
       } catch (_) {
-        fileIo.mkdirSync(dir, true);
+        await fileIo.mkdir(dir, true);
       }
-      const file = fileIo.openSync(`${dir}/${name}`,
+      const file = await fileIo.open(`${dir}/${name}`,
         fileIo.OpenMode.READ_WRITE | fileIo.OpenMode.CREATE | fileIo.OpenMode.TRUNC);
       try {
-        fileIo.writeSync(file.fd, content, { encoding: 'utf-8' });
+        await fileIo.write(file.fd, content, { encoding: 'utf-8' });
       } finally {
-        fileIo.closeSync(file);
+        await fileIo.close(file);
       }
       return true;
     } catch (error) {
@@ -342,23 +372,23 @@ export class FlashStore {
     return `${this.filesDir}/quarantine/${name}`;
   }
 
-  private readQuarantineFile(name: string): string {
+  private async readQuarantineFile(name: string): Promise<string> {
     if (!this.filesDir) return '';
     try {
       const path = this.quarantinePath(name);
-      if (!fileIo.accessSync(path)) return '';
-      const file = fileIo.openSync(path, fileIo.OpenMode.READ_ONLY);
+      if (!(await fileIo.access(path))) return '';
+      const file = await fileIo.open(path, fileIo.OpenMode.READ_ONLY);
       try {
-        const size = fileIo.statSync(file.fd).size;
+        const size = (await fileIo.stat(file.fd)).size;
         // Never load an oversized quarantine file: plaintext exposure stays
         // bounded even if a pre-upgrade leftover exceeds the cap.
         if (size < 1 || size > QUARANTINE_MAX_FILE_BYTES) return '';
         const buffer = new ArrayBuffer(size);
-        fileIo.readSync(file.fd, buffer, { length: size });
+        await fileIo.read(file.fd, buffer, { length: size });
         const decoder = util.TextDecoder.create('utf-8', { fatal: false, ignoreBOM: true });
         return decoder.decodeToString(new Uint8Array(buffer));
       } finally {
-        fileIo.closeSync(file);
+        await fileIo.close(file);
       }
     } catch (_) {
       return '';
@@ -367,25 +397,25 @@ export class FlashStore {
 
   /** Age out quarantine files. Best-effort, like every quarantine step: a
    * cleanup failure must never block startup. */
-  private cleanupQuarantine(): void {
+  private async cleanupQuarantine(): Promise<void> {
     if (!this.filesDir) return;
     for (const name of QUARANTINE_FILES) {
       try {
         const path = this.quarantinePath(name);
-        if (!fileIo.accessSync(path)) continue;
-        const file = fileIo.openSync(path, fileIo.OpenMode.READ_ONLY);
+        if (!(await fileIo.access(path))) continue;
+        const file = await fileIo.open(path, fileIo.OpenMode.READ_ONLY);
         let expired = false;
         try {
           // HarmonyOS Stat.mtime is documented as seconds since the epoch,
           // but some API levels report milliseconds; normalize by magnitude
           // so the TTL comparison holds in either unit.
-          const mtime = fileIo.statSync(file.fd).mtime;
+          const mtime = (await fileIo.stat(file.fd)).mtime;
           const mtimeMillis = mtime > 1e12 ? mtime : mtime * 1000;
           expired = Number.isFinite(mtimeMillis) && (Date.now() - mtimeMillis) > QUARANTINE_TTL_MILLIS;
         } finally {
-          fileIo.closeSync(file);
+          await fileIo.close(file);
         }
-        if (expired) fileIo.unlinkSync(path);
+        if (expired) await fileIo.unlink(path);
       } catch (error) {
         console.error(`Flash quarantine cleanup failed: ${(error as Error).message}`);
       }
@@ -395,12 +425,12 @@ export class FlashStore {
   /** Remove every quarantine file after the originals have been handed to the
    * user (successful recovery export) or explicitly discarded. Recomputed on
    * the next launch from what remains on disk. */
-  clearQuarantine(): void {
+  async clearQuarantine(): Promise<void> {
     if (this.filesDir) {
       for (const name of QUARANTINE_FILES) {
         try {
           const path = this.quarantinePath(name);
-          if (fileIo.accessSync(path)) fileIo.unlinkSync(path);
+          if (await fileIo.access(path)) await fileIo.unlink(path);
         } catch (error) {
           console.error(`Flash quarantine clear failed: ${(error as Error).message}`);
         }
@@ -421,23 +451,26 @@ export class FlashStore {
     return values;
   }
 
-  private singlePayloadDocument(table: string, raw: string): string {
-    const logs = table === LOGS_TABLE ? `[${raw}]` : '[]';
-    const emotions = table === EMOTIONS_TABLE ? `[${raw}]` : '[]';
-    const tasks = table === TASKS_TABLE ? `[${raw}]` : '[]';
-    return `{"version":"${BackupService.VERSION}","exportedAt":"${isoNow()}",` +
-      '"appVersion":"0.1.0","notes":"local-rdb-validation",' +
-      '"schemas":{"logs":1,"emotions":1,"tasks":1},' +
-      `"data":{"logs":${logs},"emotions":${emotions},"tasks":${tasks}}}`;
+  private parseRowPayload(payload: string): ParsedRowPayload {
+    // Mirrors the old document-wrapped path: an oversized payload tripped the
+    // file-size guard there and was quarantined as malformed-json.
+    if (new util.TextEncoder().encodeInto(payload).length > BackupService.MAX_BYTES) {
+      return { ok: false, value: undefined };
+    }
+    try {
+      return { ok: true, value: JSON.parse(payload) as Object };
+    } catch (_) {
+      return { ok: false, value: undefined };
+    }
   }
 
   private recoveryEntry(table: string, row: RawPayloadRow, reason: string): DatabaseRecoveryEntry {
     return { table: table, id: row.id, raw: row.payload, reason: reason, capturedAt: isoNow() };
   }
 
-  private persistDatabaseRecovery(incoming: DatabaseRecoveryEntry[]): boolean {
+  private async persistDatabaseRecovery(incoming: DatabaseRecoveryEntry[]): Promise<boolean> {
     if (incoming.length === 0) return true;
-    const stored = this.readQuarantineFile(QUARANTINE_RDB_FILE) || '[]';
+    const stored = await this.readQuarantineFile(QUARANTINE_RDB_FILE) || '[]';
     let entries: DatabaseRecoveryEntry[] = [];
     try {
       const parsed = JSON.parse(stored) as DatabaseRecoveryEntry[];
@@ -478,10 +511,10 @@ export class FlashStore {
 
   async recoveryArchive(): Promise<string | undefined> {
     if (!this.hasRecoveryData) return undefined;
-    const logs = this.readQuarantineFile(QUARANTINE_LOGS_FILE);
-    const emotions = this.readQuarantineFile(QUARANTINE_EMOTIONS_FILE);
-    const tasks = this.readQuarantineFile(QUARANTINE_TASKS_FILE);
-    const databaseRaw = this.readQuarantineFile(QUARANTINE_RDB_FILE) || '[]';
+    const logs = await this.readQuarantineFile(QUARANTINE_LOGS_FILE);
+    const emotions = await this.readQuarantineFile(QUARANTINE_EMOTIONS_FILE);
+    const tasks = await this.readQuarantineFile(QUARANTINE_TASKS_FILE);
+    const databaseRaw = await this.readQuarantineFile(QUARANTINE_RDB_FILE) || '[]';
     const raw: RecoveryRaw = { logs: logs, emotions: emotions, tasks: tasks };
     const archive: RecoveryArchive = {
       version: 'flash-recovery-v1',
@@ -528,23 +561,80 @@ export class FlashStore {
   async deleteLog(id: string): Promise<void> {
     return this.enqueue(async () => {
       await this.requiredDatabase().executeSql(`DELETE FROM ${LOGS_TABLE} WHERE id = ?`, [id]);
+      // Android 靠外键级联清理 idea_view_state；这里手动同步删除本机已读状态。
+      await this.requiredDatabase().executeSql(`DELETE FROM ${IDEA_VIEW_TABLE} WHERE id = ?`, [id]);
+      this.viewedIdeaIds.delete(id);
       this.logs = this.logs.filter((item: LogItem) => item.id !== id);
       this.changes.publish(StorePartition.LOGS);
     });
   }
 
+  /** 未读灵感 = 从未在本机查看过的灵感。已读状态不进跨端备份。 */
+  unviewedIdeas(): LogItem[] {
+    return this.logs.filter((item: LogItem) =>
+      item.category === Category.IDEA && !this.viewedIdeaIds.has(item.id));
+  }
+
+  async markIdeaViewed(id: string): Promise<void> {
+    if (this.viewedIdeaIds.has(id)) return;
+    return this.enqueue(async () => {
+      await this.persistIdeaViewed(id, isoNow());
+      this.changes.publish(StorePartition.LOGS);
+    });
+  }
+
+  /** 批量已读（首页提醒行/灵感视图进入时）：一次队列写入、单次发布。 */
+  async markAllIdeasViewed(): Promise<void> {
+    const pending = this.unviewedIdeas();
+    if (pending.length === 0) return;
+    return this.enqueue(async () => {
+      const viewedAt = isoNow();
+      for (const item of pending) {
+        await this.persistIdeaViewed(item.id, viewedAt);
+      }
+      this.changes.publish(StorePartition.LOGS);
+    });
+  }
+
+  private async persistIdeaViewed(id: string, viewedAt: string): Promise<void> {
+    await this.upsert(IDEA_VIEW_TABLE, id, viewedAt, JSON.stringify({ viewedAt: viewedAt }));
+    this.viewedIdeaIds.set(id, viewedAt);
+  }
+
+  /** 覆盖导入/清空后修剪已读表，避免指向已删除记录的残留行。仅影响本地提醒，
+   * 最坏结果是灵感重新显示为未读，因此不与业务替换共用同一事务。 */
+  private async pruneIdeaViewState(surviving: Set<string>): Promise<void> {
+    let dirty = false;
+    this.viewedIdeaIds.forEach((viewedAt: string, id: string) => {
+      if (!surviving.has(id)) {
+        this.viewedIdeaIds.delete(id);
+        dirty = true;
+      }
+    });
+    if (!dirty) return;
+    const database = this.requiredDatabase();
+    await database.executeSql(`DELETE FROM ${IDEA_VIEW_TABLE}`);
+    const rows: relationalStore.ValuesBucket[] = [];
+    this.viewedIdeaIds.forEach((viewedAt: string, id: string) => {
+      rows.push({ 'id': id, 'sort_key': viewedAt, 'payload': JSON.stringify({ viewedAt: viewedAt }) });
+    });
+    if (rows.length > 0) await database.batchInsert(IDEA_VIEW_TABLE, rows);
+  }
+
   /** One queued row write publishes only after all edited fields are persisted. */
-  async updateLog(id: string, content: string, category?: string, colorTag?: string, recordDate?: string): Promise<void> {
+  async updateLog(id: string, content: string, category?: string, colorTag?: string, recordDate?: string,
+    importance?: number): Promise<void> {
     return this.enqueue(async () => {
       const trimmed = content.trim();
       if (!trimmed) throw new Error('内容不能为空');
       if (content.length > 100000) throw new Error('内容超过 100000 字符，请删减后保存');
       if (recordDate !== undefined && !isValidRecordDay(recordDate)) throw new Error('请输入有效日期（YYYY-MM-DD）');
+      if (importance !== undefined && !isValidImportance(importance)) throw new Error('重要度需在 0 到 4 之间');
       const existing = this.logs.find((item: LogItem) => item.id === id);
       if (!existing) throw new Error('这条记录已不存在');
       const updated: LogItem = {
         id: existing.id, content: trimmed, colorTag: colorTag ?? existing.colorTag, category: category ?? existing.category,
-        importance: existing.importance, createdAt: existing.createdAt, recordDate: recordDate ?? existing.recordDate
+        importance: importance ?? existing.importance, createdAt: existing.createdAt, recordDate: recordDate ?? existing.recordDate
       };
       await this.upsert(LOGS_TABLE, updated.id, updated.createdAt, JSON.stringify(updated));
       this.logs = this.logs.map((item: LogItem) => item.id === id ? updated : item);
@@ -568,11 +658,49 @@ export class FlashStore {
     });
   }
 
-  async addEmotion(level: number, subEmotion?: string, note?: string): Promise<void> {
+  /** Batch form of updateLogMeta: one queued pass, one publish. A failure
+   * stops the remaining rows; rows already persisted stay visible in memory,
+   * matching what a per-row loop would leave behind. */
+  async updateLogsMetaBatch(edits: LogMetaEdit[]): Promise<void> {
+    return this.enqueue(async () => {
+      const editsById = new Map<string, LogMetaEdit>();
+      edits.forEach((edit: LogMetaEdit) => editsById.set(edit.id, edit));
+      if (editsById.size === 0) return;
+      const next = this.logs.slice();
+      let applied = 0;
+      let failure: Error | undefined;
+      for (let index = 0; index < next.length; index++) {
+        const edit = editsById.get(next[index].id);
+        if (!edit) continue;
+        const existing = next[index];
+        const updated: LogItem = {
+          id: existing.id, content: existing.content, colorTag: edit.colorTag, category: edit.category,
+          importance: existing.importance, createdAt: existing.createdAt, recordDate: existing.recordDate
+        };
+        try {
+          await this.upsert(LOGS_TABLE, updated.id, updated.createdAt, JSON.stringify(updated));
+        } catch (error) {
+          failure = error as Error;
+          break;
+        }
+        next[index] = updated;
+        applied++;
+      }
+      if (applied > 0) {
+        this.logs = next;
+        this.changes.publish(StorePartition.LOGS);
+      }
+      if (failure) throw failure;
+    });
+  }
+
+  async addEmotion(level: number, subEmotion?: string, note?: string, status?: string): Promise<void> {
     return this.enqueue(async () => {
       const record: EmotionRecord = {
         id: util.generateRandomUUID(true), level: Math.max(-3, Math.min(3, Math.round(level))),
-        subEmotion: level < 0 ? subEmotion : undefined, status: undefined,
+        subEmotion: level < 0 ? subEmotion : undefined,
+        // 具体心情状态：PRD 语义为短文本（≤50），契约上限远高于此。
+        status: status?.trim().slice(0, 50) || undefined,
         note: note?.trim().slice(0, 2000) || undefined, recordDate: dayString(), createdAt: isoNow()
       };
       await this.upsert(EMOTIONS_TABLE, record.id, record.createdAt, JSON.stringify(record));
@@ -610,6 +738,7 @@ export class FlashStore {
   async replaceAll(logs: LogItem[], emotions: EmotionRecord[], tasks: TaskItem[] = []): Promise<void> {
     return this.enqueue(async () => {
       await this.replaceDatabase(logs, emotions, tasks);
+      await this.pruneIdeaViewState(new Set<string>(logs.map((item: LogItem) => item.id)));
       this.logs = logs.slice(); this.emotions = emotions.slice(); this.tasks = tasks.slice();
       this.sortAll();
       this.changes.publish(StorePartition.ALL);
@@ -626,6 +755,7 @@ export class FlashStore {
     return this.enqueue(async () => {
       if (!BackupDiff.sameData(expected, this.snapshot())) return false;
       await this.replaceDatabase(logs, emotions, tasks);
+      await this.pruneIdeaViewState(new Set<string>(logs.map((item: LogItem) => item.id)));
       this.logs = logs.slice(); this.emotions = emotions.slice(); this.tasks = tasks.slice();
       this.sortAll();
       this.changes.publish(StorePartition.ALL);
@@ -660,6 +790,7 @@ export class FlashStore {
   async clearAll(): Promise<void> {
     return this.enqueue(async () => {
       await this.replaceDatabase([], [], []);
+      await this.pruneIdeaViewState(new Set<string>());
       this.logs = []; this.emotions = []; this.tasks = [];
       this.changes.publish(StorePartition.ALL);
     });

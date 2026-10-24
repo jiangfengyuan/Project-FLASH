@@ -5,6 +5,8 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import SwiftUI
+import FlashCore
+import FlashDesign
 
 /// 首次启动欢迎页（对应 Android WelcomeScreen）。完成后 setWelcomed。
 /// 翻页：旧页以 .appear 反向过渡淡出；新页图标/标题/副标题按 50ms 级联
@@ -28,25 +30,25 @@ struct WelcomeView: View {
     private var shown: Bool { shownPage == page }
 
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: Spacing.lg) {
             Spacer()
-            VStack(spacing: 12) {
+            VStack(spacing: Spacing.sm) {
                 // 图标有标题文字承载信息，对读屏标记为装饰
                 Image(systemName: pages[page].symbol)
-                    .font(.system(size: 56))
+                    .scaledSystemFont(size: 56, relativeTo: .largeTitle)
                     .foregroundStyle(pages[page].tint)
-                    .padding(.bottom, 8)
+                    .padding(.bottom, Spacing.xs)
                     .opacity(shown ? 1 : 0)
                     .scaleEffect(shown || reduceMotion ? 1 : 0.96)
                     .animation(entrance(0), value: shownPage)
                     .accessibilityHidden(true)
                 Text(pages[page].title)
-                    .font(.title).bold()
+                    .font(Typography.heroTitle)
                     .opacity(shown ? 1 : 0)
                     .offset(y: shown || reduceMotion ? 0 : 6)
                     .animation(entrance(1), value: shownPage)
                 Text(pages[page].subtitle)
-                    .font(.body)
+                    .font(Typography.body)
                     .foregroundStyle(.secondary)
                     .opacity(shown ? 1 : 0)
                     .offset(y: shown || reduceMotion ? 0 : 6)
@@ -68,9 +70,9 @@ struct WelcomeView: View {
                         .modifier(HoverZoomModifier(reduceMotion: reduceMotion))
                 }
             }
-            .padding(.bottom, 32)
+            .padding(.bottom, Spacing.xl)
         }
-        .frame(width: 480, height: 420)
+        .frame(width: 480, height: 420) // 欢迎窗固有尺寸（几何值）
         .padding()
     }
 

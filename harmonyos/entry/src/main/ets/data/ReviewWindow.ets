@@ -64,11 +64,13 @@ function previousDays(count: number, today: Date): string[] {
 }
 
 function countInDays(dates: string[], days: string[]): number {
-  return dates.filter((date: string) => days.includes(date)).length;
+  const daySet = new Set<string>(days);
+  return dates.filter((date: string) => daySet.has(date)).length;
 }
 
 function averageLevel(emotions: EmotionRecord[], days: string[]): number | null {
-  const inWindow = emotions.filter((item: EmotionRecord) => days.includes(item.recordDate));
+  const daySet = new Set<string>(days);
+  const inWindow = emotions.filter((item: EmotionRecord) => daySet.has(item.recordDate));
   if (inWindow.length === 0) return null;
   return inWindow.reduce((sum: number, item: EmotionRecord) => sum + item.level, 0) / inWindow.length;
 }
@@ -132,7 +134,8 @@ export interface EmotionDistribution {
 }
 
 export function emotionDistribution(emotions: EmotionRecord[], days: string[]): EmotionDistribution {
-  const inWindow = emotions.filter((item: EmotionRecord) => days.includes(item.recordDate));
+  const daySet = new Set<string>(days);
+  const inWindow = emotions.filter((item: EmotionRecord) => daySet.has(item.recordDate));
   const slices = new Map<string, number>();
   let positive = 0;
   let neutral = 0;

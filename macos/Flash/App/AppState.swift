@@ -5,14 +5,16 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import Observation
+import FlashCore
+import FlashDesign
 
 enum Module: String, CaseIterable, Identifiable {
-    case home, explore, logflow, emotion, calendar, stats, settings
+    case home, explore, logflow, emotion, calendar, stats, memory, settings
 
     var id: String { rawValue }
 
     /// 一级导航：此刻 / 记录 / 回顾 / 设置；
-    /// 情绪、日历、日志流为次级入口（侧栏分组展示）
+    /// 情绪、日历、日志流、Memory 为次级入口（侧栏分组展示）
     var title: String {
         switch self {
         case .home: "此刻"
@@ -21,6 +23,7 @@ enum Module: String, CaseIterable, Identifiable {
         case .emotion: "情绪"
         case .calendar: "日历"
         case .stats: "回顾"
+        case .memory: "Memory"
         case .settings: "设置"
         }
     }
@@ -33,8 +36,43 @@ enum Module: String, CaseIterable, Identifiable {
         case .emotion: "face.smiling"
         case .calendar: "calendar"
         case .stats: "chart.line.uptrend.xyaxis"
+        // sparkles 已被菜单栏伴侣（MenuBarExtra）占用；周报是「回看过去一周」，
+        // 用回溯语义图标（PRD §32 建议方向之一）
+        case .memory: "clock.arrow.circlepath"
         case .settings: "gearshape"
         }
+    }
+}
+
+/// 跨模块定位目标（全局搜索跳转 / 日历「查看灵感」）：目标模块 + 可选载荷。
+/// 消费方按载荷类型取用：记录页取 logID 打开编辑弹层；日历页取 taskDate 选中日期；
+/// 情绪记录无详情编辑态，仅切换模块即可。
+struct FocusTarget: Equatable {
+    let module: Module
+    /// 记录/灵感 id：记录页打开该记录的编辑弹层
+    var logID: String? = nil
+    /// 任务的日历日（yyyy-MM-dd）：日历页选中并翻到该日期
+    var taskDate: String? = nil
+
+    static func log(_ id: String) -> FocusTarget { FocusTarget(module: .explore, logID: id) }
+    static var emotion: FocusTarget { FocusTarget(module: .emotion) }
+    static func task(on date: String?) -> FocusTarget { FocusTarget(module: .calendar, taskDate: date) }
+}
+
+extension FocusTarget {
+    /// macOS 模块化载荷 ↔ 共享路由目标
+    init(_ destination: FocusDestination) {
+        switch destination {
+        case .log(let id): self = .log(id)
+        case .emotion: self = .emotion
+        case .task(let date): self = .task(on: date)
+        }
+    }
+
+    var destination: FocusDestination {
+        if let logID { return .log(logID) }
+        if module == .calendar { return .task(taskDate) }
+        return .emotion
     }
 }
 
@@ -48,9 +86,15 @@ final class AppState {
     /// 菜单「导出备份…」⇧⌘E → token 递增，Settings 监听并弹导出面板
     private(set) var exportRequestToken = 0
     private(set) var handledExportToken = 0
-    /// 菜单「搜索」⌘K → 切到搜索页 + token 递增，Explore 监听并聚焦搜索框
-    private(set) var searchRequestToken = 0
-    private(set) var handledSearchToken = 0
+    /// 菜单「搜索」⌘K → 唤起 RootView 层的全局搜索浮层（Spotlight 风格）
+    var isGlobalSearchPresented = false
+    /// 跨模块定位：token + 载荷模式（同 requestSearch 旧 token 的消费语义），
+    /// 目标页 onAppear 兜底 + onChange 消费，handled token 与请求 token 同存于此，
+    /// 视图重建后不会归零，保证不回放旧 token。
+    /// 载荷与 token 存于共享 FocusRouter（FlashCore），共享视图（日历等）直接经环境读取；
+    /// 本类保留 FocusTarget API 作 macOS 侧适配。
+    let focusRouter = FocusRouter()
+    var focusRequestToken: Int { focusRouter.requestToken }
     /// 本地数据库回退提示；非 nil 时由 RootView 弹 alert。
     /// 持久化容器创建失败、降级为内存模式时本次运行数据不持久，必须告知用户。
     /// setter 开放：RootView「我知道了」直接置 nil 清除（亦可用 clearDatabaseFallbackMessage()）。
@@ -72,18 +116,32 @@ final class AppState {
         exportRequestToken += 1
     }
 
-    /// ⌘K 搜索：先切到搜索页再递增 token。
-    /// 若已在搜索页，ExploreView 的 onChange 直接消费；不在搜索页时本视图随切换重建，
-    /// onAppear 兜底消费一次，handled token 与请求 token 同存于 AppState，
-    /// 视图重建后不会归零，保证不回放旧 token。
+    /// ⌘K 全局搜索：唤起浮层（不切模块；Explore 页内搜索是独立能力，不再响应 ⌘K）
     func requestSearch() {
-        selectedModule = .explore
-        searchRequestToken += 1
+        isGlobalSearchPresented = true
+    }
+
+    init() {
+        // 路由先切模块再发 token（共享视图经 FocusRouter.request 发起的定位同样切模块）
+        focusRouter.onRequest = { [weak self] destination in
+            self?.selectedModule = FocusTarget(destination).module
+        }
+    }
+
+    /// 跨模块定位：先切模块再发 token，目标页消费载荷后清除
+    func requestFocus(_ target: FocusTarget) {
+        focusRouter.request(target.destination)
+    }
+
+    /// 目标页消费一次：token 未消费过才返回载荷；无论载荷是否适用都标记已处理，
+    /// 避免不适用载荷（如情绪跳转无 logID）滞留后被后续页面误消费
+    @discardableResult
+    func consumeFocusTarget() -> FocusTarget? {
+        focusRouter.consume().map(FocusTarget.init)
     }
 
     func markNewLogHandled() { handledNewLogToken = newLogRequestToken }
     func markExportHandled() { handledExportToken = exportRequestToken }
-    func markSearchHandled() { handledSearchToken = searchRequestToken }
 
     /// 启动时检测数据库回退标记（由 App 装配层在容器创建后调用，
     /// 标记来自 FlashDatabase.makeContainerWithFallback / RepositoryEnvironment.makeDefault）。

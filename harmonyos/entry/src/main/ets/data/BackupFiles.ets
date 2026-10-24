@@ -32,18 +32,18 @@ export class BackupFiles {
     const viewPicker = new picker.DocumentViewPicker(context);
     const uris = await viewPicker.save(options);
     if (uris.length === 0) throw new Error('未选择保存位置');
-    const file = fileIo.openSync(uris[0], fileIo.OpenMode.READ_WRITE | fileIo.OpenMode.TRUNC);
+    const file = await fileIo.open(uris[0], fileIo.OpenMode.READ_WRITE | fileIo.OpenMode.TRUNC);
     let written: number = 0;
     try {
-      written = fileIo.writeSync(file.fd, json, { encoding: 'utf-8' });
+      written = await fileIo.write(file.fd, json, { encoding: 'utf-8' });
     } finally {
-      fileIo.closeSync(file);
+      await fileIo.close(file);
     }
-    // writeSync may report a short write (e.g. full disk) instead of throwing;
+    // write may report a short write (e.g. full disk) instead of throwing;
     // a truncated backup must never look like a successful export.
     const expected = new util.TextEncoder().encodeInto(json).length;
     if (written !== expected) {
-      try { fileIo.unlinkSync(uris[0]); } catch (_) {}
+      try { await fileIo.unlink(uris[0]); } catch (_) {}
       throw new Error('备份写入不完整，导出失败');
     }
   }
@@ -55,20 +55,20 @@ export class BackupFiles {
     const viewPicker = new picker.DocumentViewPicker(context);
     const uris = await viewPicker.select(options);
     if (uris.length === 0) throw new Error('未选择备份文件');
-    const file = fileIo.openSync(uris[0], fileIo.OpenMode.READ_ONLY);
+    const file = await fileIo.open(uris[0], fileIo.OpenMode.READ_ONLY);
     try {
-      const size = fileIo.statSync(file.fd).size;
+      const size = (await fileIo.stat(file.fd)).size;
       if (size > BackupService.MAX_BYTES) throw new Error('备份文件超过 50 MB');
       if (size < 1) throw new Error('备份文件为空');
       const buffer = new ArrayBuffer(size);
-      const bytesRead = fileIo.readSync(file.fd, buffer, { length: size });
+      const bytesRead = await fileIo.read(file.fd, buffer, { length: size });
       if (bytesRead !== size) throw new Error('备份文件读取不完整');
       // No ignoreBOM: a UTF-8 BOM decodes to U+FEFF and the strict importer
       // rejects it, matching the Android and macOS import paths.
       const decoder = util.TextDecoder.create('utf-8', { fatal: true });
       return decoder.decodeToString(new Uint8Array(buffer));
     } finally {
-      fileIo.closeSync(file);
+      await fileIo.close(file);
     }
   }
 
@@ -104,27 +104,27 @@ export class BackupFiles {
     }
     let dir = BackupFiles.joinPath(baseDir, BackupFiles.SHARED_EXPORT_DIR);
     try {
-      if (!fileIo.accessSync(dir)) fileIo.mkdirSync(dir);
+      if (!(await fileIo.access(dir))) await fileIo.mkdir(dir);
     } catch (_) {
       dir = baseDir;
     }
     const day = dayString();
     const target = BackupFiles.joinPath(dir, BackupFiles.sharedExportName(filePrefix, day));
     const temp = `${target}.tmp`;
-    try { fileIo.unlinkSync(temp); } catch (_) {}
-    const file = fileIo.openSync(temp, fileIo.OpenMode.READ_WRITE | fileIo.OpenMode.CREATE | fileIo.OpenMode.TRUNC);
+    try { await fileIo.unlink(temp); } catch (_) {}
+    const file = await fileIo.open(temp, fileIo.OpenMode.READ_WRITE | fileIo.OpenMode.CREATE | fileIo.OpenMode.TRUNC);
     let written: number = 0;
     try {
-      written = fileIo.writeSync(file.fd, json, { encoding: 'utf-8' });
+      written = await fileIo.write(file.fd, json, { encoding: 'utf-8' });
     } finally {
-      fileIo.closeSync(file);
+      await fileIo.close(file);
     }
     const expected = new util.TextEncoder().encodeInto(json).length;
     if (written !== expected) {
-      try { fileIo.unlinkSync(temp); } catch (_) {}
+      try { await fileIo.unlink(temp); } catch (_) {}
       throw new Error('备份写入不完整，导出失败');
     }
-    fileIo.renameSync(temp, target);
+    await fileIo.rename(temp, target);
     return { status: SharedExportStatus.EXPORTED, path: target };
   }
 

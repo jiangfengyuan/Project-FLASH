@@ -203,22 +203,64 @@ export class BackupService {
 
   static exportJSON(logs: LogItem[], emotions: EmotionRecord[], tasks: TaskItem[] = [],
     notes: string = ''): string {
-    const data: BackupData = {
-      logs: logs,
-      emotions: emotions,
-      tasks: tasks
-    };
+    // Same metadata guard the strict pass applied to the constructed document.
+    if (typeof BackupService.appVersion !== 'string' || typeof notes !== 'string' ||
+      notes.length > BackupService.MAX_FIELD_LENGTH) throw new Error('/：备份版本或元信息不合法');
+    if (logs.length > BackupService.MAX_ENTRY_COUNT || emotions.length > BackupService.MAX_ENTRY_COUNT ||
+      tasks.length > BackupService.MAX_ENTRY_COUNT) throw new Error('/data：数组超过上限');
+    // Locally produced records no longer round-trip through
+    // stringify→parseStrict→stringify: the same field validators run directly
+    // and the document is stringified once. Output stays identical.
     const document: BackupDocument = {
       version: BackupService.VERSION,
       exportedAt: isoNow(),
       appVersion: BackupService.appVersion,
       notes: notes,
       schemas: { logs: 1, emotions: 1, tasks: 1 },
-      data: data
+      data: {
+        logs: BackupService.exportLogs(logs),
+        emotions: BackupService.exportEmotions(emotions),
+        tasks: BackupService.exportTasks(tasks)
+      }
     };
-    const validated = BackupService.parseStrict(JSON.stringify(document));
-    document.data = { logs: validated.logs, emotions: validated.emotions, tasks: validated.tasks };
-    return JSON.stringify(document, null, 2);
+    const output = JSON.stringify(document, null, 2);
+    if (new util.TextEncoder().encodeInto(output).length > BackupService.MAX_BYTES) {
+      throw new Error('/：文件超过 50 MiB');
+    }
+    return output;
+  }
+
+  private static exportLogs(logs: LogItem[]): LogItem[] {
+    const ids = new Set<string>();
+    return logs.map((item: LogItem) => {
+      if (!BackupService.validLog(item) || ids.has(item.id)) {
+        throw new Error('/data/logs：存在非法或重复记录，请先处理异常数据再导出');
+      }
+      ids.add(item.id);
+      return BackupService.normalizedLog(item);
+    });
+  }
+
+  private static exportEmotions(emotions: EmotionRecord[]): EmotionRecord[] {
+    const ids = new Set<string>();
+    return emotions.map((item: EmotionRecord) => {
+      if (!BackupService.validEmotion(item) || ids.has(item.id)) {
+        throw new Error('/data/emotions：存在非法或重复记录，请先处理异常数据再导出');
+      }
+      ids.add(item.id);
+      return BackupService.normalizedEmotion(item);
+    });
+  }
+
+  private static exportTasks(tasks: TaskItem[]): TaskItem[] {
+    const ids = new Set<string>();
+    return tasks.map((item: TaskItem) => {
+      if (!BackupService.validTask(item) || ids.has(item.id)) {
+        throw new Error('/data/tasks：存在非法或重复记录，请先处理异常数据再导出');
+      }
+      ids.add(item.id);
+      return BackupService.normalizedTask(item);
+    });
   }
 
   static parse(json: string): BackupImport {
@@ -269,15 +311,7 @@ export class BackupService {
       const item = sourceLogs[index];
       if (BackupService.validLog(item) && !logIds.has(item.id)) {
         logIds.add(item.id);
-        result.logs.push({
-          id: item.id,
-          content: item.content,
-          colorTag: item.colorTag,
-          category: item.category,
-          importance: item.importance,
-          createdAt: BackupService.normalizedISO(item.createdAt),
-          recordDate: item.recordDate
-        });
+        result.logs.push(BackupService.normalizedLog(item));
       } else {
         result.skippedLogs++;
       }
@@ -291,15 +325,7 @@ export class BackupService {
       const item = sourceEmotions[index];
       if (BackupService.validEmotion(item) && !emotionIds.has(item.id)) {
         emotionIds.add(item.id);
-        result.emotions.push({
-          id: item.id,
-          level: item.level,
-          subEmotion: item.subEmotion ?? undefined,
-          status: item.status ?? undefined,
-          note: item.note ?? undefined,
-          recordDate: item.recordDate,
-          createdAt: BackupService.normalizedISO(item.createdAt)
-        });
+        result.emotions.push(BackupService.normalizedEmotion(item));
       } else {
         result.skippedEmotions++;
       }
@@ -423,6 +449,30 @@ export class BackupService {
       typeof item.due.timeZone === 'string' && BackupService.validTimeZone(item.due.timeZone);
   }
 
+  private static normalizedLog(item: LogItem): LogItem {
+    return {
+      id: item.id,
+      content: item.content,
+      colorTag: item.colorTag,
+      category: item.category,
+      importance: item.importance,
+      createdAt: BackupService.normalizedISO(item.createdAt),
+      recordDate: item.recordDate
+    };
+  }
+
+  private static normalizedEmotion(item: EmotionRecord): EmotionRecord {
+    return {
+      id: item.id,
+      level: item.level,
+      subEmotion: item.subEmotion ?? undefined,
+      status: item.status ?? undefined,
+      note: item.note ?? undefined,
+      recordDate: item.recordDate,
+      createdAt: BackupService.normalizedISO(item.createdAt)
+    };
+  }
+
   private static normalizedTask(item: TaskItem): TaskItem {
     const due = item.due;
     let normalizedDue: TaskDue;
@@ -475,6 +525,21 @@ export class BackupService {
   static normalizedTimestamp(value: string): string {
     if (!BackupService.validISO(value)) throw new Error('/updatedAt：任务时间不合法');
     return BackupService.normalizedISO(value);
+  }
+
+  /** Single-record validation + normalization for row-level checks: startup
+   * loading validates one stored payload at a time without wrapping it in a
+   * whole backup document first. */
+  static validatedLog(item: LogItem): LogItem | undefined {
+    return BackupService.validLog(item) ? BackupService.normalizedLog(item) : undefined;
+  }
+
+  static validatedEmotion(item: EmotionRecord): EmotionRecord | undefined {
+    return BackupService.validEmotion(item) ? BackupService.normalizedEmotion(item) : undefined;
+  }
+
+  static validatedTask(item: TaskItem): TaskItem | undefined {
+    return BackupService.validTask(item) ? BackupService.normalizedTask(item) : undefined;
   }
 
   private static normalizedISO(value?: string): string {

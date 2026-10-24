@@ -1,8 +1,9 @@
 import { common } from '@kit.AbilityKit';
 import { util } from '@kit.ArkTS';
 import { i18n } from '@kit.LocalizationKit';
-import { dayString, shiftCalendarMonth } from '../data/DateUtils';
-import { ColorTag, TaskDueKind, TaskItem } from '../models/Models';
+import { dayString, shiftCalendarMonth, calendarWeeks } from '../data/DateUtils';
+import { calendarDayMarkers, DayMarkers, EMPTY_DAY_MARKERS } from '../data/CalendarMarkers';
+import { ColorTag, EmotionRecord, LogItem, TaskDueKind, TaskItem } from '../models/Models';
 import { CalendarState } from '../state/FeatureStates';
 import { FlashStore } from '../data/FlashStore';
 import { TaskReminderScheduler } from '../data/TaskReminderScheduler';
@@ -12,11 +13,67 @@ export class CalendarController {
   private state: CalendarState;
   private store: FlashStore;
   private runtime: ControllerRuntime;
+  private weeksMonth: string = '';
+  private weeksVersion: number = -1;
+  private weeksCache: string[][] = [];
+  private countsVersion: number = -1;
+  private countsCache: Map<string, number> = new Map<string, number>();
+  private markersVersion: number = -1;
+  private markersCache: Map<string, DayMarkers> = new Map<string, DayMarkers>();
   constructor(state: CalendarState, runtime: ControllerRuntime, store: FlashStore = FlashStore.instance) {
     this.state = state;
     this.store = store;
     this.runtime = runtime;
   }
+
+  /** Month grid memoized per (month, data version): 42 cells re-render on
+   * every state touch, and the grid only changes with the data or the month. */
+  monthWeeks(): string[][] {
+    if (this.weeksMonth !== this.state.displayedMonth || this.weeksVersion !== this.state.dataVersion) {
+      this.weeksCache = calendarWeeks(this.state.displayedMonth);
+      this.weeksMonth = this.state.displayedMonth;
+      this.weeksVersion = this.state.dataVersion;
+    }
+    return this.weeksCache;
+  }
+
+  /** Per-day record totals aggregated once per data version; each of the 42
+   * day cells asks for its count several times per render. */
+  dayCount(day: string): number {
+    if (this.countsVersion !== this.state.dataVersion) {
+      const counts = new Map<string, number>();
+      this.state.logsByDay.forEach((items: LogItem[], key: string) => {
+        counts.set(key, (counts.get(key) ?? 0) + items.length);
+      });
+      this.state.emotionsByDay.forEach((items: EmotionRecord[], key: string) => {
+        counts.set(key, (counts.get(key) ?? 0) + items.length);
+      });
+      this.state.tasksByDay.forEach((items: TaskItem[], key: string) => {
+        counts.set(key, (counts.get(key) ?? 0) + items.length);
+      });
+      this.countsCache = counts;
+      this.countsVersion = this.state.dataVersion;
+    }
+    return this.countsCache.get(day) ?? 0;
+  }
+
+  /** 日期格视觉编码聚合（色点 + 主导情绪），与 dayCount 同一数据版本节奏。 */
+  dayMarkers(day: string): DayMarkers {
+    if (this.markersVersion !== this.state.dataVersion) {
+      const markers = new Map<string, DayMarkers>();
+      const days = new Set<string>();
+      this.state.logsByDay.forEach((_, key: string) => { days.add(key); });
+      this.state.emotionsByDay.forEach((_, key: string) => { days.add(key); });
+      days.forEach((key: string) => {
+        markers.set(key, calendarDayMarkers(
+          this.state.logsByDay.get(key) ?? [], this.state.emotionsByDay.get(key) ?? []));
+      });
+      this.markersCache = markers;
+      this.markersVersion = this.state.dataVersion;
+    }
+    return this.markersCache.get(day) ?? EMPTY_DAY_MARKERS;
+  }
+
   selectCalendarDay(day: string): void {
     this.state.selectedDay = day;
     this.state.displayedMonth = day.slice(0, 7) + '-01';
@@ -124,8 +181,8 @@ export class CalendarController {
     const title = this.state.taskTitle.trim().slice(0, 200);
     const anchor = this.localDateToInstant(this.state.taskDate, this.state.taskAllDay ? '09:00' : this.state.taskTime,
       this.state.taskTimeZone || i18n.getTimeZone().getID());
-    if (!title) { this.runtime.notify('请输入任务标题'); return; }
-    if (!anchor) { this.runtime.notify('请输入有效的日期和时间'); return; }
+    if (!title) { this.runtime.notify('请输入任务标题', 'error'); return; }
+    if (!anchor) { this.runtime.notify('请输入有效的日期和时间', 'error'); return; }
     const existing = this.state.tasks.find((item: TaskItem) => item.id === this.state.editingTaskId);
     const now = new Date().toISOString();
     const reminderAt = this.state.taskReminderMinutes < 0 ? undefined :
@@ -148,12 +205,12 @@ export class CalendarController {
       const context = this.runtime.context() as common.UIAbilityContext;
       try {
         await TaskReminderScheduler.rebuild(context, this.store.tasks.slice(), reminderAt !== undefined);
-        this.runtime.notify('任务已保存');
+        this.runtime.notify('任务已保存', 'success');
       } catch (_) {
         this.runtime.notify('任务已保存，但系统提醒未启用');
       }
     } catch (error) {
-      this.runtime.notify(this.runtime.errorMessage(error as Error));
+      this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     } finally {
       this.state.busy = false;
     }
@@ -174,10 +231,10 @@ export class CalendarController {
         const context = this.runtime.context();
         await TaskReminderScheduler.rebuild(context, this.store.tasks.slice(), false);
       } catch (_) {
-        this.runtime.notify('任务状态已更新，但系统提醒同步失败');
+        this.runtime.notify('任务状态已更新，但系统提醒同步失败', 'error');
       }
     } catch (error) {
-      this.runtime.notify(this.runtime.errorMessage(error as Error));
+      this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     } finally {
       this.state.busy = false;
     }
@@ -190,7 +247,7 @@ export class CalendarController {
       await TaskReminderScheduler.rebuild(context, this.store.tasks.slice(), false);
       return true;
     } catch (_) {
-      this.runtime.notify('任务已删除，但系统提醒同步失败');
+      this.runtime.notify('任务已删除，但系统提醒同步失败', 'error');
       return false;
     }
   }

@@ -11,6 +11,7 @@
 | ArkUI 沉浸光感材质与 V2 组件 | ArkUI 新版材质与组件状态管理 V2 体系 | 各页面/组件在保持 V1（`@Observed` + `@State`/`@ObjectLink`）架构不变的前提下做视觉精修：`entry/src/main/ets/pages/Index.ets`、`entry/src/main/ets/components/` | 本次落地（视觉精修部分）；V2 组件未整体迁移 | 材质与视觉效果按系统版本自动回落，不阻塞 V1 状态管理 |
 | Ability Kit ModularObjectExtensionAbility | Ability Kit 模块化对象扩展能力（本机 API 26 SDK d.ts 中未见声明） | 未使用；本工程为单 UIAbility + 单路由架构 | 未使用 | 不需要 |
 | Core File Kit 沙箱共享系统级可见 | `api/@ohos.fileshare.d.ts`（`SystemCapability.FileManagement.AppFileService.FolderAuthorization`，部分接口 since 11/20） | 备份导出经 Core File Kit 将 `flash-backup-v2` JSON 分享/导出为系统级可见文件；数据格式不变：`entry/src/main/ets/data/BackupFiles.ets`、`entry/src/main/ets/data/BackupService.ets` | 本次落地 | 不支持时回退为沙箱内导出 + 文件选择器另存，契约行为不变 |
+| 系统分享面板 | `@kit.ShareKit` systemShare（`SystemCapability.Collaboration.SystemShare`） | 记录详情分享单条记录文本、设置页「分享导出」分享备份文件：`entry/src/main/ets/data/ShareService.ets`、`entry/src/main/ets/state/BackupController.ets` | 已接入（2026-10-05） | canIUse 探测缺失时不渲染分享入口，不提供虚假按钮 |
 | Notification Kit 半模态通知设置 | `api/@ohos.notificationManager.d.ts`：`requestEnableNotification(context)`（since 10，带 context 版本弹出半模态授权框） | 任务提醒前引导开启通知，渠道化提醒设置：`entry/src/main/ets/data/TaskReminderScheduler.ets` | 本次落地 | 授权被拒或弹框已展示时仅提示并保持原提醒开关状态 |
 | 平行视界 EasyGo 与应用内分屏 | 折叠屏/平板双栏显示（本机 API 26 SDK d.ts 中未见 EasyGo 声明） | 单路由架构下以 `600vp`/`840vp` 断点 + 宽屏布局承接等效体验：`entry/src/main/ets/pages/Index.ets` | 仅检测（以断点布局承接） | 窄屏保持单列底部导航布局 |
 | 服务卡片 | `kits/@kit.FormKit.d.ts`：`FormExtensionAbility`、`formProvider`、`formBindingData` | 「今日概览」卡片展示今日灵感/情绪/任务摘要 | 本次落地 | 不支持卡片形态的设备仅应用内今日概览 |
@@ -18,7 +19,8 @@
 | 星闪（NearLink） | `api/@ohos.nearlink.*.d.ts`（advertising/scan/dataTransfer/ssap 等） | 「鸿蒙体验」页检测硬件支持；数据传输继续使用跨平台局域网协议 | 仅检测 | 无星闪硬件时使用 `_flashbackup._tcp` 局域网传输回退 |
 | 系统深浅色 | `api/@ohos.app.ability.ConfigurationConstant.d.ts`：`ColorMode`；`Configuration.colorMode` | `EntryAbility` 监听配置变化并跟随系统深浅色：`entry/src/main/ets/entryability/EntryAbility.ets` | 本次落地 | 无法读取配置时保持浅色默认主题 |
 | 沉浸式窗口 | `api/@ohos.window.d.ts`：`setWindowLayoutFullScreen`、`setSpecificSystemBarEnabled` | 主窗口沉浸布局 + 避让状态栏/导航条：`entry/src/main/ets/entryability/EntryAbility.ets`、`entry/src/main/ets/pages/Index.ets` | 本次落地 | 接口不可用时保持非沉浸默认窗口 |
-| 折叠屏 | `api/@ohos.display.d.ts`：`isFoldable`、`getFoldStatus`、`on('foldStatusChange')` | 折叠态变化监听并联动响应式布局：`entry/src/main/ets/pages/Index.ets` | 本次落地 | 无折叠能力时仅按窗口断点布局 |
+| 减少动态效果 | 系统「减少动态效果」设置（API 12 起无公开查询接口） | 应用内自建开关 `SettingsState.reduceMotion`（Preferences 持久化，设置页「外观与使用」），全站 `.animation`/`animateTo` 经 `motionDuration` helper 统一归零降级：`entry/src/main/ets/state/FeatureStates.ets`、`entry/src/main/ets/components/DesignTokens.ets` | 应用内自建（2026-10-04） | 系统接口不可查询，由用户在应用内控制；开启时动画时长归零 |
+| 折叠屏 | `api/@ohos.display.d.ts`：`isFoldable`、`getFoldStatus`、`on('foldStatusChange')` | 折叠态变化监听并被布局实际消费：展开态视同 `840vp` 双栏、半折叠态强制单栏居中限宽避让折痕（`contentLayout()` 裁决）：`entry/src/main/ets/state/FeatureStates.ets`、`entry/src/main/ets/pages/Index.ets` | 本次落地 | 无折叠能力时仅按窗口断点布局 |
 | 双语资源 | Localization Kit 资源目录限定词（`en_US`） | 应用名双语：`AppScope/resources/en_US/element/string.json`（`app_name = "Flash Aero"`）；页面文案仍为硬编码中文 | 本次落地（应用名）；页面文案多语言资源化为后续工作 | 无匹配语言资源时回落 base 目录 |
 | 碰一碰 | Share Kit + App Linking | 未接入 | 需签名上架与平台配置 | 继续使用局域网互传 |
 | 小艺意图（Harmony Intelligence） | 意图框架 + 小艺开放平台 | 「快速记录」适合作为意图入口，未接入 | 需签名上架与意图审核 | 应用内快速创建浮动按钮 |
@@ -32,3 +34,11 @@
   不依赖其任何能力。
 - 实况窗、碰一碰、小艺意图等受限能力在未取得签名、AGC 上架与对应场景准入前，
   只保留检测路径，不提供虚假入口。
+- 2026-10-04 缺陷修复与性能优化轮未新增系统能力接入，矩阵各行不变；相关完善点：
+  窗口/折叠回调改为保存引用并在销毁时配对注销（沉浸式窗口、折叠屏两行），
+  卡片注册表为空时跳过 Preferences IPC（服务卡片一行），备份导出字段级校验后单次
+  stringify 且文件 IO 全异步（Core File Kit 一行），行为与降级策略均不变。
+- 2026-10-04 UI/UX 补齐轮与 2026-10-05 功能构建轮：矩阵新增「减少动态效果」
+  「系统分享面板」两行；折叠屏行的 foldStatus 由仅监听更新为实际消费（展开态视同
+  `840vp` 双栏、半折叠态单栏居中限宽）；实况窗、碰一碰、小艺意图等受限能力维持
+  仅检测/待准入表述不变。

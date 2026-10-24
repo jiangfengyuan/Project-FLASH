@@ -5,8 +5,11 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import SwiftUI
+import FlashCore
+import FlashDesign
 
-/// 侧栏：分区 + 自定义行。
+/// 侧栏：三组分区（HOME 此刻 / RECORD 记录·日志流·日历·情绪 / INSIGHTS 回顾·Memory）+
+/// 底部常驻「设置」（分隔线隔离，不随分组滚动；选中态与导航行一致）。
 /// 选中胶囊用 matchedGeometryEffect 随 Motion.spring 平滑滑动；hover 行高亮走
 /// Motion.quick；选中图标极轻 bounce。所有动效尊重 Reduce Motion。
 struct Sidebar: View {
@@ -15,35 +18,44 @@ struct Sidebar: View {
     @Namespace private var selectionNamespace
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 2) {
-                // 一级导航：此刻 / 记录 / 回顾 / 设置
-                sectionHeader("导航")
-                row(.home)
-                row(.explore)
-                row(.stats)
-                row(.settings)
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 2) { // 行间距 2：紧凑清单节奏，无对应令牌
+                    sectionHeader("HOME")
+                    row(.home)
 
-                Spacer().frame(height: 20)
+                    Spacer().frame(height: Spacing.md)
 
-                // 次级入口：情绪、日历、日志流（保留，不删除不合并）
-                sectionHeader("更多")
-                row(.emotion)
-                row(.calendar)
-                row(.logflow)
+                    sectionHeader("RECORD")
+                    row(.explore)
+                    row(.logflow)
+                    row(.calendar)
+                    row(.emotion)
+
+                    Spacer().frame(height: Spacing.md)
+
+                    sectionHeader("INSIGHTS")
+                    row(.stats)
+                    row(.memory)
+                }
+                .padding(Spacing.xs)
             }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 8)
+
+            Divider()
+
+            // 设置固定底部：与导航行同一 SidebarRow/命名空间，选中胶囊可滑入
+            row(.settings)
+                .padding(Spacing.xs)
         }
         .navigationTitle("Flash")
     }
 
     private func sectionHeader(_ title: String) -> some View {
         Text(title)
-            .font(.callout)
+            .font(Typography.caption)
             .foregroundStyle(.secondary)
-            .padding(.horizontal, 10)
-            .padding(.bottom, 4)
+            .padding(.horizontal, Spacing.xs)
+            .padding(.bottom, Spacing.xxs)
     }
 
     private func row(_ module: Module) -> some View {
@@ -61,6 +73,7 @@ struct Sidebar: View {
 }
 
 /// 侧栏行：图标 + 标题；选中时胶囊背景（跟随 accent 色）与图标 bounce，hover 时轻高亮。
+/// 字号走相对 TextStyle（标题 .body）；图标基准 14pt、图标列宽 20 随系统字体档位缩放。
 private struct SidebarRow: View {
     let module: Module
     let isSelected: Bool
@@ -69,30 +82,32 @@ private struct SidebarRow: View {
     let onSelect: () -> Void
 
     @State private var hovering = false
+    /// 图标列宽：固定基准 20，随字体档位缩放（图标框场景）
+    @ScaledMetric(relativeTo: .body) private var iconColumnWidth = 20
 
     var body: some View {
         Button(action: onSelect) {
-            HStack(spacing: 8) {
+            HStack(spacing: Spacing.xs) {
                 Image(systemName: module.systemImage)
-                    .font(.system(size: 14))
-                    .frame(width: 20, alignment: .center)
+                    .scaledSystemFont(size: 14, relativeTo: .body)
+                    .frame(width: iconColumnWidth, alignment: .center)
                     // 选中图标极轻 bounce（减弱动态时关闭）
                     .scaleEffect(isSelected && !reduceMotion ? 1.06 : 1)
                     .animation(Motion.bounce(reduceMotion), value: isSelected)
                 Text(module.title)
-                    .font(.system(size: 13))
+                    .font(Typography.body)
                 Spacer()
             }
             .foregroundStyle(isSelected ? Color.white : .primary)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 5)
+            .padding(.horizontal, Spacing.xs)
+            .padding(.vertical, 5) // 行高紧凑：5 为侧栏行垂直内距特调值（xxs 偏扁、xs 偏高）
             .background {
                 if isSelected {
-                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    RoundedRectangle(cornerRadius: Radius.control, style: .continuous)
                         .fill(BrandColors.accent)
                         .matchedGeometryEffect(id: "selection", in: selectionNamespace)
                 } else {
-                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    RoundedRectangle(cornerRadius: Radius.control, style: .continuous)
                         .fill(Color.primary.opacity(hovering ? 0.07 : 0))
                 }
             }

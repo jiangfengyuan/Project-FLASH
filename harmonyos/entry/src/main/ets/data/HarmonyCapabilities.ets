@@ -16,6 +16,7 @@ export interface HarmonyCapabilitySnapshot {
   agentRuntimeSupported: boolean;
   fileSandboxShareSupported: boolean;
   notificationSettingsSupported: boolean;
+  systemShareSupported: boolean;
 }
 
 function hasSystemCapability(syscap: string): boolean {
@@ -62,7 +63,8 @@ export class HarmonyCapabilities {
       agentFrameworkSupported: hasSystemCapability('SystemCapability.AI.Agent.AgentKit'),
       agentRuntimeSupported: hasSystemCapability('SystemCapability.Ability.AgentRuntime.Core'),
       fileSandboxShareSupported: hasSystemCapability('SystemCapability.FileManagement.AppFileService'),
-      notificationSettingsSupported: hasSystemCapability('SystemCapability.Notification.NotificationSettings')
+      notificationSettingsSupported: hasSystemCapability('SystemCapability.Notification.NotificationSettings'),
+      systemShareSupported: hasSystemCapability('SystemCapability.Collaboration.SystemShare')
     };
   }
 }

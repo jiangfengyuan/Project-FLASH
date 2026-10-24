@@ -2,24 +2,82 @@ import { Category, COLOR_TAGS, ColorTag, colorTagName, LogItem } from '../models
 import { ThemeState, LogsState, FeedbackState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
 import {
-  PageHeader, FilterChip, RecordCard, DOCK_CLEARANCE, RADIUS_CARD, RADIUS_FOCUS, BRAND, brandText,
-  cardShadowColor, floatingSurface, hairlineColor, supportsBlurMaterial
+  PageHeader, FilterChip, RecordCard, FlashCard, EmptyState, DOCK_CLEARANCE, RADIUS_FOCUS, brandText,
+  floatingSurface, hairlineColor, supportsBlurMaterial, scrimColor, cardShadowColor, motionDuration, MOTION_FADE,
+  TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY
 } from '../components/CommonBuilders';
+
+/** Lazy row source for the records list; reloaded only when the displayed
+ * slice inputs (search results, sort direction, display cap) actually change. */
+class DisplayedLogsSource implements IDataSource {
+  private listeners: DataChangeListener[] = [];
+  private items: LogItem[] = [];
+
+  totalCount(): number {
+    return this.items.length;
+  }
+
+  getData(index: number): LogItem {
+    return this.items[index];
+  }
+
+  registerDataChangeListener(listener: DataChangeListener): void {
+    if (this.listeners.indexOf(listener) < 0) this.listeners.push(listener);
+  }
+
+  unregisterDataChangeListener(listener: DataChangeListener): void {
+    const index = this.listeners.indexOf(listener);
+    if (index >= 0) this.listeners.splice(index, 1);
+  }
+
+  reload(items: LogItem[]): void {
+    this.items = items;
+    this.listeners.forEach((listener: DataChangeListener): void => listener.onDataReloaded());
+  }
+}
 
 @Component
 export struct ExplorePage {
+  @ObjectLink @Watch('syncLogSource') logs: LogsState;
   @ObjectLink theme: ThemeState;
-  @ObjectLink logs: LogsState;
   @ObjectLink feedback: FeedbackState;
   actions?: PageActions;
   @State private filterPanelOpen: boolean = false;
+  private logSource: DisplayedLogsSource = new DisplayedLogsSource();
+  private syncedResults?: LogItem[];
+  private syncedAscending: boolean = false;
+  private syncedLimit: number = -1;
+
+  aboutToAppear(): void {
+    this.syncLogSource();
+    this.noteIdeaViewed();
+  }
+
+  // 进入灵感视图即把灵感标记为已读（Idea Reminder 消除路径之一）。
+  private noteIdeaViewed(): void {
+    if (this.logs.filterCategory === Category.IDEA) {
+      requireActions(this.actions).logsController.markAllIdeasViewed();
+    }
+  }
+
+  private syncLogSource(): void {
+    const state = this.logs;
+    if (this.syncedResults === state.searchResults && this.syncedAscending === state.sortAscending &&
+      this.syncedLimit === state.logDisplayLimit) return;
+    this.syncedResults = state.searchResults;
+    this.syncedAscending = state.sortAscending;
+    this.syncedLimit = state.logDisplayLimit;
+    this.logSource.reload(requireActions(this.actions).logsController.displayedLogs());
+  }
 
   @Builder
   private explorePage() {
     Stack({ alignContent: Alignment.Bottom }) {
-      Scroll() {
-        Column({ space: 14 }) {
+      List({ space: 12 }) {
+        ListItem() {
           PageHeader(this.theme, '记录', '搜索、筛选与整理所有片段')
+        }
+        ListItem() {
           Column({ space: 12 }) {
             Row({ space: 8 }) {
               SymbolGlyph($r('sys.symbol.magnifyingglass')).fontSize(20).fontColor([brandText(this.theme)])
@@ -33,7 +91,7 @@ export struct ExplorePage {
                 })
               if (this.logs.searchText !== '') {
                 Button('清除', { type: ButtonType.Normal })
-                  .height(44).fontSize(12).fontColor(brandText(this.theme)).backgroundColor(this.theme.themeTint)
+                  .height(44).fontSize(TYPE_SECONDARY).fontColor(brandText(this.theme)).backgroundColor(this.theme.themeTint)
                   .onClick(() => {
                     this.logs.searchText = '';
                     this.logs.logDisplayLimit = 50;
@@ -48,9 +106,9 @@ export struct ExplorePage {
             .backgroundBlurStyle(supportsBlurMaterial() ? BlurStyle.COMPONENT_THIN : BlurStyle.NONE)
             .borderRadius(26)
             .border({ width: 0.5, color: hairlineColor(this.theme) })
-            .animation({ duration: 180, curve: Curve.EaseOut })
+            .animation({ duration: motionDuration(MOTION_FADE), curve: Curve.EaseOut })
 
-            Text(this.summaryText()).fontSize(12).fontColor(this.theme.themeMuted).width('100%')
+            Text(this.summaryText()).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width('100%')
 
             Scroll() {
               Row({ space: 8 }) {
@@ -70,84 +128,88 @@ export struct ExplorePage {
 
             if (this.logs.filterCategory === 'inbox') {
               Text('待整理：使用日常标签的日志。')
-                .fontSize(12).fontColor(this.theme.themeMuted).width('100%')
+                .fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width('100%')
             }
 
             Row({ space: 12 }) {
               Text(this.logs.sortAscending ? '按最早记录' : '按最新记录')
-                .fontSize(13).fontColor(brandText(this.theme))
+                .fontSize(TYPE_SECONDARY).fontColor(brandText(this.theme))
                 .height(44).padding({ left: 4, right: 4 })
+                .stateStyles({
+                  normal: { .opacity(1) },
+                  pressed: { .opacity(0.6) }
+                })
                 .onClick(() => this.logs.sortAscending = !this.logs.sortAscending)
+                .animation({ duration: motionDuration(MOTION_FADE), curve: Curve.EaseOut })
               Blank()
               Row({ space: 4 }) {
                 SymbolGlyph($r('sys.symbol.slider_vertical_3')).fontSize(16)
                   .fontColor([this.filterPanelOpen ? brandText(this.theme) : this.theme.themeMuted])
-                Text('筛选').fontSize(13)
+                Text('筛选').fontSize(TYPE_SECONDARY)
                   .fontColor(this.filterPanelOpen ? brandText(this.theme) : this.theme.themeMuted)
               }
               .height(44)
               .padding({ left: 12, right: 12 })
               .accessibilityGroup(true)
               .accessibilityText(this.filterPanelOpen ? '收起筛选面板' : '展开筛选面板')
+              .stateStyles({
+                normal: { .opacity(1) },
+                pressed: { .opacity(0.6) }
+              })
               .onClick(() => this.filterPanelOpen = !this.filterPanelOpen)
+              .animation({ duration: motionDuration(MOTION_FADE), curve: Curve.EaseOut })
             }.width('100%')
 
             if (this.logs.filterCategory === 'inbox' &&
               requireActions(this.actions).logsController.inboxLogs().length > 0) {
-              Column({ space: 8 }) {
-                Text('批量整理（影响全部待整理记录）').fontSize(12).fontColor(this.theme.themeMuted).width('100%')
+              FlashCard({ theme: this.theme, contentPadding: 12, radius: 16, space: 8 }) {
+                Text('批量整理（影响全部待整理记录）').fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width('100%')
                 Row({ space: 8 }) {
                   Button('转为灵感', { type: ButtonType.Normal })
-                    .height(44).fontSize(12).fontColor(brandText(this.theme)).backgroundColor(this.theme.themeTint)
+                    .height(44).fontSize(TYPE_SECONDARY).fontColor(brandText(this.theme)).backgroundColor(this.theme.themeTint)
                     .onClick(() => requireActions(this.actions).logsController.batchUpdateInbox(Category.IDEA, ColorTag.IDEA))
                   Button('标记备忘', { type: ButtonType.Normal })
-                    .height(44).fontSize(12).fontColor(brandText(this.theme)).backgroundColor(this.theme.themeTint)
+                    .height(44).fontSize(TYPE_SECONDARY).fontColor(brandText(this.theme)).backgroundColor(this.theme.themeTint)
                     .onClick(() => requireActions(this.actions).logsController.batchUpdateInbox(Category.LOG, ColorTag.MEMO))
                   Button('标记紧急', { type: ButtonType.Normal })
-                    .height(44).fontSize(12).fontColor(brandText(this.theme)).backgroundColor(this.theme.themeTint)
+                    .height(44).fontSize(TYPE_SECONDARY).fontColor(brandText(this.theme)).backgroundColor(this.theme.themeTint)
                     .onClick(() => requireActions(this.actions).logsController.batchUpdateInbox(Category.LOG, ColorTag.URGENT))
                 }.width('100%')
               }
-              .width('100%')
-              .padding(12)
-              .backgroundColor(this.theme.themeSurface)
-              .borderRadius(16)
-              .border({ width: 0.5, color: hairlineColor(this.theme) })
             }
+          }.width('100%')
+        }
 
-            Column({ space: 12 }) {
-              ForEach(requireActions(this.actions).logsController.displayedLogs(), (item: LogItem) => {
-                RecordCard({ theme: this.theme, feedback: this.feedback, actions: requireActions(this.actions), item: item })
-              }, (item: LogItem) => item.id)
-            }.width('100%')
+        LazyForEach(this.logSource, (item: LogItem) => {
+          ListItem() {
+            RecordCard({ theme: this.theme, feedback: this.feedback, actions: requireActions(this.actions), item: item })
+          }
+        }, (item: LogItem) => item.id)
 
-            if (requireActions(this.actions).logsController.filteredLogCount() === 0) {
-              Column({ space: 12 }) {
-                Text('没有找到相关记录').fontSize(14).fontColor(this.theme.themeMuted)
-                Button('清除筛选').height(44).backgroundColor(BRAND)
-                  .onClick(() => requireActions(this.actions).logsController.clearFilters())
-              }
-              .width('100%')
-              .padding(24)
-              .justifyContent(FlexAlign.Center)
-              .backgroundColor(this.theme.themeSurface)
-              .borderRadius(RADIUS_CARD)
-              .border({ width: 0.5, color: hairlineColor(this.theme) })
-              .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
-            }
-            if (requireActions(this.actions).logsController.hasMoreLogs()) {
-              Button(`加载更多（剩余 ${requireActions(this.actions).logsController.filteredLogCount() - requireActions(this.actions).logsController.displayedLogs().length} 条）`)
-                .width('100%').height(44).fontColor(brandText(this.theme)).backgroundColor(this.theme.themeTint)
-                .onClick(() => this.logs.logDisplayLimit += 50)
-            }
-          }.width('100%').padding({ left: 20, right: 20, bottom: DOCK_CLEARANCE })
-        }.width('100%')
-      }.width('100%').height('100%')
+        if (requireActions(this.actions).logsController.filteredLogCount() === 0) {
+          ListItem() {
+            EmptyState(this.theme, '🔍', '没有找到相关记录', '清除筛选',
+              () => requireActions(this.actions).logsController.clearFilters())
+          }
+        }
+        if (requireActions(this.actions).logsController.hasMoreLogs()) {
+          ListItem() {
+            Button(`加载更多（剩余 ${requireActions(this.actions).logsController.filteredLogCount() - requireActions(this.actions).logsController.displayedLogs().length} 条）`)
+              .width('100%').height(44).fontColor(brandText(this.theme)).backgroundColor(this.theme.themeTint)
+              .onClick(() => this.logs.logDisplayLimit += 50)
+          }
+        }
+      }
+      .width('100%')
+      .height('100%')
+      .cachedCount(5)
+      .padding({ left: 20, right: 20, bottom: DOCK_CLEARANCE })
 
       if (this.filterPanelOpen) {
-        Column().width('100%').height('100%').backgroundColor('#66000000')
+        Column().width('100%').height('100%').backgroundColor(scrimColor(this.theme))
           .backdropBlur(supportsBlurMaterial() ? 10 : 0)
           .onClick(() => this.filterPanelOpen = false)
+          .transition(TransitionEffect.opacity(0).animation({ duration: motionDuration(MOTION_FADE), curve: Curve.EaseOut }))
         this.filterPanel()
       }
     }.width('100%').height('100%').backgroundColor(this.theme.themeBackground)
@@ -157,6 +219,7 @@ export struct ExplorePage {
     this.logs.filterCategory = value;
     this.logs.logDisplayLimit = 50;
     requireActions(this.actions).logsController.updateSearchResults();
+    this.noteIdeaViewed();
   }
 
   private summaryText(): string {
@@ -170,21 +233,26 @@ export struct ExplorePage {
   private filterPanel() {
     Column({ space: 14 }) {
       Row() {
-        Text('筛选').fontSize(17).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)
+        Text('筛选').fontSize(TYPE_GROUP).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)
         Blank()
-        Text('完成').fontSize(14).fontColor(brandText(this.theme))
+        Text('完成').fontSize(TYPE_BODY).fontColor(brandText(this.theme))
           .padding({ top: 12, bottom: 12 })
+          .stateStyles({
+            normal: { .opacity(1) },
+            pressed: { .opacity(0.6) }
+          })
           .onClick(() => this.filterPanelOpen = false)
+          .animation({ duration: motionDuration(MOTION_FADE), curve: Curve.EaseOut })
       }.width('100%')
 
-      Text('类型').fontSize(12).fontColor(this.theme.themeMuted).width('100%')
+      Text('类型').fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width('100%')
       Row({ space: 8 }) {
         FilterChip(this.theme, '全部', this.logs.filterCategory === 'all', () => this.applyCategory('all'))
         FilterChip(this.theme, '日志', this.logs.filterCategory === 'log', () => this.applyCategory('log'))
         FilterChip(this.theme, '灵感', this.logs.filterCategory === 'idea', () => this.applyCategory('idea'))
       }.width('100%')
 
-      Text('标签').fontSize(12).fontColor(this.theme.themeMuted).width('100%')
+      Text('标签').fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width('100%')
       Scroll() {
         Row({ space: 8 }) {
           FilterChip(this.theme, '全部', this.logs.filterTag === '', () => this.applyTag(''))
@@ -197,7 +265,7 @@ export struct ExplorePage {
       .scrollBar(BarState.Off)
       .width('100%')
 
-      Text('日期范围').fontSize(12).fontColor(this.theme.themeMuted).width('100%')
+      Text('日期范围').fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width('100%')
       Row({ space: 8 }) {
         FilterChip(this.theme, '全部', this.logs.filterDate === 'all', () => this.applyDate('all'))
         FilterChip(this.theme, '今天', this.logs.filterDate === 'today', () => this.applyDate('today'))
@@ -205,7 +273,7 @@ export struct ExplorePage {
         FilterChip(this.theme, '近30天', this.logs.filterDate === 'month', () => this.applyDate('month'))
       }.width('100%')
 
-      Text('重要度').fontSize(12).fontColor(this.theme.themeMuted).width('100%')
+      Text('重要度').fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width('100%')
       Row({ space: 8 }) {
         FilterChip(this.theme, '全部', this.logs.filterImportance === -1, () => this.applyImportance(-1))
         FilterChip(this.theme, '有重要度', this.logs.filterImportance === 1, () => this.applyImportance(1))
@@ -219,6 +287,8 @@ export struct ExplorePage {
     .borderRadius({ topLeft: RADIUS_FOCUS, topRight: RADIUS_FOCUS })
     .border({ width: { top: 0.5 }, color: hairlineColor(this.theme) })
     .shadow({ radius: 24, color: cardShadowColor(this.theme), offsetX: 0, offsetY: -6 })
+    .transition(TransitionEffect.opacity(0).combine(TransitionEffect.translate({ y: 24 }))
+      .animation({ duration: motionDuration(MOTION_FADE), curve: Curve.EaseOut }))
   }
 
   private applyTag(value: string): void {

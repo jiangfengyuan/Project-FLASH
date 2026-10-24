@@ -6,21 +6,35 @@
 
 import SwiftUI
 import SwiftData
+import FlashCore
+import FlashDesign
 
 @main
 struct FlashApp: App {
+    /// Quick Capture（PRD §13/§14）：窗口关闭不退出（MenuBarExtra 驻留保热键可用）
+    /// + 启动后注册全局热键；实现见 App/AppDelegate.swift
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     /// 装配单一入口（债务 A6）：容器、仓储、内存降级标记三者同源
     private let assembly: RepositoryEnvironment.Assembly
     @State private var appState: AppState
-    @StateObject private var settings = SettingsStore()
+    @StateObject private var settings: SettingsStore
 
     init() {
-        try? BackupTransfer.cleanupExpired()
-        let assembly = RepositoryEnvironment.makeDefault()
+        // 过期分享副本清理是纯沙箱文件 IO（FileManager 线程安全、无共享可变状态、
+        // 不依赖 MainActor），移出启动同步路径后台执行
+        Task.detached(priority: .utility) {
+            try? BackupTransfer.cleanupExpired()
+        }
+        let assembly = Perf.measure("StartupAssembly") { RepositoryEnvironment.makeDefault() }
         self.assembly = assembly
         let appState = AppState()
         appState.checkDatabaseFallback(didFallbackToMemory: assembly.didFallbackToMemory)
         _appState = State(initialValue: appState)
+        let settings = SettingsStore()
+        _settings = StateObject(wrappedValue: settings)
+        // Quick Capture 面板与仓储/设置同源装配；热键注册推迟到
+        // AppDelegate.applicationDidFinishLaunching（QuickCaptureController.start()）
+        QuickCaptureController.shared.configure(repository: assembly.repository, settings: settings)
     }
 
     var body: some Scene {
@@ -36,12 +50,29 @@ struct FlashApp: App {
                 }
             }
             .environment(appState)
+            .environment(appState.focusRouter)
             .environment(\.flashRepository, assembly.repository)
             .environmentObject(settings)
             .animatedPreferredColorScheme(settings.themeMode)
+            .onOpenURL { url in
+                // 桌面小组件 deep link：flash://today → 切到此刻页
+                guard url.scheme == "flash", url.host == "today" else { return }
+                appState.selectedModule = .home
+            }
             .task {
+                // 桌面小组件（WidgetKit）共享快照：启动时刷新一次；
+                // 组容器不可用（adhoc 构建）时零成本 no-op
+                WidgetSnapshot.refresh(repository: assembly.repository)
+                #if DEBUG
+                DebugSeeder.seedIfRequested(repository: assembly.repository)
+                #endif
                 do {
-                    try await TaskReminderScheduler.shared.rebuild(try assembly.repository.snapshot().tasks)
+                    // 重建任务提醒只需任务表：tasksOnly() 代替 snapshot()，
+                    // 不再连带映射日志/情绪两张全表
+                    let tasks = try Perf.measure("TasksForReminderRebuild") {
+                        try assembly.repository.tasksOnly()
+                    }
+                    try await TaskReminderScheduler.shared.rebuild(tasks)
                 } catch TaskReminderError.permissionDenied {
                     // 用户拒绝过通知权限：只影响系统提醒，与数据存储无关，
                     // 不写入 databaseFallbackMessage（避免误报存储故障）；设置页可重新引导权限
@@ -68,26 +99,32 @@ struct FlashApp: App {
                 Button("导出备份…") { appState.requestExport() }
                     .keyboardShortcut("e", modifiers: [.command, .shift])
             }
-            // ⌘K 搜索：token 递增，各页面监听并聚焦搜索框
+            // ⌘K 全局搜索：唤起 RootView 层浮层（不切模块；记录页内搜索是独立能力）
             CommandGroup(after: .sidebar) {
                 Button("搜索") { appState.requestSearch() }
                     .keyboardShortcut("k", modifiers: .command)
             }
-            // 模块切换 ⌘1…⌘6：快捷键与模块的绑定保持不变（设置已有 ⌘,，不重复占用）；
-            // 菜单文案跟随 Module.title，与侧栏一级/次级命名同源
+            // 模块切换 ⌘1…⌘7（对齐 PRD：⌘1 此刻 ⌘2 记录 ⌘3 日志流 ⌘4 日历 ⌘5 情绪 ⌘6 回顾
+            // ⌘7 Memory 周报。设置已有 ⌘,，不重复占用）；菜单文案跟随 Module.title，与侧栏命名同源
             CommandMenu("模块") {
+                // Quick Capture（PRD §13/§14）：与全局热键同一入口，不另占菜单快捷键，
+                // 避免与 RegisterEventHotKey 的注册形成双通道冲突
+                Button("Quick Capture") { QuickCaptureController.shared.toggle() }
+                Divider()
                 Button(Module.home.title) { appState.selectedModule = .home }
                     .keyboardShortcut("1", modifiers: .command)
                 Button(Module.explore.title) { appState.selectedModule = .explore }
                     .keyboardShortcut("2", modifiers: .command)
                 Button(Module.logflow.title) { appState.selectedModule = .logflow }
                     .keyboardShortcut("3", modifiers: .command)
-                Button(Module.emotion.title) { appState.selectedModule = .emotion }
-                    .keyboardShortcut("4", modifiers: .command)
                 Button(Module.calendar.title) { appState.selectedModule = .calendar }
+                    .keyboardShortcut("4", modifiers: .command)
+                Button(Module.emotion.title) { appState.selectedModule = .emotion }
                     .keyboardShortcut("5", modifiers: .command)
                 Button(Module.stats.title) { appState.selectedModule = .stats }
                     .keyboardShortcut("6", modifiers: .command)
+                Button(Module.memory.title) { appState.selectedModule = .memory }
+                    .keyboardShortcut("7", modifiers: .command)
             }
         }
 
@@ -166,12 +203,5 @@ private struct AppearanceTransitionModifier: ViewModifier {
     }
 }
 
-private extension ThemeMode {
-    var colorScheme: ColorScheme? {
-        switch self {
-        case .system: nil
-        case .light: .light
-        case .dark: .dark
-        }
-    }
-}
+// ThemeMode.colorScheme 位于 FlashKit（FlashDesign/Theme/ThemeMode+ColorScheme.swift），
+// 主窗口、菜单栏伴侣、Quick Capture 面板与 iOS 端共用同一映射

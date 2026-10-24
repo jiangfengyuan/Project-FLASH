@@ -2,7 +2,7 @@ import { bundleManager, common } from '@kit.AbilityKit';
 import { preferences } from '@kit.ArkData';
 import { dayString } from '../data/DateUtils';
 import { TaskItem } from '../models/Models';
-import { AppSession, DeleteKind, normalizeThemeMode } from '../state/FeatureStates';
+import { AppSession, DeleteKind, normalizeThemeMode, setReduceMotionEnabled } from '../state/FeatureStates';
 import { BackupService } from '../data/BackupService';
 import { FlashStore } from '../data/FlashStore';
 import { TaskReminderScheduler } from '../data/TaskReminderScheduler';
@@ -13,6 +13,7 @@ import { LogsController } from './LogsController';
 import { EmotionController } from './EmotionController';
 import { CalendarController } from './CalendarController';
 import { BackupController } from './BackupController';
+import { StatsController } from './StatsController';
 import { ControllerRuntime } from './ControllerRuntime';
 import { FeatureProjection } from './FeatureProjection';
 import { StorePartition } from '../data/StoreChanges';
@@ -21,6 +22,7 @@ import { StorePartition } from '../data/StoreChanges';
 // 这里直接读写原始值以保留 system 三态。
 const THEME_PREFERENCES_STORE = 'flash-aero-data';
 const THEME_MODE_KEY = 'theme-mode';
+const REDUCE_MOTION_KEY = 'reduce-motion';
 
 export class AppController {
   readonly session: AppSession = new AppSession();
@@ -29,9 +31,15 @@ export class AppController {
   readonly emotionController: EmotionController = new EmotionController(this.session.emotion, this.runtime);
   readonly calendarController: CalendarController = new CalendarController(this.session.calendar, this.runtime);
   readonly backupController: BackupController = new BackupController(this.session.backup, this.runtime);
+  readonly statsController: StatsController = new StatsController(this.session.logs, this.session.emotion);
   private projection: FeatureProjection = new FeatureProjection(this.session,
     (task: TaskItem) => this.calendarController.taskCalendarDay(task),
-    () => this.logsController.updateSearchResults());
+    () => this.logsController.updateSearchResults(),
+    () => {
+      // 测试替身可能不含未读查询，按无未读处理。
+      const store = FlashStore.instance;
+      return typeof store.unviewedIdeas === 'function' ? store.unviewedIdeas().length : 0;
+    });
   private unsubscribe?: () => void;
   private dateTimer: number = 0;
   private generation: number = 0;
@@ -40,6 +48,8 @@ export class AppController {
     this.dispose();
     const generation = ++this.generation;
     this.runtime.bind(context);
+    this.session.feedback.startup = 'loading';
+    this.session.feedback.startupError = '';
     try {
       const bundle = await bundleManager.getBundleInfoForSelf(
         bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
@@ -54,6 +64,7 @@ export class AppController {
       const themeMode = await this.loadThemeMode(context, store.themeMode);
       this.session.theme.themeMode = themeMode;
       themeLoaded(themeMode);
+      await this.loadReduceMotion(context);
       this.session.settings.showWelcome = !store.welcomed;
       this.session.backup.recoveryAvailable = store.hasRecoveryData;
       this.unsubscribe = store.changes.subscribe((partition: StorePartition) => {
@@ -73,10 +84,20 @@ export class AppController {
       try {
         await TaskReminderScheduler.rebuild(context, store.tasks.slice(), false);
       } catch (_) {
-        if (generation === this.generation) this.runtime.notify('任务提醒恢复失败；任务数据仍然安全，请稍后重启应用重试');
+        if (generation === this.generation) this.runtime.notify('任务提醒恢复失败；任务数据仍然安全，请稍后重启应用重试', 'error');
       }
       if (generation !== this.generation) return;
-      if (store.recoveryWarning) this.runtime.notify(store.recoveryWarning);
+      if (store.recoveryWarning) this.runtime.notify(store.recoveryWarning, 'error');
+      this.session.feedback.startup = 'ready';
+    } catch (error) {
+      if (generation === this.generation) {
+        this.session.feedback.startup = 'error';
+        this.session.feedback.startupError = `本地数据加载失败：${this.runtime.errorMessage(error as Error)}`;
+      }
+      return;
+    }
+    // 能力检测失败不阻断已加载的数据，仅提示入口状态可能不准确。
+    try {
       const capability = await HarmonyCapabilities.inspect();
       if (generation !== this.generation) return;
       this.session.settings.nearLinkSupported = capability.nearLinkSupported;
@@ -86,19 +107,44 @@ export class AppController {
       this.session.settings.agentRuntimeSupported = capability.agentRuntimeSupported;
       this.session.settings.fileSandboxShareSupported = capability.fileSandboxShareSupported;
       this.session.settings.notificationSettingsSupported = capability.notificationSettingsSupported;
-    } catch (error) {
-      if (generation === this.generation) this.runtime.notify(`本地数据加载失败：${this.runtime.errorMessage(error as Error)}`);
+      this.session.settings.systemShareSupported = capability.systemShareSupported === true;
+    } catch (_) {
+      if (generation === this.generation) this.runtime.notify('系统能力检测失败，能力入口状态可能不准确', 'error');
     }
   }
 
   saveTheme(mode: string): Promise<void> { return FlashStore.instance.setThemeMode(mode); }
 
+  async setReduceMotion(enabled: boolean): Promise<void> {
+    this.session.settings.reduceMotion = enabled;
+    setReduceMotionEnabled(enabled);
+    try {
+      const settings = await preferences.getPreferences(this.runtime.context(), THEME_PREFERENCES_STORE);
+      await settings.put(REDUCE_MOTION_KEY, enabled);
+      await settings.flush();
+    } catch (error) {
+      this.runtime.notify(`减少动态效果设置保存失败：${this.runtime.errorMessage(error as Error)}`, 'error');
+    }
+  }
+
+  private async loadReduceMotion(context: common.UIAbilityContext): Promise<void> {
+    try {
+      const settings = await preferences.getPreferences(context, THEME_PREFERENCES_STORE);
+      const stored = await settings.get(REDUCE_MOTION_KEY, false);
+      const enabled = stored === true;
+      this.session.settings.reduceMotion = enabled;
+      setReduceMotionEnabled(enabled);
+    } catch (_) {
+      // 读取失败按关闭处理，与初始默认一致。
+    }
+  }
+
   async openNotificationSettings(): Promise<void> {
     try {
       const opened = await NotificationChannels.openAppNotificationSettings(this.runtime.context());
-      if (!opened) this.runtime.notify('当前设备不支持应用内通知设置');
+      if (!opened) this.runtime.notify('当前设备不支持应用内通知设置', 'error');
     } catch (error) {
-      this.runtime.notify(this.runtime.errorMessage(error as Error));
+      this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     }
   }
 
@@ -140,24 +186,24 @@ export class AppController {
     try {
       if (request.kind === DeleteKind.LOG) {
         await this.logsController.removeLog(request.id);
-        this.runtime.notify('记录已删除');
+        this.runtime.notify('记录已删除', 'success');
       } else if (request.kind === DeleteKind.EMOTION) {
         await this.emotionController.removeEmotion(request.id);
-        this.runtime.notify('情绪记录已删除');
+        this.runtime.notify('情绪记录已删除', 'success');
       } else if (request.kind === DeleteKind.TASK) {
-        if (await this.calendarController.removeTask(request.id)) this.runtime.notify('任务已删除');
+        if (await this.calendarController.removeTask(request.id)) this.runtime.notify('任务已删除', 'success');
       } else if (request.kind === DeleteKind.ALL) {
         await FlashStore.instance.clearAll();
         const context = this.runtime.context() as common.UIAbilityContext;
         try {
           await TaskReminderScheduler.rebuild(context, [], false);
-          this.runtime.notify('本地数据已清空');
+          this.runtime.notify('本地数据已清空', 'success');
         } catch (_) {
-          this.runtime.notify('本地数据已清空，但系统提醒清理失败，请重启应用后重试');
+          this.runtime.notify('本地数据已清空，但系统提醒清理失败，请重启应用后重试', 'error');
         }
       }
     } catch (error) {
-      this.runtime.notify(this.runtime.errorMessage(error as Error));
+      this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     }
   }
 
@@ -166,7 +212,7 @@ export class AppController {
       await FlashStore.instance.setWelcomed();
       this.session.settings.showWelcome = false;
     } catch (error) {
-      this.runtime.notify(this.runtime.errorMessage(error as Error));
+      this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     }
   }
 

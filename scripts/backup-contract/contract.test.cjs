@@ -3,9 +3,10 @@ const assert = require('node:assert/strict');
 const { validateDocument, validateBytes, validDay, validInstant, MAX_BYTES } = require('./validate.cjs');
 const minimal = require('../../docs/contracts/fixtures/valid-minimal.json');
 const full = require('../../docs/contracts/fixtures/valid-full.json');
+const schema2 = require('../../docs/contracts/fixtures/valid-schema2.json');
 const legacy = require('../../docs/contracts/fixtures/legacy-v1.json');
 
-for (const [name, value] of Object.entries({ minimal, full })) {
+for (const [name, value] of Object.entries({ minimal, full, schema2 })) {
   test(`${name} fixture passes structure and semantics`, () => {
     assert.deepEqual(validateBytes(Buffer.from(JSON.stringify(value))), { valid: true, errors: [] });
   });
@@ -13,7 +14,7 @@ for (const [name, value] of Object.entries({ minimal, full })) {
 
 const invalidCases = {
   'unknown envelope': d => { d.version = 'flash-backup-v3'; },
-  'unknown section version': d => { d.schemas.tasks = 2; },
+  'unknown section version': d => { d.schemas.tasks = 3; },
   'unknown section': d => { d.data.attachments = []; },
   'unknown record field': d => { d.data.tasks[0].notificationId = 123; },
   'missing required section': d => { delete d.data.tasks; },
@@ -41,6 +42,43 @@ for (const [name, mutate] of Object.entries(invalidCases)) {
 
 test('legacy v1 is deliberately outside the v2 schema', () => {
   assert.equal(validateDocument(legacy).valid, false);
+});
+
+test('schema 2: new fields are rejected under section version 1 (version declares structure)', () => {
+  for (const mutate of [
+    d => { d.data.logs[0].isFavorite = true; },
+    d => { d.data.emotions[0].intensity = 3; },
+    d => { d.data.tasks[0].sourceLogId = '55555555-5555-4555-8555-555555555555'; }
+  ]) {
+    const d = structuredClone(full); // valid-full 全部分区为 schema 1
+    mutate(d);
+    assert.equal(validateDocument(d).valid, false);
+  }
+});
+
+test('schema 2: field value rules (intensity range, boolean, id shape)', () => {
+  for (const mutate of [
+    d => { d.data.emotions[0].intensity = 0; },
+    d => { d.data.emotions[0].intensity = 6; },
+    d => { d.data.emotions[0].intensity = 1.5; },
+    d => { d.data.emotions[0].intensity = '4'; },
+    d => { d.data.logs[0].isFavorite = 'yes'; },
+    d => { d.data.tasks[0].sourceLogId = 'not-a-uuid'; }
+  ]) {
+    const d = structuredClone(schema2);
+    mutate(d);
+    assert.equal(validateDocument(d).valid, false);
+  }
+});
+
+test('schema 2: versions mix per section; new fields follow their own section version', () => {
+  const d = structuredClone(schema2);
+  d.schemas.emotions = 1; // emotions 回到 1：intensity/isFavorite 即非法
+  assert.equal(validateDocument(d).valid, false);
+  const e = structuredClone(schema2);
+  e.schemas.emotions = 1;
+  for (const item of e.data.emotions) { delete item.intensity; delete item.isFavorite; }
+  assert.equal(validateDocument(e).valid, true);
 });
 
 test('optional fields support omission and null without conflating empty text', () => {

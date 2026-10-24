@@ -7,6 +7,8 @@ import { ControllerRuntime } from './ControllerRuntime';
 import { BackupDiff } from '../data/BackupDiff';
 import { BackupFiles, SharedExportStatus } from '../data/BackupFiles';
 import { BackupImport, BackupService } from '../data/BackupService';
+import { dayString } from '../data/DateUtils';
+import { shareBackupFile } from '../data/ShareService';
 import { LanDevice, LocalBackupDiscovery, LocalBackupReceiver, LocalBackupSender } from '../data/LocalBackupTransfer';
 
 export class BackupController {
@@ -46,7 +48,7 @@ export class BackupController {
   async exportBackup(): Promise<void> {
     if (this.state.fileBusy) return;
     if (!this.store.ready) {
-      this.runtime.notify('本地数据尚未加载完成，无法导出备份');
+      this.runtime.notify('本地数据尚未加载完成，无法导出备份', 'error');
       return;
     }
     const generation = this.generation;
@@ -56,9 +58,9 @@ export class BackupController {
       const snapshot = this.store.snapshot();
       const json = BackupService.exportJSON(snapshot.logs, snapshot.emotions, snapshot.tasks);
       await BackupFiles.exportJSON(context, json);
-      if (generation === this.generation) this.runtime.notify('备份已导出');
+      if (generation === this.generation) this.runtime.notify('备份已导出', 'success');
     } catch (error) {
-      if (generation === this.generation) this.runtime.notify(this.runtime.errorMessage(error as Error));
+      if (generation === this.generation) this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     } finally {
       if (generation === this.generation) this.state.fileBusy = false;
     }
@@ -68,10 +70,33 @@ export class BackupController {
     return BackupFiles.sharedExportStatus() === SharedExportStatus.READY;
   }
 
+  /** 分享导出：生成备份文件后调起系统分享面板（入口由 settings.systemShareSupported 守卫）。 */
+  async shareBackupExport(): Promise<void> {
+    if (this.state.fileBusy) return;
+    if (!this.store.ready) {
+      this.runtime.notify('本地数据尚未加载完成，无法导出备份', 'error');
+      return;
+    }
+    const generation = this.generation;
+    this.state.fileBusy = true;
+    try {
+      const context = this.runtime.context() as common.UIAbilityContext;
+      const snapshot = this.store.snapshot();
+      const json = BackupService.exportJSON(snapshot.logs, snapshot.emotions, snapshot.tasks);
+      const fileName = BackupFiles.sharedExportName('flash-aero-backup', dayString());
+      await shareBackupFile(context, json, fileName);
+      if (generation === this.generation) this.runtime.notify('已调起系统分享', 'success');
+    } catch (error) {
+      if (generation === this.generation) this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
+    } finally {
+      if (generation === this.generation) this.state.fileBusy = false;
+    }
+  }
+
   async exportBackupToSharedDir(): Promise<void> {
     if (this.state.fileBusy) return;
     if (!this.store.ready) {
-      this.runtime.notify('本地数据尚未加载完成，无法导出备份');
+      this.runtime.notify('本地数据尚未加载完成，无法导出备份', 'error');
       return;
     }
     const generation = this.generation;
@@ -82,14 +107,14 @@ export class BackupController {
       const result = await BackupFiles.exportToSharedDir(json);
       if (generation !== this.generation) return;
       if (result.status === SharedExportStatus.EXPORTED) {
-        this.runtime.notify('备份已导出到「文件管理」应用的下载目录');
+        this.runtime.notify('备份已导出到「文件管理」应用的下载目录', 'success');
       } else if (result.status === SharedExportStatus.DENIED) {
-        this.runtime.notify('共享目录暂不可用，请改用「选择位置导出」');
+        this.runtime.notify('共享目录暂不可用，请改用「选择位置导出」', 'error');
       } else {
-        this.runtime.notify('当前设备不支持共享目录导出，请改用「选择位置导出」');
+        this.runtime.notify('当前设备不支持共享目录导出，请改用「选择位置导出」', 'error');
       }
     } catch (error) {
-      if (generation === this.generation) this.runtime.notify(this.runtime.errorMessage(error as Error));
+      if (generation === this.generation) this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     } finally {
       if (generation === this.generation) this.state.fileBusy = false;
     }
@@ -104,18 +129,18 @@ export class BackupController {
       if (generation !== this.generation) return;
       if (!archive) {
         this.state.recoveryAvailable = false;
-        this.runtime.notify('没有可导出的恢复数据');
+        this.runtime.notify('没有可导出的恢复数据', 'error');
         return;
       }
       const context = this.runtime.context() as common.UIAbilityContext;
       await BackupFiles.exportJSON(context, archive, 'flash-aero-recovery');
       // The originals are now in the user's hands; the plaintext quarantine
       // copies must not linger once a successful export exists.
-      this.store.clearQuarantine();
+      await this.store.clearQuarantine();
       this.state.recoveryAvailable = false;
-      if (generation === this.generation) this.runtime.notify('恢复原始数据已导出，请妥善保管并联系支持人员处理');
+      if (generation === this.generation) this.runtime.notify('恢复原始数据已导出，请妥善保管并联系支持人员处理', 'success');
     } catch (error) {
-      if (generation === this.generation) this.runtime.notify(this.runtime.errorMessage(error as Error));
+      if (generation === this.generation) this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     } finally {
       if (generation === this.generation) this.state.fileBusy = false;
     }
@@ -123,9 +148,9 @@ export class BackupController {
 
   async clearRecoveryData(): Promise<void> {
     if (this.state.fileBusy) return;
-    this.store.clearQuarantine();
+    await this.store.clearQuarantine();
     this.state.recoveryAvailable = false;
-    this.runtime.notify('隔离区已清除');
+    this.runtime.notify('隔离区已清除', 'success');
   }
 
   async chooseBackup(recovery: boolean = false): Promise<void> {
@@ -142,7 +167,7 @@ export class BackupController {
     } catch (error) {
       if (generation === this.generation) {
         this.cancelImport();
-        this.runtime.notify(this.runtime.errorMessage(error as Error));
+        this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
       }
     } finally {
       if (generation === this.generation) this.state.fileBusy = false;
@@ -170,7 +195,7 @@ export class BackupController {
 
   async startLanSend(): Promise<void> {
     if (!this.store.ready) {
-      this.runtime.notify('本地数据尚未加载完成，无法发送备份');
+      this.runtime.notify('本地数据尚未加载完成，无法发送备份', 'error');
       return;
     }
     this.stopLan();
@@ -185,7 +210,7 @@ export class BackupController {
         this.state.lanMode = TransferPhase.IDLE;
         this.state.lanPin = '';
         this.lanSender = undefined;
-        this.runtime.notify(success ? '备份已发送' : '配对已结束');
+        this.runtime.notify(success ? '备份已发送' : '配对已结束', success ? 'success' : 'info');
       });
       this.lanSender = sender;
       this.state.lanMode = TransferPhase.SENDING;
@@ -194,7 +219,7 @@ export class BackupController {
     } catch (error) {
       if (generation !== this.lanGeneration) return;
       this.stopLan();
-      this.runtime.notify(this.runtime.errorMessage(error as Error));
+      this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     }
   }
 
@@ -214,15 +239,15 @@ export class BackupController {
       discovery.start();
     } catch (error) {
       this.stopLan();
-      this.runtime.notify(this.runtime.errorMessage(error as Error));
+      this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     }
   }
 
   async receiveLan(): Promise<void> {
     if (this.state.lanMode !== TransferPhase.RECEIVING || this.state.busy) return;
     const device = this.state.lanDevices.find((item: LanDevice) => item.id === this.state.selectedLanDevice);
-    if (!device) { this.runtime.notify('请先选择发送设备'); return; }
-    if (!/^\d{6}$/.test(this.state.lanEnteredPin)) { this.runtime.notify('请输入六位数字 PIN'); return; }
+    if (!device) { this.runtime.notify('请先选择发送设备', 'error'); return; }
+    if (!/^\d{6}$/.test(this.state.lanEnteredPin)) { this.runtime.notify('请输入六位数字 PIN', 'error'); return; }
     this.state.lanMode = TransferPhase.CONNECTING;
     // Pass a live PIN source, not a copy: the receiver re-reads the input on
     // every re-challenge so a corrected PIN is picked up mid-handshake.
@@ -234,12 +259,12 @@ export class BackupController {
       this.lanReceiver = undefined;
       this.stopLan();
       this.stageImport(incoming);
-      this.runtime.notify('备份已接收，请选择合并或覆盖');
+      this.runtime.notify('备份已接收，请选择合并或覆盖', 'success');
     } catch (error) {
       if (this.lanReceiver !== receiver) return;
       this.lanReceiver = undefined;
       this.state.lanMode = TransferPhase.RECEIVING;
-      this.runtime.notify(this.runtime.errorMessage(error as Error));
+      this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     }
   }
 
@@ -301,13 +326,13 @@ export class BackupController {
       const context = this.runtime.context() as common.UIAbilityContext;
       try {
         await TaskReminderScheduler.rebuild(context, this.store.snapshot().tasks, false);
-        this.runtime.notify(merge ? '备份已合并' : '本地数据已覆盖');
+        this.runtime.notify(merge ? '备份已合并' : '本地数据已覆盖', 'success');
       } catch (_) {
-        this.runtime.notify((merge ? '备份已合并' : '本地数据已覆盖') + '，但系统提醒恢复失败');
+        this.runtime.notify((merge ? '备份已合并' : '本地数据已覆盖') + '，但系统提醒恢复失败', 'error');
       }
     } catch (error) {
       this.state.importPhase = this.pendingImport ? ImportPhase.PREVIEW : ImportPhase.IDLE;
-      this.runtime.notify(this.runtime.errorMessage(error as Error));
+      this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     } finally {
       this.state.busy = false;
     }

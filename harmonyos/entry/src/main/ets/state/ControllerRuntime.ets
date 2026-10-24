@@ -1,5 +1,5 @@
 import { common } from '@kit.AbilityKit';
-import { FeedbackState } from './FeatureStates';
+import { FeedbackState, normalizeToastLevel } from './FeatureStates';
 
 /** Platform context and short-lived feedback are bound only while the root is mounted. */
 export class ControllerRuntime {
@@ -12,10 +12,10 @@ export class ControllerRuntime {
     if (!this.host) throw new Error('页面尚未准备完成，请稍后重试');
     return this.host;
   }
-  notify(message: string): void {
+  notify(message: string, level: string = 'info'): void {
     if (!this.host) return;
     clearTimeout(this.timer);
-    this.feedback.notice = { message: message };
+    this.feedback.notice = { message: message, level: normalizeToastLevel(level) };
     this.timer = setTimeout(() => { this.feedback.notice = undefined; }, 2200);
   }
   errorMessage(error: Error): string { return error.message || '操作失败'; }

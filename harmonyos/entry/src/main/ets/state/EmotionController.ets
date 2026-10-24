@@ -8,6 +8,8 @@ export class EmotionController {
   private state: EmotionState;
   private store: FlashStore;
   private runtime: ControllerRuntime;
+  private aggregatesVersion: number = -1;
+  private aggregates: Map<string, number[]> = new Map<string, number[]>();
   constructor(state: EmotionState, runtime: ControllerRuntime, store: FlashStore = FlashStore.instance) {
     this.state = state;
     this.store = store;
@@ -17,12 +19,17 @@ export class EmotionController {
     if (this.state.busy) return;
     this.state.busy = true;
     try {
-      await this.store.addEmotion(this.state.emotionLevel,
-        this.state.emotionLevel < 0 ? this.state.selectedSubEmotion : undefined, this.state.emotionNote);
+      const level = this.state.emotionLevel;
+      await this.store.addEmotion(level,
+        level < 0 ? this.state.selectedSubEmotion : undefined, this.state.emotionNote, this.state.emotionStatus);
       this.state.emotionNote = '';
-      this.runtime.notify('情绪已记录');
+      this.state.emotionStatus = '';
+      // 保存成功动效信号：页面按 savedLevel 极性做差异化反馈，尊重减少动态效果。
+      this.state.savedLevel = level;
+      this.state.savedFlash++;
+      this.runtime.notify('情绪已记录', 'success');
     } catch (error) {
-      this.runtime.notify(this.runtime.errorMessage(error as Error));
+      this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     } finally {
       this.state.busy = false;
     }
@@ -44,10 +51,26 @@ export class EmotionController {
     return days;
   }
 
+  /** Per-day [sum, count] aggregation built once per data version: the stats
+   * trend rows ask for every day in the window, so each lookup must not
+   * re-scan the whole emotion list. */
+  private dayAggregates(): Map<string, number[]> {
+    if (this.aggregatesVersion === this.state.emotionsVersion) return this.aggregates;
+    const map = new Map<string, number[]>();
+    this.state.emotions.forEach((item: EmotionRecord) => {
+      const entry = map.get(item.recordDate) ?? [0, 0];
+      entry[0] += item.level;
+      entry[1] += 1;
+      map.set(item.recordDate, entry);
+    });
+    this.aggregates = map;
+    this.aggregatesVersion = this.state.emotionsVersion;
+    return map;
+  }
+
   dayAverage(day: string): number | undefined {
-    const matches = this.state.emotions.filter((item: EmotionRecord) => item.recordDate === day);
-    if (matches.length === 0) return undefined;
-    return matches.reduce((sum: number, item: EmotionRecord) => sum + item.level, 0) / matches.length;
+    const entry = this.dayAggregates().get(day);
+    return entry === undefined ? undefined : entry[0] / entry[1];
   }
 
   dayBar(day: string): number {

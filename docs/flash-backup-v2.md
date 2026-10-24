@@ -78,6 +78,25 @@ Rules:
 - OS notification IDs and permission state are local implementation details
   and are never exported.
 
+## Section schema 2（2026-10-05，macOS 先行）
+
+Section version 2 adds optional fields only; required sets are unchanged. A
+partition declared as version 1 must not carry these fields — the declared
+version defines the record structure, and strict readers reject undeclared
+fields. macOS reads versions 1 and 2 and always exports 2; Android and
+HarmonyOS readers currently accept only version 1 and reject version-2 files
+until they follow (explicit rejection, never silent discard).
+
+| Section | New optional fields | Rule |
+| --- | --- | --- |
+| `logs` | `isFavorite` | JSON boolean or null/omitted |
+| `emotions` | `intensity`, `isFavorite` | `intensity`: integer 1–5 or null/omitted |
+| `tasks` | `sourceLogId`, `isFavorite` | `sourceLogId`: UUID-shaped string referencing a `logs` record (Idea→Task provenance) |
+
+Exporters omit these fields when unset rather than writing null.
+`sourceLogId` is a soft reference: importers keep it even if the referenced
+log is absent from the same file.
+
 ## Import and merge
 
 - Overwrite replaces all logs, emotions, and tasks in one logical operation.

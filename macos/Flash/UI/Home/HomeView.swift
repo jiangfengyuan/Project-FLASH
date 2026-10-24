@@ -6,12 +6,14 @@
 
 import SwiftUI
 import SwiftData
+import FlashCore
+import FlashDesign
 
 /// 此刻页（核心记录闭环）：问候区 + 「+ 新建」→ 今日一览卡（记录数/待办数/情绪状态）
 /// → 快速捕捉卡（日志/灵感分段，保存后 toast 反馈并立即刷新一览）→ 最近闪念（全宽记录卡，
 /// 宽窗口两列、阅读优先）→ 空状态（EmptyStateView，行动按钮聚焦输入框）。
 /// 数据装配由 HomeViewModel 完成，仅在注入的 logs/emotions 变化时重算；
-/// ⌘N 聚焦快速记录输入框（⌘K 全局搜索走「记录」页）；情绪/任务经「+ 新建」直达。
+/// ⌘N 聚焦快速记录输入框（⌘K 全局搜索为 RootView 层浮层）；情绪/任务经「+ 新建」直达。
 struct HomeView: View {
     @Environment(\.flashRepository) private var repository
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -33,6 +35,8 @@ struct HomeView: View {
     /// 记录卡的编辑/删除目标
     @State private var editingLog: LogItem? = nil
     @State private var deletingLog: LogItem? = nil
+    /// Idea→Task 转化草稿（nil 表示不展示任务编辑器）
+    @State private var ideaTaskDraft: IdeaTaskDraft? = nil
     /// 顶部 toast 文案（nil 表示不展示）；toastID 用于相同文案连发时重置计时
     @State private var toastMessage: String? = nil
     @State private var toastID = 0
@@ -41,10 +45,14 @@ struct HomeView: View {
     @State private var overviewAppeared = false
     @State private var bodyAppeared = false
 
-    private var logs: [LogItem] { logEntities.map { $0.toModel() } }
-    private var emotions: [EmotionRecord] { emotionEntities.map { $0.toModel() } }
-    /// 未完成待办数（不限今日）
-    private var openTaskCount: Int { taskEntities.filter { $0.completedAt == nil }.count }
+    /// 未完成待办数（不限今日）：按写代际缓存，body 求值不再逐次过滤
+    @State private var openTaskCountCache = ViewComputeCache<Int, Int>()
+
+    private var openTaskCount: Int {
+        openTaskCountCache.value(for: repository?.revision ?? 0) {
+            taskEntities.filter { $0.completedAt == nil }.count
+        }
+    }
 
     var body: some View {
         ScrollView {
@@ -88,13 +96,14 @@ struct HomeView: View {
             syncViewModel()
             playEntranceAnimation()
         }
-        .onChange(of: logs) { syncViewModel() }
-        .onChange(of: emotions) { syncViewModel() }
+        // 写代际变化 = 任一表有提交（插入/更新/删除/导入）；草稿按键等无关求值不再触发同步。
+        // 不直接观察实体数组：PersistentModel 相等走身份，漏掉编辑等就地属性更新
+        .onChange(of: repository?.revision ?? 0) { syncViewModel() }
         // 顶部 toast：过渡由 ToastView 内置 .pop 接管，调用点不再叠加 .transition
         .overlay(alignment: .top) {
             if let toastMessage {
                 ToastView(message: toastMessage)
-                    .padding(.top, 12)
+                    .padding(.top, Spacing.sm)
             }
         }
         .animation(toastAnimation, value: toastMessage != nil)
@@ -112,9 +121,19 @@ struct HomeView: View {
         }
         .sheet(item: $editingLog) { log in
             LogEditSheet(log: log,
-                         title: log.category == .idea ? "编辑灵感" : "编辑记录") { updated in
-                guard let repository else { throw SaveError() }
-                try repository.updateLog(updated)
+                         title: log.category == .idea ? "编辑灵感" : "编辑记录",
+                         onSave: { updated in
+                             guard let repository else { throw SaveError() }
+                             try repository.updateLog(updated)
+                         },
+                         onConvertToTask: { draft in
+                             ideaTaskDraft = IdeaTaskDraft(sourceLogId: draft.id, title: draft.content)
+                         })
+        }
+        .sheet(item: $ideaTaskDraft) { draft in
+            TaskEditorView(selectedDate: Date(), task: nil, ideaDraft: draft) { task in
+                // 入库成功才关闭编辑器（失败保留草稿，错误经 errorMessage 提示）
+                if saveTask(task) { ideaTaskDraft = nil }
             }
         }
         .sheet(isPresented: $showingTaskEditor) {
@@ -159,7 +178,7 @@ struct HomeView: View {
         } else {
             VStack(alignment: .leading, spacing: Spacing.sm) {
                 Text("最近闪念")
-                    .font(.callout)
+                    .font(Typography.secondary)
                     .foregroundStyle(BrandColors.textSecondary)
                     .padding(.horizontal, Spacing.sm)
                 ViewThatFits(in: .horizontal) {
@@ -179,9 +198,16 @@ struct HomeView: View {
             ForEach(logs) { log in
                 LogCardView(log: log,
                             onEdit: { editingLog = log },
-                            onDelete: { deletingLog = log })
+                            onDelete: { deletingLog = log },
+                            onToggleFavorite: { toggleFavorite(log) })
                     .contextMenu {
                         Button("编辑…") { editingLog = log }
+                        Button(log.isFavorite == true ? "取消收藏" : "收藏") { toggleFavorite(log) }
+                        if log.category == .idea {
+                            Button("转为任务") {
+                                ideaTaskDraft = IdeaTaskDraft(sourceLogId: log.id, title: log.content)
+                            }
+                        }
                         Button("删除", role: .destructive) { deletingLog = log }
                     }
             }
@@ -212,9 +238,11 @@ struct HomeView: View {
 
     // MARK: - 数据注入 / ⌘N / 新建 / 保存
 
-    /// 把最新 logs/emotions 注入 ViewModel；内容未变时 VM 内部直接返回，不重算
+    /// 把最新 logs/emotions 注入 ViewModel；实体→模型映射只在此处发生（写代际变化时），
+    /// VM 内部按值比较，内容未变时直接返回不重算
     private func syncViewModel() {
-        viewModel.update(logs: logs, emotions: emotions)
+        viewModel.update(logs: logEntities.map { $0.toModel() },
+                         emotions: emotionEntities.map { $0.toModel() })
     }
 
     private var errorPresented: Binding<Bool> {
@@ -227,6 +255,14 @@ struct HomeView: View {
 
     private var deletePresented: Binding<Bool> {
         Binding(get: { deletingLog != nil }, set: { if !$0 { deletingLog = nil } })
+    }
+
+    private func toggleFavorite(_ log: LogItem) {
+        do { try repository?.setLogFavorite(id: log.id, !(log.isFavorite ?? false)) }
+        catch {
+            print("HomeView: 收藏切换失败 - \(error)")
+            errorMessage = "操作失败，请重试"
+        }
     }
 
     /// 菜单「新建记录」⌘N：token 递增时聚焦输入框。
@@ -256,13 +292,16 @@ struct HomeView: View {
         guard let repository else { throw SaveError() }
         try repository.addLog(content: item.content, colorTag: item.colorTag,
                               category: item.category, importance: item.importance,
+                              isFavorite: item.isFavorite,
                               recordDate: DateFormatting.parseDay(item.recordDate))
         showToast(item.category == .idea ? "✓ 已保存到灵感" : "✓ 已保存到日志")
     }
 
-    /// 「+ 新建」任务直达编辑器后的保存：入库 + 重建系统提醒（与日历页同一契约）
-    private func saveTask(_ task: TaskItem) {
-        guard let repository else { errorMessage = "内部错误：存储未就绪"; return }
+    /// 「+ 新建」任务直达编辑器后的保存：入库 + 重建系统提醒（与日历页同一契约）。
+    /// 返回是否入库成功，供 item 型 sheet 决定何时关闭编辑器（失败保留草稿）
+    @discardableResult
+    private func saveTask(_ task: TaskItem) -> Bool {
+        guard let repository else { errorMessage = "内部错误：存储未就绪"; return false }
         do {
             try repository.saveTask(task)
             showingTaskEditor = false
@@ -277,9 +316,11 @@ struct HomeView: View {
                     errorMessage = "任务已保存，但系统提醒未启用"
                 }
             }
+            return true
         } catch {
             print("HomeView: 任务保存失败 - \(error)")
             errorMessage = "任务保存失败，请重试"
+            return false
         }
     }
 
@@ -289,25 +330,20 @@ struct HomeView: View {
         toastID += 1
     }
 
+    /// 保存规则（去空白 / 契约上限 / 标签与重要度）在 FlashKit 的 QuickCaptureCommit，与 iOS 共用
     private func quickAdd(as category: Category) {
-        let content = draft.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !content.isEmpty else { return }
-        // 契约上限（UTF-16 单元）：超限不静默截断，保留草稿并弹提示说明原因
-        guard TextLimits.fits(content) else {
-            errorMessage = "内容超出 \(TextLimits.maxContentUTF16) 字上限，请删减后再保存"
-            return
-        }
         guard let repository else { errorMessage = "内部错误：存储未就绪"; return }
         do {
-            switch category {
-            case .log:
-                try repository.addLog(content: content, colorTag: .daily, category: .log)
-            case .idea:
-                try repository.addLog(content: content, colorTag: .idea, category: .idea,
-                                      importance: importanceFromContent(content))
+            switch try QuickCaptureCommit.commit(draft, as: category, repository: repository) {
+            case .saved(let toast):
+                draft = ""
+                showToast(toast)
+            case .empty:
+                return
+            case .tooLong(let message):
+                // 超限不静默截断，保留草稿并弹提示说明原因
+                errorMessage = message
             }
-            draft = ""
-            showToast(category == .idea ? "✓ 已保存到灵感" : "✓ 已保存到日志")
         } catch {
             // 弹窗文案固定，详细错误只进控制台（localizedDescription 可能含本机路径）
             print("HomeView: 快速记录保存失败 - \(error)")

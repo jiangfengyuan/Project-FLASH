@@ -1,7 +1,7 @@
 import { Category, ColorTag, colorTagName, LogItem } from '../models/Models';
 import { dayOffset, dayString, isValidRecordDay } from '../data/DateUtils';
 import { LogsState } from '../state/FeatureStates';
-import { FlashStore } from '../data/FlashStore';
+import { FlashStore, LogMetaEdit } from '../data/FlashStore';
 import { ControllerRuntime } from './ControllerRuntime';
 
 export class LogsController {
@@ -24,9 +24,9 @@ export class LogsController {
         isIdea ? ColorTag.IDEA : ColorTag.DAILY);
       this.state.quickText = '';
       this.state.quickCategory = '';
-      this.runtime.notify(isIdea ? '灵感已保存' : '日志已记录');
+      this.runtime.notify(isIdea ? '灵感已保存' : '日志已记录', 'success');
     } catch (error) {
-      this.runtime.notify(this.runtime.errorMessage(error as Error));
+      this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     } finally {
       this.state.busy = false;
     }
@@ -42,9 +42,9 @@ export class LogsController {
       await this.store.addLog(this.state.captureText, isIdea ? Category.IDEA : Category.LOG,
         isIdea ? ColorTag.IDEA : ColorTag.DAILY);
       this.state.captureText = '';
-      this.runtime.notify(isIdea ? '灵感已保存' : '日志已记录');
+      this.runtime.notify(isIdea ? '灵感已保存' : '日志已记录', 'success');
     } catch (error) {
-      this.runtime.notify(this.runtime.errorMessage(error as Error));
+      this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     } finally {
       this.state.busy = false;
     }
@@ -54,12 +54,36 @@ export class LogsController {
     await this.store.deleteLog(id);
   }
 
+  /** 卡片点击进入详情；打开灵感详情即视为已读（对齐 Android RecordDetailViewModel）。 */
+  openLogDetail(item: LogItem): void {
+    this.state.detailLogId = item.id;
+    if (item.category === Category.IDEA) {
+      this.store.markIdeaViewed(item.id).catch(() => {});
+    }
+  }
+
+  closeLogDetail(): void {
+    this.state.detailLogId = '';
+  }
+
+  detailLog(): LogItem | undefined {
+    return this.state.logs.find((item: LogItem) => item.id === this.state.detailLogId);
+  }
+
+  /** 首页提醒行/灵感视图进入时的批量已读；失败仅表现为提醒保留，不打扰用户。 */
+  async markAllIdeasViewed(): Promise<void> {
+    try {
+      await this.store.markAllIdeasViewed();
+    } catch (_) {}
+  }
+
   startEditLog(item: LogItem): void {
     this.state.editingLogId = item.id;
     this.state.editText = item.content;
     this.state.editCategory = item.category;
     this.state.editTag = item.colorTag;
     this.state.editDate = item.recordDate;
+    this.state.editImportance = item.importance;
     this.state.editError = '';
     this.state.editDiscard = false;
   }
@@ -71,6 +95,7 @@ export class LogsController {
     this.state.editCategory = '';
     this.state.editTag = '';
     this.state.editDate = '';
+    this.state.editImportance = 0;
     this.state.editError = '';
     this.state.editDiscard = false;
   }
@@ -79,7 +104,8 @@ export class LogsController {
     if (this.state.busy) return;
     const item = this.state.logs.find((log: LogItem) => log.id === this.state.editingLogId);
     if (!item || item.content !== this.state.editText || item.category !== this.state.editCategory ||
-      item.colorTag !== this.state.editTag || item.recordDate !== this.state.editDate) {
+      item.colorTag !== this.state.editTag || item.recordDate !== this.state.editDate ||
+      item.importance !== this.state.editImportance) {
       this.state.editDiscard = true;
     } else {
       this.closeEdit();
@@ -100,24 +126,26 @@ export class LogsController {
     this.state.busy = true;
     try {
       const id = this.state.editingLogId;
-      await this.store.updateLog(id, this.state.editText, this.state.editCategory, this.state.editTag, this.state.editDate);
+      await this.store.updateLog(id, this.state.editText, this.state.editCategory, this.state.editTag,
+        this.state.editDate, this.state.editImportance);
       this.state.editingLogId = '';
       this.state.editText = '';
       this.state.editCategory = '';
       this.state.editTag = '';
       this.state.editDate = '';
+      this.state.editImportance = 0;
       this.state.editError = '';
-      this.runtime.notify('记录已更新');
+      this.runtime.notify('记录已更新', 'success');
     } catch (error) {
       this.state.editError = this.runtime.errorMessage(error as Error);
-      this.runtime.notify(this.state.editError);
+      this.runtime.notify(this.state.editError, 'error');
     } finally {
       this.state.busy = false;
     }
   }
 
-  /** 待整理 = 分类为日志且仍为默认「日常」标签的记录。批量整理复用 updateLogMeta，
-   * 正文与重要度保持不变。 */
+  /** 待整理 = 分类为日志且仍为默认「日常」标签的记录。批量整理复用 updateLogMeta
+   * 的语义，正文与重要度保持不变；整批在 store 内一次落库、单次发布。 */
   inboxLogs(): LogItem[] {
     return this.state.logs.filter((item: LogItem) => item.category === Category.LOG && item.colorTag === ColorTag.DAILY);
   }
@@ -127,12 +155,13 @@ export class LogsController {
     if (targets.length === 0 || this.state.busy) return;
     this.state.busy = true;
     try {
-      for (const item of targets) {
-        await this.store.updateLogMeta(item.id, category, colorTag);
-      }
-      this.runtime.notify(`已整理 ${targets.length} 条记录`);
+      await this.store.updateLogsMetaBatch(targets.map((item: LogItem) => {
+        const edit: LogMetaEdit = { id: item.id, category: category, colorTag: colorTag };
+        return edit;
+      }));
+      this.runtime.notify(`已整理 ${targets.length} 条记录`, 'success');
     } catch (error) {
-      this.runtime.notify(this.runtime.errorMessage(error as Error));
+      this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     } finally {
       this.state.busy = false;
     }

@@ -8,16 +8,21 @@ export class FeatureProjection {
   private session: AppSession;
   private taskDay: (task: TaskItem) => string;
   private searchChanged: () => void;
-  constructor(session: AppSession, taskDay: (task: TaskItem) => string, searchChanged: () => void) {
+  // 未读灵感数由 store 侧本地视图状态推导，投影只负责写入 HomeState。
+  private unviewedCount: () => number;
+  constructor(session: AppSession, taskDay: (task: TaskItem) => string, searchChanged: () => void,
+    unviewedCount: () => number = () => 0) {
     this.session = session;
     this.taskDay = taskDay;
     this.searchChanged = searchChanged;
+    this.unviewedCount = unviewedCount;
   }
 
   update(partition: StorePartition, data: BackupData): void {
     const calendar = this.session.calendar;
     if (partition === StorePartition.ALL || partition === StorePartition.LOGS) {
       this.session.logs.logs = data.logs.slice();
+      this.session.logs.logsVersion++;
       this.session.home.recentLogs = data.logs.slice(0, 5);
       const groups = new Map<string, LogItem[]>();
       data.logs.forEach((item: LogItem) => {
@@ -28,9 +33,11 @@ export class FeatureProjection {
       calendar.logsByDay = groups;
       this.searchChanged();
       this.updateLogCounts();
+      this.session.home.unviewedIdeaCount = this.unviewedCount();
     }
     if (partition === StorePartition.ALL || partition === StorePartition.EMOTIONS) {
       this.session.emotion.emotions = data.emotions.slice();
+      this.session.emotion.emotionsVersion++;
       const groups = new Map<string, EmotionRecord[]>();
       data.emotions.forEach((item: EmotionRecord) => {
         const entries = groups.get(item.recordDate) ?? [];
@@ -58,6 +65,7 @@ export class FeatureProjection {
     calendar.emotionsByDay.forEach((_, key: string) => { days.add(key); });
     calendar.tasksByDay.forEach((_, key: string) => { days.add(key); });
     calendar.activityDays = Array.from(days).sort().reverse();
+    calendar.dataVersion++;
   }
 
   updateDay(): void {
