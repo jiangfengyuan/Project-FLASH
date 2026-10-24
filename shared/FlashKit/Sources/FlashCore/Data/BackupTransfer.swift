@@ -28,9 +28,7 @@ public enum BackupTransfer: Sendable {
 
         let fileName = "\(filePrefix)\(DateFormatting.today())-\(UUID().uuidString.prefix(8)).json"
         let file = directory.appendingPathComponent(fileName)
-        try json.write(to: file, atomically: true, encoding: .utf8)
-        try? fileManager.setAttributes([.posixPermissions: NSNumber(value: 0o600)],
-                                       ofItemAtPath: file.path)
+        try writePrivateFile(Data(json.utf8), to: file)
         return file
     }
 
@@ -68,32 +66,42 @@ public enum BackupTransfer: Sendable {
         let fileManager = FileManager.default
         let temporary = destination.deletingLastPathComponent()
             .appendingPathComponent(".flash-backup-\(UUID().uuidString).tmp")
-        try json.write(to: temporary, atomically: false, encoding: .utf8)
-        // 明文备份在临时文件上收紧到 0o600 再原子换入（rename 同卷内属性随 inode 生效）。
-        // 本地卷（MNT_LOCAL：APFS/HFS/直挂卷）chmod 失败视为导出失败；
-        // 网络卷（SMB/NFS 等）不实现 POSIX 模式，该卷的系统权限仍为最终权威。
-        if isLocalVolume(destination) {
-            do {
-                try fileManager.setAttributes([.posixPermissions: NSNumber(value: 0o600)],
-                                              ofItemAtPath: temporary.path)
-            } catch {
-                try? fileManager.removeItem(at: temporary)
-                throw BackupTransferError.permissionTighteningFailed
-            }
-        } else {
-            // 网络卷（SMB/NFS 等）不实现 POSIX 模式：尽力收紧，失败则以该卷系统权限为准
-            try? fileManager.setAttributes([.posixPermissions: NSNumber(value: 0o600)],
-                                           ofItemAtPath: temporary.path)
-        }
+        try writePrivateFile(Data(json.utf8), to: temporary)
         defer { try? fileManager.removeItem(at: temporary) }
 
         if let finalize {
             try finalize(temporary, destination)
         } else if fileManager.fileExists(atPath: destination.path) {
-            _ = try fileManager.replaceItemAt(destination, withItemAt: temporary)
+            // Default replacement preserves old metadata, including a broad
+            // destination mode. Keep the new private inode's metadata instead.
+            _ = try fileManager.replaceItemAt(destination, withItemAt: temporary,
+                                              options: .usingNewMetadataOnly)
         } else {
             try fileManager.moveItem(at: temporary, to: destination)
         }
+    }
+
+    /// Exclusive creation restricts access before the first plaintext byte.
+    /// Failure at any write/close step removes the partial file. The injectable
+    /// descriptor writer lets tests observe creation mode and failed writes.
+    static func writePrivateFile(_ data: Data, to file: URL,
+                                 writer: (FileHandle, Data) throws -> Void = { try $0.write(contentsOf: $1) }) throws {
+        let descriptor = open(file.path, O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW, 0o600)
+        guard descriptor >= 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
+        let handle = FileHandle(fileDescriptor: descriptor, closeOnDealloc: true)
+        var complete = false
+        defer {
+            try? handle.close()
+            if !complete { try? FileManager.default.removeItem(at: file) }
+        }
+        // Some remote volumes have no POSIX mode support; their ACL remains
+        // authoritative. On local volumes fail before writing any plaintext.
+        if fchmod(descriptor, 0o600) != 0 && isLocalVolume(file) {
+            throw BackupTransferError.permissionTighteningFailed
+        }
+        try writer(handle, data)
+        try handle.close()
+        complete = true
     }
     /// 目标路径所在卷是否为本地卷（MNT_LOCAL：APFS/HFS/直挂卷；SMB/NFS 等网络卷为否）。
     /// 查询失败按本地卷处理（chmod 失败从严判为导出失败）。
