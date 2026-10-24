@@ -9,11 +9,11 @@ import SwiftUI
 import WidgetKit
 
 /// 控制中心 / 锁屏 / 操作按钮「快速记录」控件（iOS 版全局热键）：
-/// 经系统 OpenURLIntent 打开 flash://capture，由 App 的深链处理弹出快速记录面板。
+/// 经 QuickCaptureControlIntent 打开 flash://capture，由 App 的深链处理弹出快速记录面板。
 struct QuickCaptureControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
         StaticControlConfiguration(kind: "com.flash.app.ios.quickCapture") {
-            ControlWidgetButton(action: OpenURLIntent(URL(string: "flash://capture")!)) {
+            ControlWidgetButton(action: QuickCaptureControlIntent()) {
                 Label("记一闪", systemImage: "sparkle")
             }
         }

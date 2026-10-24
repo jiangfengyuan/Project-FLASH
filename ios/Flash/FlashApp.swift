@@ -33,6 +33,7 @@ struct FlashApp: App {
         // App Intents 在本进程执行：注入同一仓储与应用状态（快捷指令 / 控制中心直接写库或唤起面板）
         IntentBridge.repository = assembly.repository
         IntentBridge.appState = appState
+        QuickCaptureControlIntent.presentCapture = { appState.presentQuickCapture() }
         // 通知点按（灵感提醒等）走深链；前台也展示横幅
         UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
         // 任务提醒通知上的「完成 / 稍后 10 分钟」
