@@ -26,3 +26,10 @@ test('recovery still reports ordinary damaged records and accepts legacy empty b
   const empty = BackupService.parseRecovery('{"version":"flash-backup-v1","logs":[],"emotions":[]}');
   assert.equal(empty.skippedLogs, 0);
 });
+
+test('recovery rejects dense under-byte-cap input before allocating its object tree', () => {
+  const { BackupService } = createLoader()('data/BackupService');
+  const json = '{"version":"flash-backup-v1","logs":[' + '0,'.repeat(10_000_000) + '0],"emotions":[]}';
+  assert.ok(Buffer.byteLength(json) < 50 * 1024 * 1024);
+  assert.throws(() => BackupService.parseRecovery(json), /资源上限/);
+});

@@ -27,6 +27,7 @@ export class BackupImport {
 /** JSON.parse overwrites duplicate object keys, so strict import scans the raw text first. */
 class StrictJSONScanner {
   private index: number = 0;
+  private valueCount: number = 0;
   private readonly text: string;
 
   private constructor(text: string) {
@@ -41,6 +42,9 @@ class StrictJSONScanner {
   }
 
   private value(depth: number): void {
+    this.valueCount++;
+    // Match FlashCore before JSON.parse can expand dense primitive arrays.
+    if (this.valueCount > 10000000) throw new Error('/：JSON 值数量超过资源上限');
     this.whitespace();
     if (depth > 128 || this.index >= this.text.length) this.fail();
     switch (this.text[this.index]) {

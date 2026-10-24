@@ -72,3 +72,15 @@ Fresh macOS baseline app gate was separately run from a disposable `git archive 
 An already-cancelled merge/overwrite task previously committed records and rebuilt reminders. The parent production regression executed both modes and failed with6 expectations (no cancellation error, changed snapshot, reminder rebuild). The coordinator now checks cancellation before the synchronous main-actor transaction. Detached preview/export work propagates cancellation to its worker and discards cancelled results. JSONSerialization has no internal interruption hook; the bounded synchronous parse may finish before its result is discarded. No postcommit rollback is promised.
 
 After fix: **199 FlashKit tests passed**, including cancelled preview and unchanged-data/no-reminder guarantees in both import modes. Logs: `m5-cancel-parent.log`, `m5-flashkit.log`. `cancelledPreviewDoesNotProduceAnImportableResult` is additional post-fix coverage; only the two-mode apply regression was run against parent production. macOS/iOS cumulative app gates still pending.
+
+## M6 — preallocation budgets and deterministic mutation coverage
+
+Android/Harmony raw scanners now cap JSON values at10,000,000, matching FlashCore's existing budget before full object-tree allocation. This is separate from128-deep nesting,50MiB and100k-record section limits. Legal schema/record semantics and recovery skip reporting remain unchanged. The contract documentation records the input policy; the backup schema itself was not changed.
+
+Parent regressions failed for both the Android raw scanner and Harmony recovery dense-input case (about20MiB, under file cap). Android's scanner-only test avoids org.json materialization on the unfixed code; Harmony's parent case returned instead of rejecting the budget. No crash/OOM threshold is claimed.
+
+After: Android Debug/Release JVM80 each, app/test APK builds pass; combined contract/Harmony host271 tests pass; native unsigned Harmony HAP builds. The added host mutation test evaluates256 deterministic insert/replace mutations of the shared valid fixture against the existing reference validator. Apple framing test mutates each header position with10 character classes and checks canonical parsing, foreign-nonce rejection and protocol0/2 rejection; FlashKit full suite **200 passed**. This is deterministic parser mutation coverage, not coverage-guided fuzzing or a network appliance stress test.
+
+Logs: `m6-android-budget-parent.log`, `m6-harmony-budget-parent.log`, `m6-android-gates.log`, `m6-contract-harmony.log`, `m6-harmony-native.log`, `m6-flashkit-fuzz.log`.
+
+The cumulative macOS candidate app gate after M5 passed13 app tests, equal to the freshly executed13-test baseline (`m5-macos.log`, `m5-macos.xcresult`). Subsequent shared changes still require a final cumulative gate.

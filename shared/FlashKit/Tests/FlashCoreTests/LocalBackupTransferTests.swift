@@ -11,6 +11,28 @@ import Testing
 
 @Suite("LocalBackupTransfer")
 struct LocalBackupTransferTests {
+    @Test func framingStructuralMutationCorpusAcceptsOnlyCanonicalHeaders() {
+        let header = Array("OK 123 " + String(repeating: "a", count: 64))
+        let replacements: [Character] = ["0", "9", "a", "A", " ", "-", "+", "\r", "\n", "🙂"]
+        for index in header.indices {
+            for replacement in replacements {
+                var candidate = header
+                candidate[index] = replacement
+                let line = String(candidate)
+                if let parsed = LanHandshake.parseOKHeader(line) {
+                    #expect(parsed.size > 0)
+                    #expect(parsed.macHex.count == 64)
+                    #expect(LanHandshake.isLowerHex(parsed.macHex))
+                    #expect(line == "OK \(parsed.size) \(parsed.macHex)")
+                }
+            }
+        }
+        let nonce = "00112233445566778899aabbccddeeff"
+        let proof = "FLASH-AERO/1 " + LanHandshake.proof(pin: "123456", nonce: nonce)
+        #expect(!LanHandshake.verifyProofLine(pin: "123456", nonce: String(repeating: "0", count: 32), line: proof))
+        #expect(LanHandshake.parseProofLine(proof.replacingOccurrences(of: "/1", with: "/0")) == nil)
+        #expect(LanHandshake.parseProofLine(proof.replacingOccurrences(of: "/1", with: "/2")) == nil)
+    }
     @Test func discoveryLabelIsEphemeralAndContainsNoHostOrModel() {
         let names = (0..<100).map { _ in LocalBackupSender.generateServiceName() }
         #expect(Set(names).count == names.count)
