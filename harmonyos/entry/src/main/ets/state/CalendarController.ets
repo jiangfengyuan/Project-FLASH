@@ -198,6 +198,10 @@ export class CalendarController {
       reminderAt: reminderAt, completedAt: existing?.completedAt,
       createdAt: existing?.createdAt ?? now, updatedAt: now
     };
+    if (existing) {
+      if (typeof existing.sourceLogId === 'string') task.sourceLogId = existing.sourceLogId;
+      if (typeof existing.isFavorite === 'boolean') task.isFavorite = existing.isFavorite;
+    }
     this.state.busy = true;
     try {
       await this.store.saveTask(task);
@@ -224,6 +228,8 @@ export class CalendarController {
       completedAt: task.completedAt ? undefined : new Date().toISOString(),
       createdAt: task.createdAt, updatedAt: new Date().toISOString()
     };
+    if (typeof task.sourceLogId === 'string') updated.sourceLogId = task.sourceLogId;
+    if (typeof task.isFavorite === 'boolean') updated.isFavorite = task.isFavorite;
     this.state.busy = true;
     try {
       await this.store.saveTask(updated);

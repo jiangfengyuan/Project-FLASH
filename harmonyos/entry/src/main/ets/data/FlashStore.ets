@@ -636,6 +636,7 @@ export class FlashStore {
         id: existing.id, content: trimmed, colorTag: colorTag ?? existing.colorTag, category: category ?? existing.category,
         importance: importance ?? existing.importance, createdAt: existing.createdAt, recordDate: recordDate ?? existing.recordDate
       };
+      if (typeof existing.isFavorite === 'boolean') updated.isFavorite = existing.isFavorite;
       await this.upsert(LOGS_TABLE, updated.id, updated.createdAt, JSON.stringify(updated));
       this.logs = this.logs.map((item: LogItem) => item.id === id ? updated : item);
       this.changes.publish(StorePartition.LOGS);
@@ -652,6 +653,7 @@ export class FlashStore {
         id: existing.id, content: existing.content, colorTag: colorTag, category: category,
         importance: existing.importance, createdAt: existing.createdAt, recordDate: existing.recordDate
       };
+      if (typeof existing.isFavorite === 'boolean') updated.isFavorite = existing.isFavorite;
       await this.upsert(LOGS_TABLE, updated.id, updated.createdAt, JSON.stringify(updated));
       this.logs = this.logs.map((item: LogItem) => item.id === id ? updated : item);
       this.changes.publish(StorePartition.LOGS);
@@ -678,6 +680,7 @@ export class FlashStore {
           importance: existing.importance, createdAt: existing.createdAt, recordDate: existing.recordDate
         };
         try {
+          if (typeof existing.isFavorite === 'boolean') updated.isFavorite = existing.isFavorite;
           await this.upsert(LOGS_TABLE, updated.id, updated.createdAt, JSON.stringify(updated));
         } catch (error) {
           failure = error as Error;

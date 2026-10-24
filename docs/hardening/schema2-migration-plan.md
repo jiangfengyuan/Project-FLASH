@@ -41,6 +41,6 @@ The baseline Apple production exporter generated2,639 bytes, SHA256 `cc9718e96f8
 
 Until native migration/rollback/reopen and actual-export cross-platform checks pass, this document and an approved migration are not an acceptance verdict.
 
-## Executed Android implementation checkpoint
+## Executed implementation checkpoint
 
-Android candidate:91 JVM tests per variant; native12pass/1manual-probe skip; populated migration and injected-DDL rollback passed; explicit separate write/read invocations passed with force-stop between. Actual Apple artifact metadata survives Android native Room and a native re-export. Harmony support and cross-export codec evidence land in a separate milestone. No real-device Android/iOS acceptance is implied. See verification.md and retained raw logs/hashes.
+Android candidate:91 JVM tests per variant; native12pass/1manual-probe skip; populated migration and injected-DDL rollback passed; explicit separate write/read invocations passed with force-stop between. Actual Apple artifact metadata survives Android native Room and a native re-export. Harmony candidate:278 host/contract tests and unsigned native build pass; existing payload schema unchanged, row reload/ordinary-edit metadata coverage uses explicit RDB fakes. Cross-export codec checks compare every incoming schema2 metadata field. No Harmony device or real-device Android/iOS acceptance is implied. See verification.md and retained raw logs/hashes.
