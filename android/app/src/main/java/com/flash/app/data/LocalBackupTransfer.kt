@@ -10,7 +10,6 @@ import android.content.Context
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import android.net.wifi.WifiManager
-import android.os.Build
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import kotlinx.coroutines.currentCoroutineContext
@@ -61,6 +60,8 @@ object LocalBackupTransfer {
 
     fun generatePin(): String = secureRandom.nextInt(1_000_000).toString().padStart(6, '0')
 
+    internal fun generateServiceName(): String = "Flash Aero-${randomNonceHex().take(8)}"
+
     /**
      * 部分 Android 版本回调的 serviceType 不带末尾 "."，去掉尾点归一后再比较，
      * 避免把合法发现结果静默丢弃。
@@ -102,7 +103,7 @@ object LocalBackupTransfer {
 
         suspend fun run(): Boolean {
             val service = NsdServiceInfo().apply {
-                serviceName = "Flash Aero (${Build.MODEL.take(24)})"
+                serviceName = generateServiceName()
                 serviceType = SERVICE_TYPE
                 port = server.localPort
             }

@@ -265,6 +265,10 @@ public final class LocalBackupSender: @unchecked Sendable {
         String(format: "%06d", Int.random(in: 0...999_999))
     }
 
+    public static func generateServiceName() -> String {
+        "Flash Aero-" + UUID().uuidString.prefix(8).lowercased()
+    }
+
     public init(json: String, timing: LocalTransferTiming = LocalTransferTiming(),
          onFinish: @escaping @Sendable (LocalBackupSendResult) -> Void) throws {
         self.timing = timing
@@ -272,14 +276,9 @@ public final class LocalBackupSender: @unchecked Sendable {
         payloadMacHex = LanHandshake.payloadMAC(pin: pin, payload: payload)
         self.onFinish = onFinish
         listener = try NWListener(using: .tcp, on: .any)
-        #if os(macOS)
-        let deviceName = Host.current().localizedName ?? "Mac"
-        #else
-        // iOS 16+ 未申请 user-assigned-device-name 权限时 UIDevice.name 只返回机型名，
-        // 这里直接用机型名，避免为一个 Bonjour 显示名引入 UIKit
-        let deviceName = "iPhone"
-        #endif
-        listener.service = .init(name: "Flash Aero (\(deviceName.prefix(24)))",
+        // Rotate the display label per sender, without personal host/model data.
+        // This is discovery metadata, never an authenticated device identity.
+        listener.service = .init(name: Self.generateServiceName(),
                                  type: Self.serviceType)
         listener.newConnectionHandler = { [weak self] connection in self?.accept(connection) }
         listener.stateUpdateHandler = { [weak self] state in

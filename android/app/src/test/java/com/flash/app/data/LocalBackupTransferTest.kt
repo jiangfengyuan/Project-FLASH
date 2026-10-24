@@ -28,6 +28,13 @@ class LocalBackupTransferTest {
     private val pin = "123456"
 
     @Test
+    fun `discovery labels rotate without personal or model data`() {
+        val names = List(100) { LocalBackupTransfer.generateServiceName() }
+        assertEquals(names.size, names.toSet().size)
+        names.forEach { assertTrue(it.matches(Regex("Flash Aero-[0-9a-f]{8}"))) }
+    }
+
+    @Test
     fun `sender cancellation interrupts accepted handshake read`() {
         assertSenderCancellationClosesActiveIO(blockWrite = false)
     }

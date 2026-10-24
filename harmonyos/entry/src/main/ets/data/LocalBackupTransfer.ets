@@ -107,6 +107,7 @@ function decode(buffer: ArrayBuffer): string {
 
 export class LocalBackupSender {
   readonly pin: string;
+  readonly serviceName: string;
   private server?: socket.TCPSocketServer;
   private service?: mdns.LocalServiceInfo;
   private stopped: boolean = false;
@@ -127,6 +128,7 @@ export class LocalBackupSender {
     this.onFinished = onFinished;
     this.idleMillis = idleMillis;
     this.pin = securePin();
+    this.serviceName = `Flash Aero-${randomNonce().slice(0, 8)}`;
   }
 
   async start(): Promise<void> {
@@ -134,7 +136,7 @@ export class LocalBackupSender {
     this.server.on('connect', (connection: socket.TCPSocketConnection) => this.handle(connection));
     await this.server.listen({ address: '0.0.0.0', family: 1, port: 0 });
     const address = await this.server.getLocalAddress();
-    this.service = { serviceType: SERVICE_TYPE, serviceName: 'Flash Aero HarmonyOS', port: address.port };
+    this.service = { serviceType: SERVICE_TYPE, serviceName: this.serviceName, port: address.port };
     this.service = await mdns.addLocalService(this.context, this.service);
     this.timer = setTimeout(() => this.stop(false), SESSION_MILLIS);
   }

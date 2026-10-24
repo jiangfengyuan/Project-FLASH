@@ -58,3 +58,11 @@ JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home \
 ```
 
 After: BUILD SUCCESSFUL;78 JVM tests passed in each Debug/Release variant, Debug APK and instrumentation APK built. Release unit tests are not Release app/profile measurements and do not bypass the release-signing guard. Logs: `m3-android-parent-regression.log`, `m3-android-gates.log`; counts read from JUnit XML. Connected Room/device gates still pending. The no-PIN-download, plaintext transport and offline PIN-verifier design flaws remain unresolved pending protocol approval.
+
+## M4 — discovery metadata minimization
+
+All senders now advertise a neutral `Flash Aero-<8hex>` label newly generated per sender/session, rather than personal Mac host name, Android model or a stable platform label. This changes display metadata only; service type, TCP bytes, PIN handling and NetService main-thread resolution stay unchanged. The suffix is a convenience label, not a secret or authenticated identity. mDNS host/address metadata remains observable.
+
+Gates: FlashKit197 passed (includes actual Bonjour discovery), combined host suite269 passed, Harmony native unsigned HAP build successful, Android Debug/Release JVM79 each plus Debug app/test-APK builds successful. Added generated-label shape/rotation checks; these introduce helper/property test seams, so no failing-parent execution is claimed for label tests. Logs: `m4-flashkit.log`, `m4-contract-harmony.log`, `m4-harmony-native.log`, `m4-android-gates.log`.
+
+Fresh macOS baseline app gate was separately run from a disposable `git archive e9a0aa6` copy: **13 app tests passed**, `** TEST SUCCEEDED **`, `m0-macos.xcresult`. The original PR checkout was not built or edited. A cumulative candidate app comparison remains pending until shared fixes settle.

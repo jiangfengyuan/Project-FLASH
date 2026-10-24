@@ -131,6 +131,13 @@ test('sender PIN is an unbiased 6-digit decimal string', () => {
   assert.ok(seen.size > 1, 'PINs must vary across senders');
 });
 
+test('sender discovery labels rotate without device identity', () => {
+  const { LocalBackupSender } = transferModule();
+  const names = Array.from({ length: 8 }, () => new LocalBackupSender({}, '{}', () => {}).serviceName);
+  names.forEach(name => assert.match(name, /^Flash Aero-[0-9a-f]{8}$/));
+  assert.equal(new Set(names).size, names.length);
+});
+
 test('receiver strictly parses the OK header and rejects OK 123abc', async () => {
   const { receiver, client } = startReceiver(() => '123456');
   const rejection = assert.rejects(receiver.result, /无效响应/);
