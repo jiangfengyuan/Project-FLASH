@@ -30,8 +30,13 @@ struct IdeaReminderCenterTests {
         center.refresh(repository: repository, settings: settings)
         #expect(center.unreadCount == 0)          // 基线：历史灵感视为已读
 
-        for text in ["一", "二", "三"] {
-            try repository.addLog(content: text, colorTag: .idea, category: .idea)
+        // Distinct explicit instants: rapid addLog calls can share a millisecond;
+        // equal timestamps have no insertion-order guarantee in SwiftData.
+        for (index, text) in ["一", "二", "三"].enumerated() {
+            try repository.updateLog(LogItem(
+                id: "00000000-0000-4000-8000-00000000000\(index + 1)",
+                content: text, colorTag: .idea, category: .idea, importance: 0,
+                createdAt: "2026-10-24T00:00:0\(index + 1).000Z", recordDate: "2026-10-24"))
         }
         try repository.addLog(content: "日志不计", colorTag: .daily, category: .log)
         center.refresh(repository: repository, settings: settings)
