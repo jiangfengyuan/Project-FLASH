@@ -1,6 +1,6 @@
 # Next-beta UI preparation — architecture and review proposal
 
-Status: planning only. No visual redesign, theme switch, remote configuration, alternate UI framework or production theme seam added. Current appearance/navigation remains the default. Acceptance belongs to the owner and Claude.
+Status: planning only. No visual redesign, theme switch, remote configuration, alternate UI framework or production theme seam added. Current appearance/navigation remains the default. Independent review/evidence belongs to Claude; final acceptance remains with the owner.
 
 ## Current system and coupling audit
 
@@ -50,7 +50,7 @@ Visual sample inspection: home light/default places part of the empty-state acti
 | Android compact GLASS,4empty primary screens |16PNG/XML captures, build/OS/commit/hash manifest | Populate fictional records; capture emotion/calendar/Memory/editor/import/search/batch/errors; repeat Material, expanded/fold/tablet; actual TalkBack/keyboard/touch/contrast/Reduce Motion traversal |
 | iOS dedicated iPhone18 Pro/iOS27.0 |14app tests; existing UI screenshot not yet captured | Candidate installed only on owned CodexFlashHardening simulator. Xcode27.2 uses Device Hub at Contents/Applications/DeviceHub.app. Select that named device; capture each major screen at light/dark × default/accessibilityExtraExtraExtraLarge(AX5), including Chinese/emoji/error/keyboard states and narrow/wide sizes. Mac locked during UI selection; CUA requires manual unlock, which has been requested. Do not bypass the lock or substitute generated images |
 | macOS |13behavior tests; no screenshot baseline | Launch in a dedicated fictional user/container, preserve daily store; capture normal/minimum windows, light/dark, largest supported text, keyboard/VoiceOver; use existing signing, no store move |
-| Harmony |283host/contract tests, unsigned HAP; no native screenshot | Attach a supported phone/fold/tablet with existing authorized signing; seed fictional data; capture light/dark/default/maximum accessibility font, form/keyboard/error states; run ScreenReader and native touch/motion checks |
+| Harmony |287host/contract tests, unsigned HAP; no native screenshot | Attach a supported phone/fold/tablet with existing authorized signing; seed fictional data; capture light/dark/default/maximum accessibility font, form/keyboard/error states; run ScreenReader and native touch/motion checks |
 
 Current screenshot coverage is incomplete. `tools/verification/android-screenshot-baseline.py` documents the already-executed purpose-built emulator capture and requires explicit emulator/build/source metadata; it must never target physical/daily devices. Original PNGs are retained unchanged. No baseline claim is made for uncaptured states or unavailable devices.
 

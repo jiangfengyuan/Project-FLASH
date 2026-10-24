@@ -18,7 +18,7 @@ test at harmonyos/tests/atomic-read-state.test.cjs:32:3
   AssertionError [ERR_ASSERTION]: failed operation must roll back business and read-state rows
   + actual - expected
   ... Skipped lines
-  
+
     {
   +   emotions: [],
   -   emotions: [
@@ -60,7 +60,7 @@ test at harmonyos/tests/atomic-read-state.test.cjs:32:3
   -     }
   -   ]
     }
-  
+
       at TestContext.<anonymous> (/Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/tests/atomic-read-state.test.cjs:48:12)
       at async Test.run (node:internal/test_runner/test:1373:7)
       at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
@@ -76,7 +76,7 @@ test at harmonyos/tests/atomic-read-state.test.cjs:32:3
 ✖ conditional: read-state IO failure leaves business rows, memory and viewed state unchanged (91.940209ms)
   AssertionError [ERR_ASSERTION]: failed operation must roll back business and read-state rows
   + actual - expected
-  
+
     {
   +   emotions: [],
   +   idea_view_state: [],
@@ -130,7 +130,7 @@ test at harmonyos/tests/atomic-read-state.test.cjs:32:3
   -     }
   -   ]
     }
-  
+
       at TestContext.<anonymous> (/Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/tests/atomic-read-state.test.cjs:48:12)
       at async Test.run (node:internal/test_runner/test:1373:7)
       at async Test.processPendingSubtests (node:internal/test_runner/test:946:7) {
@@ -147,7 +147,7 @@ test at harmonyos/tests/atomic-read-state.test.cjs:32:3
   AssertionError [ERR_ASSERTION]: failed operation must roll back business and read-state rows
   + actual - expected
   ... Skipped lines
-  
+
     {
   +   emotions: [],
   -   emotions: [
@@ -196,7 +196,7 @@ test at harmonyos/tests/atomic-read-state.test.cjs:32:3
   -     }
   -   ]
     }
-  
+
       at TestContext.<anonymous> (/Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/tests/atomic-read-state.test.cjs:48:12)
       at async Test.run (node:internal/test_runner/test:1373:7)
       at async Test.processPendingSubtests (node:internal/test_runner/test:946:7) {
@@ -213,7 +213,7 @@ test at harmonyos/tests/atomic-read-state.test.cjs:32:3
   AssertionError [ERR_ASSERTION]: failed operation must roll back business and read-state rows
   + actual - expected
   ... Skipped lines
-  
+
     {
       emotions: [
         {
@@ -231,7 +231,7 @@ test at harmonyos/tests/atomic-read-state.test.cjs:32:3
         {
           id: '33333333-3333-4333-8333-333333333333',
           payload: '{"id":"33333333-3333-4333-8333-333333333333","title":"提交协议首稿","notes":"包含经理说明和技术契约","colorTag":"urgent","importance":3,"due":{"kind":"dateTime","at":"2026-09-06T01:00:00.000Z","timeZone":"Asia/Shanghai"},"reminderAt":"2026-09-06T00:30:00.000Z","createdAt":"2026-09-04T00:00:00.000Z","updatedAt":"2026-09-05T00:00:00.000Z","sourceLogId":"55555555-5555-4555-8555-555555555555","isFavorite":true}',
-  
+
       at TestContext.<anonymous> (/Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/tests/atomic-read-state.test.cjs:48:12)
       at async Test.run (node:internal/test_runner/test:1373:7)
       at async Test.processPendingSubtests (node:internal/test_runner/test:946:7) {

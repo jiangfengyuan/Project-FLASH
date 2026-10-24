@@ -35,6 +35,8 @@
 
 2026-10-25 加固进行中：现行 LAN v1.1 的公开 CHALLENGE 即释放完整明文备份、离线猜 PIN、未认证错误结束会话等缺陷已复核。用户批准本轮暂时停用旧协议，历史实现在测试目标内保留回归，应用中没有启用开关或不安全回退。替代协议尚未选定，也未添加密码库。见 [加固基线](docs/hardening/baseline-2026-10-24.md)、[LAN 决策与停用边界](docs/hardening/lan-v2-decision.md)、[时区/schema 兼容阻塞](docs/hardening/compatibility-blockers.md)。
 
+加固审查交接见 [当前报告与未验证项](docs/hardening/review-handoff.md)；[Release 实测](docs/hardening/performance.md) 仅覆盖明确记录的共享 macOS host 工作负载，[下一 beta UI 提案](docs/hardening/next-beta-ui-plan.md) 仅规划与部分截图基线，尚未实施视觉改版。
+
 ## 构建
 
 ### Android
