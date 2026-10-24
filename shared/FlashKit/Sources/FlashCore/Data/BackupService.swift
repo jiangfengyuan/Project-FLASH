@@ -471,6 +471,10 @@ public enum BackupService: Sendable {
 
     public static func parseRecovery(_ json: String) throws -> ImportPreview {
         if json.utf8.count > maxFileBytes { throw BackupError.fileTooLarge }
+        // Recovery may skip damaged records, but must not bypass the input
+        // resource limits or accept ambiguous duplicate keys before allocation.
+        var scanner = StrictJSONScanner(json)
+        try scanner.validate()
         let root = try serializedRoot(json)
         let result = try parse(root: root)
         let legacy = result.sourceVersion == legacyBackupVersion

@@ -378,6 +378,9 @@ export class BackupService {
   }
 
   static parseRecovery(json: string): BackupImport {
+    if (new util.TextEncoder().encodeInto(json).length > BackupService.MAX_BYTES) throw new Error('/：文件超过 50 MiB');
+    // Recover individual records only after bounded, unambiguous JSON syntax.
+    StrictJSONScanner.validate(json);
     const result = BackupService.parse(json);
     const document = JSON.parse(json) as BackupDocument;
     const legacy = result.sourceVersion === BackupService.LEGACY_VERSION;

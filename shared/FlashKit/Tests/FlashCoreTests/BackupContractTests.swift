@@ -71,6 +71,19 @@ struct BackupContractTests {
         #expect(throws: (any Error).self) { _ = try BackupService.parseRecovery(fixture("invalid-unknown-section")) }
     }
 
+    @Test func recoveryRejectsDuplicateAndEscapedEquivalentKeys() {
+        for key in ["logs", "\\u006cogs"] {
+            let json = "{\"version\":\"flash-backup-v1\",\"logs\":[],\"\(key)\":[],\"emotions\":[]}"
+            #expect(throws: (any Error).self) { _ = try BackupService.parseRecovery(json) }
+        }
+    }
+
+    @Test func recoveryRejectsDeeplyNestedSkippedRecords() {
+        let nested = String(repeating: "[", count: 130) + "0" + String(repeating: "]", count: 130)
+        let json = "{\"version\":\"flash-backup-v1\",\"logs\":[\(nested)],\"emotions\":[]}"
+        #expect(throws: (any Error).self) { _ = try BackupService.parseRecovery(json) }
+    }
+
     @Test func strictExportRejectsInvalidDataAndNormalizesTimes() throws {
         let input = try BackupService.parseStrict(fixture("valid-full"))
         var log = try #require(input.logs.first)
