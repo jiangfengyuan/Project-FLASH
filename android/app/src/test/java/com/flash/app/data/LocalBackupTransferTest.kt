@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -25,6 +26,82 @@ import org.junit.Test
 
 class LocalBackupTransferTest {
     private val pin = "123456"
+
+    @Test
+    fun `sender cancellation interrupts accepted handshake read`() {
+        assertSenderCancellationClosesActiveIO(blockWrite = false)
+    }
+
+    @Test
+    fun `sender cancellation interrupts a non-reading receiver`() {
+        assertSenderCancellationClosesActiveIO(blockWrite = true)
+    }
+
+    private fun assertSenderCancellationClosesActiveIO(blockWrite: Boolean) {
+        val accepted = CountDownLatch(1)
+        val stopped = AtomicBoolean(false)
+        val server = object : ServerSocket(0) {
+            override fun accept(): Socket = super.accept().also {
+                it.sendBufferSize = 1024
+                accepted.countDown()
+            }
+        }
+        server.soTimeout = 1000
+        val executor = Executors.newSingleThreadExecutor()
+        var client: Socket? = null
+        try {
+            val session = executor.submit<Boolean> {
+                runBlocking {
+                    LocalBackupTransfer.serveSession(server, pin,
+                        if (blockWrite) "x".repeat(8 * 1024 * 1024) else "{}",
+                        isStopped = { stopped.get() })
+                }
+            }
+            client = Socket("127.0.0.1", server.localPort)
+            client.soTimeout = 2000
+            client.receiveBufferSize = 1024
+            assertTrue(accepted.await(2, TimeUnit.SECONDS))
+            if (blockWrite) {
+                client.getOutputStream().write("CHALLENGE $SPEC_NONCE\n".toByteArray(Charsets.US_ASCII))
+                readLineRaw(client.getInputStream())
+                readLineRaw(client.getInputStream())
+                // Leave the bulk payload unread, forcing a blocked socket write.
+            } else {
+                client.getOutputStream().write('C'.code)
+            }
+            stopped.set(true)
+            assertFalse(session.get(2, TimeUnit.SECONDS))
+            if (!blockWrite) assertEquals(-1, client.getInputStream().read())
+        } finally {
+            stopped.set(true)
+            client?.close()
+            server.close()
+            executor.shutdownNow()
+        }
+    }
+
+    @Test
+    fun `session expiry closes an accepted incomplete handshake`() {
+        val server = ServerSocket(0).apply { soTimeout = 1000 }
+        val executor = Executors.newSingleThreadExecutor()
+        try {
+            val session = executor.submit<Boolean> {
+                runBlocking {
+                    LocalBackupTransfer.serveSession(server, pin, "{}", { false }, sessionMillis = 300)
+                }
+            }
+            Socket("127.0.0.1", server.localPort).use { client ->
+                client.soTimeout = 2000
+                client.getOutputStream().write('C'.code)
+                assertFalse(session.get(2, TimeUnit.SECONDS))
+                assertEquals(-1, client.getInputStream().read())
+                assertTrue(server.isClosed)
+            }
+        } finally {
+            server.close()
+            executor.shutdownNow()
+        }
+    }
 
     companion object {
         private const val SPEC_NONCE = "00112233445566778899aabbccddeeff"

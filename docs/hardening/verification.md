@@ -37,3 +37,24 @@ Observed a second permissions defect during runtime reproduction: replacing an e
 The writer now uses exclusive/no-follow creation with0600 before any plaintext, enforces local-volume mode before writing, removes partial files after write/close failure, and preserves atomic replacement. New descriptor-level tests inspect mode before the first write, inject a partial write/failure and verify deletion, and ensure an existing symlink is neither followed nor removed. The new internal test seam does not exist on the parent, so those two tests are **post-fix guarantees**, not claimed as executable failing-parent regressions. File protection flags and read-state persistence were untouched.
 
 Full FlashKit gate: **196 passed**. Reproduction: `swift test --filter BackupTransferTests` (substring also selects the LAN suites; parent31 executed with1 failure), then full `swift test`. Logs: `m2-export-parent-regression.log`, `m2-flashkit.log`. Local host filesystem results do not verify SMB/NFS/Files-provider ACLs or iOS device protection. Network-volume permissions remain controlled by that volume's ACL; no stronger promise is made.
+
+## M3 — Android sender cancellation and expiry
+
+The two cancellation regressions failed against unchanged Android parent production code:20 LAN tests executed,2 timed out (accepted incomplete handshake and a receiver that leaves an8MiB payload unread). The tests explicitly synchronize acceptance and constrain socket buffers; their finally blocks close sockets/workers.
+
+The sender now owns the accepted socket inside the session and runs one daemon watchdog per active session. A monotonic lifetime, explicit stop flag, closed listener or coroutine cancellation closes both listener and accepted socket, interrupting blocking reads/writes. Every exit cancels the watchdog and releases socket ownership. The normal60s session deadline now actually bounds active I/O; successful protocol bytes/roles and framing remain v1.1. A new300ms injected lifetime verifies active-handshake expiry and peer EOF without waiting60s.
+
+Executed serially:
+
+```sh
+cd android
+ANDROID_HOME=/Users/haydenjiang/Library/Android/sdk \
+JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home \
+./gradlew --offline :app:testDebugUnitTest --tests com.flash.app.data.LocalBackupTransferTest --console=plain
+# After fix:
+ANDROID_HOME=/Users/haydenjiang/Library/Android/sdk \
+JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home \
+./gradlew --offline test assembleDebug :app:assembleDebugAndroidTest --console=plain
+```
+
+After: BUILD SUCCESSFUL;78 JVM tests passed in each Debug/Release variant, Debug APK and instrumentation APK built. Release unit tests are not Release app/profile measurements and do not bypass the release-signing guard. Logs: `m3-android-parent-regression.log`, `m3-android-gates.log`; counts read from JUnit XML. Connected Room/device gates still pending. The no-PIN-download, plaintext transport and offline PIN-verifier design flaws remain unresolved pending protocol approval.

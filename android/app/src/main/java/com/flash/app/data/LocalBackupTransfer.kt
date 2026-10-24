@@ -25,6 +25,10 @@ import java.net.SocketTimeoutException
 import java.security.MessageDigest
 import java.security.SecureRandom
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.net.SocketException
 
 /**
  * 单次、短时的局域网备份通道。Bonjour/NSD 只负责发现，JSON 通过临时 TCP 连接传输。
@@ -145,25 +149,59 @@ object LocalBackupTransfer {
         pin: String,
         json: String,
         isStopped: () -> Boolean,
+        sessionMillis: Long = SESSION_MILLIS,
     ): Boolean {
-        val deadline = System.currentTimeMillis() + SESSION_MILLIS
-        val payload = json.toByteArray(Charsets.UTF_8)
-        val mac = computePayloadMac(pin, payload).toHex()
-        while (!isStopped() && currentCoroutineContext().isActive &&
-            System.currentTimeMillis() < deadline
-        ) {
-            val socket = try {
-                server.accept()
-            } catch (_: SocketTimeoutException) {
-                continue
-            }
-            when (socket.use { handleSenderConnection(it, pin, payload, mac) }) {
-                ConnectionOutcome.PAIRED -> return true
-                ConnectionOutcome.SESSION_FAILED -> return false
-                ConnectionOutcome.CONTINUE -> Unit
-            }
+        require(sessionMillis > 0)
+        val started = System.nanoTime()
+        val lifetime = TimeUnit.MILLISECONDS.toNanos(sessionMillis)
+        val context = currentCoroutineContext()
+        val ended = AtomicBoolean(false)
+        val active = AtomicReference<Socket?>(null)
+        val watchdog = Executors.newSingleThreadScheduledExecutor { work ->
+            Thread(work, "flash-lan-session-deadline").apply { isDaemon = true }
         }
-        return false
+        fun shouldStop(): Boolean = ended.get() || server.isClosed || isStopped() ||
+            !context.isActive || System.nanoTime() - started >= lifetime
+        // SO_TIMEOUT applies only to reads. Closing the accepted socket from
+        // another thread is what interrupts a stalled write or a drip-fed line.
+        val deadlineTask = watchdog.scheduleAtFixedRate({
+            if (shouldStop()) {
+                ended.set(true)
+                runCatching { active.get()?.close() }
+                runCatching { server.close() }
+            }
+        }, 0, 50, TimeUnit.MILLISECONDS)
+        try {
+            val payload = json.toByteArray(Charsets.UTF_8)
+            val mac = computePayloadMac(pin, payload).toHex()
+            while (!shouldStop()) {
+                val socket = try {
+                    server.accept()
+                } catch (_: SocketTimeoutException) {
+                    continue
+                } catch (error: SocketException) {
+                    if (shouldStop()) return false
+                    throw error
+                }
+                active.set(socket)
+                try {
+                    if (shouldStop()) return false
+                    when (socket.use { handleSenderConnection(it, pin, payload, mac) }) {
+                        ConnectionOutcome.PAIRED -> return !shouldStop()
+                        ConnectionOutcome.SESSION_FAILED -> return false
+                        ConnectionOutcome.CONTINUE -> Unit
+                    }
+                } finally {
+                    active.compareAndSet(socket, null)
+                    runCatching { socket.close() }
+                }
+            }
+            return false
+        } finally {
+            deadlineTask.cancel(false)
+            watchdog.shutdownNow()
+            runCatching { active.getAndSet(null)?.close() }
+        }
     }
 
     private class TransferLimitException : IOException()
