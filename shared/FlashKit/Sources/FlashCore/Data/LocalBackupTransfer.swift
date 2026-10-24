@@ -489,13 +489,11 @@ public final class LocalBackupBrowser: @unchecked Sendable {
                     browser.emitDevices()
                 }
             }
-            let service = NetService(domain: domain, type: type, name: name)
-            service.delegate = delegate
-            resolvers[key] = ServiceResolver(service: service, delegate: delegate)
-            // NetService 的异步解析依赖 RunLoop，主线程创建并启动
-            DispatchQueue.main.async {
-                service.resolve(withTimeout: 5)
-            }
+            let resolver = ServiceResolver(delegate: delegate)
+            resolvers[key] = resolver
+            // NetService 在创建线程的 RunLoop 上回调：必须在主线程创建（在浏览队列创建则解析永不回调，
+            // 设备列表始终为空），并在主线程启动
+            resolver.startOnMain(domain: domain, type: type, name: name)
         }
         // 消失的服务：移除已解析条目并取消进行中的解析
         for key in devicesByEndpoint.keys where !seen.contains(key) {
@@ -523,20 +521,32 @@ private enum ServiceResolution {
     case failed
 }
 
-/// 解析中的服务盒：NetService 创建后跨队列仅做 start/stop（线程安全），
+/// 解析中的服务盒：NetService 只在主线程创建、启动与停止（service 仅主线程访问），
 /// 结果经 delegate 闭包回浏览器队列装配
 private final class ServiceResolver: @unchecked Sendable {
-    let service: NetService
     let delegate: ServiceResolverDelegate
+    private var service: NetService?
+    private var stopped = false
 
-    init(service: NetService, delegate: ServiceResolverDelegate) {
-        self.service = service
+    init(delegate: ServiceResolverDelegate) {
         self.delegate = delegate
     }
 
+    func startOnMain(domain: String, type: String, name: String) {
+        DispatchQueue.main.async { [self] in
+            guard !stopped else { return }
+            let service = NetService(domain: domain, type: type, name: name)
+            service.delegate = delegate
+            self.service = service
+            service.resolve(withTimeout: 5)
+        }
+    }
+
     func stopOnMain() {
-        let service = self.service
-        DispatchQueue.main.async { service.stop() }
+        DispatchQueue.main.async { [self] in
+            stopped = true
+            service?.stop()
+        }
     }
 }
 

@@ -261,7 +261,8 @@ private func waitForPort(_ provider: @Sendable () -> UInt16?, timeout: TimeInter
     throw LocalTransferError.timedOut
 }
 
-@Suite("LocalBackupTransfer 回环集成")
+// 串行：各用例都会以同一 Bonjour 名称广播，并发时互相改名（(2)/(3)），拖慢设备发现用例的解析
+@Suite("LocalBackupTransfer 回环集成", .serialized)
 struct LocalBackupTransferIntegrationTests {
     private let payloadJSON = "{\"version\":\"flash-backup-v2\",\"data\":{}}"
 
@@ -311,6 +312,30 @@ struct LocalBackupTransferIntegrationTests {
         // 接收方收完即关连接：发送方应得到 confirmed
         #expect(semaphore.wait(timeout: .now() + 5) == .success)
         #expect(senderResult.value == .confirmed)
+    }
+
+    // MARK: 设备发现：浏览器须经 Bonjour 解析出正在广播的发送方（其余用例直连回环端口，绕过了发现）
+
+    @Test func browserResolvesAdvertisingSender() async throws {
+        let sender = try LocalBackupSender(json: payloadJSON, timing: fastTiming) { _ in }
+        sender.start()
+        defer { sender.cancel() }
+        let port = try waitForPort({ sender.port })
+
+        let found = Box<LocalTransferDevice?>(nil)
+        let browser = LocalBackupBrowser { devices in
+            guard found.value == nil,
+                  let device = devices.first(where: { $0.id.hasSuffix(":\(port)") }) else { return }
+            found.value = device
+        }
+        browser.start()
+        defer { browser.cancel() }
+        // NetService 在主 RunLoop 上回调：分片转动主 RunLoop（每片之间主队列可执行解析的启动块）
+        let deadline = Date().addingTimeInterval(10)
+        while found.value == nil, Date() < deadline {
+            await MainActor.run { _ = RunLoop.main.run(mode: .default, before: Date().addingTimeInterval(0.05)) }
+        }
+        #expect(found.value != nil)
     }
 
     @Test func rejectedProofIsRetriedAfterBackoffAndPinCorrection() throws {
