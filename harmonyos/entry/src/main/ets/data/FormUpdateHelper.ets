@@ -5,6 +5,7 @@ import { i18n } from '@kit.LocalizationKit';
 import { Category, EmotionRecord, LogItem, TaskDueKind, TaskItem } from '../models/Models';
 import { dayString } from './DateUtils';
 import { FlashStore } from './FlashStore';
+import { runtimeTimeZone } from './CanonicalTimeZones';
 
 export const FORM_NAME_TODAY_SUMMARY = 'todaySummary';
 
@@ -21,7 +22,9 @@ export type ZoneOffsetResolver = (timeZone: string, instantMs: number) => number
 
 function systemZoneOffset(timeZone: string, instantMs: number): number | null {
   try {
-    return i18n.getTimeZone(timeZone).getOffset(instantMs);
+    const resolved = runtimeTimeZone(timeZone);
+    if (resolved === undefined) return null;
+    return i18n.getTimeZone(resolved).getOffset(instantMs);
   } catch (_) {
     return null;
   }

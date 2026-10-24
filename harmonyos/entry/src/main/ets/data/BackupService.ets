@@ -10,7 +10,7 @@ import {
   TaskDueKind,
   TaskItem
 } from '../models/Models';
-import { CANONICAL_TIME_ZONES } from './CanonicalTimeZones';
+import { CANONICAL_TIME_ZONES, runtimeTimeZone } from './CanonicalTimeZones';
 import { util } from '@kit.ArkTS';
 import { isoNow } from './DateUtils';
 
@@ -583,13 +583,10 @@ export class BackupService {
 
   private static canonicalTimeZone(value: string): string | null {
     if (!CANONICAL_TIME_ZONES.includes(value)) return null;
-    try {
-      // Verify the identifier is parseable on this device; keep the contract canonical ID.
-      new Intl.DateTimeFormat(undefined, { timeZone: value }).format(new Date(0));
-      return value;
-    } catch (_) {
-      return null;
+    if (runtimeTimeZone(value) === undefined) {
+      throw new Error('此设备不支持备份中的任务时区，请更新系统后重试；未导入任何数据');
     }
+    return value;
   }
 
   private static validTimeZone(value: string): boolean {

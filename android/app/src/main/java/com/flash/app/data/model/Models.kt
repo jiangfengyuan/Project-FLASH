@@ -6,8 +6,8 @@
 
 package com.flash.app.data.model
 
+import com.flash.app.data.CanonicalTimeZones
 import java.time.Instant
-import java.time.ZoneId
 
 /**
  * 与 Web 版 src/lib/constants.ts 对齐的核心数据模型。
@@ -119,7 +119,7 @@ data class TaskItem(
         get() = when (dueKind) {
             TaskDueKind.ALL_DAY -> requireNotNull(dueDate)
             TaskDueKind.DATE_TIME -> Instant.parse(requireNotNull(dueAt))
-                .atZone(ZoneId.of(requireNotNull(timeZone)))
+                .atZone(requireNotNull(CanonicalTimeZones.zoneId(requireNotNull(timeZone))))
                 .toLocalDate()
                 .toString()
         }

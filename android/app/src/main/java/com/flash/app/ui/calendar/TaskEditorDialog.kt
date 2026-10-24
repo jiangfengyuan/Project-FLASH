@@ -37,6 +37,7 @@ import com.flash.app.data.model.ColorTag
 import com.flash.app.data.model.TaskDueKind
 import com.flash.app.data.model.TaskItem
 import java.time.Duration
+import com.flash.app.data.CanonicalTimeZones
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -61,7 +62,7 @@ fun TaskEditorDialog(
     onSave: (TaskDraft) -> Unit,
 ) {
     val context = LocalContext.current
-    val initialZone = existing?.timeZone?.let { runCatching { ZoneId.of(it) }.getOrNull() }
+    val initialZone = existing?.timeZone?.let { CanonicalTimeZones.zoneId(it) }
         ?: ZoneId.systemDefault()
     val initialDate = existing?.let { runCatching { LocalDate.parse(it.calendarDate) }.getOrNull() }
         ?: selectedDate
@@ -197,7 +198,7 @@ fun TaskEditorDialog(
                             dueKind = if (allDay) TaskDueKind.ALL_DAY else TaskDueKind.DATE_TIME,
                             dueDate = if (allDay) dueDate.toString() else null,
                             dueAt = if (allDay) null else anchor.toString(),
-                            timeZone = if (allDay) null else zone.id,
+                            timeZone = if (allDay) null else existing?.timeZone ?: zone.id,
                             reminderAt = reminderAt,
                         )
                     )

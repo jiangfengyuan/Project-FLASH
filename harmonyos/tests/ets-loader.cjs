@@ -91,7 +91,7 @@ function createLoader(overrides = {}, options = {}) {
       },
       SelectionMode: { SINGLE: 0, BATCH: 1 },
       SharePreviewMode: { DEFAULT: 0, DETAIL: 1 } } },
-    '@kit.LocalizationKit': { i18n: { getTimeZone: () => ({ getID: () => 'UTC', getOffset: () => 0 }) } },
+    '@kit.LocalizationKit': { i18n: { TimeZone: { getAvailableIDs: () => [...new Set(Object.values(require('../../scripts/backup-contract/timezone-aliases.json')).flat())].filter(id => { try { new Intl.DateTimeFormat('en', { timeZone: id }); return true; } catch (_) { return false; } }) }, getTimeZone: () => ({ getID: () => 'UTC', getOffset: () => 0 }) } },
     'data/BackupFiles': { BackupFiles: {
       exportJSON: async () => {},
       importJSON: async () => { throw new Error('Configure the file picker fake for this test'); },
@@ -114,6 +114,11 @@ function createLoader(overrides = {}, options = {}) {
     }) } }
   };
   const mocks = { ...defaults, ...overrides };
+  // Tests may replace offset behavior while retaining native ID enumeration.
+  const localization = '@kit.LocalizationKit';
+  if (overrides[localization]) mocks[localization] = { i18n: {
+    ...defaults[localization].i18n, ...overrides[localization].i18n
+  } };
   function load(name) {
     // A null override loads the real module, bypassing the default mock.
     if (Object.hasOwn(mocks, name) && mocks[name] !== null) return mocks[name];

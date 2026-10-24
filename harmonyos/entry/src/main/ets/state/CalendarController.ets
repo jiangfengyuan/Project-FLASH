@@ -1,6 +1,7 @@
 import { common } from '@kit.AbilityKit';
 import { util } from '@kit.ArkTS';
 import { i18n } from '@kit.LocalizationKit';
+import { runtimeTimeZone } from '../data/CanonicalTimeZones';
 import { dayString, shiftCalendarMonth, calendarWeeks } from '../data/DateUtils';
 import { calendarDayMarkers, DayMarkers, EMPTY_DAY_MARKERS } from '../data/CalendarMarkers';
 import { ColorTag, EmotionRecord, LogItem, TaskDueKind, TaskItem } from '../models/Models';
@@ -91,7 +92,7 @@ export class CalendarController {
     const instant = new Date(task.due.at).getTime();
     if (!Number.isFinite(instant)) return '';
     try {
-      const offset = i18n.getTimeZone(task.due.timeZone).getOffset(instant);
+      const offset = i18n.getTimeZone(this.requiredRuntimeZone(task.due.timeZone)).getOffset(instant);
       const local = new Date(instant + offset);
       return `${local.getUTCFullYear()}-${this.pad2(local.getUTCMonth() + 1)}-${this.pad2(local.getUTCDate())}`;
     } catch (_) {
@@ -110,7 +111,7 @@ export class CalendarController {
     if (task?.due.at) {
       try {
         const instant = new Date(task.due.at).getTime();
-        const offset = i18n.getTimeZone(this.state.taskTimeZone).getOffset(instant);
+        const offset = i18n.getTimeZone(this.requiredRuntimeZone(this.state.taskTimeZone)).getOffset(instant);
         const local = new Date(instant + offset);
         this.state.taskTime = `${this.pad2(local.getUTCHours())}:${this.pad2(local.getUTCMinutes())}`;
       } catch (_) {}
@@ -142,6 +143,12 @@ export class CalendarController {
     return undefined;
   }
 
+  private requiredRuntimeZone(identifier: string): string {
+    const resolved = runtimeTimeZone(identifier);
+    if (resolved === undefined) throw new Error('此设备不支持任务时区，请更新系统后重试');
+    return resolved;
+  }
+
   localDateToInstant(day: string, time: string, timeZone: string): Date | undefined {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || !/^\d{2}:\d{2}$/.test(time)) return undefined;
     const dateParts = day.split('-').map((value: string) => Number(value));
@@ -157,7 +164,7 @@ export class CalendarController {
         wall.getUTCMinutes() !== timeParts[1]) return undefined;
     const localMillis = wall.getTime();
     try {
-      const zone = i18n.getTimeZone(timeZone);
+      const zone = i18n.getTimeZone(this.requiredRuntimeZone(timeZone));
       let instant = localMillis - zone.getOffset(localMillis);
       instant = localMillis - zone.getOffset(instant);
       const result = new Date(instant);

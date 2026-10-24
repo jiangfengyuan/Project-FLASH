@@ -118,6 +118,31 @@ class BackupTest {
     }
 
     @Test
+    fun `modern and legacy time zones retain wire spelling and native calendar rules`() {
+        for (identifier in listOf("Europe/Kyiv", "Europe/Kiev", "Asia/Kolkata", "Asia/Calcutta", "Asia/Kathmandu", "Asia/Katmandu", "Africa/Asmara", "Africa/Asmera", "Pacific/Chuuk", "Pacific/Truk")) {
+            val first = Backup.parse(sampleV2TaskBackup(identifier))
+            assertEquals(identifier, 1, first.tasks.size)
+            assertEquals(identifier, first.tasks.single().timeZone)
+            val second = Backup.parse(Backup.exportJson(first.logs, first.emotions, first.tasks))
+            assertEquals(first.tasks, second.tasks)
+            assertEquals("2026-09-01", second.tasks.single().calendarDate)
+        }
+    }
+
+    @Test
+    fun `IANA rename aliases support older native databases without GMT fallback`() {
+        for ((modern, legacy) in listOf("Europe/Kyiv" to "Europe/Kiev", "Asia/Kolkata" to "Asia/Calcutta", "Africa/Asmara" to "Africa/Asmera", "Pacific/Chuuk" to "Pacific/Truk")) {
+            assertEquals(legacy, CanonicalTimeZones.runtimeIdentifier(modern) { it == legacy })
+            assertEquals(modern, CanonicalTimeZones.runtimeIdentifier(legacy) { it == modern })
+        }
+        assertEquals(null, CanonicalTimeZones.runtimeIdentifier("Europe/Kyiv") { false })
+        assertEquals(null, CanonicalTimeZones.runtimeIdentifier("Africa/Asmara") { it == "Africa/Nairobi" })
+        for (bad in listOf("utc", "Zulu", "US/Eastern", "+08:00", "Europe/kyiv", "Mars/Olympus")) {
+            assertEquals(null, CanonicalTimeZones.runtimeIdentifier(bad) { true })
+        }
+    }
+
+    @Test
     fun `parse skips a timed task with invalid IANA time zone`() {
         val result = Backup.parse(sampleV2TaskBackup(timeZone = "Mars/Olympus"))
 
