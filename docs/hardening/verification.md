@@ -66,3 +66,9 @@ All senders now advertise a neutral `Flash Aero-<8hex>` label newly generated pe
 Gates: FlashKit197 passed (includes actual Bonjour discovery), combined host suite269 passed, Harmony native unsigned HAP build successful, Android Debug/Release JVM79 each plus Debug app/test-APK builds successful. Added generated-label shape/rotation checks; these introduce helper/property test seams, so no failing-parent execution is claimed for label tests. Logs: `m4-flashkit.log`, `m4-contract-harmony.log`, `m4-harmony-native.log`, `m4-android-gates.log`.
 
 Fresh macOS baseline app gate was separately run from a disposable `git archive e9a0aa6` copy: **13 app tests passed**, `** TEST SUCCEEDED **`, `m0-macos.xcresult`. The original PR checkout was not built or edited. A cumulative candidate app comparison remains pending until shared fixes settle.
+
+## M5 — Apple import cancellation
+
+An already-cancelled merge/overwrite task previously committed records and rebuilt reminders. The parent production regression executed both modes and failed with6 expectations (no cancellation error, changed snapshot, reminder rebuild). The coordinator now checks cancellation before the synchronous main-actor transaction. Detached preview/export work propagates cancellation to its worker and discards cancelled results. JSONSerialization has no internal interruption hook; the bounded synchronous parse may finish before its result is discarded. No postcommit rollback is promised.
+
+After fix: **199 FlashKit tests passed**, including cancelled preview and unchanged-data/no-reminder guarantees in both import modes. Logs: `m5-cancel-parent.log`, `m5-flashkit.log`. `cancelledPreviewDoesNotProduceAnImportableResult` is additional post-fix coverage; only the two-mode apply regression was run against parent production. macOS/iOS cumulative app gates still pending.

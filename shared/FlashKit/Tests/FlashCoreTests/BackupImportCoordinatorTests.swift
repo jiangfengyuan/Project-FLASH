@@ -27,6 +27,34 @@ struct BackupImportCoordinatorTests {
         return try BackupService.parseStrict(json)
     }
 
+    @Test(arguments: [false, true])
+    func cancelledImportDoesNotWriteOrRebuildReminders(overwrite: Bool) async throws {
+        let repository = makeRepo()
+        try repository.updateLog(log("11111111-1111-1111-1111-111111111111", "本机"))
+        let before = try repository.snapshot()
+        let preview = try await incomingPreview([log("22222222-2222-2222-2222-222222222222", "对端")])
+        var rebuilt = false
+        let operation = Task { @MainActor in
+            withUnsafeCurrentTask { $0?.cancel() }
+            return try await BackupImportCoordinator.apply(
+                preview, overwrite: overwrite, previewSnapshot: before, repository: repository,
+                rebuildReminders: { _ in rebuilt = true })
+        }
+        await #expect(throws: CancellationError.self) { _ = try await operation.value }
+        #expect(try repository.snapshot() == before)
+        #expect(!rebuilt)
+    }
+
+    @Test func cancelledPreviewDoesNotProduceAnImportableResult() async throws {
+        let json = try BackupService.exportStrictJSON(logs: [], emotions: [], appVersion: "test")
+        let operation = Task {
+            withUnsafeCurrentTask { $0?.cancel() }
+            return try await BackupImportCoordinator.preview(
+                json: json, against: FlashSnapshot(logs: [], emotions: [], tasks: []))
+        }
+        await #expect(throws: CancellationError.self) { _ = try await operation.value }
+    }
+
     @Test func mergeKeepsLocalOnlyRecordsAndReportsCounts() async throws {
         let repository = makeRepo()
         try repository.updateLog(log("11111111-1111-1111-1111-111111111111", "本机"))
