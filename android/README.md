@@ -1,5 +1,7 @@
 # Flash Aero · Android
 
+> 2026-10-25 加固候选：旧版 LAN 因未认证下载/明文风险经批准暂时停用，请使用文件导出/系统分享；没有不安全回退。四端候选支持既有分区 schema1/2，原生 IANA 别名策略已统一；完整 app/真机矩阵仍未验收。见 [审查交接与限制](../docs/hardening/review-handoff.md)。构建/签名配置未变。
+
 Android 端原生实现。Kotlin + Jetpack Compose，严格遵循 Material Design 3。
 
 当前发布身份为 **Flash Aero v0.1.0**；`Aero` 为 v0 Alpha 阶段的版本代号。
@@ -11,7 +13,7 @@ Android 端原生实现。Kotlin + Jetpack Compose，严格遵循 Material Desig
 ## 技术栈
 
 - Kotlin 2.2 + Jetpack Compose（BOM 2025.06）+ Material 3
-- Room 2.7，数据库名 `flash-db`
+- Room 2.7，数据库名 `flash-db`；候选数据库版本5，获批4→5仅增加五个可空schema2列，无破坏性降级
 - MVVM + StateFlow，单 Activity
 - Gradle 8.14.3 / AGP 8.11 / JDK 17+（本机用 Temurin 21 亦可）
 
@@ -53,12 +55,7 @@ APK 输出：`app/build/outputs/apk/debug/app-debug.apk`
 `FileProvider` URI 调用 Android 系统分享面板。可选择附近分享、邮件、聊天应用或
 云盘。
 
-「局域网发送 / 接收」使用 Android NSD 自动发现同一网络内的 Android 或 macOS
-设备。发送方随机生成六位 PIN；PIN 60 秒失效、最多尝试五次，正确配对并完成
-一次传输后服务立即关闭。App 仅申请局域网发现与连接所需权限，不连接 Flash
-服务器；接收内容会执行格式校验并分析新增、修改、相同与仅本机数据，再选择差异
-合并或覆盖。
-建议只在可信的家庭或办公局域网使用。
+「局域网发送 / 接收」入口会说明旧协议暂时停用和文件/分享替代方式，不导出负载、不请求附近设备权限、不发现/监听/连接。历史实现仅在测试fixture中保留。标准导入仍严格预览后合并/覆盖；恢复入口独立，未知版本/字段不静默丢弃。已有schema2元数据与原始时区名称会保留；老schema1-only客户端明确拒绝新导出。
 
 ## 目录结构
 
@@ -116,4 +113,4 @@ app/src/main/java/com/flash/app/
 
 ## 验收与发布状态（2026-09-26）
 
-设备品质结果与未验项目见 [品质矩阵](../docs/quality/device-matrix.md)，跨端互传状态见 [契约验收](../docs/contracts/acceptance.md)。局域网使用 [握手 v1.1](../docs/contracts/lan-handshake-v1.1.md)：六位 PIN、挑战应答与 payload HMAC；内容未做端到端加密。历史明文 PIN 首包不兼容，双方需使用同代构建，旧数据经 JSON 文件迁移。
+设备品质结果与未验项目见 [品质矩阵](../docs/quality/device-matrix.md)，当前实际导出/原生门禁与缺项见 [审查交接](../docs/hardening/review-handoff.md)。[握手 v1.1](../docs/contracts/lan-handshake-v1.1.md) 仅作已停用历史协议记录；生产应用没有监听/发现/连接路径。安全替代协议尚未选定或实施，旧版客户端的漏洞不会因另一端更新而消失。

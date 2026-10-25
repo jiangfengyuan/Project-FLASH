@@ -174,3 +174,9 @@ Those operations now include business and local read-state changes in the same e
 Full contract/Harmony host gate **287 passed**; unsigned native ArkTS/HAP build passed. [Failing-parent, candidate and build receipts](evidence/transactions/) are committed. These tests execute actual store/controller sources with transactional RDB fakes; real Harmony RDB/power-loss/device behavior remains unverified. Apple/Android production source was unaffected, so their last cumulative gates remain204/13/14 and93-per-variant/native13pass+1manual skip respectively.
 
 M15 cached Gradle wrapper launch also reports8.14.3/JDK21.0.11 successfully; it is configuration sanity only, not a fresh-download checksum mismatch test.
+
+## M17 — active fallback/readme safety guidance
+
+The temporary-memory storage banner still suggested LAN as a rescue path; it now directs file backup/system sharing. Platform/shared READMEs uniformly describe the approved disablement, existing schema1/2 support, actual evidence tiers and historical LAN tests. No default layout, state, store or signing change. macOS **13passed** and iOS app/widget build + simulator **14passed** after the shared copy change; current FlashCore logic remains covered by204package tests, Android93per variant and Harmony287 are unaffected by these docs/Apple-only text edits.
+
+The managed baseline scan was sealed successfully with7findings and partial coverage for the original e9a0aa6 snapshot. Its working-tree-change warning is retained; original tracked files are unchanged, untracked independent review directories remain untouched. This is separate from candidate gates and final owner acceptance.
