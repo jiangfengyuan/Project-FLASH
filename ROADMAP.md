@@ -4,6 +4,8 @@
 
 ## 本轮加固：仍未验收
 
+- C2补齐47张iOS原始截图，含明暗×默认/AX5的八个空数据界面与虚构长草稿；实际搜索入口两次因缺少FocusRouter崩溃，AX5月历/任务日期/情绪提交/紧凑记录面板可见裁切，已交回分配修复归属。无视觉改版，不能据截图或14项现有测试授予UI验收。[证据与缺项](docs/hardening/evidence/screenshots/ios-c2/README.md)。
+
 - 用户批准暂时停用旧版 LAN。F-01/F-06、明文与离线猜 PIN 在旧协议中仍成立；历史网络实现移到测试目标，应用入口仅说明文件备份/分享替代方式，不监听、发现或连接，无运行时开关/不安全回退。[协议决策与回归边界](docs/hardening/lan-v2-decision.md)。
 - F-02/F-03 候选修复已实现：统一生成的 IANA 命名/别名与原生规则；既有 schema2 无损支持及获批 Room4→5。实际 Apple→Android 仿真器保存/强停/重读及多向实际源码 codec 重导出通过，完整 app/真机矩阵仍待验收，不能静默丢字段。[设计/矩阵](docs/hardening/compatibility-blockers.md)。
 - 已交付小提交覆盖备份扫描/导出权限/取消、Android 导入所有权与原子覆盖、LAN 生命周期/匿名发现；共享与四端原生门禁已串行运行，仿真器/真机与截图矩阵仍需按证据层级收口。[验证记录](docs/hardening/verification.md)。

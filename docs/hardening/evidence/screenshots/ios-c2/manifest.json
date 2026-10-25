@@ -1,0 +1,730 @@
+{
+  "kind": "existing iOS UI screenshots; dedicated test simulator, no daily-use store",
+  "sourceCommit": "dd07bcd5227a88debbfc7be8c948576b206fdb9f",
+  "realDevice": false,
+  "device": "CodexFlashHardening",
+  "udid": "CC4C60DA-A92D-44A6-A90D-F47AEA86341D",
+  "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro",
+  "runtime": "iOS 27.0",
+  "osVersion": "27.0",
+  "osBuild": "24A434",
+  "appIdentifier": "com.flash.app.ios",
+  "appVersion": "0.1.0",
+  "appBuild": "1",
+  "configuration": "Debug; CODE_SIGNING_ALLOWED=NO",
+  "locale": "zh-Hant_CN",
+  "languages": [
+    "zh-Hant-CN",
+    "zh-Hans-CN",
+    "en-GB",
+    "yue-Hant-CN",
+    "fr-CN",
+    "ja-CN"
+  ],
+  "timezone": "record separately from simulator settings; not inferred from host",
+  "installedBundleFiles": [
+    {
+      "path": "AppIcon60x60@2x.png",
+      "sha256": "fed3e88784b8fbe33aea67d6310cb6178ef1a18e7910423e1048f541ed3c58c9"
+    },
+    {
+      "path": "AppIcon76x76@2x~ipad.png",
+      "sha256": "38b571d6b84fefbd688cb4a970d7e2fd3ace2cfec000b8ce10834221bb226aa3"
+    },
+    {
+      "path": "Assets.car",
+      "sha256": "2d6f30f94c056ef53be63608e00cca3a747dfcfe6a38c9606b82d93426ff1cb0"
+    },
+    {
+      "path": "Flash",
+      "sha256": "5541a9df9e84ae8a29c437d7873ada5b60c1c799b903ed8b975fe222596880dd"
+    },
+    {
+      "path": "Flash.debug.dylib",
+      "sha256": "559a2fda83ff0eaed478b9bad7c434760c90da80f5976ba05bd795bdcfcd3739"
+    },
+    {
+      "path": "Info.plist",
+      "sha256": "b248c81bb1b075443022b4f7b781ba447c18e4d330af6fa9b3efff4599fc0f1e"
+    },
+    {
+      "path": "Metadata.appintents/extract.actionsdata",
+      "sha256": "9983ad92a753ece37ed49ef03c2d7b49e22684bc355cde7eff367caace885e5b"
+    },
+    {
+      "path": "Metadata.appintents/version.json",
+      "sha256": "62ff6f56ad113bcfa0797a37296e89da299aa8d48b0d6e5c569ba9e6dcf409f6"
+    },
+    {
+      "path": "PkgInfo",
+      "sha256": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0"
+    },
+    {
+      "path": "PlugIns/FlashTests.xctest/FlashTests",
+      "sha256": "f2fcdaea046702e3dd3ea09dec899a39d25836a3bc37a886496b507e0d595337"
+    },
+    {
+      "path": "PlugIns/FlashTests.xctest/Info.plist",
+      "sha256": "d32695d70f788ab61cb8c0b55dce3c0502b6318bfea531d7766d9701f8306b33"
+    },
+    {
+      "path": "PlugIns/FlashTests.xctest.dSYM/Contents/Info.plist",
+      "sha256": "2b3c93aba1c4a37a92a4b63ed5c3e694dc8e2051af0da14a2f7266de585159e3"
+    },
+    {
+      "path": "PlugIns/FlashTests.xctest.dSYM/Contents/Resources/DWARF/FlashTests",
+      "sha256": "c681baed420b354db980b5c1040eec7026ca3ab80514b09b77947bae888ce5f5"
+    },
+    {
+      "path": "PlugIns/FlashTests.xctest.dSYM/Contents/Resources/Relocations/aarch64/FlashTests.yml",
+      "sha256": "670c0ec62579367c76bb6574174e0ed95416f24e10c4661b0e5545384b309f70"
+    },
+    {
+      "path": "PlugIns/FlashTests.xctest.dSYM/Contents/Resources/Relocations/x86_64/FlashTests.yml",
+      "sha256": "8b32cef08787940d8cccac446ff81d092c579f327245409ede9b566b04ac69ad"
+    },
+    {
+      "path": "PlugIns/FlashWidgetExtension.appex/FlashWidgetExtension",
+      "sha256": "f7f42799ecba1d7b1439955050f477c44cc69077644a51565cbe7a6f6888dd0c"
+    },
+    {
+      "path": "PlugIns/FlashWidgetExtension.appex/FlashWidgetExtension.debug.dylib",
+      "sha256": "4ae3ff3a6e751ab65a1f57285d89955dc3e3938e629617b7c911adad59a1cfe2"
+    },
+    {
+      "path": "PlugIns/FlashWidgetExtension.appex/Info.plist",
+      "sha256": "ea4111defa0506b9418112d2d017dc23d0689d0cbee1757cd8a2b28fd6ede93d"
+    },
+    {
+      "path": "PlugIns/FlashWidgetExtension.appex/Metadata.appintents/extract.actionsdata",
+      "sha256": "ae63d11ab4601178082246e1e81ec14aa7b84f5920c1848cae99b218366d8c85"
+    },
+    {
+      "path": "PlugIns/FlashWidgetExtension.appex/Metadata.appintents/version.json",
+      "sha256": "62ff6f56ad113bcfa0797a37296e89da299aa8d48b0d6e5c569ba9e6dcf409f6"
+    },
+    {
+      "path": "PlugIns/FlashWidgetExtension.appex/__preview.dylib",
+      "sha256": "0489863ff3df38f896722d1bd92646da58f4584dba6a92431aaa3cff167865e3"
+    },
+    {
+      "path": "PrivacyInfo.xcprivacy",
+      "sha256": "a331d51864743ebe4e00dd22360b4a538b6b3ac26a6b3eb54094e60a36959a12"
+    },
+    {
+      "path": "__preview.dylib",
+      "sha256": "3bbbaf65beac55e225593dab0241e01499c7a7792f802addfef36b7652d70616"
+    }
+  ],
+  "captures": [
+    {
+      "screen": "welcome",
+      "state": "Empty dedicated container; welcome page1 of3",
+      "theme": "light",
+      "textSize": "large",
+      "width": 1206,
+      "height": 2622,
+      "png": "welcome-light-large.png",
+      "sha256": "8be8d15d4bfccbc1990f9bdd658d64fffe82f416d6072382387a1cd74dd9693e",
+      "capturedAtUTC": "2026-10-25T03:25:02.852124+00:00",
+      "dataPhase": "initial-empty"
+    },
+    {
+      "screen": "home-empty",
+      "state": "Empty home after onboarding; zero records/tasks, no emotion",
+      "theme": "light",
+      "textSize": "large",
+      "width": 1206,
+      "height": 2622,
+      "png": "home-empty-light-large.png",
+      "sha256": "8960f3b55ef516bd89bbf2ad8ce0a6e3c0e7ed27e0d32090be5227f0add9fc8a",
+      "capturedAtUTC": "2026-10-25T03:26:20.681950+00:00",
+      "dataPhase": "initial-empty"
+    },
+    {
+      "screen": "emotion-empty",
+      "state": "Existing emotion screen; default happy draft, no saved emotion records",
+      "theme": "light",
+      "textSize": "large",
+      "width": 1206,
+      "height": 2622,
+      "png": "emotion-empty-light-large.png",
+      "sha256": "b7b7fcb0e075fef8eaf12030aafe700a3bec35b1d008fbd55558320784838337",
+      "capturedAtUTC": "2026-10-25T03:33:43.002557+00:00",
+      "dataPhase": "initial-empty"
+    },
+    {
+      "screen": "task-editor",
+      "state": "Unsaved new all-day task; blank title/notes; reminder none; no keyboard",
+      "theme": "light",
+      "textSize": "large",
+      "width": 1206,
+      "height": 2622,
+      "png": "task-editor-light-large.png",
+      "sha256": "e52bcd8b8794a5259c1785ba26836eac8c58cda85f3929eb3195fa01e7e4dd84",
+      "capturedAtUTC": "2026-10-25T03:34:21.391187+00:00",
+      "dataPhase": "initial-empty"
+    },
+    {
+      "screen": "records-empty",
+      "state": "Records tab; All selected; zero records",
+      "theme": "light",
+      "textSize": "large",
+      "width": 1206,
+      "height": 2622,
+      "png": "records-empty-light-large.png",
+      "sha256": "581617904c121f5f2aef71c3ed464764d18067a96322f931673be7d171a36055",
+      "capturedAtUTC": "2026-10-25T03:36:40.304729+00:00",
+      "dataPhase": "initial-empty"
+    },
+    {
+      "screen": "review-empty",
+      "state": "Review tab; current week 2026-10-19 through 2026-10-25; zero records/emotions",
+      "theme": "light",
+      "textSize": "large",
+      "width": 1206,
+      "height": 2622,
+      "png": "review-empty-light-large.png",
+      "sha256": "0de4e2e6b3543610f500ee0a0c3332ab1b2b024f1911a5326dc7419116193a9a",
+      "capturedAtUTC": "2026-10-25T03:37:02.855296+00:00",
+      "dataPhase": "initial-empty"
+    },
+    {
+      "screen": "memory-empty",
+      "state": "Memory tab; current week; zero records",
+      "theme": "light",
+      "textSize": "large",
+      "width": 1206,
+      "height": 2622,
+      "png": "memory-empty-light-large.png",
+      "sha256": "86531af57b060ef8a816f1432f2f35f2ea435ef150caff663d3c6f1e04a75bf4",
+      "capturedAtUTC": "2026-10-25T03:37:39.388744+00:00",
+      "dataPhase": "initial-empty"
+    },
+    {
+      "screen": "settings",
+      "state": "Settings initial viewport; existing reminder switch unchanged; LAN labels explicitly disabled",
+      "theme": "light",
+      "textSize": "large",
+      "width": 1206,
+      "height": 2622,
+      "png": "settings-light-large.png",
+      "sha256": "b9396d092a30922b13745a933f39042d7ee63d89e729bd65fb3e671ae9b9d44b",
+      "capturedAtUTC": "2026-10-25T03:38:05.535585+00:00",
+      "dataPhase": "initial-empty"
+    },
+    {
+      "screen": "lan-disabled-alert",
+      "state": "LAN send action shows local temporary-disablement explanation and file/share guidance; no pairing UI",
+      "theme": "light",
+      "textSize": "large",
+      "width": 1206,
+      "height": 2622,
+      "png": "lan-disabled-alert-light-large.png",
+      "sha256": "622eec67276bc3e1e17b8b4d5f37e37e7f992bd6a9aae64a15fbf431de5e0bd1",
+      "capturedAtUTC": "2026-10-25T03:38:27.563534+00:00",
+      "dataPhase": "initial-empty"
+    },
+    {
+      "screen": "memory-one-idea",
+      "state": "Current-week Memory; one operator-entered idea preserved; standard inspector profile restored",
+      "theme": "dark",
+      "textSize": "large",
+      "width": 1206,
+      "height": 2622,
+      "png": "memory-one-idea-dark-large.png",
+      "sha256": "df04857d4f5ce48aa2e8302ff6c33fe647aeb4e79f5677b9791f049e004ef422",
+      "capturedAtUTC": "2026-10-25T03:47:44.629304+00:00",
+      "dataPhase": "operator-one-idea"
+    },
+    {
+      "screen": "welcome-reinstalled",
+      "state": "Fresh onboarding page1/3 after same-bundle reinstall; no data entered",
+      "theme": "dark",
+      "textSize": "large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "welcome-reinstalled-dark-large.png",
+      "sha256": "51152f783f3260e592d902942308fe28de39137a199c27646d6d0d9eed5e0457",
+      "capturedAtUTC": "2026-10-25T04:00:55.367046+00:00"
+    },
+    {
+      "screen": "home-reinstalled",
+      "state": "Empty home after same-bundle reinstall; no saved entries or draft",
+      "theme": "dark",
+      "textSize": "large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "home-reinstalled-dark-large.png",
+      "sha256": "b3e1cd8a690206c5f6d72ffb4efbe3b8745c10d0faff3451e3012e0ceb329fea",
+      "capturedAtUTC": "2026-10-25T04:01:21.293465+00:00"
+    },
+    {
+      "screen": "records-reinstalled",
+      "state": "Records All selected; zero records",
+      "theme": "dark",
+      "textSize": "large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "records-reinstalled-dark-large.png",
+      "sha256": "d01d3f22b6e69fe684835273e821c4550942164f37f565aec1349e3ef0ae0411",
+      "capturedAtUTC": "2026-10-25T04:01:36.350981+00:00"
+    },
+    {
+      "screen": "review-reinstalled",
+      "state": "Review weekly trend 2026-10-19 to 2026-10-25; zero records/emotions",
+      "theme": "dark",
+      "textSize": "large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "review-reinstalled-dark-large.png",
+      "sha256": "16a6c40242652ba724bddfdd52338cf08e0973b5c9b4d1a49654cb71830ae817",
+      "capturedAtUTC": "2026-10-25T04:01:51.992874+00:00"
+    },
+    {
+      "screen": "memory-reinstalled",
+      "state": "Memory current week; empty",
+      "theme": "dark",
+      "textSize": "large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "memory-reinstalled-dark-large.png",
+      "sha256": "2a1a36e7c55e145da8eede67c79be2f76a05322d083fc1a2572f3450e9279cd9",
+      "capturedAtUTC": "2026-10-25T04:02:05.976358+00:00"
+    },
+    {
+      "screen": "settings-reinstalled",
+      "state": "Settings top, disabled LAN actions visible; no system permission prompt accepted",
+      "theme": "dark",
+      "textSize": "large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "settings-reinstalled-dark-large.png",
+      "sha256": "5d5d1b3c81c03287663756ace32140567f72daacf4d6a171289fa103da434df0",
+      "capturedAtUTC": "2026-10-25T04:02:20.490475+00:00"
+    },
+    {
+      "screen": "settings-reinstalled",
+      "state": "AX5 settings top; storage message wraps; reminder section below fold and dock overlay",
+      "theme": "dark",
+      "textSize": "accessibility-extra-extra-extra-large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "settings-reinstalled-dark-accessibility-extra-extra-extra-large.png",
+      "sha256": "592a905953d336b93110d4b4da80f250c1b49eef304de88585398e89f7f8fc35",
+      "capturedAtUTC": "2026-10-25T04:02:32.979191+00:00"
+    },
+    {
+      "screen": "memory-reinstalled",
+      "state": "AX5 Memory current week; empty",
+      "theme": "dark",
+      "textSize": "accessibility-extra-extra-extra-large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "memory-reinstalled-dark-accessibility-extra-extra-extra-large.png",
+      "sha256": "f39054087eace25cb666cc85c4e0eab74d9910b6dcb0fd89c0d20edfc296e159",
+      "capturedAtUTC": "2026-10-25T04:02:46.047268+00:00"
+    },
+    {
+      "screen": "review-reinstalled",
+      "state": "AX5 Review weekly trend; empty",
+      "theme": "dark",
+      "textSize": "accessibility-extra-extra-extra-large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "review-reinstalled-dark-accessibility-extra-extra-extra-large.png",
+      "sha256": "39d9396f061342684e10fab993330d23605645ec74cef86194403e02902dbb19",
+      "capturedAtUTC": "2026-10-25T04:03:00.186098+00:00"
+    },
+    {
+      "screen": "records-reinstalled",
+      "state": "AX5 Records All selected; zero records",
+      "theme": "dark",
+      "textSize": "accessibility-extra-extra-extra-large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "records-reinstalled-dark-accessibility-extra-extra-extra-large.png",
+      "sha256": "f592aff5689d59347f2d61865cdb7b9c2840c34235b12e55eda7ba523e6f7c56",
+      "capturedAtUTC": "2026-10-25T04:03:13.215520+00:00"
+    },
+    {
+      "screen": "home-reinstalled",
+      "state": "AX5 empty home; no saved entries or draft",
+      "theme": "dark",
+      "textSize": "accessibility-extra-extra-extra-large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "home-reinstalled-dark-accessibility-extra-extra-extra-large.png",
+      "sha256": "4a4648168f3120e2a4cfa3091f83d245f7335fc42db85296df1bf01dcfabbbc5",
+      "capturedAtUTC": "2026-10-25T04:03:28.961493+00:00"
+    },
+    {
+      "screen": "home-reinstalled",
+      "state": "AX5 empty home top; composer below fold behind dock",
+      "theme": "light",
+      "textSize": "accessibility-extra-extra-extra-large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "home-reinstalled-light-accessibility-extra-extra-extra-large.png",
+      "sha256": "049d31c3aee9c7266c6d83ebd2ae9b0de15ab1a1690b0cf0fc9dbedeb834632f",
+      "capturedAtUTC": "2026-10-25T04:03:42.597121+00:00"
+    },
+    {
+      "screen": "records-reinstalled",
+      "state": "AX5 Records All selected; zero records",
+      "theme": "light",
+      "textSize": "accessibility-extra-extra-extra-large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "records-reinstalled-light-accessibility-extra-extra-extra-large.png",
+      "sha256": "6c9eae18e9aca49e8fc45a2c92a4c95c9182d793d4c469c7f9060427fba765c9",
+      "capturedAtUTC": "2026-10-25T04:03:55.132425+00:00"
+    },
+    {
+      "screen": "review-reinstalled",
+      "state": "AX5 Review weekly trend; empty",
+      "theme": "light",
+      "textSize": "accessibility-extra-extra-extra-large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "review-reinstalled-light-accessibility-extra-extra-extra-large.png",
+      "sha256": "e33663f948def404f074805ef0384adcad279d8aa9e061d8f346d4832133d800",
+      "capturedAtUTC": "2026-10-25T04:04:11.765619+00:00"
+    },
+    {
+      "screen": "memory-reinstalled",
+      "state": "AX5 Memory current week; empty",
+      "theme": "light",
+      "textSize": "accessibility-extra-extra-extra-large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "memory-reinstalled-light-accessibility-extra-extra-extra-large.png",
+      "sha256": "47ce05805f74b8bbc1fafbe6e0130e4034a670c1398cb29aad481774cd192838",
+      "capturedAtUTC": "2026-10-25T04:04:26.048942+00:00"
+    },
+    {
+      "screen": "settings-reinstalled",
+      "state": "AX5 settings top; storage message wraps; reminder section below fold",
+      "theme": "light",
+      "textSize": "accessibility-extra-extra-extra-large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "settings-reinstalled-light-accessibility-extra-extra-extra-large.png",
+      "sha256": "e0c2c76b050540a4f15df3a7174e76df1be0bda303b9fcdcfd72c24ca5085907",
+      "capturedAtUTC": "2026-10-25T04:04:41.029890+00:00"
+    },
+    {
+      "screen": "settings-reinstalled",
+      "state": "Settings top; disabled LAN actions visible; same reinstalled empty data",
+      "theme": "light",
+      "textSize": "large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "settings-reinstalled-light-large.png",
+      "sha256": "cdff4fe1f360603a7c94279ea950097b81a3d1a11562b23764bf5e9c5da2eb37",
+      "capturedAtUTC": "2026-10-25T04:04:55.807059+00:00"
+    },
+    {
+      "screen": "memory-reinstalled",
+      "state": "Memory current week; empty same reinstalled data",
+      "theme": "light",
+      "textSize": "large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "memory-reinstalled-light-large.png",
+      "sha256": "ad12e517c07ed6dcc06de62fdacd29be487f31f00ba354fbeaad04a1cc77cde6",
+      "capturedAtUTC": "2026-10-25T04:05:12.782530+00:00"
+    },
+    {
+      "screen": "review-reinstalled",
+      "state": "Review weekly trend; zero records/emotions; same reinstalled data",
+      "theme": "light",
+      "textSize": "large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "review-reinstalled-light-large.png",
+      "sha256": "11a3ad3c47529488c562f026db85476658e81d7885baf9ba7999233b497634ff",
+      "capturedAtUTC": "2026-10-25T04:05:29.206927+00:00"
+    },
+    {
+      "screen": "calendar-reinstalled",
+      "state": "October2026 calendar; Oct25 selected; zero logs/emotions/tasks",
+      "theme": "light",
+      "textSize": "large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "calendar-reinstalled-light-large.png",
+      "sha256": "a8ddb1702754850981e0fd77e58752d45661f545fa500939a3f9aca58ff545a5",
+      "capturedAtUTC": "2026-10-25T04:05:48.757543+00:00"
+    },
+    {
+      "screen": "calendar-reinstalled",
+      "state": "AX5 month grid visibly wraps two-digit days onto separate lines and clips month header; preserve for review, not acceptance",
+      "theme": "light",
+      "textSize": "accessibility-extra-extra-extra-large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "calendar-reinstalled-light-accessibility-extra-extra-extra-large.png",
+      "sha256": "50a04e0dbc6bd704b76d2ddf6d2e669b90ccd8ff6f991d7ec9088aed0df8aafd",
+      "capturedAtUTC": "2026-10-25T04:06:08.456408+00:00"
+    },
+    {
+      "screen": "calendar-reinstalled",
+      "state": "AX5 month-grid wrapping/header clipping persists after leaving tab and re-entering; empty October2026",
+      "theme": "dark",
+      "textSize": "accessibility-extra-extra-extra-large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "calendar-reinstalled-dark-accessibility-extra-extra-extra-large.png",
+      "sha256": "57444571967ee3cb688908a3587325526555f997140cd5906c6b2da1ed5492ef",
+      "capturedAtUTC": "2026-10-25T04:06:43.497349+00:00"
+    },
+    {
+      "screen": "calendar-reinstalled",
+      "state": "Default-size October2026 calendar; Oct25 selected; empty",
+      "theme": "dark",
+      "textSize": "large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "calendar-reinstalled-dark-large.png",
+      "sha256": "3504d5f71b673f29e794ad1910a1faa7931893409b6bd4195a647d8ea87edd93",
+      "capturedAtUTC": "2026-10-25T04:07:00.056714+00:00"
+    },
+    {
+      "screen": "records-reinstalled",
+      "state": "Records All selected; zero records; same reinstalled data",
+      "theme": "light",
+      "textSize": "large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "records-reinstalled-light-large.png",
+      "sha256": "b23ccb0b8ec86fcfe5f9523454dd652ca84e776922ad049769ab28b1f75da772",
+      "capturedAtUTC": "2026-10-25T04:07:33.638124+00:00"
+    },
+    {
+      "screen": "home-reinstalled",
+      "state": "Empty home; same reinstalled data; no draft",
+      "theme": "light",
+      "textSize": "large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "home-reinstalled-light-large.png",
+      "sha256": "51446dad267497d6bce9de8c645cb2351020120b33953e2a24b159e139b5ce78",
+      "capturedAtUTC": "2026-10-25T04:07:49.930099+00:00"
+    },
+    {
+      "screen": "emotion-reinstalled",
+      "state": "Unsaved default happy emotion; no intensity/note; no recorded emotions",
+      "theme": "light",
+      "textSize": "large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "emotion-reinstalled-light-large.png",
+      "sha256": "33176c4cdb279fb398d048602af1820ef55b7ab87e2eb065e7f3af59597bffdb",
+      "capturedAtUTC": "2026-10-25T04:08:12.689243+00:00"
+    },
+    {
+      "screen": "emotion-reinstalled",
+      "state": "AX5 unsaved default happy emotion; submit control wraps vertically near dock; no save attempted",
+      "theme": "light",
+      "textSize": "accessibility-extra-extra-extra-large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "emotion-reinstalled-light-accessibility-extra-extra-extra-large.png",
+      "sha256": "3dae801b38a094e2f4fe337a48ebcc3402a4c89f32b1fa680b133d2ddda3c757",
+      "capturedAtUTC": "2026-10-25T04:08:26.432436+00:00"
+    },
+    {
+      "screen": "emotion-reinstalled",
+      "state": "AX5 unsaved default happy emotion; no note/intensity or save",
+      "theme": "dark",
+      "textSize": "accessibility-extra-extra-extra-large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "emotion-reinstalled-dark-accessibility-extra-extra-extra-large.png",
+      "sha256": "901e8115fffea94b6a338c019fb4c01a7c1407f31ee82033e7170787be42ad61",
+      "capturedAtUTC": "2026-10-25T04:08:41.991348+00:00"
+    },
+    {
+      "screen": "emotion-reinstalled",
+      "state": "Default unsaved happy emotion; no intensity/note; no recorded emotions",
+      "theme": "dark",
+      "textSize": "large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "emotion-reinstalled-dark-large.png",
+      "sha256": "c786c407ddbb01d06a3163ceab0de5eb53aaa327a7428c40e3af7681375e60f9",
+      "capturedAtUTC": "2026-10-25T04:08:56.283113+00:00"
+    },
+    {
+      "screen": "task-editor-reinstalled",
+      "state": "Blank unsaved task; all-day on, favorite off, reminder none; date Oct25",
+      "theme": "dark",
+      "textSize": "large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "task-editor-reinstalled-dark-large.png",
+      "sha256": "f52105b42ea9b5f4bbf8fbadce5c88619f05610befc96835b93becf6b5757d09",
+      "capturedAtUTC": "2026-10-25T04:09:27.163525+00:00"
+    },
+    {
+      "screen": "task-editor-reinstalled",
+      "state": "AX5 blank unsaved task; deadline label/date visibly clipped horizontally; no reminder requested",
+      "theme": "dark",
+      "textSize": "accessibility-extra-extra-extra-large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "task-editor-reinstalled-dark-accessibility-extra-extra-extra-large.png",
+      "sha256": "5305a5b772917174ca75484cd7ba18f9c1797863823f9197bf3859819be8e9ef",
+      "capturedAtUTC": "2026-10-25T04:09:44.463799+00:00"
+    },
+    {
+      "screen": "task-editor-reinstalled",
+      "state": "AX5 blank unsaved task; deadline/date clipped horizontally; reminder remains none",
+      "theme": "light",
+      "textSize": "accessibility-extra-extra-extra-large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "task-editor-reinstalled-light-accessibility-extra-extra-extra-large.png",
+      "sha256": "343d83e602a46bb6981b611e69597b2e0b8e5ef46a95d87db190760baf641630",
+      "capturedAtUTC": "2026-10-25T04:09:57.723623+00:00"
+    },
+    {
+      "screen": "task-editor-reinstalled",
+      "state": "Blank unsaved task; all-day on, favorite off, reminder none; same data",
+      "theme": "light",
+      "textSize": "large",
+      "dataPhase": "reinstalled-empty",
+      "width": 1206,
+      "height": 2622,
+      "png": "task-editor-reinstalled-light-large.png",
+      "sha256": "8376b4596262c854f8c5c7cd578fc8cbd7af941e269feeb0245edf87a75c0661",
+      "capturedAtUTC": "2026-10-25T04:10:12.719003+00:00"
+    },
+    {
+      "screen": "quick-capture-long-draft",
+      "state": "Unsaved fictional Chinese/emoji long draft; idea selected; single-line field scrolls to end; keyboard hidden; Save not pressed",
+      "theme": "light",
+      "textSize": "large",
+      "dataPhase": "fictional-draft",
+      "width": 1206,
+      "height": 2622,
+      "png": "quick-capture-long-draft-light-large.png",
+      "sha256": "a6e355f2eb8f701fbab415d4829e4d501e2c9ca03b3b3b771fd3d1e94f5b1b99",
+      "capturedAtUTC": "2026-10-25T04:13:44.791013+00:00"
+    },
+    {
+      "screen": "quick-capture-long-draft",
+      "state": "AX5 fictional unsaved long draft; keyboard hidden; compact detent clips Flash/header title; no save",
+      "theme": "light",
+      "textSize": "accessibility-extra-extra-extra-large",
+      "dataPhase": "fictional-draft",
+      "width": 1206,
+      "height": 2622,
+      "png": "quick-capture-long-draft-light-accessibility-extra-extra-extra-large.png",
+      "sha256": "3e45667b624f86719e8fbabf97719a806b63e3ebf8d63f0eda21ed51470fd0fb",
+      "capturedAtUTC": "2026-10-25T04:14:05.301337+00:00"
+    },
+    {
+      "screen": "quick-capture-long-draft",
+      "state": "AX5 fictional unsaved long draft; compact detent header clipping; keyboard hidden; no save",
+      "theme": "dark",
+      "textSize": "accessibility-extra-extra-extra-large",
+      "dataPhase": "fictional-draft",
+      "width": 1206,
+      "height": 2622,
+      "png": "quick-capture-long-draft-dark-accessibility-extra-extra-extra-large.png",
+      "sha256": "f0a9d4db504fee28499fbb1cdce8b98634f0a5ab7c5267cbec394e5c25d72a52",
+      "capturedAtUTC": "2026-10-25T04:14:25.256759+00:00"
+    },
+    {
+      "screen": "quick-capture-long-draft",
+      "state": "Fictional unsaved Chinese/emoji long draft; idea; keyboard hidden; no save",
+      "theme": "dark",
+      "textSize": "large",
+      "dataPhase": "fictional-draft",
+      "width": 1206,
+      "height": 2622,
+      "png": "quick-capture-long-draft-dark-large.png",
+      "sha256": "846780722bd02cd7acf2f5f5eb18dd6b5b489ee14404a6e5a177217f56ee2ae2",
+      "capturedAtUTC": "2026-10-25T04:14:39.722637+00:00"
+    }
+  ],
+  "notVerified": [
+    "physical devices, thermal, battery, notification/widget behavior",
+    "VoiceOver traversal, contrast and minimum touch bounds",
+    "other representative screen sizes and uncaptured states",
+    "Simulator time zone independently verified",
+    "Search baseline: blocked by reproducible FocusRouter missing-environment crash",
+    "Software keyboard screenshot after introduction; exported long-draft screenshots have keyboard hidden",
+    "Accessibility acceptance: AX5 month grid/task date/emotion submit/compact capture header show defects"
+  ],
+  "dataPhases": [
+    {
+      "phase": "initial-empty",
+      "description": "First nine captures; zero saved records, emotions and tasks."
+    },
+    {
+      "phase": "operator-one-idea",
+      "observedAfter": "lan-disabled-alert-light-large.png",
+      "description": "One short operator-entered idea appeared during window assistance. Preserved without deletion or modification. Subsequent one-idea captures explicitly label the changed data state."
+    },
+    {
+      "phase": "reinstalled-empty",
+      "description": "Same-bundle reinstall after missing installation/data registration; no committed rows in any entity. Welcome plus five primary screens/calendar/emotion/task at four conditions."
+    },
+    {
+      "phase": "fictional-draft",
+      "description": "Unsubmitted idea draft containing fictional Chinese and emoji. CUA input verified by accessibility value; full draft text never committed as a record. Cancel/reopen retained draft. Keyboard hidden in all four exported draft captures."
+    }
+  ],
+  "standardInspectorProfile": {
+    "liquidGlass": 0.5,
+    "colorFilter": "None",
+    "reduceMotion": false,
+    "increaseContrast": false,
+    "showBorders": false,
+    "reduceTransparency": false,
+    "voiceOver": false,
+    "slowAnimations": false
+  },
+  "conditionNote": "Operator changed text/glass/contrast/borders/transparency/slow-animation settings after initial cohort; original observed profile restored via Device Hub UI before dark/AX5 cohort. Not a benchmark.",
+  "restartNote": "Device Hub unexpectedly showed Start and native inventory showed zero booted devices; same simulator restarted without resetting data. Cause not established.",
+  "reinstallationPhase": "After unexplained simulator Shutdown then FBSOpenApplicationServiceErrorDomain/4, listapps and get_app_container found no Flash installation/data registration, and no matching orphan metadata container was found. Cause unknown; agent did not erase/uninstall/delete operator entry. Reinstalled identical existing Debug bundle; all bundle hashes verified on subsequent captures. Fresh onboarding/empty data; prior 10 PNGs retained. This is not evidence attributing data loss to product code.",
+  "xcodeBuild": "27B5028f",
+  "sdkName": "iphonesimulator27.2",
+  "minimumOSVersion": "18.0",
+  "profileScopeNote": "Initial Inspector profile was observed/restored before original captures. After unexplained stop and missing app installation, only SDK-reported appearance/content_size and bundle hashes are verified per capture; remaining inspector flags were not re-audited. Screenshot text size/theme are exact native readbacks."
+}

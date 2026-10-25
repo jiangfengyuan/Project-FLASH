@@ -1,0 +1,87 @@
+{
+  "kind": "minimal diagnostic extract, no raw crash report or store",
+  "sourceCommit": "dd07bcd5227a88debbfc7be8c948576b206fdb9f",
+  "reproduction": "Empty home -> global search, twice. Returned to SpringBoard; native Flash SIGTRAP reports at matching times. Search never accepted as screenshot baseline.",
+  "reports": [
+    {
+      "file": "Flash-2026-10-25-121042.ips",
+      "sha256": "fc2c35c2e0c47c7e0fc3acdc50272502447438c2a105304c2d06434d214298a1",
+      "exception": {
+        "codes": "0x0000000000000001, 0x00000001c16c415c",
+        "rawCodes": [
+          1,
+          7540064604
+        ],
+        "type": "EXC_BREAKPOINT",
+        "signal": "SIGTRAP"
+      },
+      "termination": {
+        "flags": 0,
+        "code": 5,
+        "namespace": "SIGNAL",
+        "indicator": "Trace/BPT trap: 5",
+        "byProc": "exc handler",
+        "byPid": 43514
+      },
+      "triggeredFrames": [
+        "_assertionFailure(_:_:file:line:flags:)",
+        "specialized EnvironmentValues.subscript.getter",
+        "<unsymbolicated>",
+        "KeyPath._projectReadOnly(from:)",
+        "swift_getAtKeyPath",
+        "closure #1 in EnvironmentBox.update(property:phase:)",
+        "EnvironmentBox.update(property:phase:)",
+        "static BoxVTable.update(elt:property:phase:)",
+        "_DynamicPropertyBuffer.update(container:phase:)",
+        "closure #1 in closure #1 in DynamicBody.updateValue()",
+        "closure #1 in DynamicBody.updateValue()",
+        "DynamicBody.updateValue()",
+        "partial apply for implicit closure #1 in closure #1 in closure #1 in Attribute.init<A>(_:)",
+        "AG::Graph::UpdateStack::update()",
+        "AG::Graph::update_attribute(AG::data::ptr<AG::Node>, unsigned int)"
+      ]
+    },
+    {
+      "file": "Flash-2026-10-25-121112.ips",
+      "sha256": "6267953e0d5b1ae5bb59d2637fea8942966b7e678c336e0dd3b1ad151371cff6",
+      "exception": {
+        "codes": "0x0000000000000001, 0x00000001c16c415c",
+        "rawCodes": [
+          1,
+          7540064604
+        ],
+        "type": "EXC_BREAKPOINT",
+        "signal": "SIGTRAP"
+      },
+      "termination": {
+        "flags": 0,
+        "code": 5,
+        "namespace": "SIGNAL",
+        "indicator": "Trace/BPT trap: 5",
+        "byProc": "exc handler",
+        "byPid": 46153
+      },
+      "triggeredFrames": [
+        "_assertionFailure(_:_:file:line:flags:)",
+        "specialized EnvironmentValues.subscript.getter",
+        "<unsymbolicated>",
+        "KeyPath._projectReadOnly(from:)",
+        "swift_getAtKeyPath",
+        "closure #1 in EnvironmentBox.update(property:phase:)",
+        "EnvironmentBox.update(property:phase:)",
+        "static BoxVTable.update(elt:property:phase:)",
+        "_DynamicPropertyBuffer.update(container:phase:)",
+        "closure #1 in closure #1 in DynamicBody.updateValue()",
+        "closure #1 in DynamicBody.updateValue()",
+        "DynamicBody.updateValue()",
+        "partial apply for implicit closure #1 in closure #1 in closure #1 in Attribute.init<A>(_:)",
+        "AG::Graph::UpdateStack::update()",
+        "AG::Graph::update_attribute(AG::data::ptr<AG::Node>, unsigned int)"
+      ]
+    }
+  ],
+  "fatalMessages": [
+    "2026-10-25 12:10:39.427 Df Flash[43514:130e49] (libswiftCore.dylib) SwiftUICore/Environment+Objects.swift:34: Fatal error: No Observable object of type FocusRouter found. A View.environmentObject(_:) for FocusRouter may be missing as an ancestor of this view.",
+    "2026-10-25 12:11:11.125 Df Flash[46153:1358e7] (libswiftCore.dylib) SwiftUICore/Environment+Objects.swift:34: Fatal error: No Observable object of type FocusRouter found. A View.environmentObject(_:) for FocusRouter may be missing as an ancestor of this view."
+  ]
+}
