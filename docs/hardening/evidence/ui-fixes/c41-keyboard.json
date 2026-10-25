@@ -1,0 +1,35 @@
+{
+  "kind": "iOS-only keyboard-safe-area follow-up; no performance/real-device acceptance",
+  "parent": "4049a75db844eac4954720f53a36001350186434",
+  "sourceFile": {
+    "path": "ios/Flash/UI/QuickCapture/QuickCaptureSheet.swift",
+    "sha256": "6eb401ff1422c374a0dfadb8ed8d28485a21a13a0855c23421f91496669bf9c1"
+  },
+  "device": "CodexFlashHardening iPhone18 Pro/iOS27.0 24A434",
+  "build": "Debug; Xcode-beta27.2; CODE_SIGNING_ALLOWED=NO",
+  "logs": [
+    {
+      "file": "c41-keyboard-build.log",
+      "sha256": "2b091aa5f2b2c4480b25f2ee94333f126791829a523ffc23254708aec4f0b01d",
+      "selectedOutput": [
+        "** TEST BUILD SUCCEEDED **"
+      ]
+    },
+    {
+      "file": "c41-keyboard-ios.log",
+      "sha256": "1494bc1aea62f0473fce7a02a0565f6d272ff136689b67328e0a7e91557fd492",
+      "selectedOutput": [
+        "✔ Test run with 15 tests in 5 suites passed after 0.801 seconds.",
+        "** TEST EXECUTE SUCCEEDED **"
+      ]
+    }
+  ],
+  "before": "C5 original keyboard-initial PNG on4049a75 shows Save below software keyboard at AX5. CUA scroll attempts did not bring it into view; this does not prove every human gesture impossible.",
+  "change": "Only AX sizes: reuse identical actions in bottom safeAreaInset outside scroll content, ordinary-size actions remain in original content. No new font caps or changes to text/category/draft/commit/cancel logic.",
+  "actualObservation": "After build/test and actual toolbar launch, direct AX5 quick capture restored the fictional draft with real software keyboard; both Cancel and Save were complete and above keyboard. Root title remained readable; Flash label was above scroll offset. Native PNGs to follow in separate source-identified manifest.",
+  "notVerified": [
+    "VoiceOver focus traversal/contrast/touch measurement",
+    "narrow375pt/wide screens and real devices",
+    "all-path keyboard/category/Return interactions and save/relaunch pending continuation"
+  ]
+}

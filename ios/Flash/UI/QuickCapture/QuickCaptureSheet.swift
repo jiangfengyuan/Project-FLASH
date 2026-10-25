@@ -40,9 +40,16 @@ struct QuickCaptureSheet: View {
             if dynamicTypeSize.isAccessibilitySize {
                 // A fixed 260pt detent cannot contain AX text. Keep native text
                 // sizing and make all content reachable even with the keyboard.
-                ScrollView { captureContent }
+                ScrollView { captureContent(includeActions: false) }
+                    .safeAreaInset(edge: .bottom, spacing: 0) {
+                        // Keep both actions in the keyboard-adjusted safe area;
+                        // long AX content may scroll independently above them.
+                        captureActions
+                            .padding(.horizontal, Spacing.lg)
+                            .padding(.vertical, Spacing.sm)
+                    }
             } else {
-                captureContent
+                captureContent(includeActions: true)
             }
         }
         .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : [.height(260), .medium])
@@ -54,7 +61,7 @@ struct QuickCaptureSheet: View {
         .onDisappear(perform: keepDraftIfNeeded)
     }
 
-    private var captureContent: some View {
+    private func captureContent(includeActions: Bool) -> some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
             captureHeader
 
@@ -74,22 +81,26 @@ struct QuickCaptureSheet: View {
                     .transition(.appear(reduceMotion: reduceMotion))
             }
 
-            (dynamicTypeSize.isAccessibilitySize
-             ? AnyLayout(VStackLayout(alignment: .leading, spacing: Spacing.md))
-             : AnyLayout(HStackLayout())) {
-                Button("取消") { dismiss() }
-                    .flashGlassButtonStyle()
-                if !dynamicTypeSize.isAccessibilitySize { Spacer() }
-                Button(action: commit) {
-                    Label("保存", systemImage: "arrow.up")
-                        .font(Typography.body.weight(.semibold))
-                }
-                .flashGlassProminentButtonStyle(tint: BrandColors.brandPrimary)
-                .disabled(!hasText)
-                .animation(Motion.quick(reduceMotion), value: hasText)
-            }
+            if includeActions { captureActions }
         }
         .padding(Spacing.lg)
+    }
+
+    private var captureActions: some View {
+        (dynamicTypeSize.isAccessibilitySize
+         ? AnyLayout(VStackLayout(alignment: .leading, spacing: Spacing.md))
+         : AnyLayout(HStackLayout())) {
+            Button("取消") { dismiss() }
+                .flashGlassButtonStyle()
+            if !dynamicTypeSize.isAccessibilitySize { Spacer() }
+            Button(action: commit) {
+                Label("保存", systemImage: "arrow.up")
+                    .font(Typography.body.weight(.semibold))
+            }
+            .flashGlassProminentButtonStyle(tint: BrandColors.brandPrimary)
+            .disabled(!hasText)
+            .animation(Motion.quick(reduceMotion), value: hasText)
+        }
     }
 
     private var captureHeader: some View {
