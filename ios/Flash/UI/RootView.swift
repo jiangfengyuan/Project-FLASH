@@ -69,6 +69,9 @@ struct RootView: View {
         .onChange(of: settings.ideaReminderFrequency) { refreshIdeaReminders() }
         .sheet(isPresented: $appState.isSearchPresented) {
             SearchScreen()
+                // The router on TabView content does not reach this sibling sheet.
+                // Share the same instance so result selection keeps cross-tab routing.
+                .environment(appState.focusRouter)
         }
         .sheet(item: $appState.quickCapture) { request in
             QuickCaptureSheet(initialCategory: request.category)

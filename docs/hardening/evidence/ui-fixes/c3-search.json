@@ -1,0 +1,55 @@
+{
+  "kind": "native simulator correctness receipt; not performance/device acceptance",
+  "productionParent": "e1149a8819206a03b275d9448d1f93bd5ca054a8",
+  "device": "CodexFlashHardening / CC4C60DA-A92D-44A6-A90D-F47AEA86341D",
+  "os": "iOS27.0 /24A434",
+  "build": "Debug, existing Xcode-beta27.2; CODE_SIGNING_ALLOWED=NO",
+  "nativeCommand": "xcodebuild -project ios/Flash.xcodeproj -scheme Flash -destination platform=iOS Simulator,id=CC4C60DA-A92D-44A6-A90D-F47AEA86341D -parallel-testing-enabled NO test-without-building CODE_SIGNING_ALLOWED=NO",
+  "sourceFiles": [
+    {
+      "path": "ios/Flash/UI/RootView.swift",
+      "sha256": "bba7787f8f3d2bad7fa78721198bade800ec17f11e72acb1a555b4e7573670e3"
+    },
+    {
+      "path": "ios/FlashTests/SearchPresentationTests.swift",
+      "sha256": "6005f833e4454a12afe290d0fab01af4de450ba1152f473cea044d2bec47c5e7"
+    }
+  ],
+  "logs": [
+    {
+      "file": "c3-search-parent.log",
+      "sha256": "80e554543b3ed2276075a7176c4c0058ca48af4f65229c53b01f81def1d8c725",
+      "status": "startup stalled, cancelled then terminated; no test outcome",
+      "selectedOutput": []
+    },
+    {
+      "file": "c3-search-parent-retry.log",
+      "sha256": "18d65cd46f22e85180afc2ffd9252850667105f27bead9fe34b62170933e96f3",
+      "status": "real regression reproduced missing FocusRouter fatal assertion; runner restarted with0remaining tests then stalled finalization; terminated, not a completed numeric test result",
+      "selectedOutput": [
+        "SwiftUICore/Environment+Objects.swift:34: Fatal error: No Observable object of type FocusRouter found. A View.environmentObject(_:) for FocusRouter may be missing as an ancestor of this view.",
+        "2026-10-25 12:27:20.130467+0800 Flash[48436:1302972] SwiftUICore/Environment+Objects.swift:34: Fatal error: No Observable object of type FocusRouter found. A View.environmentObject(_:) for FocusRouter may be missing as an ancestor of this view.",
+        "✔ Test run with 0 tests in 1 suite passed after 0.005 seconds."
+      ]
+    },
+    {
+      "file": "c3-search-build.log",
+      "sha256": "71fe8e0eb234ab0850a1504b24b75c92ea5f0c53c2b0cb87c505d1f6c3e9abe1",
+      "status": "TEST BUILD SUCCEEDED",
+      "selectedOutput": [
+        "** TEST BUILD SUCCEEDED **"
+      ]
+    },
+    {
+      "file": "c3-search-candidate.log",
+      "sha256": "f284170e54dbc50655f6494fd1eb9729dc52321468a826449d8ac0f7bad71d6d",
+      "status": "TEST EXECUTE SUCCEEDED;15tests/5suites;new real-sheet test passed",
+      "selectedOutput": [
+        "✔ Test realSearchSheetMountsAndSharesTheNavigationRouter() passed after 0.928 seconds.",
+        "✔ Test run with 15 tests in 5 suites passed after 1.126 seconds.",
+        "** TEST EXECUTE SUCCEEDED **"
+      ]
+    }
+  ],
+  "scope": "Same AppState.focusRouter explicitly injected into sibling SearchScreen sheet. Regression mounts actual RootView with in-memory repository/isolated defaults/read-state and checks presented view plus task routing. No production store, permissions, signing, protocol or AX5 changes."
+}
