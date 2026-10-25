@@ -8,6 +8,7 @@ public struct TaskEditorView: View {
     private let sourceLogId: String?
     public let onSave: (TaskItem) -> Void
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.dismiss) private var dismiss
     @State private var title: String
     @State private var notes: String
@@ -95,8 +96,21 @@ public struct TaskEditorView: View {
         }
         Toggle("全天任务", isOn: $allDay)
         Toggle("收藏", isOn: $isFavorite)
-        DatePicker("截止时间", selection: $dueDate,
-                   displayedComponents: allDay ? [.date] : [.date, .hourAndMinute])
+        #if os(iOS)
+        if dynamicTypeSize.isAccessibilitySize {
+            VStack(alignment: .leading, spacing: Spacing.sm) {
+                Text("截止时间")
+                DatePicker("截止时间", selection: $dueDate,
+                           displayedComponents: allDay ? [.date] : [.date, .hourAndMinute])
+                    .datePickerStyle(.wheel)
+                    .labelsHidden()
+            }
+        } else {
+            deadlinePicker
+        }
+        #else
+        deadlinePicker
+        #endif
         Picker("本地提醒", selection: $reminderMinutes) {
             Text("不提醒").tag(Int?.none)
             Text("截止时").tag(Int?.some(0))
@@ -104,6 +118,11 @@ public struct TaskEditorView: View {
             Text("提前 1 小时").tag(Int?.some(60))
             Text("提前 1 天").tag(Int?.some(1440))
         }
+    }
+
+    private var deadlinePicker: some View {
+        DatePicker("截止时间", selection: $dueDate,
+                   displayedComponents: allDay ? [.date] : [.date, .hourAndMinute])
     }
 
     private func makeTask() -> TaskItem {

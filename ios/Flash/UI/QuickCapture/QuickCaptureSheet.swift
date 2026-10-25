@@ -19,6 +19,7 @@ struct QuickCaptureSheet: View {
 
     @Environment(\.flashRepository) private var repository
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var text = ""
@@ -35,24 +36,27 @@ struct QuickCaptureSheet: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.md) {
-            HStack(alignment: .firstTextBaseline) {
-                VStack(alignment: .leading, spacing: Spacing.xxs) {
-                    Text("✦ Flash")
-                        .font(Typography.caption.weight(.semibold))
-                        .foregroundStyle(BrandColors.brandPrimary)
-                    Text("现在想记录什么？")
-                        .font(Typography.sectionTitle)
-                }
-                Spacer()
-                SegmentedPicker(selection: $category, options: [
-                    .init(value: Category.idea, title: "灵感"),
-                    .init(value: Category.log, title: "日志"),
-                ])
-                .frame(maxWidth: 150) // 分段控件固有宽度（几何值）
-                .tint(category == .idea ? BrandColors.ideaYellow : BrandColors.logPurple)
-                .animation(Motion.quick(reduceMotion), value: category)
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                // A fixed 260pt detent cannot contain AX text. Keep native text
+                // sizing and make all content reachable even with the keyboard.
+                ScrollView { captureContent }
+            } else {
+                captureContent
             }
+        }
+        .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : [.height(260), .medium])
+        .presentationDragIndicator(.visible)
+        .sensoryFeedback(.success, trigger: saveCount)
+        .sensoryFeedback(.selection, trigger: category)
+        .animation(Motion.soft(reduceMotion), value: errorMessage)
+        .onAppear(perform: restoreDraft)
+        .onDisappear(perform: keepDraftIfNeeded)
+    }
+
+    private var captureContent: some View {
+        VStack(alignment: .leading, spacing: Spacing.md) {
+            captureHeader
 
             TextField("写下刚刚闪过的念头……", text: $text)
                 .font(Typography.body)
@@ -70,10 +74,12 @@ struct QuickCaptureSheet: View {
                     .transition(.appear(reduceMotion: reduceMotion))
             }
 
-            HStack {
+            (dynamicTypeSize.isAccessibilitySize
+             ? AnyLayout(VStackLayout(alignment: .leading, spacing: Spacing.md))
+             : AnyLayout(HStackLayout())) {
                 Button("取消") { dismiss() }
                     .flashGlassButtonStyle()
-                Spacer()
+                if !dynamicTypeSize.isAccessibilitySize { Spacer() }
                 Button(action: commit) {
                     Label("保存", systemImage: "arrow.up")
                         .font(Typography.body.weight(.semibold))
@@ -84,13 +90,29 @@ struct QuickCaptureSheet: View {
             }
         }
         .padding(Spacing.lg)
-        .presentationDetents([.height(260), .medium])
-        .presentationDragIndicator(.visible)
-        .sensoryFeedback(.success, trigger: saveCount)
-        .sensoryFeedback(.selection, trigger: category)
-        .animation(Motion.soft(reduceMotion), value: errorMessage)
-        .onAppear(perform: restoreDraft)
-        .onDisappear(perform: keepDraftIfNeeded)
+    }
+
+    private var captureHeader: some View {
+        (dynamicTypeSize.isAccessibilitySize
+         ? AnyLayout(VStackLayout(alignment: .leading, spacing: Spacing.sm))
+         : AnyLayout(HStackLayout(alignment: .firstTextBaseline))) {
+            VStack(alignment: .leading, spacing: Spacing.xxs) {
+                Text("✦ Flash")
+                    .font(Typography.caption.weight(.semibold))
+                    .foregroundStyle(BrandColors.brandPrimary)
+                Text("现在想记录什么？")
+                    .font(Typography.sectionTitle)
+                    .fixedSize(horizontal: false, vertical: dynamicTypeSize.isAccessibilitySize)
+            }
+            if !dynamicTypeSize.isAccessibilitySize { Spacer() }
+            SegmentedPicker(selection: $category, options: [
+                .init(value: Category.idea, title: "灵感"),
+                .init(value: Category.log, title: "日志"),
+            ])
+            .frame(maxWidth: dynamicTypeSize.isAccessibilitySize ? .infinity : 150)
+            .tint(category == .idea ? BrandColors.ideaYellow : BrandColors.logPurple)
+            .animation(Motion.quick(reduceMotion), value: category)
+        }
     }
 
     // MARK: - 草稿
