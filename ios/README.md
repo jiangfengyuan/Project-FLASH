@@ -1,5 +1,7 @@
 # Flash Aero · iOS
 
+2026-10-30 功能收口检查点：模拟器测试18项、FlashKit204项及通用模拟器测试构建通过；修复today/ideas深链被旧弹层遮挡，并新增文件往返/磁盘重开验证。完整界面、VoiceOver、iOS18与真机验收仍未完成，详见[执行记录与交付](../docs/hardening/ios-acceptance-20261030.md)。
+
 > 2026-10-25 加固候选：旧版 LAN 因未认证下载/明文风险经批准暂时停用，请使用文件导出/系统分享；没有不安全回退。四端候选支持既有分区 schema1/2，原生 IANA 别名策略已统一；完整 app/真机矩阵仍未验收。见 [审查交接与限制](../docs/hardening/review-handoff.md)。构建/签名配置未变。
 
 iPhone 原生实现（Alpha）。SwiftUI + SwiftData，零第三方依赖；数据层、领域逻辑、设计语言与大部分页面
