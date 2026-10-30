@@ -150,6 +150,12 @@ final class AppState {
         return true
     }
 
+    /// 系统搜索（Spotlight）结果：按记录 id 走跨模块定位（记录页打开编辑弹层；记录已删则只停在记录页）
+    func openSpotlightResult(id: String) {
+        quickCapture = nil
+        focusRouter.request(.log(id))
+    }
+
     /// 启动时检测数据库回退标记（App 装配层在容器创建后调用）；文案与 macOS 共用
     func checkDatabaseFallback(didFallbackToMemory: Bool) {
         guard didFallbackToMemory else { return }

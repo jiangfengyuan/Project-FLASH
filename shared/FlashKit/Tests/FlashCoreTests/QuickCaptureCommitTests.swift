@@ -53,4 +53,21 @@ struct QuickCaptureCommitTests {
         }
         #expect(try repository.allLogs().isEmpty)
     }
+
+    @Test func prepareTrimsAndValidatesWithoutTouchingStore() {
+        #expect(QuickCaptureCommit.prepare("  一闪 \n") == .ready("一闪"))
+        #expect(QuickCaptureCommit.prepare(" \n ") == .empty)
+        let tooLong = String(repeating: "a", count: TextLimits.maxContentUTF16 + 1)
+        guard case .tooLong = QuickCaptureCommit.prepare(tooLong) else {
+            Issue.record("超限内容应返回 .tooLong")
+            return
+        }
+    }
+
+    @Test func commitKeepsProvidedID() throws {
+        let repository = makeRepository()
+        _ = try QuickCaptureCommit.commit("分享来的", as: .idea, id: "inbox-1", repository: repository)
+        #expect(try repository.allLogs().map(\.id) == ["inbox-1"])
+        #expect(try repository.containsLog(id: "inbox-1"))
+    }
 }

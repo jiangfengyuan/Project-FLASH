@@ -15,6 +15,9 @@ struct RootView: View {
     @EnvironmentObject private var settings: SettingsStore
     @Environment(IdeaReminderCenter.self) private var ideaReminders
     @Environment(\.flashRepository) private var repository
+    @Environment(\.scenePhase) private var scenePhase
+    /// 分享扩展投递的内容收入后的提示
+    @State private var inboxToast: FlashToast? = nil
     /// 快速记录入口 → 面板的缩放转场
     @Namespace private var captureNamespace
 
@@ -82,6 +85,11 @@ struct RootView: View {
         .onChange(of: repository?.revision ?? 0) { refreshIdeaReminders() }
         .onChange(of: settings.ideaReminderEnabled) { refreshIdeaReminders() }
         .onChange(of: settings.ideaReminderFrequency) { refreshIdeaReminders() }
+        // 分享扩展只投递到 App Group 收件箱（不碰主库）：启动与每次回到前台时收入
+        .onChange(of: scenePhase, initial: true) { _, phase in
+            if phase == .active { drainCaptureInbox() }
+        }
+        .flashToast($inboxToast)
         .sheet(isPresented: $appState.isSearchPresented) {
             SearchScreen()
         }
@@ -112,6 +120,12 @@ struct RootView: View {
         .background(BrandColors.pageBackground)
         .navigationTitle(route.title)
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func drainCaptureInbox() {
+        guard let repository else { return }
+        let imported = CaptureInboxImporter.drain(.shared, into: repository)
+        if imported > 0 { inboxToast = FlashToast("✓ 已收入 \(imported) 条分享内容") }
     }
 
     private func refreshIdeaReminders() {

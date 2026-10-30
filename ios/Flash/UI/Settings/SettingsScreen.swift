@@ -73,6 +73,19 @@ struct SettingsScreen: View {
                 }
 
                 Section {
+                    Toggle(isOn: Binding(get: { settings.spotlightIndexingEnabled },
+                                         set: { settings.setSpotlightIndexingEnabled($0) })) {
+                        SettingsRowLabel(title: "在系统搜索中显示", systemImage: "magnifyingglass",
+                                         color: BrandColors.accessibleGreen)
+                    }
+                    .tint(BrandColors.brandPrimary)
+                } header: {
+                    Text("隐私")
+                } footer: {
+                    Text("开启后，日志与灵感的首行和摘录会写入本机的系统搜索索引（不含情绪与任务，不离开此设备）。关闭即从系统搜索中移除。")
+                }
+
+                Section {
                     NavigationLink(value: SettingsPage.backup) {
                         SettingsRowLabel(title: "备份与恢复", systemImage: "externaldrive",
                                          color: BrandColors.accessibleGreen)

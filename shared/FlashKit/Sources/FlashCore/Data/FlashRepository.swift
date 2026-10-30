@@ -38,6 +38,15 @@ private extension Array {
 }
 #endif
 
+/// 日志 / 灵感分区的变更（提交成功后发出），供系统搜索索引等派生状态增量同步
+public enum LogChange: Equatable, Sendable {
+    /// 新增或改动（含收藏切换、合并导入）
+    case upserted([LogItem])
+    case deleted([String])
+    /// 整表替换或清空（覆盖导入、清空全部、调试灌注）：派生状态应整体重建
+    case reset
+}
+
 /// 对应 Web 版 StorageAdapter / Android FlashRepository。
 /// createdAt 使用 ISO-8601，recordDate 为 yyyy-MM-dd。
 public final class FlashRepository {
@@ -55,6 +64,9 @@ public final class FlashRepository {
     /// 灵感已读状态）和导入导出都必须跳过，避免用空库覆盖真实状态（F-07）。
     public let isTemporaryStore: Bool
 
+    /// 日志 / 灵感变更回调：只在 commit 成功后、主线程调用；失败回滚的写入不会发出
+    public var onLogChange: (@MainActor (LogChange) -> Void)?
+
     public init(container: ModelContainer, isTemporaryStore: Bool = false,
                 beforeSave: @escaping () throws -> Void = {}) {
         self.container = container
@@ -67,14 +79,15 @@ public final class FlashRepository {
 
     // MARK: - Logs
 
-    /// recordDate 为空时取今天；新建面板允许用户指定记录日期，必须透传而不是静默改回今天
+    /// recordDate 为空时取今天；新建面板允许用户指定记录日期，必须透传而不是静默改回今天。
+    /// `id` 为 nil 时新生成；分享收件箱导入传入条目 id，使中断后重放不产生重复记录
     @MainActor
-    public func addLog(content: String, colorTag: ColorTag,
+    public func addLog(id: String? = nil, content: String, colorTag: ColorTag,
                 category: Category = .log, importance: Int = 0,
                 isFavorite: Bool? = nil,
                 recordDate: Date? = nil) throws {
         let entity = LogEntity(
-            id: UUID().uuidString,
+            id: id ?? UUID().uuidString,
             content: content,
             colorTag: colorTag.rawValue,
             category: category.rawValue,
@@ -84,6 +97,7 @@ public final class FlashRepository {
             recordDate: recordDate.map(DateFormatting.dayString) ?? DateFormatting.today()
         )
         try commit { context.insert(entity) }
+        onLogChange?(.upserted([entity.toModel()]))
     }
 
     @MainActor
@@ -101,13 +115,21 @@ public final class FlashRepository {
                                          recordDate: log.recordDate))
             }
         }
+        onLogChange?(.upserted([log]))
     }
 
     @MainActor
     public func deleteLog(id: String) throws {
         if let entity = try fetchLog(id: id) {
             try commit { context.delete(entity) }
+            onLogChange?(.deleted([id]))
         }
+    }
+
+    /// 按 id 判断记录是否存在（收件箱去重、Spotlight 结果回跳校验）
+    @MainActor
+    public func containsLog(id: String) throws -> Bool {
+        try fetchLog(id: id) != nil
     }
 
     @MainActor
@@ -217,6 +239,7 @@ public final class FlashRepository {
     public func setLogFavorite(id: String, _ isFavorite: Bool) throws {
         if let entity = try fetchLog(id: id) {
             try commit { entity.isFavorite = isFavorite }
+            onLogChange?(.upserted([entity.toModel()]))
         }
     }
 
@@ -250,6 +273,7 @@ public final class FlashRepository {
         for batch in tasks.chunked(into: batchSize) {
             try commit { batch.forEach { context.insert(TaskEntity($0)) } }
         }
+        onLogChange?(.reset)
     }
     #endif
 
@@ -276,6 +300,7 @@ public final class FlashRepository {
             for emotion in emotions { upsertEmotionEntity(emotion) }
             for task in tasks { context.insert(TaskEntity(task)) }
         }
+        onLogChange?(.reset)
     }
 
     /// 合并式导入：同 id 覆盖，其余保留（对应 Web 版 mergeImport）
@@ -292,6 +317,7 @@ public final class FlashRepository {
                 }
             }
         }
+        if !logs.isEmpty { onLogChange?(.upserted(logs)) }
     }
 
     @MainActor
@@ -299,6 +325,7 @@ public final class FlashRepository {
         try commit {
             try deleteAllEntities()
         }
+        onLogChange?(.reset)
     }
 
     // MARK: - Widget Summary
