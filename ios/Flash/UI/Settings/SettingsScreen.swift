@@ -9,18 +9,20 @@ import UniformTypeIdentifiers
 import FlashCore
 import FlashDesign
 
-/// 设置页（iOS 外壳）：共享分组（外观 / 数据与安全 / 危险操作 / 关于）+ iOS 文件交互：
+/// 设置页（iOS 外壳）：根页按「通用 / 数据 / 关于」分类，只留入口与状态摘要；
+/// 灵感提醒、备份与恢复（含危险操作）、设备间传输下沉为子页（SettingsPages）。
+/// 自带导航栈：系统弹层挂在栈上，无论停在哪个子页都能正常弹出。iOS 文件交互：
 /// 导出走 `.fileExporter`（存到「文件」），分享走 ShareLink，导入走 `.fileImporter`（安全作用域访问），
 /// 局域网收发走共享 LanTransferSheet。导入预览、合并/覆盖与提醒重建全部经 BackupImportCoordinator。
 struct SettingsScreen: View {
     @Environment(\.flashRepository) private var repository
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(AppState.self) private var appState
+    @EnvironmentObject private var settings: SettingsStore
 
     @State private var lanTransfer = LocalBackupTransferController.shared
     @State private var isBusy = false
     @State private var message: String? = nil
-    @State private var toastMessage: String? = nil
-    @State private var toastID = 0
+    @State private var toast: FlashToast? = nil
 
     // 导出 / 分享
     @State private var exportDocument: BackupJSONDocument? = nil
@@ -38,26 +40,62 @@ struct SettingsScreen: View {
     @State private var showClearConfirm = false
 
     var body: some View {
-        Form {
-            StorageBannerSection()
-            AppearanceSection(appeared: true)
-            IdeaReminderSection()
-            DataSafetySection(isBusy: isBusy, appeared: true,
-                              onShare: prepareShare,
-                              onLanSend: startLanSend,
-                              onLanReceive: { lanTransfer.startReceiving() },
-                              onExport: prepareExport,
-                              onImport: { chooseImportFile(recovery: false) },
-                              onRecoveryImport: { chooseImportFile(recovery: true) })
-            DangerZoneSection(isDisabled: isBusy || lanTransfer.mode != .idle) {
-                showClearConfirm = true
+        NavigationStack {
+            Form {
+                if appState.isDatabaseInMemoryFallback {
+                    Section {
+                        Label {
+                            VStack(alignment: .leading, spacing: Spacing.xxs) {
+                                Text("临时内存模式")
+                                    .font(Typography.cardTitle)
+                                Text("本地数据库不可用，重启后数据可能丢失，请尽快导出备份。")
+                                    .font(Typography.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        } icon: {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(BrandColors.destructive)
+                        }
+                    }
+                }
+
+                AppearanceSection(appeared: true)
+
+                Section("通知") {
+                    NavigationLink(value: SettingsPage.ideaReminder) {
+                        LabeledContent {
+                            Text(settings.ideaReminderEnabled ? settings.ideaReminderFrequency.displayName : "已关闭")
+                        } label: {
+                            SettingsRowLabel(title: "灵感提醒", systemImage: "lightbulb.max",
+                                             color: BrandColors.ideaYellowText)
+                        }
+                    }
+                }
+
+                Section {
+                    NavigationLink(value: SettingsPage.backup) {
+                        SettingsRowLabel(title: "备份与恢复", systemImage: "externaldrive",
+                                         color: BrandColors.accessibleGreen)
+                    }
+                    NavigationLink(value: SettingsPage.transfer) {
+                        SettingsRowLabel(title: "设备间传输", systemImage: "arrow.left.arrow.right",
+                                         color: BrandColors.accessibleGreen)
+                    }
+                } header: {
+                    Text("数据")
+                } footer: {
+                    Text("数据只保存在此设备。导出、分享与传输都由你主动发起。")
+                }
+
+                AboutSection(version: BackupImportCoordinator.appVersion, appeared: true)
             }
-            AboutSection(version: BackupImportCoordinator.appVersion, appeared: true)
+            .scrollContentBackground(.hidden)
+            .background(BrandColors.pageBackground)
+            .navigationTitle("设置")
+            .navigationDestination(for: SettingsPage.self, destination: page)
         }
-        .scrollContentBackground(.hidden)
-        .background(BrandColors.pageBackground)
-        .navigationTitle("设置")
-        .toolbar { GlobalSearchToolbarItem() }
+        .flashToast($toast)
+        .sensoryFeedback(.success, trigger: toast) { _, new in new != nil }
         // 导出：先在后台生成 JSON，再交给系统「存储到文件」
         .fileExporter(isPresented: exportPresented, document: exportDocument,
                       contentType: .json,
@@ -101,19 +139,6 @@ struct SettingsScreen: View {
             lanTransfer.sendCompleted = false
             showToast("✓ 备份已发送至对方设备，请在对端确认导入")
         }
-        .overlay(alignment: .top) {
-            if let toastMessage {
-                ToastView(message: toastMessage)
-                    .padding(.top, Spacing.sm)
-            }
-        }
-        .animation(reduceMotion ? Motion.reducedFade(true) : Motion.spring(), value: toastMessage != nil)
-        .task(id: toastID) {
-            guard toastMessage != nil else { return }
-            try? await Task.sleep(for: .seconds(1.6))
-            guard !Task.isCancelled else { return }
-            toastMessage = nil
-        }
         .alert(recoveryImport ? "部分恢复预览（原文件不变）" : "标准导入预览", isPresented: previewPresented) {
             Button("按差异合并") { pendingImport = importPreview; confirmImport(overwrite: false) }
             Button("覆盖导入", role: .destructive) { pendingImport = importPreview; showOverwriteConfirm = true }
@@ -133,10 +158,32 @@ struct SettingsScreen: View {
         } message: {
             Text("将删除本机全部日志、灵感、情绪与任务。如未导出备份，数据将无法找回。")
         }
-        .alert("提示", isPresented: messagePresented) {
+        .alert("出了点问题", isPresented: messagePresented) {
             Button("好") { message = nil }
         } message: {
             Text(message ?? "")
+        }
+    }
+
+    // MARK: - 子页
+
+    @ViewBuilder
+    private func page(_ page: SettingsPage) -> some View {
+        switch page {
+        case .ideaReminder:
+            IdeaReminderSettingsPage()
+        case .backup:
+            BackupSettingsPage(isBusy: isBusy,
+                               isClearDisabled: isBusy || lanTransfer.mode != .idle,
+                               onExport: prepareExport,
+                               onShare: prepareShare,
+                               onImport: { chooseImportFile(recovery: false) },
+                               onRecoveryImport: { chooseImportFile(recovery: true) },
+                               onClearAll: { showClearConfirm = true })
+        case .transfer:
+            TransferSettingsPage(isDisabled: isBusy || lanTransfer.mode != .idle,
+                                 onSend: startLanSend,
+                                 onReceive: { lanTransfer.startReceiving() })
         }
     }
 
@@ -314,8 +361,7 @@ struct SettingsScreen: View {
     }
 
     private func showToast(_ text: String) {
-        toastMessage = text
-        toastID += 1
+        toast = FlashToast(text)
     }
 
     private enum SettingsDataError: Error {

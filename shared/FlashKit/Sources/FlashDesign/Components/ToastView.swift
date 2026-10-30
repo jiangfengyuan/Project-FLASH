@@ -16,23 +16,87 @@ import FlashCore
 /// 自动消隐由外部定时把 message 置回 nil（参考 HomeView 用法）。
 public struct ToastView: View {
     public let message: String
+    /// 可选的行内操作（如「撤销」）；nil 时为纯文案胶囊
+    public let actionTitle: String?
+    public let action: (@MainActor () -> Void)?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    public init(message: String) {
+    public init(message: String, actionTitle: String? = nil, action: (@MainActor () -> Void)? = nil) {
         self.message = message
+        self.actionTitle = actionTitle
+        self.action = action
     }
 
     public var body: some View {
-        Text(message)
-            .font(.body.weight(.medium))
-            .foregroundStyle(Color.primary)
-            .padding(.horizontal, 14) // 胶囊横向呼吸：无对应间距令牌（sm 偏紧、md 偏宽）
-            .padding(.vertical, Spacing.xs)
-            .flashGlassBackground(in: Capsule())
-            .flashElevatedShadow()
-            .accessibilityLabel(message)
-            .transition(.pop(reduceMotion: reduceMotion))
+        HStack(spacing: Spacing.sm) {
+            Text(message)
+                .font(.body.weight(.medium))
+                .foregroundStyle(Color.primary)
+                .accessibilityLabel(message)
+            if let actionTitle, let action {
+                Button(actionTitle, action: action)
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(BrandColors.brandPrimary)
+                    .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 14) // 胶囊横向呼吸：无对应间距令牌（sm 偏紧、md 偏宽）
+        .padding(.vertical, Spacing.xs)
+        .flashGlassBackground(in: Capsule())
+        .flashElevatedShadow()
+        .accessibilityElement(children: .contain)
+        .transition(.pop(reduceMotion: reduceMotion))
+    }
+}
+
+/// 一条 toast 请求：文案 + 可选操作（撤销等）。每次新建都有新 id，相同文案连发也会重置计时
+public struct FlashToast: Identifiable, Equatable {
+    public let id = UUID()
+    public var message: String
+    public var actionTitle: String?
+    public var action: (@MainActor () -> Void)?
+
+    public init(_ message: String, actionTitle: String? = nil, action: (@MainActor () -> Void)? = nil) {
+        self.message = message
+        self.actionTitle = actionTitle
+        self.action = action
+    }
+
+    public static func == (lhs: FlashToast, rhs: FlashToast) -> Bool { lhs.id == rhs.id }
+}
+
+/// 顶部 toast 承载：出现动画 + 自动消隐（纯文案 1.6s；带操作 4s，给足点「撤销」的时间）。
+/// 点操作后立即收起。替代各页重复的 toastMessage / toastID / task 计时样板。
+private struct FlashToastModifier: ViewModifier {
+    @Binding var toast: FlashToast?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        content
+            .overlay(alignment: .top) {
+                if let toast {
+                    ToastView(message: toast.message, actionTitle: toast.actionTitle,
+                              action: toast.action.map { action in
+                                  { action(); self.toast = nil }
+                              })
+                        .padding(.top, Spacing.sm)
+                        .id(toast.id)
+                }
+            }
+            .animation(reduceMotion ? Motion.reducedFade(true) : Motion.spring(), value: toast)
+            .task(id: toast?.id) {
+                guard let current = toast else { return }
+                try? await Task.sleep(for: .seconds(current.action == nil ? 1.6 : 4))
+                guard !Task.isCancelled, toast?.id == current.id else { return }
+                toast = nil
+            }
+    }
+}
+
+public extension View {
+    func flashToast(_ toast: Binding<FlashToast?>) -> some View {
+        modifier(FlashToastModifier(toast: toast))
     }
 }
 

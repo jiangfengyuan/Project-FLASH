@@ -9,8 +9,9 @@ import FlashCore
 import FlashDesign
 
 /// 快速记录面板（iOS 版 Quick Capture，规则对齐 macOS PRD §13–14）：
-/// - 「✦ Flash / 现在想记录什么？」+ 单行输入，默认类型为灵感，可点选切到日志，不强制分类；
-/// - 回车或「保存」提交，保存后立即关闭（成功触感）；
+/// - 「✦ Flash / 现在想记录什么？」+ 自动增高输入（1–5 行），默认类型为灵感，可点选切到日志，不强制分类；
+/// - 回车或「保存」提交（粘贴的多行文本保留换行），保存后立即关闭（成功触感）；
+/// - 面板高度随内容测量（大字号不截断），接近字数上限时显示剩余字数；
 /// - 未提交关闭（下滑 / 点外部 / 取消）保留草稿，下次打开恢复正文与类型（QuickCaptureDraftStore，与 macOS 同语义）；
 /// - 保存规则（去空白 / 契约上限 / 标签与重要度）走共享 QuickCaptureCommit。
 struct QuickCaptureSheet: View {
@@ -26,6 +27,8 @@ struct QuickCaptureSheet: View {
     @State private var errorMessage: String? = nil
     @State private var committed = false
     @State private var saveCount = 0
+    /// 内容实测高度：驱动自适应 detent（0 = 尚未测量，先用 .medium）
+    @State private var contentHeight: CGFloat = 0
     @FocusState private var focused: Bool
 
     private let draftStore = QuickCaptureDraftStore()
@@ -54,14 +57,23 @@ struct QuickCaptureSheet: View {
                 .animation(Motion.quick(reduceMotion), value: category)
             }
 
-            TextField("写下刚刚闪过的念头……", text: $text)
+            TextField("写下刚刚闪过的念头……", text: $text, axis: .vertical)
                 .font(Typography.body)
+                .lineLimit(1...5)
                 .focused($focused)
                 .submitLabel(.done)
-                .onSubmit(commit)
+                .onChange(of: text) { old, new in submitOnTypedReturn(old: old, new: new) }
                 .padding(.horizontal, Spacing.sm)
                 .padding(.vertical, Spacing.sm)
                 .background(BrandColors.weakSurface, in: RoundedRectangle(cornerRadius: Radius.field))
+
+            if let remaining = remainingHint {
+                Text(remaining)
+                    .font(Typography.caption.monospacedDigit())
+                    .foregroundStyle(remaining.hasPrefix("超出") ? BrandColors.destructive : BrandColors.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .transition(.appear(reduceMotion: reduceMotion))
+            }
 
             if let errorMessage {
                 Text(errorMessage)
@@ -84,13 +96,32 @@ struct QuickCaptureSheet: View {
             }
         }
         .padding(Spacing.lg)
-        .presentationDetents([.height(260), .medium])
+        .fixedSize(horizontal: false, vertical: true)
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
+        .frame(maxHeight: .infinity, alignment: .top)
+        .presentationDetents(contentHeight > 0 ? [.height(contentHeight), .large] : [.medium, .large])
         .presentationDragIndicator(.visible)
         .sensoryFeedback(.success, trigger: saveCount)
         .sensoryFeedback(.selection, trigger: category)
         .animation(Motion.soft(reduceMotion), value: errorMessage)
+        .animation(Motion.soft(reduceMotion), value: remainingHint == nil)
         .onAppear(perform: restoreDraft)
         .onDisappear(perform: keepDraftIfNeeded)
+    }
+
+    /// 只剩不到 10% 时提示剩余字数；超出时提示超出量（与 QuickCaptureCommit 同一 UTF-16 口径）
+    private var remainingHint: String? {
+        let limit = TextLimits.maxContentUTF16
+        let remaining = limit - text.utf16.count
+        if remaining < 0 { return "超出 \(-remaining) 字" }
+        return remaining < limit / 10 ? "还可输入 \(remaining) 字" : nil
+    }
+
+    /// 多行输入下回车会插入换行：只在「末尾敲入单个换行」时视为提交，粘贴的多行文本不受影响
+    private func submitOnTypedReturn(old: String, new: String) {
+        guard new.count == old.count + 1, new.hasSuffix("\n"), new.dropLast() == Substring(old) else { return }
+        text = old
+        commit()
     }
 
     // MARK: - 草稿

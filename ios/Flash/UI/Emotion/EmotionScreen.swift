@@ -7,11 +7,11 @@
 import SwiftUI
 import FlashDesign
 
-/// Memory 周报（iOS 外壳）：共享 MemoryView（周导航与报告卡片），标题交给系统导航栏
-struct MemoryScreen: View {
+/// 情绪页（iOS 外壳）：共享 EmotionView（情绪选择 / 本周 / 历史），独立成 Tab，标题交给系统导航栏
+struct EmotionScreen: View {
     var body: some View {
-        MemoryView()
-            .navigationTitle("Memory")
+        EmotionView()
+            .navigationTitle("情绪")
             .toolbar { GlobalSearchToolbarItem() }
     }
 }

@@ -31,6 +31,8 @@ public struct ExploreLogListView: View {
     /// 删除成功计数：驱动 Light 触感（PRD v3 §3.5.3）
     @State private var deleteCount = 0
     @State private var errorMessage: String? = nil
+    /// 触屏：删除即生效，顶部 toast 提供「撤销」（取代确认弹窗）
+    @State private var toast: FlashToast? = nil
     /// Idea→Task 转化草稿（nil 表示不展示任务编辑器）
     @State private var ideaTaskDraft: IdeaTaskDraft? = nil
     /// 灵感提醒：未读灵感 id 集与「已读」回调，由宿主经环境注入（未注入时不标未读）
@@ -100,6 +102,9 @@ public struct ExploreLogListView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .flashHaptic(.impact(weight: .light), trigger: deleteCount)
+        #if os(iOS)
+        .flashToast($toast)
+        #endif
         // 新增/删除条目、空态切换均走 soft 过渡
         .animation(Motion.soft(reduceMotion), value: displayedLogs.count)
         .animation(Motion.soft(reduceMotion), value: displayedLogs.isEmpty)
@@ -171,7 +176,7 @@ public struct ExploreLogListView: View {
                             ideaTaskDraft = IdeaTaskDraft(sourceLogId: log.id, title: log.content)
                         }
                     }
-                    Button("删除", role: .destructive) { deletingLog = log }
+                    Button("删除", role: .destructive) { requestDelete(log) }
                 }
         }
     }
@@ -198,7 +203,7 @@ public struct ExploreLogListView: View {
             }
             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                 Button(role: .destructive) {
-                    deletingLog = log
+                    requestDelete(log)
                 } label: {
                     Label("删除", systemImage: "trash")
                 }
@@ -217,6 +222,29 @@ public struct ExploreLogListView: View {
     private func openEditor(_ log: LogItem) {
         if log.category == .idea { markIdeaViewed?(log.id) }
         editingLog = log
+    }
+
+    /// 删除入口：macOS 先确认；触屏立即删除并给出 4s「撤销」（updateLog 对缺失 id 走插入，原样恢复）
+    private func requestDelete(_ log: LogItem) {
+        #if os(iOS)
+        guard let repository else { return }
+        do {
+            try repository.deleteLog(id: log.id)
+            deleteCount += 1
+            toast = FlashToast(log.category == .idea ? "已删除灵感" : "已删除记录", actionTitle: "撤销") {
+                do { try repository.updateLog(log) }
+                catch {
+                    print("[ExploreView] 撤销删除失败: \(error)")
+                    errorMessage = "撤销失败，请重试"
+                }
+            }
+        } catch {
+            print("[ExploreView] 删除记录失败: \(error)")
+            errorMessage = "删除失败，请重试"
+        }
+        #else
+        deletingLog = log
+        #endif
     }
 
     private var deleteTitle: String {

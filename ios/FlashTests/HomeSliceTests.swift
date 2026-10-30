@@ -10,14 +10,15 @@ import Testing
 import FlashCore
 @testable import Flash
 
-/// iOS 此刻页切片：Tab 与 macOS 一级入口对齐 + 快速记录 → 仓储 → 视图模型的端到端链路
+/// iOS 此刻页切片：Tab 结构（情绪独立、Memory 并入回顾） + 快速记录 → 仓储 → 视图模型的端到端链路
 @MainActor
 @Suite("iOS 此刻切片")
 struct HomeSliceTests {
-    @Test func tabsMirrorMacOSPrimaryModules() {
-        #expect(AppTab.allCases.map(\.title) == ["此刻", "记录", "回顾", "Memory", "设置"])
+    @Test func tabsSurfaceEmotionAndFoldMemoryIntoReview() {
+        #expect(AppTab.allCases.map(\.title) == ["此刻", "记录", "情绪", "回顾", "设置"])
         #expect(AppTab.home.systemImage == "house")
-        #expect(AppTab.memory.systemImage == "clock.arrow.circlepath")
+        #expect(AppTab.emotion.systemImage == "face.smiling")
+        #expect(AppRoute.memory.title == "Memory")
     }
 
     @Test func databaseFallbackRaisesAlertMessage() {

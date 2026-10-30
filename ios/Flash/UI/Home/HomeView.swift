@@ -9,7 +9,8 @@ import SwiftData
 import FlashCore
 import FlashDesign
 
-/// 此刻页（iOS 首个端到端切片）：问候区 → 今日一览 → 快速捕捉 → 最近闪念。
+/// 此刻页（iOS 首个端到端切片）：问候区 → 今日一览 → 最近闪念。
+/// 记录入口统一为标签栏快速记录（底部配件 / 悬浮按钮），页内不再重复一张输入卡。
 /// 读路径与 macOS 相同：@Query 直读 + 仓储写代际（revision）驱动 HomeViewModel 同步；
 /// 写路径统一经 FlashRepository（保存规则走共享 QuickCaptureCommit）。
 struct HomeView: View {
@@ -24,11 +25,7 @@ struct HomeView: View {
     @Query(sort: \TaskEntity.updatedAt, order: .reverse) private var taskEntities: [TaskEntity]
 
     @State private var viewModel = HomeViewModel()
-    @State private var draft = ""
-    @State private var captureCategory: Category = .log
-    @FocusState private var inputFocused: Bool
     @State private var errorMessage: String? = nil
-    @State private var deletingLog: LogItem? = nil
     /// 最近闪念点按编辑
     @State private var editingLog: LogItem? = nil
     /// 卡片 → 编辑弹层的缩放转场
@@ -37,14 +34,13 @@ struct HomeView: View {
     /// 「+ 新建 → 任务」与「灵感转任务」的任务编辑器
     @State private var showingTaskEditor = false
     @State private var ideaTaskDraft: IdeaTaskDraft? = nil
-    /// 顶部 toast 文案（nil 表示不展示）；toastID 用于相同文案连发时重置计时
-    @State private var toastMessage: String? = nil
-    @State private var toastID = 0
+    /// 顶部 toast（保存成功 / 删除可撤销）
+    @State private var toast: FlashToast? = nil
     /// 可用宽度（随折叠/展开、窗口缩放实时更新）。不读屏幕尺寸、方向或机型：
     /// iPhone Duo 内屏、iPhone 镜像等场景下窗口尺寸会在运行中变化
     @State private var availableWidth: CGFloat = 0
 
-    /// 宽于此值时改为双栏（左：今日一览 + 快速捕捉；右：最近闪念）。
+    /// 宽于此值时改为双栏（左：今日一览；右：最近闪念）。
     /// iPhone 竖屏约 400pt 为单栏；iPhone Duo 展开横置约 880pt（扣除竖向标签栏）为双栏
     private static let twoColumnMinWidth: CGFloat = 700
 
@@ -58,9 +54,9 @@ struct HomeView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.lg) {
                 GreetingHeaderView(
-                    onNewLog: { startCapture(.log) },
-                    onNewIdea: { startCapture(.idea) },
-                    onNewEmotion: { appState.push(.emotion) },
+                    onNewLog: { appState.presentQuickCapture(category: .log) },
+                    onNewIdea: { appState.presentQuickCapture(category: .idea) },
+                    onNewEmotion: { appState.selectedTab = .emotion },
                     onNewTask: { showingTaskEditor = true }
                 )
 
@@ -71,17 +67,13 @@ struct HomeView: View {
 
                 if isTwoColumn {
                     HStack(alignment: .top, spacing: Spacing.lg) {
-                        VStack(alignment: .leading, spacing: Spacing.lg) {
-                            overviewCard
-                            captureCard
-                        }
-                        .frame(maxWidth: .infinity)
+                        overviewCard
+                            .frame(maxWidth: .infinity)
                         recentSection
                             .frame(maxWidth: .infinity)
                     }
                 } else {
                     overviewCard
-                    captureCard
                     recentSection
                 }
             }
@@ -96,7 +88,6 @@ struct HomeView: View {
         } action: { width in
             availableWidth = width
         }
-        .scrollDismissesKeyboard(.interactively)
         .flashHaptic(.impact(weight: .light), trigger: deleteCount)
         .background(BrandColors.pageBackground)
         // 问候区即页标题：导航栏只承载全局搜索按钮
@@ -106,19 +97,7 @@ struct HomeView: View {
         .onAppear { syncViewModel() }
         // 写代际变化 = 任一表有提交；不直接观察实体数组（PersistentModel 相等走身份，漏掉就地更新）
         .onChange(of: repository?.revision ?? 0) { syncViewModel() }
-        .overlay(alignment: .top) {
-            if let toastMessage {
-                ToastView(message: toastMessage)
-                    .padding(.top, Spacing.sm)
-            }
-        }
-        .animation(reduceMotion ? Motion.reducedFade(true) : Motion.spring(), value: toastMessage != nil)
-        .task(id: toastID) {
-            guard toastMessage != nil else { return }
-            try? await Task.sleep(for: .seconds(1.6))
-            guard !Task.isCancelled else { return }
-            toastMessage = nil
-        }
+        .flashToast($toast)
         .sheet(item: $editingLog) { log in
             LogEditSheet(log: log,
                          title: log.category == .idea ? "编辑灵感" : "编辑记录",
@@ -141,11 +120,7 @@ struct HomeView: View {
                 if saveTask(task) { ideaTaskDraft = nil }
             }
         }
-        .alert(deleteTitle, isPresented: deletePresented) {
-            Button("删除", role: .destructive) { deleteConfirmed() }
-            Button("取消", role: .cancel) {}
-        }
-        .alert("提示", isPresented: errorPresented) {
+        .alert("操作失败", isPresented: errorPresented) {
             Button("好") { errorMessage = nil }
         } message: {
             Text(errorMessage ?? "")
@@ -211,13 +186,6 @@ struct HomeView: View {
         )
     }
 
-    private var captureCard: some View {
-        QuickCaptureCard(draft: $draft, category: $captureCategory,
-                         focus: $inputFocused) {
-            quickAdd()
-        }
-    }
-
     // MARK: - 最近闪念
 
     @ViewBuilder
@@ -228,7 +196,7 @@ struct HomeView: View {
                 title: "今天还没有记录。",
                 actionTitle: "记下第一个念头"
             ) {
-                inputFocused = true
+                appState.presentQuickCapture()
             }
             .frame(minHeight: 220)
         } else {
@@ -252,8 +220,13 @@ struct HomeView: View {
                                        systemImage: log.isFavorite == true ? "star.slash" : "star") {
                                     toggleFavorite(log)
                                 }
+                                if log.category == .idea {
+                                    Button("转为任务", systemImage: "checklist") {
+                                        ideaTaskDraft = IdeaTaskDraft(sourceLogId: log.id, title: log.content)
+                                    }
+                                }
                                 Button("删除", systemImage: "trash", role: .destructive) {
-                                    deletingLog = log
+                                    delete(log)
                                 }
                             }
                     }
@@ -271,30 +244,6 @@ struct HomeView: View {
                          emotions: emotionEntities.map { $0.toModel() })
     }
 
-    private func startCapture(_ category: Category) {
-        captureCategory = category
-        inputFocused = true
-    }
-
-    private func quickAdd() {
-        guard let repository else { errorMessage = "内部错误：存储未就绪"; return }
-        do {
-            switch try QuickCaptureCommit.commit(draft, as: captureCategory, repository: repository) {
-            case .saved(let toast):
-                draft = ""
-                showToast(toast)
-            case .empty:
-                return
-            case .tooLong(let message):
-                errorMessage = message
-            }
-        } catch {
-            // 弹窗文案固定，详细错误只进控制台
-            print("HomeView: 快速记录保存失败 - \(error)")
-            errorMessage = "保存失败，请重试"
-        }
-    }
-
     private func toggleFavorite(_ log: LogItem) {
         do { try repository?.setLogFavorite(id: log.id, !(log.isFavorite ?? false)) }
         catch {
@@ -303,10 +252,20 @@ struct HomeView: View {
         }
     }
 
-    private func deleteConfirmed() {
-        guard let log = deletingLog else { return }
-        do { try repository?.deleteLog(id: log.id); deleteCount += 1 }
-        catch {
+    /// 删除即生效，toast 提供 4s「撤销」（updateLog 对缺失 id 走插入，原样恢复）
+    private func delete(_ log: LogItem) {
+        guard let repository else { return }
+        do {
+            try repository.deleteLog(id: log.id)
+            deleteCount += 1
+            toast = FlashToast(log.category == .idea ? "已删除灵感" : "已删除记录", actionTitle: "撤销") {
+                do { try repository.updateLog(log) }
+                catch {
+                    print("HomeView: 撤销删除失败 - \(error)")
+                    errorMessage = "撤销失败，请重试"
+                }
+            }
+        } catch {
             print("HomeView: 删除记录失败 - \(error)")
             errorMessage = "删除失败，请重试"
         }
@@ -320,7 +279,7 @@ struct HomeView: View {
         guard let repository else { errorMessage = "内部错误：存储未就绪"; return false }
         do {
             try repository.saveTask(task)
-            showToast("✓ 已保存任务")
+            toast = FlashToast("✓ 已保存任务")
             Task {
                 if let warning = await TaskSaving.scheduleReminder(for: task) { errorMessage = warning }
             }
@@ -330,19 +289,6 @@ struct HomeView: View {
             errorMessage = "任务保存失败，请重试"
             return false
         }
-    }
-
-    private func showToast(_ message: String) {
-        toastMessage = message
-        toastID += 1
-    }
-
-    private var deleteTitle: String {
-        deletingLog?.category == .idea ? "删除这条灵感？" : "删除这条记录？"
-    }
-
-    private var deletePresented: Binding<Bool> {
-        Binding(get: { deletingLog != nil }, set: { if !$0 { deletingLog = nil } })
     }
 
     private var errorPresented: Binding<Bool> {

@@ -70,11 +70,20 @@ public struct GreetingHeaderView: View {
     /// 自定义 label + borderlessButton 样式，保持 accent 胶囊外观。
     private var newMenu: some View {
         Menu {
+            #if os(iOS)
+            // 触屏菜单带图标，便于扫读
+            Button("新建记录", systemImage: "square.and.pencil") { onNewLog() }
+            Button("新建灵感", systemImage: "lightbulb") { onNewIdea() }
+            Divider()
+            Button("记录情绪", systemImage: "face.smiling") { onNewEmotion() }
+            Button("新建任务", systemImage: "checklist") { onNewTask() }
+            #else
             Button("新建记录") { onNewLog() }
             Button("新建灵感") { onNewIdea() }
             Divider()
             Button("记录情绪") { onNewEmotion() }
             Button("新建任务") { onNewTask() }
+            #endif
         } label: {
             HStack(spacing: Spacing.xxs) {
                 Image(systemName: "plus")
