@@ -51,4 +51,24 @@ struct DeepLinkTests {
         #expect(!state.handle(url: try #require(URL(string: "https://example.com/capture"))))
         #expect(state.quickCapture == nil)
     }
+
+    @Test func destinationLinksDismissObscuringPresentations() throws {
+        for link in ["flash://today", "flash://ideas"] {
+            let state = AppState()
+            state.presentQuickCapture(category: .log)
+            state.isSearchPresented = true
+            #expect(state.handle(url: try #require(URL(string: link))))
+            #expect(!state.isSearchPresented)
+            #expect(state.quickCapture == nil)
+            #expect(state.selectedTab == (link == "flash://today" ? .home : .explore))
+        }
+    }
+
+    @Test func unknownLinkPreservesActivePresentation() throws {
+        let state = AppState()
+        state.presentQuickCapture(category: .log)
+        let request = state.quickCapture
+        #expect(!state.handle(url: try #require(URL(string: "flash://unsupported"))))
+        #expect(state.quickCapture == request)
+    }
 }
