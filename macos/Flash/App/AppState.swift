@@ -149,7 +149,7 @@ final class AppState {
     func checkDatabaseFallback(didFallbackToMemory: Bool) {
         guard didFallbackToMemory else { return }
         isDatabaseInMemoryFallback = true
-        databaseFallbackMessage = "本地数据库暂时不可用，已进入临时内存模式，重启后数据可能丢失，建议尽快导出备份"
+        databaseFallbackMessage = RepositoryEnvironment.temporaryStoreNotice
     }
 
     /// 用户确认后清除回退提示

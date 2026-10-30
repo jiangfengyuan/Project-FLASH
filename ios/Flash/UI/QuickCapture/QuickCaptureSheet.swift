@@ -162,7 +162,7 @@ struct QuickCaptureSheet: View {
                 errorMessage = message
             }
         } catch {
-            print("QuickCaptureSheet: 保存失败 - \(error)")
+            FlashLog.failure("quick_capture_save_failed", error)
             errorMessage = "保存失败，请重试"
         }
     }

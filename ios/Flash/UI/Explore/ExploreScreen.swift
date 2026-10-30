@@ -304,7 +304,7 @@ struct ExploreScreen: View {
             }
             return true
         } catch {
-            print("[ExploreScreen] 任务保存失败: \(error)")
+            FlashLog.failure("task_save_failed", error)
             errorMessage = "任务保存失败，请重试"
             return false
         }
@@ -319,7 +319,7 @@ struct ExploreScreen: View {
             mutate(&log)
             do { try repository.updateLog(log) }
             catch {
-                print("[ExploreScreen] 批量更新失败: \(error)")
+                FlashLog.failure("batch_update_failed", error)
                 errorMessage = "批量修改失败，请重试"
                 return
             }

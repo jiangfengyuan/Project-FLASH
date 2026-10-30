@@ -291,7 +291,7 @@ public struct CalendarView: View {
     private func toggleFavorite(_ log: LogItem) {
         do { try repository?.setLogFavorite(id: log.id, !(log.isFavorite ?? false)) }
         catch {
-            print("[CalendarView] 收藏切换失败: \(error)")
+            FlashLog.failure("favorite_toggle_failed", error)
             message = "操作失败，请重试"
         }
     }

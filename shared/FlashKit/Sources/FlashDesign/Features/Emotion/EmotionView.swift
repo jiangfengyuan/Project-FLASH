@@ -231,7 +231,7 @@ public struct EmotionView: View {
                 savedCount += 1
             } catch {
                 // 固定文案，详情仅输出到控制台，避免向用户暴露内部路径
-                print("[EmotionView] 保存情绪记录失败: \(error)")
+                FlashLog.failure("emotion_save_failed", error)
                 errorMessage = "保存失败，请重试"
             }
         }
@@ -389,7 +389,7 @@ private struct EmotionHistoryView: View {
                     Motion.animate(Motion.soft(reduceMotion), reduceMotion: reduceMotion) {
                         do { try repository?.deleteEmotion(id: record.id) }
                         catch {
-                            print("[EmotionHistoryView] 删除情绪记录失败: \(error)")
+                            FlashLog.failure("emotion_delete_failed", error)
                             errorMessage = "删除失败，请重试"
                         }
                     }
@@ -466,7 +466,7 @@ private struct EmotionHistoryView: View {
     private func toggleFavorite(_ record: EmotionRecord) {
         do { try repository?.setEmotionFavorite(id: record.id, !(record.isFavorite ?? false)) }
         catch {
-            print("[EmotionHistoryView] 收藏切换失败: \(error)")
+            FlashLog.failure("favorite_toggle_failed", error)
             errorMessage = "操作失败，请重试"
         }
     }

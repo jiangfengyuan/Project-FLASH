@@ -48,7 +48,7 @@ struct SettingsScreen: View {
                             VStack(alignment: .leading, spacing: Spacing.xxs) {
                                 Text("临时内存模式")
                                     .font(Typography.cardTitle)
-                                Text("本地数据库不可用，重启后数据可能丢失，请尽快导出备份。")
+                                Text("本地数据库暂时无法打开，原有数据未被改动。本次新写的内容退出后不会保留；请完全退出 Flash 后重新打开。")
                                     .font(Typography.caption)
                                     .foregroundStyle(.secondary)
                             }
@@ -84,7 +84,9 @@ struct SettingsScreen: View {
                 } header: {
                     Text("数据")
                 } footer: {
-                    Text("数据只保存在此设备。导出、分享与传输都由你主动发起。")
+                    Text(isTemporaryStore
+                     ? "本地数据库暂时无法打开：导出、导入、传输与清空已暂停，原有数据未被改动。"
+                     : "数据只保存在此设备。导出、分享与传输都由你主动发起。")
                 }
 
                 AboutSection(version: BackupImportCoordinator.appVersion, appeared: true)
@@ -104,7 +106,7 @@ struct SettingsScreen: View {
             switch result {
             case .success: showToast("✓ 备份已导出")
             case .failure(let error):
-                print("导出备份失败: \(error)")
+                FlashLog.failure("backup_export_failed", error)
                 message = "导出失败，请检查目标位置后重试"
             }
         }
@@ -112,7 +114,7 @@ struct SettingsScreen: View {
             switch result {
             case .success(let url): prepareFileImport(url)
             case .failure(let error):
-                print("选择备份文件失败: \(error)")
+                FlashLog.failure("backup_file_pick_failed", error)
                 message = "无法打开所选文件，请重试"
             }
         }
@@ -173,7 +175,8 @@ struct SettingsScreen: View {
         case .ideaReminder:
             IdeaReminderSettingsPage()
         case .backup:
-            BackupSettingsPage(isBusy: isBusy,
+            BackupSettingsPage(isTemporaryStore: isTemporaryStore,
+                               isBusy: isBusy,
                                isClearDisabled: isBusy || lanTransfer.mode != .idle,
                                onExport: prepareExport,
                                onShare: prepareShare,
@@ -181,11 +184,15 @@ struct SettingsScreen: View {
                                onRecoveryImport: { chooseImportFile(recovery: true) },
                                onClearAll: { showClearConfirm = true })
         case .transfer:
-            TransferSettingsPage(isDisabled: isBusy || lanTransfer.mode != .idle,
+            TransferSettingsPage(isTemporaryStore: isTemporaryStore,
+                                 isDisabled: isBusy || lanTransfer.mode != .idle,
                                  onSend: startLanSend,
                                  onReceive: { lanTransfer.startReceiving() })
         }
     }
+
+    /// 内存降级：数据操作全部暂停（F-07）
+    private var isTemporaryStore: Bool { repository?.isTemporaryStore == true }
 
     // MARK: - 绑定
 
@@ -215,8 +222,10 @@ struct SettingsScreen: View {
                 let json = try await BackupImportCoordinator.exportJSON(
                     snapshot: try currentSnapshot(), appVersion: BackupImportCoordinator.appVersion)
                 exportDocument = BackupJSONDocument(json: json)
+            } catch let error as BackupError {
+                message = error.userMessage
             } catch {
-                print("生成备份失败: \(error)")
+                FlashLog.failure("backup_export_failed", error)
                 message = "生成备份失败，请重试"
             }
         }
@@ -234,8 +243,10 @@ struct SettingsScreen: View {
                     try BackupTransfer.createShareFile(json: json)
                 }.value
                 shareFile = ShareFile(url: url)
+            } catch let error as BackupError {
+                message = error.userMessage
             } catch {
-                print("生成分享文件失败: \(error)")
+                FlashLog.failure("backup_share_failed", error)
                 message = "生成传输文件失败，请重试"
             }
         }
@@ -247,6 +258,8 @@ struct SettingsScreen: View {
                 let json = try await BackupImportCoordinator.exportJSON(
                     snapshot: try currentSnapshot(), appVersion: BackupImportCoordinator.appVersion)
                 lanTransfer.startSending(json: json)
+            } catch let error as BackupError {
+                message = error.userMessage
             } catch {
                 message = "无法生成局域网备份，请重试"
             }
@@ -256,6 +269,11 @@ struct SettingsScreen: View {
     // MARK: - 导入
 
     private func chooseImportFile(recovery: Bool) {
+        // 临时存储：导入的数据退出即丢，且确认后会按临时库重建提醒（F-07）
+        if repository?.isTemporaryStore == true {
+            message = BackupError.temporaryStore.userMessage
+            return
+        }
         recoveryImport = recovery
         importerPresented = true
     }
@@ -277,7 +295,7 @@ struct SettingsScreen: View {
             } catch let error as BackupError {
                 message = error.userMessage
             } catch {
-                print("导入备份失败: \(error)")
+                FlashLog.failure("backup_import_failed", error)
                 message = "导入失败，请确认选择的是 Flash 备份文件后重试"
             }
         }
@@ -323,8 +341,10 @@ struct SettingsScreen: View {
                 case .imported(let text, let hasSkipped):
                     if hasSkipped { message = text } else { showToast("✓ " + text) }
                 }
+            } catch let error as BackupError {
+                message = error.userMessage
             } catch {
-                print("导入写库失败: \(error)")
+                FlashLog.failure("backup_import_write_failed", error)
                 message = "导入失败：写入数据库时出错，请重试"
             }
             pendingImport = nil
@@ -339,6 +359,11 @@ struct SettingsScreen: View {
         Task {
             do {
                 guard let repository else { throw SettingsDataError.repositoryUnavailable }
+                // 临时存储下清空后的 rebuild([]) 会撤掉磁盘上真实任务的全部提醒（F-07）
+                guard !repository.isTemporaryStore else {
+                    message = "本地数据库暂时无法打开，当前只有临时内容，清空已暂停。原有数据未被改动，请完全退出 Flash 后重新打开再试"
+                    return
+                }
                 try repository.clearAll()
                 do {
                     try await TaskReminderScheduler.shared.rebuild([])
@@ -347,7 +372,7 @@ struct SettingsScreen: View {
                     message = "数据已清空，但系统提醒清理失败，请重启应用后重试"
                 }
             } catch {
-                print("清空数据失败: \(error)")
+                FlashLog.failure("clear_all_failed", error)
                 message = "清空失败，请重试"
             }
         }

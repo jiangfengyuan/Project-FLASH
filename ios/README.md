@@ -73,6 +73,27 @@ iPhone 原生实现（Alpha）。SwiftUI + SwiftData，零第三方依赖；数�
   展开内屏需在 Device Hub 操作，`simctl io <device> screenshot --display=<UUID>` 可分屏截图。
 - 无悬停：共享 `LogCardView` 在 iOS 用 `actionsVisibility: .hidden`，操作走轻扫与长按菜单。
 
+## 隐私与数据安全
+
+- **锁屏通知**：任务提醒的标题固定为「Flash 任务提醒」，任务名只在正文。类别设了隐藏预览占位
+  （「你有一个任务提醒」+ `.hiddenPreviewsShowTitle`），系统「显示预览」为「解锁时」（iOS 默认）时，
+  锁屏只显示通用文案。灵感提醒正文只含数量。
+- **小组件**：主屏与锁屏小组件标记 `privacySensitive()`，锁屏且需要隐藏敏感内容时由系统打码。
+- **快速记录草稿**：存于 Application Support 的 `quick-capture-draft.json`，以 `.completeFileProtection`
+  写入（锁定即不可读），并标记不纳入 iCloud / 电脑备份。旧版存在 UserDefaults 的草稿会在首次启动时迁入并删除。
+- **数据库落盘**：SwiftData 存储沿用系统默认保护级别（首次解锁后可读）。不提升到「锁定即不可读」：
+  锁屏上点通知的「完成 / 稍后」需要在锁定状态写库。存储随系统设备备份一同备份：这是用户希望换机后恢复的数据。
+- **诊断日志**：错误经 `FlashLog`（`os.Logger`）记录。事件名与错误类型公开，错误详情为 `.private`，
+  设备日志里显示为 `<private>`，不再用 `print` 输出可能含记录正文或路径的错误描述。
+- **数据库打不开（内存降级）**：提示「原有数据仍在本机、未被改动」，并请用户完全退出后重新打开；
+  不再建议导出。降级期间以下操作全部暂停：
+  - 启动时的提醒重建、小组件刷新、灵感已读状态写入；
+  - 导出、分享、局域网收发、导入、清空。
+
+  临时库只含本次启动后的内容，不是完整备份：
+  - 用它覆盖导入会抹掉真实数据，所以 `BackupImportCoordinator` 直接拒绝（`BackupError.temporaryStore`）；
+  - 按它重建提醒会撤掉全部真实提醒。
+
 ## 签名与已知限制
 
 - 未设置 `DEVELOPMENT_TEAM`。真机上 App Group 需要团队签名，否则小组件显示「打开 Flash 开始记录今天」引导态；

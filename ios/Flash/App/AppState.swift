@@ -150,10 +150,10 @@ final class AppState {
         return true
     }
 
-    /// 启动时检测数据库回退标记（App 装配层在容器创建后调用）；文案与 macOS 一致
+    /// 启动时检测数据库回退标记（App 装配层在容器创建后调用）；文案与 macOS 共用
     func checkDatabaseFallback(didFallbackToMemory: Bool) {
         guard didFallbackToMemory else { return }
         isDatabaseInMemoryFallback = true
-        databaseFallbackMessage = "本地数据库暂时不可用，已进入临时内存模式，重启后数据可能丢失，建议尽快导出备份"
+        databaseFallbackMessage = RepositoryEnvironment.temporaryStoreNotice
     }
 }

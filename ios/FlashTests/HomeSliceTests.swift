@@ -27,7 +27,9 @@ struct HomeSliceTests {
         #expect(state.databaseFallbackMessage == nil)
         state.checkDatabaseFallback(didFallbackToMemory: true)
         #expect(state.isDatabaseInMemoryFallback)
-        #expect(state.databaseFallbackMessage?.isEmpty == false)
+        // F-07：提示与 macOS 共用，不得建议从临时库导出备份
+        #expect(state.databaseFallbackMessage == RepositoryEnvironment.temporaryStoreNotice)
+        #expect(state.databaseFallbackMessage?.contains("导出备份") == false)
     }
 
     @Test func captureFlowsIntoTodayOverviewAndRecentList() throws {

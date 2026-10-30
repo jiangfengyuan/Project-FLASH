@@ -29,8 +29,30 @@ struct IdeaReminderSettingsPage: View {
     }
 }
 
-/// 备份与恢复子页：导出（存到「文件」/ 系统分享）→ 导入（标准 / 恢复）→ 危险操作
+/// 内存降级提示分组：说明为何导出 / 导入 / 传输 / 清空暂不可用（F-07）
+private struct TemporaryStoreSection: View {
+    var body: some View {
+        Section {
+            Label {
+                VStack(alignment: .leading, spacing: Spacing.xxs) {
+                    Text("导出与导入已暂停")
+                        .font(Typography.cardTitle)
+                    Text("本地数据库暂时无法打开，这里只有本次启动后的临时内容，不是完整备份。原有数据仍在本机、未被改动；请完全退出 Flash 后重新打开。")
+                        .font(Typography.caption)
+                        .foregroundStyle(.secondary)
+                }
+            } icon: {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(BrandColors.destructive)
+            }
+        }
+    }
+}
+
+/// 备份与恢复子页：导出（存到「文件」/ 系统分享）→ 导入（标准 / 恢复）→ 危险操作。
+/// 临时存储（内存降级）时整页数据操作禁用并说明原因
 struct BackupSettingsPage: View {
+    let isTemporaryStore: Bool
     let isBusy: Bool
     let isClearDisabled: Bool
     let onExport: () -> Void
@@ -43,7 +65,11 @@ struct BackupSettingsPage: View {
 
     var body: some View {
         Form {
-            StorageBannerSection()
+            if isTemporaryStore {
+                TemporaryStoreSection()
+            } else {
+                StorageBannerSection()
+            }
 
             if isBusy {
                 Section {
@@ -70,7 +96,7 @@ struct BackupSettingsPage: View {
             } footer: {
                 Text("备份为明文 JSON，可存到「文件」或用隔空投送发给自己的其他设备。")
             }
-            .disabled(isBusy)
+            .disabled(isBusy || isTemporaryStore)
 
             Section {
                 Button(action: onImport) {
@@ -86,9 +112,9 @@ struct BackupSettingsPage: View {
             } footer: {
                 Text("导入前会先显示差异预览，可选择按差异合并，或覆盖本机数据。恢复模式只读取原文件，不会修改它。")
             }
-            .disabled(isBusy)
+            .disabled(isBusy || isTemporaryStore)
 
-            DangerZoneSection(isDisabled: isClearDisabled, onClear: onClearAll)
+            DangerZoneSection(isDisabled: isClearDisabled || isTemporaryStore, onClear: onClearAll)
         }
         .scrollContentBackground(.hidden)
         .background(BrandColors.pageBackground)
@@ -100,12 +126,16 @@ struct BackupSettingsPage: View {
 
 /// 设备间传输子页：局域网发送 / 接收（配对流程在 LanTransferSheet）
 struct TransferSettingsPage: View {
+    let isTemporaryStore: Bool
     let isDisabled: Bool
     let onSend: () -> Void
     let onReceive: () -> Void
 
     var body: some View {
         Form {
+            if isTemporaryStore {
+                TemporaryStoreSection()
+            }
             Section {
                 Button(action: onSend) {
                     SettingsRowLabel(title: "发送到另一台设备…", systemImage: "paperplane",
@@ -120,7 +150,7 @@ struct TransferSettingsPage: View {
             } footer: {
                 Text("两台设备连接同一局域网，接收方输入发送方显示的配对 PIN 即可。备份内容未做端到端加密，请仅在可信的家庭或办公网络使用。")
             }
-            .disabled(isDisabled)
+            .disabled(isDisabled || isTemporaryStore)
         }
         .scrollContentBackground(.hidden)
         .background(BrandColors.pageBackground)

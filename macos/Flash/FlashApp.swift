@@ -60,19 +60,12 @@ struct FlashApp: App {
                 appState.selectedModule = .home
             }
             .task {
-                // 桌面小组件（WidgetKit）共享快照：启动时刷新一次；
-                // 组容器不可用（adhoc 构建）时零成本 no-op
-                WidgetSnapshot.refresh(repository: assembly.repository)
                 #if DEBUG
                 DebugSeeder.seedIfRequested(repository: assembly.repository)
                 #endif
                 do {
-                    // 重建任务提醒只需任务表：tasksOnly() 代替 snapshot()，
-                    // 不再连带映射日志/情绪两张全表
-                    let tasks = try Perf.measure("TasksForReminderRebuild") {
-                        try assembly.repository.tasksOnly()
-                    }
-                    try await TaskReminderScheduler.shared.rebuild(tasks)
+                    // 桌面小组件快照 + 按任务表重建提醒（只读任务表）；内存降级时整体跳过（F-07）
+                    try await LaunchMaintenance.run(repository: assembly.repository)
                 } catch TaskReminderError.permissionDenied {
                     // 用户拒绝过通知权限：只影响系统提醒，与数据存储无关，
                     // 不写入 databaseFallbackMessage（避免误报存储故障）；设置页可重新引导权限

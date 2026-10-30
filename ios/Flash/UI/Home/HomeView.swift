@@ -247,7 +247,7 @@ struct HomeView: View {
     private func toggleFavorite(_ log: LogItem) {
         do { try repository?.setLogFavorite(id: log.id, !(log.isFavorite ?? false)) }
         catch {
-            print("HomeView: 收藏切换失败 - \(error)")
+            FlashLog.failure("favorite_toggle_failed", error)
             errorMessage = "操作失败，请重试"
         }
     }
@@ -261,12 +261,12 @@ struct HomeView: View {
             toast = FlashToast(log.category == .idea ? "已删除灵感" : "已删除记录", actionTitle: "撤销") {
                 do { try repository.updateLog(log) }
                 catch {
-                    print("HomeView: 撤销删除失败 - \(error)")
+                    FlashLog.failure("undo_delete_failed", error)
                     errorMessage = "撤销失败，请重试"
                 }
             }
         } catch {
-            print("HomeView: 删除记录失败 - \(error)")
+            FlashLog.failure("log_delete_failed", error)
             errorMessage = "删除失败，请重试"
         }
     }
@@ -285,7 +285,7 @@ struct HomeView: View {
             }
             return true
         } catch {
-            print("HomeView: 任务保存失败 - \(error)")
+            FlashLog.failure("task_save_failed", error)
             errorMessage = "任务保存失败，请重试"
             return false
         }

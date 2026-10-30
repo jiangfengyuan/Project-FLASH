@@ -131,7 +131,7 @@ public struct ExploreLogListView: View {
                 if let log = deletingLog {
                     do { try repository?.deleteLog(id: log.id); deleteCount += 1 }
                     catch {
-                        print("[ExploreView] 删除记录失败: \(error)")
+                        FlashLog.failure("log_delete_failed", error)
                         errorMessage = "删除失败，请重试"
                     }
                 }
@@ -234,12 +234,12 @@ public struct ExploreLogListView: View {
             toast = FlashToast(log.category == .idea ? "已删除灵感" : "已删除记录", actionTitle: "撤销") {
                 do { try repository.updateLog(log) }
                 catch {
-                    print("[ExploreView] 撤销删除失败: \(error)")
+                    FlashLog.failure("undo_delete_failed", error)
                     errorMessage = "撤销失败，请重试"
                 }
             }
         } catch {
-            print("[ExploreView] 删除记录失败: \(error)")
+            FlashLog.failure("log_delete_failed", error)
             errorMessage = "删除失败，请重试"
         }
         #else
@@ -296,7 +296,7 @@ public struct ExploreLogListView: View {
     private func toggleFavorite(_ log: LogItem) {
         do { try repository?.setLogFavorite(id: log.id, !(log.isFavorite ?? false)) }
         catch {
-            print("[ExploreView] 收藏切换失败: \(error)")
+            FlashLog.failure("favorite_toggle_failed", error)
             errorMessage = "操作失败，请重试"
         }
     }
@@ -320,7 +320,7 @@ public struct ExploreLogListView: View {
             }
             return true
         } catch {
-            print("[ExploreView] 任务保存失败: \(error)")
+            FlashLog.failure("task_save_failed", error)
             errorMessage = "任务保存失败，请重试"
             return false
         }
