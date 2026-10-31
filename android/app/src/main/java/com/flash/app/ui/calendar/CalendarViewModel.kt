@@ -118,7 +118,6 @@ class CalendarViewModel(
     }
 
     private val _displayedMonth = MutableStateFlow(YearMonth.now())
-    val displayedMonth: StateFlow<YearMonth> = _displayedMonth.asStateFlow()
 
     private val _selectedDate = MutableStateFlow(LocalDate.now())
     val selectedDate: StateFlow<LocalDate> = _selectedDate.asStateFlow()

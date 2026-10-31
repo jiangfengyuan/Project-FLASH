@@ -221,11 +221,6 @@ public enum BackupService: Sendable {
     // ISO8601DateFormatter 共享实例经串行队列访问（安全审计项）：不再依赖
     // 「文档保证线程安全」的口径；nonisolated(unsafe) 仅为编译期标注
     private static let isoQueue = DispatchQueue(label: "com.flash.app.backup-service.iso")
-    nonisolated(unsafe) private static let isoFractionFormatter: ISO8601DateFormatter = {
-        let f = ISO8601DateFormatter()
-        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return f
-    }()
     nonisolated(unsafe) private static let isoWholeSecondFormatter: ISO8601DateFormatter = {
         let f = ISO8601DateFormatter()
         f.formatOptions = [.withInternetDateTime]

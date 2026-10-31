@@ -88,11 +88,6 @@ extension View {
         font(Typography.sectionTitle).foregroundStyle(BrandColors.textPrimary)
     }
 
-    /// 卡片 / 分组标题
-    public func flashCardTitle() -> some View {
-        font(Typography.cardTitle).foregroundStyle(BrandColors.textPrimary)
-    }
-
     /// 固定基准尺寸、但随系统字体档位缩放的字形（图标、hero emoji、配对 PIN 等展示元素）
     public func scaledSystemFont(size: CGFloat, weight: Font.Weight = .regular,
                           design: Font.Design = .default,
