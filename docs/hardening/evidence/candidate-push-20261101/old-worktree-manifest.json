@@ -1,0 +1,29 @@
+{
+  "head": "4d28844920ec511a3ff4eb0f27e4042d876ee6a0",
+  "files": [
+    {
+      "path": "android/app/src/main/java/com/flash/app/data/LocalBackupTransfer.kt",
+      "sha256": "e7e13d09941f77ae130c40291d60782a7e57d09a008f2316fffd3d63471cd8a9"
+    },
+    {
+      "path": "android/app/src/test/java/com/flash/app/data/LocalBackupTransferTest.kt",
+      "sha256": "0a0feb2aa237d3e954a2b2417c9b8e6e33d030ce7e481d76b1587864210950ab"
+    },
+    {
+      "path": "harmonyos/entry/src/main/ets/data/LocalBackupTransfer.ets",
+      "sha256": "0d445e1075ee37ccdb6c93e0071819d56d88d3959fa3813898ca50ae2d013e2e"
+    },
+    {
+      "path": "harmonyos/tests/security-audit.test.cjs",
+      "sha256": "fef26d03d7721c7883345d5723b40f021c95bf24b8ffa0441a8afd82775524d1"
+    },
+    {
+      "path": "docs/hardening/lan-v2-decision.md",
+      "sha256": "e9cd12e4b9dab721ea680c67b4d93da95b98dd9f2b59639555f1042194ee2c73"
+    },
+    {
+      "path": "docs/hardening/next-beta-ui-plan.md",
+      "sha256": "37ef80952be78c73b08fb06ca34046d6f716afec1ec6dbbf51eb8c5532be0319"
+    }
+  ]
+}

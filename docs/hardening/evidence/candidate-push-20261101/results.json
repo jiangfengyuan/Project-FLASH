@@ -1,0 +1,52 @@
+[
+  {
+    "name": "ios",
+    "exitCode": 0,
+    "command": [
+      "xcodebuild",
+      "-project",
+      "ios/Flash.xcodeproj",
+      "-scheme",
+      "Flash",
+      "-destination",
+      "platform=iOS Simulator,id=CC4C60DA-A92D-44A6-A90D-F47AEA86341D",
+      "-parallel-testing-enabled",
+      "NO",
+      "-derivedDataPath",
+      "/private/tmp/flash-integration-20261031/DerivedData",
+      "-resultBundlePath",
+      "/private/tmp/flash-candidate-push-20261101/ios.xcresult",
+      "test",
+      "CODE_SIGNING_ALLOWED=NO"
+    ]
+  },
+  {
+    "name": "macos",
+    "exitCode": 0,
+    "command": [
+      "xcodebuild",
+      "-project",
+      "macos/Flash.xcodeproj",
+      "-scheme",
+      "Flash",
+      "-destination",
+      "platform=macOS",
+      "-derivedDataPath",
+      "/private/tmp/flash-integration-20261031/MacDerived",
+      "-resultBundlePath",
+      "/private/tmp/flash-candidate-push-20261101/macos.xcresult",
+      "test",
+      "CODE_SIGNING_ALLOWED=NO"
+    ]
+  },
+  {
+    "name": "android",
+    "exitCode": 0,
+    "command": [
+      "./gradlew",
+      "test",
+      "assembleDebug",
+      "--console=plain"
+    ]
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "old": "android/app/src/main/java/com/flash/app/data/LocalBackupTransfer.kt",
+    "candidate": "android/app/src/test/java/com/flash/app/data/LegacyLocalBackupTransfer.kt",
+    "equivalentAfterArchiveRename": true
+  },
+  {
+    "old": "harmonyos/entry/src/main/ets/data/LocalBackupTransfer.ets",
+    "candidate": "harmonyos/tests/fixtures/LegacyLocalBackupTransfer.ets",
+    "equivalentAfterArchiveComment": true
+  },
+  {
+    "old": "android/app/src/test/java/com/flash/app/data/LocalBackupTransferTest.kt",
+    "candidate": "android/app/src/test/java/com/flash/app/data/LocalBackupTransferTest.kt",
+    "equivalentAfterFixtureRename": true
+  },
+  {
+    "old": "harmonyos/tests/security-audit.test.cjs",
+    "candidate": "harmonyos/tests/security-audit.test.cjs",
+    "equivalentAfterLegacyLoaderFlag": true
+  }
+]

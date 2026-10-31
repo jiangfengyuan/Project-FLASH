@@ -1,5 +1,7 @@
 # iOS 功能与加固分支整合 · 2026-10-31
 
+2026-11-01后续：统一候选已通过 `df3bded` 补入清理与真实存储恢复测试；最新门禁及推送范围见[补充记录](candidate-followup-20261101.md)。本页下述SHA与ZIP仍表示10月31日历史检查点。
+
 本地候选分支：`codex/ios-integrated-candidate`。源码交付提交 `63d54f5c8b4300ec74b5ddcda44a6aa3b3c46681`；随后文档提交不改变已构建源码。没有推送、合并main、打标签、签名分发或操作Device Hub。
 
 ## 整合结果
