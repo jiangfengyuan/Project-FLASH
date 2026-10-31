@@ -4,6 +4,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import Foundation
 import SwiftData
 import SwiftUI
 
@@ -42,8 +43,9 @@ public enum RepositoryEnvironment: Sendable {
 
     /// 生产环境装配：创建持久化容器（失败自动降级内存）并装配仓储。
     /// App 装配层启动时调用一次即可。
-    public static func makeDefault() -> Assembly {
-        let result = FlashDatabase.makeContainerWithFallback()
+    /// `storeURL` 仅供测试（见 `FlashDatabase.makeContainerWithFallback`），生产不传。
+    public static func makeDefault(storeURL: URL? = nil) -> Assembly {
+        let result = FlashDatabase.makeContainerWithFallback(storeURL: storeURL)
         return Assembly(container: result.container,
                         repository: FlashRepository(container: result.container,
                                                     isTemporaryStore: result.didFallbackToMemory),

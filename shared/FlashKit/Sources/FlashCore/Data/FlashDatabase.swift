@@ -26,9 +26,11 @@ public enum FlashDatabase: Sendable {
         makeContainerWithFallback(inMemory: inMemory).container
     }
 
-    public static func makeContainerWithFallback(inMemory: Bool = false) -> ContainerResult {
+    /// - Parameter storeURL: 仅供测试指向临时文件以模拟库打不开；生产调用不传，沿用默认存储位置
+    public static func makeContainerWithFallback(inMemory: Bool = false, storeURL: URL? = nil) -> ContainerResult {
         let schema = Schema(versionedSchema: FlashSchemaV2.self)
-        let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: inMemory)
+        let config = storeURL.map { ModelConfiguration(schema: schema, url: $0) }
+            ?? ModelConfiguration(schema: schema, isStoredInMemoryOnly: inMemory)
         do {
             return ContainerResult(container: try ModelContainer(for: schema,
                                                                  migrationPlan: FlashMigrationPlan.self,

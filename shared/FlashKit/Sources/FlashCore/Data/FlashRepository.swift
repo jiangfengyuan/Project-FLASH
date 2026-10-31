@@ -179,17 +179,6 @@ public final class FlashRepository {
     }
 
     @MainActor
-    public func updateEmotion(_ emotion: EmotionRecord) throws {
-        try commit {
-            if let entity = try fetchEmotion(id: emotion.id) {
-                entity.apply(emotion)
-            } else {
-                upsertEmotionEntity(emotion)
-            }
-        }
-    }
-
-    @MainActor
     public func allEmotions() throws -> [EmotionRecord] {
         let descriptor = FetchDescriptor<EmotionEntity>(
             sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
