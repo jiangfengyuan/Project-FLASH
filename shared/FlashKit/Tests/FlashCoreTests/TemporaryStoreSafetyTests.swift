@@ -41,6 +41,90 @@ struct TemporaryStoreSafetyTests {
         #expect(try temporary.snapshot().isFromTemporaryStore)
     }
 
+    // MARK: - 真实库打不开 → 临时模式 → 恢复后原数据完好
+
+    /// 临时目录里的库文件集（default.store 与 -wal/-shm），按文件名取原始字节
+    private func storeFiles(in directory: URL) throws -> [String: Data] {
+        let names = try FileManager.default.contentsOfDirectory(atPath: directory.path)
+        return try Dictionary(uniqueKeysWithValues: names.map {
+            ($0, try Data(contentsOf: directory.appendingPathComponent($0)))
+        })
+    }
+
+    private func makeStoreDirectory() throws -> URL {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("flash-fallback-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        return directory
+    }
+
+    /// 生产装配入口在持久库打不开时进入临时模式，且不碰原库文件
+    @Test func unreadableStoreAssemblesTemporaryRepositoryWithoutTouchingFile() throws {
+        let directory = try makeStoreDirectory()
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let storeURL = directory.appendingPathComponent("default.store")
+        let damaged = Data("这不是一个 SQLite 数据库".utf8)
+        try damaged.write(to: storeURL)
+
+        let assembly = RepositoryEnvironment.makeDefault(storeURL: storeURL)
+        #expect(assembly.didFallbackToMemory)
+        #expect(assembly.repository.isTemporaryStore)
+        #expect(try assembly.repository.snapshot().isFromTemporaryStore)
+        #expect(try Data(contentsOf: storeURL) == damaged)
+    }
+
+    /// 库暂时不可访问（目录无权限，相当于设备锁定时的数据保护）期间做完整的临时会话，
+    /// 恢复访问后重新装配：原库逐字节未变，真实数据完整，临时会话的写入不会混入
+    @Test func healthyStoreReturnsIntactAfterTemporarySession() async throws {
+        let directory = try makeStoreDirectory()
+        defer {
+            try? FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: directory.path)
+            try? FileManager.default.removeItem(at: directory)
+        }
+        let storeURL = directory.appendingPathComponent("default.store")
+        let realTask = task("11111111-1111-1111-1111-111111111111")
+
+        // 1. 正常启动写入真实数据
+        do {
+            let healthy = RepositoryEnvironment.makeDefault(storeURL: storeURL)
+            try #require(!healthy.didFallbackToMemory)
+            try healthy.repository.addLog(content: "真实记录", colorTag: .daily)
+            try healthy.repository.saveTask(realTask)
+        }
+        let before = try storeFiles(in: directory)
+
+        // 2. 库不可访问 → 临时模式；走一遍启动维护、导出、覆盖导入，并写入临时内容
+        try FileManager.default.setAttributes([.posixPermissions: 0o000], ofItemAtPath: directory.path)
+        let fallback = RepositoryEnvironment.makeDefault(storeURL: storeURL)
+        try #require(fallback.didFallbackToMemory)
+        let repository = fallback.repository
+        var rebuildCalls = 0
+        #expect(try await LaunchMaintenance.run(repository: repository) { _ in rebuildCalls += 1 }
+                == .skippedTemporaryStore)
+        try repository.addLog(content: "临时会话的记录", colorTag: .daily)
+        await #expect(throws: BackupError.temporaryStore) {
+            _ = try await BackupImportCoordinator.exportJSON(snapshot: try repository.snapshot(), appVersion: "test")
+        }
+        let incoming = try BackupService.parseStrict(try await BackupImportCoordinator.exportJSON(
+            snapshot: FlashSnapshot(logs: [log("22222222-2222-2222-2222-222222222222")], emotions: [], tasks: []),
+            appVersion: "test"))
+        await #expect(throws: BackupError.temporaryStore) {
+            _ = try await BackupImportCoordinator.apply(
+                incoming, overwrite: true, previewSnapshot: try repository.snapshot(),
+                repository: repository, rebuildReminders: { _ in rebuildCalls += 1 })
+        }
+        #expect(rebuildCalls == 0)
+
+        // 3. 恢复访问：原库逐字节未变，重新装配回到正常模式且只有真实数据
+        try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: directory.path)
+        #expect(try storeFiles(in: directory) == before)
+        let recovered = RepositoryEnvironment.makeDefault(storeURL: storeURL)
+        #expect(!recovered.didFallbackToMemory)
+        #expect(!recovered.repository.isTemporaryStore)
+        #expect(try recovered.repository.allLogs().map(\.content) == ["真实记录"])
+        #expect(try recovered.repository.allTasks().map(\.id) == [realTask.id])
+    }
+
     // MARK: - 启动维护：不撤提醒、不写小组件
 
     @Test func launchMaintenanceSkipsReminderRebuildForTemporaryStore() async throws {
