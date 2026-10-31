@@ -115,6 +115,24 @@ struct CaptureInboxTests {
         #expect(store.pending().isEmpty)
     }
 
+    @Test func failedCommitKeepsInboxForSuccessfulRetry() throws {
+        enum Failure: Error { case disk }
+        let fixture = Fixture()
+        defer { fixture.cleanUp() }
+        let store = fixture.makeStore()
+        try store.enqueue(CaptureInboxEntry(id: "retry", text: "虚构分享内容", category: .idea))
+        var fail = true
+        let repository = FlashRepository(container: FlashDatabase.makeContainer(inMemory: true),
+            beforeSave: { if fail { throw Failure.disk } })
+        #expect(CaptureInboxImporter.drain(store, into: repository) == 0)
+        #expect(store.pending().map(\.id) == ["retry"])
+        #expect(try repository.allLogs().isEmpty)
+        fail = false
+        #expect(CaptureInboxImporter.drain(store, into: repository) == 1)
+        #expect(store.pending().isEmpty)
+        #expect(try repository.allLogs().map(\.id) == ["retry"])
+    }
+
     @Test func drainSkipsTemporaryStoreAndKeepsFiles() throws {
         let fixture = Fixture()
         defer { fixture.cleanUp() }
