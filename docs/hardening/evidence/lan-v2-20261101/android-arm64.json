@@ -1,0 +1,13 @@
+{
+  "target": "android-arm64",
+  "production_enabled": false,
+  "sodium_built": false,
+  "rust_staticlib_built": false,
+  "native_dependency_linked": false,
+  "native_host_probe_passed": false,
+  "native_app_linked": false,
+  "device_executed": false,
+  "sodium_archive_sha256": "adbdd8f16149e81ac6078a03aca6fc03b592b89ef7b5ed83841c086191be3349",
+  "rust_target": "aarch64-linux-android",
+  "error": "Android NDK missing; set --android-ndk (API 26)"
+}

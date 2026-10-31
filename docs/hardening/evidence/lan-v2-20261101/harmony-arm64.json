@@ -1,0 +1,13 @@
+{
+  "target": "harmony-arm64",
+  "production_enabled": false,
+  "sodium_built": true,
+  "rust_staticlib_built": false,
+  "native_dependency_linked": true,
+  "native_host_probe_passed": false,
+  "native_app_linked": false,
+  "device_executed": false,
+  "sodium_archive_sha256": "adbdd8f16149e81ac6078a03aca6fc03b592b89ef7b5ed83841c086191be3349",
+  "rust_target": "aarch64-unknown-linux-ohos",
+  "sodium_library_sha256": "37e991e3f4de669fdd65ed1382958a57eead80520476454fe0266ed34e67da64"
+}
