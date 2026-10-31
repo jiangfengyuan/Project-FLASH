@@ -1,5 +1,7 @@
 # Flash Aero · 一闪
 
+> 2026-10-31 整合候选：已合入最新 iOS 导航、分享扩展与 Spotlight，并保留加固修复。旧 LAN 仍停用，已清理仅供其使用的网络声明；Android 的 WorkManager 依赖仍合并 ACCESS_NETWORK_STATE，未为清理 LAN 强删调度框架能力。当前仅支持文件导出/系统分享；升级本端不会修复仍运行旧版本的另一端。详见 [整合与验收](docs/hardening/integration-20261031.md)。
+
 闪过即留，一目了然。本地优先的日志 / 灵感 / 情绪记录应用。
 
 当前版本：**Flash Aero v0.1.0**。`Aero` 是 v0 Alpha 阶段的版本代号；

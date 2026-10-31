@@ -1,8 +1,10 @@
 # Flash Aero · iOS
 
+> 2026-10-31 整合候选：已合入最新 iOS 导航、分享扩展与 Spotlight，并保留加固修复。旧 LAN 仍停用，已清理仅供其使用的网络声明；Android 的 WorkManager 依赖仍合并 ACCESS_NETWORK_STATE，未为清理 LAN 强删调度框架能力。当前仅支持文件导出/系统分享；升级本端不会修复仍运行旧版本的另一端。详见 [整合与验收](../docs/hardening/integration-20261031.md)。
+
 2026-10-30 功能收口检查点：模拟器测试18项、FlashKit204项及通用模拟器测试构建通过；修复today/ideas深链被旧弹层遮挡，并新增文件往返/磁盘重开验证。完整界面、VoiceOver、iOS18与真机验收仍未完成，详见[执行记录与交付](../docs/hardening/ios-acceptance-20261030.md)。
 
-> 2026-10-25 加固候选：旧版 LAN 因未认证下载/明文风险经批准暂时停用，请使用文件导出/系统分享；没有不安全回退。四端候选支持既有分区 schema1/2，原生 IANA 别名策略已统一；完整 app/真机矩阵仍未验收。见 [审查交接与限制](../docs/hardening/review-handoff.md)。构建/签名配置未变。
+> 2026-10-25 加固候选：旧版 LAN 因未认证下载/明文风险经批准暂时停用，请使用文件导出/系统分享；没有不安全回退。四端候选支持既有分区 schema1/2，原生 IANA 别名策略已统一；完整 app/真机矩阵仍未验收。见 [审查交接与限制](../docs/hardening/review-handoff.md)。签名团队未变；本轮移除旧LAN专用声明，历史构建记录仍保留。
 
 iPhone 原生实现（Alpha）。SwiftUI + SwiftData，零第三方依赖；数据层、领域逻辑、设计语言与大部分页面
 与 macOS 共用 [`shared/FlashKit`](../shared/FlashKit) 本地 Swift Package。

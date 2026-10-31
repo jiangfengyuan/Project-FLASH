@@ -1,5 +1,7 @@
 # LAN replacement decision — approval required
 
+2026-10-31: integration retains legacy disablement and removes unused legacy network declarations. The concrete next-stage comparison, dependency checks and proposed acceptance gates are in [LAN rebuild proposal](lan-rebuild-20261031.md). This historical decision record does not enable any protocol.
+
 Status: **design blocked by F-01/F-06; proposal is not finalized or implemented**. The user approved temporary disablement of all legacy LAN send/receive. The candidate ships no legacy network adapter; historical v1.1 (`FLASH-AERO/1`) remains only in test fixtures. No new wire protocol has been enabled. Compatible parser, lifecycle and privacy maintenance must not be presented as solving its authentication/confidentiality gaps. F-02/F-03 are separate compatibility acceptance blockers; see `compatibility-blockers.md`.
 
 ## Established current behavior
