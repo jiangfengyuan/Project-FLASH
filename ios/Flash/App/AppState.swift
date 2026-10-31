@@ -8,10 +8,10 @@ import Foundation
 import Observation
 import FlashCore
 
-/// iOS 一级导航：对应 macOS `Module` 的一级入口（此刻 / 记录 / 回顾 / Memory / 设置），
-/// 标题与 SF Symbol 与 macOS 侧栏同源。日志流、情绪、日历等次级入口在各 Tab 内推入。
+/// iOS 一级导航：此刻 / 记录 / 情绪 / 回顾 / 设置。情绪是核心模块，独立成 Tab；
+/// Memory 周报并入「回顾」（工具栏入口推入），日志流、日历等次级入口在各 Tab 内推入。
 enum AppTab: String, CaseIterable, Identifiable {
-    case home, explore, stats, memory, settings
+    case home, explore, emotion, stats, settings
 
     var id: String { rawValue }
 
@@ -19,8 +19,8 @@ enum AppTab: String, CaseIterable, Identifiable {
         switch self {
         case .home: "此刻"
         case .explore: "记录"
+        case .emotion: "情绪"
         case .stats: "回顾"
-        case .memory: "Memory"
         case .settings: "设置"
         }
     }
@@ -29,8 +29,8 @@ enum AppTab: String, CaseIterable, Identifiable {
         switch self {
         case .home: "house"
         case .explore: "square.and.pencil"
+        case .emotion: "face.smiling"
         case .stats: "chart.line.uptrend.xyaxis"
-        case .memory: "clock.arrow.circlepath"
         case .settings: "gearshape"
         }
     }
@@ -39,14 +39,14 @@ enum AppTab: String, CaseIterable, Identifiable {
 /// Tab 内推入的次级页面（对应 macOS 侧栏的次级入口）
 enum AppRoute: Hashable {
     case logFlow
-    case emotion
     case calendar
+    case memory
 
     var title: String {
         switch self {
         case .logFlow: "日志流"
-        case .emotion: "情绪"
         case .calendar: "日历"
+        case .memory: "Memory"
         }
     }
 }
@@ -91,7 +91,7 @@ final class AppState {
     }
 
     /// 定位目标 → Tab 与导航栈：
-    /// 记录/灵感 → 记录页（打开编辑弹层）；情绪 → 此刻页推入情绪；任务 → 回顾页推入日历
+    /// 记录/灵感 → 记录页（打开编辑弹层）；情绪 → 情绪 Tab；任务 → 回顾页推入日历
     func route(to destination: FocusDestination) {
         isSearchPresented = false
         switch destination {
@@ -99,21 +99,20 @@ final class AppState {
             explorePath = []
             selectedTab = .explore
         case .emotion:
-            homePath = [.emotion]
-            selectedTab = .home
+            selectedTab = .emotion
         case .task:
             statsPath = [.calendar]
             selectedTab = .stats
         }
     }
 
-    /// 在当前 Tab 推入次级页面（此刻「+ 新建 → 情绪」等）
+    /// 在当前 Tab 推入次级页面；无导航路径的 Tab（情绪 / 设置）回落到此刻
     func push(_ route: AppRoute) {
         switch selectedTab {
         case .home: homePath.append(route)
         case .explore: explorePath.append(route)
         case .stats: statsPath.append(route)
-        case .memory, .settings:
+        case .emotion, .settings:
             homePath = [route]
             selectedTab = .home
         }
@@ -155,10 +154,16 @@ final class AppState {
         return true
     }
 
-    /// 启动时检测数据库回退标记（App 装配层在容器创建后调用）；文案与 macOS 一致
+    /// 系统搜索（Spotlight）结果：按记录 id 走跨模块定位（记录页打开编辑弹层；记录已删则只停在记录页）
+    func openSpotlightResult(id: String) {
+        quickCapture = nil
+        focusRouter.request(.log(id))
+    }
+
+    /// 启动时检测数据库回退标记（App 装配层在容器创建后调用）；文案与 macOS 共用
     func checkDatabaseFallback(didFallbackToMemory: Bool) {
         guard didFallbackToMemory else { return }
         isDatabaseInMemoryFallback = true
-        databaseFallbackMessage = "本地数据库暂时不可用，已进入临时内存模式，重启后数据可能丢失，建议尽快导出备份"
+        databaseFallbackMessage = RepositoryEnvironment.temporaryStoreNotice
     }
 }

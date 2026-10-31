@@ -42,7 +42,7 @@ public enum TaskReminderActions {
             // schedule 对已完成任务会撤销提醒，对稍后的任务按新时间重排
             try await TaskReminderScheduler.shared.schedule(updated)
         } catch {
-            print("TaskReminderActions: 处理通知操作失败 - \(error)")
+            FlashLog.failure("reminder_action_failed", error)
         }
     }
 

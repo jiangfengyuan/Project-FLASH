@@ -75,7 +75,7 @@ public final class IdeaViewStateStore {
             try data.write(to: fileURL, options: .atomic)
         } catch {
             // 已读状态是增强能力：写失败只影响提醒精度，不影响记录数据
-            print("IdeaViewStateStore: 写入失败 [read_state_write_failed]")
+            FlashLog.failure("read_state_write_failed", error)
         }
     }
 }

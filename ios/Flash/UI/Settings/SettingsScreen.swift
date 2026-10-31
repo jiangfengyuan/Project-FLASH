@@ -9,18 +9,20 @@ import UniformTypeIdentifiers
 import FlashCore
 import FlashDesign
 
-/// 设置页（iOS 外壳）：共享分组（外观 / 数据与安全 / 危险操作 / 关于）+ iOS 文件交互：
+/// 设置页（iOS 外壳）：根页按「通用 / 数据 / 关于」分类，只留入口与状态摘要；
+/// 灵感提醒、备份与恢复（含危险操作）、设备间传输下沉为子页（SettingsPages）。
+/// 自带导航栈：系统弹层挂在栈上，无论停在哪个子页都能正常弹出。iOS 文件交互：
 /// 导出走 `.fileExporter`（存到「文件」），分享走 ShareLink，导入走 `.fileImporter`（安全作用域访问），
 /// 局域网收发走共享 LanTransferSheet。导入预览、合并/覆盖与提醒重建全部经 BackupImportCoordinator。
 struct SettingsScreen: View {
     @Environment(\.flashRepository) private var repository
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(AppState.self) private var appState
+    @EnvironmentObject private var settings: SettingsStore
 
     @State private var lanTransfer = LocalBackupTransferController.shared
     @State private var isBusy = false
     @State private var message: String? = nil
-    @State private var toastMessage: String? = nil
-    @State private var toastID = 0
+    @State private var toast: FlashToast? = nil
 
     // 导出 / 分享
     @State private var exportDocument: BackupJSONDocument? = nil
@@ -38,26 +40,77 @@ struct SettingsScreen: View {
     @State private var showClearConfirm = false
 
     var body: some View {
-        Form {
-            StorageBannerSection()
-            AppearanceSection(appeared: true)
-            IdeaReminderSection()
-            DataSafetySection(isBusy: isBusy, appeared: true,
-                              onShare: prepareShare,
-                              onLanSend: startLanSend,
-                              onLanReceive: { lanTransfer.startReceiving() },
-                              onExport: prepareExport,
-                              onImport: { chooseImportFile(recovery: false) },
-                              onRecoveryImport: { chooseImportFile(recovery: true) })
-            DangerZoneSection(isDisabled: isBusy || lanTransfer.mode != .idle) {
-                showClearConfirm = true
+        NavigationStack {
+            Form {
+                if appState.isDatabaseInMemoryFallback {
+                    Section {
+                        Label {
+                            VStack(alignment: .leading, spacing: Spacing.xxs) {
+                                Text("临时内存模式")
+                                    .font(Typography.cardTitle)
+                                Text("本地数据库暂时无法打开，原有数据未被改动。本次新写的内容退出后不会保留；请完全退出 Flash 后重新打开。")
+                                    .font(Typography.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        } icon: {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(BrandColors.destructive)
+                        }
+                    }
+                }
+
+                AppearanceSection(appeared: true)
+
+                Section("通知") {
+                    NavigationLink(value: SettingsPage.ideaReminder) {
+                        LabeledContent {
+                            Text(settings.ideaReminderEnabled ? settings.ideaReminderFrequency.displayName : "已关闭")
+                        } label: {
+                            SettingsRowLabel(title: "灵感提醒", systemImage: "lightbulb.max",
+                                             color: BrandColors.ideaYellowText)
+                        }
+                    }
+                }
+
+                Section {
+                    Toggle(isOn: Binding(get: { settings.spotlightIndexingEnabled },
+                                         set: { settings.setSpotlightIndexingEnabled($0) })) {
+                        SettingsRowLabel(title: "在系统搜索中显示", systemImage: "magnifyingglass",
+                                         color: BrandColors.accessibleGreen)
+                    }
+                    .tint(BrandColors.brandPrimary)
+                } header: {
+                    Text("隐私")
+                } footer: {
+                    Text("开启后，日志与灵感的首行和摘录会写入本机的系统搜索索引（不含情绪与任务，不离开此设备）。关闭即从系统搜索中移除。")
+                }
+
+                Section {
+                    NavigationLink(value: SettingsPage.backup) {
+                        SettingsRowLabel(title: "备份与恢复", systemImage: "externaldrive",
+                                         color: BrandColors.accessibleGreen)
+                    }
+                    NavigationLink(value: SettingsPage.transfer) {
+                        SettingsRowLabel(title: "设备间传输", systemImage: "arrow.left.arrow.right",
+                                         color: BrandColors.accessibleGreen)
+                    }
+                } header: {
+                    Text("数据")
+                } footer: {
+                    Text(isTemporaryStore
+                     ? "本地数据库暂时无法打开：导出、导入、传输与清空已暂停，原有数据未被改动。"
+                     : "数据只保存在此设备。导出、分享与传输都由你主动发起。")
+                }
+
+                AboutSection(version: BackupImportCoordinator.appVersion, appeared: true)
             }
-            AboutSection(version: BackupImportCoordinator.appVersion, appeared: true)
+            .scrollContentBackground(.hidden)
+            .background(BrandColors.pageBackground)
+            .navigationTitle("设置")
+            .navigationDestination(for: SettingsPage.self, destination: page)
         }
-        .scrollContentBackground(.hidden)
-        .background(BrandColors.pageBackground)
-        .navigationTitle("设置")
-        .toolbar { GlobalSearchToolbarItem() }
+        .flashToast($toast)
+        .sensoryFeedback(.success, trigger: toast) { _, new in new != nil }
         // 导出：先在后台生成 JSON，再交给系统「存储到文件」
         .fileExporter(isPresented: exportPresented, document: exportDocument,
                       contentType: .json,
@@ -66,7 +119,7 @@ struct SettingsScreen: View {
             switch result {
             case .success: showToast("✓ 备份已导出")
             case .failure(let error):
-                print("导出备份失败: \(error)")
+                FlashLog.failure("backup_export_failed", error)
                 message = "导出失败，请检查目标位置后重试"
             }
         }
@@ -74,7 +127,7 @@ struct SettingsScreen: View {
             switch result {
             case .success(let url): prepareFileImport(url)
             case .failure(let error):
-                print("选择备份文件失败: \(error)")
+                FlashLog.failure("backup_file_pick_failed", error)
                 message = "无法打开所选文件，请重试"
             }
         }
@@ -101,19 +154,6 @@ struct SettingsScreen: View {
             lanTransfer.sendCompleted = false
             showToast("✓ 备份已发送至对方设备，请在对端确认导入")
         }
-        .overlay(alignment: .top) {
-            if let toastMessage {
-                ToastView(message: toastMessage)
-                    .padding(.top, Spacing.sm)
-            }
-        }
-        .animation(reduceMotion ? Motion.reducedFade(true) : Motion.spring(), value: toastMessage != nil)
-        .task(id: toastID) {
-            guard toastMessage != nil else { return }
-            try? await Task.sleep(for: .seconds(1.6))
-            guard !Task.isCancelled else { return }
-            toastMessage = nil
-        }
         .alert(recoveryImport ? "部分恢复预览（原文件不变）" : "标准导入预览", isPresented: previewPresented) {
             Button("按差异合并") { pendingImport = importPreview; confirmImport(overwrite: false) }
             Button("覆盖导入", role: .destructive) { pendingImport = importPreview; showOverwriteConfirm = true }
@@ -133,12 +173,39 @@ struct SettingsScreen: View {
         } message: {
             Text("将删除本机全部日志、灵感、情绪与任务。如未导出备份，数据将无法找回。")
         }
-        .alert("提示", isPresented: messagePresented) {
+        .alert("出了点问题", isPresented: messagePresented) {
             Button("好") { message = nil }
         } message: {
             Text(message ?? "")
         }
     }
+
+    // MARK: - 子页
+
+    @ViewBuilder
+    private func page(_ page: SettingsPage) -> some View {
+        switch page {
+        case .ideaReminder:
+            IdeaReminderSettingsPage()
+        case .backup:
+            BackupSettingsPage(isTemporaryStore: isTemporaryStore,
+                               isBusy: isBusy,
+                               isClearDisabled: isBusy || lanTransfer.mode != .idle,
+                               onExport: prepareExport,
+                               onShare: prepareShare,
+                               onImport: { chooseImportFile(recovery: false) },
+                               onRecoveryImport: { chooseImportFile(recovery: true) },
+                               onClearAll: { showClearConfirm = true })
+        case .transfer:
+            TransferSettingsPage(isTemporaryStore: isTemporaryStore,
+                                 isDisabled: isBusy || lanTransfer.mode != .idle,
+                                 onSend: startLanSend,
+                                 onReceive: { lanTransfer.startReceiving() })
+        }
+    }
+
+    /// 内存降级：数据操作全部暂停（F-07）
+    private var isTemporaryStore: Bool { repository?.isTemporaryStore == true }
 
     // MARK: - 绑定
 
@@ -168,8 +235,10 @@ struct SettingsScreen: View {
                 let json = try await BackupImportCoordinator.exportJSON(
                     snapshot: try currentSnapshot(), appVersion: BackupImportCoordinator.appVersion)
                 exportDocument = BackupJSONDocument(json: json)
+            } catch let error as BackupError {
+                message = error.userMessage
             } catch {
-                print("生成备份失败: \(error)")
+                FlashLog.failure("backup_export_failed", error)
                 message = "生成备份失败，请重试"
             }
         }
@@ -187,8 +256,10 @@ struct SettingsScreen: View {
                     try BackupTransfer.createShareFile(json: json)
                 }.value
                 shareFile = ShareFile(url: url)
+            } catch let error as BackupError {
+                message = error.userMessage
             } catch {
-                print("生成分享文件失败: \(error)")
+                FlashLog.failure("backup_share_failed", error)
                 message = "生成传输文件失败，请重试"
             }
         }
@@ -201,6 +272,11 @@ struct SettingsScreen: View {
     // MARK: - 导入
 
     private func chooseImportFile(recovery: Bool) {
+        // 临时存储：导入的数据退出即丢，且确认后会按临时库重建提醒（F-07）
+        if repository?.isTemporaryStore == true {
+            message = BackupError.temporaryStore.userMessage
+            return
+        }
         recoveryImport = recovery
         importerPresented = true
     }
@@ -222,7 +298,7 @@ struct SettingsScreen: View {
             } catch let error as BackupError {
                 message = error.userMessage
             } catch {
-                print("导入备份失败: \(error)")
+                FlashLog.failure("backup_import_failed", error)
                 message = "导入失败，请确认选择的是 Flash 备份文件后重试"
             }
         }
@@ -268,8 +344,10 @@ struct SettingsScreen: View {
                 case .imported(let text, let hasSkipped):
                     if hasSkipped { message = text } else { showToast("✓ " + text) }
                 }
+            } catch let error as BackupError {
+                message = error.userMessage
             } catch {
-                print("导入写库失败: \(error)")
+                FlashLog.failure("backup_import_write_failed", error)
                 message = "导入失败：写入数据库时出错，请重试"
             }
             pendingImport = nil
@@ -284,6 +362,11 @@ struct SettingsScreen: View {
         Task {
             do {
                 guard let repository else { throw SettingsDataError.repositoryUnavailable }
+                // 临时存储下清空后的 rebuild([]) 会撤掉磁盘上真实任务的全部提醒（F-07）
+                guard !repository.isTemporaryStore else {
+                    message = "本地数据库暂时无法打开，当前只有临时内容，清空已暂停。原有数据未被改动，请完全退出 Flash 后重新打开再试"
+                    return
+                }
                 try repository.clearAll()
                 do {
                     try await TaskReminderScheduler.shared.rebuild([])
@@ -292,7 +375,7 @@ struct SettingsScreen: View {
                     message = "数据已清空，但系统提醒清理失败，请重启应用后重试"
                 }
             } catch {
-                print("清空数据失败: \(error)")
+                FlashLog.failure("clear_all_failed", error)
                 message = "清空失败，请重试"
             }
         }
@@ -306,8 +389,7 @@ struct SettingsScreen: View {
     }
 
     private func showToast(_ text: String) {
-        toastMessage = text
-        toastID += 1
+        toast = FlashToast(text)
     }
 
     private enum SettingsDataError: Error {

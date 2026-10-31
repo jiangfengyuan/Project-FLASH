@@ -45,9 +45,11 @@ public enum BackupImportCoordinator {
 
     // MARK: - 导出
 
-    /// 严格 v2 导出 JSON（后台序列化）
+    /// 严格 v2 导出 JSON（后台序列化）。临时存储的快照一律拒绝：
+    /// 它不是完整备份，日后被当作备份覆盖导入会抹掉真实数据（F-07）
     public static func exportJSON(snapshot: FlashSnapshot, appVersion: String) async throws -> String {
-        try await background {
+        guard !snapshot.isFromTemporaryStore else { throw BackupError.temporaryStore }
+        return try await background {
             try BackupService.exportStrictJSON(logs: snapshot.logs,
                                                emotions: snapshot.emotions,
                                                tasks: snapshot.tasks,
@@ -102,6 +104,8 @@ public enum BackupImportCoordinator {
         // Reject cancellation before that boundary, never report it as an
         // undone import after a successful database commit.
         try Task.checkCancellation()
+        // 写进临时存储的数据退出即丢，随后的提醒重建还会按临时库撤掉真实提醒（F-07）
+        guard !repository.isTemporaryStore else { throw BackupError.temporaryStore }
         if overwrite {
             let current = try repository.snapshot()
             guard previewSnapshot == current else {

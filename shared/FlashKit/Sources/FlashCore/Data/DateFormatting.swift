@@ -87,12 +87,14 @@ public enum DateFormatting: Sendable {
         formatterQueue.sync { monthTitleFormatter.string(from: date) }
     }
 
+    /// ISO-8601（带或不带毫秒）→ Date；解析失败返回 nil
+    public static func parseISO(_ iso: String) -> Date? {
+        formatterQueue.sync { isoFormatter.date(from: iso) ?? isoFormatterNoFraction.date(from: iso) }
+    }
+
     /// ISO-8601 → 本地时区 HH:mm；解析失败返回 "--:--"
     public static func localTime(fromISO iso: String) -> String {
-        let date = formatterQueue.sync {
-            isoFormatter.date(from: iso) ?? isoFormatterNoFraction.date(from: iso)
-        }
-        guard let date else { return "--:--" }
+        guard let date = parseISO(iso) else { return "--:--" }
         return formatterQueue.sync { timeFormatter.string(from: date) }
     }
 }

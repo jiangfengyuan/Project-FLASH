@@ -39,7 +39,7 @@ struct DeepLinkTests {
     @Test func todayReturnsToHome() throws {
         let state = AppState()
         state.selectedTab = .settings
-        state.homePath = [.emotion]
+        state.homePath = [.logFlow]
         state.handle(url: try #require(URL(string: "flash://today")))
         #expect(state.selectedTab == .home)
         #expect(state.homePath.isEmpty)

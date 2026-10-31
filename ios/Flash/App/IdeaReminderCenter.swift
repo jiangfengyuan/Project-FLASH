@@ -32,9 +32,15 @@ final class IdeaReminderCenter {
     /// 此刻提示行点按后打开「最早的一条」（对齐 Android）
     var oldestUnread: LogItem? { unreadIdeas.last }
 
-    /// 重新计算未读并重排通知
+    /// 重新计算未读并重排通知。
+    /// 内存降级（临时存储）时只算界面上的未读，不写已读状态、不排通知：临时库里没有真实灵感，
+    /// 建基线或按它裁剪会把磁盘上的已读记录清空，恢复后所有灵感变「未读」并触发提醒（F-07）
     func refresh(repository: FlashRepository?, settings: SettingsStore) {
         guard let repository, let ideas = try? repository.allIdeas() else { return }
+        guard !repository.isTemporaryStore else {
+            unreadIdeas = IdeaReminder.unreadIdeas(in: ideas, viewed: store.viewedIDs)
+            return
+        }
         let ids = ideas.map(\.id)
         store.establishBaselineIfNeeded(existingIdeaIDs: ids)
         store.prune(keeping: Set(ids))
@@ -50,6 +56,11 @@ final class IdeaReminderCenter {
     /// 灵感被打开查看 → 已读
     func markViewed(_ id: String, repository: FlashRepository?, settings: SettingsStore) {
         guard unreadIdeas.contains(where: { $0.id == id }) else { return }
+        // 临时存储里的灵感退出即丢：只从界面移除，不写入持久的已读集合
+        if repository?.isTemporaryStore == true {
+            unreadIdeas.removeAll { $0.id == id }
+            return
+        }
         store.markViewed(id)
         refresh(repository: repository, settings: settings)
     }

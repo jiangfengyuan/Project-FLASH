@@ -150,7 +150,7 @@ public struct LogFlowView: View {
                 if let log = deletingLog {
                     do { try repository?.deleteLog(id: log.id) }
                     catch {
-                        print("[LogFlowView] 删除记录失败: \(error)")
+                        FlashLog.failure("log_delete_failed", error)
                         errorMessage = "删除失败，请重试"
                     }
                 }
@@ -190,7 +190,7 @@ public struct LogFlowView: View {
     private func toggleFavorite(_ log: LogItem) {
         do { try repository?.setLogFavorite(id: log.id, !(log.isFavorite ?? false)) }
         catch {
-            print("[LogFlowView] 收藏切换失败: \(error)")
+            FlashLog.failure("favorite_toggle_failed", error)
             errorMessage = "操作失败，请重试"
         }
     }

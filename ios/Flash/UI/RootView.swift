@@ -9,12 +9,15 @@ import FlashCore
 import FlashDesign
 
 /// 根视图：底部 Tab（iPhone）承载 macOS 侧栏的一级入口，每个 Tab 自带导航栈；
-/// 次级页面（日志流 / 情绪 / 日历）按 AppRoute 推入。全局搜索与首启欢迎页在此层弹出。
+/// 次级页面（日志流 / 日历 / Memory）按 AppRoute 推入。全局搜索与首启欢迎页在此层弹出。
 struct RootView: View {
     @Environment(AppState.self) private var appState
     @EnvironmentObject private var settings: SettingsStore
     @Environment(IdeaReminderCenter.self) private var ideaReminders
     @Environment(\.flashRepository) private var repository
+    @Environment(\.scenePhase) private var scenePhase
+    /// 分享扩展投递的内容收入后的提示
+    @State private var inboxToast: FlashToast? = nil
     /// 快速记录入口 → 面板的缩放转场
     @Namespace private var captureNamespace
 
@@ -26,33 +29,48 @@ struct RootView: View {
                     HomeView()
                         .navigationDestination(for: AppRoute.self, destination: routeView)
                 }
+                .quickCaptureFloatingButton(zoomNamespace: captureNamespace,
+                                            isActive: appState.selectedTab == .home) {
+                    appState.presentQuickCapture()
+                }
             }
             Tab(AppTab.explore.title, systemImage: AppTab.explore.systemImage, value: AppTab.explore) {
                 NavigationStack(path: $appState.explorePath) {
                     ExploreScreen()
                         .navigationDestination(for: AppRoute.self, destination: routeView)
                 }
+                .quickCaptureFloatingButton(zoomNamespace: captureNamespace,
+                                            isActive: appState.selectedTab == .explore) {
+                    appState.presentQuickCapture()
+                }
             }
             // 灵感提醒：未读灵感达到阈值时在记录 Tab 显示数量角标
             .badge(ideaReminders.badgeCount)
+            Tab(AppTab.emotion.title, systemImage: AppTab.emotion.systemImage, value: AppTab.emotion) {
+                NavigationStack {
+                    EmotionScreen()
+                }
+                .quickCaptureFloatingButton(zoomNamespace: captureNamespace,
+                                            isActive: appState.selectedTab == .emotion) {
+                    appState.presentQuickCapture()
+                }
+            }
             Tab(AppTab.stats.title, systemImage: AppTab.stats.systemImage, value: AppTab.stats) {
                 NavigationStack(path: $appState.statsPath) {
                     StatsScreen()
                         .navigationDestination(for: AppRoute.self, destination: routeView)
                 }
-            }
-            Tab(AppTab.memory.title, systemImage: AppTab.memory.systemImage, value: AppTab.memory) {
-                NavigationStack {
-                    MemoryScreen()
+                .quickCaptureFloatingButton(zoomNamespace: captureNamespace,
+                                            isActive: appState.selectedTab == .stats) {
+                    appState.presentQuickCapture()
                 }
             }
             Tab(AppTab.settings.title, systemImage: AppTab.settings.systemImage, value: AppTab.settings) {
-                NavigationStack {
-                    SettingsScreen()
-                }
+                // 设置页自带导航栈（子页与系统弹层同栈承载）
+                SettingsScreen()
             }
         }
-        // 快速记录常驻入口（iOS 26+ 标签栏底部配件；更早系统为悬浮按钮）
+        // 快速记录常驻入口（iOS 26+ 标签栏底部配件；更早系统为各 Tab 的悬浮按钮）
         .quickCaptureEntry(zoomNamespace: captureNamespace) { appState.presentQuickCapture() }
         // 共享页面隐藏自绘大标题，标题交给系统导航栏
         .environment(\.flashUsesSystemNavigationTitle, true)
@@ -67,6 +85,11 @@ struct RootView: View {
         .onChange(of: repository?.revision ?? 0) { refreshIdeaReminders() }
         .onChange(of: settings.ideaReminderEnabled) { refreshIdeaReminders() }
         .onChange(of: settings.ideaReminderFrequency) { refreshIdeaReminders() }
+        // 分享扩展只投递到 App Group 收件箱（不碰主库）：启动与每次回到前台时收入
+        .onChange(of: scenePhase, initial: true) { _, phase in
+            if phase == .active { drainCaptureInbox() }
+        }
+        .flashToast($inboxToast)
         .sheet(isPresented: $appState.isSearchPresented) {
             SearchScreen()
                 // The router on TabView content does not reach this sibling sheet.
@@ -93,13 +116,19 @@ struct RootView: View {
         Group {
             switch route {
             case .logFlow: LogFlowView()
-            case .emotion: EmotionView()
             case .calendar: CalendarView()
+            case .memory: MemoryView()
             }
         }
         .background(BrandColors.pageBackground)
         .navigationTitle(route.title)
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func drainCaptureInbox() {
+        guard let repository else { return }
+        let imported = CaptureInboxImporter.drain(.shared, into: repository)
+        if imported > 0 { inboxToast = FlashToast("✓ 已收入 \(imported) 条分享内容") }
     }
 
     private func refreshIdeaReminders() {

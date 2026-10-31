@@ -15,11 +15,16 @@ public struct FlashSnapshot: Equatable, Sendable {
     public let logs: [LogItem]
     public let emotions: [EmotionRecord]
     public let tasks: [TaskItem]
+    /// 快照取自内存降级的临时存储：只含本次启动后写入的内容，不是完整数据，
+    /// 导出路径必须拒绝（否则日后「覆盖导入」会用它抹掉真实数据，见 F-07）
+    public let isFromTemporaryStore: Bool
 
-    public init(logs: [LogItem], emotions: [EmotionRecord], tasks: [TaskItem]) {
+    public init(logs: [LogItem], emotions: [EmotionRecord], tasks: [TaskItem],
+                isFromTemporaryStore: Bool = false) {
         self.logs = logs
         self.emotions = emotions
         self.tasks = tasks
+        self.isFromTemporaryStore = isFromTemporaryStore
     }
 }
 
@@ -33,6 +38,15 @@ private extension Array {
 }
 #endif
 
+/// 日志 / 灵感分区的变更（提交成功后发出），供系统搜索索引等派生状态增量同步
+public enum LogChange: Equatable, Sendable {
+    /// 新增或改动（含收藏切换、合并导入）
+    case upserted([LogItem])
+    case deleted([String])
+    /// 整表替换或清空（覆盖导入、清空全部、调试灌注）：派生状态应整体重建
+    case reset
+}
+
 /// 对应 Web 版 StorageAdapter / Android FlashRepository。
 /// createdAt 使用 ISO-8601，recordDate 为 yyyy-MM-dd。
 public final class FlashRepository {
@@ -45,8 +59,18 @@ public final class FlashRepository {
     /// 仅在主线程读写（全部写路径经 @MainActor commit）。
     public private(set) var revision = 0
 
-    public init(container: ModelContainer, beforeSave: @escaping () throws -> Void = {}) {
+    /// true：持久化容器打不开、本次运行使用内存降级的临时存储（RepositoryEnvironment 装配时标记）。
+    /// 此时真实数据仍在磁盘上未被改动；任何会改写「磁盘外」状态的副作用（系统提醒、小组件快照、
+    /// 灵感已读状态）和导入导出都必须跳过，避免用空库覆盖真实状态（F-07）。
+    public let isTemporaryStore: Bool
+
+    /// 日志 / 灵感变更回调：只在 commit 成功后、主线程调用；失败回滚的写入不会发出
+    public var onLogChange: (@MainActor (LogChange) -> Void)?
+
+    public init(container: ModelContainer, isTemporaryStore: Bool = false,
+                beforeSave: @escaping () throws -> Void = {}) {
         self.container = container
+        self.isTemporaryStore = isTemporaryStore
         self.beforeSave = beforeSave
     }
 
@@ -55,14 +79,15 @@ public final class FlashRepository {
 
     // MARK: - Logs
 
-    /// recordDate 为空时取今天；新建面板允许用户指定记录日期，必须透传而不是静默改回今天
+    /// recordDate 为空时取今天；新建面板允许用户指定记录日期，必须透传而不是静默改回今天。
+    /// `id` 为 nil 时新生成；分享收件箱导入传入条目 id，使中断后重放不产生重复记录
     @MainActor
-    public func addLog(content: String, colorTag: ColorTag,
+    public func addLog(id: String? = nil, content: String, colorTag: ColorTag,
                 category: Category = .log, importance: Int = 0,
                 isFavorite: Bool? = nil,
                 recordDate: Date? = nil) throws {
         let entity = LogEntity(
-            id: UUID().uuidString,
+            id: id ?? UUID().uuidString,
             content: content,
             colorTag: colorTag.rawValue,
             category: category.rawValue,
@@ -72,6 +97,7 @@ public final class FlashRepository {
             recordDate: recordDate.map(DateFormatting.dayString) ?? DateFormatting.today()
         )
         try commit { context.insert(entity) }
+        onLogChange?(.upserted([entity.toModel()]))
     }
 
     @MainActor
@@ -89,13 +115,21 @@ public final class FlashRepository {
                                          recordDate: log.recordDate))
             }
         }
+        onLogChange?(.upserted([log]))
     }
 
     @MainActor
     public func deleteLog(id: String) throws {
         if let entity = try fetchLog(id: id) {
             try commit { context.delete(entity) }
+            onLogChange?(.deleted([id]))
         }
+    }
+
+    /// 按 id 判断记录是否存在（收件箱去重、Spotlight 结果回跳校验）
+    @MainActor
+    public func containsLog(id: String) throws -> Bool {
+        try fetchLog(id: id) != nil
     }
 
     @MainActor
@@ -205,6 +239,7 @@ public final class FlashRepository {
     public func setLogFavorite(id: String, _ isFavorite: Bool) throws {
         if let entity = try fetchLog(id: id) {
             try commit { entity.isFavorite = isFavorite }
+            onLogChange?(.upserted([entity.toModel()]))
         }
     }
 
@@ -238,6 +273,7 @@ public final class FlashRepository {
         for batch in tasks.chunked(into: batchSize) {
             try commit { batch.forEach { context.insert(TaskEntity($0)) } }
         }
+        onLogChange?(.reset)
     }
     #endif
 
@@ -249,7 +285,8 @@ public final class FlashRepository {
     public func snapshot() throws -> FlashSnapshot {
         FlashSnapshot(logs: try allLogs(),
                       emotions: try allEmotions(),
-                      tasks: try allTasks())
+                      tasks: try allTasks(),
+                      isFromTemporaryStore: isTemporaryStore)
     }
 
     /// 覆盖式导入：清空后写入（对应 Web 版 overwriteImport）。
@@ -263,6 +300,7 @@ public final class FlashRepository {
             for emotion in emotions { upsertEmotionEntity(emotion) }
             for task in tasks { context.insert(TaskEntity(task)) }
         }
+        onLogChange?(.reset)
     }
 
     /// 合并式导入：同 id 覆盖，其余保留（对应 Web 版 mergeImport）
@@ -279,6 +317,7 @@ public final class FlashRepository {
                 }
             }
         }
+        if !logs.isEmpty { onLogChange?(.upserted(logs)) }
     }
 
     @MainActor
@@ -286,6 +325,7 @@ public final class FlashRepository {
         try commit {
             try deleteAllEntities()
         }
+        onLogChange?(.reset)
     }
 
     // MARK: - Widget Summary
@@ -414,6 +454,8 @@ extension WidgetSnapshot {
     /// （参照 TaskReminderScheduler.rebuild 的挂接方式；读取失败静默忽略）。
     @MainActor
     public static func refresh(repository: FlashRepository, unreadIdeaCount: Int? = nil) {
+        // 临时存储只有本次启动的内容：不能用它覆盖小组件上的真实摘要
+        guard !repository.isTemporaryStore else { return }
         guard let directory = WidgetSnapshotStore.containerDirectory else { return }
         guard let summary = try? repository.widgetTodaySummary() else { return }
         // 未读灵感数由宿主（iOS 灵感提醒）提供；写库路径不知道已读状态，沿用上一份快照的值

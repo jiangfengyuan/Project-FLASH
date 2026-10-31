@@ -74,4 +74,12 @@ struct SettingsStoreTests {
         suite.set(Data("not json".utf8), forKey: "quickCaptureHotkey")
         #expect(SettingsStore(defaults: suite).quickCaptureHotkey == .defaultQuickCapture)
     }
+
+    @Test func spotlightIndexingDefaultsOnAndPersists() {
+        let (name, suite) = makeSuite()
+        defer { suite.removePersistentDomain(forName: name) }
+        #expect(SettingsStore(defaults: suite).spotlightIndexingEnabled)
+        SettingsStore(defaults: suite).setSpotlightIndexingEnabled(false)
+        #expect(!SettingsStore(defaults: suite).spotlightIndexingEnabled)
+    }
 }

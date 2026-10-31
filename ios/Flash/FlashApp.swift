@@ -4,6 +4,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import CoreSpotlight
 import SwiftUI
 import SwiftData
 import UserNotifications
@@ -18,6 +19,8 @@ struct FlashApp: App {
     @StateObject private var settings: SettingsStore
     /// 灵感提醒：未读灵感、角标与本地通知
     @State private var ideaReminders = IdeaReminderCenter()
+    /// 日志 / 灵感 → 系统搜索；跟随仓储变更与「系统搜索」设置
+    private let spotlight: SpotlightIndexer
 
     init() {
         // 过期分享副本清理是纯沙箱文件 IO，移出启动同步路径后台执行（同 macOS）
@@ -29,7 +32,12 @@ struct FlashApp: App {
         let appState = AppState()
         appState.checkDatabaseFallback(didFallbackToMemory: assembly.didFallbackToMemory)
         _appState = State(initialValue: appState)
-        _settings = StateObject(wrappedValue: SettingsStore())
+        let settings = SettingsStore()
+        _settings = StateObject(wrappedValue: settings)
+        let spotlight = SpotlightIndexer(index: CoreSpotlightIndex(), repository: assembly.repository,
+                                         isEnabled: { settings.spotlightIndexingEnabled })
+        self.spotlight = spotlight
+        assembly.repository.onLogChange = { spotlight.handle($0) }
         // App Intents 在本进程执行：注入同一仓储与应用状态（快捷指令 / 控制中心直接写库或唤起面板）
         IntentBridge.repository = assembly.repository
         IntentBridge.appState = appState
@@ -51,17 +59,24 @@ struct FlashApp: App {
                 .tint(BrandColors.brandPrimary)
                 // 深链：flash://capture、flash://today、flash://ideas（小组件 / 通知 / 控制中心）
                 .onOpenURL { appState.handle(url: $0) }
+                // 点开系统搜索里的日志 / 灵感：经 FocusRouter 定位到该记录
+                .onContinueUserActivity(CSSearchableItemActionType) { activity in
+                    guard let id = activity.userInfo?[CSSearchableItemActivityIdentifier] as? String else { return }
+                    spotlight.resultOpened(id: id)
+                    appState.openSpotlightResult(id: id)
+                }
+                .onChange(of: settings.spotlightIndexingEnabled) { _, enabled in
+                    spotlight.settingChanged(enabled: enabled)
+                }
                 .task {
-                    // 小组件共享快照：启动时刷新一次；App Group 不可用（未签名构建）时零成本 no-op
-                    WidgetSnapshot.refresh(repository: assembly.repository)
                     #if DEBUG
                     DebugSeeder.seedIfRequested(repository: assembly.repository)
                     #endif
+                    // 启动对账：按当前日志表重建系统索引（关闭或内存降级时不动）
+                    spotlight.rebuild()
                     do {
-                        let tasks = try Perf.measure("TasksForReminderRebuild") {
-                            try assembly.repository.tasksOnly()
-                        }
-                        try await TaskReminderScheduler.shared.rebuild(tasks)
+                        // 小组件快照 + 按任务表重建提醒；内存降级时整体跳过（F-07）
+                        try await LaunchMaintenance.run(repository: assembly.repository)
                     } catch TaskReminderError.permissionDenied {
                         // 用户拒绝通知权限只影响系统提醒，不误报存储故障
                     } catch {

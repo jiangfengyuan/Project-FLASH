@@ -69,4 +69,37 @@ struct IdeaReminderCenterTests {
         center.refresh(repository: repository, settings: settings)
         #expect(!store.viewedIDs.contains(idea.id))
     }
+
+    /// F-07：内存降级时临时库没有真实灵感。refresh / markViewed 不得写已读状态文件——
+    /// 否则会把磁盘上的已读集合裁成空，数据库恢复后所有灵感都变「未读」并触发提醒
+    @Test func temporaryStoreNeverRewritesPersistedReadState() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let settings = makeSettings()
+
+        // 健康启动：建立基线并读过一条灵感
+        let healthy = FlashRepository(container: FlashDatabase.makeContainer(inMemory: true))
+        try healthy.addLog(content: "历史灵感", colorTag: .idea, category: .idea)
+        let healthyCenter = IdeaReminderCenter(store: IdeaViewStateStore(directory: directory))
+        healthyCenter.refresh(repository: healthy, settings: settings)
+        let fileURL = directory.appendingPathComponent("idea-view-state.json")
+        let before = try Data(contentsOf: fileURL)
+        let historicID = try #require(try healthy.allIdeas().first?.id)
+
+        // 降级启动：临时库为空，随后又新写了一条灵感并打开查看
+        let temporary = FlashRepository(container: FlashDatabase.makeContainer(inMemory: true), isTemporaryStore: true)
+        let center = IdeaReminderCenter(store: IdeaViewStateStore(directory: directory))
+        center.refresh(repository: temporary, settings: settings)
+        try temporary.addLog(content: "临时灵感", colorTag: .idea, category: .idea)
+        center.refresh(repository: temporary, settings: settings)
+        #expect(center.unreadCount == 1)
+        let idea = try #require(center.oldestUnread)
+        center.markViewed(idea.id, repository: temporary, settings: settings)
+        #expect(center.unreadCount == 0)
+
+        // 磁盘上的已读状态原样保留：恢复后历史灵感仍是已读
+        #expect(try Data(contentsOf: fileURL) == before)
+        #expect(IdeaViewStateStore(directory: directory).viewedIDs == [historicID])
+    }
 }
+

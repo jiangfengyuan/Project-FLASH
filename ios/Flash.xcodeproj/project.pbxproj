@@ -12,6 +12,8 @@
 		FB00000000000000000000B3 /* FlashCore in Frameworks */ = {isa = PBXBuildFile; productRef = FB00000000000000000000B1 /* FlashCore */; };
 		FB00000000000000000000B4 /* FlashDesign in Frameworks */ = {isa = PBXBuildFile; productRef = FB00000000000000000000B2 /* FlashDesign */; };
 		FB00000000000000000000B5 /* FlashWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FB0000000000000000000032 /* FlashWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		FB00000000000000000000C2 /* FlashCore in Frameworks */ = {isa = PBXBuildFile; productRef = FB00000000000000000000C5 /* FlashCore */; };
+		FB00000000000000000000C3 /* FlashShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FB00000000000000000000C0 /* FlashShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -22,6 +24,7 @@
 			dstSubfolderSpec = 13;
 			files = (
 				FB00000000000000000000B5 /* FlashWidgetExtension.appex in Embed Foundation Extensions */,
+				FB00000000000000000000C3 /* FlashShareExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -43,12 +46,20 @@
 			remoteGlobalIDString = FB0000000000000000000042;
 			remoteInfo = FlashWidgetExtension;
 		};
+		FB00000000000000000000CC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FB0000000000000000000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FB00000000000000000000C8;
+			remoteInfo = FlashShareExtension;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		FB0000000000000000000030 /* Flash.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flash.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB0000000000000000000031 /* FlashTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlashTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB0000000000000000000032 /* FlashWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FlashWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		FB00000000000000000000C0 /* FlashShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FlashShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -72,9 +83,22 @@
 			path = Shared;
 			sourceTree = "<group>";
 		};
+		FB00000000000000000000C1 /* FlashShare */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = FlashShare;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		FB00000000000000000000C4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FB00000000000000000000C2 /* FlashCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FB0000000000000000000020 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -109,6 +133,7 @@
 				FB0000000000000000000010 /* Flash */,
 				FB0000000000000000000011 /* FlashTests */,
 				FB0000000000000000000012 /* FlashWidget */,
+				FB00000000000000000000C1 /* FlashShare */,
 				FB0000000000000000000013 /* Shared */,
 				FB0000000000000000000002 /* Products */,
 			);
@@ -120,6 +145,7 @@
 				FB0000000000000000000030 /* Flash.app */,
 				FB0000000000000000000031 /* FlashTests.xctest */,
 				FB0000000000000000000032 /* FlashWidgetExtension.appex */,
+				FB00000000000000000000C0 /* FlashShareExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -140,6 +166,7 @@
 			);
 			dependencies = (
 				FB0000000000000000000074 /* PBXTargetDependency */,
+				FB00000000000000000000CD /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				FB0000000000000000000010 /* Flash */,
@@ -200,6 +227,29 @@
 			productReference = FB0000000000000000000032 /* FlashWidgetExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		FB00000000000000000000C8 /* FlashShareExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FB00000000000000000000C9 /* Build configuration list for PBXNativeTarget "FlashShareExtension" */;
+			buildPhases = (
+				FB00000000000000000000C6 /* Sources */,
+				FB00000000000000000000C4 /* Frameworks */,
+				FB00000000000000000000C7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				FB00000000000000000000C1 /* FlashShare */,
+			);
+			name = FlashShareExtension;
+			packageProductDependencies = (
+				FB00000000000000000000C5 /* FlashCore */,
+			);
+			productName = FlashShareExtension;
+			productReference = FB00000000000000000000C0 /* FlashShareExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -218,6 +268,9 @@
 						TestTargetID = FB0000000000000000000040;
 					};
 					FB0000000000000000000042 = {
+						CreatedOnToolsVersion = 26.0;
+					};
+					FB00000000000000000000C8 = {
 						CreatedOnToolsVersion = 26.0;
 					};
 				};
@@ -243,11 +296,19 @@
 				FB0000000000000000000040 /* Flash */,
 				FB0000000000000000000041 /* FlashTests */,
 				FB0000000000000000000042 /* FlashWidgetExtension */,
+				FB00000000000000000000C8 /* FlashShareExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		FB00000000000000000000C7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FB0000000000000000000051 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -272,6 +333,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		FB00000000000000000000C6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FB0000000000000000000050 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -296,6 +364,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		FB00000000000000000000CD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FB00000000000000000000C8 /* FlashShareExtension */;
+			targetProxy = FB00000000000000000000CC /* PBXContainerItemProxy */;
+		};
 		FB0000000000000000000070 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = FB0000000000000000000040 /* Flash */;
@@ -309,6 +382,56 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		FB00000000000000000000CA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = FlashShare.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FlashShareInfo.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Flash Aero";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.flash.app.ios.share;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		FB00000000000000000000CB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = FlashShare.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FlashShareInfo.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Flash Aero";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.flash.app.ios.share;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 		FB0000000000000000000080 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -504,6 +627,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		FB00000000000000000000C9 /* Build configuration list for PBXNativeTarget "FlashShareExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FB00000000000000000000CA /* Debug */,
+				FB00000000000000000000CB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		FB0000000000000000000060 /* Build configuration list for PBXNativeTarget "Flash" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -550,6 +682,10 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		FB00000000000000000000C5 /* FlashCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = FlashCore;
+		};
 		FB00000000000000000000A1 /* FlashCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = FlashCore;

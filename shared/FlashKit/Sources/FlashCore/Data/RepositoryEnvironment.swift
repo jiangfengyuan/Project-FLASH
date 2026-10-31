@@ -32,12 +32,21 @@ public enum RepositoryEnvironment: Sendable {
         }
     }
 
+    /// 内存降级提示（iOS / macOS 共用）。只陈述事实与安全的下一步：原有数据未被改动、
+    /// 本次内容退出即丢、导入导出已暂停、重新打开 App。
+    /// 不得建议「导出备份」——临时库的导出不是完整备份，日后覆盖导入会抹掉真实数据（F-07）
+    public static let temporaryStoreNotice =
+        "本地数据库暂时无法打开，你原有的数据仍在本机、未被改动。" +
+        "本次启动改用临时存储：新写的内容退出后不会保留；为避免用不完整的数据覆盖原有记录，导出与导入已暂停，" +
+        "系统提醒与小组件保持原样。请完全退出 Flash 后重新打开。"
+
     /// 生产环境装配：创建持久化容器（失败自动降级内存）并装配仓储。
     /// App 装配层启动时调用一次即可。
     public static func makeDefault() -> Assembly {
         let result = FlashDatabase.makeContainerWithFallback()
         return Assembly(container: result.container,
-                        repository: FlashRepository(container: result.container),
+                        repository: FlashRepository(container: result.container,
+                                                    isTemporaryStore: result.didFallbackToMemory),
                         didFallbackToMemory: result.didFallbackToMemory)
     }
 }

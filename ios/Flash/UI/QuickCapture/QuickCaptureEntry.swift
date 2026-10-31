@@ -8,8 +8,9 @@ import SwiftUI
 import FlashDesign
 
 /// 快速记录常驻入口（iOS 版全局热键）：
-/// - iOS 26+：标签栏上方的系统底部配件（Liquid Glass，随标签栏收起而内联）；
-/// - iOS 18–25：右下角悬浮按钮（材质背景），位于标签栏之上。
+/// - iOS 26+：标签栏上方的系统底部配件（Liquid Glass，随标签栏收起而内联），挂在 TabView 上；
+/// - iOS 18–25：右下角悬浮按钮，挂在各 Tab 的导航栈上，经 safeAreaInset 占位——
+///   自动避开标签栏与 Home 指示条，列表末行也不会被按钮盖住（不再写死标签栏高度）。
 struct QuickCaptureEntryModifier: ViewModifier {
     let zoomNamespace: Namespace.ID
     let action: () -> Void
@@ -38,7 +39,22 @@ struct QuickCaptureEntryModifier: ViewModifier {
                 .tabBarMinimizeBehavior(.onScrollDown)
         } else {
             content
-                .overlay(alignment: .bottomTrailing) {
+        }
+    }
+}
+
+/// iOS 18–25 的悬浮按钮（逐 Tab 挂载）。isActive：仅当前 Tab 作为缩放转场源，避免多个同 id 源
+struct QuickCaptureFloatingButtonModifier: ViewModifier {
+    let zoomNamespace: Namespace.ID
+    let isActive: Bool
+    let action: () -> Void
+
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content
+        } else {
+            content
+                .safeAreaInset(edge: .bottom, alignment: .trailing, spacing: 0) {
                     Button(action: action) {
                         Image(systemName: "sparkle")
                             .font(.title2.weight(.semibold))
@@ -47,11 +63,24 @@ struct QuickCaptureEntryModifier: ViewModifier {
                             .background(BrandColors.brandPrimary, in: Circle())
                             .flashElevatedShadow()
                     }
-                    .flashZoomSource(id: "quickCapture", in: zoomNamespace)
+                    .modifier(ActiveZoomSource(isActive: isActive, namespace: zoomNamespace))
                     .accessibilityLabel("快速记录")
                     .padding(.trailing, Spacing.md)
-                    .padding(.bottom, 64) // 让出标签栏高度（几何值）
+                    .padding(.bottom, Spacing.sm)
                 }
+        }
+    }
+
+    private struct ActiveZoomSource: ViewModifier {
+        let isActive: Bool
+        let namespace: Namespace.ID
+
+        func body(content: Content) -> some View {
+            if isActive {
+                content.flashZoomSource(id: "quickCapture", in: namespace)
+            } else {
+                content
+            }
         }
     }
 }
@@ -59,5 +88,10 @@ struct QuickCaptureEntryModifier: ViewModifier {
 extension View {
     func quickCaptureEntry(zoomNamespace: Namespace.ID, action: @escaping () -> Void) -> some View {
         modifier(QuickCaptureEntryModifier(zoomNamespace: zoomNamespace, action: action))
+    }
+
+    func quickCaptureFloatingButton(zoomNamespace: Namespace.ID, isActive: Bool,
+                                    action: @escaping () -> Void) -> some View {
+        modifier(QuickCaptureFloatingButtonModifier(zoomNamespace: zoomNamespace, isActive: isActive, action: action))
     }
 }

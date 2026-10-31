@@ -22,12 +22,12 @@ struct RoutingTests {
         #expect(state.focusRouter.consume(matching: { if case .log = $0 { true } else { false } }) == .log("abc"))
     }
 
-    @Test func emotionRequestPushesEmotionOnHome() {
+    @Test func emotionRequestSelectsEmotionTab() {
         let state = AppState()
         state.selectedTab = .settings
         state.focusRouter.request(.emotion)
-        #expect(state.selectedTab == .home)
-        #expect(state.homePath == [.emotion])
+        #expect(state.selectedTab == .emotion)
+        #expect(state.homePath.isEmpty)
     }
 
     @Test func taskRequestPushesCalendarOnStats() {
@@ -39,9 +39,9 @@ struct RoutingTests {
 
     @Test func pushFromTablessTabFallsBackToHome() {
         let state = AppState()
-        state.selectedTab = .memory
-        state.push(.emotion)
+        state.selectedTab = .emotion
+        state.push(.logFlow)
         #expect(state.selectedTab == .home)
-        #expect(state.homePath == [.emotion])
+        #expect(state.homePath == [.logFlow])
     }
 }

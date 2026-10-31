@@ -22,6 +22,8 @@ public struct FilterChipView: View {
     public var accent: Color? = nil
     /// 模块色选中态的文字用可读变体（配 accent 使用）
     public var accentText: Color? = nil
+    /// 可选前置图标（如「已收藏」的星标，提示它是可叠加的开关而非单选分类）
+    public var systemImage: String? = nil
     public let action: () -> Void
 
     @State private var hovering = false
@@ -29,17 +31,24 @@ public struct FilterChipView: View {
     private var usesAccent: Bool { isSelected && accent != nil }
 
     public init(title: String, isSelected: Bool, accent: Color? = nil, accentText: Color? = nil,
-                action: @escaping () -> Void) {
+                systemImage: String? = nil, action: @escaping () -> Void) {
         self.title = title
         self.isSelected = isSelected
         self.accent = accent
         self.accentText = accentText
+        self.systemImage = systemImage
         self.action = action
     }
 
     public var body: some View {
         Button(action: action) {
-            Text(title)
+            HStack(spacing: Spacing.xxs) {
+                if let systemImage {
+                    Image(systemName: systemImage)
+                        .accessibilityHidden(true)
+                }
+                Text(title)
+            }
                 .font(Typography.secondary.weight(isSelected ? .semibold : .regular))
                 .foregroundStyle(isSelected
                                  ? (accentText ?? BrandColors.chipSelectedForeground)

@@ -35,10 +35,10 @@ public enum FlashDatabase: Sendable {
                                                                  configurations: [config]),
                                    didFallbackToMemory: false)
         } catch {
-            print("SwiftData 容器创建失败，尝试降级为内存容器 [storage_initialization_failed]")
+            FlashLog.failure("storage_initialization_failed", error)
             let memoryConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
             if let fallback = try? ModelContainer(for: schema, configurations: [memoryConfig]) {
-                print("已降级为内存容器：本次运行数据不会持久化")
+                FlashLog.notice("storage_fallback_to_memory")
                 return ContainerResult(container: fallback, didFallbackToMemory: true)
             }
             fatalError("无法创建 SwiftData 容器（内存降级亦失败） [storage_fallback_failed]")

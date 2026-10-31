@@ -207,6 +207,8 @@ struct SettingsView: View {
                 let picker = NSSharingServicePicker(items: [url])
                 sharingPicker = picker
                 picker.show(relativeTo: view.bounds, of: view, preferredEdge: .minY)
+            } catch let error as BackupError {
+                message = error.userMessage
             } catch {
                 print("传输备份失败: \(error)")
                 message = "生成传输文件失败，请重试"
@@ -283,6 +285,8 @@ struct SettingsView: View {
                     try BackupTransfer.writeExportFile(json: json, to: url)
                 }.value
                 showToast("✓ 备份已导出")
+            } catch let error as BackupError {
+                message = error.userMessage
             } catch {
                 // 弹窗只给固定文案，路径等详情只进日志
                 print("导出备份失败: \(error)")
@@ -342,6 +346,8 @@ struct SettingsView: View {
                     // 有跳过条目时保留 alert，把异常明细告知用户
                     if hasSkipped { message = text } else { showToast("✓ " + text) }
                 }
+            } catch let error as BackupError {
+                message = error.userMessage
             } catch {
                 print("导入写库失败: \(error)")
                 message = "导入失败：写入数据库时出错，请重试"
@@ -356,6 +362,11 @@ struct SettingsView: View {
         Task {
             do {
                 guard let repository else { throw SettingsDataError.repositoryUnavailable }
+                // 临时存储下清空后的 rebuild([]) 会撤掉磁盘上真实任务的全部提醒（F-07）
+                guard !repository.isTemporaryStore else {
+                    message = "本地数据库暂时无法打开，当前只有临时内容，清空已暂停。原有数据未被改动，请完全退出 Flash 后重新打开再试"
+                    return
+                }
                 try repository.clearAll()
                 do {
                     try await TaskReminderScheduler.shared.rebuild([])

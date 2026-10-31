@@ -11,7 +11,7 @@ import FlashDesign
 
 /// 记录页（iOS 外壳）：页内搜索（系统搜索栏，200ms 防抖）+ 筛选胶囊（全部/日志/灵感/待整理/已收藏）
 /// + 筛选面板（sheet）+ 记录列表（共享 ExploreLogListView：点按编辑、轻扫收藏/删除）。
-/// 「待整理」支持批量改分类或标签；跨模块定位（全局搜索/日历「查看灵感」）在此打开编辑弹层。
+/// 「待整理」支持「选择」模式（底部工具栏批量改分类或标签）；跨模块定位（全局搜索/日历「查看灵感」）在此打开编辑弹层。
 struct ExploreScreen: View {
     @Environment(\.flashRepository) private var repository
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -33,6 +33,7 @@ struct ExploreScreen: View {
     @State private var batchMode = false
     @State private var selection: Set<String> = []
     @State private var errorMessage: String? = nil
+    @State private var toast: FlashToast? = nil
     @State private var statsSummaryCache = ViewComputeCache<Int, String>()
 
     /// 统计摘要用的全量查询（列表本身的谓词查询在共享子视图中）
@@ -59,7 +60,12 @@ struct ExploreScreen: View {
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always),
                     prompt: "输入关键词或标签")
         .toolbar { toolbarContent }
+        .toolbar { batchToolbar }
+        .toolbar(batchMode ? .hidden : .automatic, for: .tabBar)
+        .flashToast($toast)
+        .sensoryFeedback(.success, trigger: toast) { _, new in new != nil }
         .animation(Motion.soft(reduceMotion), value: filter)
+        .animation(Motion.quick(reduceMotion), value: batchMode)
         .onChange(of: filter) {
             if filter != .unsorted { batchMode = false }
             selection = []
@@ -115,7 +121,7 @@ struct ExploreScreen: View {
                 if saveTask(task) { ideaTaskDraft = nil }
             }
         }
-        .alert("提示", isPresented: errorPresented) {
+        .alert("操作失败", isPresented: errorPresented) {
             Button("好") { errorMessage = nil }
         } message: {
             Text(errorMessage ?? "")
@@ -126,6 +132,16 @@ struct ExploreScreen: View {
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
+        // 「待整理」：系统惯用的「选择 / 完成」进入批量模式
+        if filter == .unsorted {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(batchMode ? "完成" : "选择") {
+                    batchMode.toggle()
+                    if !batchMode { selection = [] }
+                }
+                .fontWeight(batchMode ? .semibold : .regular)
+            }
+        }
         ToolbarItemGroup(placement: .topBarTrailing) {
             Button {
                 showFilterSheet = true
@@ -151,6 +167,7 @@ struct ExploreScreen: View {
 
     // MARK: - 筛选胶囊
 
+    /// 单选分类胶囊 | 分隔线 | 可叠加的「已收藏」开关（星标区分两种语义）
     private var chipsRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: Spacing.xs) {
@@ -161,10 +178,15 @@ struct ExploreScreen: View {
                         filter = item
                     }
                 }
+                Divider()
+                    .frame(height: 20) // 分隔线高度约等于胶囊文字行高（几何值）
+                    .padding(.horizontal, Spacing.xxs)
                 FilterChipView(title: "已收藏", isSelected: favoritesOnly,
-                               accent: BrandColors.ideaYellow, accentText: BrandColors.ideaYellowText) {
+                               accent: BrandColors.ideaYellow, accentText: BrandColors.ideaYellowText,
+                               systemImage: favoritesOnly ? "star.fill" : "star") {
                     favoritesOnly.toggle()
                 }
+                .accessibilityHint("与分类筛选叠加")
             }
             .padding(.horizontal, Spacing.md)
             .padding(.vertical, Spacing.sm)
@@ -175,32 +197,41 @@ struct ExploreScreen: View {
     // MARK: - 待整理 / 批量
 
     private var unsortedBar: some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
-            Text("待整理：使用日常标签的日志。")
-                .font(Typography.caption)
-                .foregroundStyle(BrandColors.textSecondary)
-            HStack(spacing: Spacing.sm) {
-                Toggle("批量整理", isOn: $batchMode)
-                    .fixedSize()
-                if batchMode {
-                    Spacer()
-                    Menu {
-                        Button("标记为灵感") { batchUpdate { $0.category = .idea } }
-                        Divider()
-                        ForEach(ColorTag.allCases, id: \.self) { tag in
-                            Button("标签：\(tag.displayName)") { batchUpdate { $0.colorTag = tag } }
-                        }
-                    } label: {
-                        Text("修改 \(selection.count) 条…")
-                            .font(Typography.secondary)
-                    }
-                    .disabled(selection.isEmpty)
+        Text(batchMode ? "点选要整理的日志，在底部批量修改。" : "待整理：仍挂「日常」标签的日志。点「选择」可批量整理。")
+            .font(Typography.caption)
+            .foregroundStyle(BrandColors.textSecondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, Spacing.md)
+            .padding(.bottom, Spacing.xs)
+    }
+
+    /// 选择模式底部工具栏：已选数量 + 标记为灵感 + 改标签
+    @ToolbarContentBuilder
+    private var batchToolbar: some ToolbarContent {
+        if batchMode {
+            ToolbarItem(placement: .bottomBar) {
+                Button("标记为灵感", systemImage: "lightbulb") {
+                    batchUpdate { $0.category = .idea }
                 }
+                .disabled(selection.isEmpty)
+            }
+            ToolbarItem(placement: .status) {
+                Text(selection.isEmpty ? "未选择" : "已选 \(selection.count) 条")
+                    .font(Typography.caption)
+                    .foregroundStyle(BrandColors.textSecondary)
+                    .contentTransition(.numericText())
+            }
+            ToolbarItem(placement: .bottomBar) {
+                Menu {
+                    ForEach(ColorTag.allCases, id: \.self) { tag in
+                        Button(tag.displayName) { batchUpdate { $0.colorTag = tag } }
+                    }
+                } label: {
+                    Label("改标签", systemImage: "tag")
+                }
+                .disabled(selection.isEmpty)
             }
         }
-        .padding(.horizontal, Spacing.md)
-        .padding(.bottom, Spacing.xs)
-        .animation(Motion.quick(reduceMotion), value: batchMode)
     }
 
     // MARK: - 数据
@@ -273,7 +304,7 @@ struct ExploreScreen: View {
             }
             return true
         } catch {
-            print("[ExploreScreen] 任务保存失败: \(error)")
+            FlashLog.failure("task_save_failed", error)
             errorMessage = "任务保存失败，请重试"
             return false
         }
@@ -288,11 +319,12 @@ struct ExploreScreen: View {
             mutate(&log)
             do { try repository.updateLog(log) }
             catch {
-                print("[ExploreScreen] 批量更新失败: \(error)")
+                FlashLog.failure("batch_update_failed", error)
                 errorMessage = "批量修改失败，请重试"
                 return
             }
         }
+        toast = FlashToast("✓ 已整理 \(selection.count) 条")
         selection = []
         batchMode = false
     }
