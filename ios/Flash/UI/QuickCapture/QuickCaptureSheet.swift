@@ -76,7 +76,11 @@ struct QuickCaptureSheet: View {
                 .onChange(of: text) { old, new in submitOnTypedReturn(old: old, new: new) }
                 .padding(.horizontal, Spacing.sm)
                 .padding(.vertical, Spacing.sm)
-                .background(BrandColors.weakSurface, in: RoundedRectangle(cornerRadius: Radius.field))
+                .background(BrandColors.weakSurface, in: RoundedRectangle(cornerRadius: Radius.field, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: Radius.field, style: .continuous)
+                        .strokeBorder(BrandColors.weakBorder, lineWidth: 0.75)
+                }
 
             if let remaining = remainingHint {
                 Text(remaining)
@@ -110,6 +114,7 @@ struct QuickCaptureSheet: View {
             Button(action: commit) {
                 Label("保存", systemImage: "arrow.up")
                     .font(Typography.body.weight(.semibold))
+                    .foregroundStyle(BrandColors.onBrandPrimary)
             }
             .flashGlassProminentButtonStyle(tint: BrandColors.brandPrimary)
             .disabled(!hasText)

@@ -96,11 +96,15 @@ public struct LogCardView: View {
         .padding(14) // 卡片内边距：sm 与 md 之间的特调值
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(BrandColors.cardSurface)
-        .clipShape(RoundedRectangle(cornerRadius: Radius.row))
+        .clipShape(RoundedRectangle(cornerRadius: Radius.row, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: Radius.row)
-                .stroke(BrandColors.weakBorder, lineWidth: 0.5)
+            RoundedRectangle(cornerRadius: Radius.row, style: .continuous)
+                .stroke(BrandColors.weakBorder, lineWidth: cardBorderWidth)
         }
+        #if os(iOS)
+        // 暖调手作：纸卡轻放在纸面上的柔和暖影
+        .flashCardShadow()
+        #endif
         .scaleEffect(deletePulse ? 0.97 : 1)
         .cardFloat(reduceMotion: reduceMotion)
         .onHover { hovering = $0 }
@@ -135,10 +139,16 @@ public struct LogCardView: View {
 
     private var timestampText: some View {
         Text(timestamp)
-            .font(Typography.caption)
-            .foregroundStyle(.secondary)
+            .font(Typography.caption.monospacedDigit())
+            .foregroundStyle(BrandColors.textSecondary)
             .fixedSize()
     }
+
+    #if os(iOS)
+    private let cardBorderWidth: CGFloat = 0.75
+    #else
+    private let cardBorderWidth: CGFloat = 0.5
+    #endif
 
     @ViewBuilder
     private var actionsOverlay: some View {
@@ -154,12 +164,27 @@ public struct LogCardView: View {
     /// 标签徽章：标签色淡底胶囊，替代原先的色点+灰字。
     /// 文案用 textColor（同色系加深变体），浅色模式下达到正文对比度
     private var tagBadge: some View {
+        #if os(iOS)
+        // 暖调手作：「印章」式徽章——小圆角方框、标签色细描边、极淡底
+        Text(log.colorTag.displayName)
+            .font(Typography.caption.weight(.medium))
+            .padding(.horizontal, Spacing.xs)
+            .padding(.vertical, 2) // 徽章纵向内距：极小特调值
+            .background(log.colorTag.color.opacity(0.08),
+                        in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .strokeBorder(log.colorTag.textColor.opacity(0.7), lineWidth: 1)
+            }
+            .foregroundStyle(log.colorTag.textColor)
+        #else
         Text(log.colorTag.displayName)
             .font(Typography.caption)
             .padding(.horizontal, Spacing.xs)
             .padding(.vertical, 2) // 徽章纵向内距：极小特调值
             .background(log.colorTag.color.opacity(0.15), in: Capsule())
             .foregroundStyle(log.colorTag.textColor)
+        #endif
     }
 
     private var actionButtons: some View {

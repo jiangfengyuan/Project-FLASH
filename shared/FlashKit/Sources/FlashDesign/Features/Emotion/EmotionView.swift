@@ -65,7 +65,7 @@ public struct EmotionView: View {
             .frame(maxWidth: Metrics.readingMaxWidth)
             .frame(maxWidth: .infinity)
         }
-        .background(BrandColors.pageBackground)
+        .flashPageBackground()
         .onAppear(perform: playEntranceAnimation)
         .alert("提示", isPresented: errorPresented) {
             Button("好") { errorMessage = nil }
@@ -275,7 +275,7 @@ private struct EmotionWeekView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) { // 10：标题行与卡片的紧凑节奏（无对应令牌）
             HStack(alignment: .firstTextBaseline) {
-                Text("本周趋势").font(Typography.cardTitle)
+                Text("本周趋势").font(Typography.blockTitle)
                 Spacer()
                 Text(summary)
                     .font(Typography.caption)
@@ -376,7 +376,7 @@ private struct EmotionHistoryView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
             HStack(alignment: .firstTextBaseline) {
-                Text("近期记录").font(Typography.cardTitle)
+                Text("近期记录").font(Typography.blockTitle)
                 Spacer()
                 if !emotionEntities.isEmpty {
                     Text("\(emotionEntities.count) 条")

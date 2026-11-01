@@ -30,6 +30,15 @@ public struct FilterChipView: View {
 
     private var usesAccent: Bool { isSelected && accent != nil }
 
+    #if os(iOS)
+    // 暖调手作：未选中为纸白胶囊 + 暖色细边，选中为墨色实心
+    private var unselectedBackground: Color { BrandColors.cardSurface }
+    private let unselectedBorderWidth: CGFloat = 0.75
+    #else
+    private var unselectedBackground: Color { BrandColors.weakSurface }
+    private let unselectedBorderWidth: CGFloat = 0.5
+    #endif
+
     public init(title: String, isSelected: Bool, accent: Color? = nil, accentText: Color? = nil,
                 systemImage: String? = nil, action: @escaping () -> Void) {
         self.title = title
@@ -59,14 +68,14 @@ public struct FilterChipView: View {
                     Capsule()
                         .fill(isSelected
                               ? (accent?.opacity(0.22) ?? BrandColors.chipSelectedBackground)
-                              : BrandColors.weakSurface)
+                              : unselectedBackground)
                 }
                 .overlay {
                     if !isSelected {
                         Capsule()
                             .strokeBorder(hovering ? BrandColors.textSecondary.opacity(0.6)
                                                    : BrandColors.weakBorder,
-                                          lineWidth: 0.5)
+                                          lineWidth: unselectedBorderWidth)
                     } else if let accent {
                         Capsule()
                             .strokeBorder(accent, lineWidth: 1)
@@ -89,5 +98,5 @@ public struct FilterChipView: View {
         FilterChipView(title: "日常", isSelected: false) {}
     }
     .padding(Spacing.lg)
-    .background(BrandColors.pageBackground)
+    .flashPageBackground()
 }

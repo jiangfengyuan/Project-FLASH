@@ -92,7 +92,7 @@ private struct OptionalFocusModifier: ViewModifier {
             QuickCaptureCard(draft: $draft, category: $category) {}
                 .padding(Spacing.lg)
                 .frame(width: 480)
-                .background(BrandColors.pageBackground)
+                .flashPageBackground()
         }
     }
     return PreviewHost()

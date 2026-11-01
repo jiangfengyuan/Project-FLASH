@@ -53,7 +53,7 @@ struct ExploreScreen: View {
                 .id(filter)
                 .transition(.appear(reduceMotion: reduceMotion))
         }
-        .background(BrandColors.pageBackground)
+        .flashPageBackground()
         .navigationTitle("记录")
         .navigationSubtitleIfAvailable(statsSummary)
         // 搜索栏常显（不必下拉才出现）
@@ -88,7 +88,7 @@ struct ExploreScreen: View {
                     ExploreFilterPanel(criteria: $criteria, onClear: clearFilters)
                         .padding(Spacing.md)
                 }
-                .background(BrandColors.pageBackground)
+                .flashPageBackground()
                 .navigationTitle("筛选")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
@@ -178,7 +178,7 @@ struct ExploreScreen: View {
                         filter = item
                     }
                 }
-                Divider()
+                FlashDivider(seed: "explore-chips", axis: .vertical)
                     .frame(height: 20) // 分隔线高度约等于胶囊文字行高（几何值）
                     .padding(.horizontal, Spacing.xxs)
                 FilterChipView(title: "已收藏", isSelected: favoritesOnly,

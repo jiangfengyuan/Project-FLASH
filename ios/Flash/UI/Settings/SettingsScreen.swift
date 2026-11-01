@@ -42,70 +42,74 @@ struct SettingsScreen: View {
     var body: some View {
         NavigationStack {
             Form {
-                if appState.isDatabaseInMemoryFallback {
-                    Section {
-                        Label {
-                            VStack(alignment: .leading, spacing: Spacing.xxs) {
-                                Text("临时内存模式")
-                                    .font(Typography.cardTitle)
-                                Text("本地数据库暂时无法打开，原有数据未被改动。本次新写的内容退出后不会保留；请完全退出 Flash 后重新打开。")
-                                    .font(Typography.caption)
-                                    .foregroundStyle(.secondary)
+                Group {
+                    if appState.isDatabaseInMemoryFallback {
+                        Section {
+                            Label {
+                                VStack(alignment: .leading, spacing: Spacing.xxs) {
+                                    Text("临时内存模式")
+                                        .font(Typography.cardTitle)
+                                    Text("本地数据库暂时无法打开，原有数据未被改动。本次新写的内容退出后不会保留；请完全退出 Flash 后重新打开。")
+                                        .font(Typography.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            } icon: {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundStyle(BrandColors.destructive)
                             }
-                        } icon: {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundStyle(BrandColors.destructive)
                         }
                     }
-                }
 
-                AppearanceSection(appeared: true)
+                    AppearanceSection(appeared: true)
 
-                Section("通知") {
-                    NavigationLink(value: SettingsPage.ideaReminder) {
-                        LabeledContent {
-                            Text(settings.ideaReminderEnabled ? settings.ideaReminderFrequency.displayName : "已关闭")
-                        } label: {
-                            SettingsRowLabel(title: "灵感提醒", systemImage: "lightbulb.max",
-                                             color: BrandColors.ideaYellowText)
+                    Section("通知") {
+                        NavigationLink(value: SettingsPage.ideaReminder) {
+                            LabeledContent {
+                                Text(settings.ideaReminderEnabled ? settings.ideaReminderFrequency.displayName : "已关闭")
+                            } label: {
+                                SettingsRowLabel(title: "灵感提醒", systemImage: "lightbulb.max",
+                                                 color: BrandColors.ideaYellowText)
+                            }
                         }
                     }
-                }
 
-                Section {
-                    Toggle(isOn: Binding(get: { settings.spotlightIndexingEnabled },
-                                         set: { settings.setSpotlightIndexingEnabled($0) })) {
-                        SettingsRowLabel(title: "在系统搜索中显示", systemImage: "magnifyingglass",
-                                         color: BrandColors.accessibleGreen)
+                    Section {
+                        Toggle(isOn: Binding(get: { settings.spotlightIndexingEnabled },
+                                             set: { settings.setSpotlightIndexingEnabled($0) })) {
+                            SettingsRowLabel(title: "在系统搜索中显示", systemImage: "magnifyingglass",
+                                             color: BrandColors.accessibleGreen)
+                        }
+                        .tint(BrandColors.brandPrimary)
+                    } header: {
+                        Text("隐私")
+                    } footer: {
+                        Text("开启后，日志与灵感的首行和摘录会写入本机的系统搜索索引（不含情绪与任务，不离开此设备）。关闭即从系统搜索中移除。")
                     }
-                    .tint(BrandColors.brandPrimary)
-                } header: {
-                    Text("隐私")
-                } footer: {
-                    Text("开启后，日志与灵感的首行和摘录会写入本机的系统搜索索引（不含情绪与任务，不离开此设备）。关闭即从系统搜索中移除。")
-                }
 
-                Section {
-                    NavigationLink(value: SettingsPage.backup) {
-                        SettingsRowLabel(title: "备份与恢复", systemImage: "externaldrive",
-                                         color: BrandColors.accessibleGreen)
+                    Section {
+                        NavigationLink(value: SettingsPage.backup) {
+                            SettingsRowLabel(title: "备份与恢复", systemImage: "externaldrive",
+                                             color: BrandColors.accessibleGreen)
+                        }
+                        NavigationLink(value: SettingsPage.transfer) {
+                            SettingsRowLabel(title: "设备间传输", systemImage: "arrow.left.arrow.right",
+                                             color: BrandColors.accessibleGreen)
+                        }
+                    } header: {
+                        Text("数据")
+                    } footer: {
+                        Text(isTemporaryStore
+                         ? "本地数据库暂时无法打开：导出、导入、传输与清空已暂停，原有数据未被改动。"
+                         : "数据只保存在此设备。导出、分享与传输都由你主动发起。")
                     }
-                    NavigationLink(value: SettingsPage.transfer) {
-                        SettingsRowLabel(title: "设备间传输", systemImage: "arrow.left.arrow.right",
-                                         color: BrandColors.accessibleGreen)
-                    }
-                } header: {
-                    Text("数据")
-                } footer: {
-                    Text(isTemporaryStore
-                     ? "本地数据库暂时无法打开：导出、导入、传输与清空已暂停，原有数据未被改动。"
-                     : "数据只保存在此设备。导出、分享与传输都由你主动发起。")
-                }
 
-                AboutSection(version: BackupImportCoordinator.appVersion, appeared: true)
+                    AboutSection(version: BackupImportCoordinator.appVersion, appeared: true)
+                }
+                // 暖调手作：分组行用纸白卡面
+                .flashFormRowBackground()
             }
             .scrollContentBackground(.hidden)
-            .background(BrandColors.pageBackground)
+            .flashPageBackground()
             .navigationTitle("设置")
             .navigationDestination(for: SettingsPage.self, destination: page)
         }

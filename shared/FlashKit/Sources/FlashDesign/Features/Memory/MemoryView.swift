@@ -56,7 +56,7 @@ public struct MemoryView: View {
                 )
             }
         }
-        .background(BrandColors.pageBackground)
+        .flashPageBackground()
         .animation(Motion.soft(reduceMotion), value: report)
         .task { await refreshBaseDateAtMidnight() }
     }
@@ -120,7 +120,7 @@ public struct MemoryView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.lg) {
                 VStack(alignment: .leading, spacing: Spacing.xs) {
-                    Text("You recorded").font(Typography.cardTitle)
+                    Text("You recorded").font(Typography.blockTitle)
                     // 一行四列放不下（窄屏 + 大字号）时退为 2×2，英文标签不被截断
                     ViewThatFits(in: .horizontal) {
                         HStack(spacing: Spacing.sm) {
@@ -145,7 +145,7 @@ public struct MemoryView: View {
 
                 if let mood = report.mood {
                     VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text("This week felt...").font(Typography.cardTitle)
+                        Text("This week felt...").font(Typography.blockTitle)
                         HStack(spacing: Spacing.sm) {
                             Text(mood.emoji).scaledSystemFont(size: 28, relativeTo: .title)
                             Text(mood.text).font(Typography.secondary)
@@ -160,7 +160,7 @@ public struct MemoryView: View {
 
                 if !report.highlights.isEmpty {
                     VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text("Highlights").font(Typography.cardTitle)
+                        Text("Highlights").font(Typography.blockTitle)
                         ForEach(Array(report.highlights.enumerated()), id: \.offset) { _, title in
                             HStack(alignment: .firstTextBaseline, spacing: Spacing.xs) {
                                 Text("•").foregroundStyle(.secondary)
@@ -182,7 +182,7 @@ public struct MemoryView: View {
             }
             .padding(Spacing.lg)
         }
-        .background(BrandColors.pageBackground)
+        .flashPageBackground()
     }
 
     private func countCard(_ title: String, _ value: Int, _ icon: String, tint: Color) -> some View {
@@ -192,7 +192,7 @@ public struct MemoryView: View {
                 .foregroundStyle(tint)
                 .accessibilityHidden(true) // 装饰图标，读屏由数值+标题承载
             Text("\(value)")
-                .font(.title2).bold()
+                .font(Typography.statValueLarge)
                 .contentTransition(.opacity)
                 .animation(Motion.quick(reduceMotion), value: value)
             // 英文标签不在词中断行：单行，放不下时缩小

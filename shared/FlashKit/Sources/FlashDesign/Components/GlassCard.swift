@@ -28,11 +28,22 @@ public struct GlassCard<Content: View>: View {
     }
 
     private var surface: some ShapeStyle {
+        #if os(iOS)
+        // 暖调手作：与实色卡同一张纸白卡面（不再用系统冷灰控件底）
+        BrandColors.cardSurface
+        #else
         // 浅色：极浅灰白；深色：深色控件底，两者都足够「内容优先」
         colorScheme == .dark
             ? BrandColors.systemControlBackground
             : BrandColors.systemControlBackground.mix(with: .white, by: 0.55)
+        #endif
     }
+
+    #if os(iOS)
+    private var borderColor: Color { BrandColors.weakBorder }
+    #else
+    private var borderColor: Color { BrandColors.systemSeparator.opacity(borderOpacity) }
+    #endif
 
     /// 细边框：深色下略提不透明度保证边缘清晰；hover 反馈开启时再微亮
     private var borderOpacity: Double {
@@ -57,11 +68,11 @@ public struct GlassCard<Content: View>: View {
             }
             .overlay {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .strokeBorder(BrandColors.systemSeparator.opacity(borderOpacity), lineWidth: 0.5)
+                    .strokeBorder(borderColor, lineWidth: 0.5)
             }
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .shadow(
-                color: .black.opacity(shadowOpacity),
+                color: BrandColors.shadowTint.opacity(shadowOpacity),
                 radius: hovering && hoverFeedback ? 10 : 8,
                 y: hovering && hoverFeedback ? 3 : 2
             )

@@ -28,10 +28,20 @@ public struct SolidCard<Content: View>: View {
             }
             .overlay {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .strokeBorder(BrandColors.weakBorder, lineWidth: 0.5)
+                    .strokeBorder(BrandColors.weakBorder, lineWidth: borderWidth)
             }
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            #if os(iOS)
+            // 暖调手作：纸卡的柔和暖影
+            .flashCardShadow()
+            #endif
     }
+
+    #if os(iOS)
+    private let borderWidth: CGFloat = 0.75
+    #else
+    private let borderWidth: CGFloat = 0.5
+    #endif
 }
 
 #Preview {
@@ -47,5 +57,5 @@ public struct SolidCard<Content: View>: View {
         .padding(Spacing.md)
     }
     .padding(Spacing.lg)
-    .background(BrandColors.pageBackground)
+    .flashPageBackground()
 }

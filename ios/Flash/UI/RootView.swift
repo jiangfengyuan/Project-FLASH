@@ -120,7 +120,7 @@ struct RootView: View {
             case .memory: MemoryView()
             }
         }
-        .background(BrandColors.pageBackground)
+        .flashPageBackground()
         .navigationTitle(route.title)
         .navigationBarTitleDisplayMode(.inline)
     }

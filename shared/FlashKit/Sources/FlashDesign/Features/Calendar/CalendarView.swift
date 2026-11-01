@@ -64,7 +64,7 @@ public struct CalendarView: View {
                             }
                         }
                         .accessibilityHint("向左右滚动查看完整月历")
-                        Divider().padding(.vertical, Spacing.xs)
+                        FlashDivider(seed: "calendar-detail").padding(.vertical, Spacing.xs)
                         dayDetails(aggregates)
                     }
                     .padding(.bottom, Spacing.lg)
@@ -74,7 +74,7 @@ public struct CalendarView: View {
                     standardHeader
                     weekdayHeader
                     monthGrid(aggregates)
-                    Divider().padding(.vertical, Spacing.xs)
+                    FlashDivider(seed: "calendar-detail").padding(.vertical, Spacing.xs)
                     ScrollView { dayDetails(aggregates) }
                 }
             }
@@ -412,7 +412,7 @@ private struct DayCell: View {
             VStack(spacing: 2) { // 2：日期数字与指示点的极小间距
                 Text("\(day)")
                     .font(Typography.secondary)
-                    .foregroundStyle(isSelected ? Color.white
+                    .foregroundStyle(isSelected ? BrandColors.onBrandPrimary
                                      : (inMonth ? Color.primary : Color.secondary.opacity(0.5)))
                 (usesAccessibleIndicators
                  ? AnyLayout(VStackLayout(spacing: 3))
@@ -420,13 +420,13 @@ private struct DayCell: View {
                     if logCount > 0 {
                         Text("\(logCount)")
                             .font(Typography.fine)
-                            .foregroundStyle(isSelected ? Color.white : BrandColors.accent)
+                            .foregroundStyle(isSelected ? BrandColors.onBrandPrimary : BrandColors.accent)
                     }
                     if taskCount > 0 {
                         Label("\(taskCount)", systemImage: "checklist")
                             .labelStyle(.titleAndIcon)
                             .font(Typography.fine)
-                            .foregroundStyle(isSelected ? Color.white : BrandColors.accessibleGreen)
+                            .foregroundStyle(isSelected ? BrandColors.onBrandPrimary : BrandColors.accessibleGreen)
                     }
                     if let emotionEmoji {
                         Text(emotionEmoji).font(Typography.fine)
