@@ -1,0 +1,35 @@
+{
+  "sourceCommit": "df3bded681d0664db6fdba289afbd7252de8c4a2",
+  "integrated": [
+    "7741e0c",
+    "7ebb0d0"
+  ],
+  "flashkit": {
+    "passed": 244,
+    "suites": 31
+  },
+  "ios": 25,
+  "macos": 13,
+  "android": {
+    "Debug": {
+      "tests": 93,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "Release": {
+      "tests": 93,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "originalWorktreesUnchanged": true,
+  "previousZipSource": "63d54f5, historical, not rebuilt for this push",
+  "logHashes": {
+    "flashkit.log": "c7266d91b6d41a2a830bf410f82bf638ec36b01bd8fef4244f7e9370d795c731",
+    "macos.log": "fc9b28babd612955ffbba4aa57f4f9a758a34dd470313935d4635dd34d5a966a",
+    "ios.log": "034b228421f8ed0cce0d360c3c9bcd597126977a806cf6264e7461b540982cd8",
+    "android.log": "93fbf08166a22e5c0eb4e7ef7e8802460bcd69099096c22b314c4fc30d3584bd"
+  }
+}

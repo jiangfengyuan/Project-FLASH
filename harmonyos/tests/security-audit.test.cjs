@@ -96,7 +96,7 @@ function transferModule(randomFn) {
     'data/LocalBackupTransfer': null,
     '@kit.CryptoArchitectureKit': cryptoKit(randomFn),
     ...net.kit
-  });
+  }, { legacyLan: true });
   return { ...load('data/LocalBackupTransfer'), client: net.client };
 }
 
@@ -131,6 +131,13 @@ test('sender PIN is an unbiased 6-digit decimal string', () => {
   assert.ok(seen.size > 1, 'PINs must vary across senders');
 });
 
+test('sender discovery labels rotate without device identity', () => {
+  const { LocalBackupSender } = transferModule();
+  const names = Array.from({ length: 8 }, () => new LocalBackupSender({}, '{}', () => {}).serviceName);
+  names.forEach(name => assert.match(name, /^Flash Aero-[0-9a-f]{8}$/));
+  assert.equal(new Set(names).size, names.length);
+});
+
 test('receiver strictly parses the OK header and rejects OK 123abc', async () => {
   const { receiver, client } = startReceiver(() => '123456');
   const rejection = assert.rejects(receiver.result, /无效响应/);
@@ -140,6 +147,15 @@ test('receiver strictly parses the OK header and rejects OK 123abc', async () =>
   client.emit(`FLASH-AERO/1 ${referenceProof('123456', nonce)}\nOK 123abc ${referenceMac('123456', payload)}\n${payload}`);
   await rejection;
   assert.ok(client.closed);
+});
+
+test('receiver rejects noncanonical leading-zero payload lengths', async () => {
+  const { receiver, client } = startReceiver(() => '123456');
+  const rejection = assert.rejects(receiver.result, /无效响应/);
+  await flush();
+  const nonce = lastChallenge(client);
+  client.emit(`FLASH-AERO/1 ${referenceProof('123456', nonce)}\nOK 02 ${referenceMac('123456', '{}')}\n{}`);
+  await rejection;
 });
 
 test('receiver rejects an over-size OK payload before buffering it', async () => {

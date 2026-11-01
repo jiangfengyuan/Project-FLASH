@@ -1,0 +1,57 @@
+{
+  "bytes" : 2639,
+  "counts" : {
+    "emotions" : 2,
+    "logs" : 2,
+    "tasks" : 2
+  },
+  "exportSHA256" : "17b0088095108a3d7349219762e44ec421427e48781e0feddc3e9765e703cc4c",
+  "incomingMetadataCompared" : true,
+  "inputSHA256" : "4fe48730cbbc3a14f15c2aa584b70a34442adc95b2de31173b6347e375b5951e",
+  "kind" : "Apple production codec export and self-import",
+  "os" : "Version 27.2 (Build 26B5101f)",
+  "realDeviceOrUI" : false,
+  "schemas" : {
+    "emotions" : 2,
+    "logs" : 2,
+    "tasks" : 2
+  },
+  "timezoneProbes" : [
+    {
+      "contractListContains" : false,
+      "foundationAccepted" : true,
+      "foundationIdentifier" : "Europe\/Kyiv",
+      "input" : "Europe\/Kyiv"
+    },
+    {
+      "contractListContains" : true,
+      "foundationAccepted" : true,
+      "foundationIdentifier" : "Europe\/Kiev",
+      "input" : "Europe\/Kiev"
+    },
+    {
+      "contractListContains" : false,
+      "foundationAccepted" : true,
+      "foundationIdentifier" : "Asia\/Kolkata",
+      "input" : "Asia\/Kolkata"
+    },
+    {
+      "contractListContains" : true,
+      "foundationAccepted" : true,
+      "foundationIdentifier" : "Asia\/Calcutta",
+      "input" : "Asia\/Calcutta"
+    },
+    {
+      "contractListContains" : true,
+      "foundationAccepted" : true,
+      "foundationIdentifier" : "GMT",
+      "input" : "UTC"
+    },
+    {
+      "contractListContains" : false,
+      "foundationAccepted" : false,
+      "foundationIdentifier" : null,
+      "input" : "Invalid\/Unknown"
+    }
+  ]
+}

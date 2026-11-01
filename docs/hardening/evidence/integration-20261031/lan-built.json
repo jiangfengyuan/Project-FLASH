@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "kind": "static declarations and production-source checks",
+  "checked": [
+    "/Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/ios/FlashInfo.plist",
+    "/Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/macos/FlashInfo.plist",
+    "/Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/macos/Flash.entitlements",
+    "/Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/ios/Flash.entitlements",
+    "/Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/ios/FlashShare.entitlements",
+    "/Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/ios/FlashWidget.entitlements",
+    "/Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/android/app/src/main/AndroidManifest.xml",
+    "/Users/haydenjiang/Documents/DEV/flash-Alpha/.worktrees/codex-hardening/harmonyos/entry/src/main/module.json5",
+    "ios/Flash",
+    "ios/FlashShare",
+    "ios/FlashWidget",
+    "macos/Flash",
+    "macos/FlashWidget",
+    "shared/FlashKit/Sources",
+    "android/app/src/main",
+    "harmonyos/entry/src/main/ets",
+    "/private/tmp/flash-integration-20261031/DerivedData/Build/Products/Debug-iphonesimulator/Flash.app/Info.plist",
+    "/private/tmp/flash-integration-20261031/DerivedData/Build/Products/Debug-iphonesimulator/Flash.app/PlugIns/FlashShareExtension.appex/Info.plist",
+    "/private/tmp/flash-integration-20261031/DerivedData/Build/Products/Debug-iphonesimulator/Flash.app/PlugIns/FlashWidgetExtension.appex/Info.plist",
+    "/private/tmp/flash-integration-20261031/MacDerived/Build/Products/Debug/Flash.app/Contents/Info.plist",
+    "android/app/build/intermediates/merged_manifests/debug/processDebugManifest/AndroidManifest.xml",
+    "harmonyos/entry/build/default/intermediates/package/default/module.json"
+  ]
+}

@@ -13,7 +13,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [LogEntity::class, EmotionEntity::class, IdeaViewStateEntity::class, TaskEntity::class],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 abstract class FlashDatabase : RoomDatabase() {
@@ -90,6 +90,17 @@ abstract class FlashDatabase : RoomDatabase() {
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_tasks_updatedAt` ON `tasks` (`updatedAt`)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_tasks_dueDate` ON `tasks` (`dueDate`)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_tasks_dueAt` ON `tasks` (`dueAt`)")
+            }
+        }
+
+        /** Approved additive schema2 metadata; preserve all existing rows/read-state. */
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `logs` ADD COLUMN `isFavorite` INTEGER")
+                db.execSQL("ALTER TABLE `emotions` ADD COLUMN `isFavorite` INTEGER")
+                db.execSQL("ALTER TABLE `emotions` ADD COLUMN `intensity` INTEGER")
+                db.execSQL("ALTER TABLE `tasks` ADD COLUMN `isFavorite` INTEGER")
+                db.execSQL("ALTER TABLE `tasks` ADD COLUMN `sourceLogId` TEXT")
             }
         }
     }

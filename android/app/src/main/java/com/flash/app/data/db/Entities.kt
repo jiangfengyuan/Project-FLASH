@@ -39,6 +39,7 @@ data class LogEntity(
     val importance: Int,
     val createdAt: String,
     val recordDate: String,
+    val isFavorite: Boolean? = null,
 )
 
 /**
@@ -76,6 +77,8 @@ data class EmotionEntity(
     val note: String?,
     val recordDate: String,
     val createdAt: String,
+    val intensity: Int? = null,
+    val isFavorite: Boolean? = null,
 )
 
 @Entity(
@@ -100,6 +103,8 @@ data class TaskEntity(
     val completedAt: String?,
     val createdAt: String,
     val updatedAt: String,
+    val sourceLogId: String? = null,
+    val isFavorite: Boolean? = null,
 )
 
 fun LogEntity.toModel() = LogItem(
@@ -110,6 +115,7 @@ fun LogEntity.toModel() = LogItem(
     importance = importance,
     createdAt = createdAt,
     recordDate = recordDate,
+    isFavorite = isFavorite,
 )
 
 fun LogItem.toEntity() = LogEntity(
@@ -120,6 +126,7 @@ fun LogItem.toEntity() = LogEntity(
     importance = importance,
     createdAt = createdAt,
     recordDate = recordDate,
+    isFavorite = isFavorite,
 )
 
 fun EmotionEntity.toModel() = EmotionRecord(
@@ -130,6 +137,8 @@ fun EmotionEntity.toModel() = EmotionRecord(
     note = note,
     recordDate = recordDate,
     createdAt = createdAt,
+    intensity = intensity,
+    isFavorite = isFavorite,
 )
 
 fun EmotionRecord.toEntity() = EmotionEntity(
@@ -140,6 +149,8 @@ fun EmotionRecord.toEntity() = EmotionEntity(
     note = note,
     recordDate = recordDate,
     createdAt = createdAt,
+    intensity = intensity,
+    isFavorite = isFavorite,
 )
 
 fun TaskEntity.toModel() = TaskItem(
@@ -156,6 +167,8 @@ fun TaskEntity.toModel() = TaskItem(
     completedAt = completedAt,
     createdAt = createdAt,
     updatedAt = updatedAt,
+    sourceLogId = sourceLogId,
+    isFavorite = isFavorite,
 )
 
 fun TaskItem.toEntity() = TaskEntity(
@@ -172,4 +185,6 @@ fun TaskItem.toEntity() = TaskEntity(
     completedAt = completedAt,
     createdAt = createdAt,
     updatedAt = updatedAt,
+    sourceLogId = sourceLogId,
+    isFavorite = isFavorite,
 )

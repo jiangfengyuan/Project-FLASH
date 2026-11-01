@@ -41,13 +41,15 @@ public struct DataSafetySection: View {
     public var body: some View {
         Section("数据与安全") {
             // 主操作：导出备份（ prominent 胶囊，图标/文字反白）。
-            // 图标显式白色：iOS 表单行会把 Label 图标染成强调色，与胶囊同色而看不见
+            // 图标显式用主色底上的前景色：iOS 表单行会把 Label 图标染成强调色，与胶囊同色而看不见
+            //（iOS 暖调主题深色下为暖墨，macOS 为白）
             Button(action: onExport) {
                 Label {
                     Text("导出备份…")
                 } icon: {
-                    Image(systemName: "tray.and.arrow.up").foregroundStyle(.white)
+                    Image(systemName: "tray.and.arrow.up")
                 }
+                .foregroundStyle(BrandColors.onBrandPrimary)
             }
             .buttonStyle(.borderedProminent)
             .tint(BrandColors.brandPrimary)
@@ -57,11 +59,11 @@ public struct DataSafetySection: View {
             }
             .hoverFeedback(reduceMotion: reduceMotion)
             Button(action: onLanSend) {
-                SettingsRowLabel(title: "局域网发送…", systemImage: "paperplane", color: BrandColors.accessibleGreen)
+                SettingsRowLabel(title: "局域网发送（暂时停用）…", systemImage: "paperplane", color: BrandColors.accessibleGreen)
             }
             .hoverFeedback(reduceMotion: reduceMotion)
             Button(action: onLanReceive) {
-                SettingsRowLabel(title: "局域网接收…", systemImage: "antenna.radiowaves.left.and.right", color: BrandColors.accessibleGreen)
+                SettingsRowLabel(title: "局域网接收（暂时停用）…", systemImage: "antenna.radiowaves.left.and.right", color: BrandColors.accessibleGreen)
             }
             .hoverFeedback(reduceMotion: reduceMotion)
             Button(action: onImport) {
@@ -72,7 +74,7 @@ public struct DataSafetySection: View {
                 SettingsRowLabel(title: "恢复损坏或旧版备份…", systemImage: "bandage", color: BrandColors.accessibleGreen)
             }
             .hoverFeedback(reduceMotion: reduceMotion)
-            Text("导出与传输均为明文 JSON，仅在可信设备与网络中使用。")
+            Text("导出的 JSON 文件未加密，仅保存或分享给可信设备或联系人。旧版局域网传输暂时停用。")
                 .font(Typography.caption)
                 .foregroundStyle(.secondary)
             if isBusy {

@@ -217,20 +217,7 @@ struct SettingsView: View {
     }
 
     private func startLanSend() {
-        do {
-            let snapshot = try currentSnapshot()
-            // 临时存储快照不是完整备份，不得发给对端（F-07；异步路径由 exportJSON 统一拒绝）
-            guard !snapshot.isFromTemporaryStore else { throw BackupError.temporaryStore }
-            let json = try BackupService.exportStrictJSON(logs: snapshot.logs,
-                                                emotions: snapshot.emotions,
-                                                tasks: snapshot.tasks,
-                                                appVersion: appVersion)
-            lanTransfer.startSending(json: json)
-        } catch let error as BackupError {
-            message = error.userMessage
-        } catch {
-            message = "无法生成局域网备份，请重试"
-        }
+        lanTransfer.startSending()
     }
 
     private func flushLanTransferResults() {

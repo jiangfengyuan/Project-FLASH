@@ -31,7 +31,7 @@ class FlashDatabaseMigrationTest {
     )
 
     @Test
-    fun migration1To4PreservesContentAndBuildsEveryLaterTable() {
+    fun migration1To5PreservesContentAndBuildsEveryLaterTable() {
         createLegacyDatabase(version = 1, includeIdeaViewState = false)
 
         val database = openMigratedDatabase()
@@ -41,14 +41,14 @@ class FlashDatabaseMigrationTest {
             assertEquals(1, sqlite.query(SimpleSQLiteQuery("SELECT COUNT(*) FROM emotions")).singleInt())
             assertEquals(1, sqlite.query(SimpleSQLiteQuery("SELECT COUNT(*) FROM idea_view_state")).singleInt())
             assertEquals(0, sqlite.query(SimpleSQLiteQuery("SELECT COUNT(*) FROM tasks")).singleInt())
-            assertEquals(4, sqlite.version)
+            assertEquals(5, sqlite.version)
         } finally {
             database.close()
         }
     }
 
     @Test
-    fun migration2To4PreservesIdeaStateAndBuildsTasks() {
+    fun migration2To5PreservesIdeaStateAndBuildsTasks() {
         createLegacyDatabase(version = 2, includeIdeaViewState = true)
 
         val database = openMigratedDatabase()
@@ -61,7 +61,7 @@ class FlashDatabaseMigrationTest {
                 assertEquals("2026-09-04T01:00:00.000Z", cursor.getString(0))
             }
             assertEquals(0, sqlite.query(SimpleSQLiteQuery("SELECT COUNT(*) FROM tasks")).singleInt())
-            assertEquals(4, sqlite.version)
+            assertEquals(5, sqlite.version)
         } finally {
             database.close()
         }
@@ -213,6 +213,7 @@ class FlashDatabaseMigrationTest {
         FlashDatabase.MIGRATION_1_2,
         FlashDatabase.MIGRATION_2_3,
         FlashDatabase.MIGRATION_3_4,
+        FlashDatabase.MIGRATION_4_5,
     ).build().also { it.openHelper.writableDatabase }
 
     private fun android.database.Cursor.singleInt(): Int = use { cursor ->

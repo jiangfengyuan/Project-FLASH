@@ -1,0 +1,26 @@
+{
+  "syntheticOnly": true,
+  "receipts": [
+    {
+      "file": "m16-atomic-parent.txt",
+      "originalFile": "m16-atomic-parent.log",
+      "originalSHA256": "9d74887487750bd9096eea7da618e3eee92e480f1954f192408cecc8af813724",
+      "copySHA256": "839c73c9b2101d27ef8300d4859f1e1f8b49e2ef8f1cf7ab7c8be5d9a83a2a50",
+      "normalization": "trailing horizontal whitespace only; original retained in isolated workspace evidence"
+    },
+    {
+      "file": "m16-host.txt",
+      "originalFile": "m16-host.log",
+      "originalSHA256": "936f0a3bd17d064b87e856ff8d28995f4eb75ef468aa74ce8269aa30c6087fc1",
+      "copySHA256": "936f0a3bd17d064b87e856ff8d28995f4eb75ef468aa74ce8269aa30c6087fc1",
+      "normalization": "trailing horizontal whitespace only; original retained in isolated workspace evidence"
+    },
+    {
+      "file": "m16-harmony-native.txt",
+      "originalFile": "m16-harmony-native.log",
+      "originalSHA256": "18f2a948f76f5c7c722ed6a8315eff6b6362a0b726bd9f7a6b879b952c8b6a3d",
+      "copySHA256": "18f2a948f76f5c7c722ed6a8315eff6b6362a0b726bd9f7a6b879b952c8b6a3d",
+      "normalization": "trailing horizontal whitespace only; original retained in isolated workspace evidence"
+    }
+  ]
+}

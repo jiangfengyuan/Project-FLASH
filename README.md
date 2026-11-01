@@ -1,12 +1,14 @@
 # Flash Aero · 一闪
 
+> 2026-10-31 整合候选：已合入最新 iOS 导航、分享扩展与 Spotlight，并保留加固修复。旧 LAN 仍停用，已清理仅供其使用的网络声明；Android 的 WorkManager 依赖仍合并 ACCESS_NETWORK_STATE，未为清理 LAN 强删调度框架能力。当前仅支持文件导出/系统分享；升级本端不会修复仍运行旧版本的另一端。详见 [整合与验收](docs/hardening/integration-20261031.md)。
+
 闪过即留，一目了然。本地优先的日志 / 灵感 / 情绪记录应用。
 
 当前版本：**Flash Aero v0.1.0**。`Aero` 是 v0 Alpha 阶段的版本代号；
 首个正式版将统一命名为 **Flash Pulse v1.0.0**。
 
-没有账号、没有后端——数据默认只存在你自己的设备上；换设备可通过 JSON 文件，
-也可在同一局域网内临时配对直传。
+没有账号、没有后端——数据默认只存在你自己的设备上；换设备可通过 JSON 文件。
+旧版局域网直传因安全风险暂时停用，请使用文件备份或系统分享。
 
 [爱发电主页](https://ifdian.net/a/HEY10086D)
 
@@ -31,7 +33,11 @@
 - **情绪**：七级选择（macOS / HarmonyOS 为滑块，Android 为 emoji 按钮）+ 子情绪标签 + 备注，周趋势与统计图表；
 - **日历**：日志与情绪按日聚合的月历视图；
 - **回顾**：本周/本月/近 30 天/近 90 天窗口、每日活跃度、与前一窗口的趋势洞察、情绪分布，以及页内趋势/日历切换；
-- **备份与传输**：JSON 导出 / 导入（合并或覆盖）；支持系统分享，以及同一局域网内通过六位临时 PIN 自动发现、配对直传，两端格式一致、可互读。注意：设备互传（文件分享与局域网直传）尚未完成真机验收，验收矩阵见 [docs/contracts/acceptance.md](docs/contracts/acceptance.md)。
+- **备份与传输**：JSON 导出 / 严格导入（合并或覆盖）、系统分享。旧版局域网发送/接收已暂时停用；点击入口会说明替代方式，不启动发现、监听或连接。四端候选现读写既有分区 schema 1/2，Android 使用获批的增量 Room4→5，保留新增可空字段；实际 app/真机导入矩阵未完成，不能宣称全部设备互读。[实际验收与限制](docs/contracts/acceptance.md)。
+
+2026-10-25 加固进行中：现行 LAN v1.1 的公开 CHALLENGE 即释放完整明文备份、离线猜 PIN、未认证错误结束会话等缺陷已复核。用户批准本轮暂时停用旧协议，历史实现在测试目标内保留回归，应用中没有启用开关或不安全回退。替代协议尚未选定，也未添加密码库。见 [加固基线](docs/hardening/baseline-2026-10-24.md)、[LAN 决策与停用边界](docs/hardening/lan-v2-decision.md)、[时区/schema 兼容阻塞](docs/hardening/compatibility-blockers.md)。
+
+加固审查交接见 [当前报告与未验证项](docs/hardening/review-handoff.md)；[Release 实测](docs/hardening/performance.md) 仅覆盖明确记录的共享 macOS host 工作负载，[下一 beta UI 提案](docs/hardening/next-beta-ui-plan.md) 仅规划与部分截图基线，尚未实施视觉改版。
 
 ## 构建
 

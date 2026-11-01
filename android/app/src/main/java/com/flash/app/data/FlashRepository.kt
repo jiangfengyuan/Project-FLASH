@@ -19,6 +19,8 @@ import com.flash.app.data.model.TaskItem
 import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -250,6 +252,22 @@ class FlashRepository(private val db: FlashDatabase) {
             db.emotionDao().upsertAll(emotions.map { it.toEntity() })
             db.taskDao().upsertAll(tasks.map { it.toEntity() })
         }
+    }
+
+    /** Compare preview and replace under one Room transaction; return stale snapshot for reconfirmation. */
+    suspend fun replaceAllIfCurrent(
+        expected: FlashSnapshot,
+        logs: List<LogItem>,
+        emotions: List<EmotionRecord>,
+        tasks: List<TaskItem>,
+    ): FlashSnapshot? = db.withTransaction {
+        val current = exportSnapshot()
+        currentCoroutineContext().ensureActive()
+        if (!BackupDiff.sameData(expected, current)) return@withTransaction current
+        // Nested Room transactions share this transaction: compare and replace
+        // cannot be separated by another local writer.
+        replaceAll(logs, emotions, tasks)
+        null
     }
 
     /** 合并式导入：同 id 覆盖，其余保留（对应 Web 版 mergeImport） */

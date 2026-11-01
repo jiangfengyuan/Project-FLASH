@@ -270,17 +270,7 @@ struct SettingsScreen: View {
     }
 
     private func startLanSend() {
-        Task {
-            do {
-                let json = try await BackupImportCoordinator.exportJSON(
-                    snapshot: try currentSnapshot(), appVersion: BackupImportCoordinator.appVersion)
-                lanTransfer.startSending(json: json)
-            } catch let error as BackupError {
-                message = error.userMessage
-            } catch {
-                message = "无法生成局域网备份，请重试"
-            }
-        }
+        lanTransfer.startSending()
     }
 
     // MARK: - 导入

@@ -79,7 +79,50 @@ struct BackupTransferTests {
         #expect(permissions == 0o600)
     }
 
+    @Test func replacingReadableDestinationDoesNotRestoreItsOldPermissions() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("flash-export-mode-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let destination = root.appendingPathComponent("backup.json")
+        try "old".write(to: destination, atomically: true, encoding: .utf8)
+        try FileManager.default.setAttributes([.posixPermissions: 0o644], ofItemAtPath: destination.path)
+        try BackupTransfer.writeExportFile(json: "private-new-backup", to: destination)
+        let mode = try FileManager.default.attributesOfItem(atPath: destination.path)[.posixPermissions] as? Int
+        #expect(mode == 0o600)
+        #expect(try String(contentsOf: destination, encoding: .utf8) == "private-new-backup")
+    }
+
     private enum InjectedExportError: Error {
         case failed
+    }
+
+    @Test func stagingModeIsPrivateBeforeWritingAndPartialFailureIsCleaned() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("flash-stage-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let file = root.appendingPathComponent("partial.json")
+        #expect(throws: InjectedExportError.self) {
+            try BackupTransfer.writePrivateFile(Data("synthetic-private".utf8), to: file) { handle, data in
+                let mode = try FileManager.default.attributesOfItem(atPath: file.path)[.posixPermissions] as? Int
+                #expect(mode == 0o600)
+                try handle.write(contentsOf: data.prefix(4))
+                throw InjectedExportError.failed
+            }
+        }
+        #expect(!FileManager.default.fileExists(atPath: file.path))
+    }
+
+    @Test func privateWriterDoesNotFollowOrRemovePreexistingSymlink() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("flash-link-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let target = root.appendingPathComponent("untouched.json")
+        let link = root.appendingPathComponent("link.json")
+        try "original".write(to: target, atomically: true, encoding: .utf8)
+        try FileManager.default.createSymbolicLink(at: link, withDestinationURL: target)
+        #expect(throws: (any Error).self) { try BackupTransfer.writePrivateFile(Data("private".utf8), to: link) }
+        #expect(try String(contentsOf: target, encoding: .utf8) == "original")
+        #expect(try FileManager.default.destinationOfSymbolicLink(atPath: link.path) == target.path)
     }
 }

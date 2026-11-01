@@ -1,0 +1,82 @@
+{
+  "kind": "backup compatibility diagnostic",
+  "native": false,
+  "commit": "4d28844920ec511a3ff4eb0f27e4042d876ee6a0",
+  "codecSHA256": "e1e352a1cefa7929a471af071470aab499e476908c5738008531408c8aac832e",
+  "host": {
+    "node": "v26.2.0",
+    "icu": "78.3",
+    "tz": "2026b"
+  },
+  "timezoneResults": [
+    {
+      "zone": "Europe/Kyiv",
+      "runtimeAccepted": true,
+      "resolvedZone": "Europe/Kiev",
+      "codecAccepted": false
+    },
+    {
+      "zone": "Europe/Kiev",
+      "runtimeAccepted": true,
+      "resolvedZone": "Europe/Kiev",
+      "codecAccepted": true
+    },
+    {
+      "zone": "Asia/Kolkata",
+      "runtimeAccepted": true,
+      "resolvedZone": "Asia/Calcutta",
+      "codecAccepted": false
+    },
+    {
+      "zone": "Asia/Calcutta",
+      "runtimeAccepted": true,
+      "resolvedZone": "Asia/Calcutta",
+      "codecAccepted": true
+    },
+    {
+      "zone": "UTC",
+      "runtimeAccepted": true,
+      "resolvedZone": "UTC",
+      "codecAccepted": true
+    },
+    {
+      "zone": "Invalid/Unknown",
+      "runtimeAccepted": false,
+      "resolvedZone": null,
+      "codecAccepted": false
+    }
+  ],
+  "actualExports": [
+    {
+      "sender": "HarmonyOS production codec on Node",
+      "receiver": "same codec on Node",
+      "schemas": {
+        "logs": 1,
+        "emotions": 1,
+        "tasks": 1
+      },
+      "status": "accepted",
+      "counts": {
+        "logs": 1,
+        "emotions": 1,
+        "tasks": 2
+      },
+      "bytes": 1689,
+      "sha256": "54ffa5896bb5339061715980a000e51667d98cf68feb81a85201e85dffd9e05d"
+    },
+    {
+      "sender": "caller-supplied export; see provenance",
+      "receiver": "HarmonyOS production codec on Node",
+      "status": "rejected",
+      "error": "备份数据结构不完整或分区版本不兼容",
+      "bytes": 2639,
+      "sha256": "cc9718e96f86ce50df4c028a673cfcd2d37ce385e0235c3e1d1764889f6fffa2"
+    }
+  ],
+  "unverified": [
+    "Apple actual export -> Android",
+    "Apple actual export -> HarmonyOS",
+    "all native device imports and persistence",
+    "platform timezone alias equivalence"
+  ]
+}

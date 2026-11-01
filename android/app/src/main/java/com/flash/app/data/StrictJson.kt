@@ -3,6 +3,7 @@ package com.flash.app.data
 /** org.json also accepts JavaScript-like syntax; the standard importer must accept JSON only. */
 internal class StrictJson(private val text: String) {
     private var index = 0
+    private var valueCount = 0
     fun validate() {
         value(0)
         whitespace()
@@ -17,6 +18,10 @@ internal class StrictJson(private val text: String) {
     }
     private fun expect(c: Char) { if (!take(c)) fail() }
     private fun value(depth: Int) {
+        // Match FlashCore's preallocation budget. A dense20MiB primitive
+        // array must not expand into millions of org.json objects first.
+        valueCount++
+        if (valueCount > 10_000_000) throw Backup.BackupFormatException("/：JSON 值数量超过资源上限")
         whitespace()
         if (depth > 128 || index == text.length) fail()
         when (text[index]) {

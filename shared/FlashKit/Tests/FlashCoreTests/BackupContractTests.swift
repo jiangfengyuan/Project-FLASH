@@ -5,6 +5,29 @@ import Testing
 
 @Suite("Shared backup contract")
 struct BackupContractTests {
+    @Test func canonicalUTCNormalizationPreservesCalendarAndFractionRules() throws {
+        // Contract examples spanning Gregorian century rules, early years and
+        // the upper bound; these pass before the performance change as well.
+        for year in [1, 4, 100, 400, 1582, 1900, 2000, 2026, 9999] {
+            for month in [1, 2, 10, 12] {
+                for day in [1, 28] {
+                    for second in [0, 59] {
+                        let base = String(format: "%04d-%02d-%02dT12:34:%02d", year, month, day, second)
+                        for (fraction, milliseconds) in [("", "000"), (".1", "100"), (".123456789", "123")] {
+                            #expect(try BackupService.normalizedTimestamp(base + fraction + "Z") == base + "." + milliseconds + "Z")
+                        }
+                    }
+                }
+            }
+        }
+        #expect(try BackupService.normalizedTimestamp("9999-12-31T23:59:59.999999999Z") == "9999-12-31T23:59:59.999Z")
+        for invalid in ["1900-02-29T12:00:00Z", "2026-01-01T24:00:00Z", "2026-01-01T00:00:60Z",
+                        "2026-01-01T00:00:00-00:00", "0000-01-01T00:00:00Z",
+                        "2026-01-01T00:00:00Z\n", "0001-01-01T00:00:00+00:01",
+                        "9999-12-31T23:59:59-00:01"] {
+            #expect(throws: BackupError.self) { _ = try BackupService.normalizedTimestamp(invalid) }
+        }
+    }
     private func fixture(_ name: String) throws -> String {
         let root = URL(fileURLWithPath: #filePath)
             // app/shared/FlashKit/Tests/FlashCoreTests/<file> → app/
@@ -69,6 +92,19 @@ struct BackupContractTests {
         #expect(throws: (any Error).self) { _ = try BackupService.parseStrict(json) }
         #expect(try BackupService.parseRecovery(json).skippedLogs == 1)
         #expect(throws: (any Error).self) { _ = try BackupService.parseRecovery(fixture("invalid-unknown-section")) }
+    }
+
+    @Test func recoveryRejectsDuplicateAndEscapedEquivalentKeys() {
+        for key in ["logs", "\\u006cogs"] {
+            let json = "{\"version\":\"flash-backup-v1\",\"logs\":[],\"\(key)\":[],\"emotions\":[]}"
+            #expect(throws: (any Error).self) { _ = try BackupService.parseRecovery(json) }
+        }
+    }
+
+    @Test func recoveryRejectsDeeplyNestedSkippedRecords() {
+        let nested = String(repeating: "[", count: 130) + "0" + String(repeating: "]", count: 130)
+        let json = "{\"version\":\"flash-backup-v1\",\"logs\":[\(nested)],\"emotions\":[]}"
+        #expect(throws: (any Error).self) { _ = try BackupService.parseRecovery(json) }
     }
 
     @Test func strictExportRejectsInvalidDataAndNormalizesTimes() throws {

@@ -1,5 +1,9 @@
 # Flash Aero · macOS
 
+> 2026-10-31 整合候选：已合入最新 iOS 导航、分享扩展与 Spotlight，并保留加固修复。旧 LAN 仍停用，已清理仅供其使用的网络声明；Android 的 WorkManager 依赖仍合并 ACCESS_NETWORK_STATE，未为清理 LAN 强删调度框架能力。当前仅支持文件导出/系统分享；升级本端不会修复仍运行旧版本的另一端。详见 [整合与验收](../docs/hardening/integration-20261031.md)。
+
+> 2026-10-25 加固候选：旧版 LAN 因未认证下载/明文风险经批准暂时停用，请使用文件导出/系统分享；没有不安全回退。四端候选支持既有分区 schema1/2，原生 IANA 别名策略已统一；完整 app/真机矩阵仍未验收。见 [审查交接与限制](../docs/hardening/review-handoff.md)。签名团队未变；本轮移除旧LAN专用声明，历史构建记录仍保留。
+
 桌面端原生实现。SwiftUI + SwiftData，零第三方依赖，在 App Sandbox 内运行。
 
 当前发布身份为 **Flash Aero v0.1.0**；`Aero` 为 v0 Alpha 阶段的版本代号。
@@ -22,7 +26,7 @@
 | Memory（一级） | 周报：四类计数、本周情绪基调、收藏优先的 Highlights、周导航（PRD §22 规则聚合版） |
 | 全局搜索 | ⌘K 唤起浮层，跨日志/灵感/情绪/任务搜索，↑↓ 选择、Enter 跳转定位、Esc 关闭 |
 | 收藏 | 日志/灵感/情绪/任务星标；记录页与日志流「已收藏」筛选；周报 Highlights 优先取收藏 |
-| 设置（一级） | 主题、Quick Capture 快捷键（录制改键/恢复默认）、备份导入导出、系统分享、PIN 配对局域网直传、清空数据 |
+| 设置（一级） | 主题、Quick Capture 快捷键（录制改键/恢复默认）、备份导入导出、系统分享、旧LAN停用提示（改用文件/系统分享）、清空数据 |
 | 菜单栏伴侣 | MenuBarExtra：快速记录（回车即存）、今日概览、一键跳转主窗口 |
 | 桌面小组件 | WidgetKit（small/medium）：✦ Flash、今日记录数、今日待办数、主导情绪 emoji，点击经 `flash://today` 回到此刻页；数据走 App Group 快照（见「安全与已知限制」） |
 | Quick Capture 面板 | 全局热键（默认 ⇧⌘Space，Carbon RegisterEventHotKey，沙盒可用）唤起浮动面板；Enter/⌘Enter 保存即关、Esc 放弃、未提交保留草稿；主窗口关闭后 App 驻留菜单栏，热键保持可用 |
@@ -89,16 +93,12 @@ FlashKit，用 `cd ../shared/FlashKit && swift test` 运行。测试数量以当
   "data": { "logs": [...], "emotions": [...], "tasks": [...] } }
 ```
 
-- 分区 schema 2（2026-10-05 起）：新增可选字段——三分区 `isFavorite`、情绪 `intensity`（1–5）、任务 `sourceLogId`（灵感转任务的来源关联）。macOS 导出写 2、读取接受 1 与 2；Android/HarmonyOS 跟进前会显式拒绝 schema 2 文件（不静默丢弃），详见 `app/docs/contracts/README.md`。
+- 分区 schema 2（2026-10-05 起）：新增可选字段——三分区 `isFavorite`、情绪 `intensity`（1–5）、任务 `sourceLogId`（灵感转任务的来源关联）。候选四端导出写2、读取接受1/2并保留可空元数据；旧schema1-only客户端仍须显式拒绝schema2（不静默丢弃），详见 `app/docs/contracts/README.md`。
 - 标准入口严格校验 v2，任何非法条目整体拒绝；独立恢复入口用于 v1 或旧/损坏备份，逐条跳过可恢复范围内的非法记录。未知版本/分区拒绝导入；单文件上限 50 MB。
 - 读写走 App Sandbox 的用户择定文件授权，导出文件权限 0600。
 - 「通过系统分享」会创建沙箱缓存副本并调用系统分享服务，可选择 AirDrop、
   信息、邮件或云盘；Flash 不会自行上传文件。
-- 「局域网发送 / 接收」通过 Bonjour 自动发现 Android 或 macOS 设备。发送方生成
-  随机六位 PIN，PIN 60 秒失效、最多尝试五次；正确配对并完成一次传输后监听立即
-  关闭。接收后会分析新增、修改、相同与仅本机数据，再选择差异合并或覆盖。仅启用
-  App Sandbox 的客户端 / 服务端网络能力，数据不经过 Flash 服务器；
-  建议只在可信的家庭或办公局域网使用。
+- 「局域网发送 / 接收」因旧协议安全风险暂时停用，入口说明文件/分享替代方式；不先生成备份或启动Bonjour/监听/连接。历史实现/NetService回归保留在测试目标，新的安全替代协议未启用。
 
 ## 性能基线
 
@@ -150,4 +150,4 @@ FlashKit，用 `cd ../shared/FlashKit && swift test` 运行。测试数量以当
 
 ## 验收与发布状态（2026-09-26）
 
-设备品质结果与未验项目见 [品质矩阵](../docs/quality/device-matrix.md)，跨端互传状态见 [契约验收](../docs/contracts/acceptance.md)。局域网使用 [握手 v1.1](../docs/contracts/lan-handshake-v1.1.md)：六位 PIN、挑战应答与 payload HMAC；内容未做端到端加密。历史明文 PIN 首包不兼容，双方需使用同代构建，旧数据经 JSON 文件迁移。
+设备品质结果与未验项目见 [品质矩阵](../docs/quality/device-matrix.md)，当前实际导出/原生门禁与缺项见 [审查交接](../docs/hardening/review-handoff.md)。[握手 v1.1](../docs/contracts/lan-handshake-v1.1.md) 仅作已停用历史协议记录；生产应用没有监听/发现/连接路径。安全替代协议尚未选定或实施，旧版客户端的漏洞不会因另一端更新而消失。

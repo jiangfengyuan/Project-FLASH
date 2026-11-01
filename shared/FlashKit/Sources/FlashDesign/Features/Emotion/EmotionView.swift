@@ -13,6 +13,7 @@ import FlashCore
 /// 区块结构：情绪选择卡片 → 本周趋势 → 近期记录，入场按 50ms 级联错开。
 public struct EmotionView: View {
     @Environment(\.flashRepository) private var repository
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var sliderValue: Double = 5 // 1...7 → veryUnhappy...slightlyHappy 默认
@@ -157,7 +158,10 @@ public struct EmotionView: View {
                     .transition(.pop(reduceMotion: reduceMotion))
                 }
 
-                HStack(spacing: 10) { // 10：输入框与按钮的紧凑节奏（无对应令牌）
+                // Full-size submit text needs its own row at accessibility sizes.
+                (usesAccessibleInputLayout
+                 ? AnyLayout(VStackLayout(alignment: .leading, spacing: 10))
+                 : AnyLayout(HStackLayout(spacing: 10))) {
                     TextField("想说点什么？（可选）", text: $note)
                         .textFieldStyle(.roundedBorder)
                     Button("记录情绪") { save() }
@@ -170,6 +174,14 @@ public struct EmotionView: View {
             .frame(maxWidth: .infinity)
         }
         .animation(Motion.soft(reduceMotion), value: selectedLevel)
+    }
+
+    private var usesAccessibleInputLayout: Bool {
+        #if os(iOS)
+        dynamicTypeSize.isAccessibilitySize
+        #else
+        false
+        #endif
     }
 
     private func subEmotionChip(_ sub: SubEmotion) -> some View {

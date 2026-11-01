@@ -197,46 +197,6 @@ test('task save failure retains editor and suppresses double submit', async () =
   assert.ok(r.messages.includes('task disk failure'));
 });
 
-test('cancelled discovery/receive and old sender failure cannot overwrite the new LAN session', async () => {
-  const senders = [], discoveries = [], receivers = [];
-  const load = createLoader({ 'data/LocalBackupTransfer': {
-    LocalBackupSender: class {
-      constructor(context, json, done) { this.done = done; this.pin = '123456'; this.gate = deferred(); senders.push(this); }
-      start() { return this.gate.promise; }
-      stop() { this.done(false); }
-    },
-    LocalBackupDiscovery: class {
-      constructor(context, changed) { this.changed = changed; discoveries.push(this); }
-      start() {} stop() {}
-    },
-    LocalBackupReceiver: { start() {
-      const gate = deferred();
-      const receiver = { gate, result: gate.promise, cancel() { gate.reject(new Error('cancelled')); } };
-      receivers.push(receiver); return receiver;
-    } }
-  } });
-  const { BackupState, TransferPhase: P } = load('state/FeatureStates');
-  const { BackupController } = load('state/BackupController');
-  const state = new BackupState(), r = runtime();
-  const controller = new BackupController(state, r, { ready: true, snapshot: () => ({ logs: [], emotions: [], tasks: [] }) });
-  const old = controller.startLanSend();
-  controller.startLanReceive();
-  senders[0].gate.reject(new Error('late failure'));
-  await old;
-  assert.equal(state.lanMode, P.RECEIVING);
-  discoveries[0].changed([{ id: 'device', name: 'sender' }]);
-  state.selectedLanDevice = 'device'; state.lanEnteredPin = '123456';
-  const receiving = controller.receiveLan();
-  controller.stopLan();
-  controller.startLanReceive();
-  discoveries[0].changed([{ id: 'stale', name: 'stale' }]);
-  await receiving;
-  assert.equal(state.lanMode, P.RECEIVING);
-  assert.deepEqual(state.lanDevices, []);
-  assert.equal(state.importSummary, '');
-  assert.equal(r.messages.length, 0);
-});
-
 test('import failure retains preview for retry and disposal ignores pending picker result', async () => {
   const gate = deferred();
   const load = createLoader({ 'data/BackupFiles': { BackupFiles: { importJSON: () => gate.promise } } });

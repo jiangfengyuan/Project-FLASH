@@ -1,0 +1,70 @@
+{
+  "kind": "correctness gates; no visual, performance or real-device acceptance",
+  "parent": "420c51c790d0ceab7c1d1e9ad60552d5f554fc9c",
+  "sourceFiles": [
+    {
+      "path": "ios/Flash/UI/QuickCapture/QuickCaptureSheet.swift",
+      "sha256": "7beb6158b93bd9d923a9fefd9cd05dfca36a109d17b698f4a17d6abb112d8256"
+    },
+    {
+      "path": "shared/FlashKit/Sources/FlashDesign/Features/Calendar/CalendarView.swift",
+      "sha256": "c477e7cdf9340edd85c2dd692d3c611da6fb7eac689b7efec9731648f87ff1ce"
+    },
+    {
+      "path": "shared/FlashKit/Sources/FlashDesign/Features/Calendar/TaskEditorView.swift",
+      "sha256": "e8e7a8000e365798d6ebf7a7f19b9a97f11f8983a4541f2f5339011446870a61"
+    },
+    {
+      "path": "shared/FlashKit/Sources/FlashDesign/Features/Emotion/EmotionView.swift",
+      "sha256": "45eb7a5169270df3deceee7abef5884fae88e1288e3a03895c11a8c765789bfa"
+    }
+  ],
+  "simulator": "CodexFlashHardening / iPhone18 Pro / iOS27.0 24A434",
+  "simulatorProfileConfiguredBeforeAndReadAfterFinalIOSGate": {
+    "appearance": "light",
+    "content_size": "accessibility-extra-extra-extra-large"
+  },
+  "build": "Debug, Xcode-beta27.2, CODE_SIGNING_ALLOWED=NO; gates serialized",
+  "logs": [
+    {
+      "file": "c4-ax5-capture-build.log",
+      "sha256": "1ccd5d112d3c6580e88908d6a392c36f25645e2b1f3ccd20f786378bd57d34fc",
+      "selectedOutput": [
+        "** TEST BUILD SUCCEEDED **"
+      ]
+    },
+    {
+      "file": "c4-ax5-final-ios.log",
+      "sha256": "0eacabc4c7d70dc8eada47e4a5033f1d0ee027724328a937a4a91b3b0ed07a83",
+      "selectedOutput": [
+        "✔ Test run with 15 tests in 5 suites passed after 0.843 seconds.",
+        "** TEST EXECUTE SUCCEEDED **"
+      ]
+    },
+    {
+      "file": "c4-ax5-macos.log",
+      "sha256": "748789c15039647bc3c327a102740e1590e4d9edce349a8cc2679cad315091ae",
+      "selectedOutput": [
+        "􁁛 Test run with 13 tests in 2 suites passed after 0.008 seconds.",
+        "** TEST SUCCEEDED **"
+      ]
+    },
+    {
+      "file": "c4-ax5-flashkit.log",
+      "sha256": "b2791d0b99c6749862887c40327f93f045c8cae585a8e7727972c7c573449ff3",
+      "selectedOutput": [
+        "􁁛  Test run with 3 tests in 1 suite passed after 0.039 seconds.",
+        "􁁛  Test run with 204 tests in 26 suites passed after 3.085 seconds."
+      ]
+    }
+  ],
+  "uiStatus": "NOT VERIFIED: Device Hub native CUA capture failed SCStreamErrorDomain/-3812. Approval quota was restored and getApp briefly succeeded; reset/rebind did not repair screenshot bridge. Owner asked to bring named window front/Zoom to Fit. No alternate input technology used, no acceptance inferred from source or unit gates.",
+  "remainingChecks": [
+    "light/dark default vs AX5 original PNG comparisons",
+    "calendar horizontal/vertical scrolling, selected-date and month navigation, counts/emoji, task detail access",
+    "all-day and timed native wheel selection, same-zone save/relaunch, cancel and keyboard access",
+    "emotion positive/negative, intensity/note, submit and readback, VoiceOver focus",
+    "quick capture header/category/text/cancel/save with keyboard and long draft; narrow375pt and wide sizes",
+    "real devices and other platform accessibility behavior"
+  ]
+}

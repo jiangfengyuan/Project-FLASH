@@ -10,6 +10,23 @@ import SwiftData
 
 @Suite("FlashRepository") @MainActor
 struct FlashRepositoryTests {
+    @Test func failedCommitDoesNotPublishSpotlightChange() throws {
+        enum Failure: Error { case disk }
+        var fail = false
+        let repo = makeRepo(beforeSave: { if fail { throw Failure.disk } })
+        try repo.addLog(content: "original", colorTag: .daily)
+        let original = try repo.allLogs()[0]
+        var changes: [LogChange] = []
+        repo.onLogChange = { changes.append($0) }
+        fail = true
+        #expect(throws: Failure.self) { try repo.deleteLog(id: original.id) }
+        #expect(changes.isEmpty)
+        #expect(try repo.containsLog(id: original.id))
+        fail = false
+        try repo.deleteLog(id: original.id)
+        #expect(changes == [.deleted([original.id])])
+    }
+
     private func makeRepo(beforeSave: @escaping () throws -> Void = {}) -> FlashRepository {
         FlashRepository(container: FlashDatabase.makeContainer(inMemory: true), beforeSave: beforeSave)
     }

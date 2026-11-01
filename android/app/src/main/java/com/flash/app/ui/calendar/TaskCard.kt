@@ -27,8 +27,8 @@ import androidx.compose.ui.unit.dp
 import com.flash.app.data.model.TaskDueKind
 import com.flash.app.data.model.TaskItem
 import com.flash.app.ui.components.StyleCard
+import com.flash.app.data.CanonicalTimeZones
 import java.time.Instant
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -81,7 +81,7 @@ private fun taskDueLabel(task: TaskItem): String = when (task.dueKind) {
     TaskDueKind.ALL_DAY -> "全天"
     TaskDueKind.DATE_TIME -> runCatching {
         Instant.parse(requireNotNull(task.dueAt))
-            .atZone(ZoneId.of(requireNotNull(task.timeZone)))
+            .atZone(requireNotNull(CanonicalTimeZones.zoneId(requireNotNull(task.timeZone))))
             .format(DateTimeFormatter.ofPattern("HH:mm"))
     }.getOrDefault("具体时间")
 }

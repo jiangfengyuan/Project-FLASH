@@ -1,0 +1,184 @@
+{
+  "kind": "existing UI baseline; empty fictional app container",
+  "realDevice": false,
+  "serial": "emulator-5580",
+  "apkSHA256": "59613e5ccd19b0c2fc50001aabcfc49d61ee16b4587961936da5b58fa97d8513",
+  "sourceCommit": "1acf52d02f9628a0f5322e16922c5fc895637330",
+  "buildFingerprint": "google/sdk_gphone64_arm64/emu64a:16/BE2A.250530.026.F3/13894323:userdebug/dev-keys",
+  "configuration": "Debug; default GLASS style, system theme",
+  "os": "16",
+  "api": "36",
+  "display": "Physical size: 1080x1920",
+  "locale": "en-US",
+  "timezone": "Asia/Hong_Kong",
+  "captures": [
+    {
+      "screen": "home",
+      "theme": "light",
+      "fontScale": "1.0",
+      "png": "home-light-font1.0.png",
+      "sha256": "e5a83b077a2ff925f52ca230f34314797d22ecf12ecea17a9fbcabeb4ff078f0",
+      "width": 1080,
+      "height": 1920,
+      "hierarchy": "home-light-font1.0.xml"
+    },
+    {
+      "screen": "records",
+      "theme": "light",
+      "fontScale": "1.0",
+      "png": "records-light-font1.0.png",
+      "sha256": "cb97e43c1beaac56709ef37482a6a3db48249a9fa4d70d26773b673ba3aca4a0",
+      "width": 1080,
+      "height": 1920,
+      "hierarchy": "records-light-font1.0.xml"
+    },
+    {
+      "screen": "review",
+      "theme": "light",
+      "fontScale": "1.0",
+      "png": "review-light-font1.0.png",
+      "sha256": "3dc3e0a553fa83ce319d01148e9b41c4d832b48b7f8efddc2b91e0059a702513",
+      "width": 1080,
+      "height": 1920,
+      "hierarchy": "review-light-font1.0.xml"
+    },
+    {
+      "screen": "settings",
+      "theme": "light",
+      "fontScale": "1.0",
+      "png": "settings-light-font1.0.png",
+      "sha256": "cfb01cb25791f1ca6348751ae9cbb79ca6c2f6050cce3e975117ed503cf2c41b",
+      "width": 1080,
+      "height": 1920,
+      "hierarchy": "settings-light-font1.0.xml"
+    },
+    {
+      "screen": "home",
+      "theme": "light",
+      "fontScale": "2.0",
+      "png": "home-light-font2.0.png",
+      "sha256": "208aa8f382bb870829f7eeb34c209442d329930fc398683e3ce8b3e9455cc13e",
+      "width": 1080,
+      "height": 1920,
+      "hierarchy": "home-light-font2.0.xml"
+    },
+    {
+      "screen": "records",
+      "theme": "light",
+      "fontScale": "2.0",
+      "png": "records-light-font2.0.png",
+      "sha256": "7a2574eba40781bdc4bdc439be380a2ad5412503a3740d6fe4e35993a2001027",
+      "width": 1080,
+      "height": 1920,
+      "hierarchy": "records-light-font2.0.xml"
+    },
+    {
+      "screen": "review",
+      "theme": "light",
+      "fontScale": "2.0",
+      "png": "review-light-font2.0.png",
+      "sha256": "1f8f3ffff64868721341bf93e5a85f24b1aaaee5011c342724ec563494ac1aa7",
+      "width": 1080,
+      "height": 1920,
+      "hierarchy": "review-light-font2.0.xml"
+    },
+    {
+      "screen": "settings",
+      "theme": "light",
+      "fontScale": "2.0",
+      "png": "settings-light-font2.0.png",
+      "sha256": "a63b666cef04c85d369ad6633b383bbcd542d47e20fc4780f19d7f16d9436a70",
+      "width": 1080,
+      "height": 1920,
+      "hierarchy": "settings-light-font2.0.xml"
+    },
+    {
+      "screen": "home",
+      "theme": "dark",
+      "fontScale": "1.0",
+      "png": "home-dark-font1.0.png",
+      "sha256": "562d2e1f2b1ca278550b45c1ab624efeb9b72b99490de31afed634de39d5c645",
+      "width": 1080,
+      "height": 1920,
+      "hierarchy": "home-dark-font1.0.xml"
+    },
+    {
+      "screen": "records",
+      "theme": "dark",
+      "fontScale": "1.0",
+      "png": "records-dark-font1.0.png",
+      "sha256": "871fe3ef8237493ef62e6274b62f010e5fc34f506ada105798be33229526e851",
+      "width": 1080,
+      "height": 1920,
+      "hierarchy": "records-dark-font1.0.xml"
+    },
+    {
+      "screen": "review",
+      "theme": "dark",
+      "fontScale": "1.0",
+      "png": "review-dark-font1.0.png",
+      "sha256": "22e64405cf28645230a7ffa26608e653f35a210a65a5d3c04deb9c509db3a796",
+      "width": 1080,
+      "height": 1920,
+      "hierarchy": "review-dark-font1.0.xml"
+    },
+    {
+      "screen": "settings",
+      "theme": "dark",
+      "fontScale": "1.0",
+      "png": "settings-dark-font1.0.png",
+      "sha256": "eaf9c00a4d0b2ab4bbb58cc56649fd7cfb7c067dd6fa14f48f12e0c42d98935b",
+      "width": 1080,
+      "height": 1920,
+      "hierarchy": "settings-dark-font1.0.xml"
+    },
+    {
+      "screen": "home",
+      "theme": "dark",
+      "fontScale": "2.0",
+      "png": "home-dark-font2.0.png",
+      "sha256": "97795e9f4ef7d1958ef660c30891460646eadc6b6005ed6b806da3052a24ab79",
+      "width": 1080,
+      "height": 1920,
+      "hierarchy": "home-dark-font2.0.xml"
+    },
+    {
+      "screen": "records",
+      "theme": "dark",
+      "fontScale": "2.0",
+      "png": "records-dark-font2.0.png",
+      "sha256": "d97eb96358afe6c06d8b73837b1cf4dc50efa1963e1a062daf70fea1aeaf4e39",
+      "width": 1080,
+      "height": 1920,
+      "hierarchy": "records-dark-font2.0.xml"
+    },
+    {
+      "screen": "review",
+      "theme": "dark",
+      "fontScale": "2.0",
+      "png": "review-dark-font2.0.png",
+      "sha256": "acd628a108a8892e54ba363a5798046ef5cff25348d78ec398bea9ea086b4a71",
+      "width": 1080,
+      "height": 1920,
+      "hierarchy": "review-dark-font2.0.xml"
+    },
+    {
+      "screen": "settings",
+      "theme": "dark",
+      "fontScale": "2.0",
+      "png": "settings-dark-font2.0.png",
+      "sha256": "7d3393e761a3853ffedd5ea03cfe8d0f1169f5f91f25327a1fc2f675e2eb0d30",
+      "width": 1080,
+      "height": 1920,
+      "hierarchy": "settings-dark-font2.0.xml"
+    }
+  ],
+  "notVerified": [
+    "populated records, emotion, calendar, Memory, editor/import states",
+    "Material style, expanded/fold/tablet sizes",
+    "TalkBack, touch bounds and contrast",
+    "real-device performance/energy/thermal/notifications/widgets"
+  ],
+  "captureDate": "2026-10-25",
+  "visualInspection": "Home light/default and records dark/font2 inspected; full accessibility/contrast/touch traversal not verified"
+}

@@ -12,6 +12,27 @@ import Foundation
 /// 合并或覆盖写库（覆盖前 TOCTOU 重校验）→ 重建系统提醒。
 /// 序列化、解析与差异分析在后台执行；写库经 `@MainActor` 的 FlashRepository。
 public enum BackupImportCoordinator {
+    /// Detached work must not outlive cancellation as a successful preview.
+    /// JSONSerialization itself has no interruption hook; discard its result
+    /// if cancellation arrives during that bounded synchronous operation.
+    private static func background<Value: Sendable>(
+        _ operation: @escaping @Sendable () throws -> Value
+    ) async throws -> Value {
+        try Task.checkCancellation()
+        let worker = Task.detached(priority: .userInitiated) {
+            try Task.checkCancellation()
+            let value = try operation()
+            try Task.checkCancellation()
+            return value
+        }
+        return try await withTaskCancellationHandler {
+            let value = try await worker.value
+            try Task.checkCancellation()
+            return value
+        } onCancel: {
+            worker.cancel()
+        }
+    }
     /// 确认导入后的结果
     public enum ApplyOutcome: Sendable {
         /// 已写入；`message` 为结果文案，`hasSkipped` 为 true 时宜用弹窗展示（含异常明细）
@@ -28,12 +49,12 @@ public enum BackupImportCoordinator {
     /// 它不是完整备份，日后被当作备份覆盖导入会抹掉真实数据（F-07）
     public static func exportJSON(snapshot: FlashSnapshot, appVersion: String) async throws -> String {
         guard !snapshot.isFromTemporaryStore else { throw BackupError.temporaryStore }
-        return try await Task.detached(priority: .userInitiated) {
+        return try await background {
             try BackupService.exportStrictJSON(logs: snapshot.logs,
                                                emotions: snapshot.emotions,
                                                tasks: snapshot.tasks,
                                                appVersion: appVersion)
-        }.value
+        }
     }
 
     // MARK: - 预览
@@ -41,7 +62,7 @@ public enum BackupImportCoordinator {
     /// 从用户选择的文件生成导入预览：先查大小（超 50 MB 直接拒绝）再全量读入
     public static func preview(fileAt url: URL, recovery: Bool,
                                against snapshot: FlashSnapshot) async throws -> ImportPreview {
-        try await Task.detached(priority: .userInitiated) {
+        try await background {
             let values = try url.resourceValues(forKeys: [.fileSizeKey])
             if let size = values.fileSize, size > BackupService.maxFileBytes {
                 throw BackupError.fileTooLarge
@@ -49,14 +70,14 @@ public enum BackupImportCoordinator {
             let json = try BackupService.readJSON(from: url)
             let parsed = try recovery ? BackupService.parseRecovery(json) : BackupService.parseStrict(json)
             return analyzed(parsed, against: snapshot)
-        }.value
+        }
     }
 
     /// 从局域网接收的 JSON 生成导入预览（只走严格 v2）
     public static func preview(json: String, against snapshot: FlashSnapshot) async throws -> ImportPreview {
-        try await Task.detached(priority: .userInitiated) {
+        try await background {
             analyzed(try BackupService.parseStrict(json), against: snapshot)
-        }.value
+        }
     }
 
     /// 为预览附上与本机快照的差异分析
@@ -79,6 +100,10 @@ public enum BackupImportCoordinator {
                              previewSnapshot: FlashSnapshot?,
                              repository: FlashRepository,
                              rebuildReminders: (([TaskItem]) async throws -> Void)? = nil) async throws -> ApplyOutcome {
+        // The following main-actor mutation is a synchronous atomic commit.
+        // Reject cancellation before that boundary, never report it as an
+        // undone import after a successful database commit.
+        try Task.checkCancellation()
         // 写进临时存储的数据退出即丢，随后的提醒重建还会按临时库撤掉真实提醒（F-07）
         guard !repository.isTemporaryStore else { throw BackupError.temporaryStore }
         if overwrite {

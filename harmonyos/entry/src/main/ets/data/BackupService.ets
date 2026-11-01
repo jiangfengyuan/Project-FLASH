@@ -10,7 +10,7 @@ import {
   TaskDueKind,
   TaskItem
 } from '../models/Models';
-import { CANONICAL_TIME_ZONES } from './CanonicalTimeZones';
+import { CANONICAL_TIME_ZONES, runtimeTimeZone } from './CanonicalTimeZones';
 import { util } from '@kit.ArkTS';
 import { isoNow } from './DateUtils';
 
@@ -27,6 +27,7 @@ export class BackupImport {
 /** JSON.parse overwrites duplicate object keys, so strict import scans the raw text first. */
 class StrictJSONScanner {
   private index: number = 0;
+  private valueCount: number = 0;
   private readonly text: string;
 
   private constructor(text: string) {
@@ -41,6 +42,9 @@ class StrictJSONScanner {
   }
 
   private value(depth: number): void {
+    this.valueCount++;
+    // Match FlashCore before JSON.parse can expand dense primitive arrays.
+    if (this.valueCount > 10000000) throw new Error('/：JSON 值数量超过资源上限');
     this.whitespace();
     if (depth > 128 || this.index >= this.text.length) this.fail();
     switch (this.text[this.index]) {
@@ -216,7 +220,7 @@ export class BackupService {
       exportedAt: isoNow(),
       appVersion: BackupService.appVersion,
       notes: notes,
-      schemas: { logs: 1, emotions: 1, tasks: 1 },
+      schemas: { logs: 2, emotions: 2, tasks: 2 },
       data: {
         logs: BackupService.exportLogs(logs),
         emotions: BackupService.exportEmotions(emotions),
@@ -289,7 +293,7 @@ export class BackupService {
     } else {
       const schemas = document.schemas;
       const data = document.data;
-      if (!schemas || schemas.logs !== 1 || schemas.emotions !== 1 || schemas.tasks !== 1 ||
+      if (!schemas || ![1, 2].includes(schemas.logs) || ![1, 2].includes(schemas.emotions) || ![1, 2].includes(schemas.tasks) ||
         !data || !Array.isArray(data.logs) || !Array.isArray(data.emotions) || !Array.isArray(data.tasks)) {
         throw new Error('备份数据结构不完整或分区版本不兼容');
       }
@@ -364,13 +368,13 @@ export class BackupService {
     if (data.logs.length > BackupService.MAX_ENTRY_COUNT || data.emotions.length > BackupService.MAX_ENTRY_COUNT ||
       data.tasks.length > BackupService.MAX_ENTRY_COUNT) throw new Error('/data：数组超过上限');
     data.logs.forEach((item: LogItem, i: number) => {
-      BackupService.checkFields(item, ['id', 'content', 'colorTag', 'category', 'importance', 'createdAt', 'recordDate'], [], `/data/logs/${i}`);
+      BackupService.checkFields(item, ['id', 'content', 'colorTag', 'category', 'importance', 'createdAt', 'recordDate'], BackupService.schema2Fields(document, 'logs'), `/data/logs/${i}`);
     });
     data.emotions.forEach((item: EmotionRecord, i: number) => {
-      BackupService.checkFields(item, ['id', 'level', 'createdAt', 'recordDate'], ['subEmotion', 'note', 'status'], `/data/emotions/${i}`);
+      BackupService.checkFields(item, ['id', 'level', 'createdAt', 'recordDate'], ['subEmotion', 'note', 'status'].concat(BackupService.schema2Fields(document, 'emotions')), `/data/emotions/${i}`);
     });
     data.tasks.forEach((item: TaskItem, i: number) => {
-      BackupService.checkFields(item, ['id', 'title', 'colorTag', 'importance', 'due', 'createdAt', 'updatedAt'], ['notes', 'reminderAt', 'completedAt'], `/data/tasks/${i}`);
+      BackupService.checkFields(item, ['id', 'title', 'colorTag', 'importance', 'due', 'createdAt', 'updatedAt'], ['notes', 'reminderAt', 'completedAt'].concat(BackupService.schema2Fields(document, 'tasks')), `/data/tasks/${i}`);
       BackupService.checkFields(item.due, item.due.kind === TaskDueKind.ALL_DAY ? ['kind', 'date'] : ['kind', 'at', 'timeZone'], [], `/data/tasks/${i}/due`);
     });
     if (result.skippedLogs + result.skippedEmotions + result.skippedTasks !== 0) throw new Error('/data：存在非法或重复记录，请使用损坏文件恢复入口');
@@ -378,6 +382,9 @@ export class BackupService {
   }
 
   static parseRecovery(json: string): BackupImport {
+    if (new util.TextEncoder().encodeInto(json).length > BackupService.MAX_BYTES) throw new Error('/：文件超过 50 MiB');
+    // Recover individual records only after bounded, unambiguous JSON syntax.
+    StrictJSONScanner.validate(json);
     const result = BackupService.parse(json);
     const document = JSON.parse(json) as BackupDocument;
     const legacy = result.sourceVersion === BackupService.LEGACY_VERSION;
@@ -389,17 +396,30 @@ export class BackupService {
     const logs = legacy ? (document.logs ?? []) : (document.data?.logs ?? []);
     const emotions = legacy ? (document.emotions ?? []) : (document.data?.emotions ?? []);
     logs.forEach((item: LogItem, i: number) => {
-      if (item && typeof item === 'object' && !Array.isArray(item)) BackupService.checkFields(item, [], ['id', 'content', 'colorTag', 'category', 'importance', 'createdAt', 'recordDate'], `/data/logs/${i}`);
+      if (item && typeof item === 'object' && !Array.isArray(item)) BackupService.checkFields(item, [], ['id', 'content', 'colorTag', 'category', 'importance', 'createdAt', 'recordDate'].concat(BackupService.schema2Fields(document, 'logs')), `/data/logs/${i}`);
     });
     emotions.forEach((item: EmotionRecord, i: number) => {
-      if (item && typeof item === 'object' && !Array.isArray(item)) BackupService.checkFields(item, [], ['id', 'level', 'createdAt', 'recordDate', 'note', 'status', 'subEmotion'], `/data/emotions/${i}`);
+      if (item && typeof item === 'object' && !Array.isArray(item)) BackupService.checkFields(item, [], ['id', 'level', 'createdAt', 'recordDate', 'note', 'status', 'subEmotion'].concat(BackupService.schema2Fields(document, 'emotions')), `/data/emotions/${i}`);
     });
     if (!legacy) document.data?.tasks.forEach((item: TaskItem, i: number) => {
       if (!item || typeof item !== 'object' || Array.isArray(item)) return;
-      BackupService.checkFields(item, [], ['id', 'title', 'colorTag', 'importance', 'due', 'createdAt', 'updatedAt', 'notes', 'reminderAt', 'completedAt'], `/data/tasks/${i}`);
+      BackupService.checkFields(item, [], ['id', 'title', 'colorTag', 'importance', 'due', 'createdAt', 'updatedAt', 'notes', 'reminderAt', 'completedAt'].concat(BackupService.schema2Fields(document, 'tasks')), `/data/tasks/${i}`);
       if (item.due && typeof item.due === 'object' && !Array.isArray(item.due)) BackupService.checkFields(item.due, [], item.due.kind === TaskDueKind.ALL_DAY ? ['kind', 'date'] : ['kind', 'at', 'timeZone'], `/data/tasks/${i}/due`);
     });
     return result;
+  }
+
+  private static schema2Fields(document: BackupDocument, section: string): string[] {
+    const schemas = document.schemas;
+    if (!schemas) return [];
+    const version = section === 'logs' ? schemas.logs : section === 'emotions' ? schemas.emotions : schemas.tasks;
+    if (version !== 2) return [];
+    return section === 'emotions' ? ['isFavorite', 'intensity'] :
+      section === 'tasks' ? ['isFavorite', 'sourceLogId'] : ['isFavorite'];
+  }
+
+  private static validOptionalBoolean(value?: boolean | null): boolean {
+    return value === undefined || value === null || typeof value === 'boolean';
   }
 
   private static checkFields(value: Object | undefined, required: string[], optional: string[], path: string): void {
@@ -413,6 +433,7 @@ export class BackupService {
 
   private static validLog(item: LogItem): boolean {
     return !!item && typeof item.id === 'string' && BackupService.UUID_PATTERN.test(item.id) &&
+      BackupService.validOptionalBoolean(item.isFavorite) &&
       typeof item.content === 'string' && item.content.length <= BackupService.MAX_FIELD_LENGTH &&
       COLOR_TAGS.includes(item.colorTag) && CATEGORIES.includes(item.category) &&
       Number.isInteger(item.importance) && item.importance >= 0 && item.importance <= 4 &&
@@ -428,11 +449,17 @@ export class BackupService {
       (typeof item.status === 'string' && item.status.length <= BackupService.MAX_FIELD_LENGTH);
     return typeof item.id === 'string' && BackupService.UUID_PATTERN.test(item.id) &&
       Number.isInteger(item.level) && item.level >= -3 && item.level <= 3 &&
-      subValid && noteValid && statusValid && BackupService.validDate(item.createdAt, item.recordDate);
+      subValid && noteValid && statusValid && BackupService.validOptionalBoolean(item.isFavorite) &&
+      (item.intensity === undefined || item.intensity === null ||
+        (typeof item.intensity === 'number' && Number.isInteger(item.intensity) && item.intensity >= 1 && item.intensity <= 5)) &&
+      BackupService.validDate(item.createdAt, item.recordDate);
   }
 
   private static validTask(item: TaskItem): boolean {
     if (!item || typeof item.id !== 'string' || !BackupService.UUID_PATTERN.test(item.id) ||
+      !BackupService.validOptionalBoolean(item.isFavorite) ||
+      (item.sourceLogId !== undefined && item.sourceLogId !== null &&
+        (typeof item.sourceLogId !== 'string' || !BackupService.UUID_PATTERN.test(item.sourceLogId))) ||
       typeof item.title !== 'string' || !item.title.trim() || item.title.length > 200 ||
       !BackupService.validOptionalText(item.notes) || !COLOR_TAGS.includes(item.colorTag) ||
       !Number.isInteger(item.importance) || item.importance < 0 || item.importance > 4 ||
@@ -450,7 +477,7 @@ export class BackupService {
   }
 
   private static normalizedLog(item: LogItem): LogItem {
-    return {
+    const normalized: LogItem = {
       id: item.id,
       content: item.content,
       colorTag: item.colorTag,
@@ -459,10 +486,12 @@ export class BackupService {
       createdAt: BackupService.normalizedISO(item.createdAt),
       recordDate: item.recordDate
     };
+    if (typeof item.isFavorite === 'boolean') normalized.isFavorite = item.isFavorite;
+    return normalized;
   }
 
   private static normalizedEmotion(item: EmotionRecord): EmotionRecord {
-    return {
+    const normalized: EmotionRecord = {
       id: item.id,
       level: item.level,
       subEmotion: item.subEmotion ?? undefined,
@@ -471,6 +500,9 @@ export class BackupService {
       recordDate: item.recordDate,
       createdAt: BackupService.normalizedISO(item.createdAt)
     };
+    if (typeof item.intensity === 'number') normalized.intensity = item.intensity;
+    if (typeof item.isFavorite === 'boolean') normalized.isFavorite = item.isFavorite;
+    return normalized;
   }
 
   private static normalizedTask(item: TaskItem): TaskItem {
@@ -486,7 +518,7 @@ export class BackupService {
         timeZone: canonicalZone === null ? undefined : canonicalZone
       };
     }
-    return {
+    const normalized: TaskItem = {
       id: item.id,
       title: item.title.trim(),
       notes: item.notes ?? undefined,
@@ -498,6 +530,9 @@ export class BackupService {
       createdAt: BackupService.normalizedISO(item.createdAt),
       updatedAt: BackupService.normalizedISO(item.updatedAt)
     };
+    if (typeof item.sourceLogId === 'string') normalized.sourceLogId = item.sourceLogId;
+    if (typeof item.isFavorite === 'boolean') normalized.isFavorite = item.isFavorite;
+    return normalized;
   }
 
   private static validOptionalText(value?: string | null): boolean {
@@ -548,13 +583,10 @@ export class BackupService {
 
   private static canonicalTimeZone(value: string): string | null {
     if (!CANONICAL_TIME_ZONES.includes(value)) return null;
-    try {
-      // Verify the identifier is parseable on this device; keep the contract canonical ID.
-      new Intl.DateTimeFormat(undefined, { timeZone: value }).format(new Date(0));
-      return value;
-    } catch (_) {
-      return null;
+    if (runtimeTimeZone(value) === undefined) {
+      throw new Error('此设备不支持备份中的任务时区，请更新系统后重试；未导入任何数据');
     }
+    return value;
   }
 
   private static validTimeZone(value: string): boolean {

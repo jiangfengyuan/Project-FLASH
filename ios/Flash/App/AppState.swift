@@ -138,9 +138,13 @@ final class AppState {
                 .queryItems?.first(where: { $0.name == "category" })?.value
             presentQuickCapture(category: value.flatMap(Category.init(rawValue:)))
         case "today":
+            isSearchPresented = false
+            quickCapture = nil
             homePath = []
             selectedTab = .home
         case "ideas":
+            isSearchPresented = false
+            quickCapture = nil
             explorePath = []
             exploreFilterRequest = .idea
             selectedTab = .explore

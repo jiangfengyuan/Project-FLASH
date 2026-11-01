@@ -151,3 +151,12 @@ for (const name of ['merge-local', 'merge-incoming', 'merge-expected', 'overwrit
     assert.deepEqual(validateDocument(document), { valid: true, errors: [] });
   });
 }
+
+
+test('generated IANA policy accepts modern names and retains authoritative rename spelling', () => {
+  for (const zone of ['Europe/Kyiv', 'Europe/Kiev', 'Asia/Kolkata', 'Asia/Calcutta', 'Asia/Kathmandu', 'Africa/Asmara', 'Pacific/Chuuk']) {
+    const input = structuredClone(full); input.data.tasks[0].due.timeZone = zone;
+    assert.equal(validateDocument(input).valid, true, zone);
+    assert.equal(input.data.tasks[0].due.timeZone, zone);
+  }
+});

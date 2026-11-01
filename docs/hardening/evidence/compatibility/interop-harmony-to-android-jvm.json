@@ -1,0 +1,67 @@
+{
+  "kind": "Android production Kotlin codec on host JVM",
+  "nativeAndroid": false,
+  "timezoneProbes": [
+    {
+      "input": "Europe/Kyiv",
+      "hostJDKZoneId": "Europe/Kyiv",
+      "hostJDKAccepted": true,
+      "codecAccepted": false
+    },
+    {
+      "input": "Europe/Kiev",
+      "hostJDKZoneId": "Europe/Kiev",
+      "hostJDKAccepted": true,
+      "codecAccepted": true
+    },
+    {
+      "input": "Asia/Kolkata",
+      "hostJDKZoneId": "Asia/Kolkata",
+      "hostJDKAccepted": true,
+      "codecAccepted": false
+    },
+    {
+      "input": "Asia/Calcutta",
+      "hostJDKZoneId": "Asia/Calcutta",
+      "hostJDKAccepted": true,
+      "codecAccepted": true
+    },
+    {
+      "input": "UTC",
+      "hostJDKZoneId": "UTC",
+      "hostJDKAccepted": true,
+      "codecAccepted": true
+    },
+    {
+      "input": "Invalid/Unknown",
+      "hostJDKAccepted": false,
+      "codecAccepted": false
+    }
+  ],
+  "hostJava": "21.0.11+10-LTS",
+  "androidExport": {
+    "sha256": "6157aa2d961f7f3d5b2d160d2983e4135c487e18462b3da1bcb9e15f0c0d482f",
+    "bytes": 1781,
+    "counts": {
+      "emotions": 1,
+      "logs": 1,
+      "tasks": 2
+    },
+    "schemas": {
+      "emotions": 2,
+      "logs": 2,
+      "tasks": 2
+    }
+  },
+  "incomingExportToAndroidCodec": {
+    "sha256": "cab6922ea6a3ea92f3d5642748cd0bcf4e4bf47076785e63123006947f6a893b",
+    "incomingMetadataCompared": true,
+    "bytes": 2352,
+    "counts": {
+      "emotions": 2,
+      "logs": 2,
+      "tasks": 2
+    },
+    "status": "accepted"
+  }
+}

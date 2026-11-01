@@ -15,6 +15,7 @@ public enum BackupError: Error, Equatable, Sendable {
     case invalidObject(String)
     case contract(String)
     case fileTooLarge
+    case unsupportedTimeZone
     /// 当前为内存降级的临时存储：导出只会包含本次启动后的内容，导入也会在退出后丢失（F-07）
     case temporaryStore
 
@@ -27,6 +28,7 @@ public enum BackupError: Error, Equatable, Sendable {
         case .invalidObject(let name): "\(name) 必须是对象"
         case .contract(let path): "\(path)：不符合备份契约，请检查文件或使用恢复入口"
         case .fileTooLarge: "文件过大，不是有效的备份"
+        case .unsupportedTimeZone: "此设备不支持备份中的任务时区，请更新系统后重试；未导入任何数据"
         case .temporaryStore: "本地数据库暂时无法打开，当前只有本次启动后的临时内容，不能导出或导入。原有数据未被改动，请完全退出 Flash 后重新打开再试"
         }
     }
@@ -217,6 +219,8 @@ public enum BackupService: Sendable {
     private static let uuidRegex = try! NSRegularExpression(
         pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
     private static let dayRegex = try! NSRegularExpression(pattern: "^\\d{4}-\\d{2}-\\d{2}$")
+    private static let instantRegex = try! NSRegularExpression(
+        pattern: #"^([0-9]{4}-[0-9]{2}-[0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})(?:\.([0-9]{1,9}))?(Z|[+-][0-9]{2}:[0-9]{2})$"#)
 
     // ISO8601DateFormatter 共享实例经串行队列访问（安全审计项）：不再依赖
     // 「文档保证线程安全」的口径；nonisolated(unsafe) 仅为编译期标注
@@ -401,7 +405,7 @@ public enum BackupService: Sendable {
         var taskIDs = Set<String>()
         var skippedTasks = max(0, tasksArray.count - maxEntryCount)
         for element in tasksArray.prefix(maxEntryCount) {
-            if let entry = element as? [String: Any], let task = parseTask(entry),
+            if let entry = element as? [String: Any], let task = try parseTask(entry),
                taskIDs.insert(task.id).inserted {
                 tasks.append(task)
             } else {
@@ -469,6 +473,10 @@ public enum BackupService: Sendable {
 
     public static func parseRecovery(_ json: String) throws -> ImportPreview {
         if json.utf8.count > maxFileBytes { throw BackupError.fileTooLarge }
+        // Recovery may skip damaged records, but must not bypass the input
+        // resource limits or accept ambiguous duplicate keys before allocation.
+        var scanner = StrictJSONScanner(json)
+        try scanner.validate()
         let root = try serializedRoot(json)
         let result = try parse(root: root)
         let legacy = result.sourceVersion == legacyBackupVersion
@@ -557,7 +565,7 @@ public enum BackupService: Sendable {
         return .some(intensity)
     }
 
-    private static func parseTask(_ dict: [String: Any]) -> TaskItem? {
+    private static func parseTask(_ dict: [String: Any]) throws -> TaskItem? {
         guard let id = dict["id"] as? String, isUUID(id),
               let rawTitle = dict["title"] as? String,
               !rawTitle.trimmingCharacters(in: contractWhitespace).isEmpty,
@@ -599,7 +607,7 @@ public enum BackupService: Sendable {
             guard let rawDueAt = due["at"] as? String,
                   let normalizedDueAt = normalizeISODate(rawDueAt),
                   let zone = due["timeZone"] as? String,
-                  let canonicalZone = canonicalTimeZone(zone) else { return nil }
+                  let canonicalZone = try canonicalTimeZone(zone) else { return nil }
             dueDate = nil
             dueAt = normalizedDueAt
             timeZone = canonicalZone
@@ -647,11 +655,10 @@ public enum BackupService: Sendable {
         return text.utf16.count <= maxTextLength
     }
 
-    /// 命名时区校验：输入必须在契约白名单中，且 TimeZone(identifier:) 可解析。
-    /// 这样拒绝 ICU 别名（utc、Zulu、GMT0、US/Eastern 等）和偏移写法，与契约校验器保持同一口径。
-    /// 返回输入本身作为标准 ID（Foundation 会把 UTC 显示为 GMT，但契约以白名单为准）。
-    private static func canonicalTimeZone(_ zone: String) -> String? {
-        guard CanonicalTimeZones.all.contains(zone), TimeZone(identifier: zone) != nil else { return nil }
+    /// Preserve the wire spelling; native rules resolve IANA rename aliases.
+    private static func canonicalTimeZone(_ zone: String) throws -> String? {
+        guard CanonicalTimeZones.all.contains(zone) else { return nil }
+        guard CanonicalTimeZones.timeZone(for: zone) != nil else { throw BackupError.unsupportedTimeZone }
         return zone
     }
 
@@ -684,8 +691,10 @@ public enum BackupService: Sendable {
     private static let maximumInstant = isoWholeSecondDate(from: "9999-12-31T23:59:59Z")!
 
     private static func normalizeISODate(_ value: String) -> String? {
-        let pattern = #"^([0-9]{4}-[0-9]{2}-[0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})(?:\.([0-9]{1,9}))?(Z|[+-][0-9]{2}:[0-9]{2})$"#
-        guard let match = value.range(of: pattern, options: .regularExpression), match == value.startIndex..<value.endIndex else { return nil }
+        let range = NSRange(value.startIndex..., in: value)
+        // Only the range is needed: avoid materializing a checking-result
+        // object for every timestamp in a large import/export operation.
+        guard instantRegex.rangeOfFirstMatch(in: value, range: range) == range else { return nil }
         let chars = Array(value)
         let day = String(chars[0..<10])
         guard isDay(day), let h = Int(String(chars[11..<13])), h <= 23,
@@ -693,6 +702,14 @@ public enum BackupService: Sendable {
               let s = Int(String(chars[17..<19])), s <= 59 else { return nil }
         let zone = value.hasSuffix("Z") ? "Z" : String(value.suffix(6))
         guard zone != "-00:00" else { return nil }
+        let fraction = chars.count > 19 && chars[19] == "." ? String(chars[20..<(chars.count - zone.count)]) : ""
+        let milliseconds = String((fraction + "000").prefix(3))
+        if zone == "Z" {
+            // ASCII syntax, real Gregorian date/year and time ranges were all
+            // validated above. Already-UTC input needs no calendar/formatter
+            // round trip; retain the exact contract's fractional truncation.
+            return String(chars[0..<19]) + "." + milliseconds + "Z"
+        }
         var offset = 0
         if zone != "Z" {
             let z = Array(zone)
@@ -707,8 +724,6 @@ public enum BackupService: Sendable {
         guard instant >= minimumInstant, instant <= maximumInstant else { return nil }
         let utc = isoWholeSecondString(from: instant)
         guard utc.count == 20, let year = Int(utc.prefix(4)), (1...9999).contains(year) else { return nil }
-        let fraction = chars.count > 19 && chars[19] == "." ? String(chars[20..<(chars.count - zone.count)]) : ""
-        let milliseconds = String((fraction + "000").prefix(3))
         return String(utc.dropLast()) + "." + milliseconds + "Z"
     }
 

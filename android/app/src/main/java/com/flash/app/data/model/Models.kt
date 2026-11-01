@@ -6,8 +6,8 @@
 
 package com.flash.app.data.model
 
+import com.flash.app.data.CanonicalTimeZones
 import java.time.Instant
-import java.time.ZoneId
 
 /**
  * 与 Web 版 src/lib/constants.ts 对齐的核心数据模型。
@@ -74,6 +74,7 @@ data class LogItem(
     val importance: Int,
     val createdAt: String,
     val recordDate: String,
+    val isFavorite: Boolean? = null,
 )
 
 data class EmotionRecord(
@@ -84,6 +85,8 @@ data class EmotionRecord(
     val note: String?,
     val recordDate: String,
     val createdAt: String,
+    val intensity: Int? = null,
+    val isFavorite: Boolean? = null,
 )
 
 enum class TaskDueKind(val storageKey: String) {
@@ -109,12 +112,14 @@ data class TaskItem(
     val completedAt: String?,
     val createdAt: String,
     val updatedAt: String,
+    val sourceLogId: String? = null,
+    val isFavorite: Boolean? = null,
 ) {
     val calendarDate: String
         get() = when (dueKind) {
             TaskDueKind.ALL_DAY -> requireNotNull(dueDate)
             TaskDueKind.DATE_TIME -> Instant.parse(requireNotNull(dueAt))
-                .atZone(ZoneId.of(requireNotNull(timeZone)))
+                .atZone(requireNotNull(CanonicalTimeZones.zoneId(requireNotNull(timeZone))))
                 .toLocalDate()
                 .toString()
         }

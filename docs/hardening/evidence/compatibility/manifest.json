@@ -1,0 +1,115 @@
+{
+  "syntheticOnly": true,
+  "notInstalledAppUIOrPhysicalDevice": true,
+  "candidateProductionSource": "1acf52d02f9628a0f5322e16922c5fc895637330",
+  "historicalInteropSource": "schema2 milestone 6914f04, before timezone milestone; see each source hash",
+  "nativeAndroid": {
+    "avd": "Codex_Flash_Hardening_API36",
+    "os": "Android16 API36",
+    "build": "google/sdk_gphone64_arm64/emu64a:16/BE2A.250530.026.F3/13894323:userdebug/dev-keys",
+    "tzData": "009.001|2025a|001",
+    "appAPK_SHA256": "59613e5ccd19b0c2fc50001aabcfc49d61ee16b4587961936da5b58fa97d8513"
+  },
+  "files": [
+    {
+      "file": "android-native-schema2-export.json",
+      "bytes": 2564,
+      "sha256": "4fe48730cbbc3a14f15c2aa584b70a34442adc95b2de31173b6347e375b5951e"
+    },
+    {
+      "file": "apple-actual-export.json",
+      "bytes": 2639,
+      "sha256": "cc9718e96f86ce50df4c028a673cfcd2d37ce385e0235c3e1d1764889f6fffa2"
+    },
+    {
+      "file": "f02-f03-android-codec-probe.json",
+      "bytes": 1438,
+      "sha256": "fabcfdc4d1c938bb2a6270d224d151097c51455e5345a0fbd0c6d85a1fb16647"
+    },
+    {
+      "file": "f02-f03-baseline-probe.json",
+      "bytes": 1763,
+      "sha256": "b676c79a2bcf7035559d9521ccfb83f840610c0988d7ea0eab5b60abd68c11f6"
+    },
+    {
+      "file": "f03-apple-actual-export-probe.json",
+      "bytes": 1460,
+      "sha256": "1d07119839bb176a843a076ebc8989f30494bbba137342b09b0749ad87265716"
+    },
+    {
+      "file": "f03-apple-to-harmony-codec.json",
+      "bytes": 2092,
+      "sha256": "0416965ef11d8afd2772a08a9b83cc56cb9dc8338d71a5c595658b71fce9618f"
+    },
+    {
+      "file": "harmony-reexport-from-apple.json",
+      "bytes": 2352,
+      "sha256": "cab6922ea6a3ea92f3d5642748cd0bcf4e4bf47076785e63123006947f6a893b"
+    },
+    {
+      "file": "harmony-through-android-native-export.json",
+      "bytes": 2564,
+      "sha256": "db02cd6df7a5e2446401987be4087e072a72ca27a450c0a23c848ea819aa3c6d"
+    },
+    {
+      "file": "interop-android-to-apple.json",
+      "bytes": 1497,
+      "sha256": "7ee716d43eeee6ab51cfe7a74590da38f7fdf7068aba601fda419734a05bc640"
+    },
+    {
+      "file": "interop-android-to-harmony.json",
+      "bytes": 519,
+      "sha256": "18852109579d808f0c5aecceb05c6c5de2baa89d4f4942dba76d3c8707c1857d"
+    },
+    {
+      "file": "interop-apple-to-harmony.json",
+      "bytes": 519,
+      "sha256": "6a991da33e8e56d13a8978af57eb9161f5a940803548ee724af93d82471a251d"
+    },
+    {
+      "file": "interop-harmony-to-android-jvm.json",
+      "bytes": 1510,
+      "sha256": "c2b69104b6ec8fa5277e651b941caff7b39ac0a51f2239473f04c907da4d0e5b"
+    },
+    {
+      "file": "interop-harmony-to-apple.json",
+      "bytes": 1497,
+      "sha256": "da564aa3b83ceb905d31cd88abb7d0241f27291b5ac29d9b8da14845f9b4b07a"
+    },
+    {
+      "file": "m12-android-native.txt",
+      "bytes": 13111,
+      "sha256": "c8f05b21008f70534a634e30e8eaca73070485df40c9847a6ce9eab340d5f0b9"
+    },
+    {
+      "file": "m13-current-android-jvm-probe.json",
+      "bytes": 1508,
+      "sha256": "48e1e9730699ee01e2e0edffefa05c35d808de4cf401c9929f0d51a34abd8595"
+    },
+    {
+      "file": "m13-harmony-android-read.txt",
+      "bytes": 769,
+      "sha256": "5b69c88177f669364397de7dfdc4b8bfb2c33d6936636c5cf07640256e144037"
+    },
+    {
+      "file": "m13-harmony-android-write.txt",
+      "bytes": 770,
+      "sha256": "e68109c4f667d3a4620337778e2390c9a2e5fa47a2f0e10b9ff6531bc209326c"
+    },
+    {
+      "file": "m13-interop-harmony-android-apple.json",
+      "bytes": 1495,
+      "sha256": "e07796fdb71db4c1d51293017de833107974c54677b6f005cc52f127ea1e8db5"
+    },
+    {
+      "file": "m13-persistence-read.json",
+      "bytes": 128,
+      "sha256": "f5284c90316b83b1a18f2863014ae80b38b3e98e71c15a3a5401ea0fac12aa07"
+    },
+    {
+      "file": "m13-persistence-write.json",
+      "bytes": 129,
+      "sha256": "b5e9c0a97899ee5ff9b26e269229e4a1867322e994ea359cd71705a227ec76fa"
+    }
+  ]
+}

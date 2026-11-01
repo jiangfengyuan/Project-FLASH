@@ -26,6 +26,7 @@ export interface LogItem {
   importance: number;
   createdAt: string;
   recordDate: string;
+  isFavorite?: boolean | null;
 }
 
 export interface EmotionRecord {
@@ -36,6 +37,8 @@ export interface EmotionRecord {
   note?: string | null;
   recordDate: string;
   createdAt: string;
+  intensity?: number | null;
+  isFavorite?: boolean | null;
 }
 
 export enum TaskDueKind {
@@ -61,6 +64,8 @@ export interface TaskItem {
   completedAt?: string | null;
   createdAt: string;
   updatedAt: string;
+  sourceLogId?: string | null;
+  isFavorite?: boolean | null;
 }
 
 export interface BackupSchemas {

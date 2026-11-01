@@ -1,0 +1,56 @@
+[
+  {
+    "name": "contract",
+    "exitCode": 0,
+    "command": [
+      "npm",
+      "test",
+      "--prefix",
+      "scripts/backup-contract"
+    ]
+  },
+  {
+    "name": "fixture-generation",
+    "exitCode": 0,
+    "command": [
+      "node",
+      "scripts/backup-contract/generate-cases.cjs",
+      "--check"
+    ]
+  },
+  {
+    "name": "harmony-host",
+    "exitCode": 0,
+    "command": [
+      "node",
+      "--test"
+    ]
+  },
+  {
+    "name": "android",
+    "exitCode": 0,
+    "command": [
+      "./gradlew",
+      "test",
+      "assembleDebug",
+      "--console=plain"
+    ]
+  },
+  {
+    "name": "harmony-hap",
+    "exitCode": 0,
+    "command": [
+      "/Applications/DevEco-Studio.app/Contents/tools/hvigor/bin/hvigorw",
+      "assembleHap",
+      "--mode",
+      "module",
+      "-p",
+      "product=default",
+      "-p",
+      "module=entry@default",
+      "-p",
+      "buildMode=debug",
+      "--no-daemon"
+    ]
+  }
+]

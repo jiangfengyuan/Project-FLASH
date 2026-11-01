@@ -1,0 +1,21 @@
+[
+  {
+    "platform": "ios",
+    "executable": "/private/tmp/flash-integration-20261031/DerivedData/Build/Products/Debug-iphonesimulator/Flash.app/Flash",
+    "legacySymbolCheck": "passed; static symbols only"
+  },
+  {
+    "platform": "macos",
+    "executable": "/private/tmp/flash-integration-20261031/MacDerived/Build/Products/Debug/Flash.app/Contents/MacOS/Flash",
+    "legacySymbolCheck": "passed; static symbols only"
+  },
+  {
+    "platform": "harmony",
+    "packagedModuleNoInternet": true
+  },
+  {
+    "platform": "android",
+    "packagedPermissionsPassed": true,
+    "retainedDependencyPermission": "ACCESS_NETWORK_STATE from androidx.work:work-runtime:2.10.1"
+  }
+]

@@ -1,0 +1,18 @@
+{
+  "kind": "Harmony production codec on Node; not native RDB/device",
+  "inputSHA256": "cc9718e96f86ce50df4c028a673cfcd2d37ce385e0235c3e1d1764889f6fffa2",
+  "outputSHA256": "cab6922ea6a3ea92f3d5642748cd0bcf4e4bf47076785e63123006947f6a893b",
+  "bytes": 2352,
+  "incomingMetadataCompared": true,
+  "schemas": {
+    "logs": 2,
+    "emotions": 2,
+    "tasks": 2
+  },
+  "counts": {
+    "logs": 2,
+    "emotions": 2,
+    "tasks": 2
+  },
+  "sourceSHA256": "4288fb7a6657850b669090357640fb54fd2d3e65b5cda2d846c772e220ba8a93"
+}

@@ -21,6 +21,8 @@ public struct CalendarView: View {
     @State private var message: String?
     /// 月份切换方向：+1 前进 / -1 后退 / 0 无方向（回到本月），驱动方向性过渡
     @State private var monthDirection = 0
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @ScaledMetric(relativeTo: .body) private var accessibleDayWidth = 64
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.flashRepository) private var repository
     @Environment(FocusRouter.self) private var focusRouter
@@ -47,89 +49,34 @@ public struct CalendarView: View {
                              tasks: taskEntities.map { $0.toModel() })
             }
         }
-        VStack(spacing: 0) {
-            // 头部
-            HStack {
-                Button { shiftMonth(-1) } label: { Image(systemName: "chevron.left") }
-                    .accessibilityLabel("上一月")
-                    .help("上一月")
-                Text(monthTitle)
-                    .font(Typography.cardTitle)
-                    .frame(minWidth: 140) // 月份标题最小宽度，切换月份不抖动（几何值）
-                Button { shiftMonth(1) } label: { Image(systemName: "chevron.right") }
-                    .accessibilityLabel("下一月")
-                    .help("下一月")
-                Spacer()
-                Button {
-                    editingTask = nil
-                    showingTaskEditor = true
-                } label: {
-                    Label("新建任务", systemImage: "plus")
-                }
-                Button("回到今天") {
-                    let today = Date()
-                    let order = Self.gregorian.compare(today, to: displayedMonth, toGranularity: .month)
-                    monthDirection = order == .orderedAscending ? -1 : (order == .orderedDescending ? 1 : 0)
-                    displayedMonth = today
-                    selectedDate = today
-                }
-            }
-            .padding(.horizontal, Spacing.md)
-            .padding(.vertical, 10) // 头部纵向内距：紧凑特调值（无对应令牌）
-
-            // 星期表头
-            HStack {
-                ForEach(["一", "二", "三", "四", "五", "六", "日"], id: \.self) { day in
-                    Text(day)
-                        .font(Typography.caption)
-                        .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity)
-                }
-            }
-            .padding(.horizontal, Spacing.md)
-            .padding(.bottom, 6) // 表头与网格的紧凑间距
-
-            // 月网格
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Spacing.xxs), count: 7),
-                      spacing: Spacing.xxs) {
-                ForEach(weeks.flatMap { $0 }, id: \.self) { date in
-                    dayCell(date, aggregates: aggregates)
-                }
-            }
-            .padding(.horizontal, Spacing.md)
-            .id(displayedMonth)
-            .transition(monthTransition)
-            .animation(reduceMotion ? Motion.reducedFade(true) : Motion.emphasize(false),
-                       value: displayedMonth)
-
-            FlashDivider(seed: "calendar-detail").padding(.vertical, Spacing.xs)
-
-            // 选中日详情
-            ScrollView {
-                VStack(alignment: .leading, spacing: 10) { // 10：详情行的紧凑节奏（无对应令牌）
-                    Text("\(selectedKey) 详情")
-                        .font(Typography.cardTitle)
-                    if let aggregate = aggregates[selectedKey] {
-                        if aggregate.emotions.isEmpty && aggregate.logs.isEmpty && aggregate.tasks.isEmpty {
-                            Text("这一天没有记录").foregroundStyle(.secondary)
+        Group {
+            if usesAccessibleLayout {
+                // Keep full-size text and seven-day semantics. Scroll the entire
+                // page vertically and the wide month grid horizontally instead
+                // of compressing dates or displacing the navigation chrome.
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 0) {
+                        accessibleHeader
+                        ScrollView(.horizontal) {
+                            VStack(spacing: 0) {
+                                weekdayHeader
+                                monthGrid(aggregates)
+                            }
                         }
-                        ForEach(aggregate.tasks) { task in
-                            taskRow(task)
-                        }
-                        ForEach(aggregate.emotions) { emotion in
-                            Label("\(emotion.level.emoji) \(emotion.level.displayName)",
-                                  systemImage: "face.smiling")
-                                .font(Typography.secondary)
-                        }
-                        ForEach(aggregate.logs) { log in
-                            LogCardView(log: log, onToggleFavorite: { toggleFavorite(log) })
-                        }
-                    } else {
-                        Text("这一天没有记录").foregroundStyle(.secondary)
+                        .accessibilityHint("向左右滚动查看完整月历")
+                        FlashDivider(seed: "calendar-detail").padding(.vertical, Spacing.xs)
+                        dayDetails(aggregates)
                     }
+                    .padding(.bottom, Spacing.lg)
                 }
-                .padding(Spacing.md)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                VStack(spacing: 0) {
+                    standardHeader
+                    weekdayHeader
+                    monthGrid(aggregates)
+                    FlashDivider(seed: "calendar-detail").padding(.vertical, Spacing.xs)
+                    ScrollView { dayDetails(aggregates) }
+                }
             }
         }
         .sheet(isPresented: $showingTaskEditor) {
@@ -146,6 +93,138 @@ public struct CalendarView: View {
         } message: {
             Text(message ?? "")
         }
+    }
+
+    private var usesAccessibleLayout: Bool {
+        #if os(iOS)
+        dynamicTypeSize.isAccessibilitySize
+        #else
+        false // Preserve macOS layout and keyboard behavior.
+        #endif
+    }
+
+    private var accessibleHeader: some View {
+        VStack(alignment: .leading, spacing: Spacing.md) {
+            Text(monthTitle)
+                .font(Typography.cardTitle)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityAddTraits(.isHeader)
+            HStack {
+                Button { shiftMonth(-1) } label: {
+                    Image(systemName: "chevron.left")
+                        .frame(minWidth: Metrics.minTouchTarget, minHeight: Metrics.minTouchTarget)
+                }
+                .accessibilityLabel("上一月")
+                Spacer()
+                Button { shiftMonth(1) } label: {
+                    Image(systemName: "chevron.right")
+                        .frame(minWidth: Metrics.minTouchTarget, minHeight: Metrics.minTouchTarget)
+                }
+                .accessibilityLabel("下一月")
+            }
+            Button {
+                editingTask = nil
+                showingTaskEditor = true
+            } label: {
+                Label("新建任务", systemImage: "plus")
+            }
+            .fixedSize(horizontal: false, vertical: true)
+            Button("回到今天") {
+                let today = Date()
+                let order = Self.gregorian.compare(today, to: displayedMonth, toGranularity: .month)
+                monthDirection = order == .orderedAscending ? -1 : (order == .orderedDescending ? 1 : 0)
+                displayedMonth = today
+                selectedDate = today
+            }
+        }
+        .padding(.horizontal, Spacing.md)
+        .padding(.vertical, 10)
+    }
+
+    private var standardHeader: some View {
+        HStack {
+            Button { shiftMonth(-1) } label: { Image(systemName: "chevron.left") }
+                .accessibilityLabel("上一月")
+                .help("上一月")
+            Text(monthTitle)
+                .font(Typography.cardTitle)
+                .frame(minWidth: 140) // 月份标题最小宽度，切换月份不抖动（几何值）
+            Button { shiftMonth(1) } label: { Image(systemName: "chevron.right") }
+                .accessibilityLabel("下一月")
+                .help("下一月")
+            Spacer()
+            Button {
+                editingTask = nil
+                showingTaskEditor = true
+            } label: {
+                Label("新建任务", systemImage: "plus")
+            }
+            Button("回到今天") {
+                let today = Date()
+                let order = Self.gregorian.compare(today, to: displayedMonth, toGranularity: .month)
+                monthDirection = order == .orderedAscending ? -1 : (order == .orderedDescending ? 1 : 0)
+                displayedMonth = today
+                selectedDate = today
+            }
+        }
+        .padding(.horizontal, Spacing.md)
+        .padding(.vertical, 10) // 头部纵向内距：紧凑特调值（无对应令牌）
+    }
+
+    private var weekdayHeader: some View {
+        HStack(spacing: usesAccessibleLayout ? Spacing.xxs : nil) {
+            ForEach(["一", "二", "三", "四", "五", "六", "日"], id: \.self) { day in
+                Text(day)
+                    .font(Typography.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(minWidth: usesAccessibleLayout ? accessibleDayWidth : nil,
+                           maxWidth: usesAccessibleLayout ? accessibleDayWidth : .infinity)
+            }
+        }
+        .padding(.horizontal, Spacing.md)
+        .padding(.bottom, 6) // 表头与网格的紧凑间距
+    }
+
+    private func monthGrid(_ aggregates: [String: DayAggregate]) -> some View {
+        LazyVGrid(columns: Array(repeating: GridItem(usesAccessibleLayout ? .fixed(accessibleDayWidth) : .flexible(),
+                                                     spacing: Spacing.xxs), count: 7),
+                  spacing: Spacing.xxs) {
+            ForEach(weeks.flatMap { $0 }, id: \.self) { date in
+                dayCell(date, aggregates: aggregates)
+            }
+        }
+        .padding(.horizontal, Spacing.md)
+        .id(displayedMonth)
+        .transition(monthTransition)
+        .animation(reduceMotion ? Motion.reducedFade(true) : Motion.emphasize(false),
+                   value: displayedMonth)
+    }
+
+    private func dayDetails(_ aggregates: [String: DayAggregate]) -> some View {
+        VStack(alignment: .leading, spacing: 10) { // 10：详情行的紧凑节奏（无对应令牌）
+            Text("\(selectedKey) 详情")
+                .font(Typography.cardTitle)
+            if let aggregate = aggregates[selectedKey] {
+                if aggregate.emotions.isEmpty && aggregate.logs.isEmpty && aggregate.tasks.isEmpty {
+                    Text("这一天没有记录").foregroundStyle(.secondary)
+                }
+                ForEach(aggregate.tasks) { task in
+                    taskRow(task)
+                }
+                ForEach(aggregate.emotions) { emotion in
+                    Label("\(emotion.level.emoji) \(emotion.level.displayName)",
+                          systemImage: "face.smiling")
+                        .font(Typography.secondary)
+                }
+                ForEach(aggregate.logs) { log in
+                    LogCardView(log: log, onToggleFavorite: { toggleFavorite(log) })
+                }
+            } else {
+                Text("这一天没有记录").foregroundStyle(.secondary)
+            }
+        }
+        .padding(Spacing.md)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var monthTitle: String {
@@ -317,6 +396,16 @@ private struct DayCell: View {
     let action: () -> Void
 
     @State private var hovering = false
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @ScaledMetric(relativeTo: .caption2) private var accessibleIndicatorHeight = 14
+
+    private var usesAccessibleIndicators: Bool {
+        #if os(iOS)
+        dynamicTypeSize.isAccessibilitySize
+        #else
+        false
+        #endif
+    }
 
     var body: some View {
         Button(action: action) {
@@ -325,7 +414,9 @@ private struct DayCell: View {
                     .font(Typography.secondary)
                     .foregroundStyle(isSelected ? BrandColors.onBrandPrimary
                                      : (inMonth ? Color.primary : Color.secondary.opacity(0.5)))
-                HStack(spacing: 3) { // 3：指示标记的极小间距
+                (usesAccessibleIndicators
+                 ? AnyLayout(VStackLayout(spacing: 3))
+                 : AnyLayout(HStackLayout(spacing: 3))) {
                     if logCount > 0 {
                         Text("\(logCount)")
                             .font(Typography.fine)
@@ -341,7 +432,10 @@ private struct DayCell: View {
                         Text(emotionEmoji).font(Typography.fine)
                     }
                 }
-                .frame(height: 14) // 指示行固定高度，保证无记录日格子等高（几何值）
+                // Keep the existing 14pt row normally; AX counts/emoji must
+                // grow with their font rather than being clipped by that row.
+                .frame(height: usesAccessibleIndicators ? nil : 14)
+                .frame(minHeight: usesAccessibleIndicators ? accessibleIndicatorHeight : nil)
             }
             .frame(maxWidth: .infinity, minHeight: Metrics.minTouchTarget)
             .background {

@@ -17,7 +17,7 @@ public struct StorageBannerSection: View {
                 VStack(alignment: .leading, spacing: Spacing.xxs) {
                     Text("数据默认保存在此设备")
                         .font(Typography.cardTitle)
-                    Text("可导出备份或在可信局域网内传输")
+                    Text("可导出文件备份或通过系统分享保存")
                         .font(Typography.caption).foregroundStyle(.secondary)
                 }
             } icon: {

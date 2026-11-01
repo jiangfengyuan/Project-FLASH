@@ -1,0 +1,121 @@
+{
+  "scope": "Historical Release macOS host workload only; no new timing run",
+  "mediansRecomputedFromRawSamples": true,
+  "rows": [
+    {
+      "logs": 1000,
+      "datasetSHA256": "7bad294f8304f5445c86d4204e2d03bbc1e849e24ce7c3122d58b568ef2ade2a",
+      "beforeMedianMS": 140.597333,
+      "afterMedianMS": 33.746417,
+      "ratio": 4.166289209310724
+    },
+    {
+      "logs": 10000,
+      "datasetSHA256": "1bf230d2d0180fc8716f64f5ecde0f55c24b80251c043681eda84a815b2a925a",
+      "beforeMedianMS": 1472.487125,
+      "afterMedianMS": 322.283875,
+      "ratio": 4.5689134307448676
+    },
+    {
+      "logs": 100000,
+      "datasetSHA256": "4add5e212dc17f5ec04cc4c870563d5a5903a3cc95cbe37873244fb923b6642c",
+      "beforeMedianMS": 14893.931833999999,
+      "afterMedianMS": 3301.492834,
+      "ratio": 4.511271895130819
+    }
+  ],
+  "files": [
+    {
+      "file": "after-range-1000-resources.log",
+      "sha256": "8a8d1d9414e2a989ec0529fa6898d5a8568030493a9e08aaf7f8494d6b283391"
+    },
+    {
+      "file": "after-range-1000-resources.txt",
+      "sha256": "8a8d1d9414e2a989ec0529fa6898d5a8568030493a9e08aaf7f8494d6b283391"
+    },
+    {
+      "file": "after-range-1000.jsonl",
+      "sha256": "2e2cbe01966ad9c3e4d2dab5771b5c047983ef27a9bbd7fb5ca644767001da61"
+    },
+    {
+      "file": "after-range-10000-resources.log",
+      "sha256": "8196157d58b9f1222606752181dc76223aab87da88caf37fc3322f829d76a434"
+    },
+    {
+      "file": "after-range-10000-resources.txt",
+      "sha256": "8196157d58b9f1222606752181dc76223aab87da88caf37fc3322f829d76a434"
+    },
+    {
+      "file": "after-range-10000.jsonl",
+      "sha256": "470f6eb5aba6d8032d8e06018dc84760e3d8a2050b3126bc32c1c4fb37114cdb"
+    },
+    {
+      "file": "after-range-100000-resources.log",
+      "sha256": "e39f00b8c0128dd06e5cf19fff3e045f4a9c91842d4c443338a7a19703bf88dc"
+    },
+    {
+      "file": "after-range-100000-resources.txt",
+      "sha256": "e39f00b8c0128dd06e5cf19fff3e045f4a9c91842d4c443338a7a19703bf88dc"
+    },
+    {
+      "file": "after-range-100000.jsonl",
+      "sha256": "28719a0283f4c661ec4735e4ad58772708902e034ff585a55e8054f965807336"
+    },
+    {
+      "file": "after-range-conditions.json",
+      "sha256": "4936cb7cf4499b9f6511db49edb28457aeb2511a85d009bb39dfb01942506a06"
+    },
+    {
+      "file": "before-1000-resources.log",
+      "sha256": "bd586e7c0ef9f70c5fd6405fcab476dd03c40bd1a7ffa0b2ba0c6bec69acfa27"
+    },
+    {
+      "file": "before-1000-resources.txt",
+      "sha256": "bd586e7c0ef9f70c5fd6405fcab476dd03c40bd1a7ffa0b2ba0c6bec69acfa27"
+    },
+    {
+      "file": "before-1000.jsonl",
+      "sha256": "9f56afd5d73c05ce0d101fcae41941ffda60ed74498479986e48b4a041a9865d"
+    },
+    {
+      "file": "before-10000-resources.log",
+      "sha256": "69f1d17a4827233aacd566572e4e7504ed8c3713ccb95953944fe591e0da3375"
+    },
+    {
+      "file": "before-10000-resources.txt",
+      "sha256": "69f1d17a4827233aacd566572e4e7504ed8c3713ccb95953944fe591e0da3375"
+    },
+    {
+      "file": "before-10000.jsonl",
+      "sha256": "5810cd5d3ae9c7908478bebc474e68637ea476acf8fc0ae32f9f3677bb288d59"
+    },
+    {
+      "file": "before-100000-resources.log",
+      "sha256": "08fc9634d4cbd0549bfc6bfd8f698c4aaf5775b340d22e806446bd603f74fc14"
+    },
+    {
+      "file": "before-100000-resources.txt",
+      "sha256": "08fc9634d4cbd0549bfc6bfd8f698c4aaf5775b340d22e806446bd603f74fc14"
+    },
+    {
+      "file": "before-100000.jsonl",
+      "sha256": "6af6fa636c203ed7596ae1973ca00443f7d0251719907a209c3b9afee01d987c"
+    },
+    {
+      "file": "before-conditions.json",
+      "sha256": "fa82e68b1421d0ba7093fd5dd955bfa701eadc6c485e439dcd99e7aca7d50275"
+    },
+    {
+      "file": "before-native-sample.txt",
+      "sha256": "ca289be4e51e26ad186e74054f402f1a10e374c2ea8da70b9caef4a1cb14a913"
+    },
+    {
+      "file": "before-sample-command.txt",
+      "sha256": "4aec4ca40a825589e066e9956e5268bf95ff389ce0a9bbf91542132666048627"
+    },
+    {
+      "file": "before-time-profiler.txt",
+      "sha256": "01352fb12fe991d041c3f226e2c77165816dfe085059b2904732a0208ee7110d"
+    }
+  ]
+}

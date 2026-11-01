@@ -23,7 +23,6 @@ import java.nio.ByteBuffer
 import java.nio.charset.CodingErrorAction
 import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
@@ -38,6 +37,7 @@ object Backup {
     const val BACKUP_VERSION = "flash-backup-v2"
     const val LEGACY_BACKUP_VERSION = "flash-backup-v1"
     private const val SECTION_SCHEMA_V1 = 1
+    private const val SECTION_SCHEMA_V2 = 2
 
     /** 与 macOS BackupService 对齐的导入上限 */
     const val MAX_FILE_BYTES = 50L * 1024 * 1024        // 50 MB
@@ -70,6 +70,7 @@ object Backup {
                     .put("importance", log.importance)
                     .put("createdAt", normalizedForExport(log.createdAt))
                     .put("recordDate", log.recordDate)
+                    .putOptional("isFavorite", log.isFavorite)
             )
         }
         val emotionsArray = JSONArray()
@@ -83,6 +84,8 @@ object Backup {
                     .put("note", e.note ?: JSONObject.NULL)
                     .put("recordDate", e.recordDate)
                     .put("createdAt", normalizedForExport(e.createdAt))
+                    .putOptional("intensity", e.intensity)
+                    .putOptional("isFavorite", e.isFavorite)
             )
         }
         val tasksArray = JSONArray()
@@ -106,12 +109,14 @@ object Backup {
                     .put("completedAt", task.completedAt?.let(::normalizedForExport) ?: JSONObject.NULL)
                     .put("createdAt", normalizedForExport(task.createdAt))
                     .put("updatedAt", normalizedForExport(task.updatedAt))
+                    .putOptional("sourceLogId", task.sourceLogId)
+                    .putOptional("isFavorite", task.isFavorite)
             )
         }
         val schemas = JSONObject()
-            .put("logs", SECTION_SCHEMA_V1)
-            .put("emotions", SECTION_SCHEMA_V1)
-            .put("tasks", SECTION_SCHEMA_V1)
+            .put("logs", SECTION_SCHEMA_V2)
+            .put("emotions", SECTION_SCHEMA_V2)
+            .put("tasks", SECTION_SCHEMA_V2)
         val data = JSONObject()
             .put("logs", logsArray)
             .put("emotions", emotionsArray)
@@ -183,18 +188,13 @@ object Backup {
         }
     }
 
-    /**
-     * 任务时区只接受标准 IANA ID：必须在契约白名单中，且 ZoneId.of 可解析、输入与 zone.id 完全一致。
-     * 这样拒绝 ICU 别名（utc、Zulu、GMT0、US/Eastern 等）和偏移写法（+08:00），与契约校验器保持同一口径。
-     */
+    /** Preserve wire spelling; strict native rules resolve IANA rename aliases. */
     private fun canonicalTimeZone(id: String): String? {
         if (id !in CanonicalTimeZones.ALL) return null
-        return try {
-            val zone = ZoneId.of(id)
-            zone.takeIf { it.id == id }?.id
-        } catch (_: Exception) {
-            null
+        if (CanonicalTimeZones.zoneId(id) == null) {
+            throw BackupFormatException("此设备不支持备份中的任务时区，请更新系统后重试；未导入任何数据")
         }
+        return id
     }
 
     /** @throws BackupFormatException 文件整体不合法时抛出；单条非法数据跳过。 */
@@ -216,7 +216,8 @@ object Backup {
                 val schemas = root.optJSONObject("schemas")
                     ?: throw BackupFormatException("schemas 必须是对象")
                 listOf("logs", "emotions", "tasks").forEach { section ->
-                    if (schemas.integerOrNull(section) != SECTION_SCHEMA_V1) {
+                    val schema = schemas.integerOrNull(section)
+                    if (schema == null || schema !in SECTION_SCHEMA_V1..SECTION_SCHEMA_V2) {
                         throw BackupFormatException("不支持的 $section 分区版本")
                     }
                 }
@@ -313,7 +314,7 @@ object Backup {
                     "tasks" -> setOf("notes", "reminderAt", "completedAt")
                     else -> emptySet()
                 }
-                item.checkFields(required, "/data/$section/$i", optional)
+                item.checkFields(required, "/data/$section/$i", optional + schema2Fields(root, section))
                 if (section == "tasks") {
                     val due = item.optJSONObject("due") ?: throw BackupFormatException("/data/tasks/$i/due：必须是对象")
                     due.checkFields(if (due.optString("kind") == "allDay") setOf("kind", "date") else setOf("kind", "at", "timeZone"), "/data/tasks/$i/due")
@@ -348,12 +349,28 @@ object Backup {
             }
             for (i in 0 until array.length()) {
                 val item = array.optJSONObject(i) ?: continue
-                item.checkFields(emptySet(), "/data/$section/$i", allowed)
+                item.checkFields(emptySet(), "/data/$section/$i", allowed + schema2Fields(root, section))
                 item.optJSONObject("due")?.checkFields(emptySet(), "/data/$section/$i/due", if (item.optJSONObject("due")?.optString("kind") == "allDay") setOf("kind", "date") else setOf("kind", "at", "timeZone"))
             }
         }
         return result
     }
+
+    private fun schema2Fields(root: JSONObject, section: String): Set<String> {
+        if (root.optJSONObject("schemas")?.integerOrNull(section) != SECTION_SCHEMA_V2) return emptySet()
+        return when (section) {
+            "emotions" -> setOf("isFavorite", "intensity")
+            "tasks" -> setOf("isFavorite", "sourceLogId")
+            else -> setOf("isFavorite")
+        }
+    }
+
+    private fun JSONObject.putOptional(key: String, value: Any?): JSONObject = apply {
+        if (value != null) put(key, value)
+    }
+
+    private fun JSONObject.hasValidOptionalBoolean(key: String): Boolean =
+        !has(key) || isNull(key) || opt(key) is Boolean
 
     private fun JSONObject.checkFields(required: Set<String>, path: String, optional: Set<String> = emptySet()) {
         if (!required.all { has(it) } || keys().asSequence().any { it !in required && it !in optional }) {
@@ -362,6 +379,7 @@ object Backup {
     }
 
     private fun parseLog(obj: JSONObject): LogItem? {
+        if (!obj.hasValidOptionalBoolean("isFavorite")) return null
         val id = obj.optString("id").takeIf { UUID_REGEX.matches(it) } ?: return null
         val content = obj.stringOrNull("content")?.takeIf { it.length <= MAX_FIELD_LENGTH }
             ?: return null
@@ -382,10 +400,15 @@ object Backup {
             importance = importance,
             createdAt = createdAt,
             recordDate = recordDate,
+            isFavorite = obj.opt("isFavorite") as? Boolean,
         )
     }
 
     private fun parseEmotion(obj: JSONObject): EmotionRecord? {
+        if (!obj.hasValidOptionalBoolean("isFavorite")) return null
+        val intensity = if (!obj.has("intensity") || obj.isNull("intensity")) null else {
+            obj.integerOrNull("intensity")?.takeIf { it in 1..5 } ?: return null
+        }
         val id = obj.optString("id").takeIf { UUID_REGEX.matches(it) } ?: return null
         if (!obj.has("level")) return null
         val level = obj.integerOrNull("level")
@@ -409,10 +432,16 @@ object Backup {
             note = obj.stringOrNull("note")?.takeIf { it.length <= MAX_FIELD_LENGTH },
             recordDate = recordDate,
             createdAt = createdAt,
+            intensity = intensity,
+            isFavorite = obj.opt("isFavorite") as? Boolean,
         )
     }
 
     private fun parseTask(obj: JSONObject): TaskItem? {
+        if (!obj.hasValidOptionalBoolean("isFavorite")) return null
+        val sourceLogId = if (!obj.has("sourceLogId") || obj.isNull("sourceLogId")) null else {
+            obj.stringOrNull("sourceLogId")?.takeIf { UUID_REGEX.matches(it) } ?: return null
+        }
         val id = obj.optString("id").takeIf { UUID_REGEX.matches(it) } ?: return null
         val title = obj.stringOrNull("title")
             ?.takeIf { it.trimContract().isNotEmpty() && it.length <= 200 } ?: return null
@@ -463,6 +492,8 @@ object Backup {
             completedAt = completedAt,
             createdAt = createdAt,
             updatedAt = updatedAt,
+            sourceLogId = sourceLogId,
+            isFavorite = obj.opt("isFavorite") as? Boolean,
         )
     }
 

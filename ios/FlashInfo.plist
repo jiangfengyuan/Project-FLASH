@@ -13,12 +13,6 @@
 			</array>
 		</dict>
 	</array>
-	<key>NSBonjourServices</key>
-	<array>
-		<string>_flashbackup._tcp</string>
-	</array>
-	<key>NSLocalNetworkUsageDescription</key>
-	<string>用于在同一局域网内发现 Flash Aero 设备并传输备份。</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>LXGWWenKai-Medium.ttf</string>
