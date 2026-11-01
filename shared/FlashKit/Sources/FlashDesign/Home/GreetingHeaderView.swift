@@ -46,12 +46,19 @@ public struct GreetingHeaderView: View {
         VStack(alignment: .leading, spacing: 6) { // 6：问候语与副标题的紧凑节奏（无对应令牌）
             Text(greeting)
                 .flashPageTitle()
+                .flashHandUnderline(seed: "greeting", widthFraction: 0.45)
 
             Text("今天也记录一点什么吧。")
                 .font(Typography.secondary)
-                .foregroundStyle(Color.secondary)
+                .foregroundStyle(subtitleColor)
         }
     }
+
+    #if os(iOS)
+    private var subtitleColor: Color { BrandColors.textSecondary }
+    #else
+    private var subtitleColor: Color { Color.secondary }
+    #endif
 
     // MARK: - Greeting
 
@@ -92,7 +99,7 @@ public struct GreetingHeaderView: View {
                     .font(Typography.secondary.weight(.semibold))
             }
             .fixedSize()
-            .foregroundStyle(Color.white)
+            .foregroundStyle(BrandColors.onBrandPrimary)
             .padding(.horizontal, 14) // 胶囊横向内距：无对应令牌（sm 偏紧、md 偏宽）
             .padding(.vertical, Spacing.xs)
             .background(
@@ -112,5 +119,5 @@ public struct GreetingHeaderView: View {
     GreetingHeaderView(onNewLog: {}, onNewIdea: {}, onNewEmotion: {}, onNewTask: {})
         .padding(Spacing.lg)
         .frame(width: 720)
-        .background(BrandColors.pageBackground)
+        .flashPageBackground()
 }

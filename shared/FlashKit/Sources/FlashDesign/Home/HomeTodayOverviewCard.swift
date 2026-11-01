@@ -37,19 +37,19 @@ public struct HomeTodayOverviewCard: View {
             ViewThatFits(in: .horizontal) {
                 HStack(spacing: Spacing.lg) {
                     ForEach(Array(entries.enumerated()), id: \.offset) { index, entry in
-                        if index > 0 { Divider().frame(maxHeight: 36) }
+                        if index > 0 { FlashDivider(seed: "overview-\(index)", axis: .vertical).frame(maxHeight: 36) }
                         wideItem(entry)
                     }
                 }
                 HStack(spacing: Spacing.sm) {
                     ForEach(Array(entries.enumerated()), id: \.offset) { index, entry in
-                        if index > 0 { Divider().frame(maxHeight: 44) }
+                        if index > 0 { FlashDivider(seed: "overview-\(index)", axis: .vertical).frame(maxHeight: 44) }
                         compactItem(entry)
                     }
                 }
                 VStack(alignment: .leading, spacing: Spacing.sm) {
                     ForEach(Array(entries.enumerated()), id: \.offset) { index, entry in
-                        if index > 0 { Divider() }
+                        if index > 0 { FlashDivider(seed: "overview-\(index)") }
                         stackedItem(entry)
                     }
                 }
@@ -127,7 +127,7 @@ public struct HomeTodayOverviewCard: View {
 
     private func value(_ entry: Entry) -> some View {
         Text(entry.value)
-            .font(.title3.bold())
+            .font(Typography.statValue)
             .monospacedDigit()
             .foregroundStyle(BrandColors.textPrimary)
             .contentTransition(.numericText())
@@ -145,7 +145,7 @@ public struct HomeTodayOverviewCard: View {
     HomeTodayOverviewCard(recordCount: 5, openTaskCount: 2,
                           emotionEmoji: "😊", emotionTitle: "平静")
         .padding(Spacing.lg)
-        .background(BrandColors.pageBackground)
+        .flashPageBackground()
 }
 
 #Preview("iPhone 宽度") {
@@ -153,5 +153,5 @@ public struct HomeTodayOverviewCard: View {
                           emotionEmoji: "🙂", emotionTitle: "还没有记录")
         .frame(width: 370)
         .padding(Spacing.md)
-        .background(BrandColors.pageBackground)
+        .flashPageBackground()
 }

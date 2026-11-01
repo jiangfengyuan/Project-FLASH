@@ -30,6 +30,8 @@ struct WelcomeScreen: View {
     ]
 
     @State private var page = 0
+    /// 欢迎页图标手绘圈：固定基准 132，随系统字体档位缩放
+    @ScaledMetric(relativeTo: .largeTitle) private var heroRingSize: CGFloat = 132
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var isLastPage: Bool { page == pages.count - 1 }
@@ -40,17 +42,22 @@ struct WelcomeScreen: View {
                 ForEach(pages) { item in
                     VStack(spacing: Spacing.sm) {
                         Image(systemName: item.symbol)
-                            .scaledSystemFont(size: 64, relativeTo: .largeTitle)
+                            .scaledSystemFont(size: 52, relativeTo: .largeTitle)
                             .foregroundStyle(item.tint)
                             .symbolEffect(.bounce, value: page == item.id && !reduceMotion)
-                            .padding(.bottom, Spacing.xs)
+                            .frame(width: heroRingSize, height: heroRingSize)
+                            .background { HandDrawnRing(seed: item.title, tint: item.tint) }
+                            .padding(.bottom, Spacing.sm)
                             .accessibilityHidden(true)
                         Text(item.title)
                             .font(Typography.heroTitle)
+                            .foregroundStyle(BrandColors.textPrimary)
                             .multilineTextAlignment(.center)
+                            .flashHandUnderline(seed: "welcome-\(item.id)", color: item.tint, widthFraction: 0.5)
+                            .padding(.bottom, Spacing.xxs)
                         Text(item.subtitle)
                             .font(Typography.body)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(BrandColors.textSecondary)
                             .multilineTextAlignment(.center)
                     }
                     .padding(.horizontal, Spacing.lg)
@@ -69,6 +76,7 @@ struct WelcomeScreen: View {
             } label: {
                 Text(isLastPage ? "开始使用" : "下一步")
                     .font(Typography.body.weight(.semibold))
+                    .foregroundStyle(BrandColors.onBrandPrimary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, Spacing.xs)
             }
@@ -78,6 +86,6 @@ struct WelcomeScreen: View {
             .padding(.bottom, Spacing.lg)
             .sensoryFeedback(.selection, trigger: page)
         }
-        .background(BrandColors.pageBackground)
+        .flashPageBackground()
     }
 }

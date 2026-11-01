@@ -21,6 +21,11 @@ public struct EmptyStateView: View {
     public var actionTitle: String? = nil
     public var action: (() -> Void)? = nil
 
+    #if os(iOS)
+    /// 手绘圈尺寸：固定基准 76，随系统字体档位缩放
+    @ScaledMetric(relativeTo: .title) private var ringSize: CGFloat = 76
+    #endif
+
     public init(systemImage: String, title: String, message: String? = nil, iconTint: Color? = nil,
                 actionTitle: String? = nil, action: (() -> Void)? = nil) {
         self.systemImage = systemImage
@@ -33,12 +38,26 @@ public struct EmptyStateView: View {
 
     public var body: some View {
         VStack(spacing: Spacing.sm) {
+            #if os(iOS)
+            // 暖调手作：图标落在一笔勾成的圈里，标题用手写感展示字体
+            Image(systemName: systemImage)
+                .scaledSystemFont(size: 28, relativeTo: .title)
+                .foregroundStyle(iconTint ?? BrandColors.brandPrimary)
+                .frame(width: ringSize, height: ringSize)
+                .background { HandDrawnRing(seed: title, tint: iconTint ?? BrandColors.brandPrimary) }
+                .padding(.bottom, Spacing.xxs)
+            Text(title)
+                .font(Typography.display(.title3))
+                .foregroundStyle(BrandColors.textPrimary)
+                .multilineTextAlignment(.center)
+            #else
             Image(systemName: systemImage)
                 .scaledSystemFont(size: 32, relativeTo: .title)
                 .foregroundStyle(iconTint ?? BrandColors.textSecondary)
             Text(title)
                 .font(Typography.cardTitle)
                 .foregroundStyle(BrandColors.textPrimary)
+            #endif
             if let message {
                 Text(message)
                     .font(Typography.secondary)
@@ -46,11 +65,13 @@ public struct EmptyStateView: View {
                     .multilineTextAlignment(.center)
             }
             if let actionTitle, let action {
-                Button(actionTitle, action: action)
-                    .buttonStyle(.borderedProminent)
-                    .tint(BrandColors.brandPrimary)
-                    .controlSize(.large)
-                    .padding(.top, Spacing.xs)
+                Button(action: action) {
+                    Text(actionTitle).foregroundStyle(BrandColors.onBrandPrimary)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(BrandColors.brandPrimary)
+                .controlSize(.large)
+                .padding(.top, Spacing.xs)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -66,5 +87,5 @@ public struct EmptyStateView: View {
         message: "记下此刻的想法，它会留在这里等你回看。",
         actionTitle: "新建记录"
     ) {}
-    .background(BrandColors.pageBackground)
+    .flashPageBackground()
 }

@@ -24,6 +24,7 @@ struct QuickCaptureEntryModifier: ViewModifier {
                             Image(systemName: "sparkle")
                                 .foregroundStyle(BrandColors.brandPrimary)
                             Text("现在想记录什么？")
+                                .font(Typography.display(.body))
                                 .foregroundStyle(BrandColors.textSecondary)
                             Spacer()
                         }
@@ -58,7 +59,7 @@ struct QuickCaptureFloatingButtonModifier: ViewModifier {
                     Button(action: action) {
                         Image(systemName: "sparkle")
                             .font(.title2.weight(.semibold))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(BrandColors.onBrandPrimary)
                             .frame(width: 56, height: 56) // 悬浮按钮尺寸（几何值）
                             .background(BrandColors.brandPrimary, in: Circle())
                             .flashElevatedShadow()

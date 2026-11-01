@@ -89,7 +89,7 @@ struct HomeView: View {
             availableWidth = width
         }
         .flashHaptic(.impact(weight: .light), trigger: deleteCount)
-        .background(BrandColors.pageBackground)
+        .flashPageBackground()
         // 问候区即页标题：导航栏只承载全局搜索按钮
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
@@ -160,11 +160,12 @@ struct HomeView: View {
                     .foregroundStyle(.tertiary)
             }
             .padding(Spacing.md)
-            .background(BrandColors.cardSurface, in: RoundedRectangle(cornerRadius: Radius.cardSmall))
+            .background(BrandColors.cardSurface, in: RoundedRectangle(cornerRadius: Radius.cardSmall, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: Radius.cardSmall)
-                    .stroke(BrandColors.weakBorder, lineWidth: 0.5)
+                RoundedRectangle(cornerRadius: Radius.cardSmall, style: .continuous)
+                    .stroke(BrandColors.ideaYellow.opacity(0.55), lineWidth: 0.75)
             }
+            .flashCardShadow()
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -202,9 +203,12 @@ struct HomeView: View {
         } else {
             VStack(alignment: .leading, spacing: Spacing.sm) {
                 Text("最近闪念")
-                    .font(Typography.secondary)
-                    .foregroundStyle(BrandColors.textSecondary)
-                    .padding(.horizontal, Spacing.sm)
+                    .font(Typography.display(.title3))
+                    .foregroundStyle(BrandColors.textPrimary)
+                    .flashHandUnderline(seed: "recent", color: BrandColors.ideaYellow, widthFraction: 0.9)
+                    .padding(.horizontal, Spacing.xxs)
+                    .padding(.bottom, Spacing.xxs)
+                    .accessibilityAddTraits(.isHeader)
                 // 无悬停：卡片内操作按钮不出现；点按编辑，收藏 / 删除走长按菜单
                 VStack(spacing: Spacing.sm) {
                     ForEach(viewModel.recentLogs) { log in

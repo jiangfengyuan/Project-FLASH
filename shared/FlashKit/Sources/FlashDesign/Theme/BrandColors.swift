@@ -71,6 +71,32 @@ public enum BrandColors {
 
     public static func emotionColor(_ level: EmotionLevel) -> Color { level.color }
 
+    #if os(iOS)
+    // MARK: - iOS「暖调手作」主题（色值见 WarmPalette；macOS 保持下方品牌标准原值）
+
+    private static func warm(_ pair: WarmPalette.Pair) -> Color {
+        dynamic(light: pair.light, dark: pair.dark)
+    }
+
+    public static let logPurple = warm(WarmPalette.logPurple)
+    public static let ideaYellow = warm(WarmPalette.ideaYellow)
+    public static let ideaYellowText = warm(WarmPalette.ideaYellowText)
+    public static let calendarGreen = warm(WarmPalette.calendarGreen)
+    public static let emotionPink = warm(WarmPalette.emotionPink)
+    public static let pageBackground = warm(WarmPalette.pageBackground)
+    public static let cardSurface = warm(WarmPalette.cardSurface)
+    public static let weakSurface = warm(WarmPalette.weakSurface)
+    public static let weakBorder = warm(WarmPalette.weakBorder)
+    public static let chipSelectedBackground = warm(WarmPalette.chipSelectedBackground)
+    public static let chipSelectedForeground = warm(WarmPalette.chipSelectedForeground)
+    public static let textPrimary = warm(WarmPalette.textPrimary)
+    public static let textSecondary = warm(WarmPalette.textSecondary)
+    public static let brandPrimary = warm(WarmPalette.brandPrimary)
+    public static let onBrandPrimary = warm(WarmPalette.onBrandPrimary)
+    public static let accessibleGreen = warm(WarmPalette.accessibleGreen)
+    /// 阴影色：浅色暖褐、深色黑（不透明度由 Shadow 令牌控制）
+    public static let shadowTint = warm(WarmPalette.shadowTint)
+    #else
     // MARK: - Home 此刻页模块强调色（Aero PRD，低饱和柔和色）
 
     /// 日志模块：柔和紫
@@ -126,4 +152,11 @@ public enum BrandColors {
     /// 系统 .green 浅色下在白底仅约 2.1:1，不满足图标/文字对比度；
     /// 此令牌浅色取深绿（白底 ≥ 4.5:1），深色取浅绿（深底 ≥ 4.5:1）。
     public static let accessibleGreen = dynamic(light: "#3A8545", dark: "#8FCE9F")
+
+    /// 品牌主操作色实心底上的文字/图标
+    public static let onBrandPrimary = Color.white
+
+    /// 阴影色（不透明度由 Shadow 令牌控制）
+    public static let shadowTint = Color.black
+    #endif
 }

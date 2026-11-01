@@ -47,10 +47,14 @@ public struct TaskEditorView: View {
         #if os(iOS)
         // 触屏：系统表单 + 导航栏取消/保存（键盘弹出时仍可点）
         Form {
-            Section { fields }
+            Group {
+                Section { fields }
+            }
+            // 暖调手作：分组行用纸白卡面（macOS 不变）
+            .flashFormRowBackground()
         }
         .scrollContentBackground(.hidden)
-        .background(BrandColors.pageBackground)
+        .flashPageBackground()
         .flashEditorChrome(title: task == nil ? "新建任务" : "编辑任务", saveDisabled: saveDisabled,
                            onCancel: { dismiss() }, onSave: { onSave(makeTask()) })
         .environment(\.timeZone, editorTimeZone)

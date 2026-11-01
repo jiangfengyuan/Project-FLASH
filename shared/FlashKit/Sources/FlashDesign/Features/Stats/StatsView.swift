@@ -58,7 +58,7 @@ public struct StatsView: View {
                     CalendarView()
                 }
             }
-        }.background(BrandColors.pageBackground)
+        }.flashPageBackground()
         .task { await refreshBaseDateAtMidnight() }
     }
 
@@ -94,7 +94,7 @@ public struct StatsView: View {
                 .clipShape(RoundedRectangle(cornerRadius: Radius.card))
 
                 activityChart(stats.activity)
-                Text("累计概览 · 全部时间").font(Typography.cardTitle)
+                Text("累计概览 · 全部时间").font(Typography.blockTitle)
                 // KPI：图标走四模块色（日志紫 / 灵感黄 / 情绪粉 / 日历绿）
                 // 一行四列放不下（iPhone 竖屏）时退为 2×2，数字与标签不被挤压截断
                 ViewThatFits(in: .horizontal) {
@@ -120,7 +120,7 @@ public struct StatsView: View {
                 if stats.hasEmotionData {
                     // 日均情绪趋势
                     VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text("情绪趋势 · 日均值").font(Typography.cardTitle)
+                        Text("情绪趋势 · 日均值").font(Typography.blockTitle)
                         Text("-3 至 +3，0 为中性；无记录日期不计入均值").font(Typography.caption).foregroundStyle(.secondary)
                         Chart {
                             RuleMark(y: .value("中性", 0))
@@ -152,7 +152,7 @@ public struct StatsView: View {
 
                     if !stats.distribution.isEmpty {
                         VStack(alignment: .leading, spacing: Spacing.xs) {
-                            Text("负面情绪构成").font(Typography.cardTitle)
+                            Text("负面情绪构成").font(Typography.blockTitle)
                             Text("伤心 / 生气 / 难受的出现次数，次数见条形末端数值")
                                 .font(Typography.caption).foregroundStyle(.secondary)
                             Chart(stats.distribution, id: \.name) { item in
@@ -184,7 +184,7 @@ public struct StatsView: View {
             }
             .padding(Spacing.lg)
         }
-        .background(BrandColors.pageBackground)
+        .flashPageBackground()
         .onAppear {
             if reduceMotion {
                 cardsShown = true
@@ -285,7 +285,7 @@ public struct StatsView: View {
         let maximum = max(1, days.map(\.total).max() ?? 0)
         let active = days.filter { $0.total > 0 }.count
         return VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("记录活跃度").font(Typography.cardTitle)
+            Text("记录活跃度").font(Typography.blockTitle)
             Text("每天的日志、灵感与情绪次数 · 不含任务").font(Typography.caption).foregroundStyle(.secondary)
             Text("\(active) 个活跃日 · 共 \(days.reduce(0) { $0 + $1.total }) 次")
             Chart(days) { day in
@@ -335,7 +335,7 @@ public struct StatsView: View {
                 .foregroundStyle(tint)
                 .accessibilityHidden(true) // 装饰图标，读屏由数值+标题承载
             Text("\(value)")
-                .font(.title2).bold()
+                .font(Typography.statValueLarge)
                 .contentTransition(.opacity) // 数字变化淡变
                 .animation(Motion.quick(reduceMotion), value: value)
             Text(title).font(Typography.caption).foregroundStyle(.secondary)

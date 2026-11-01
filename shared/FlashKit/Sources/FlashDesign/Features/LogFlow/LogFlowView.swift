@@ -84,7 +84,7 @@ public struct LogFlowView: View {
             }
             .padding(Spacing.sm)
 
-            Divider()
+            FlashDivider(seed: "logflow-filters")
 
             if filtered.isEmpty {
                 // PRD §34：空态用品牌化 EmptyStateView（内置 .appear 过渡，不再叠加）；

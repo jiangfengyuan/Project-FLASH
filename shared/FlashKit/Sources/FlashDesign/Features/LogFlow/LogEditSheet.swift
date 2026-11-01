@@ -192,7 +192,7 @@ public struct LogEditSheet: View {
             Button("继续编辑", role: .cancel) {}
         }
         .flashPanelWidth(480) // 编辑面板固有宽度（几何值，仅 macOS）
-        .background(BrandColors.pageBackground)
+        .flashPageBackground()
         .flashEditorChrome(title: title, saveTitle: isSaving ? "保存中…" : "保存",
                            saveDisabled: content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                                || contentExceedsLimit || isSaving || saved,

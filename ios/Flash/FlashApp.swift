@@ -46,6 +46,8 @@ struct FlashApp: App {
         UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
         // 任务提醒通知上的「完成 / 稍后 10 分钟」
         TaskReminderScheduler.registerCategories()
+        // 暖调手作主题：导航栏标题字体与颜色
+        CraftedAppearance.apply()
     }
 
     var body: some Scene {
