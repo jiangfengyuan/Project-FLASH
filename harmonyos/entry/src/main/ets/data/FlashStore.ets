@@ -779,15 +779,30 @@ export class FlashStore {
       emotions.forEach((item: EmotionRecord) => emotionMap.set(item.id, item));
       const taskMap = new Map<string, TaskItem>();
       this.tasks.forEach((item: TaskItem) => taskMap.set(item.id, item));
+      const winningTasks: TaskItem[] = [];
       tasks.forEach((item: TaskItem) => {
         const local = taskMap.get(item.id);
-        if (!local || BackupService.normalizedTimestamp(item.updatedAt) >= BackupService.normalizedTimestamp(local.updatedAt)) taskMap.set(item.id, item);
+        if (!local || BackupService.normalizedTimestamp(item.updatedAt) >= BackupService.normalizedTimestamp(local.updatedAt)) {
+          taskMap.set(item.id, item);
+          winningTasks.push(item);
+        }
       });
-      const mergedLogs = Array.from(logMap.values());
-      const mergedEmotions = Array.from(emotionMap.values());
-      const mergedTasks = Array.from(taskMap.values());
-      await this.replaceDatabase(mergedLogs, mergedEmotions, mergedTasks);
-      this.logs = mergedLogs; this.emotions = mergedEmotions; this.tasks = mergedTasks;
+      // Only incoming rows are written. Rows rejected at load are absent from
+      // memory but still in the database, and a merge must not delete them.
+      const database = this.requiredDatabase();
+      database.beginTransaction();
+      try {
+        for (const item of logs) await this.upsertRow(LOGS_TABLE, this.row(item.id, item.createdAt, item));
+        for (const item of emotions) await this.upsertRow(EMOTIONS_TABLE, this.row(item.id, item.createdAt, item));
+        for (const item of winningTasks) await this.upsertRow(TASKS_TABLE, this.row(item.id, item.updatedAt, item));
+        database.commit();
+      } catch (error) {
+        database.rollBack();
+        throw error as Error;
+      }
+      this.logs = Array.from(logMap.values());
+      this.emotions = Array.from(emotionMap.values());
+      this.tasks = Array.from(taskMap.values());
       this.sortAll();
       this.changes.publish(StorePartition.ALL);
     });
@@ -827,6 +842,10 @@ export class FlashStore {
       database.rollBack();
       throw error as Error;
     }
+  }
+
+  private async upsertRow(table: string, row: relationalStore.ValuesBucket): Promise<void> {
+    await this.requiredDatabase().insert(table, row, relationalStore.ConflictResolution.ON_CONFLICT_REPLACE);
   }
 
   private row(id: string, sortKey: string, value: Object): relationalStore.ValuesBucket {

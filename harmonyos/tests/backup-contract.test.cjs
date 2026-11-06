@@ -56,7 +56,7 @@ test('shared merge/overwrite results and failed commit preserve state', async ()
   const local = fixture('merge-local'), incoming = fixture('merge-incoming');
   const store = new FlashStore();
   store.initialized = true;
-  store.database = { beginTransaction() {}, executeSql: async () => {}, batchInsert: async () => {}, commit() {}, rollBack() {} };
+  store.database = { beginTransaction() {}, executeSql: async () => {}, insert: async () => {}, batchInsert: async () => {}, commit() {}, rollBack() {} };
   const check = expected => {
     for (const section of ['logs', 'emotions', 'tasks']) {
       const sort = a => a.slice().sort((x, y) => x.id.localeCompare(y.id));
