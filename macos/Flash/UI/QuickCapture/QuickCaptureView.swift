@@ -5,6 +5,8 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import SwiftUI
+import FlashCore
+import FlashDesign
 
 /// Quick Capture 浮动面板内容（PRD §13.3 布局 / §14 交互原则）：
 /// 标题「现在想记录什么？」+ 输入区 + 类型标签（默认 Idea，可点选，不强制）+ Cancel / Save ⌘↵。

@@ -6,6 +6,8 @@
 
 import Testing
 @testable import Flash
+import FlashCore
+import FlashDesign
 
 @Suite("AppState 数据库降级标记")
 struct AppStateTests {

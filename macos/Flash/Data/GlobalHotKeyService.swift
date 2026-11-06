@@ -6,6 +6,8 @@
 
 import Carbon
 import Observation
+import FlashCore
+import FlashDesign
 
 /// 全局热键服务（PRD §13.2）：Carbon `RegisterEventHotKey`——
 /// App Sandbox 内可用，无需辅助功能权限，进程退出时系统自动回收注册。

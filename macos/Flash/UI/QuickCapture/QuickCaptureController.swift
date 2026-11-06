@@ -7,6 +7,8 @@
 import AppKit
 import Combine
 import SwiftUI
+import FlashCore
+import FlashDesign
 
 /// Quick Capture 面板控制器（PRD §13/§14）：全局热键唤起 → 非激活样式 NSPanel
 /// 悬浮输入 → Enter/⌘Enter 保存即关、Esc 放弃。未提交关闭时草稿持久化，下次打开恢复。
@@ -206,13 +208,5 @@ private final class QuickCapturePanel: NSPanel {
     }
 }
 
-extension ThemeMode {
-    /// 主题模式 → SwiftUI ColorScheme（nil = 跟随系统）
-    var colorScheme: ColorScheme? {
-        switch self {
-        case .system: nil
-        case .light: .light
-        case .dark: .dark
-        }
-    }
-}
+// ThemeMode.colorScheme 已移入 FlashKit（FlashDesign/Theme/ThemeMode+ColorScheme.swift），与 iOS 共用
+

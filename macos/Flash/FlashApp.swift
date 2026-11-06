@@ -6,6 +6,8 @@
 
 import SwiftUI
 import SwiftData
+import FlashCore
+import FlashDesign
 
 @main
 struct FlashApp: App {
@@ -48,6 +50,7 @@ struct FlashApp: App {
                 }
             }
             .environment(appState)
+            .environment(appState.focusRouter)
             .environment(\.flashRepository, assembly.repository)
             .environmentObject(settings)
             .animatedPreferredColorScheme(settings.themeMode)
@@ -200,5 +203,5 @@ private struct AppearanceTransitionModifier: ViewModifier {
     }
 }
 
-// ThemeMode.colorScheme 已提升为 internal（UI/QuickCapture/QuickCaptureController.swift），
-// Quick Capture 面板与主窗口/菜单栏伴侣共用同一映射
+// ThemeMode.colorScheme 位于 FlashKit（FlashDesign/Theme/ThemeMode+ColorScheme.swift），
+// 主窗口、菜单栏伴侣、Quick Capture 面板与 iOS 端共用同一映射

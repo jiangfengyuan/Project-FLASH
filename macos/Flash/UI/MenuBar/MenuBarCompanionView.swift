@@ -6,6 +6,8 @@
 
 import SwiftUI
 import SwiftData
+import FlashCore
+import FlashDesign
 
 /// 菜单栏伴侣面板（PRD §26 Menu Bar Companion，输入交互遵循 §13/§14 Quick Capture）：
 /// 快速记录（回车即存，默认类型 Idea）+ 今日概览（只读）+ 快速跳转 + 退出。

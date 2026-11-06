@@ -19,9 +19,10 @@
 | Android | Kotlin + Jetpack Compose + Material 3 + Room | Flash Aero v0.1.0 |
 | macOS | SwiftUI + SwiftData，universal2（arm64 + x86_64） | Flash Aero v0.1.0 |
 | HarmonyOS | ArkTS + ArkUI + 加密 RDB + Preferences 设置存储，纯原生 HAP | Flash Aero v0.1.0 |
+| iOS | SwiftUI + SwiftData，iPhone，iOS 18+（与 macOS 共用 FlashKit） | 开发中（Alpha，未发布） |
 
 历史上有过 React + Capacitor 的 Web/混合版，已退役（git 历史可查），
-本仓库现在包含 Android、macOS 与 HarmonyOS 三个纯原生工程。
+本仓库现在包含 Android、macOS、HarmonyOS 三个纯原生工程，以及开发中的 iOS 工程（与 macOS 共用 `shared/FlashKit`）。
 
 ## 功能
 
@@ -59,6 +60,22 @@ xcodebuild test -scheme Flash -destination 'platform=macOS'
 
 详见 [macos/README.md](macos/README.md)。
 
+### iOS（开发中）
+
+iPhone、iOS 18+，与 macOS 共用本地 Swift Package `shared/FlashKit`（数据层、领域逻辑、设计语言与大部分页面）。
+功能已对齐 macOS（此刻 / 记录 / 日志流 / 情绪 / 日历与任务 / 回顾 / Memory / 搜索 / 设置与备份），
+并有 iOS 增强：快速记录（Liquid Glass 常驻入口、控制中心控件、Siri 与快捷指令）、灵感提醒通知、
+主屏与锁屏小组件、缩放转场与触感反馈：
+
+```bash
+cd ios
+DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer \
+xcodebuild -scheme Flash -destination 'generic/platform=iOS Simulator' build CODE_SIGNING_ALLOWED=NO
+cd ../shared/FlashKit && DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer swift test
+```
+
+详见 [ios/README.md](ios/README.md) 与 [shared/FlashKit/README.md](shared/FlashKit/README.md)。
+
 ### HarmonyOS
 
 要求 DevEco Studio 与 HarmonyOS SDK。可直接用 DevEco Studio 打开 `harmonyos/`，
@@ -82,6 +99,8 @@ assembleHap --mode module -p product=default -p module=entry@default \
 ```
 ├── android/     # 原生 Android 工程
 ├── macos/       # 原生 macOS 工程（含单元测试）
+├── ios/         # 原生 iOS 工程（iPhone，开发中）
+├── shared/      # macOS / iOS 共用 Swift Package（FlashKit）
 ├── harmonyos/   # 原生 HarmonyOS 工程（ArkTS + ArkUI）
 ├── scripts/     # Android 发布签名脚本
 ├── ROADMAP.md   # 开发路线图
