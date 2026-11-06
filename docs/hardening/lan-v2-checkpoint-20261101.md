@@ -1,3 +1,5 @@
+> 历史检查点。后续候选接线与验证见 [2026-11-06 验收记录](lan-v2-acceptance-20261106.md)，正式启用仍待真机验收。
+
 # LAN v2 implementation checkpoint · 2026-11-01
 
 Status: **incomplete; production LAN remains disabled**. Owner selected all four

@@ -1,10 +1,11 @@
 # FLASH-LAN/2 — byte-level review draft
 
-Status: **candidate for isolated implementation; not release-approved**. On
+Status: **implemented candidate; production disabled, not release-approved**. On
 2026-11-01 the owner requested Codex self-review instead of an external reviewer.
 See [self-review and limits](../hardening/lan-v2-self-review-20261101.md).
-This does not replace the disabled legacy adapter or waive the vector, application
-integration and physical-device acceptance gates.
+The legacy wire is permanently disabled. Candidate adapters and verification
+status are recorded in [acceptance](../hardening/lan-v2-acceptance-20261106.md);
+physical-device and minimum-system gates have not been waived.
 
 ## Roles, scope and trust
 

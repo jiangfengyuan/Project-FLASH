@@ -42,3 +42,13 @@ Failure to compare codes, compromised endpoints, traffic analysis, and local
 process/OS memory compromise remain outside this transport's guarantees. The
 display encodes 39 bits; no separate formal analysis of Flash's active-attack
 success probability has been delivered.
+
+## Implementation follow-up (2026-11-06)
+
+The owner-authorized self-review was followed by native core and adapter checks.
+See [acceptance evidence](lan-v2-acceptance-20261106.md). This follow-up covers
+confirmation-before-snapshot, strict-parse-before-receipt, bounded fragmented input,
+callback generations and ACK-write/peer-close ordering. Core keys are owned and
+wiped by Rust; platform immutable strings and OS memory are not claimed erased.
+No external independent audit or physical-device acceptance is implied. Release
+remains blocked on the documented real-device and minimum-system gates.

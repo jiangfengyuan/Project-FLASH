@@ -70,11 +70,11 @@ memory erasure, process-abort recovery, or protocol security.
 
 ## Current checkpoint
 
-See [checkpoint and evidence](../../docs/hardening/lan-v2-checkpoint-20261101.md).
-Rust toolchain and Android NDK were later recovered locally; Rust host tests,
-cross-target static builds and bridge links are recorded under
-`outputs/lan-v2-continuation-20261101/` (outside git). The isolated
-`shared/FlashLAN/` state machine is a candidate only, with a Codex self-review
-(`docs/hardening/lan-v2-self-review-20261101.md`), not an independent audit. No
-network adapter, application link, device execution, 12-direction physical-device
-matrix or formal enablement has been delivered.
+The isolated primitive probe remains separate from application build graphs.
+The shared protocol core now has gated four-platform candidate adapters and
+native application build evidence. Production is disabled pending acceptance.
+See [2026-11-06 evidence and remaining gates](../../docs/hardening/lan-v2-acceptance-20261106.md)
+and [shared core reproduction steps](../../shared/FlashLAN/README.md). Neither
+cross-linking, host JNI/N-API execution nor simulator tests replace the required
+12-direction physical-device matrix. The protocol review is owner-requested
+Codex self-review, not an external independent audit.

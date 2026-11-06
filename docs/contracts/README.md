@@ -10,7 +10,7 @@
 
 - 文件版本仍为 `flash-backup-v2`；分区 schema 现支持 `1` 与 `2`：**分区版本声明该分区记录结构**，schema 2 仅新增可选字段（日志/情绪/任务 `isFavorite`，情绪 `intensity`，任务 `sourceLogId`），必填集不变。只实现 schema 1 的客户端读取 schema 2 文件时必须显式拒绝并提示升级。`0.2.0` 是本次契约草案修订号，不是新的文件版本，也不是客户端版本。
 - [flash-backup-v2.schema.json](flash-backup-v2.schema.json) 使用 JSON Schema Draft 2020-12；`$id` 是标识符，不是需要联网获取的地址。
-- 文件是完整快照，不是增量消息；当前支持文件与系统分享，不规定各端 UI、数据库表或通知 API。旧版局域网因接收方未认证且明文传输而经批准暂时停用；历史协议见 [lan-handshake-v1.1.md](lan-handshake-v1.1.md)，不属于本 Schema 范围。
+- 文件是完整快照，不是增量消息；当前支持文件与系统分享，不规定各端 UI、数据库表或通知 API。旧版局域网因接收方未认证且明文传输而永久停用；安全 LAN v2 已有候选实现但正式启用仍待[真机验收](../hardening/lan-v2-acceptance-20261106.md)；历史协议见 [lan-handshake-v1.1.md](lan-handshake-v1.1.md)，不属于本 Schema 范围。
 - 本次不定义账号、云端 API、自动同步、加密或删除传播。`flash-sync-v1` 仍只是预留设计，不能交给本 Schema 校验或现有备份导入器处理。
 - 此 Schema 定义“严格互通文件”，不是现有“跳过坏记录、尽量恢复”的导入算法。不能直接用它替换旧解析器而不评估兼容性与交互变化。
 
