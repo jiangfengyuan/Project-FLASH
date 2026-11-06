@@ -63,7 +63,10 @@ static napi_value input(napi_env env, napi_callback_info info) {
 static napi_value copy(napi_env env, uint64_t id, int64_t length, int received) {
     if (length < 0 || (uint64_t)length > LIMIT) return fail(env, length < 0 ? length : -5);
     napi_value result;
-    if (length == 0) { napi_get_null(env, &result); return result; }
+    if (length == 0) {
+        if (napi_get_null(env, &result) != napi_ok) return fail(env, -1);
+        return result;
+    }
     void *data;
     if (napi_create_arraybuffer(env, (size_t)length, &data, &result) != napi_ok) return fail(env, -5);
     int64_t copied = received ? flash_lan_copy_received(id, data, length) : flash_lan_copy_output(id, data, length);

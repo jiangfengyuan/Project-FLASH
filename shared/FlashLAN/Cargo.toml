@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 publish = false
 license = "MPL-2.0"
+rust-version = "1.99"
 
 [lib]
 crate-type = ["staticlib", "rlib"]
@@ -12,6 +13,11 @@ crate-type = ["staticlib", "rlib"]
 vodozemac = { version = "=0.11.1", default-features = false }
 sha2 = "=0.11.1"
 zeroize = "=1.9.1"
+
+[dev-dependencies]
+serde_json = "=1.0.154"
+hkdf = "=0.13.0"
+hmac = "=0.13.0"
 
 [profile.release]
 panic = "unwind"

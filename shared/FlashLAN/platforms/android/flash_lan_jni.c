@@ -17,7 +17,10 @@ JNIEXPORT jlong JNICALL JNI(create)(JNIEnv *env, jclass cls, jint role, jlong no
     (void)cls;
     if (now < 0 || remaining <= 0 || (role != 1 && role != 2)) { fail(env, -1); return 0; }
     uint64_t id = flash_lan_new((uint8_t)role, (uint64_t)now, (uint64_t)remaining);
-    if (id == 0) fail(env, -8);
+    if (id == 0 || id > INT64_MAX) {
+        if (id != 0) flash_lan_free(id);
+        fail(env, -8); return 0;
+    }
     return (jlong)id;
 }
 JNIEXPORT jlong JNICALL JNI(action)(JNIEnv *env, jclass cls, jlong id, jint op, jlong now, jlong parameter) {

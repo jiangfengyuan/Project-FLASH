@@ -59,7 +59,27 @@ impl Session {
     }
     fn clear_secrets(&mut self) {
         self.ephemeral = None; self.established = None; self.keys = None;
-        self.sas.zeroize(); self.payload.zeroize();
+        self.sas.zeroize(); self.payload.zeroize(); self.digest.zeroize();
+    }
+    fn append_payload(&mut self, bytes: &[u8]) -> Result<()> {
+        let needed = self.payload.len().checked_add(bytes.len()).ok_or(Error::Size)?;
+        if needed > self.cap { return Err(Error::Size); }
+        if needed > self.payload.capacity() {
+            // Vec::realloc can leave a freed plaintext copy. Allocate separately
+            // and let the old Zeroizing owner wipe before freeing its allocation.
+            let capacity = needed.max(self.payload.capacity().saturating_mul(2)).max(256).min(self.cap);
+            let mut grown = Zeroizing::new(Vec::new());
+            grown.try_reserve_exact(capacity).map_err(|_| Error::Size)?;
+            grown.extend_from_slice(&self.payload);
+            self.payload = grown;
+        }
+        self.payload.extend_from_slice(bytes);
+        Ok(())
+    }
+    fn valid_utf8(bytes: &[u8]) -> bool {
+        // Existing strict backup contracts reject BOM. Check before platform
+        // decoders can strip it or replace malformed UTF-8 differently.
+        !bytes.starts_with(&[0xef, 0xbb, 0xbf]) && std::str::from_utf8(bytes).is_ok()
     }
     fn fail<T>(&mut self, error: Error) -> Result<T> {
         self.state = State::Failed; self.error = Some(error);
@@ -205,9 +225,10 @@ impl Session {
         self.tick(now_ms)?;
         if self.state != State::ReadyToSend { return Err(Error::State); }
         if bytes.is_empty() || bytes.len() > self.cap { return self.fail(Error::Size); }
-        if std::str::from_utf8(bytes).is_err() { return self.fail(Error::Malformed); }
+        if !Self::valid_utf8(bytes) { return self.fail(Error::Malformed); }
         self.digest = crypto::hash(bytes); self.total = bytes.len();
-        self.payload.extend_from_slice(bytes); self.state = State::Sending;
+        if let Err(error) = self.append_payload(bytes) { return self.fail(error); }
+        self.state = State::Sending;
         Ok(())
     }
     fn encrypt_record(&mut self, kind: u8, bytes: &[u8]) -> Result<Vec<u8>> {
@@ -263,7 +284,7 @@ impl Session {
         match (self.state, packet[4]) {
             (State::Receiving, 0x20) => {
                 if plaintext.is_empty() || plaintext.len() > self.cap.saturating_sub(self.payload.len()) { return Err(Error::Size); }
-                self.payload.extend_from_slice(&plaintext);
+                self.append_payload(&plaintext)?;
             }
             (State::Receiving, 0x21) => {
                 if plaintext.len() != 40 || self.payload.is_empty() { return Err(Error::Malformed); }
@@ -271,7 +292,7 @@ impl Session {
                 if plaintext[..8] != (self.total as u64).to_be_bytes() || !crypto::equal(&plaintext[8..], &self.digest) {
                     return Err(Error::Authentication);
                 }
-                if std::str::from_utf8(&self.payload).is_err() { return Err(Error::Malformed); }
+                if !Self::valid_utf8(&self.payload) { return Err(Error::Malformed); }
                 self.state = State::Validate;
             }
             (State::WaitReceipt, 0x22) => {
@@ -301,8 +322,11 @@ impl Session {
             Err(error) => return self.fail(error),
         };
         self.output.push_back(receipt); self.state = State::Done;
-        self.established = None; self.keys = None; self.sas.zeroize();
+        self.established = None; self.keys = None; self.sas.zeroize(); self.digest.zeroize();
         Ok(())
     }
 }
 impl Drop for Session { fn drop(&mut self) { self.clear_secrets(); } }
+
+#[cfg(test)]
+mod vector_tests;

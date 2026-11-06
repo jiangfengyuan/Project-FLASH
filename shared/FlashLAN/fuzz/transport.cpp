@@ -40,7 +40,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         if (result == -100 || flash_lan_state(id) == 13 || flash_lan_state(id) == 8 ||
             flash_lan_received_len(id) >= 0) abort();
         const uint8_t secret[] = "must not be accepted";
-        if (flash_lan_provide(id, secret, sizeof secret, 0) >= 0) abort();
+        int64_t provided = flash_lan_provide(id, secret, sizeof secret, 0);
+        if (provided >= 0 || provided == -100) abort();
         return 0;
     }
     // Real key agreement, then mutate an authenticated record in a valid state.

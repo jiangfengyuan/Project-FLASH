@@ -15,7 +15,9 @@ extern "C" {
  * 6 local confirmation, 7 peer confirmation, 8 ready for deferred snapshot,
  * 9 sending, 10 receiving, 11 strict validation required, 12 receipt,
  * 13 done, 14 failed. No state implies database import or commit.
- * All buffers must remain valid for the duration of the call. Never log
+ * Input buffers must remain valid and unmodified throughout a call; output
+ * buffers must be exclusively writable and must not alias input/core memory.
+ * Never log
  * buffers/SAS, reuse freed handles, or queue another socket write before the
  * current immutable frame completes. Free is idempotent; IDs are not reused.
  */

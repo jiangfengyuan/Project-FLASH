@@ -200,7 +200,20 @@ fn oversized_backup_is_rejected_before_any_body_record() {
 
 #[test]
 fn invalid_utf8_is_rejected_without_lossy_platform_decoding() {
-    let (mut s, _) = ready();
-    assert_eq!(s.provide_backup(&[0xff, 0xfe], 0), Err(Error::Malformed));
+    for bytes in [vec![0xff, 0xfe], vec![0xef, 0xbb, 0xbf, b'{', b'}']] {
+        let (mut s, _) = ready();
+        assert_eq!(s.provide_backup(&bytes, 0), Err(Error::Malformed));
+        assert_eq!(s.state(), State::Failed);
+    }
+}
+
+#[test]
+fn modified_receipt_never_reports_success() {
+    let (mut s, mut r) = ready();
+    s.provide_backup(b"{}", 0).unwrap(); pump(&mut s, &mut r, 10);
+    r.validated(true, 0).unwrap();
+    let mut receipt = r.take_output(0).unwrap().unwrap();
+    *receipt.last_mut().unwrap() ^= 1;
+    assert_eq!(s.receive(&receipt, 0), Err(Error::Authentication));
     assert_eq!(s.state(), State::Failed);
 }

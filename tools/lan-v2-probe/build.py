@@ -23,10 +23,31 @@ TARGETS = {
     "macos-x86_64": ("x86_64-apple-darwin", "macosx", "x86_64", "-mmacosx-version-min=15.0"),
     "ios-arm64": ("aarch64-apple-ios", "iphoneos", "arm64", "-miphoneos-version-min=18.0"),
     "ios-sim-arm64": ("aarch64-apple-ios-sim", "iphonesimulator", "arm64", "-mios-simulator-version-min=18.0"),
+    "ios-sim-x86_64": ("x86_64-apple-ios", "iphonesimulator", "x86_64", "-mios-simulator-version-min=18.0"),
     "harmony-arm64": ("aarch64-unknown-linux-ohos", None, "aarch64", None),
+    "harmony-x86_64": ("x86_64-unknown-linux-ohos", None, "x86_64", None),
     "android-arm64": ("aarch64-linux-android", None, "aarch64", None),
+    "android-armv7": ("armv7-linux-androideabi", None, "armv7", None),
+    "android-x86": ("i686-linux-android", None, "i686", None),
     "android-x86_64": ("x86_64-linux-android", None, "x86_64", None),
 }
+
+
+def source_digest(crate_root):
+    paths = [crate_root / name for name in ('Cargo.toml', 'Cargo.lock', 'build.rs', 'rust-toolchain.toml')]
+    for directory, suffixes in [('src', ('.rs',)), ('include', ('.h', '.modulemap')),
+                                ('platforms', ('.c', '.java', '.ts', '.swift')),
+                                ('native', ('.c',)), ('android', ('.c', '.java')),
+                                ('harmony', ('.c', '.ts')), ('apple', ('.swift',))]:
+        for path in (crate_root / directory).rglob('*'):
+            if path.is_file() and path.suffix in suffixes:
+                paths.append(path)
+    digest = hashlib.sha256()
+    for path in sorted(set(paths)):
+        if path.exists():
+            digest.update(str(path.relative_to(crate_root)).encode() + b'\0' + path.read_bytes() + b'\0')
+    digest.update(Path(__file__).read_bytes())
+    return digest.hexdigest()
 
 
 def run(command, env, cwd, log):
@@ -40,6 +61,7 @@ def run(command, env, cwd, log):
 def build(args, report):
     crate_root = ROOT.parents[1] / "shared/FlashLAN" if args.core else ROOT
     library_name = "flash_lan" if args.core else "flash_lan_probe"
+    report['source_sha256'] = source_digest(crate_root)
     archive = args.sodium_archive.resolve()
     digest = hashlib.sha256(archive.read_bytes()).hexdigest()
     if digest != SODIUM_SHA256:
@@ -64,7 +86,7 @@ def build(args, report):
         host = f"{arch}-apple-darwin"
     elif args.target.startswith("harmony"):
         native = args.harmony_native.resolve()
-        compiler = str(native / "llvm/bin/aarch64-unknown-linux-ohos-clang")
+        compiler = str(native / f"llvm/bin/{target}-clang")
         if not Path(compiler).is_file():
             raise ValueError("HarmonyOS native compiler missing; set --harmony-native")
         env["CC"] = shlex.quote(compiler)
@@ -76,7 +98,8 @@ def build(args, report):
         if not args.android_ndk:
             raise ValueError("Android NDK missing; set --android-ndk (API 26)")
         binaries = args.android_ndk.resolve() / "toolchains/llvm/prebuilt/darwin-x86_64/bin"
-        compiler = str(binaries / f"{target}26-clang")
+        compiler_prefix = 'armv7a-linux-androideabi' if args.target == 'android-armv7' else target
+        compiler = str(binaries / f"{compiler_prefix}26-clang")
         if not Path(compiler).is_file():
             raise ValueError("Android NDK API 26 compiler missing")
         env["CC"] = shlex.quote(compiler)
@@ -93,7 +116,12 @@ def build(args, report):
     work = out / "build"
     work.mkdir(exist_ok=True)
     run([str(sodium / "configure"), f"--prefix={prefix}", f"--host={host}",
-         "--disable-shared", "--enable-static", "--disable-asm"], env, work, out / "configure.log")
+         "--disable-shared", "--enable-static", "--disable-asm", "--with-pic", "--disable-pie"],
+        env, work, out / "configure.log")
+    # Match upstream Android's --disable-pie for libraries. Configure otherwise
+    # appends -fPIE after -fPIC, breaking 32-bit x86 shared-library relocations.
+    # Clean objects so an earlier invocation cannot retain different CFLAGS.
+    run(["make", "clean"], env, work, out / "clean.log")
     run(["make", "-j4"], env, work, out / "make.log")
     run(["make", "install"], env, work, out / "install.log")
     report["sodium_built"] = True
@@ -150,6 +178,9 @@ def build(args, report):
          "-o", str(rust_dynamic)],
         env, work, out / "rust-native-link.log")
     report["rust_bridge_linked"] = True
+    report["native_bridge_sha256"] = hashlib.sha256(rust_dynamic.read_bytes()).hexdigest()
+    if source_digest(crate_root) != report['source_sha256']:
+        raise ValueError('Source changed during the native build; rebuild before packaging')
     if args.target == "macos-arm64" and platform.machine() == "arm64":
         swift = xcrun("--find", "swiftc")
         executable = out / "swift-rust-probe"
