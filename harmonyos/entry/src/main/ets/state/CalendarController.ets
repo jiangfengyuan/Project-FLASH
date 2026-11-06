@@ -1,6 +1,7 @@
 import { common } from '@kit.AbilityKit';
 import { util } from '@kit.ArkTS';
 import { i18n } from '@kit.LocalizationKit';
+import { deviceTimeZone, runtimeTimeZone } from '../data/CanonicalTimeZones';
 import { dayString, shiftCalendarMonth, calendarWeeks } from '../data/DateUtils';
 import { calendarDayMarkers, DayMarkers, EMPTY_DAY_MARKERS } from '../data/CalendarMarkers';
 import { ColorTag, EmotionRecord, LogItem, TaskDueKind, TaskItem } from '../models/Models';
@@ -91,7 +92,7 @@ export class CalendarController {
     const instant = new Date(task.due.at).getTime();
     if (!Number.isFinite(instant)) return '';
     try {
-      const offset = i18n.getTimeZone(task.due.timeZone).getOffset(instant);
+      const offset = i18n.getTimeZone(this.requiredRuntimeZone(task.due.timeZone)).getOffset(instant);
       const local = new Date(instant + offset);
       return `${local.getUTCFullYear()}-${this.pad2(local.getUTCMonth() + 1)}-${this.pad2(local.getUTCDate())}`;
     } catch (_) {
@@ -104,13 +105,13 @@ export class CalendarController {
     this.state.taskTitle = task?.title ?? '';
     this.state.taskNotes = task?.notes ?? '';
     this.state.taskAllDay = task?.due.kind !== TaskDueKind.DATE_TIME;
-    this.state.taskTimeZone = task?.due.timeZone ?? i18n.getTimeZone().getID();
+    this.state.taskTimeZone = task?.due.timeZone ?? deviceTimeZone();
     this.state.taskDate = task ? this.taskCalendarDay(task) : (selectedDay || dayString());
     this.state.taskTime = '09:00';
     if (task?.due.at) {
       try {
         const instant = new Date(task.due.at).getTime();
-        const offset = i18n.getTimeZone(this.state.taskTimeZone).getOffset(instant);
+        const offset = i18n.getTimeZone(this.requiredRuntimeZone(this.state.taskTimeZone)).getOffset(instant);
         const local = new Date(instant + offset);
         this.state.taskTime = `${this.pad2(local.getUTCHours())}:${this.pad2(local.getUTCMinutes())}`;
       } catch (_) {}
@@ -138,8 +139,14 @@ export class CalendarController {
 
   taskAnchor(task: TaskItem): Date | undefined {
     if (task.due.kind === TaskDueKind.DATE_TIME && task.due.at) return new Date(task.due.at);
-    if (task.due.date) return this.localDateToInstant(task.due.date, '09:00', i18n.getTimeZone().getID());
+    if (task.due.date) return this.localDateToInstant(task.due.date, '09:00', deviceTimeZone());
     return undefined;
+  }
+
+  private requiredRuntimeZone(identifier: string): string {
+    const resolved = runtimeTimeZone(identifier);
+    if (resolved === undefined) throw new Error('此设备不支持任务时区，请更新系统后重试');
+    return resolved;
   }
 
   localDateToInstant(day: string, time: string, timeZone: string): Date | undefined {
@@ -157,7 +164,7 @@ export class CalendarController {
         wall.getUTCMinutes() !== timeParts[1]) return undefined;
     const localMillis = wall.getTime();
     try {
-      const zone = i18n.getTimeZone(timeZone);
+      const zone = i18n.getTimeZone(this.requiredRuntimeZone(timeZone));
       let instant = localMillis - zone.getOffset(localMillis);
       instant = localMillis - zone.getOffset(instant);
       const result = new Date(instant);
@@ -180,7 +187,7 @@ export class CalendarController {
     if (this.state.busy) return;
     const title = this.state.taskTitle.trim().slice(0, 200);
     const anchor = this.localDateToInstant(this.state.taskDate, this.state.taskAllDay ? '09:00' : this.state.taskTime,
-      this.state.taskTimeZone || i18n.getTimeZone().getID());
+      this.state.taskTimeZone || deviceTimeZone());
     if (!title) { this.runtime.notify('请输入任务标题', 'error'); return; }
     if (!anchor) { this.runtime.notify('请输入有效的日期和时间', 'error'); return; }
     const existing = this.state.tasks.find((item: TaskItem) => item.id === this.state.editingTaskId);
@@ -193,7 +200,7 @@ export class CalendarController {
       colorTag: existing?.colorTag ?? ColorTag.MEMO, importance: existing?.importance ?? 0,
       due: this.state.taskAllDay ? { kind: TaskDueKind.ALL_DAY, date: this.state.taskDate } : {
         kind: TaskDueKind.DATE_TIME, at: anchor.toISOString(),
-        timeZone: this.state.taskTimeZone || i18n.getTimeZone().getID()
+        timeZone: this.state.taskTimeZone || deviceTimeZone()
       },
       reminderAt: reminderAt, completedAt: existing?.completedAt,
       createdAt: existing?.createdAt ?? now, updatedAt: now

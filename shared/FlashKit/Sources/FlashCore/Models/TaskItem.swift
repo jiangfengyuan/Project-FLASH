@@ -40,7 +40,7 @@ public struct TaskItem: Identifiable, Equatable, Sendable {
         case .dateTime:
             guard let dueAt,
                   let timeZone,
-                  let zone = TimeZone(identifier: timeZone),
+                  let zone = CanonicalTimeZones.timeZone(for: timeZone),
                   let date = TaskItem.parseFraction(dueAt) ?? TaskItem.parseWholeSecond(dueAt) else { return nil }
             var calendar = Calendar(identifier: .gregorian)
             calendar.timeZone = zone

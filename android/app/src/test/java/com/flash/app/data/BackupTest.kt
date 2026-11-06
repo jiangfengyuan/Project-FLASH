@@ -118,6 +118,75 @@ class BackupTest {
     }
 
     @Test
+    fun `modern and legacy time zones retain wire spelling and native calendar rules`() {
+        for (identifier in listOf("Europe/Kyiv", "Europe/Kiev", "Asia/Kolkata", "Asia/Calcutta", "Asia/Kathmandu", "Asia/Katmandu", "Africa/Asmara", "Africa/Asmera", "Pacific/Chuuk", "Pacific/Truk")) {
+            val first = Backup.parse(sampleV2TaskBackup(identifier))
+            assertEquals(identifier, 1, first.tasks.size)
+            assertEquals(identifier, first.tasks.single().timeZone)
+            val second = Backup.parse(Backup.exportJson(first.logs, first.emotions, first.tasks))
+            assertEquals(first.tasks, second.tasks)
+            assertEquals("2026-09-01", second.tasks.single().calendarDate)
+        }
+    }
+
+    @Test
+    fun `IANA rename aliases support older native databases without GMT fallback`() {
+        for ((modern, legacy) in listOf("Europe/Kyiv" to "Europe/Kiev", "Asia/Kolkata" to "Asia/Calcutta", "Africa/Asmara" to "Africa/Asmera", "Pacific/Chuuk" to "Pacific/Truk")) {
+            assertEquals(legacy, CanonicalTimeZones.runtimeIdentifier(modern) { it == legacy })
+            assertEquals(modern, CanonicalTimeZones.runtimeIdentifier(legacy) { it == modern })
+        }
+        assertEquals(null, CanonicalTimeZones.runtimeIdentifier("Europe/Kyiv") { false })
+        assertEquals(null, CanonicalTimeZones.runtimeIdentifier("Africa/Asmara") { it == "Africa/Nairobi" })
+        for (bad in listOf("utc", "Zulu", "US/Eastern", "+08:00", "Europe/kyiv", "Mars/Olympus")) {
+            assertEquals(null, CanonicalTimeZones.runtimeIdentifier(bad) { true })
+        }
+    }
+
+    @Test
+    fun `device-reported zones outside the wire set never fail export`() {
+        val task = Backup.parse(sampleV2TaskBackup("Asia/Shanghai")).tasks.single()
+        for ((device, wire) in listOf(
+            "GMT" to "UTC", "Etc/GMT" to "UTC", "Zulu" to "UTC", "Asia/Chongqing" to "Asia/Shanghai",
+            "US/Eastern" to "America/New_York", "Asia/Ho_Chi_Minh" to "Asia/Ho_Chi_Minh",
+            "UTC" to "UTC", "Etc/UTC" to "Etc/UTC",
+        )) {
+            val parsed = Backup.parse(Backup.exportJson(emptyList(), emptyList(), listOf(task.copy(timeZone = device))))
+            assertEquals(device, wire, parsed.tasks.single().timeZone)
+            assertEquals(device, task.dueAt, parsed.tasks.single().dueAt)
+        }
+    }
+
+    @Test
+    fun `a fixed-offset device zone degrades to UTC with the instant kept and a note recorded`() {
+        val task = Backup.parse(sampleV2TaskBackup("Asia/Shanghai")).tasks.single()
+        val json = Backup.exportJson(emptyList(), emptyList(), listOf(task.copy(timeZone = "GMT+08:00")), notes = "kept")
+        val parsed = Backup.parse(json)
+        assertEquals("UTC", parsed.tasks.single().timeZone)
+        assertEquals(task.dueAt, parsed.tasks.single().dueAt)
+        val notes = org.json.JSONObject(json).getString("notes")
+        org.junit.Assert.assertTrue(notes, notes.startsWith("kept\n") && notes.contains("GMT+08:00") && notes.contains("UTC"))
+        val exact = Backup.exportJson(emptyList(), emptyList(), listOf(task), notes = "kept")
+        assertEquals("kept", org.json.JSONObject(exact).getString("notes"))
+    }
+
+    @Test
+    fun `every JDK zone ID exports`() {
+        val task = Backup.parse(sampleV2TaskBackup("Asia/Shanghai")).tasks.single()
+        for (device in java.time.ZoneId.getAvailableZoneIds()) {
+            val parsed = Backup.parse(Backup.exportJson(emptyList(), emptyList(), listOf(task.copy(timeZone = device))))
+            assertEquals(device, 1, parsed.tasks.size)
+        }
+    }
+
+    @Test
+    fun `a local task keeps the native rules of its device zone`() {
+        for (device in listOf("GMT", "US/Eastern", "GMT+08:00")) {
+            assertEquals(device, java.time.ZoneId.of(device), CanonicalTimeZones.zoneId(device))
+        }
+        assertEquals(null, CanonicalTimeZones.zoneId("Mars/Olympus"))
+    }
+
+    @Test
     fun `parse skips a timed task with invalid IANA time zone`() {
         val result = Backup.parse(sampleV2TaskBackup(timeZone = "Mars/Olympus"))
 

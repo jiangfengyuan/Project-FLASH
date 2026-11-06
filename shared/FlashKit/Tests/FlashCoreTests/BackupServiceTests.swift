@@ -56,6 +56,76 @@ struct BackupServiceTests {
         #expect(preview.tasks[0] == sampleTask())
     }
 
+    @Test func modernAndLegacyTimeZonesRoundTripWithoutRenaming() throws {
+        for identifier in ["Europe/Kyiv", "Europe/Kiev", "Asia/Kolkata", "Asia/Calcutta", "Asia/Kathmandu", "Asia/Katmandu", "Africa/Asmara", "Africa/Asmera", "Pacific/Chuuk", "Pacific/Truk"] {
+            var task = sampleTask()
+            task.timeZone = identifier
+            let preview = try BackupService.parse(BackupService.exportJSON(logs: [], emotions: [], tasks: [task], appVersion: "test"))
+            #expect(preview.taskCount == 1, "\(identifier)")
+            #expect(preview.tasks.first?.timeZone == identifier)
+            #expect(preview.tasks.first?.calendarDate == task.calendarDate)
+        }
+    }
+
+    @Test func authoritativeAliasesResolveOnOlderNativeDatabases() {
+        for (modern, legacy) in [("Europe/Kyiv", "Europe/Kiev"), ("Asia/Kolkata", "Asia/Calcutta"), ("Africa/Asmara", "Africa/Asmera"), ("Pacific/Chuuk", "Pacific/Truk")] {
+            #expect(CanonicalTimeZones.runtimeIdentifier(modern, supports: { $0 == legacy }) == legacy)
+            #expect(CanonicalTimeZones.runtimeIdentifier(legacy, supports: { $0 == modern }) == modern)
+        }
+        #expect(CanonicalTimeZones.runtimeIdentifier("Europe/Kyiv", supports: { _ in false }) == nil)
+        // Asmara must not silently substitute a different historical Zone such as Nairobi.
+        #expect(CanonicalTimeZones.runtimeIdentifier("Africa/Asmara", supports: { $0 == "Africa/Nairobi" }) == nil)
+        for bad in ["utc", "Zulu", "US/Eastern", "+08:00", "Europe/kyiv", "Mars/Olympus"] {
+            #expect(CanonicalTimeZones.runtimeIdentifier(bad, supports: { _ in true }) == nil)
+        }
+    }
+
+    @Test func deviceReportedZonesOutsideTheWireSetNeverFailExport() throws {
+        let cases = [("GMT", "UTC"), ("Etc/GMT", "UTC"), ("Zulu", "UTC"), ("Asia/Chongqing", "Asia/Shanghai"),
+                     ("US/Eastern", "America/New_York"), ("Asia/Ho_Chi_Minh", "Asia/Ho_Chi_Minh"),
+                     ("UTC", "UTC"), ("Etc/UTC", "Etc/UTC")]
+        for (device, wire) in cases {
+            var task = sampleTask()
+            task.timeZone = device
+            let json = try BackupService.exportStrictJSON(logs: [], emotions: [], tasks: [task], appVersion: "0.1.0")
+            let preview = try BackupService.parseStrict(json)
+            #expect(preview.tasks.first?.timeZone == wire, "\(device)")
+            #expect(preview.tasks.first?.dueAt == task.dueAt, "\(device)")
+        }
+    }
+
+    @Test func everyFoundationKnownZoneExports() throws {
+        for device in TimeZone.knownTimeZoneIdentifiers {
+            var task = sampleTask()
+            task.timeZone = device
+            let preview = try BackupService.parseStrict(
+                BackupService.exportStrictJSON(logs: [], emotions: [], tasks: [task], appVersion: "0.1.0"))
+            #expect(preview.tasks.count == 1, "\(device)")
+        }
+    }
+
+    @Test func fixedOffsetDeviceZoneDegradesToUTCWithANote() throws {
+        var task = sampleTask()
+        task.timeZone = "GMT+0800"
+        let json = try BackupService.exportStrictJSON(logs: [], emotions: [], tasks: [task], notes: "kept", appVersion: "0.1.0")
+        let preview = try BackupService.parseStrict(json)
+        #expect(preview.tasks.first?.timeZone == "UTC")
+        #expect(preview.tasks.first?.dueAt == task.dueAt)
+        let root = try #require(JSONSerialization.jsonObject(with: Data(json.utf8)) as? [String: Any])
+        let notes = try #require(root["notes"] as? String)
+        #expect(notes.hasPrefix("kept\n") && notes.contains("GMT+0800") && notes.contains("UTC"))
+        let exact = try BackupService.exportStrictJSON(logs: [], emotions: [], tasks: [sampleTask()], notes: "kept", appVersion: "0.1.0")
+        let exactRoot = try #require(JSONSerialization.jsonObject(with: Data(exact.utf8)) as? [String: Any])
+        #expect(exactRoot["notes"] as? String == "kept")
+    }
+
+    @Test func aLocalTaskKeepsTheNativeRulesOfItsDeviceZone() {
+        for device in ["GMT", "US/Eastern"] {
+            #expect(CanonicalTimeZones.timeZone(for: device) == TimeZone(identifier: device), "\(device)")
+        }
+        #expect(CanonicalTimeZones.timeZone(for: "Mars/Olympus") == nil)
+    }
+
     @Test func exportContainsMetaFields() {
         let json = BackupService.exportJSON(logs: [], emotions: [], appVersion: "0.1.0")
         #expect(json.contains("\"version\" : \"flash-backup-v2\"") || json.contains("\"version\":\"flash-backup-v2\""))

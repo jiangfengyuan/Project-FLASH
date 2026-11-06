@@ -1,0 +1,27 @@
+# Named time zones: wire spelling and native rules
+
+The former list was frozen from one ICU `supportedValuesOf` enumeration. It rejected modern IANA names even when native rules supported them (F-02). A formatter's canonical spelling is also not a cross-platform naming authority.
+
+The candidate uses the complete geographic Zone/zone.tab/zone1970.tab naming set from the pinned IANA snapshot, plus every historically accepted wire identifier. This is generated policy, not a hand-added exception list. `scripts/backup-contract/timezones/iana-zone-links.json` records the source URL, version, SHA256 and extracted public-domain facts. `legacy-wire-identifiers.json` freezes previous acceptance. `generate-timezones.py` generates the three native adapters, contract ID list and alias candidates; run it with `--check` in review/CI. No runtime download, new dependency or database rewrite.
+
+IANA tzdata2026e archive: `https://data.iana.org/time-zones/releases/tzdata2026e.tar.gz`, SHA256 `b26882805f26aac59d5b222978e6580484b834ccdc98be89df2f05a6dc53a652`. Facts were extracted from bounded archive members; archive code was not executed. The current generated set contains439 identifiers; all420 previous wire identifiers remain. New arbitrary ICU aliases/abbreviations, other `Etc/*`, offsets and case variants remain rejected. UTC/Etc/UTC remain grandfathered as before.
+
+Each platform first checks the naming policy, then native existence/rules: Foundation `TimeZone(identifier:)`, Android strict `ZoneId.of`, Harmony `i18n.TimeZone.getAvailableIDs()` plus an Intl formatter probe. Harmony's fallback-prone `getTimeZone` is used only after resolution to an available ID. Raw spelling is tried first, followed by the canonical family and authoritative IANA Link siblings. The backzone history separates historically distinct Zones that the post-1970 distribution may merge; it never broadens the wire naming policy or invents equivalence from one offset.
+
+Import/export preserves the original accepted identifier and absolute instant. Calendar grouping, task cards/editors and Harmony summary forms use the same native alias resolver. Opening/saving a timed task must retain its wire identifier. No conversion to the device's current zone is permitted for a validated imported task. If an accepted ID and all safe aliases are unavailable on the OS, strict/recovery import fails before preview/write with an update-system message. Malformed/unknown zone values remain ordinary invalid records for the existing explicit recovery workflow. No valid unsupported-zone record is silently dropped.
+
+Native OS tzdb rules remain authoritative; the pinned naming facts do not replace rule data or guarantee identical historical/future offsets on different OS releases. Verify OS versions separately. Candidate tests cover modern/legacy parse-export spelling, simulated older-OS rename fallback, no GMT/neighbor-city substitution and invalid casing/offset/unknown IDs. Existing DST, timestamp, strict and recovery gates remain required. Physical devices/oldest supported OS coverage remains pending.
+
+Updating facts requires a reviewed upstream snapshot/hash, regeneration, preservation of legacy acceptance, alias-family review (including backzone), all contract/native gates and export/import matrix tests. Do not remove a previously accepted identifier or rewrite stored task zones as a side effect.
+
+## Device-reported identifiers at export
+
+Strict import accepts only the wire set above, but a device may report an identifier outside it: Foundation lists `GMT`, `Asia/Chongqing`, `America/Montreal`; Java also lists `US/Eastern`, `Etc/GMT-8` and custom `GMT+08:00`. Such a value must never block a backup, so every exporter maps it before strict validation. Import is deliberately not widened, so files stay readable by existing peers.
+
+| Device-reported ID | Written to the backup | Backup `notes` |
+| --- | --- | --- |
+| Already a wire ID | Unchanged | Unchanged |
+| IANA Link or legacy POSIX name (`scripts/backup-contract/timezone-export-aliases.json`) | Wire ID of the same zone family; the UTC family maps to `UTC` | Unchanged |
+| No zone family (`Etc/GMT±N`, `GMT+08:00`, `SystemV/*`, anything unrecognised) | `UTC`; the task's instant is unchanged | Gains a line naming the original IDs (at most eight) |
+
+The stored task is not rewritten on Apple or Android, so local display keeps the device's zone. HarmonyOS stores wire IDs at creation and maps legacy rows when loading them, instead of hiding them. Fallback changes how a timed task displays on the receiving device, never when it is due. `timezones/device-reported-samples.json` is a host enumeration used as a regression list, not a device matrix.

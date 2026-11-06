@@ -76,14 +76,16 @@ function validInstant(value) {
   return year >= 1 && year <= 9999;
 }
 
-// Exact whitelist of canonical IANA identifiers. Deliberately NOT an
-// Intl.DateTimeFormat probe: ICU accepts aliases (utc, Zulu, GMT0, GMT,
-// US/Eastern, ...) which must not round-trip into backup files.
-// The stable list is committed as canonical-timezones.json; it starts from
-// Intl.supportedValuesOf('timeZone') and explicitly includes UTC and Etc/UTC.
+// Generated IANA naming policy, with legacy spelling compatibility. Existence
+// and rules are checked by the host's maintained native Intl implementation.
 const SUPPORTED_IANA_ZONES = new Set(require('./canonical-timezones.json'));
+const ZONE_ALIASES = require('./timezone-aliases.json');
 function isSupportedIANAZone(value) {
-  return typeof value === 'string' && SUPPORTED_IANA_ZONES.has(value);
+  if (typeof value !== 'string' || !SUPPORTED_IANA_ZONES.has(value)) return false;
+  return ZONE_ALIASES[value].some(candidate => {
+    try { new Intl.DateTimeFormat('en', { timeZone: candidate }).format(new Date(0)); return true; }
+    catch (_) { return false; }
+  });
 }
 
 const ajv = new Ajv2020({ allErrors: true, strict: true });
@@ -116,7 +118,7 @@ function validateDocument(document) {
       }
       if (item.due.kind === 'dateTime' && !isSupportedIANAZone(item.due.timeZone)) {
         fail(`${location}/due/timeZone`, 'TIME_ZONE',
-          'Time zone must be a canonical IANA identifier from Intl.supportedValuesOf(\'timeZone\') (exact match; ICU aliases such as utc, Zulu, GMT0, US/Eastern are rejected)');
+          'Time zone must follow the generated IANA naming policy and resolve through native rules or a documented rename alias');
       }
     });
   }

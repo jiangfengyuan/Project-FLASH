@@ -151,3 +151,59 @@ for (const name of ['merge-local', 'merge-incoming', 'merge-expected', 'overwrit
     assert.deepEqual(validateDocument(document), { valid: true, errors: [] });
   });
 }
+
+
+test('generated IANA policy accepts modern names and retains authoritative rename spelling', () => {
+  for (const zone of ['Europe/Kyiv', 'Europe/Kiev', 'Asia/Kolkata', 'Asia/Calcutta', 'Asia/Kathmandu', 'Africa/Asmara', 'Pacific/Chuuk']) {
+    const input = structuredClone(full); input.data.tasks[0].due.timeZone = zone;
+    assert.equal(validateDocument(input).valid, true, zone);
+    assert.equal(input.data.tasks[0].due.timeZone, zone);
+  }
+});
+
+const deviceSamples = require('./timezones/device-reported-samples.json');
+const exportAliases = require('./timezone-export-aliases.json');
+const canonicalZones = new Set(require('./canonical-timezones.json'));
+// Fixed offsets (and JDK SystemV pseudo-zones) have no IANA family. They are the
+// only spellings allowed to degrade to UTC, and exporters must say so in notes.
+const hasNoZoneFamily = zone => /^(?:Etc\/GMT[+-]\d{1,2}|GMT[+-]\d{2}:?\d{2}|SystemV\/.+)$/.test(zone);
+
+test('every device-reported zone resolves to a strictly valid wire ID', () => {
+  for (const zone of new Set([...deviceSamples.apple, ...deviceSamples.jdk])) {
+    const wire = canonicalZones.has(zone) ? zone : exportAliases[zone];
+    if (wire === undefined) {
+      assert.ok(hasNoZoneFamily(zone), `${zone} has no export alias`);
+      continue;
+    }
+    const input = structuredClone(full); input.data.tasks[0].due.timeZone = wire;
+    assert.equal(validateDocument(input).valid, true, `${zone} -> ${wire}`);
+  }
+});
+
+test('export aliases map zone families, not neighbouring offsets', () => {
+  assert.equal(exportAliases['Asia/Chongqing'], 'Asia/Shanghai');
+  assert.equal(exportAliases['US/Eastern'], 'America/New_York');
+  assert.equal(exportAliases['America/Montreal'], 'America/Toronto');
+  for (const zone of ['GMT', 'Etc/GMT', 'Etc/GMT0', 'GMT0', 'Greenwich', 'UCT', 'Universal', 'Zulu', 'Etc/UCT', 'Etc/Zulu']) {
+    assert.equal(exportAliases[zone], 'UTC', zone);
+  }
+  assert.equal(exportAliases['Etc/GMT-8'], undefined);
+  assert.equal(exportAliases['GMT+08:00'], undefined);
+});
+
+test('strict import stays narrow: aliases and unknown IDs remain invalid on the wire', () => {
+  for (const zone of ['GMT', 'Etc/GMT', 'Etc/GMT-8', 'US/Eastern', 'Zulu', 'GMT+08:00', 'Mars/Olympus', 'europe/kyiv']) {
+    const input = structuredClone(full); input.data.tasks[0].due.timeZone = zone;
+    assert.equal(validateDocument(input).valid, false, zone);
+  }
+  for (const zone of ['UTC', 'Etc/UTC']) {
+    const input = structuredClone(full); input.data.tasks[0].due.timeZone = zone;
+    assert.equal(validateDocument(input).valid, true, zone);
+  }
+});
+
+test('generated time-zone adapters match the generator', () => {
+  const { spawnSync } = require('node:child_process');
+  const run = spawnSync('python3', [require('node:path').join(__dirname, 'generate-timezones.py'), '--check'], { encoding: 'utf8' });
+  assert.equal(run.status, 0, run.stderr);
+});

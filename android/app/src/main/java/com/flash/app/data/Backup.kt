@@ -23,7 +23,6 @@ import java.nio.ByteBuffer
 import java.nio.charset.CodingErrorAction
 import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
@@ -86,13 +85,18 @@ object Backup {
             )
         }
         val tasksArray = JSONArray()
+        val replacedTimeZones = mutableSetOf<String>()
         tasks.forEach { task ->
             val due = JSONObject().put("kind", task.dueKind.storageKey)
             when (task.dueKind) {
                 TaskDueKind.ALL_DAY -> due.put("date", task.dueDate)
                 TaskDueKind.DATE_TIME -> due
                     .put("at", task.dueAt?.let(::normalizedForExport))
-                    .put("timeZone", task.timeZone)
+                    .put("timeZone", task.timeZone?.let { zone ->
+                        val (wire, exact) = CanonicalTimeZones.wireIdentifier(zone)
+                        if (!exact) replacedTimeZones += zone
+                        wire
+                    })
             }
             tasksArray.put(
                 JSONObject()
@@ -120,7 +124,7 @@ object Backup {
             .put("version", BACKUP_VERSION)
             .put("exportedAt", NORMALIZED_ISO.format(Instant.now()))
             .put("appVersion", BuildConfig.VERSION_NAME)
-            .put("notes", notes)
+            .put("notes", CanonicalTimeZones.exportNotes(notes, replacedTimeZones))
             .put("schemas", schemas)
             .put("data", data)
             .toString(2).also { parseStrict(it) }
@@ -183,18 +187,13 @@ object Backup {
         }
     }
 
-    /**
-     * 任务时区只接受标准 IANA ID：必须在契约白名单中，且 ZoneId.of 可解析、输入与 zone.id 完全一致。
-     * 这样拒绝 ICU 别名（utc、Zulu、GMT0、US/Eastern 等）和偏移写法（+08:00），与契约校验器保持同一口径。
-     */
+    /** Preserve wire spelling; strict native rules resolve IANA rename aliases. */
     private fun canonicalTimeZone(id: String): String? {
         if (id !in CanonicalTimeZones.ALL) return null
-        return try {
-            val zone = ZoneId.of(id)
-            zone.takeIf { it.id == id }?.id
-        } catch (_: Exception) {
-            null
+        if (CanonicalTimeZones.zoneId(id) == null) {
+            throw BackupFormatException("此设备不支持备份中的任务时区，请更新系统后重试；未导入任何数据")
         }
+        return id
     }
 
     /** @throws BackupFormatException 文件整体不合法时抛出；单条非法数据跳过。 */

@@ -17,7 +17,7 @@ public struct TaskEditorView: View {
     @State private var isFavorite: Bool
 
     private var editorTimeZone: TimeZone {
-        task?.timeZone.flatMap(TimeZone.init(identifier:)) ?? .current
+        task?.timeZone.flatMap(CanonicalTimeZones.timeZone(for:)) ?? .current
     }
 
     public init(selectedDate: Date, task: TaskItem?, ideaDraft: IdeaTaskDraft? = nil,
@@ -126,7 +126,7 @@ public struct TaskEditorView: View {
             dueKind: allDay ? .allDay : .dateTime,
             dueDate: allDay ? DateFormatting.dayString(dueDate) : nil,
             dueAt: allDay ? nil : Self.isoFractionString(from: dueDate),
-            timeZone: allDay ? nil : editorTimeZone.identifier,
+            timeZone: allDay ? nil : (task?.timeZone ?? editorTimeZone.identifier),
             reminderAt: reminderMinutes.map { Self.isoFractionString(from: anchor.addingTimeInterval(-Double($0 * 60))) },
             completedAt: task?.completedAt,
             sourceLogId: sourceLogId,

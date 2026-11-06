@@ -15,6 +15,7 @@ public enum BackupError: Error, Equatable, Sendable {
     case invalidObject(String)
     case contract(String)
     case fileTooLarge
+    case unsupportedTimeZone
 
     public var userMessage: String {
         switch self {
@@ -25,6 +26,7 @@ public enum BackupError: Error, Equatable, Sendable {
         case .invalidObject(let name): "\(name) 必须是对象"
         case .contract(let path): "\(path)：不符合备份契约，请检查文件或使用恢复入口"
         case .fileTooLarge: "文件过大，不是有效的备份"
+        case .unsupportedTimeZone: "此设备不支持备份中的任务时区，请更新系统后重试；未导入任何数据"
         }
     }
 }
@@ -258,6 +260,7 @@ public enum BackupService: Sendable {
             if let isFavorite = e.isFavorite { dict["isFavorite"] = isFavorite }
             return dict
         }
+        var replacedTimeZones = Set<String>()
         let taskDicts: [[String: Any]] = tasks.map { task in
             let due: [String: Any]
             switch task.dueKind {
@@ -266,7 +269,11 @@ public enum BackupService: Sendable {
             case .dateTime:
                 due = ["kind": task.dueKind.rawValue,
                        "at": normalizedForExport(task.dueAt),
-                       "timeZone": task.timeZone ?? NSNull()]
+                       "timeZone": task.timeZone.map { zone -> String in
+                           let wire = CanonicalTimeZones.wireIdentifier(zone)
+                           if !wire.exact { replacedTimeZones.insert(zone) }
+                           return wire.identifier
+                       } ?? NSNull()]
             }
             var dict: [String: Any] = [
                 "id": task.id, "title": task.title, "notes": task.notes ?? NSNull(),
@@ -285,7 +292,7 @@ public enum BackupService: Sendable {
             "version": backupVersion,
             "exportedAt": DateFormatting.isoNow(),
             "appVersion": appVersion,
-            "notes": notes,
+            "notes": CanonicalTimeZones.exportNotes(notes, replacing: replacedTimeZones),
             "schemas": ["logs": sectionSchemaVersion,
                         "emotions": sectionSchemaVersion,
                         "tasks": sectionSchemaVersion],
@@ -403,7 +410,7 @@ public enum BackupService: Sendable {
         var taskIDs = Set<String>()
         var skippedTasks = max(0, tasksArray.count - maxEntryCount)
         for element in tasksArray.prefix(maxEntryCount) {
-            if let entry = element as? [String: Any], let task = parseTask(entry),
+            if let entry = element as? [String: Any], let task = try parseTask(entry),
                taskIDs.insert(task.id).inserted {
                 tasks.append(task)
             } else {
@@ -559,7 +566,7 @@ public enum BackupService: Sendable {
         return .some(intensity)
     }
 
-    private static func parseTask(_ dict: [String: Any]) -> TaskItem? {
+    private static func parseTask(_ dict: [String: Any]) throws -> TaskItem? {
         guard let id = dict["id"] as? String, isUUID(id),
               let rawTitle = dict["title"] as? String,
               !rawTitle.trimmingCharacters(in: contractWhitespace).isEmpty,
@@ -601,7 +608,7 @@ public enum BackupService: Sendable {
             guard let rawDueAt = due["at"] as? String,
                   let normalizedDueAt = normalizeISODate(rawDueAt),
                   let zone = due["timeZone"] as? String,
-                  let canonicalZone = canonicalTimeZone(zone) else { return nil }
+                  let canonicalZone = try canonicalTimeZone(zone) else { return nil }
             dueDate = nil
             dueAt = normalizedDueAt
             timeZone = canonicalZone
@@ -649,11 +656,10 @@ public enum BackupService: Sendable {
         return text.utf16.count <= maxTextLength
     }
 
-    /// 命名时区校验：输入必须在契约白名单中，且 TimeZone(identifier:) 可解析。
-    /// 这样拒绝 ICU 别名（utc、Zulu、GMT0、US/Eastern 等）和偏移写法，与契约校验器保持同一口径。
-    /// 返回输入本身作为标准 ID（Foundation 会把 UTC 显示为 GMT，但契约以白名单为准）。
-    private static func canonicalTimeZone(_ zone: String) -> String? {
-        guard CanonicalTimeZones.all.contains(zone), TimeZone(identifier: zone) != nil else { return nil }
+    /// Preserve the wire spelling; native rules resolve IANA rename aliases.
+    private static func canonicalTimeZone(_ zone: String) throws -> String? {
+        guard CanonicalTimeZones.all.contains(zone) else { return nil }
+        guard CanonicalTimeZones.timeZone(for: zone) != nil else { throw BackupError.unsupportedTimeZone }
         return zone
     }
 
