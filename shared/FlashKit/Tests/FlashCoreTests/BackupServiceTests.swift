@@ -126,6 +126,25 @@ struct BackupServiceTests {
         #expect(CanonicalTimeZones.timeZone(for: "Mars/Olympus") == nil)
     }
 
+    @Test func idsAndDaysWithTrailingLineTerminatorsAreRejected() throws {
+        // Android, HarmonyOS and the reference validator reject these (PR #3 F-09).
+        let json = try BackupService.exportStrictJSON(logs: [sampleLog()], emotions: [], appVersion: "0.1.0")
+        for suffix in ["\n", "\r\n", "\u{2028}"] {
+            for field in ["id", "recordDate"] {
+                var root = try #require(JSONSerialization.jsonObject(with: Data(json.utf8)) as? [String: Any])
+                var data = try #require(root["data"] as? [String: Any])
+                var logs = try #require(data["logs"] as? [[String: Any]])
+                logs[0][field] = try #require(logs[0][field] as? String) + suffix
+                data["logs"] = logs
+                root["data"] = data
+                let mutated = String(decoding: try JSONSerialization.data(withJSONObject: root), as: UTF8.self)
+                #expect(throws: (any Error).self, "\(field) \(suffix.debugDescription)") {
+                    _ = try BackupService.parseStrict(mutated)
+                }
+            }
+        }
+    }
+
     @Test func exportContainsMetaFields() {
         let json = BackupService.exportJSON(logs: [], emotions: [], appVersion: "0.1.0")
         #expect(json.contains("\"version\" : \"flash-backup-v2\"") || json.contains("\"version\":\"flash-backup-v2\""))

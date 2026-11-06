@@ -217,8 +217,9 @@ public enum BackupService: Sendable {
     public static let maxJSONTokenCount = 10_000_000
 
     private static let uuidRegex = try! NSRegularExpression(
-        pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
-    private static let dayRegex = try! NSRegularExpression(pattern: "^\\d{4}-\\d{2}-\\d{2}$")
+        pattern: "\\A[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\z")
+    // \\z: `$` would also match before a trailing line terminator.
+    private static let dayRegex = try! NSRegularExpression(pattern: "\\A\\d{4}-\\d{2}-\\d{2}\\z")
 
     // ISO8601DateFormatter 共享实例经串行队列访问（安全审计项）：不再依赖
     // 「文档保证线程安全」的口径；nonisolated(unsafe) 仅为编译期标注
