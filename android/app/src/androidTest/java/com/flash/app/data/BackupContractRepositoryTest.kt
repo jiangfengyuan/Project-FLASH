@@ -11,9 +11,33 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.json.JSONArray
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class BackupContractRepositoryTest {
+    @Test fun overwriteCannotDeleteWritesMadeAfterTheConfirmedPreview() = runBlocking {
+        val db = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext(), FlashDatabase::class.java)
+            .allowMainThreadQueries().build()
+        try {
+            val repo = FlashRepository(db)
+            val local = fixture("merge-local")
+            val incoming = fixture("merge-incoming")
+            repo.replaceAll(local.logs, local.emotions, local.tasks)
+            val preview = repo.exportSnapshot()
+            repo.updateLog(local.logs.first().copy(content = "saved after preview"))
+            val updated = repo.exportSnapshot()
+            val stale = repo.replaceAllIfCurrent(preview, incoming.logs, incoming.emotions, incoming.tasks)
+            assertNotNull(stale)
+            assertTrue(BackupDiff.sameData(updated, requireNotNull(stale)))
+            assertTrue(BackupDiff.sameData(updated, repo.exportSnapshot()))
+            assertNull(repo.replaceAllIfCurrent(updated, incoming.logs, incoming.emotions, incoming.tasks))
+            val applied = repo.exportSnapshot()
+            assertEquals(incoming.logs.sortedBy { it.id }, applied.logs.sortedBy { it.id })
+            assertEquals(incoming.emotions.sortedBy { it.id }, applied.emotions.sortedBy { it.id })
+            assertEquals(incoming.tasks.sortedBy { it.id }, applied.tasks.sortedBy { it.id })
+        } finally { db.close() }
+    }
     private fun fixture(name: String): Backup.ImportResult = Backup.parseStrict(
         InstrumentationRegistry.getInstrumentation().context.assets.open("fixtures/$name.json")
             .bufferedReader().use { it.readText() }

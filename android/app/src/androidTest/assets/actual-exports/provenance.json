@@ -1,0 +1,13 @@
+{
+  "origin": "Actual FlashCore BackupService.exportJSON on macOS27.2, seeded solely with fictional models",
+  "exporterCommit": "4d28844920ec511a3ff4eb0f27e4042d876ee6a0",
+  "exporterSourceSHA256": "36238cb69872540a3794c45862a36a201af3765261f310afc58aea59289f7a8e",
+  "bytes": 2639,
+  "sha256": "cc9718e96f86ce50df4c028a673cfcd2d37ce385e0235c3e1d1764889f6fffa2",
+  "schemas": {
+    "emotions": 2,
+    "logs": 2,
+    "tasks": 2
+  },
+  "notAnInstalledIOSAppUIExport": true
+}

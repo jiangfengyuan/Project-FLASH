@@ -560,9 +560,16 @@ export class FlashStore {
 
   async deleteLog(id: string): Promise<void> {
     return this.enqueue(async () => {
-      await this.requiredDatabase().executeSql(`DELETE FROM ${LOGS_TABLE} WHERE id = ?`, [id]);
-      // Android 靠外键级联清理 idea_view_state；这里手动同步删除本机已读状态。
-      await this.requiredDatabase().executeSql(`DELETE FROM ${IDEA_VIEW_TABLE} WHERE id = ?`, [id]);
+      const database = this.requiredDatabase();
+      database.beginTransaction();
+      try {
+        await database.executeSql(`DELETE FROM ${LOGS_TABLE} WHERE id = ?`, [id]);
+        await database.executeSql(`DELETE FROM ${IDEA_VIEW_TABLE} WHERE id = ?`, [id]);
+        database.commit();
+      } catch (error) {
+        database.rollBack();
+        throw error as Error;
+      }
       this.viewedIdeaIds.delete(id);
       this.logs = this.logs.filter((item: LogItem) => item.id !== id);
       this.changes.publish(StorePartition.LOGS);
@@ -601,24 +608,22 @@ export class FlashStore {
     this.viewedIdeaIds.set(id, viewedAt);
   }
 
-  /** 覆盖导入/清空后修剪已读表，避免指向已删除记录的残留行。仅影响本地提醒，
-   * 最坏结果是灵感重新显示为未读，因此不与业务替换共用同一事务。 */
-  private async pruneIdeaViewState(surviving: Set<string>): Promise<void> {
-    let dirty = false;
+  /** Called only inside the business-replacement transaction. Stage memory
+   * until commit so a read-state failure rolls back the complete operation. */
+  private async pruneIdeaViewState(surviving: Set<string>): Promise<Map<string, string>> {
+    const next = new Map<string, string>();
     this.viewedIdeaIds.forEach((viewedAt: string, id: string) => {
-      if (!surviving.has(id)) {
-        this.viewedIdeaIds.delete(id);
-        dirty = true;
-      }
+      if (surviving.has(id)) next.set(id, viewedAt);
     });
-    if (!dirty) return;
+    if (next.size === this.viewedIdeaIds.size) return this.viewedIdeaIds;
     const database = this.requiredDatabase();
     await database.executeSql(`DELETE FROM ${IDEA_VIEW_TABLE}`);
     const rows: relationalStore.ValuesBucket[] = [];
-    this.viewedIdeaIds.forEach((viewedAt: string, id: string) => {
+    next.forEach((viewedAt: string, id: string) => {
       rows.push({ 'id': id, 'sort_key': viewedAt, 'payload': JSON.stringify({ viewedAt: viewedAt }) });
     });
-    if (rows.length > 0) await database.batchInsert(IDEA_VIEW_TABLE, rows);
+    await this.batchInsert(IDEA_VIEW_TABLE, rows);
+    return next;
   }
 
   /** One queued row write publishes only after all edited fields are persisted. */
@@ -636,6 +641,7 @@ export class FlashStore {
         id: existing.id, content: trimmed, colorTag: colorTag ?? existing.colorTag, category: category ?? existing.category,
         importance: importance ?? existing.importance, createdAt: existing.createdAt, recordDate: recordDate ?? existing.recordDate
       };
+      if (typeof existing.isFavorite === 'boolean') updated.isFavorite = existing.isFavorite;
       await this.upsert(LOGS_TABLE, updated.id, updated.createdAt, JSON.stringify(updated));
       this.logs = this.logs.map((item: LogItem) => item.id === id ? updated : item);
       this.changes.publish(StorePartition.LOGS);
@@ -652,6 +658,7 @@ export class FlashStore {
         id: existing.id, content: existing.content, colorTag: colorTag, category: category,
         importance: existing.importance, createdAt: existing.createdAt, recordDate: existing.recordDate
       };
+      if (typeof existing.isFavorite === 'boolean') updated.isFavorite = existing.isFavorite;
       await this.upsert(LOGS_TABLE, updated.id, updated.createdAt, JSON.stringify(updated));
       this.logs = this.logs.map((item: LogItem) => item.id === id ? updated : item);
       this.changes.publish(StorePartition.LOGS);
@@ -678,6 +685,7 @@ export class FlashStore {
           importance: existing.importance, createdAt: existing.createdAt, recordDate: existing.recordDate
         };
         try {
+          if (typeof existing.isFavorite === 'boolean') updated.isFavorite = existing.isFavorite;
           await this.upsert(LOGS_TABLE, updated.id, updated.createdAt, JSON.stringify(updated));
         } catch (error) {
           failure = error as Error;
@@ -737,8 +745,7 @@ export class FlashStore {
 
   async replaceAll(logs: LogItem[], emotions: EmotionRecord[], tasks: TaskItem[] = []): Promise<void> {
     return this.enqueue(async () => {
-      await this.replaceDatabase(logs, emotions, tasks);
-      await this.pruneIdeaViewState(new Set<string>(logs.map((item: LogItem) => item.id)));
+      await this.replaceDatabase(logs, emotions, tasks, true);
       this.logs = logs.slice(); this.emotions = emotions.slice(); this.tasks = tasks.slice();
       this.sortAll();
       this.changes.publish(StorePartition.ALL);
@@ -754,8 +761,7 @@ export class FlashStore {
     expected: BackupData): Promise<boolean> {
     return this.enqueue(async () => {
       if (!BackupDiff.sameData(expected, this.snapshot())) return false;
-      await this.replaceDatabase(logs, emotions, tasks);
-      await this.pruneIdeaViewState(new Set<string>(logs.map((item: LogItem) => item.id)));
+      await this.replaceDatabase(logs, emotions, tasks, true);
       this.logs = logs.slice(); this.emotions = emotions.slice(); this.tasks = tasks.slice();
       this.sortAll();
       this.changes.publish(StorePartition.ALL);
@@ -789,8 +795,7 @@ export class FlashStore {
 
   async clearAll(): Promise<void> {
     return this.enqueue(async () => {
-      await this.replaceDatabase([], [], []);
-      await this.pruneIdeaViewState(new Set<string>());
+      await this.replaceDatabase([], [], [], true);
       this.logs = []; this.emotions = []; this.tasks = [];
       this.changes.publish(StorePartition.ALL);
     });
@@ -802,7 +807,8 @@ export class FlashStore {
     }, relationalStore.ConflictResolution.ON_CONFLICT_REPLACE);
   }
 
-  private async replaceDatabase(logs: LogItem[], emotions: EmotionRecord[], tasks: TaskItem[]): Promise<void> {
+  private async replaceDatabase(logs: LogItem[], emotions: EmotionRecord[], tasks: TaskItem[],
+    pruneReadState: boolean = false): Promise<void> {
     const database = this.requiredDatabase();
     database.beginTransaction();
     try {
@@ -813,7 +819,10 @@ export class FlashStore {
       await this.batchInsert(EMOTIONS_TABLE,
         emotions.map((item: EmotionRecord) => this.row(item.id, item.createdAt, item)));
       await this.batchInsert(TASKS_TABLE, tasks.map((item: TaskItem) => this.row(item.id, item.updatedAt, item)));
+      const nextViewed = pruneReadState ?
+        await this.pruneIdeaViewState(new Set<string>(logs.map((item: LogItem) => item.id))) : this.viewedIdeaIds;
       database.commit();
+      this.viewedIdeaIds = nextViewed;
     } catch (error) {
       database.rollBack();
       throw error as Error;
