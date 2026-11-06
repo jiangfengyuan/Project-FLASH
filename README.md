@@ -6,7 +6,7 @@
 首个正式版将统一命名为 **Flash Pulse v1.0.0**。
 
 没有账号、没有后端——数据默认只存在你自己的设备上；换设备可通过 JSON 文件，
-也可在同一局域网内临时配对直传。
+旧版局域网直传因安全风险暂时停用，请使用文件备份或系统分享。
 
 [爱发电主页](https://ifdian.net/a/HEY10086D)
 
@@ -31,7 +31,7 @@
 - **情绪**：七级选择（macOS / HarmonyOS 为滑块，Android 为 emoji 按钮）+ 子情绪标签 + 备注，周趋势与统计图表；
 - **日历**：日志与情绪按日聚合的月历视图；
 - **回顾**：本周/本月/近 30 天/近 90 天窗口、每日活跃度、与前一窗口的趋势洞察、情绪分布，以及页内趋势/日历切换；
-- **备份与传输**：JSON 导出 / 导入（合并或覆盖）；支持系统分享，以及同一局域网内通过六位临时 PIN 自动发现、配对直传，两端格式一致、可互读。注意：设备互传（文件分享与局域网直传）尚未完成真机验收，验收矩阵见 [docs/contracts/acceptance.md](docs/contracts/acceptance.md)。
+- **备份与传输**：JSON 导出 / 导入（合并或覆盖）；支持系统分享。旧版局域网发送/接收已暂时停用：点击入口只说明替代方式，不启动发现、监听或连接。注意：设备互传（文件分享与局域网直传）尚未完成真机验收，验收矩阵见 [docs/contracts/acceptance.md](docs/contracts/acceptance.md)。
 
 ## 构建
 
@@ -125,12 +125,12 @@ v2 增加 Calendar 任务、截止时间、完成状态和提醒时间。协议�
 `flash-sync-v1` 自动同步层分离，后续同步可复用相同分区模型而不改变备份语义；
 完整定义见 [docs/flash-backup-v2.md](docs/flash-backup-v2.md)。
 
-也可使用系统分享面板，或选择「局域网发送 / 接收」进行直传。局域网发送方会
-生成随机六位 PIN，接收方只有输入正确 PIN 才能取得备份；PIN 60 秒失效、最多
-尝试五次，成功后服务立即关闭。接收方会看到新增、修改、相同与仅本机数据的差异，
-再选择保留本机数据并合并，或覆盖全部。数据不经过 Flash 服务器。
-设备互传尚待真机验收（见 [docs/contracts/acceptance.md](docs/contracts/acceptance.md)），
-局域网直传建议只在可信的家庭或办公网络使用。
+也可使用系统分享面板。导入前会看到新增、修改、相同与仅本机数据的差异，再选择保留
+本机数据并合并，或覆盖全部。数据不经过 Flash 服务器。设备互传尚待真机验收（见
+[docs/contracts/acceptance.md](docs/contracts/acceptance.md)）。
+
+局域网直传暂时停用：旧协议 v1.1 允许未持 PIN 的对端取得完整明文备份，安全替代协议
+评审通过前不会重新开放。
 
 ## 路线图与参与
 
@@ -150,4 +150,4 @@ Copyright (c) 2026 Fengyuan Jiang
 
 UI/UX 阶段三主体实现已完成；完整设备矩阵见 [设备品质验收](docs/quality/device-matrix.md)，跨端文件/LAN 互操作仍见 [契约验收](docs/contracts/acceptance.md)。现有发布目录中的 APK 与 macOS ZIP 是历史构建，不能代表当前代码或作为本轮新版继续分发。后续顺序见 [三端原生路线图](ROADMAP.md)。
 
-局域网采用 [握手 v1.1](docs/contracts/lan-handshake-v1.1.md)：六位 PIN，接收方发挑战、发送方证明 PIN 知识，payload 使用 HMAC 完整性校验；备份内容未做端到端加密，仅用于可信局域网。历史明文 PIN 首包与新版不兼容，双方需升级至同代构建；旧数据可经 JSON 恢复入口迁移。
+历史局域网协议见 [握手 v1.1](docs/contracts/lan-handshake-v1.1.md)，因安全缺陷已在四端生产代码中停用，仅保留在测试夹具中。

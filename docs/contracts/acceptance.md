@@ -26,7 +26,7 @@
 
 - 新增可选字段：日志/情绪/任务 `isFavorite`，情绪 `intensity`（1–5），任务 `sourceLogId`（Idea→Task 来源）。分区版本声明结构：schema 1 分区携带新字段即非法。
 - 已落地：JSON Schema 0.2.0（`flash-backup-v2.schema.json`，if/then 按分区版本切换记录结构）、参考校验器与 npm 测试（67 项）、macOS 读写与 SwiftData V1→V2 迁移（含迁移测试）。macOS 导出写 schemas 2，读取接受 1 与 2。
-- 待跟进：Android/HarmonyOS 解析器接受 schema 2 并读写新字段；跟进前其对 schema 2 文件显式拒绝（符合「不静默丢弃」原则）。`valid-schema2.json` 暂未接入 Android/HarmonyOS 测试。
+- Android/HarmonyOS 解析器已接受 schema 1/2 并读写新字段，两端导出 schema 2；未升级的旧版仍会显式拒绝 schema 2。主机测试已覆盖，安装后 UI 与真机矩阵待验收。
 - 互传提示：macOS 导出的文件在旧版 Android/HarmonyOS 上会收到“不兼容”提示，需等待两端跟进版本；macOS 读取旧端 schema 1 文件不受影响。
 
 ## 局域网握手 v1.1（2026-09-19 安全审计）
