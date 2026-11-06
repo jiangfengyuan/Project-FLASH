@@ -3,10 +3,12 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 import { display, window } from '@kit.ArkUI';
 import { FlashStore } from '../data/FlashStore';
 import { systemEnvironment } from '../state/FeatureStates';
+import { SecureLanTransfer } from '../data/LocalBackupTransfer';
 
 const DOMAIN = 0x0000;
 
 export default class EntryAbility extends UIAbility {
+  onBackground(): void { SecureLanTransfer.stopForBackground(); }
   private mainWindow?: window.Window;
   private avoidAreaChangeCallback?: () => void;
   private windowSizeChangeCallback?: () => void;
@@ -74,6 +76,7 @@ export default class EntryAbility extends UIAbility {
   }
 
   onDestroy(): void {
+    SecureLanTransfer.stopForBackground();
     this.onWindowStageDestroy();
     if (this.foldStatusChangeCallback) {
       try {

@@ -1,5 +1,5 @@
 import { NavigationState, ThemeState, BackupState, FeedbackState, SettingsState, TransferPhase, ImportPhase, DeleteKind, contentLayout } from '../state/FeatureStates';
-import { LanDevice } from '../data/LocalBackupTransfer';
+import { LanDevice, LanPhase } from '../data/LocalBackupTransfer';
 import { PageActions, requireActions } from '../state/PageActions';
 import {
   PageHeader, DOCK_CLEARANCE, RADIUS_CARD, BRAND, SegmentedControl, FlashCard, brandText, cardShadowColor,
@@ -174,44 +174,52 @@ export struct ProfilePage {
   private lanGroup() {
     this.groupLabel('局域网传输')
     FlashCard({ theme: this.theme, space: 2 }) {
-      Text('局域网传输因旧协议安全风险暂时停用。请使用导出备份或系统分享，通过可信渠道传输 JSON 文件。')
+      Text('安全 LAN v2 尚待真机验收。仅兼容新版；传输完成后仍需另行确认导入。')
         .fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).lineHeight(19).width('100%').padding({ top: 12, bottom: 6 })
       if (this.backup.lanMode === TransferPhase.IDLE) {
         this.actionRow($r('sys.symbol.house'), iconSemantic(this.theme, 'lan'), '发送备份', '暂时停用，点击查看替代方式',
           true, () => requireActions(this.actions).backupController.startLanSend())
         this.actionRow($r('sys.symbol.house'), iconSemantic(this.theme, 'lan'), '接收备份', '暂时停用，点击查看替代方式',
           true, () => requireActions(this.actions).backupController.startLanReceive())
-      } else if (this.backup.lanMode === TransferPhase.SENDING) {
+      } else if (this.backup.lanPhase === LanPhase.CONFIRMING || this.backup.lanPhase === LanPhase.WAITING_FOR_PEER) {
         Column({ space: 8 }) {
-          Text('配对 PIN').fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
-          Text(this.backup.lanPin).fontSize(TYPE_DISPLAY).fontWeight(FontWeight.Bold).fontColor(iconSemantic(this.theme, 'lan')).letterSpacing(6)
-          Text('请在接收设备输入此 PIN；60 秒后自动失效。').fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
-          Button('取消发送').width('100%').height(44).fontColor(this.theme.themeMuted).backgroundColor(this.theme.themeControl)
-            .onClick(() => requireActions(this.actions).backupController.stopLan())
-        }.width('100%').padding(12).backgroundColor(this.theme.themeControl).borderRadius(14).margin({ bottom: 8 })
-      } else {
+          Text('核对两端短码').fontSize(TYPE_SECONDARY).fontColor(this.theme.themeText)
+          Text(this.backup.lanShortCode.map((value: number) => value.toString().padStart(4, '0')).join('  '))
+            .fontSize(TYPE_DISPLAY).fontWeight(FontWeight.Bold).fontColor(iconSemantic(this.theme, 'lan'))
+          Text('当面或通过可信通话核对三组数字；60 秒内两端均需主动确认。确认前不会生成或发送备份。')
+            .fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
+          if (this.backup.lanPhase === LanPhase.CONFIRMING) {
+            Button('三组数字全部一致').width('100%').height(44)
+              .onClick(() => requireActions(this.actions).backupController.confirmLanMatch())
+          } else {
+            Text('已确认，等待另一端确认…').fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
+          }
+          Button('不一致，拒绝传输').width('100%').height(44)
+            .onClick(() => requireActions(this.actions).backupController.rejectLan())
+        }.width('100%').padding(12)
+      } else if (this.backup.lanMode === TransferPhase.RECEIVING) {
         Column({ space: 8 }) {
-          Text(this.backup.lanDevices.length === 0 ? '正在搜索发送设备…' : '选择发送设备')
-            .fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width('100%')
+          Text(this.backup.lanDevices.length === 0 ? '正在查找安全 LAN v2 服务…' : '选择发送设备')
+            .fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
           ForEach(this.backup.lanDevices, (device: LanDevice) => {
             Button(device.name).width('100%').height(44)
               .fontColor(this.backup.selectedLanDevice === device.id ? Color.White : this.theme.themeText)
               .backgroundColor(this.backup.selectedLanDevice === device.id ? iconSemantic(this.theme, 'lan') : this.theme.themeControl)
               .onClick(() => this.backup.selectedLanDevice = device.id)
           }, (device: LanDevice) => device.id)
-          TextInput({ placeholder: '六位配对 PIN', text: this.backup.lanEnteredPin })
-            .type(InputType.Number).maxLength(6).height(44)
-            .fontColor(this.theme.themeText).placeholderColor(this.theme.themeMuted)
-            .backgroundColor(this.theme.themeControl).borderRadius(12)
-            .onChange((value: string) => this.backup.lanEnteredPin = value.replace(/\D/g, '').slice(0, 6))
-          Row({ space: 8 }) {
-            Button(this.backup.lanMode === TransferPhase.CONNECTING ? '正在接收…' : '验证并接收').layoutWeight(1).height(44)
-              .backgroundColor(iconSemantic(this.theme, 'lan')).enabled(this.backup.lanMode !== TransferPhase.CONNECTING)
-              .onClick(() => requireActions(this.actions).backupController.receiveLan())
-            Button('取消').width(80).height(44).fontColor(this.theme.themeMuted).backgroundColor(this.theme.themeControl)
-              .onClick(() => requireActions(this.actions).backupController.stopLan())
-          }.width('100%')
-        }.width('100%').padding(12).backgroundColor(this.theme.themeControl).borderRadius(14).margin({ bottom: 8 })
+          Button('连接并核对短码').width('100%').height(44)
+            .enabled(this.backup.lanDevices.some((device: LanDevice) => device.id === this.backup.selectedLanDevice))
+            .onClick(() => requireActions(this.actions).backupController.receiveLan())
+          Button('取消').width('100%').height(44).onClick(() => requireActions(this.actions).backupController.stopLan())
+        }.width('100%').padding(12)
+      } else {
+        Column({ space: 8 }) {
+          Text(this.backup.lanMode === TransferPhase.SENDING ? '等待接收设备，本次开启 120 秒' :
+            this.backup.lanPhase === LanPhase.VERIFYING ? '正在完整校验备份' :
+            this.backup.lanPhase === LanPhase.TRANSFERRING ? '正在加密传输' : '正在建立安全连接')
+            .fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
+          Button('取消').width('100%').height(44).onClick(() => requireActions(this.actions).backupController.stopLan())
+        }.width('100%').padding(12)
       }
     }
   }

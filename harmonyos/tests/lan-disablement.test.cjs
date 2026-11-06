@@ -9,6 +9,8 @@ test('all production LAN actions stay idle before export/context/transport acces
   const forbidden = () => { sideEffects++; throw new Error('unexpected LAN side effect'); };
   const reason = '局域网传输暂时停用：请使用导出备份或系统分享';
   const load = createLoader({ 'data/LocalBackupTransfer': {
+    LAN_ENABLED: false,
+    LanPhase: { IDLE: 0 },
     LAN_UNAVAILABLE_MESSAGE: reason,
     LocalBackupSender: class { constructor() { forbidden(); } },
     LocalBackupDiscovery: class { constructor() { forbidden(); } },
@@ -26,10 +28,10 @@ test('all production LAN actions stay idle before export/context/transport acces
   assert.equal(state.lanMode, P.IDLE);
   state.lanMode = P.RECEIVING;
   state.lanDevices = [{ id: 'spoof', name: 'Spoofed sender', host: '127.0.0.1', port: 9 }];
-  state.selectedLanDevice = 'spoof'; state.lanEnteredPin = '123456';
+  state.selectedLanDevice = 'spoof'; state.lanShortCode = [1, 2, 3];
   await controller.receiveLan();
   assert.equal(state.lanMode, P.IDLE);
-  assert.equal(state.lanPin, ''); assert.deepEqual(state.lanDevices, []);
+  assert.deepEqual(state.lanShortCode, []); assert.deepEqual(state.lanDevices, []);
   assert.equal(state.importSummary, ''); assert.equal(sideEffects, 0);
   assert.deepEqual(messages, [reason, reason, reason]);
 });

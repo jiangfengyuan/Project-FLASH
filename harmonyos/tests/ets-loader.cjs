@@ -71,6 +71,9 @@ function createLoader(overrides = {}, options = {}) {
     '@kit.AbilityKit': { bundleManager: {
       BundleFlag: { GET_BUNDLE_INFO_WITH_APPLICATION: 1 },
       getBundleInfoForSelf: async () => ({ versionName: '0.1.0' }) } },
+    'libflash_lan.so': new Proxy({}, { get: () => () => { throw new Error('Native crypto is not mocked as success in host tests'); } }),
+    '@kit.NetworkKit': {},
+    '@kit.BasicServicesKit': { systemDateTime: { TimeType: { STARTUP: 0 }, getUptime: () => Math.floor(performance.now()) } },
     '@kit.ArkTS': { util: { generateRandomUUID: () => randomUUID(),
       TextDecoder: NodeTextDecoder,
       TextEncoder: class { encodeInto(value) { return new TextEncoder().encode(value); } } } },

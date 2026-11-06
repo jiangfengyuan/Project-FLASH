@@ -18,14 +18,14 @@ class LegacyLANDisablementTest {
             assertUnavailable(model)
             model.startLanReceive()
             assertUnavailable(model)
-            model.receiveLanBackup(LocalBackupTransfer.Device("spoof", "Spoofed name", "127.0.0.1", 9), "123456")
+            model.receiveLanBackup(LocalBackupTransfer.Device("spoof", "Spoofed name", "127.0.0.1", 9))
             assertUnavailable(model)
         }
     }
 
     private fun assertUnavailable(model: SettingsViewModel) {
         assertEquals(LanTransferMode.IDLE, model.lanTransfer.value.mode)
-        assertTrue(model.lanTransfer.value.pin.isEmpty())
+        assertTrue(model.lanTransfer.value.shortCode.isEmpty())
         assertTrue(model.lanTransfer.value.devices.isEmpty())
         assertTrue(model.message.value.orEmpty().contains("局域网传输暂时停用"))
         assertTrue(model.message.value.orEmpty().contains("导出备份"))

@@ -1,6 +1,6 @@
 import { dayString } from '../data/DateUtils';
 import { Category, EmotionRecord, LogItem, SubEmotion, TaskItem } from '../models/Models';
-import { LanDevice } from '../data/LocalBackupTransfer';
+import { LanDevice, LanPhase } from '../data/LocalBackupTransfer';
 // 与 components/CommonBuilders.ets 的浅色令牌保持一致（CommonBuilders 反向依赖
 // 本文件的类型，无法直接引用其常量，改动令牌时需同步）。
 const LIGHT_BACKGROUND = '#FFF7F9FA';
@@ -171,8 +171,8 @@ export class BackupState {
   importPhase: ImportPhase = ImportPhase.IDLE;
   importSummary: string = '';
   lanMode: TransferPhase = TransferPhase.IDLE;
-  lanPin: string = '';
-  lanEnteredPin: string = '';
+  lanPhase: LanPhase = LanPhase.IDLE;
+  lanShortCode: number[] = [];
   lanDevices: LanDevice[] = [];
   selectedLanDevice: string = '';
   recoveryAvailable: boolean = false;

@@ -6,6 +6,7 @@
 
 import Testing
 import SwiftUI
+#if canImport(AppKit)
 import AppKit
 @testable import FlashDesign
 import FlashCore
@@ -59,3 +60,4 @@ struct BrandColorsTests {
         }
     }
 }
+#endif

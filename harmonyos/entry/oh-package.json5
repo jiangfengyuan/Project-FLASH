@@ -5,5 +5,7 @@
   "main": "",
   "author": "Fengyuan Jiang",
   "license": "MPL-2.0",
-  "dependencies": {}
+  "dependencies": {
+    "libflash_lan.so": "file:../../shared/FlashLAN/platforms/harmony"
+  }
 }

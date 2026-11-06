@@ -45,7 +45,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -64,8 +63,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.flash.app.BuildConfig
@@ -92,10 +89,12 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
     val shareUri by viewModel.shareUri.collectAsStateWithLifecycle()
     val transferInProgress by viewModel.transferInProgress.collectAsStateWithLifecycle()
     val lanTransfer by viewModel.lanTransfer.collectAsStateWithLifecycle()
+    androidx.lifecycle.compose.LifecycleEventEffect(androidx.lifecycle.Lifecycle.Event.ON_STOP) {
+        viewModel.cancelLanTransfer()
+    }
 
     var showClearConfirm by remember { mutableStateOf(false) }
     var selectedLanDevice by remember { mutableStateOf<LocalBackupTransfer.Device?>(null) }
-    var lanPin by remember { mutableStateOf("") }
     val snackbarHostState = remember { SnackbarHostState() }
 
     val exportLauncher = rememberLauncherForActivityResult(
@@ -223,7 +222,7 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
             SettingsGroup(
                 title = "数据与安全",
                 note = "备份为明文 JSON，包含日志、情绪和任务内容；请只保存或分享至可信位置",
-                footnote = "旧版局域网传输暂时停用，请使用文件备份或系统分享",
+                footnote = "安全 LAN v2 尚待真机验收；旧版 LAN 永久停用。请使用文件备份或系统分享",
             ) {
                 SettingsRow(
                     icon = Icons.Outlined.FileUpload,
@@ -278,7 +277,6 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
                     subtitle = "暂时停用，点击查看替代方式",
                     onClick = {
                         selectedLanDevice = null
-                        lanPin = ""
                         viewModel.startLanReceive()
                     },
                 )
@@ -348,86 +346,52 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
         )
     }
 
-    when (lanTransfer.mode) {
-        LanTransferMode.SENDING -> AlertDialog(
+    if (lanTransfer.mode != LanTransferMode.IDLE) {
+        val comparing = lanTransfer.phase == LocalBackupTransfer.Phase.CONFIRMING
+        val waiting = lanTransfer.phase == LocalBackupTransfer.Phase.WAITING_FOR_PEER
+        AlertDialog(
             onDismissRequest = viewModel::cancelLanTransfer,
-            title = { Text("等待接收设备") },
+            title = { Text(when (lanTransfer.phase) {
+                LocalBackupTransfer.Phase.CONFIRMING, LocalBackupTransfer.Phase.WAITING_FOR_PEER -> "核对两端短码"
+                LocalBackupTransfer.Phase.WAITING -> "等待接收设备"
+                LocalBackupTransfer.Phase.DISCOVERING -> "选择发送设备"
+                LocalBackupTransfer.Phase.VERIFYING -> "正在完整校验备份"
+                LocalBackupTransfer.Phase.TRANSFERRING -> "正在加密传输"
+                else -> "正在建立安全连接"
+            }) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("在另一台设备选择“局域网接收”，然后输入配对 PIN：")
-                    Text(
-                        lanTransfer.pin,
-                        style = MaterialTheme.typography.displayMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                    Text("PIN 仅本次有效，60 秒后自动失效。")
-                    Text(
-                        "内容未做端到端加密，请仅在可信的家庭或办公局域网使用。",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = viewModel::cancelLanTransfer) { Text("取消发送") }
-            },
-        )
-
-        LanTransferMode.RECEIVING -> AlertDialog(
-            onDismissRequest = viewModel::cancelLanTransfer,
-            title = { Text("从局域网接收") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(if (lanTransfer.devices.isEmpty()) "正在查找附近的 Flash Aero…" else "选择发送设备：")
-                    lanTransfer.devices.forEach { device ->
-                        OutlinedButton(
-                            onClick = { selectedLanDevice = device },
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Text(if (selectedLanDevice?.id == device.id) "✓ ${device.name}" else device.name)
+                    if (comparing || waiting) {
+                        Text("通过可信通话或当面核对三组数字，两端均需主动确认。")
+                        Text(lanTransfer.shortCode.joinToString("  ") { "%04d".format(java.util.Locale.ROOT, it) }, style = MaterialTheme.typography.headlineMedium)
+                        if (waiting) Text("已确认，等待另一端确认…")
+                        Text("60 秒内完成；确认前不会生成或发送备份。")
+                    } else if (lanTransfer.mode == LanTransferMode.RECEIVING) {
+                        if (lanTransfer.devices.isEmpty()) Text("正在查找安全 LAN v2 服务…")
+                        lanTransfer.devices.forEach { device ->
+                            OutlinedButton(onClick = { selectedLanDevice = device }, modifier = Modifier.fillMaxWidth()) {
+                                Text(if (selectedLanDevice?.id == device.id) "✓ ${device.name}" else device.name)
+                            }
                         }
+                    } else {
+                        CircularProgressIndicator()
+                        Text(if (lanTransfer.mode == LanTransferMode.SENDING) "在同一局域网的另一台设备选择接收。本次开启 120 秒。" else "请保持两端应用在前台")
                     }
-                    OutlinedTextField(
-                        value = lanPin,
-                        onValueChange = { lanPin = it.filter(Char::isDigit).take(6) },
-                        label = { Text("六位配对 PIN") },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Text(
-                        "内容未做端到端加密，请仅连接可信的家庭或办公局域网设备。",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    Text("仅支持安全 LAN v2，不兼容旧版。传输完成后仍需确认导入。", style = MaterialTheme.typography.bodySmall)
                 }
             },
             confirmButton = {
-                TextButton(
-                    onClick = { selectedLanDevice?.let { viewModel.receiveLanBackup(it, lanPin) } },
-                    enabled = selectedLanDevice != null && lanPin.length == 6,
-                ) { Text("配对并接收") }
+                if (comparing) TextButton(onClick = viewModel::confirmLanMatch) { Text("三组数字全部一致") }
+                else if (lanTransfer.mode == LanTransferMode.RECEIVING) TextButton(
+                    onClick = { selectedLanDevice?.let(viewModel::receiveLanBackup) },
+                    enabled = lanTransfer.devices.any { it.id == selectedLanDevice?.id },
+                ) { Text("连接并核对短码") }
             },
             dismissButton = {
-                TextButton(onClick = viewModel::cancelLanTransfer) { Text("取消") }
+                if (comparing || waiting) TextButton(onClick = viewModel::rejectLan) { Text("不一致，拒绝") }
+                else TextButton(onClick = viewModel::cancelLanTransfer) { Text("取消") }
             },
         )
-
-        LanTransferMode.CONNECTING -> AlertDialog(
-            onDismissRequest = {},
-            title = { Text("正在配对") },
-            text = {
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    CircularProgressIndicator()
-                    Text("正在验证 PIN 并接收备份…")
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = viewModel::cancelLanTransfer) { Text("取消") }
-            },
-        )
-
-        LanTransferMode.IDLE -> Unit
     }
 
     if (showClearConfirm) {

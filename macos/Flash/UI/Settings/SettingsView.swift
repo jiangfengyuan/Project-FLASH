@@ -217,7 +217,11 @@ struct SettingsView: View {
     }
 
     private func startLanSend() {
-        lanTransfer.startSending()
+        lanTransfer.startSending {
+            let snapshot = try currentSnapshot()
+            let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.0"
+            return try await BackupImportCoordinator.exportJSON(snapshot: snapshot, appVersion: version)
+        }
     }
 
     private func flushLanTransferResults() {

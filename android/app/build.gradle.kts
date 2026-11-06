@@ -89,6 +89,8 @@ android {
     }
 
     sourceSets {
+        getByName("main").java.srcDir("../../shared/FlashLAN/platforms/android/src")
+        getByName("main").jniLibs.srcDir("../../shared/FlashLAN/artifacts/android")
         getByName("test").resources.srcDir("../../docs/contracts")
         getByName("androidTest").assets.srcDir("$projectDir/schemas")
         getByName("androidTest").assets.srcDir("../../docs/contracts")
