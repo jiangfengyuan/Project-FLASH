@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.Job
 
 enum class LanTransferMode { IDLE, SENDING, RECEIVING, CONNECTING }
 
@@ -79,11 +78,6 @@ class SettingsViewModel(
 
     private val _lanTransfer = MutableStateFlow(LanTransferState())
     val lanTransfer: StateFlow<LanTransferState> = _lanTransfer.asStateFlow()
-    private var lanSender: LocalBackupTransfer.Sender? = null
-    private var lanDiscovery: LocalBackupTransfer.Discovery? = null
-    private var lanReceiver: LocalBackupTransfer.Receiver? = null
-    private var lanJob: Job? = null
-    private var lanGeneration: Long = 0
 
     fun setThemeMode(mode: ThemeMode) = settings.setThemeMode(mode)
     fun setUiStyle(style: UiStyle) = settings.setUiStyle(style)
@@ -133,111 +127,17 @@ class SettingsViewModel(
         _message.value = "无法打开系统分享，请先安装可接收文件的应用"
     }
 
-    fun reportLanPermissionDenied() {
-        _message.value = "需要“附近的设备”权限才能发现并连接局域网设备"
-    }
-
-    fun startLanSend() {
+    private fun reportLanUnavailable() {
         cancelLanTransfer()
-        val generation = lanGeneration
-        val job = viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val snapshot = repository.exportSnapshot()
-                val sender = LocalBackupTransfer.Sender(
-                    app,
-                    Backup.exportJson(snapshot.logs, snapshot.emotions, snapshot.tasks),
-                )
-                if (generation != lanGeneration) {
-                    sender.stop()
-                    return@launch
-                }
-                lanSender = sender
-                _lanTransfer.value = LanTransferState(LanTransferMode.SENDING, pin = sender.pin)
-                val sent = try {
-                    sender.run()
-                } catch (cancelled: CancellationException) {
-                    throw cancelled
-                } catch (_: Exception) {
-                    false
-                }
-                if (lanSender !== sender) return@launch
-                if (sent) _message.value = "局域网备份已发送"
-                else if (_lanTransfer.value.mode == LanTransferMode.SENDING) {
-                    _message.value = "配对已结束，请重新发起"
-                }
-                lanSender = null
-                _lanTransfer.value = LanTransferState()
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (error: Exception) {
-                if (generation != lanGeneration) return@launch
-                _message.value = "无法启动局域网发送：${error.message}"
-                _lanTransfer.value = LanTransferState()
-            }
-        }
-        lanJob = job
+        _message.value = LocalBackupTransfer.UNAVAILABLE_MESSAGE
     }
 
-    fun startLanReceive() {
-        cancelLanTransfer()
-        _lanTransfer.value = LanTransferState(LanTransferMode.RECEIVING)
-        lanDiscovery = LocalBackupTransfer.Discovery(app) { devices ->
-            if (_lanTransfer.value.mode == LanTransferMode.RECEIVING) {
-                _lanTransfer.value = _lanTransfer.value.copy(devices = devices)
-            }
-        }.also { it.start() }
-    }
-
-    fun receiveLanBackup(device: LocalBackupTransfer.Device, pin: String) {
-        if (!pin.matches(Regex("\\d{6}"))) {
-            _message.value = "请输入六位数字 PIN"
-            return
-        }
-        lanDiscovery?.stop()
-        lanDiscovery = null
-        _lanTransfer.value = LanTransferState(LanTransferMode.CONNECTING)
-        val receiver = LocalBackupTransfer.Receiver(device, pin)
-        lanReceiver = receiver
-        lanJob = viewModelScope.launch(Dispatchers.IO) {
-            runCatching {
-                val json = receiver.run()
-                val result = Backup.parseStrict(json)
-                val local = repository.exportSnapshot()
-                ImportPreview(
-                    result.logs.size, result.emotions.size,
-                    result.skippedLogs, result.skippedEmotions,
-                    result.tasks.size, result.skippedTasks,
-                    result.logs, result.emotions, result.tasks,
-                    BackupDiff.analyze(
-                        local.logs, local.emotions, result.logs, result.emotions,
-                        local.tasks, result.tasks,
-                    ),
-                    localSnapshot = local,
-                )
-            }.onSuccess {
-                if (lanReceiver !== receiver) return@onSuccess
-                lanReceiver = null
-                _importPreview.value = it
-                _lanTransfer.value = LanTransferState()
-            }.onFailure {
-                if (lanReceiver !== receiver) return@onFailure
-                lanReceiver = null
-                _message.value = "局域网接收失败：${it.message}"
-                startLanReceive()
-            }
-        }
-    }
+    fun startLanSend() = reportLanUnavailable()
+    fun startLanReceive() = reportLanUnavailable()
+    @Suppress("UNUSED_PARAMETER")
+    fun receiveLanBackup(device: LocalBackupTransfer.Device, pin: String) = reportLanUnavailable()
 
     fun cancelLanTransfer() {
-        lanGeneration++
-        lanSender?.stop()
-        lanSender = null
-        lanDiscovery?.stop()
-        lanDiscovery = null
-        lanReceiver?.stop()
-        lanReceiver = null
-        lanJob?.cancel()
-        lanJob = null
         _lanTransfer.value = LanTransferState()
     }
 

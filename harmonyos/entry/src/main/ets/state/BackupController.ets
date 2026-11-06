@@ -9,7 +9,7 @@ import { BackupFiles, SharedExportStatus } from '../data/BackupFiles';
 import { BackupImport, BackupService } from '../data/BackupService';
 import { dayString } from '../data/DateUtils';
 import { shareBackupFile } from '../data/ShareService';
-import { LanDevice, LocalBackupDiscovery, LocalBackupReceiver, LocalBackupSender } from '../data/LocalBackupTransfer';
+import { LAN_UNAVAILABLE_MESSAGE } from '../data/LocalBackupTransfer';
 
 export class BackupController {
   private state: BackupState;
@@ -26,10 +26,6 @@ export class BackupController {
    * preview and confirmation would be deleted without being counted. */
   private pendingSnapshot?: BackupData;
   private generation: number = 0;
-  private lanGeneration: number = 0;
-  private lanSender?: LocalBackupSender;
-  private lanDiscovery?: LocalBackupDiscovery;
-  private lanReceiver?: LocalBackupReceiver;
   cancelImport(): void {
     if (this.state.busy) return;
     this.pendingImport = undefined;
@@ -193,93 +189,16 @@ export class BackupController {
       `无效项目：${incoming.skippedLogs + incoming.skippedEmotions + incoming.skippedTasks}`;
   }
 
-  async startLanSend(): Promise<void> {
-    if (!this.store.ready) {
-      this.runtime.notify('本地数据尚未加载完成，无法发送备份', 'error');
-      return;
-    }
-    this.stopLan();
-    const generation = this.lanGeneration;
-    try {
-      const context = this.runtime.context() as common.UIAbilityContext;
-      const snapshot = this.store.snapshot();
-      const json = BackupService.exportJSON(snapshot.logs, snapshot.emotions, snapshot.tasks);
-      const sender = new LocalBackupSender(context, json, (success: boolean) => {
-        // An older session may finish while a new one is starting; never clear the new session's state.
-        if (this.lanSender !== sender) return;
-        this.state.lanMode = TransferPhase.IDLE;
-        this.state.lanPin = '';
-        this.lanSender = undefined;
-        this.runtime.notify(success ? '备份已发送' : '配对已结束', success ? 'success' : 'info');
-      });
-      this.lanSender = sender;
-      this.state.lanMode = TransferPhase.SENDING;
-      this.state.lanPin = sender.pin;
-      await sender.start();
-    } catch (error) {
-      if (generation !== this.lanGeneration) return;
-      this.stopLan();
-      this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
-    }
-  }
+  async startLanSend(): Promise<void> { this.reportLanUnavailable(); }
+  startLanReceive(): void { this.reportLanUnavailable(); }
+  async receiveLan(): Promise<void> { this.reportLanUnavailable(); }
 
-  startLanReceive(): void {
+  private reportLanUnavailable(): void {
     this.stopLan();
-    try {
-      const context = this.runtime.context() as common.UIAbilityContext;
-      this.state.lanMode = TransferPhase.RECEIVING;
-      const discovery = new LocalBackupDiscovery(context, (devices: LanDevice[]) => {
-        if (this.lanDiscovery !== discovery) return;
-        this.state.lanDevices = devices.slice();
-        if (this.state.selectedLanDevice !== '' && !devices.some((device: LanDevice) => device.id === this.state.selectedLanDevice)) {
-          this.state.selectedLanDevice = '';
-        }
-      });
-      this.lanDiscovery = discovery;
-      discovery.start();
-    } catch (error) {
-      this.stopLan();
-      this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
-    }
-  }
-
-  async receiveLan(): Promise<void> {
-    if (this.state.lanMode !== TransferPhase.RECEIVING || this.state.busy) return;
-    const device = this.state.lanDevices.find((item: LanDevice) => item.id === this.state.selectedLanDevice);
-    if (!device) { this.runtime.notify('请先选择发送设备', 'error'); return; }
-    if (!/^\d{6}$/.test(this.state.lanEnteredPin)) { this.runtime.notify('请输入六位数字 PIN', 'error'); return; }
-    this.state.lanMode = TransferPhase.CONNECTING;
-    // Pass a live PIN source, not a copy: the receiver re-reads the input on
-    // every re-challenge so a corrected PIN is picked up mid-handshake.
-    const receiver = LocalBackupReceiver.start(device, () => this.state.lanEnteredPin);
-    this.lanReceiver = receiver;
-    try {
-      const incoming = BackupService.parseStrict(await receiver.result);
-      if (this.lanReceiver !== receiver) return;
-      this.lanReceiver = undefined;
-      this.stopLan();
-      this.stageImport(incoming);
-      this.runtime.notify('备份已接收，请选择合并或覆盖', 'success');
-    } catch (error) {
-      if (this.lanReceiver !== receiver) return;
-      this.lanReceiver = undefined;
-      this.state.lanMode = TransferPhase.RECEIVING;
-      this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
-    }
+    this.runtime.notify(LAN_UNAVAILABLE_MESSAGE, 'info');
   }
 
   stopLan(): void {
-    this.lanGeneration++;
-    const sender = this.lanSender;
-    const discovery = this.lanDiscovery;
-    const receiver = this.lanReceiver;
-    this.lanSender = undefined;
-    this.lanDiscovery = undefined;
-    this.lanReceiver = undefined;
-    // Invalidate callbacks before closing adapters, which may call back synchronously.
-    sender?.stop(false);
-    discovery?.stop();
-    receiver?.cancel();
     this.state.lanMode = TransferPhase.IDLE;
     this.state.lanPin = '';
     this.state.lanEnteredPin = '';

@@ -65,7 +65,7 @@ class NodeTextDecoder extends require('node:util').TextDecoder {
   }
 }
 
-function createLoader(overrides = {}) {
+function createLoader(overrides = {}, options = {}) {
   const cache = new Map();
   const defaults = {
     '@kit.AbilityKit': { bundleManager: {
@@ -97,7 +97,7 @@ function createLoader(overrides = {}) {
       importJSON: async () => { throw new Error('Configure the file picker fake for this test'); },
       sharedExportName: (filePrefix, day) => `${filePrefix}-${day}.json`
     } },
-    'data/LocalBackupTransfer': {},
+    'data/LocalBackupTransfer': null,
     'data/TaskReminderScheduler': { TaskReminderScheduler: { rebuild: async () => {} } },
     '@kit.NotificationKit': { notificationManager: {
       SlotType: { UNKNOWN_TYPE: 0, SOCIAL_COMMUNICATION: 1, SERVICE_INFORMATION: 2 },
@@ -119,7 +119,9 @@ function createLoader(overrides = {}) {
     if (Object.hasOwn(mocks, name) && mocks[name] !== null) return mocks[name];
     if (cache.has(name)) return cache.get(name).exports;
     if (name.startsWith('@')) throw new Error(`Missing explicit platform fake: ${name}`);
-    const filename = path.join(root, name + '.ets');
+    // Explicit host-test-only archive; never selected by the application or normal loader.
+    const filename = options.legacyLan === true && name === 'data/LocalBackupTransfer' ?
+      path.join(__dirname, 'fixtures/LegacyLocalBackupTransfer.ets') : path.join(root, name + '.ets');
     const source = fs.readFileSync(filename, 'utf8').replace(/^@Observed\s*$/gm, '');
     const compiled = ts.transpileModule(source, {
       compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },

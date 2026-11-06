@@ -11,6 +11,15 @@ import Testing
 
 @Suite("LocalBackupTransfer")
 struct LocalBackupTransferTests {
+    @Test func discoveryLabelIsEphemeralAndContainsNoHostOrModel() {
+        let names = (0..<100).map { _ in LocalBackupSender.generateServiceName() }
+        #expect(Set(names).count == names.count)
+        for name in names {
+            #expect(name.hasPrefix("Flash Aero-"))
+            #expect(name.count == 19)
+            #expect(LanHandshake.isLowerHex(name.suffix(8)))
+        }
+    }
     // MARK: PIN 生成（规格：6 位十进制）
 
     @Test func generatedPINIsAlwaysSixDigits() {

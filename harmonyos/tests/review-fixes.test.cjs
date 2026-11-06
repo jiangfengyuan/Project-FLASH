@@ -141,7 +141,7 @@ test('overwrite with local changes after preview re-computes the diff and asks a
   assert.ok(store.merged, 'merge is not blocked by a stale preview');
 });
 
-test('export and LAN send are refused while the store is not initialized', async () => {
+test('file export requires loaded data and legacy LAN remains disabled regardless of store state', async () => {
   let exports = 0;
   const load = createLoader({ 'data/BackupFiles': { BackupFiles: {
     exportJSON: async () => { exports++; },
@@ -155,7 +155,7 @@ test('export and LAN send are refused while the store is not initialized', async
   assert.ok(r.messages.some(m => m.includes('尚未加载完成')));
   await controller.startLanSend();
   assert.equal(state.lanMode, TransferPhase.IDLE);
-  assert.ok(r.messages.some(m => m.includes('无法发送备份')));
+  assert.ok(r.messages.some(m => m.includes('局域网传输暂时停用')));
 });
 
 // --- 4. editing a log preserves cross-device metadata ------------------------
@@ -322,7 +322,7 @@ function networkOverride(randomFn = deterministicRandom()) {
 }
 
 function transferLoader(net) {
-  return createLoader({ 'data/LocalBackupTransfer': null, ...net.kit });
+  return createLoader({ 'data/LocalBackupTransfer': null, ...net.kit }, { legacyLan: true });
 }
 
 function lastChallengeLine(client) {

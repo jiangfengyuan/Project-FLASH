@@ -1,5 +1,7 @@
 # Flash Aero for HarmonyOS
 
+> 2026-10-25 加固候选：旧版 LAN 因未认证下载/明文风险经批准暂时停用，请使用文件导出/系统分享；没有不安全回退。四端候选支持既有分区 schema1/2，原生 IANA 别名策略已统一；完整 app/真机矩阵仍未验收。见 [审查交接与限制](../docs/hardening/review-handoff.md)。构建/签名配置未变。
+
 Flash Aero v0.1.0 的 HarmonyOS 原生版本，使用 ArkTS、ArkUI、加密 RDB 与 Preferences 设置存储构建，
 不依赖 Android 兼容层。
 
@@ -10,8 +12,7 @@ Flash Aero v0.1.0 的 HarmonyOS 原生版本，使用 ArkTS、ArkUI、加密 RDB
 - 日历聚合、本周/本月/近 30 天/近 90 天回顾、活跃度图、趋势洞察与情绪分布；
 - `flash-backup-v2` 分区 JSON 导入/导出（兼容 v1），持久化 Calendar 任务并在导入前
   分析日志、情绪和任务差异，可选择合并或覆盖；
-- 与 Android/macOS 共用 `_flashbackup._tcp` 局域网协议：mDNS 自动发现、随机六位 PIN、
-  60 秒有效、最多五次尝试，成功后立即关闭发送服务；
+- 旧LAN暂时停用，入口说明文件/系统分享替代方式；历史mDNS/TCP实现只在测试fixture；
 - 本地优先存储、欢迎页和 Flash Aero v0.1.0 品牌信息。
 - 与 Android 对齐的四模块首页、明确命名的“搜索”导航、今日概览、快速创建浮动按钮、
   页面淡入/位移转场；
@@ -29,8 +30,8 @@ Flash Aero v0.1.0 的 HarmonyOS 原生版本，使用 ArkTS、ArkUI、加密 RDB
 
 ## 稳定性与安全加固
 
-- 局域网接收采用按声明长度分配的定长缓冲区，挑战/证明行限制为 64 字节，OK 头使用 128 字节缓冲，备份上限为 50 MB；
-- 六位 PIN 使用系统密码学随机数生成，拒绝取模偏差，仍保持 60 秒有效和五次尝试限制；
+- 历史LAN缓冲、长度/超时/取消回归保留于测试fixture，生产不再执行配对或发送任何负载；
+- 备份读取既有分区schema1/2并导出2，保留收藏false/强度/软来源关联，现有payload表不迁移；覆盖/清空/日志删除与已读状态同一RDB事务，提交后才发布；
 - 备份导入校验 UUID、日期、字段长度和重复 ID，单类记录最多接收 100,000 条；
 - 本地日志与情绪数据分别校验，单类损坏不会清空另一类正常数据；
 - 无法解析的异常记录隔离到应用沙箱 `quarantine/` 文件（不再写入 Preferences，规避其单值约 8 KB 上限），
@@ -38,7 +39,7 @@ Flash Aero v0.1.0 的 HarmonyOS 原生版本，使用 ArkTS、ArkUI、加密 RDB
 - 任务编辑保存前对日期做 round-trip 校验，`2026-02-30` 等不存在的日期和越界年份会被拒绝并提示，
   避免保存成功却在重启后被协议校验隔离；本地时刻经时区换算后同样做回环校验，
   夏令时切换中不存在的墙钟时间（如切换日 02:30）会被拒绝；
-- 任务提醒通知 ID 持久化读取带类型/范围校验，损坏值按无记录处理；PIN 校验退避表为空时回退默认阶梯；
+- 任务提醒通知 ID 持久化读取带类型/范围校验，损坏值按无记录处理；历史PIN退避测试仅在fixture；
 - 隔离区 TTL 清理对 `stat().mtime` 按量纲归一（兼容秒/毫秒两种上报）；
 - 窗口尺寸、避让区与折叠屏状态回调均保存引用并在销毁时配对注销，避免舞台重建累积重复回调；
 - 搜索采用短防抖；回顾页统计、情绪日均、日历网格与日计数按数据版本号 memoize，
@@ -76,7 +77,7 @@ Flash Aero v0.1.0 的 HarmonyOS 原生版本，使用 ArkTS、ArkUI、加密 RDB
 | 备份导出系统级可见 | 已接入 | 经 Core File Kit 沙箱共享导出备份文件，不支持时回退沙箱导出。 |
 | 系统分享面板 | 已接入 | 记录详情分享单条记录文本、设置页“分享导出”分享备份文件，经 `@kit.ShareKit` systemShare 面板；`SystemCapability.Collaboration.SystemShare` 经 canIUse 探测，能力缺失时不渲染入口。 |
 | 双语资源 | 应用名已双语 | AppScope 提供 `en_US` 资源；页面文案多语言资源化为后续工作。 |
-| 星闪 | 已接入能力检测 | API 23 起调用 NearLink Kit 检测硬件支持；数据传输继续使用跨平台局域网协议作为通用回退。 |
+| 星闪 | 已接入能力检测 | API 23 起调用 NearLink Kit 检测硬件支持；数据通过JSON文件/系统分享传输；旧LAN回退暂时停用。 |
 | 实况窗 | 已接入可用性检测 | 正式创建实况窗仍需满足时效性场景并通过 Live View Kit 准入，模拟器不能完成端到端验收。 |
 | 闪控球/闪控窗 | 已接入可用性检测 | 不申请 `USE_FLOAT_BALL` 受限权限；Flash 当前笔记场景不在官方开放范围内。 |
 | 碰一碰 | 待签名与平台配置 | 需要 Share Kit、App Linking、手动签名及真机验证，当前模拟器不支持。 |
@@ -145,8 +146,8 @@ assembleHap --mode module -p product=default -p module=entry@default \
 - 目标版本：HarmonyOS 7.0.0（API 26）
 - 设备类型：手机（包含折叠屏）、平板
 
-局域网传输依赖设备支持 mDNS、TCP 网络能力，跨平台互传需在真实设备且同一可信局域网内验收。
+当前候选不执行局域网传输；未来替代协议启用前须独立审查、批准并完成真机双向/中断/取消/旧端拒绝验收。
 
 ## 验收与发布状态（2026-09-26）
 
-设备品质结果与未验项目见 [品质矩阵](../docs/quality/device-matrix.md)，跨端互传状态见 [契约验收](../docs/contracts/acceptance.md)。局域网使用 [握手 v1.1](../docs/contracts/lan-handshake-v1.1.md)：六位 PIN、挑战应答与 payload HMAC；内容未做端到端加密。历史明文 PIN 首包不兼容，双方需使用同代构建，旧数据经 JSON 文件迁移。
+设备品质结果与未验项目见 [品质矩阵](../docs/quality/device-matrix.md)，当前实际导出/原生门禁与缺项见 [审查交接](../docs/hardening/review-handoff.md)。[握手 v1.1](../docs/contracts/lan-handshake-v1.1.md) 仅作已停用历史协议记录；生产应用没有监听/发现/连接路径。安全替代协议尚未选定或实施，旧版客户端的漏洞不会因另一端更新而消失。
