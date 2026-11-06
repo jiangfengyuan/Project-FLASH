@@ -52,16 +52,12 @@ struct FlashApp: App {
                 // 深链：flash://capture、flash://today、flash://ideas（小组件 / 通知 / 控制中心）
                 .onOpenURL { appState.handle(url: $0) }
                 .task {
-                    // 小组件共享快照：启动时刷新一次；App Group 不可用（未签名构建）时零成本 no-op
-                    WidgetSnapshot.refresh(repository: assembly.repository)
                     #if DEBUG
                     DebugSeeder.seedIfRequested(repository: assembly.repository)
                     #endif
                     do {
-                        let tasks = try Perf.measure("TasksForReminderRebuild") {
-                            try assembly.repository.tasksOnly()
-                        }
-                        try await TaskReminderScheduler.shared.rebuild(tasks)
+                        // 小组件快照 + 按任务表重建提醒；内存降级时整体跳过（F-07）
+                        try await LaunchMaintenance.run(repository: assembly.repository)
                     } catch TaskReminderError.permissionDenied {
                         // 用户拒绝通知权限只影响系统提醒，不误报存储故障
                     } catch {

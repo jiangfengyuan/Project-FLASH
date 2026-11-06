@@ -26,22 +26,24 @@ public enum FlashDatabase: Sendable {
         makeContainerWithFallback(inMemory: inMemory).container
     }
 
-    public static func makeContainerWithFallback(inMemory: Bool = false) -> ContainerResult {
+    /// - Parameter storeURL: 仅供测试指向临时文件以模拟库打不开；生产调用不传，沿用默认存储位置
+    public static func makeContainerWithFallback(inMemory: Bool = false, storeURL: URL? = nil) -> ContainerResult {
         let schema = Schema(versionedSchema: FlashSchemaV2.self)
-        let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: inMemory)
+        let config = storeURL.map { ModelConfiguration(schema: schema, url: $0) }
+            ?? ModelConfiguration(schema: schema, isStoredInMemoryOnly: inMemory)
         do {
             return ContainerResult(container: try ModelContainer(for: schema,
                                                                  migrationPlan: FlashMigrationPlan.self,
                                                                  configurations: [config]),
                                    didFallbackToMemory: false)
         } catch {
-            print("SwiftData 容器创建失败，尝试降级为内存容器: \(error)")
+            FlashLog.failure("storage_initialization_failed", error)
             let memoryConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
             if let fallback = try? ModelContainer(for: schema, configurations: [memoryConfig]) {
-                print("已降级为内存容器：本次运行数据不会持久化")
+                FlashLog.notice("storage_fallback_to_memory")
                 return ContainerResult(container: fallback, didFallbackToMemory: true)
             }
-            fatalError("无法创建 SwiftData 容器（内存降级亦失败）: \(error)")
+            fatalError("无法创建 SwiftData 容器（内存降级亦失败） [storage_fallback_failed]")
         }
     }
 }

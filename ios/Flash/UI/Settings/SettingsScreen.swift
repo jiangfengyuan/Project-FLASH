@@ -168,6 +168,8 @@ struct SettingsScreen: View {
                 let json = try await BackupImportCoordinator.exportJSON(
                     snapshot: try currentSnapshot(), appVersion: BackupImportCoordinator.appVersion)
                 exportDocument = BackupJSONDocument(json: json)
+            } catch let error as BackupError {
+                message = error.userMessage
             } catch {
                 print("生成备份失败: \(error)")
                 message = "生成备份失败，请重试"
@@ -187,6 +189,8 @@ struct SettingsScreen: View {
                     try BackupTransfer.createShareFile(json: json)
                 }.value
                 shareFile = ShareFile(url: url)
+            } catch let error as BackupError {
+                message = error.userMessage
             } catch {
                 print("生成分享文件失败: \(error)")
                 message = "生成传输文件失败，请重试"
@@ -284,6 +288,11 @@ struct SettingsScreen: View {
         Task {
             do {
                 guard let repository else { throw SettingsDataError.repositoryUnavailable }
+                // 临时存储下清空后的 rebuild([]) 会撤掉磁盘上真实任务的全部提醒（F-07）
+                guard !repository.isTemporaryStore else {
+                    message = "本地数据库暂时无法打开，当前只有临时内容，清空已暂停。原有数据未被改动，请完全退出 Flash 后重新打开。"
+                    return
+                }
                 try repository.clearAll()
                 do {
                     try await TaskReminderScheduler.shared.rebuild([])

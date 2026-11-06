@@ -15,11 +15,16 @@ public struct FlashSnapshot: Equatable, Sendable {
     public let logs: [LogItem]
     public let emotions: [EmotionRecord]
     public let tasks: [TaskItem]
+    /// 快照取自内存降级的临时存储：只含本次启动后写入的内容，不是完整数据，
+    /// 导出路径必须拒绝（否则日后「覆盖导入」会用它抹掉真实数据，见 F-07）
+    public let isFromTemporaryStore: Bool
 
-    public init(logs: [LogItem], emotions: [EmotionRecord], tasks: [TaskItem]) {
+    public init(logs: [LogItem], emotions: [EmotionRecord], tasks: [TaskItem],
+                isFromTemporaryStore: Bool = false) {
         self.logs = logs
         self.emotions = emotions
         self.tasks = tasks
+        self.isFromTemporaryStore = isFromTemporaryStore
     }
 }
 
@@ -45,8 +50,15 @@ public final class FlashRepository {
     /// 仅在主线程读写（全部写路径经 @MainActor commit）。
     public private(set) var revision = 0
 
-    public init(container: ModelContainer, beforeSave: @escaping () throws -> Void = {}) {
+    /// true：持久化容器打不开、本次运行使用内存降级的临时存储（RepositoryEnvironment 装配时标记）。
+    /// 此时真实数据仍在磁盘上未被改动；任何会改写「磁盘外」状态的副作用（系统提醒、小组件快照、
+    /// 灵感已读状态）和导入导出都必须跳过，避免用空库覆盖真实状态（F-07）。
+    public let isTemporaryStore: Bool
+
+    public init(container: ModelContainer, isTemporaryStore: Bool = false,
+                beforeSave: @escaping () throws -> Void = {}) {
         self.container = container
+        self.isTemporaryStore = isTemporaryStore
         self.beforeSave = beforeSave
     }
 
@@ -249,7 +261,8 @@ public final class FlashRepository {
     public func snapshot() throws -> FlashSnapshot {
         FlashSnapshot(logs: try allLogs(),
                       emotions: try allEmotions(),
-                      tasks: try allTasks())
+                      tasks: try allTasks(),
+                      isFromTemporaryStore: isTemporaryStore)
     }
 
     /// 覆盖式导入：清空后写入（对应 Web 版 overwriteImport）。
@@ -414,6 +427,8 @@ extension WidgetSnapshot {
     /// （参照 TaskReminderScheduler.rebuild 的挂接方式；读取失败静默忽略）。
     @MainActor
     public static func refresh(repository: FlashRepository, unreadIdeaCount: Int? = nil) {
+        // 临时存储只有本次启动的内容：不能用它覆盖小组件上的真实摘要
+        guard !repository.isTemporaryStore else { return }
         guard let directory = WidgetSnapshotStore.containerDirectory else { return }
         guard let summary = try? repository.widgetTodaySummary() else { return }
         // 未读灵感数由宿主（iOS 灵感提醒）提供；写库路径不知道已读状态，沿用上一份快照的值
