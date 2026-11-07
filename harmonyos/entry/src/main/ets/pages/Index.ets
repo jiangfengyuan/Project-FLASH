@@ -1,7 +1,6 @@
 import { common } from '@kit.AbilityKit';
 import { mediaquery } from '@kit.ArkUI';
 import { Category } from '../models/Models';
-import { dayString } from '../data/DateUtils';
 import { shouldShowIdeaReminder } from '../data/IdeaReminder';
 import { AppController } from '../state/AppController';
 import { PageActions } from '../state/PageActions';
@@ -12,16 +11,20 @@ import { StatsPage } from '../pages/StatsPage';
 import { ProfilePage } from '../pages/ProfilePage';
 import { EmotionPage } from '../pages/EmotionPage';
 import { CalendarPage } from '../pages/CalendarPage';
+import { MemoryPage } from '../pages/MemoryPage';
+import { SearchPage } from '../pages/SearchPage';
+import { LogFlowPage } from '../pages/LogFlowPage';
+import { AppEntry, EntryKind } from '../data/AppEntry';
+import { tr } from '../data/I18n';
 import { HarmonyFeaturesPage } from '../pages/HarmonyFeaturesPage';
 import { QuickInputDialog } from '../components/QuickInputDialog';
 import { EditLogDialog } from '../components/EditLogDialog';
-import { RecordDetailDialog } from '../components/RecordDetailDialog';
 import { TaskEditorDialog } from '../components/TaskEditorDialog';
 import { DestructiveConfirmDialog } from '../components/DestructiveConfirmDialog';
 import { WelcomeOverlay } from '../components/WelcomeOverlay';
 import {
-  FabButton, FabOption, FlashDockBar, DetailHeader, LoadingState, ErrorState, FAB_SIZE, BRAND, brandText,
-  scrimColor, toastSurface, toastLevelColor, fabOptionColor, motionDuration,
+  DISPLAY_FONT_NAME, FabButton, FlashDockBar, QuickCaptureBar, DetailHeader, LoadingState, ErrorState, brandText, brandFill, onBrandFill, parchmentColor, dockShadowColor,
+  toastSurface, toastLevelColor, motionDuration, ELEVATED_SHADOW_RADIUS, ELEVATED_SHADOW_Y,
   MOTION_PRESS, MOTION_FADE, MOTION_PAGE, TYPE_CAPTION, TYPE_SECONDARY,
   CONTENT_MAX_WIDE, CONTENT_MAX_MEDIUM, CONTENT_MAX_CENTERED,
   PAGE_BACKGROUND_LIGHT, PAGE_BACKGROUND_DARK, CARD_SURFACE_LIGHT, CARD_SURFACE_DARK,
@@ -66,6 +69,7 @@ struct Index {
   @State private settings: SettingsState = this.controller.session.settings;
   @State private feedback: FeedbackState = this.controller.session.feedback;
   @State @Watch('onSystemEnvironmentChange') private systemEnv: SystemEnvironment = systemEnvironment;
+  @StorageLink('flashPendingEntry') @Watch('onPendingEntry') private pendingEntry: AppEntry | undefined = undefined;
   private actions: PageActions = new PageActions(this.controller,
     (index: number) => this.switchTab(index), (destination: string) => this.openDetail(destination),
     (mode: string) => this.setThemeMode(mode));
@@ -73,7 +77,6 @@ struct Index {
   private expandedQuery?: mediaquery.MediaQueryListener;
   private hostContext?: common.UIAbilityContext;
   private navigationToken: number = 0;
-  private fabToken: number = 0;
 
   aboutToAppear(): void {
     const query = this.getUIContext().getMediaQuery();
@@ -89,13 +92,44 @@ struct Index {
     });
     const context = this.getUIContext().getHostContext() as common.UIAbilityContext;
     this.hostContext = context;
+    // 中文展示字体：随包霞鹜文楷，失败时回退系统字体，不影响使用。
+    try {
+      this.getUIContext().getFont().registerFont({ familyName: DISPLAY_FONT_NAME, familySrc: $rawfile('fonts/LXGWWenKai-Medium.ttf') });
+    } catch (_) {
+    }
     this.onSystemEnvironmentChange();
-    this.controller.prepare(context, (mode: string) => this.applyThemePalette(mode));
+    this.controller.prepare(context, (mode: string) => this.applyThemePalette(mode)).then(() => this.onPendingEntry());
+  }
+
+  // 深链 / 通知 / 系统分享：首启欢迎页完成后才处理，避免把用户从欢迎页带走。
+  private onPendingEntry(): void {
+    const entry = this.pendingEntry;
+    if (entry === undefined || this.feedback.startup !== 'ready' || this.settings.showWelcome) return;
+    this.pendingEntry = undefined;
+    switch (entry.kind) {
+      case EntryKind.CAPTURE_IDEA:
+        this.logs.quickCategory = Category.IDEA;
+        break;
+      case EntryKind.CAPTURE_LOG:
+        this.logs.quickCategory = Category.LOG;
+        break;
+      case EntryKind.SHARED:
+        this.logs.quickShared = true;
+        this.logs.quickText = entry.payload;
+        this.logs.quickCategory = Category.IDEA;
+        break;
+      case EntryKind.IDEAS:
+        this.logs.filterCategory = 'idea';
+        this.actions.logsController.updateSearchResults();
+        this.switchTab(1);
+        break;
+      default:
+        this.switchTab(0);
+    }
   }
 
   aboutToDisappear(): void {
     this.navigationToken++;
-    this.fabToken++;
     this.mediumQuery?.off('change');
     this.expandedQuery?.off('change');
     this.controller.dispose();
@@ -109,12 +143,18 @@ struct Index {
       this.actions?.logsController.requestCloseEdit();
       return true;
     }
-    if (this.logs.detailLogId !== '') {
-      this.actions?.logsController.closeLogDetail();
+    // 所有浮层都先响应返回：否则返回会关掉下面的页面或直接退出应用。
+    if (this.logs.quickCategory !== '') {
+      this.logs.quickShared = false;
+      this.logs.quickCategory = '';
       return true;
     }
-    if (this.navigation.fabExpanded) {
-      this.dismissFab();
+    if (this.calendar.editingTaskId !== '') {
+      this.actions?.calendarController.closeTaskEditor();
+      return true;
+    }
+    if (this.feedback.destructive !== undefined) {
+      this.feedback.destructive = undefined;
       return true;
     }
     if (this.navigation.detail !== '') {
@@ -132,9 +172,6 @@ struct Index {
   private switchTab(index: number): void {
     if (index === this.navigation.activeTab && this.navigation.detail === '') return;
     const token = ++this.navigationToken;
-    this.fabToken++;
-    this.navigation.fabExpanded = false;
-    this.navigation.fabProgress = 0;
     this.getUIContext().animateTo({ duration: motionDuration(MOTION_PRESS), curve: Curve.EaseIn }, () => {
       this.navigation.contentOpacity = 0;
       this.navigation.contentOffset = -8;
@@ -153,9 +190,6 @@ struct Index {
 
   private openDetail(destination: string): void {
     const token = ++this.navigationToken;
-    this.fabToken++;
-    this.navigation.fabExpanded = false;
-    this.navigation.fabProgress = 0;
     this.getUIContext().animateTo({ duration: motionDuration(MOTION_PRESS), curve: Curve.EaseIn }, () => {
       this.navigation.contentOpacity = 0;
       this.navigation.contentOffset = -12;
@@ -188,30 +222,17 @@ struct Index {
     }, motionDuration(MOTION_PRESS));
   }
 
-  private toggleFab(): void {
-    const token = ++this.fabToken;
-    if (!this.navigation.fabExpanded) {
-      this.navigation.fabExpanded = true;
-      this.navigation.fabProgress = 0;
-      this.getUIContext().animateTo({ duration: motionDuration(MOTION_FADE), curve: Curve.EaseOut }, () => this.navigation.fabProgress = 1);
-    } else {
-      this.getUIContext().animateTo({ duration: motionDuration(MOTION_FADE), curve: Curve.EaseIn }, () => this.navigation.fabProgress = 0);
-      setTimeout(() => {
-        if (token === this.fabToken) this.navigation.fabExpanded = false;
-      }, motionDuration(MOTION_FADE));
-    }
-  }
-
-  private dismissFab(): void {
-    if (!this.navigation.fabExpanded) return;
-    this.toggleFab();
-  }
-
   private detailTitle(): string {
-    if (this.navigation.detail === 'emotion') return '记录情绪';
-    if (this.navigation.detail === 'calendar') return '日历';
-    if (this.navigation.detail === 'harmony') return '鸿蒙体验';
-    return '设置与备份';
+    if (this.navigation.detail === 'emotion') return tr('记录情绪');
+    if (this.navigation.detail === 'calendar') return tr('日历');
+    if (this.navigation.detail === 'harmony') return tr('鸿蒙体验');
+    if (this.navigation.detail === 'memory') return 'Memory';
+    if (this.navigation.detail === 'search') return tr('搜索');
+    if (this.navigation.detail === 'logflow') return tr('日志流');
+    if (this.navigation.detail === 'settings-idea') return tr('灵感提醒');
+    if (this.navigation.detail === 'settings-backup') return tr('备份与恢复');
+    if (this.navigation.detail === 'settings-transfer') return tr('设备间传输');
+    return '';
   }
 
   private applyThemePalette(mode: string): void {
@@ -234,7 +255,7 @@ struct Index {
       this.applyThemePalette(normalized);
     });
     this.controller.setThemeMode(normalized).catch((error: Error) => {
-      this.controller.runtime.notify(`主题设置保存失败：${this.controller.runtime.errorMessage(error)}`, 'error');
+      this.controller.runtime.notify(tr('主题设置保存失败：{0}', this.controller.runtime.errorMessage(error)), 'error');
     });
   }
 
@@ -268,6 +289,8 @@ struct Index {
     } else if (this.navigation.activeTab === 1) {
       ExplorePage({ theme: this.theme, logs: this.logs, feedback: this.feedback, actions: this.actions })
     } else if (this.navigation.activeTab === 2) {
+      EmotionPage({ theme: this.theme, emotion: this.emotion, feedback: this.feedback, actions: this.actions, asTab: true })
+    } else if (this.navigation.activeTab === 3) {
       StatsPage({ navigation: this.navigation, theme: this.theme, logs: this.logs, emotion: this.emotion, calendar: this.calendar, feedback: this.feedback, actions: this.actions })
     } else {
       ProfilePage({ navigation: this.navigation, theme: this.theme, backup: this.backup, feedback: this.feedback, settings: this.settings, actions: this.actions })
@@ -278,10 +301,13 @@ struct Index {
   private detailPage() {
     Column() {
       DetailHeader(this.theme, this.detailTitle(), () => this.closeDetail())
-      if (this.navigation.detail === 'emotion') EmotionPage({ theme: this.theme, emotion: this.emotion, feedback: this.feedback, actions: this.actions })
+      if (this.navigation.detail === 'memory') MemoryPage({ theme: this.theme, logs: this.logs, emotion: this.emotion, calendar: this.calendar, actions: this.actions })
+      else if (this.navigation.detail === 'search') SearchPage({ theme: this.theme, logs: this.logs, emotion: this.emotion, calendar: this.calendar, actions: this.actions })
+      else if (this.navigation.detail === 'logflow') LogFlowPage({ theme: this.theme, logs: this.logs, feedback: this.feedback, actions: this.actions })
+      else if (this.navigation.detail.startsWith('settings-')) ProfilePage({ navigation: this.navigation, theme: this.theme, backup: this.backup, feedback: this.feedback, settings: this.settings, actions: this.actions, section: this.navigation.detail })
       else if (this.navigation.detail === 'calendar') CalendarPage({ theme: this.theme, calendar: this.calendar, feedback: this.feedback, actions: this.actions })
       else if (this.navigation.detail === 'harmony') HarmonyFeaturesPage({ navigation: this.navigation, theme: this.theme, settings: this.settings, actions: this.actions })
-    }.width('100%').height('100%').backgroundColor(this.theme.themeBackground)
+    }.width('100%').height('100%')
   }
 
   // Idea Reminder 角标：达到阈值才显示（对齐 Android shouldShowIdeaReminder）。
@@ -291,22 +317,23 @@ struct Index {
 
   @Builder
   private dockBar() {
-    Row({ space: 12 }) {
+    Column({ space: 8 }) {
+      QuickCaptureBar(this.theme, () => this.logs.quickCategory = Category.IDEA)
       FlashDockBar(this.theme, this.navigation, (index: number) => this.switchTab(index), this.ideaBadge())
-      FabButton(this.navigation, () => this.toggleFab())
     }
     .width('100%')
-    .padding({ left: 20, right: 20, bottom: 16 + this.navigation.navigationBarHeight })
+    .padding({ left: 20, right: 20, bottom: 12 + this.navigation.navigationBarHeight })
   }
 
   @Builder
   private navigationRail() {
     Column({ space: 10 }) {
       Image($r('app.media.icon')).width(40).height(40).borderRadius(10).margin({ top: 24, bottom: 18 })
-      this.railButton(0, $r('sys.symbol.house'), $r('sys.symbol.house_fill'), '此刻')
-      this.railButton(1, $r('sys.symbol.doc_text'), $r('sys.symbol.doc_text_fill'), '记录', this.ideaBadge())
-      this.railButton(2, $r('sys.symbol.clock_arrow_2_circlepath'), $r('sys.symbol.clock_arrow_2_circlepath_fill'), '回顾')
-      this.railButton(3, $r('sys.symbol.gearshape'), $r('sys.symbol.gearshape_fill'), '设置')
+      this.railButton(0, $r('sys.symbol.house'), $r('sys.symbol.house_fill'), tr('此刻'))
+      this.railButton(1, $r('sys.symbol.doc_text'), $r('sys.symbol.doc_text_fill'), tr('记录'), this.ideaBadge())
+      this.railButton(2, $r('sys.symbol.face_smiling'), $r('sys.symbol.face_smiling'), tr('情绪'))
+      this.railButton(3, $r('sys.symbol.clock_arrow_2_circlepath'), $r('sys.symbol.clock_arrow_2_circlepath_fill'), tr('回顾'))
+      this.railButton(4, $r('sys.symbol.gearshape'), $r('sys.symbol.gearshape_fill'), tr('设置'))
       Blank()
       Text('Flash').fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).margin({ bottom: 20 })
     }
@@ -332,72 +359,26 @@ struct Index {
       if (badge > 0) {
         Text(badge > 99 ? '99+' : `${badge}`)
           .fontSize(TYPE_CAPTION)
-          .fontColor(Color.White)
+          .fontColor(onBrandFill(this.theme))
           .textAlign(TextAlign.Center)
           .constraintSize({ minWidth: 18 })
           .height(18)
           .padding({ left: 4, right: 4 })
-          .backgroundColor(BRAND)
+          .backgroundColor(brandFill(this.theme))
           .borderRadius(9)
           .translate({ x: -6, y: 4 })
       }
     }
-    .backgroundColor(this.navigation.activeTab === index ? this.theme.themeTint : Color.Transparent)
+    .backgroundColor(this.navigation.activeTab === index ? parchmentColor(this.theme) : Color.Transparent)
     .borderRadius(18)
     .accessibilityGroup(true)
-    .accessibilityText(label + (this.navigation.activeTab === index ? '，已选中' : '') + (badge > 0 ? `，${badge} 条未读灵感` : ''))
+    .accessibilityText(label + (this.navigation.activeTab === index ? tr('，已选中') : '') + (badge > 0 ? tr('，{0} 条未读灵感', badge) : ''))
     .stateStyles({
       normal: { .scale({ x: 1, y: 1 }) },
       pressed: { .scale({ x: 0.92, y: 0.92 }) }
     })
     .onClick(() => this.switchTab(index))
     .animation({ duration: motionDuration(MOTION_PRESS), curve: Curve.EaseOut })
-  }
-
-  private fabBottomGap(): number {
-    return (this.navigation.isExpandedWindow ? 22 : 16) + FAB_SIZE + 12 + this.navigation.navigationBarHeight;
-  }
-
-  @Builder
-  private fabOverlay() {
-    Stack({ alignContent: Alignment.BottomEnd }) {
-      if (this.navigation.fabExpanded) {
-        Column().width('100%').height('100%').backgroundColor(scrimColor(this.theme))
-          .opacity(this.navigation.fabProgress)
-          .onClick(() => this.dismissFab())
-        Column({ space: 12 }) {
-          FabOption(this.theme, '记录', $r('sys.symbol.square_and_pencil'), fabOptionColor('log'), () => {
-            this.navigation.fabExpanded = false;
-            this.navigation.fabProgress = 0;
-            this.logs.quickCategory = Category.LOG;
-          })
-          FabOption(this.theme, '灵感', $r('sys.symbol.lightbulb'), fabOptionColor('idea'), () => {
-            this.navigation.fabExpanded = false;
-            this.navigation.fabProgress = 0;
-            this.logs.quickCategory = Category.IDEA;
-          })
-          FabOption(this.theme, '情绪', $r('sys.symbol.face_smiling'), fabOptionColor('emotion'), () => {
-            this.navigation.fabExpanded = false;
-            this.navigation.fabProgress = 0;
-            this.openDetail('emotion');
-          })
-          FabOption(this.theme, '任务', $r('sys.symbol.checkmark_circle'), fabOptionColor('task'), () => {
-            this.navigation.fabExpanded = false;
-            this.navigation.fabProgress = 0;
-            this.actions.calendarController.openTaskEditor(undefined, dayString());
-          })
-        }
-        .alignItems(HorizontalAlign.End)
-        .opacity(this.navigation.fabProgress)
-        .translate({ y: 18 * (1 - this.navigation.fabProgress) })
-        .margin({ right: this.navigation.isExpandedWindow ? 24 : 20, bottom: this.fabBottomGap() })
-      }
-      if (this.navigation.isExpandedWindow) {
-        Column() {
-          FabButton(this.navigation, () => this.toggleFab())
-        }.margin({ right: 24, bottom: 22 + this.navigation.navigationBarHeight })
-      }
-    }.width('100%').height('100%')
   }
 
   private toastIcon(level: string): Resource {
@@ -442,7 +423,7 @@ struct Index {
           if (this.feedback.startup === 'error') {
             ErrorState(this.theme, this.feedback.startupError, () => this.retryPrepare())
           } else {
-            LoadingState(this.theme, '正在载入本地数据…')
+            LoadingState(this.theme, tr('正在载入本地数据…'))
           }
         }
         .width('100%')
@@ -457,27 +438,33 @@ struct Index {
           SymbolGlyph(this.toastIcon(this.feedback.notice?.level ?? 'info'))
             .fontSize(16)
             .fontColor([toastLevelColor(this.feedback.notice?.level ?? 'info')])
-          Text(this.feedback.notice?.message ?? '').fontSize(TYPE_SECONDARY).fontColor(Color.White)
+          Text(this.feedback.notice?.message ?? '').fontSize(TYPE_SECONDARY).fontColor(this.theme.themeText)
+          if (this.feedback.notice?.actionLabel !== undefined) {
+            Text(this.feedback.notice?.actionLabel ?? '').fontSize(TYPE_SECONDARY).fontWeight(FontWeight.Medium)
+              .fontColor(brandText(this.theme)).height(44).padding({ left: 8, right: 4 })
+              .onClick(() => this.feedback.notice?.action?.())
+          }
         }
         .padding({ left: 18, right: 18, top: 10, bottom: 10 })
         .backgroundColor(toastSurface(this.theme))
         .borderRadius(18)
-        .border({ width: 0.5, color: hairlineColor(this.theme) })
-        .margin({ bottom: (this.navigation.isExpandedWindow ? 32 : 96) + this.navigation.navigationBarHeight })
+        .border({ width: 0.75, color: hairlineColor(this.theme) })
+        .shadow({ radius: ELEVATED_SHADOW_RADIUS, color: dockShadowColor(this.theme), offsetY: ELEVATED_SHADOW_Y })
+        .margin({ bottom: (this.navigation.isExpandedWindow ? 32 : 160) + this.navigation.navigationBarHeight })
         .transition(TransitionEffect.opacity(0).combine(TransitionEffect.translate({ y: 12 }))
           .animation({ duration: motionDuration(MOTION_FADE), curve: Curve.EaseOut }))
       }
 
-      if (!this.settings.showWelcome && this.navigation.detail === '') this.fabOverlay()
+      if (!this.settings.showWelcome && this.navigation.detail === '' && this.navigation.isExpandedWindow) {
+        Column() {
+          FabButton(this.theme, () => this.logs.quickCategory = Category.IDEA)
+        }
+        .width('100%')
+        .alignItems(HorizontalAlign.End)
+        .padding({ right: 24, bottom: 22 + this.navigation.navigationBarHeight })
+      }
       if (this.logs.quickCategory !== '') {
         QuickInputDialog({ navigation: this.navigation, theme: this.theme, logs: this.logs, actions: this.actions })
-          .transition(overlayTransition())
-      }
-      if (this.logs.detailLogId !== '') {
-        RecordDetailDialog({
-          navigation: this.navigation, theme: this.theme, logs: this.logs,
-          feedback: this.feedback, settings: this.settings, actions: this.actions
-        })
           .transition(overlayTransition())
       }
       if (this.logs.editingLogId !== '') {
@@ -501,6 +488,9 @@ struct Index {
     .width('100%')
     .height('100%')
     .backgroundColor(this.theme.themeBackground)
+    // 纸张颗粒：三端同一张可平铺贴图（256px 对应 128vp）。
+    .backgroundImage(this.theme.isDark() ? $r('app.media.paper_grain_dark') : $r('app.media.paper_grain_light'), ImageRepeat.XY)
+    .backgroundImageSize({ width: 128, height: 128 })
     .padding({ top: this.navigation.statusBarHeight })
   }
 }

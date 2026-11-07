@@ -1,3 +1,4 @@
+import { tr } from '../data/I18n';
 import { common } from '@kit.AbilityKit';
 import { util } from '@kit.ArkTS';
 import { i18n } from '@kit.LocalizationKit';
@@ -100,8 +101,30 @@ export class CalendarController {
     }
   }
 
+  /** 定时任务的显示时刻：按任务时区换算（不把 UTC 串直接切片当本地时间）。 */
+  taskTimeLabel(task: TaskItem): string {
+    if (!task.due.at) return '';
+    const instant = new Date(task.due.at).getTime();
+    if (!Number.isFinite(instant)) return '';
+    try {
+      const offset = i18n.getTimeZone(this.requiredRuntimeZone(task.due.timeZone ?? i18n.getTimeZone().getID())).getOffset(instant);
+      const local = new Date(instant + offset);
+      return `${this.pad2(local.getUTCHours())}:${this.pad2(local.getUTCMinutes())} · ${task.due.timeZone ?? ''}`;
+    } catch (_) {
+      return task.due.timeZone ?? '';
+    }
+  }
+
+  openTaskFromIdea(sourceLogId: string, title: string): void {
+    this.openTaskEditor(undefined, dayString());
+    this.state.taskTitle = title.slice(0, 200);
+    this.state.taskSourceLogId = sourceLogId;
+  }
+
   openTaskEditor(task?: TaskItem, selectedDay?: string): void {
     this.state.editingTaskId = task?.id ?? 'new';
+    this.state.taskSourceLogId = task?.sourceLogId ?? '';
+    this.state.taskFavorite = task?.isFavorite === true;
     this.state.taskTitle = task?.title ?? '';
     this.state.taskNotes = task?.notes ?? '';
     this.state.taskAllDay = task?.due.kind !== TaskDueKind.DATE_TIME;
@@ -145,7 +168,7 @@ export class CalendarController {
 
   private requiredRuntimeZone(identifier: string): string {
     const resolved = runtimeTimeZone(identifier);
-    if (resolved === undefined) throw new Error('此设备不支持任务时区，请更新系统后重试');
+    if (resolved === undefined) throw new Error(tr('此设备不支持任务时区，请更新系统后重试'));
     return resolved;
   }
 
@@ -188,8 +211,8 @@ export class CalendarController {
     const title = this.state.taskTitle.trim().slice(0, 200);
     const anchor = this.localDateToInstant(this.state.taskDate, this.state.taskAllDay ? '09:00' : this.state.taskTime,
       this.state.taskTimeZone || i18n.getTimeZone().getID());
-    if (!title) { this.runtime.notify('请输入任务标题', 'error'); return; }
-    if (!anchor) { this.runtime.notify('请输入有效的日期和时间', 'error'); return; }
+    if (!title) { this.runtime.notify(tr('请输入任务标题'), 'error'); return; }
+    if (!anchor) { this.runtime.notify(tr('请输入有效的日期和时间'), 'error'); return; }
     const existing = this.state.tasks.find((item: TaskItem) => item.id === this.state.editingTaskId);
     const now = new Date().toISOString();
     const reminderAt = this.state.taskReminderMinutes < 0 ? undefined :
@@ -208,7 +231,10 @@ export class CalendarController {
     if (existing) {
       if (typeof existing.sourceLogId === 'string') task.sourceLogId = existing.sourceLogId;
       if (typeof existing.isFavorite === 'boolean') task.isFavorite = existing.isFavorite;
+    } else if (this.state.taskSourceLogId !== '') {
+      task.sourceLogId = this.state.taskSourceLogId;
     }
+    if (this.state.taskFavorite || typeof task.isFavorite === 'boolean') task.isFavorite = this.state.taskFavorite;
     this.state.busy = true;
     try {
       await this.store.saveTask(task);
@@ -216,9 +242,9 @@ export class CalendarController {
       const context = this.runtime.context() as common.UIAbilityContext;
       try {
         await TaskReminderScheduler.rebuild(context, this.store.tasks.slice(), reminderAt !== undefined);
-        this.runtime.notify('任务已保存', 'success');
+        this.runtime.notify(tr('任务已保存'), 'success');
       } catch (_) {
-        this.runtime.notify('任务已保存，但系统提醒未启用');
+        this.runtime.notify(tr('任务已保存，但系统提醒未启用'));
       }
     } catch (error) {
       this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
@@ -244,7 +270,7 @@ export class CalendarController {
         const context = this.runtime.context();
         await TaskReminderScheduler.rebuild(context, this.store.tasks.slice(), false);
       } catch (_) {
-        this.runtime.notify('任务状态已更新，但系统提醒同步失败', 'error');
+        this.runtime.notify(tr('任务状态已更新，但系统提醒同步失败'), 'error');
       }
     } catch (error) {
       this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
@@ -260,7 +286,7 @@ export class CalendarController {
       await TaskReminderScheduler.rebuild(context, this.store.tasks.slice(), false);
       return true;
     } catch (_) {
-      this.runtime.notify('任务已删除，但系统提醒同步失败', 'error');
+      this.runtime.notify(tr('任务已删除，但系统提醒同步失败'), 'error');
       return false;
     }
   }

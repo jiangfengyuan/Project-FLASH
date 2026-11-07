@@ -429,7 +429,7 @@ function reminderKits() {
   };
   const tasks = {
     reminderAgentManager: {
-      ReminderType: { REMINDER_TYPE_CALENDAR: 0 },
+      ReminderType: { REMINDER_TYPE_CALENDAR: 0 }, ActionButtonType: { ACTION_BUTTON_TYPE_SNOOZE: 1 },
       getAllValidReminders: async () => [],
       publishReminder: async (request) => { published.push(request); return ++reminderCounter; },
       cancelReminder: async () => {}

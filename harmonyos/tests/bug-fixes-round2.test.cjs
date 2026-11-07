@@ -40,7 +40,7 @@ function reminderKits(seed) {
   const kits = {
     '@kit.ArkData': { preferences: prefs, relationalStore: { ConflictResolution: { ON_CONFLICT_REPLACE: 1 } } },
     '@kit.BackgroundTasksKit': { reminderAgentManager: {
-      ReminderType: { REMINDER_TYPE_CALENDAR: 0 },
+      ReminderType: { REMINDER_TYPE_CALENDAR: 0 }, ActionButtonType: { ACTION_BUTTON_TYPE_SNOOZE: 1 },
       getAllValidReminders: async () => [],
       publishReminder: async (request) => { published.push(request); return published.length; },
       cancelReminder: async () => {}

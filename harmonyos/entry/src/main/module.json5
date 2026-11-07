@@ -9,7 +9,8 @@
     "installationFree": false,
     "pages": "$profile:main_pages",
     "requestPermissions": [
-      { "name": "ohos.permission.PUBLISH_AGENT_REMINDER" }
+      { "name": "ohos.permission.PUBLISH_AGENT_REMINDER" },
+      { "name": "ohos.permission.VIBRATE" }
     ],
     "abilities": [
       {
@@ -25,7 +26,25 @@
           {
             "entities": ["entity.system.home"],
             "actions": ["action.system.home"]
+          },
+          {
+            "actions": ["ohos.want.action.viewData"],
+            "uris": [
+              { "scheme": "flash", "host": "capture" },
+              { "scheme": "flash", "host": "today" },
+              { "scheme": "flash", "host": "ideas" }
+            ]
+          },
+          {
+            "actions": ["ohos.want.action.sendData"],
+            "uris": [
+              { "scheme": "file", "utd": "general.text", "maxFileSupported": 1 },
+              { "scheme": "file", "utd": "general.plain-text", "maxFileSupported": 1 }
+            ]
           }
+        ],
+        "metadata": [
+          { "name": "ohos.ability.shortcuts", "resource": "$profile:shortcuts_config" }
         ]
       }
     ],

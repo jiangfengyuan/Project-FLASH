@@ -3,6 +3,9 @@ import { BackupData, Category, EmotionRecord, LogItem, TaskItem } from '../model
 import { dayString } from '../data/DateUtils';
 import { AppSession } from './FeatureStates';
 
+// 最近闪念条数（对齐 iOS）。
+export const RECENT_LIMIT = 6;
+
 /** Rebuild only changed partitions. Drafts and pagination survive publication. */
 export class FeatureProjection {
   private session: AppSession;
@@ -10,12 +13,14 @@ export class FeatureProjection {
   private searchChanged: () => void;
   // 未读灵感数由 store 侧本地视图状态推导，投影只负责写入 HomeState。
   private unviewedCount: () => number;
+  private unviewedIds: () => string[];
   constructor(session: AppSession, taskDay: (task: TaskItem) => string, searchChanged: () => void,
-    unviewedCount: () => number = () => 0) {
+    unviewedCount: () => number = () => 0, unviewedIds: () => string[] = () => []) {
     this.session = session;
     this.taskDay = taskDay;
     this.searchChanged = searchChanged;
     this.unviewedCount = unviewedCount;
+    this.unviewedIds = unviewedIds;
   }
 
   update(partition: StorePartition, data: BackupData): void {
@@ -23,7 +28,7 @@ export class FeatureProjection {
     if (partition === StorePartition.ALL || partition === StorePartition.LOGS) {
       this.session.logs.logs = data.logs.slice();
       this.session.logs.logsVersion++;
-      this.session.home.recentLogs = data.logs.slice(0, 5);
+      this.session.home.recentLogs = data.logs.slice(0, RECENT_LIMIT);
       const groups = new Map<string, LogItem[]>();
       data.logs.forEach((item: LogItem) => {
         const entries = groups.get(item.recordDate) ?? [];
@@ -34,6 +39,7 @@ export class FeatureProjection {
       this.searchChanged();
       this.updateLogCounts();
       this.session.home.unviewedIdeaCount = this.unviewedCount();
+      this.session.home.unviewedIdeaIds = this.unviewedIds();
     }
     if (partition === StorePartition.ALL || partition === StorePartition.EMOTIONS) {
       this.session.emotion.emotions = data.emotions.slice();
@@ -84,12 +90,14 @@ export class FeatureProjection {
 
   private updateEmotionCount(): void {
     const today = dayString();
-    this.session.home.todayEmotionCount = this.session.emotion.emotions.filter((item: EmotionRecord) =>
-      item.recordDate === today).length;
+    const todays = this.session.emotion.emotions.filter((item: EmotionRecord) => item.recordDate === today);
+    this.session.home.todayEmotionCount = todays.length;
+    this.session.home.latestEmotionLevel = todays.length > 0 ? todays[0].level : undefined;
   }
 
   private updateTaskCounts(): void {
     const today = dayString();
+    this.session.home.openTaskCount = this.session.calendar.tasks.filter((item: TaskItem) => !item.completedAt).length;
     const todays = this.session.calendar.tasks.filter((item: TaskItem) => this.taskDay(item) === today);
     this.session.home.todayTaskCount = todays.length;
     this.session.home.todayTaskDoneCount = todays.filter((item: TaskItem) =>

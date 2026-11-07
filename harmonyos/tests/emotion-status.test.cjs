@@ -104,7 +104,7 @@ test('saveEmotion wires status through, clears the drafts and raises the saved f
   state.emotionNote = '记录一下';
   state.emotionStatus = '疲惫';
   await controller.saveEmotion();
-  assert.deepEqual(saved, [[-2, 'uncomfortable', '记录一下', '疲惫']]);
+  assert.deepEqual(saved, [[-2, 'uncomfortable', '记录一下', '疲惫', undefined]]);
   assert.equal(state.emotionNote, '');
   assert.equal(state.emotionStatus, '');
   assert.equal(state.savedFlash, 1);
@@ -115,7 +115,7 @@ test('saveEmotion wires status through, clears the drafts and raises the saved f
   state.emotionLevel = 3;
   state.emotionStatus = '放松';
   await controller.saveEmotion();
-  assert.deepEqual(saved[1], [3, undefined, '', '放松']);
+  assert.deepEqual(saved[1], [3, undefined, '', '放松', undefined]);
   assert.equal(state.savedFlash, 2);
   assert.equal(state.savedLevel, 3);
 });

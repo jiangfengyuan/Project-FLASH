@@ -3,10 +3,10 @@ import { Category, EmotionRecord, LogItem, SubEmotion, TaskItem } from '../model
 import { LanDevice } from '../data/LocalBackupTransfer';
 // 与 components/CommonBuilders.ets 的浅色令牌保持一致（CommonBuilders 反向依赖
 // 本文件的类型，无法直接引用其常量，改动令牌时需同步）。
-const LIGHT_BACKGROUND = '#FFF7F9FA';
-const LIGHT_SURFACE = '#FFFFFFFF';
-const LIGHT_TEXT = '#FF2D3436';
-const LIGHT_MUTED = '#FF636E72';
+const LIGHT_BACKGROUND = '#FFFFF9ED';
+const LIGHT_SURFACE = '#FFFFFDF6';
+const LIGHT_TEXT = '#FF2E2A26';
+const LIGHT_MUTED = '#FF5E5044';
 
 export function normalizeThemeMode(mode: string): string {
   return mode === 'dark' || mode === 'system' ? mode : 'light';
@@ -29,8 +29,6 @@ export class NavigationState {
   foldStatus: number = 0;
   contentOpacity: number = 1;
   contentOffset: number = 0;
-  fabExpanded: boolean = false;
-  fabProgress: number = 0;
 }
 
 // display.FoldStatus 原值桥接：0 未知 / 1 展开 / 2 折叠 / 3 半折叠。
@@ -52,10 +50,10 @@ export class ThemeState {
   themeSurface: string = LIGHT_SURFACE;
   themeText: string = LIGHT_TEXT;
   themeMuted: string = LIGHT_MUTED;
-  themeControl: string = '#FFEDF0F5';
-  themeTint: string = '#FFEAF2FF';
-  themeDanger: string = '#FFFFF1F0';
-  themeNavigation: string = '#FFFFFFFF';
+  themeControl: string = '#FFF3EADA';
+  themeTint: string = '#FFEADFCB';
+  themeDanger: string = '#FFF3EADA';
+  themeNavigation: string = '#FFFFFDF6';
 
   isDark(): boolean {
     return resolveThemeDark(this.themeMode, this.systemDark);
@@ -81,6 +79,11 @@ export class HomeState {
   todayTaskCount: number = 0;
   todayTaskDoneCount: number = 0;
   recentLogs: LogItem[] = [];
+  // 未完成待办（全部，不限今日），与 iOS 今日一览同口径。
+  openTaskCount: number = 0;
+  // 今天最新一条情绪的等级；没有记录时为 undefined。
+  latestEmotionLevel?: number = undefined;
+  unviewedIdeaIds: string[] = [];
   // 未读灵感数（本地已读状态，不进备份）；提醒与角标按 IDEA_REMINDER_THRESHOLD 显示。
   unviewedIdeaCount: number = 0;
 }
@@ -101,8 +104,6 @@ export class LogsState {
   editImportance: number = 0;
   editError: string = '';
   editDiscard: boolean = false;
-  // 记录详情弹层：卡片点击进入详情，详情内再编辑/删除/分享。
-  detailLogId: string = '';
   captureText: string = '';
   captureCategory: string = Category.LOG;
   // 记录页筛选：filterCategory 为 all/log/idea/inbox，filterDate 为 all/today/week/month，
@@ -114,6 +115,22 @@ export class LogsState {
   sortAscending: boolean = false;
   logDisplayLimit: number = 50;
   busy: boolean = false;
+  // 已收藏：可与类型筛选叠加（对齐 iOS）。
+  favoritesOnly: boolean = false;
+  // 待整理的批量选择。
+  selecting: boolean = false;
+  selectedIds: string[] = [];
+  // 编辑器里的收藏开关。
+  editFavorite: boolean = false;
+  // 日志流（日志管理）筛选：多选标签、日期上下界、三种排序、已收藏。
+  flowQuery: string = '';
+  flowTags: string[] = [];
+  flowStart: string = '';
+  flowEnd: string = '';
+  flowSort: string = 'newest';
+  flowFavorites: boolean = false;
+  // 系统分享的文字：由用户确认后才保存，不覆盖草稿。
+  quickShared: boolean = false;
 }
 
 @Observed
@@ -125,6 +142,8 @@ export class EmotionState {
   // 当前状态（具体心情）：快捷 chip 或自由文本，随情绪记录保存。
   emotionStatus: string = '';
   selectedSubEmotion: string = SubEmotion.SAD;
+  // 可选强度 1–5；0 表示未选。再点同一档清除。
+  emotionIntensity: number = 0;
   busy: boolean = false;
   // 保存成功动效信号：savedFlash 递增触发页面差异化反馈，savedLevel 记录情绪极性。
   savedFlash: number = 0;
@@ -144,6 +163,9 @@ export class CalendarState {
   taskTimeZone: string = '';
   taskAllDay: boolean = true;
   taskReminderMinutes: number = -1;
+  // 灵感转任务：保留来源回链。
+  taskSourceLogId: string = '';
+  taskFavorite: boolean = false;
   calendarDayLimit: number = 30;
   activityDays: string[] = [];
   dataVersion: number = 0;
@@ -194,6 +216,9 @@ export class SettingsState {
   systemShareSupported: boolean = false;
   // 减少动态效果：系统无公开查询接口，此为应用内设置（Preferences 持久化）。
   reduceMotion: boolean = false;
+  // 灵感提醒（对齐 iOS）：开关与频率（daily / every3days / weekly）。
+  ideaReminderEnabled: boolean = true;
+  ideaReminderFrequency: string = 'daily';
 }
 
 // 减少动态效果的全局生效标记：由 AppController 随设置读写，
@@ -223,6 +248,8 @@ export interface DeleteRequest {
 export interface ToastNotice {
   message: string;
   level: string;
+  actionLabel?: string;
+  action?: () => void;
 }
 
 // Toast 级别归一：success/error/info，未知值按 info 处理。

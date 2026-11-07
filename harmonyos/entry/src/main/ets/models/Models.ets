@@ -1,3 +1,4 @@
+import { tr } from '../data/I18n';
 export enum ColorTag {
   URGENT = 'urgent',
   INSPIRATION = 'inspiration',
@@ -106,12 +107,12 @@ export const SUB_EMOTIONS: string[] = [SubEmotion.SAD, SubEmotion.ANGRY, SubEmot
 
 export function colorTagName(value: string): string {
   switch (value) {
-    case ColorTag.URGENT: return '紧急';
-    case ColorTag.INSPIRATION: return '灵感';
-    case ColorTag.MEMO: return '备忘';
-    case ColorTag.EMOTION: return '情绪';
-    case ColorTag.IDEA: return '想法';
-    default: return '日常';
+    case ColorTag.URGENT: return tr('紧急');
+    case ColorTag.INSPIRATION: return tr('灵感');
+    case ColorTag.MEMO: return tr('备忘');
+    case ColorTag.EMOTION: return tr('情绪');
+    case ColorTag.IDEA: return tr('想法');
+    default: return tr('日常');
   }
 }
 
@@ -128,13 +129,13 @@ export function colorTagColor(value: string): string {
 
 export function emotionName(level: number): string {
   switch (level) {
-    case -3: return '非常不开心';
-    case -2: return '很不开心';
-    case -1: return '不开心';
-    case 1: return '开心';
-    case 2: return '很开心';
-    case 3: return '非常开心';
-    default: return '中性';
+    case -3: return tr('非常不开心');
+    case -2: return tr('很不开心');
+    case -1: return tr('不开心');
+    case 1: return tr('开心');
+    case 2: return tr('很开心');
+    case 3: return tr('非常开心');
+    default: return tr('中性');
   }
 }
 
@@ -152,9 +153,9 @@ export function emotionEmoji(level: number): string {
 
 export function subEmotionName(value?: string | null): string {
   switch (value) {
-    case SubEmotion.SAD: return '伤心';
-    case SubEmotion.ANGRY: return '生气';
-    case SubEmotion.UNCOMFORTABLE: return '难受';
+    case SubEmotion.SAD: return tr('伤心');
+    case SubEmotion.ANGRY: return tr('生气');
+    case SubEmotion.UNCOMFORTABLE: return tr('难受');
     default: return '';
   }
 }

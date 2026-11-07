@@ -1,3 +1,4 @@
+import { tr } from './I18n';
 function pad2(value: number): string {
   return value < 10 ? `0${value}` : `${value}`;
 }
@@ -19,13 +20,21 @@ export function dayOffset(offset: number): string {
 export function monthTitle(day: string): string {
   const parts = day.split('-');
   if (parts.length < 2) return day;
-  return `${parts[0]} 年 ${Number(parts[1])} 月`;
+  return tr('{0} 年 {1} 月', parts[0], Number(parts[1]));
 }
 
 export function shortDay(day: string): string {
   const parts = day.split('-');
   if (parts.length < 3) return day;
-  return `${Number(parts[1])}月${Number(parts[2])}日`;
+  return tr('{0}月{1}日', Number(parts[1]), Number(parts[2]));
+}
+
+/** 本地时分（createdAt 存 UTC，显示必须换算；数字保持 ASCII）。解析失败返回空串。 */
+export function localTimeHM(iso: string): string {
+  const date = new Date(iso);
+  if (!Number.isFinite(date.getTime())) return '';
+  const pad = (value: number): string => `${value}`.padStart(2, '0');
+  return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 // Copyright (c) 2026 Fengyuan Jiang
 //

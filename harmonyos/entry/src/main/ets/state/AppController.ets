@@ -1,7 +1,10 @@
+import { tr } from '../data/I18n';
 import { bundleManager, common } from '@kit.AbilityKit';
 import { preferences } from '@kit.ArkData';
 import { dayString } from '../data/DateUtils';
-import { TaskItem } from '../models/Models';
+import { LogItem, TaskItem } from '../models/Models';
+import { IdeaReminderScheduler } from '../data/IdeaReminderScheduler';
+import { dayString as today } from '../data/DateUtils';
 import { AppSession, DeleteKind, normalizeThemeMode, setReduceMotionEnabled } from '../state/FeatureStates';
 import { BackupService } from '../data/BackupService';
 import { FlashStore } from '../data/FlashStore';
@@ -23,6 +26,10 @@ import { StorePartition } from '../data/StoreChanges';
 const THEME_PREFERENCES_STORE = 'flash-aero-data';
 const THEME_MODE_KEY = 'theme-mode';
 const REDUCE_MOTION_KEY = 'reduce-motion';
+const IDEA_REMINDER_ENABLED_KEY = 'idea-reminder-enabled';
+const IDEA_REMINDER_FREQUENCY_KEY = 'idea-reminder-frequency';
+const IDEA_REMINDER_LAST_KEY = 'idea-reminder-last';
+const QUICK_DRAFT_KEY = 'quick-draft';
 
 export class AppController {
   readonly session: AppSession = new AppSession();
@@ -39,6 +46,10 @@ export class AppController {
       // 测试替身可能不含未读查询，按无未读处理。
       const store = FlashStore.instance;
       return typeof store.unviewedIdeas === 'function' ? store.unviewedIdeas().length : 0;
+    },
+    () => {
+      const store = FlashStore.instance;
+      return typeof store.unviewedIdeas === 'function' ? store.unviewedIdeas().map((item: LogItem) => item.id) : [];
     });
   private unsubscribe?: () => void;
   private dateTimer: number = 0;
@@ -65,11 +76,13 @@ export class AppController {
       this.session.theme.themeMode = themeMode;
       themeLoaded(themeMode);
       await this.loadReduceMotion(context);
+      await this.loadIdeaReminderSettings(context);
       this.session.settings.showWelcome = !store.welcomed;
       this.session.backup.recoveryAvailable = store.hasRecoveryData;
       this.unsubscribe = store.changes.subscribe((partition: StorePartition) => {
         this.projection.update(partition, { logs: store.logs, emotions: store.emotions, tasks: store.tasks });
         FormUpdateHelper.updateForms(context).catch(() => {});
+        if (partition === StorePartition.ALL || partition === StorePartition.LOGS) this.syncIdeaReminder();
       });
       this.projection.update(StorePartition.ALL, { logs: store.logs, emotions: store.emotions, tasks: store.tasks });
       let observedDay = dayString();
@@ -84,7 +97,7 @@ export class AppController {
       try {
         await TaskReminderScheduler.rebuild(context, store.tasks.slice(), false);
       } catch (_) {
-        if (generation === this.generation) this.runtime.notify('任务提醒恢复失败；任务数据仍然安全，请稍后重启应用重试', 'error');
+        if (generation === this.generation) this.runtime.notify(tr('任务提醒恢复失败；任务数据仍然安全，请稍后重启应用重试'), 'error');
       }
       if (generation !== this.generation) return;
       if (store.recoveryWarning) this.runtime.notify(store.recoveryWarning, 'error');
@@ -92,7 +105,7 @@ export class AppController {
     } catch (error) {
       if (generation === this.generation) {
         this.session.feedback.startup = 'error';
-        this.session.feedback.startupError = `本地数据加载失败：${this.runtime.errorMessage(error as Error)}`;
+        this.session.feedback.startupError = tr('本地数据加载失败：{0}', this.runtime.errorMessage(error as Error));
       }
       return;
     }
@@ -109,7 +122,7 @@ export class AppController {
       this.session.settings.notificationSettingsSupported = capability.notificationSettingsSupported;
       this.session.settings.systemShareSupported = capability.systemShareSupported === true;
     } catch (_) {
-      if (generation === this.generation) this.runtime.notify('系统能力检测失败，能力入口状态可能不准确', 'error');
+      if (generation === this.generation) this.runtime.notify(tr('系统能力检测失败，能力入口状态可能不准确'), 'error');
     }
   }
 
@@ -123,8 +136,68 @@ export class AppController {
       await settings.put(REDUCE_MOTION_KEY, enabled);
       await settings.flush();
     } catch (error) {
-      this.runtime.notify(`减少动态效果设置保存失败：${this.runtime.errorMessage(error as Error)}`, 'error');
+      this.runtime.notify(tr('减少动态效果设置保存失败：{0}', this.runtime.errorMessage(error as Error)), 'error');
     }
+  }
+
+  private async loadIdeaReminderSettings(context: common.UIAbilityContext): Promise<void> {
+    try {
+      const settings = await preferences.getPreferences(context, THEME_PREFERENCES_STORE);
+      this.session.settings.ideaReminderEnabled = (await settings.get(IDEA_REMINDER_ENABLED_KEY, true)) !== false;
+      const frequency = await settings.get(IDEA_REMINDER_FREQUENCY_KEY, 'daily');
+      this.session.settings.ideaReminderFrequency = typeof frequency === 'string' ? frequency : 'daily';
+      this.ideaReminderLast = String(await settings.get(IDEA_REMINDER_LAST_KEY, ''));
+      this.quickDraft = String(await settings.get(QUICK_DRAFT_KEY, ''));
+    } catch (_) {
+      // 读取失败按默认值处理。
+    }
+  }
+
+  private ideaReminderLast: string = '';
+  private quickDraft: string = '';
+
+  /** 快速记录草稿：未提交时保留，只存本机，不进备份。 */
+  draft(): string {
+    return this.quickDraft;
+  }
+
+  saveDraft(text: string): void {
+    this.quickDraft = text;
+    this.writeSetting(QUICK_DRAFT_KEY, text);
+  }
+
+  private writeSetting(key: string, value: string | boolean): void {
+    preferences.getPreferences(this.runtime.context(), THEME_PREFERENCES_STORE).then(async (settings: preferences.Preferences) => {
+      await settings.put(key, value);
+      await settings.flush();
+    }).catch(() => {});
+  }
+
+  /** 灵感提醒设置变化时立即按新设置排程；通知权限只在开启时申请。 */
+  setIdeaReminder(enabled: boolean, frequency: string): void {
+    this.session.settings.ideaReminderEnabled = enabled;
+    this.session.settings.ideaReminderFrequency = frequency;
+    this.writeSetting(IDEA_REMINDER_ENABLED_KEY, enabled);
+    this.writeSetting(IDEA_REMINDER_FREQUENCY_KEY, frequency);
+    this.syncIdeaReminder(enabled);
+  }
+
+  private syncIdeaReminder(requestPermission: boolean = false): void {
+    const store = FlashStore.instance;
+    const unread = typeof store.unviewedIdeas === 'function' ? store.unviewedIdeas().length : 0;
+    let context: common.UIAbilityContext;
+    try {
+      context = this.runtime.context();
+    } catch (_) {
+      return;
+    }
+    IdeaReminderScheduler.sync(context, this.session.settings.ideaReminderEnabled, unread,
+      this.session.settings.ideaReminderFrequency, this.ideaReminderLast, requestPermission).then((fired: boolean) => {
+        if (fired) {
+          this.ideaReminderLast = today();
+          this.writeSetting(IDEA_REMINDER_LAST_KEY, this.ideaReminderLast);
+        }
+      }).catch(() => {});
   }
 
   private async loadReduceMotion(context: common.UIAbilityContext): Promise<void> {
@@ -142,7 +215,7 @@ export class AppController {
   async openNotificationSettings(): Promise<void> {
     try {
       const opened = await NotificationChannels.openAppNotificationSettings(this.runtime.context());
-      if (!opened) this.runtime.notify('当前设备不支持应用内通知设置', 'error');
+      if (!opened) this.runtime.notify(tr('当前设备不支持应用内通知设置'), 'error');
     } catch (error) {
       this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     }
@@ -186,20 +259,20 @@ export class AppController {
     try {
       if (request.kind === DeleteKind.LOG) {
         await this.logsController.removeLog(request.id);
-        this.runtime.notify('记录已删除', 'success');
+        this.runtime.notify(tr('记录已删除'), 'success');
       } else if (request.kind === DeleteKind.EMOTION) {
         await this.emotionController.removeEmotion(request.id);
-        this.runtime.notify('情绪记录已删除', 'success');
+        this.runtime.notify(tr('情绪记录已删除'), 'success');
       } else if (request.kind === DeleteKind.TASK) {
-        if (await this.calendarController.removeTask(request.id)) this.runtime.notify('任务已删除', 'success');
+        if (await this.calendarController.removeTask(request.id)) this.runtime.notify(tr('任务已删除'), 'success');
       } else if (request.kind === DeleteKind.ALL) {
         await FlashStore.instance.clearAll();
         const context = this.runtime.context() as common.UIAbilityContext;
         try {
           await TaskReminderScheduler.rebuild(context, [], false);
-          this.runtime.notify('本地数据已清空', 'success');
+          this.runtime.notify(tr('本地数据已清空'), 'success');
         } catch (_) {
-          this.runtime.notify('本地数据已清空，但系统提醒清理失败，请重启应用后重试', 'error');
+          this.runtime.notify(tr('本地数据已清空，但系统提醒清理失败，请重启应用后重试'), 'error');
         }
       }
     } catch (error) {
@@ -222,14 +295,14 @@ export class AppController {
 
   destructiveTitle(): string {
     const kind = this.session.feedback.destructive?.kind;
-    if (kind === DeleteKind.LOG) return '删除这条记录？';
-    if (kind === DeleteKind.EMOTION) return '删除这条情绪记录？';
-    if (kind === DeleteKind.TASK) return '删除这个任务？';
-    return '清空全部本地数据？';
+    if (kind === DeleteKind.LOG) return tr('删除这条记录？');
+    if (kind === DeleteKind.EMOTION) return tr('删除这条情绪记录？');
+    if (kind === DeleteKind.TASK) return tr('删除这个任务？');
+    return tr('清空全部本地数据？');
   }
 
   destructiveMessage(): string {
-    return this.session.feedback.destructive?.kind === DeleteKind.ALL ? '日志、灵感、情绪和任务将全部删除。此操作无法撤销，建议先导出备份。' :
-      '删除后无法撤销。';
+    return this.session.feedback.destructive?.kind === DeleteKind.ALL ? tr('日志、灵感、情绪和任务将全部删除。此操作无法撤销，建议先导出备份。') :
+      tr('删除后无法撤销。');
   }
 }

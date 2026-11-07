@@ -1,0 +1,40 @@
+{
+  "color": [
+    {
+      "name": "start_window_background",
+      "value": "#1F1A16"
+    },
+    {
+      "name": "form_accent_records",
+      "value": "#E9926C"
+    },
+    {
+      "name": "form_accent_ideas",
+      "value": "#DDB565"
+    },
+    {
+      "name": "form_accent_tasks",
+      "value": "#A6C09C"
+    },
+    {
+      "name": "form_paper",
+      "value": "#1F1A16"
+    },
+    {
+      "name": "form_border",
+      "value": "#4A4039"
+    },
+    {
+      "name": "form_ink",
+      "value": "#F4ECDF"
+    },
+    {
+      "name": "form_ink_secondary",
+      "value": "#BFB2A3"
+    },
+    {
+      "name": "form_oat",
+      "value": "#362E28"
+    }
+  ]
+}

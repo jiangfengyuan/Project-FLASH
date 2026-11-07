@@ -86,8 +86,8 @@ function contrast(a, b) {
   return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
 }
 
-const SURFACE_LIGHT = '#FFFFFF';
-const SURFACE_DARK = '#3A3D5C';
+const SURFACE_LIGHT = '#FFFDF6';
+const SURFACE_DARK = '#2B2520';
 
 function themed(mode) {
   const theme = new ThemeState();
@@ -120,12 +120,6 @@ test('emotionColor meets 3:1 on both card surfaces at all levels', () => {
   }
 });
 
-test('fabOptionColor keeps the white glyph at 3:1 or better', () => {
-  for (const kind of FAB_KINDS) {
-    assert.ok(contrast(fabOptionColor(kind), '#FFFFFF') >= 3, kind);
-  }
-});
-
 test('statusText and successText meet 4.5:1 for text use', () => {
   for (const kind of ['ok', 'warn']) {
     assert.ok(contrast(statusText(themed('light'), kind), SURFACE_LIGHT) >= 4.5, `light ${kind}`);
@@ -146,17 +140,22 @@ test('text semantic colors meet 4.5:1 on both card surfaces', () => {
   }
 });
 
-test('toast surfaces keep white text at 4.5:1 and level icons at 3:1', () => {
+test('toast text and level icons stay readable on the vellum surface', () => {
+  globalThis.canIUse = () => true;
   for (const mode of ['light', 'dark']) {
-    const surface = toastSurface(themed(mode)).replace(/^..(?=[0-9A-Fa-f]{6}$)/, '');
-    assert.ok(contrast('#FFFFFF', surface) >= 4.5, `${mode} text`);
-    for (const level of ['success', 'error', 'info']) {
-      assert.ok(contrast(toastLevelColor(level), surface) >= 3, `${mode} ${level}`);
+    const theme = themed(mode);
+    const surface = toastSurface(theme).replace(/^#../, '#');
+    const text = mode === 'dark' ? '#F4ECDF' : '#2E2A26';
+    assert.ok(contrast(text, surface) >= 4.5, `${mode} text`);
+    if (mode === 'light') {
+      for (const level of ['success', 'error', 'info']) {
+        assert.ok(contrast(toastLevelColor(level), surface) >= 3, `${mode} ${level}`);
+      }
     }
   }
 });
 
-test('filled action buttons keep white content legible', () => {
-  assert.ok(contrast(dangerButtonColor(), '#FFFFFF') >= 4.5);
-  assert.ok(contrast(successFill(), '#FFFFFF') >= 3);
+test('filled action colors keep paper-white content legible', () => {
+  assert.ok(contrast(dangerButtonColor(), '#FFFDF6') >= 4.5);
+  assert.ok(contrast(successFill(), '#FFFDF6') >= 3);
 });

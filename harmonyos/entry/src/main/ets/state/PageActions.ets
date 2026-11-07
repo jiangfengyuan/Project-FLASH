@@ -1,3 +1,4 @@
+import { tr } from '../data/I18n';
 import { AppController } from './AppController';
 import { LogsController } from './LogsController';
 import { EmotionController } from './EmotionController';
@@ -33,6 +34,6 @@ export class PageActions {
 }
 
 export function requireActions(actions: PageActions | undefined): PageActions {
-  if (!actions) throw new Error('页面操作依赖未装配');
+  if (!actions) throw new Error(tr('页面操作依赖未装配'));
   return actions;
 }

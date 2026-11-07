@@ -1,3 +1,4 @@
+import { tr } from '../data/I18n';
 import { ActivityChart } from '../components/ActivityChart';
 import { CalendarPage } from './CalendarPage';
 import { ReviewComparison, EmotionDistribution, SubEmotionSlice } from '../data/ReviewWindow';
@@ -7,7 +8,7 @@ import { NavigationState, ThemeState, LogsState, EmotionState, CalendarState, Fe
 import { PageActions, requireActions } from '../state/PageActions';
 import { StatsController } from '../state/StatsController';
 import {
-  PageHeader, DOCK_CLEARANCE, FilterChip, FlashCard, brandText, hairlineColor, statLineColor,
+  PageHeader, DOCK_CLEARANCE, pageGutter, statFontFamily, FilterChip, FlashCard, brandText, hairlineColor, statLineColor,
   TYPE_TITLE, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY
 } from '../components/CommonBuilders';
 
@@ -43,10 +44,10 @@ export struct StatsPage {
       Column({ space: 14 }) {
         Scroll() {
           Row({ space: 8 }) {
-            FilterChip(this.theme, '本周', this.window === 'week', () => this.window = 'week')
-            FilterChip(this.theme, '本月', this.window === 'month', () => this.window = 'month')
-            FilterChip(this.theme, '近30天', this.window === '30', () => this.window = '30')
-            FilterChip(this.theme, '近90天', this.window === '90', () => this.window = '90')
+            FilterChip(this.theme, tr('本周'), this.window === 'week', () => this.window = 'week')
+            FilterChip(this.theme, tr('本月'), this.window === 'month', () => this.window = 'month')
+            FilterChip(this.theme, tr('近30天'), this.window === '30', () => this.window = '30')
+            FilterChip(this.theme, tr('近90天'), this.window === '90', () => this.window = '90')
           }
         }.scrollable(ScrollDirection.Horizontal).scrollBar(BarState.Off).width('100%')
         if (this.isDual()) {
@@ -55,8 +56,8 @@ export struct StatsPage {
               this.comparisonCard()
               ActivityChart({ theme: this.theme, days: this.stats().activity(this.window) })
               Row({ space: 10 }) {
-                this.metric(`${this.periodLogs().length}`, '范围内记录', this.theme.themeTint)
-                this.metric(`${this.periodAverage()}`, '平均情绪', this.theme.themeTint)
+                this.metric(`${this.periodLogs().length}`, tr('范围内记录'), this.theme.themeTint)
+                this.metric(`${this.periodAverage()}`, tr('平均情绪'), this.theme.themeTint)
               }.width('100%')
             }.layoutWeight(1).alignItems(HorizontalAlign.Start)
             Column({ space: 14 }) {
@@ -69,15 +70,15 @@ export struct StatsPage {
           this.comparisonCard()
           ActivityChart({ theme: this.theme, days: this.stats().activity(this.window) })
           Row({ space: 10 }) {
-            this.metric(`${this.periodLogs().length}`, '范围内记录', this.theme.themeTint)
-            this.metric(`${this.periodAverage()}`, '平均情绪', this.theme.themeTint)
+            this.metric(`${this.periodLogs().length}`, tr('范围内记录'), this.theme.themeTint)
+            this.metric(`${this.periodAverage()}`, tr('平均情绪'), this.theme.themeTint)
           }.width('100%')
           this.trendCard()
           this.distributionCard()
           this.compositionCard()
         }
-      }.width('100%').padding({ left: 20, right: 20, bottom: DOCK_CLEARANCE })
-    }.width('100%').layoutWeight(1).backgroundColor(this.theme.themeBackground)
+      }.width('100%').padding({ left: pageGutter(), right: pageGutter(), bottom: DOCK_CLEARANCE })
+    }.width('100%').layoutWeight(1)
   }
 
   @Builder
@@ -88,12 +89,12 @@ export struct StatsPage {
       Text(`${this.days()[0]} — ${this.days()[this.days().length - 1]}`)
         .fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width('100%')
       if (this.comparison().insufficient) {
-        Text(`这段时间有 ${this.periodLogs().length} 条记录 · ${this.periodEmotions().length} 次情绪`)
+        Text(tr('这段时间有 {0} 条记录 · {1} 次情绪', this.periodLogs().length, this.periodEmotions().length))
           .fontSize(TYPE_BODY).fontColor(this.theme.themeText).width('100%')
       } else {
-        Text(`${this.comparison().currentLabel} ${this.comparison().currentCount} 条 · ${this.comparison().previousLabel} ${this.comparison().previousCount} 条`)
+        Text(tr('{0} {1} 条 · {2} {3} 条', this.comparison().currentLabel, this.comparison().currentCount, this.comparison().previousLabel, this.comparison().previousCount))
           .fontSize(TYPE_BODY).fontColor(this.theme.themeText).width('100%')
-        Text(`活跃 ${this.activeDays()} 天 · 平均情绪 ${this.periodAverage()}`)
+        Text(tr('活跃 {0} 天 · 平均情绪 {1}', this.activeDays(), this.periodAverage()))
           .fontSize(TYPE_BODY).fontColor(this.theme.themeText).width('100%')
       }
     }
@@ -102,11 +103,11 @@ export struct StatsPage {
   @Builder
   private trendCard() {
     FlashCard({ theme: this.theme, space: 12 }) {
-      Text('情绪趋势 · 日均值').fontSize(TYPE_GROUP).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).width('100%')
-      Text('-3 至 +3，0 为中性；— 表示当日未记录')
+      Text(tr('情绪趋势 · 日均值')).fontSize(TYPE_GROUP).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).width('100%')
+      Text(tr('-3 至 +3，0 为中性；— 表示当日未记录'))
         .fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width('100%')
       if (this.periodEmotions().length === 0) {
-        Text('时间范围内暂无情绪记录').fontSize(TYPE_BODY).fontColor(this.theme.themeMuted)
+        Text(tr('时间范围内暂无情绪记录')).fontSize(TYPE_BODY).fontColor(this.theme.themeMuted)
       }
       ForEach(this.days(), (day: string) => {
         Row({ space: 10 }) {
@@ -124,17 +125,17 @@ export struct StatsPage {
   @Builder
   private distributionCard() {
     FlashCard({ theme: this.theme, space: 12 }) {
-      Text('情绪分布').fontSize(TYPE_GROUP).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).width('100%')
-      Text('时间范围内开心 / 中性 / 不开心的次数，条形长度按比例')
+      Text(tr('情绪分布')).fontSize(TYPE_GROUP).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).width('100%')
+      Text(tr('时间范围内开心 / 中性 / 不开心的次数，条形长度按比例'))
         .fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width('100%')
       if (this.distribution().total === 0) {
-        Text('时间范围内暂无情绪记录，分布会慢慢成形').fontSize(TYPE_BODY).fontColor(this.theme.themeMuted).width('100%')
+        Text(tr('时间范围内暂无情绪记录，分布会慢慢成形')).fontSize(TYPE_BODY).fontColor(this.theme.themeMuted).width('100%')
       } else {
-        this.distributionRow('开心', this.distribution().positive, this.distribution().total)
-        this.distributionRow('中性', this.distribution().neutral, this.distribution().total)
-        this.distributionRow('不开心', this.distribution().negative, this.distribution().total)
+        this.distributionRow(tr('开心'), this.distribution().positive, this.distribution().total)
+        this.distributionRow(tr('中性'), this.distribution().neutral, this.distribution().total)
+        this.distributionRow(tr('不开心'), this.distribution().negative, this.distribution().total)
         if (this.distribution().subEmotions.length > 0) {
-          Text('不开心时的具体感受').fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width('100%')
+          Text(tr('不开心时的具体感受')).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width('100%')
           ForEach(this.distribution().subEmotions, (slice: SubEmotionSlice) => {
             this.distributionRow(slice.name, slice.count, this.distribution().negative)
           }, (slice: SubEmotionSlice) => slice.key)
@@ -146,10 +147,10 @@ export struct StatsPage {
   @Builder
   private compositionCard() {
     FlashCard({ theme: this.theme, space: 10 }) {
-      Text('累计构成 · 全部时间').fontSize(TYPE_GROUP).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).width('100%')
-      this.statLine('日志', this.logs.logs.filter((item: LogItem) => item.category === Category.LOG).length, statLineColor(this.theme, 'log'))
-      this.statLine('灵感', this.logs.logs.filter((item: LogItem) => item.category === Category.IDEA).length, statLineColor(this.theme, 'idea'))
-      this.statLine('情绪', this.emotion.emotions.length, statLineColor(this.theme, 'emotion'))
+      Text(tr('累计构成 · 全部时间')).fontSize(TYPE_GROUP).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).width('100%')
+      this.statLine(tr('日志'), this.logs.logs.filter((item: LogItem) => item.category === Category.LOG).length, statLineColor(this.theme, 'log'))
+      this.statLine(tr('灵感'), this.logs.logs.filter((item: LogItem) => item.category === Category.IDEA).length, statLineColor(this.theme, 'idea'))
+      this.statLine(tr('情绪'), this.emotion.emotions.length, statLineColor(this.theme, 'emotion'))
     }
   }
 
@@ -181,19 +182,24 @@ export struct StatsPage {
           Row().height(10).width(`${Math.max(4, Math.round(100 * count / total))}%`).backgroundColor(brandText(this.theme)).borderRadius(5)
         }
       }.layoutWeight(1).height(12)
-      Text(`${count} 次`).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeText).width(48).textAlign(TextAlign.End)
+      Text(tr('{0} 次', count)).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeText).width(48).textAlign(TextAlign.End)
     }.width('100%')
   }
 
   build() {
     Column({ space: 12 }) {
       Column({ space: 12 }) {
-        PageHeader(this.theme, '回顾', '看见记录背后的节奏与情绪')
+        Row() {
+          Column() { PageHeader(this.theme, tr('回顾'), tr('看见记录背后的节奏与情绪')) }.layoutWeight(1)
+          Text('Memory').fontSize(TYPE_SECONDARY).fontColor(brandText(this.theme)).height(44).padding({ left: 12, right: 20 })
+            .accessibilityText('Memory')
+            .onClick(() => requireActions(this.actions).openDetail('memory'))
+        }.width('100%').margin({ left: -20, right: -20 })
         Row({ space: 12 }) {
-          FilterChip(this.theme, '趋势', !this.showCalendar, () => this.showCalendar = false)
-          FilterChip(this.theme, '日历', this.showCalendar, () => this.showCalendar = true)
+          FilterChip(this.theme, tr('趋势'), !this.showCalendar, () => this.showCalendar = false)
+          FilterChip(this.theme, tr('日历'), this.showCalendar, () => this.showCalendar = true)
         }.width('100%')
-      }.width('100%').padding({ left: 20, right: 20 })
+      }.width('100%').padding({ left: pageGutter(), right: pageGutter() })
       if (this.showCalendar) {
         CalendarPage({ theme: this.theme, calendar: this.calendar, feedback: this.feedback, actions: this.actions, embedded: true })
       } else {

@@ -1,8 +1,40 @@
 {
   "color": [
-    { "name": "start_window_background", "value": "#F7F9FA" },
-    { "name": "form_accent_records", "value": "#6C5CE7" },
-    { "name": "form_accent_ideas", "value": "#FF9F43" },
-    { "name": "form_accent_tasks", "value": "#4D96FF" }
+    {
+      "name": "start_window_background",
+      "value": "#FFF9ED"
+    },
+    {
+      "name": "form_accent_records",
+      "value": "#A84A24"
+    },
+    {
+      "name": "form_accent_ideas",
+      "value": "#7A5A12"
+    },
+    {
+      "name": "form_accent_tasks",
+      "value": "#55714F"
+    },
+    {
+      "name": "form_paper",
+      "value": "#FFF9ED"
+    },
+    {
+      "name": "form_border",
+      "value": "#E4D8C2"
+    },
+    {
+      "name": "form_ink",
+      "value": "#2E2A26"
+    },
+    {
+      "name": "form_ink_secondary",
+      "value": "#5E5044"
+    },
+    {
+      "name": "form_oat",
+      "value": "#F3EADA"
+    }
   ]
 }

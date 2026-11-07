@@ -1,3 +1,4 @@
+import { tr } from './I18n';
 import {
   BackupDocument,
   BackupData,
@@ -44,7 +45,7 @@ class StrictJSONScanner {
   private value(depth: number): void {
     this.valueCount++;
     // Match FlashCore before JSON.parse can expand dense primitive arrays.
-    if (this.valueCount > 10000000) throw new Error('/：JSON 值数量超过资源上限');
+    if (this.valueCount > 10000000) throw new Error(tr('/：JSON 值数量超过资源上限'));
     this.whitespace();
     if (depth > 128 || this.index >= this.text.length) this.fail();
     switch (this.text[this.index]) {
@@ -55,7 +56,7 @@ class StrictJSONScanner {
         do {
           this.whitespace();
           const key = this.key();
-          if (keys.has(key)) throw new Error(`/：JSON 对象包含重复键：${key}`);
+          if (keys.has(key)) throw new Error(tr('/：JSON 对象包含重复键：{0}', key));
           keys.add(key);
           this.expect(':');
           this.value(depth + 1);
@@ -186,7 +187,7 @@ class StrictJSONScanner {
   }
 
   private fail(): never {
-    throw new Error(`/：JSON 语法不合法（位置 ${this.index}）`);
+    throw new Error(tr('/：JSON 语法不合法（位置 {0}）', this.index));
   }
 }
 
@@ -209,9 +210,9 @@ export class BackupService {
     notes: string = ''): string {
     // Same metadata guard the strict pass applied to the constructed document.
     if (typeof BackupService.appVersion !== 'string' || typeof notes !== 'string' ||
-      notes.length > BackupService.MAX_FIELD_LENGTH) throw new Error('/：备份版本或元信息不合法');
+      notes.length > BackupService.MAX_FIELD_LENGTH) throw new Error(tr('/：备份版本或元信息不合法'));
     if (logs.length > BackupService.MAX_ENTRY_COUNT || emotions.length > BackupService.MAX_ENTRY_COUNT ||
-      tasks.length > BackupService.MAX_ENTRY_COUNT) throw new Error('/data：数组超过上限');
+      tasks.length > BackupService.MAX_ENTRY_COUNT) throw new Error(tr('/data：数组超过上限'));
     // Locally produced records no longer round-trip through
     // stringify→parseStrict→stringify: the same field validators run directly
     // and the document is stringified once. Output stays identical.
@@ -229,7 +230,7 @@ export class BackupService {
     };
     const output = JSON.stringify(document, null, 2);
     if (new util.TextEncoder().encodeInto(output).length > BackupService.MAX_BYTES) {
-      throw new Error('/：文件超过 50 MiB');
+      throw new Error(tr('/：文件超过 50 MiB'));
     }
     return output;
   }
@@ -238,7 +239,7 @@ export class BackupService {
     const ids = new Set<string>();
     return logs.map((item: LogItem) => {
       if (!BackupService.validLog(item) || ids.has(item.id)) {
-        throw new Error('/data/logs：存在非法或重复记录，请先处理异常数据再导出');
+        throw new Error(tr('/data/logs：存在非法或重复记录，请先处理异常数据再导出'));
       }
       ids.add(item.id);
       return BackupService.normalizedLog(item);
@@ -249,7 +250,7 @@ export class BackupService {
     const ids = new Set<string>();
     return emotions.map((item: EmotionRecord) => {
       if (!BackupService.validEmotion(item) || ids.has(item.id)) {
-        throw new Error('/data/emotions：存在非法或重复记录，请先处理异常数据再导出');
+        throw new Error(tr('/data/emotions：存在非法或重复记录，请先处理异常数据再导出'));
       }
       ids.add(item.id);
       return BackupService.normalizedEmotion(item);
@@ -260,7 +261,7 @@ export class BackupService {
     const ids = new Set<string>();
     return tasks.map((item: TaskItem) => {
       if (!BackupService.validTask(item) || ids.has(item.id)) {
-        throw new Error('/data/tasks：存在非法或重复记录，请先处理异常数据再导出');
+        throw new Error(tr('/data/tasks：存在非法或重复记录，请先处理异常数据再导出'));
       }
       ids.add(item.id);
       return BackupService.normalizedTask(item);
@@ -269,23 +270,23 @@ export class BackupService {
 
   static parse(json: string): BackupImport {
     if (new util.TextEncoder().encodeInto(json).length > BackupService.MAX_BYTES) {
-      throw new Error('备份文件超过 50 MB');
+      throw new Error(tr('备份文件超过 50 MB'));
     }
     let document: BackupDocument;
     try {
       document = JSON.parse(json) as BackupDocument;
     } catch (_) {
-      throw new Error('备份文件不是有效的 JSON 对象');
+      throw new Error(tr('备份文件不是有效的 JSON 对象'));
     }
     if (document.version !== BackupService.VERSION && document.version !== BackupService.LEGACY_VERSION) {
-      throw new Error('备份版本不兼容');
+      throw new Error(tr('备份版本不兼容'));
     }
     let sourceLogs: LogItem[];
     let sourceEmotions: EmotionRecord[];
     let sourceTasks: TaskItem[];
     if (document.version === BackupService.LEGACY_VERSION) {
       if (!Array.isArray(document.logs) || !Array.isArray(document.emotions)) {
-        throw new Error('备份数据结构不完整');
+        throw new Error(tr('备份数据结构不完整'));
       }
       sourceLogs = document.logs;
       sourceEmotions = document.emotions;
@@ -295,14 +296,14 @@ export class BackupService {
       const data = document.data;
       if (!schemas || ![1, 2].includes(schemas.logs) || ![1, 2].includes(schemas.emotions) || ![1, 2].includes(schemas.tasks) ||
         !data || !Array.isArray(data.logs) || !Array.isArray(data.emotions) || !Array.isArray(data.tasks)) {
-        throw new Error('备份数据结构不完整或分区版本不兼容');
+        throw new Error(tr('备份数据结构不完整或分区版本不兼容'));
       }
       sourceLogs = data.logs;
       sourceEmotions = data.emotions;
       sourceTasks = data.tasks;
     }
     if (!Array.isArray(sourceLogs) || !Array.isArray(sourceEmotions)) {
-      throw new Error('备份数据结构不完整');
+      throw new Error(tr('备份数据结构不完整'));
     }
     const result = new BackupImport();
     result.sourceVersion = document.version;
@@ -352,21 +353,21 @@ export class BackupService {
   }
 
   static parseStrict(json: string): BackupImport {
-    if (json.startsWith('\uFEFF')) throw new Error('/：不允许 BOM');
-    if (new util.TextEncoder().encodeInto(json).length > BackupService.MAX_BYTES) throw new Error('/：文件超过 50 MiB');
+    if (json.startsWith('\uFEFF')) throw new Error(tr('/：不允许 BOM'));
+    if (new util.TextEncoder().encodeInto(json).length > BackupService.MAX_BYTES) throw new Error(tr('/：文件超过 50 MiB'));
     StrictJSONScanner.validate(json);
     const result = BackupService.parse(json);
     const document = JSON.parse(json) as BackupDocument;
     BackupService.checkFields(document, ['version', 'exportedAt', 'appVersion', 'notes', 'schemas', 'data'], [], '/');
     if (result.sourceVersion !== BackupService.VERSION || !BackupService.validISO(document.exportedAt) ||
       typeof document.appVersion !== 'string' || typeof document.notes !== 'string' ||
-      document.notes.length > BackupService.MAX_FIELD_LENGTH) throw new Error('/：备份版本或元信息不合法');
+      document.notes.length > BackupService.MAX_FIELD_LENGTH) throw new Error(tr('/：备份版本或元信息不合法'));
     BackupService.checkFields(document.schemas, ['logs', 'emotions', 'tasks'], [], '/schemas');
     BackupService.checkFields(document.data, ['logs', 'emotions', 'tasks'], [], '/data');
     const data = document.data;
-    if (!data) throw new Error("/data：必须是对象");
+    if (!data) throw new Error(tr("/data：必须是对象"));
     if (data.logs.length > BackupService.MAX_ENTRY_COUNT || data.emotions.length > BackupService.MAX_ENTRY_COUNT ||
-      data.tasks.length > BackupService.MAX_ENTRY_COUNT) throw new Error('/data：数组超过上限');
+      data.tasks.length > BackupService.MAX_ENTRY_COUNT) throw new Error(tr('/data：数组超过上限'));
     data.logs.forEach((item: LogItem, i: number) => {
       BackupService.checkFields(item, ['id', 'content', 'colorTag', 'category', 'importance', 'createdAt', 'recordDate'], BackupService.schema2Fields(document, 'logs'), `/data/logs/${i}`);
     });
@@ -377,12 +378,12 @@ export class BackupService {
       BackupService.checkFields(item, ['id', 'title', 'colorTag', 'importance', 'due', 'createdAt', 'updatedAt'], ['notes', 'reminderAt', 'completedAt'].concat(BackupService.schema2Fields(document, 'tasks')), `/data/tasks/${i}`);
       BackupService.checkFields(item.due, item.due.kind === TaskDueKind.ALL_DAY ? ['kind', 'date'] : ['kind', 'at', 'timeZone'], [], `/data/tasks/${i}/due`);
     });
-    if (result.skippedLogs + result.skippedEmotions + result.skippedTasks !== 0) throw new Error('/data：存在非法或重复记录，请使用损坏文件恢复入口');
+    if (result.skippedLogs + result.skippedEmotions + result.skippedTasks !== 0) throw new Error(tr('/data：存在非法或重复记录，请使用损坏文件恢复入口'));
     return result;
   }
 
   static parseRecovery(json: string): BackupImport {
-    if (new util.TextEncoder().encodeInto(json).length > BackupService.MAX_BYTES) throw new Error('/：文件超过 50 MiB');
+    if (new util.TextEncoder().encodeInto(json).length > BackupService.MAX_BYTES) throw new Error(tr('/：文件超过 50 MiB'));
     // Recover individual records only after bounded, unambiguous JSON syntax.
     StrictJSONScanner.validate(json);
     const result = BackupService.parse(json);
@@ -423,11 +424,11 @@ export class BackupService {
   }
 
   private static checkFields(value: Object | undefined, required: string[], optional: string[], path: string): void {
-    if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${path}：必须是对象`);
+    if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(tr('{0}：必须是对象', path));
     const keys = Object.keys(value);
     if (required.some((key: string) => !keys.includes(key)) ||
       keys.some((key: string) => !required.includes(key) && !optional.includes(key))) {
-      throw new Error(`${path}：缺少必填字段或包含未知字段`);
+      throw new Error(tr('{0}：缺少必填字段或包含未知字段', path));
     }
   }
 
@@ -558,7 +559,7 @@ export class BackupService {
   }
 
   static normalizedTimestamp(value: string): string {
-    if (!BackupService.validISO(value)) throw new Error('/updatedAt：任务时间不合法');
+    if (!BackupService.validISO(value)) throw new Error(tr('/updatedAt：任务时间不合法'));
     return BackupService.normalizedISO(value);
   }
 
@@ -584,7 +585,7 @@ export class BackupService {
   private static canonicalTimeZone(value: string): string | null {
     if (!CANONICAL_TIME_ZONES.includes(value)) return null;
     if (runtimeTimeZone(value) === undefined) {
-      throw new Error('此设备不支持备份中的任务时区，请更新系统后重试；未导入任何数据');
+      throw new Error(tr('此设备不支持备份中的任务时区，请更新系统后重试；未导入任何数据'));
     }
     return value;
   }

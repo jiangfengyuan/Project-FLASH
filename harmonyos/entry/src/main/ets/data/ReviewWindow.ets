@@ -1,3 +1,4 @@
+import { tr } from './I18n';
 import { LogItem, EmotionRecord, subEmotionName } from '../models/Models';
 import { dayString } from './DateUtils';
 
@@ -47,10 +48,10 @@ export interface ReviewComparison {
 }
 
 function windowLabels(window: string): string[] {
-  if (window === 'week') return ['这周', '上周'];
-  if (window === 'month') return ['这个月', '上个月'];
-  if (window === '90') return ['近 90 天', '之前 90 天'];
-  return ['近 30 天', '之前 30 天'];
+  if (window === 'week') return [tr('这周'), tr('上周')];
+  if (window === 'month') return [tr('这个月'), tr('上个月')];
+  if (window === '90') return [tr('近 90 天'), tr('之前 90 天')];
+  return [tr('近 30 天'), tr('之前 30 天')];
 }
 
 function previousDays(count: number, today: Date): string[] {
@@ -92,19 +93,19 @@ export function reviewComparison(logs: LogItem[], emotions: EmotionRecord[], win
   const insufficient = currentCount + previousCount < 5;
   let conclusion: string;
   if (insufficient) {
-    conclusion = '继续记录，回顾会慢慢清晰';
+    conclusion = tr('继续记录，回顾会慢慢清晰');
   } else if (currentCount > previousCount) {
-    conclusion = `${labels[0]}你记录得比${labels[1]}更频繁`;
+    conclusion = tr('{0}你记录得比{1}更频繁', labels[0], labels[1]);
   } else if (currentCount < previousCount) {
-    conclusion = `${labels[0]}不如${labels[1]}活跃`;
+    conclusion = tr('{0}不如{1}活跃', labels[0], labels[1]);
   } else {
-    conclusion = `${labels[0]}与${labels[1]}持平`;
+    conclusion = tr('{0}与{1}持平', labels[0], labels[1]);
   }
   if (!insufficient && currentEmotionAvg !== null && previousEmotionAvg !== null &&
     currentEmotions >= 2 && previousEmotions >= 2) {
     const diff = currentEmotionAvg - previousEmotionAvg;
-    if (diff >= 1) conclusion += '，情绪整体更积极了一些';
-    else if (diff <= -1) conclusion += '，情绪整体低落了一些';
+    if (diff >= 1) conclusion += tr('，情绪整体更积极了一些');
+    else if (diff <= -1) conclusion += tr('，情绪整体低落了一些');
   }
   return {
     currentLabel: labels[0],

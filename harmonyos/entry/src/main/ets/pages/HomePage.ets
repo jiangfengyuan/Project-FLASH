@@ -1,16 +1,25 @@
-import { Category, LogItem } from '../models/Models';
-import { dayString, shortDay } from '../data/DateUtils';
+// Copyright (c) 2026 Fengyuan Jiang
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+import { Category } from '../models/Models';
+import { dayString } from '../data/DateUtils';
 import { shouldShowIdeaReminder } from '../data/IdeaReminder';
+import { greetingText } from '../data/AppEntry';
+import { tr } from '../data/I18n';
 import { NavigationState, ThemeState, HomeState, LogsState, FeedbackState, contentLayout } from '../state/FeatureStates';
+import { LogItem, emotionEmoji, emotionName } from '../models/Models';
 import { PageActions, requireActions } from '../state/PageActions';
 import {
-  PageHeader, RecordCard, SegmentedControl, FlashCard, EmptyState, DOCK_CLEARANCE, BRAND, brandText,
-  floatingSurface, hairlineColor, supportsBlurMaterial, iconSemantic, fabOptionColor, motionDuration,
-  MOTION_PRESS, MOTION_FADE,
-  TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION,
-  HOME_HALO_TOP, HOME_HALO_MID, HOME_HALO_OUTER
+  FlashCard, RecordCard, EmptyState, TornSectionBreak, HandUnderline, StickyUnderSheet, DOCK_CLEARANCE, pageGutter,
+  brandText, brandFill, onBrandFill, displayFontFamily, statFontFamily, hairlineColor, iconSemantic, statusText, paperShadow,
+  motionDuration, MOTION_PRESS, TYPE_DISPLAY, TYPE_TITLE, TYPE_SECTION, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION,
+  RADIUS_CARD_SMALL, TOUCH_MIN
 } from '../components/CommonBuilders';
 
+/** 此刻页（对齐 iOS）：问候 + 新建 → 灵感提示 → 今日一览 → 断口 → 最近闪念；宽屏双栏。 */
 @Component
 export struct HomePage {
   @ObjectLink navigation: NavigationState;
@@ -20,7 +29,6 @@ export struct HomePage {
   @ObjectLink feedback: FeedbackState;
   actions?: PageActions;
 
-  // 840vp 或折叠屏展开态：快速记录卡与最近闪念左右双栏。
   private isDual(): boolean {
     return contentLayout(this.navigation.isExpandedWindow, this.navigation.foldable, this.navigation.foldStatus) === 'dual';
   }
@@ -28,191 +36,143 @@ export struct HomePage {
   @Builder
   private homePage() {
     Scroll() {
-      Column() {
-        Stack({ alignContent: Alignment.Top }) {
-          // 仅此页允许的极克制蓝紫光晕，向下消散为页面底色。
-          Column()
-            .width('100%')
-            .height(190)
-            .linearGradient({
-              angle: 180,
-              colors: [[HOME_HALO_TOP, 0.0], [HOME_HALO_MID, 0.45], [HOME_HALO_OUTER, 1.0]]
-            })
-          Column() {
-            PageHeader(this.theme, '此刻', this.dateSubtitle())
-            Row({ space: 12 }) {
-              SymbolGlyph($r('sys.symbol.magnifyingglass')).fontSize(20).fontColor([brandText(this.theme)])
-              Text('搜索或筛选记录').fontSize(TYPE_BODY).fontColor(this.theme.themeMuted).layoutWeight(1)
-              SymbolGlyph($r('sys.symbol.slider_vertical_3')).fontSize(18).fontColor([brandText(this.theme)])
-            }
-            .width('100%')
-            .height(52)
-            .padding({ left: 16, right: 16 })
-            .backgroundColor(floatingSurface(this.theme))
-            .backgroundBlurStyle(supportsBlurMaterial() ? BlurStyle.COMPONENT_THIN : BlurStyle.NONE)
-            .borderRadius(26)
-            .border({ width: 0.5, color: hairlineColor(this.theme) })
-            .hoverEffect(HoverEffect.Highlight)
-            .stateStyles({
-              normal: { .opacity(1) },
-              pressed: { .opacity(0.85) }
-            })
-            .accessibilityGroup(true)
-            .accessibilityText('搜索或筛选记录')
-            .onClick(() => requireActions(this.actions).switchTab(1))
-            .animation({ duration: motionDuration(MOTION_FADE), curve: Curve.EaseOut })
-            .margin({ left: 20, right: 20 })
-          }.width('100%')
+      Column({ space: 24 }) {
+        this.greeting()
+        if (shouldShowIdeaReminder(this.home.unviewedIdeaCount)) {
+          this.ideaReminderRow()
         }
-
         if (this.isDual()) {
-          Row({ space: 12 }) {
-            Column({ space: 12 }) {
-              this.todayCard()
-              this.captureCard()
-            }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-            Column({ space: 12 }) {
-              this.recentSection()
-            }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+          Row({ space: 24 }) {
+            Column() { this.todayCard() }.layoutWeight(1)
+            Column() { this.recentSection() }.layoutWeight(1)
           }
           .alignItems(VerticalAlign.Top)
-          .padding({ left: 20, right: 20, top: 12, bottom: DOCK_CLEARANCE })
           .width('100%')
         } else {
-          Column({ space: 12 }) {
-            this.todayCard()
-            this.captureCard()
-            this.recentSection()
-          }.padding({ left: 20, right: 20, top: 12, bottom: DOCK_CLEARANCE }).width('100%')
+          this.todayCard()
+          TornSectionBreak({ theme: this.theme, seed: 'home-break' })
+          this.recentSection()
         }
+      }
+      .width('100%')
+      .padding({ left: pageGutter(), right: pageGutter(), top: 8, bottom: DOCK_CLEARANCE })
+    }.width('100%').height('100%')
+  }
+
+  @Builder
+  private greeting() {
+    Column({ space: 6 }) {
+      Row() {
+        Blank()
+        SymbolGlyph($r('sys.symbol.magnifyingglass')).fontSize(20).fontColor([brandText(this.theme)])
+          .width(TOUCH_MIN).height(TOUCH_MIN)
+          .accessibilityText(tr('全局搜索'))
+          .onClick(() => requireActions(this.actions).openDetail('search'))
       }.width('100%')
-    }.width('100%').height('100%').backgroundColor(this.theme.themeBackground)
+      Row({ space: 12 }) {
+        Column({ space: 6 }) {
+          Text(greetingText(new Date().getHours()))
+            .fontSize(TYPE_DISPLAY).fontFamily(displayFontFamily()).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)
+          HandUnderline({ seed: 'greeting', color: brandText(this.theme), widthVp: 84 })
+          Text(tr('今天也记录一点什么吧。')).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
+        }.alignItems(HorizontalAlign.Start).layoutWeight(1)
+        Button(tr('＋ 新建'))
+          .height(TOUCH_MIN)
+          .fontSize(TYPE_SECONDARY)
+          .fontColor(onBrandFill(this.theme))
+          .backgroundColor(brandFill(this.theme))
+          .bindMenu([
+            { value: tr('新建记录'), action: () => this.logs.quickCategory = Category.LOG },
+            { value: tr('新建灵感'), action: () => this.logs.quickCategory = Category.IDEA },
+            { value: tr('记录情绪'), action: () => requireActions(this.actions).switchTab(2) },
+            { value: tr('新建任务'), action: () => requireActions(this.actions).calendarController.openTaskEditor(undefined, dayString()) }
+          ])
+      }.width('100%')
+    }.width('100%')
   }
 
-  private dateSubtitle(): string {
-    const now = new Date();
-    const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-    return `${shortDay(dayString(now))} · ${weekdays[now.getDay()]}`;
+  @Builder
+  private ideaReminderRow() {
+    Stack() {
+      StickyUnderSheet({ theme: this.theme, seed: 'idea-reminder', radius: RADIUS_CARD_SMALL })
+      Row({ space: 12 }) {
+        SymbolGlyph($r('sys.symbol.lightbulb')).fontSize(22).fontColor([statusText(this.theme, 'warn')])
+        Column({ space: 2 }) {
+          Text(tr('想法等待梳理')).fontSize(TYPE_BODY).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)
+          Text(tr('你还有 {0} 个想法，先看看最早的一条', this.home.unviewedIdeaCount))
+            .fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted)
+        }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+        Text(`${this.home.unviewedIdeaCount}`).fontSize(TYPE_GROUP).fontFamily(statFontFamily()).fontColor(statusText(this.theme, 'warn'))
+        Text('›').fontSize(TYPE_GROUP).fontColor(this.theme.themeMuted)
+      }
+      .width('100%')
+      .padding(16)
+      .backgroundColor(this.theme.themeSurface)
+      .borderRadius(RADIUS_CARD_SMALL)
+      .border({ width: 0.75, color: hairlineColor(this.theme) })
+      .shadow(paperShadow(this.theme))
+    }
+    .width('100%')
+    .accessibilityGroup(true)
+    .accessibilityText(tr('{0} 个想法等待梳理，打开最早的一条', this.home.unviewedIdeaCount))
+    .stateStyles({
+      normal: { .opacity(1) },
+      pressed: { .opacity(0.7) }
+    })
+    .animation({ duration: motionDuration(MOTION_PRESS), curve: Curve.EaseOut })
+    .onClick(() => {
+      // 打开最早的一条未读灵感；只有真正打开的灵感才算已读。
+      const ids = this.home.unviewedIdeaIds;
+      if (ids.length > 0) requireActions(this.actions).logsController.openLogById(ids[ids.length - 1]);
+    })
   }
 
-  private hasTodayData(): boolean {
-    return this.home.todayLogCount + this.home.todayIdeaCount +
-      this.home.todayEmotionCount + this.home.todayTaskCount > 0;
+  @Builder
+  private todayCard() {
+    FlashCard({ theme: this.theme, seed: 'today', frayed: true, folded: true }) {
+      Row() {
+        this.todayStat($r('sys.symbol.doc_text'), iconSemantic(this.theme, 'calendar'),
+          `${this.home.todayLogCount + this.home.todayIdeaCount}`, tr('今日记录'))
+        this.todayStat($r('sys.symbol.checkmark_circle'), iconSemantic(this.theme, 'task'),
+          `${this.home.openTaskCount}`, tr('待办'))
+        this.todayStat($r('sys.symbol.face_smiling'), iconSemantic(this.theme, 'emotion'),
+          this.home.latestEmotionLevel !== undefined ? emotionEmoji(this.home.latestEmotionLevel) : '🙂',
+          this.home.latestEmotionLevel !== undefined ? emotionName(this.home.latestEmotionLevel) : tr('还没有记录'))
+      }.width('100%')
+    }
+  }
+
+  @Builder
+  private todayStat(icon: Resource, tint: string, value: string, label: string) {
+    Row({ space: 6 }) {
+      SymbolGlyph(icon).fontSize(16).fontColor([tint])
+      Column({ space: 2 }) {
+        Text(value).fontSize(TYPE_SECTION).fontFamily(statFontFamily()).fontWeight(FontWeight.Bold).fontColor(this.theme.themeText)
+        Text(label).fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).maxLines(2)
+      }.alignItems(HorizontalAlign.Start)
+    }
+    .layoutWeight(1)
+    .accessibilityGroup(true)
+    .accessibilityText(`${label} ${value}`)
   }
 
   @Builder
   private recentSection() {
     if (this.home.recentLogs.length > 0) {
       Column({ space: 12 }) {
-        Row() {
-          Text('最近闪念').fontSize(TYPE_GROUP).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)
-          Blank()
-          Text('全部').fontSize(TYPE_SECONDARY).fontColor(brandText(this.theme))
-            .height(44).padding({ left: 12 })
-            .stateStyles({
-              normal: { .opacity(1) },
-              pressed: { .opacity(0.6) }
-            })
-            .onClick(() => requireActions(this.actions).switchTab(1))
-            .animation({ duration: motionDuration(MOTION_FADE), curve: Curve.EaseOut })
-        }.width('100%')
+        Column({ space: 2 }) {
+          Text(tr('最近闪念')).fontSize(TYPE_SECTION).fontFamily(displayFontFamily()).fontColor(this.theme.themeText)
+          HandUnderline({ seed: 'recent', color: iconSemantic(this.theme, 'logs'), widthVp: 72 })
+        }.alignItems(HorizontalAlign.Start).width('100%')
         ForEach(this.home.recentLogs, (item: LogItem) => {
-          RecordCard({ theme: this.theme, feedback: this.feedback, actions: requireActions(this.actions), item: item })
-        }, (item: LogItem) => item.id)
+          RecordCard({
+            theme: this.theme, feedback: this.feedback, actions: requireActions(this.actions), item: item,
+            unread: this.home.unviewedIdeaIds.includes(item.id), sticky: item.category === Category.IDEA
+          })
+        }, (item: LogItem) => `${item.id}-${item.isFavorite === true}-${item.importance}-${item.content.length}`)
       }.width('100%')
     } else {
-      EmptyState(this.theme, '✨', '今天还没有记录。', '记下第一个念头', () => this.logs.quickCategory = Category.LOG)
-    }
-  }
-
-  @Builder
-  private todayCard() {
-    FlashCard({ theme: this.theme, space: 12 }) {
-      Row() {
-        Text('今天的片段').fontSize(TYPE_GROUP).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)
-        Blank()
-        Text(shortDay(dayString())).fontSize(TYPE_CAPTION).fontColor(brandText(this.theme))
-          .padding({ left: 12, right: 12, top: 4, bottom: 4 })
-          .backgroundColor(this.theme.themeTint).borderRadius(12)
-      }.width('100%')
-
-      if (!this.hasTodayData()) {
-        Row({ space: 8 }) {
-          SymbolGlyph($r('sys.symbol.lightbulb')).fontSize(18).fontColor([brandText(this.theme)])
-          Text('今天可以从一个念头开始').fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
-        }.width('100%')
-      } else {
-        Row({ space: 16 }) {
-          this.todayStat($r('sys.symbol.doc_text'), '记录', `${this.home.todayLogCount + this.home.todayIdeaCount}`)
-          this.todayStat($r('sys.symbol.checkmark_circle'), '待办', `${this.home.todayTaskCount}`)
-        }.width('100%')
-        Row({ space: 8 }) {
-          SymbolGlyph($r('sys.symbol.face_smiling')).fontSize(16).fontColor([iconSemantic(this.theme, 'emotion')])
-          Text(`情绪 ${this.home.todayEmotionCount}`).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeText)
-          Blank()
-          SymbolGlyph($r('sys.symbol.checkmark_circle')).fontSize(16).fontColor([iconSemantic(this.theme, 'task')])
-          Text(`已完成任务 ${this.home.todayTaskDoneCount}/${this.home.todayTaskCount}`)
-            .fontSize(TYPE_SECONDARY).fontColor(this.theme.themeText)
-        }
-        .width('100%')
-        .padding({ left: 12, right: 12 })
-        .height(44)
-        .backgroundColor(this.theme.themeControl)
-        .borderRadius(16)
-      }
-
-      // Idea Reminder：未读灵感达到阈值才出现；点击跳记录页并把灵感标记为已读。
-      if (shouldShowIdeaReminder(this.home.unviewedIdeaCount)) {
-        Row({ space: 8 }) {
-          SymbolGlyph($r('sys.symbol.lightbulb')).fontSize(18).fontColor([fabOptionColor('idea')])
-          Text(`还有 ${this.home.unviewedIdeaCount} 条灵感待查看`).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeText)
-            .layoutWeight(1)
-          Text('›').fontSize(TYPE_GROUP).fontColor(this.theme.themeMuted)
-        }
-        .width('100%')
-        .padding({ left: 12, right: 12 })
-        .height(44)
-        .backgroundColor(this.theme.themeTint)
-        .borderRadius(16)
-        .accessibilityGroup(true)
-        .accessibilityText(`${this.home.unviewedIdeaCount} 条灵感待查看，点击查看`)
-        .hoverEffect(HoverEffect.Highlight)
-        .stateStyles({
-          normal: { .opacity(1) },
-          pressed: { .opacity(0.6) }
-        })
-        .animation({ duration: motionDuration(MOTION_PRESS), curve: Curve.EaseOut })
-        .onClick(() => {
-          const actions = requireActions(this.actions);
-          actions.logsController.markAllIdeasViewed();
-          actions.switchTab(1);
-        })
-      }
-    }
-  }
-
-  @Builder
-  private todayStat(icon: Resource, label: string, value: string) {
-    Row({ space: 8 }) {
-      SymbolGlyph(icon).fontSize(16).fontColor([brandText(this.theme)])
-      Text(label).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
-      Text(value).fontSize(TYPE_GROUP).fontWeight(FontWeight.Bold).fontColor(this.theme.themeText)
-    }
-  }
-
-  @Builder
-  private captureCard() {
-    FlashCard({ theme: this.theme, space: 12 }) {
-      TextArea({ placeholder: '写下刚刚闪过的念头……', text: this.logs.captureText })
-        .height(76).maxLength(10000).fontColor(this.theme.themeText).placeholderColor(this.theme.themeMuted)
-        .backgroundColor(this.theme.themeControl).borderRadius(14)
-        .onChange((value: string) => this.logs.captureText = value.slice(0, 10000))
-      SegmentedControl(this.theme, ['日志', '灵感'], this.logs.captureCategory === Category.IDEA ? 1 : 0,
-        (index: number) => this.logs.captureCategory = index === 1 ? Category.IDEA : Category.LOG)
-      Button('保存')
-        .width('100%').height(44).backgroundColor(BRAND)
-        .enabled(this.logs.captureText.trim().length > 0)
-        .onClick(() => requireActions(this.actions).logsController.saveCapture())
+      EmptyState(this.theme, '✨', tr('今天还没有记录。'), tr('记下第一个念头'), () => this.logs.quickCategory = Category.IDEA)
     }
   }
 

@@ -19,6 +19,26 @@
       "supportDimensions": [
         "2*2"
       ]
+    },
+    {
+      "name": "todayCapture",
+      "displayName": "$string:form_today_capture_display_name",
+      "description": "$string:form_today_capture_desc",
+      "src": "./ets/formability/pages/TodayCaptureCard.ets",
+      "uiSyntax": "arkts",
+      "window": {
+        "designWidth": 720,
+        "autoDesignWidth": true
+      },
+      "colorMode": "auto",
+      "isDefault": false,
+      "updateEnabled": true,
+      "scheduledUpdateTime": "07:30",
+      "updateDuration": 1,
+      "defaultDimension": "2*4",
+      "supportDimensions": [
+        "2*4"
+      ]
     }
   ]
 }

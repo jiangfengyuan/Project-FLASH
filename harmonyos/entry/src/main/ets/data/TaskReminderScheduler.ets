@@ -10,8 +10,10 @@ import { reminderAgentManager } from '@kit.BackgroundTasksKit';
 import { notificationManager } from '@kit.NotificationKit';
 import { TaskItem } from '../models/Models';
 import { NotificationChannels } from './NotificationChannels';
+import { tr } from './I18n';
 
 const TASK_GROUP = 'flash-aero-tasks';
+const SNOOZE_SECONDS = 600;
 const ID_STORE_NAME = 'flash-task-reminder-ids';
 // Reserved key holding the last allocated notification id. Ids start at 1 and
 // stay below the 32-bit positive range the notification service expects.
@@ -81,13 +83,20 @@ export class TaskReminderScheduler {
           hour: reminderDate.getHours(), minute: reminderDate.getMinutes(), second: reminderDate.getSeconds()
         },
         title: task.title.slice(0, 200),
-        content: task.notes?.slice(0, 500) || '任务即将到期',
+        content: task.notes?.slice(0, 500) || tr('任务即将到期'),
         expiredContent: task.title.slice(0, 200),
         notificationId: storedId(task.id) ?? allocate(task.id),
         groupId: TASK_GROUP,
         wantAgent: { pkgName: 'com.flash.app.harmonyos', abilityName: 'EntryAbility' },
         ringDuration: 0,
-        tapDismissed: true
+        tapDismissed: true,
+        // 「稍后 10 分钟」由系统贪睡完成。第三方应用没有自定义按钮类型，
+        // 所以 HarmonyOS 上没有通知里的「完成」，点按通知打开应用后再勾选。
+        snoozeTimes: 1,
+        timeInterval: SNOOZE_SECONDS,
+        actionButton: [
+          { title: tr('稍后 {0} 分钟', SNOOZE_SECONDS / 60), type: reminderAgentManager.ActionButtonType.ACTION_BUTTON_TYPE_SNOOZE }
+        ]
       };
       if (slotType !== undefined) request.slotType = slotType;
       await reminderAgentManager.publishReminder(request);

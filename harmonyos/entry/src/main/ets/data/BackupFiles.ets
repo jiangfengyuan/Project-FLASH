@@ -1,3 +1,4 @@
+import { tr } from './I18n';
 import { common } from '@kit.AbilityKit';
 import { util } from '@kit.ArkTS';
 import { Environment, fileIo, picker } from '@kit.CoreFileKit';
@@ -28,10 +29,10 @@ export class BackupFiles {
     const options = new picker.DocumentSaveOptions();
     const day = dayString();
     options.newFileNames = [`${filePrefix}-${day}.json`];
-    options.fileSuffixChoices = ['JSON 备份|.json'];
+    options.fileSuffixChoices = [tr('JSON 备份|.json')];
     const viewPicker = new picker.DocumentViewPicker(context);
     const uris = await viewPicker.save(options);
-    if (uris.length === 0) throw new Error('未选择保存位置');
+    if (uris.length === 0) throw new Error(tr('未选择保存位置'));
     const file = await fileIo.open(uris[0], fileIo.OpenMode.READ_WRITE | fileIo.OpenMode.TRUNC);
     let written: number = 0;
     try {
@@ -44,25 +45,25 @@ export class BackupFiles {
     const expected = new util.TextEncoder().encodeInto(json).length;
     if (written !== expected) {
       try { await fileIo.unlink(uris[0]); } catch (_) {}
-      throw new Error('备份写入不完整，导出失败');
+      throw new Error(tr('备份写入不完整，导出失败'));
     }
   }
 
   static async importJSON(context: common.UIAbilityContext): Promise<string> {
     const options = new picker.DocumentSelectOptions();
     options.maxSelectNumber = 1;
-    options.fileSuffixFilters = ['JSON 备份|.json'];
+    options.fileSuffixFilters = [tr('JSON 备份|.json')];
     const viewPicker = new picker.DocumentViewPicker(context);
     const uris = await viewPicker.select(options);
-    if (uris.length === 0) throw new Error('未选择备份文件');
+    if (uris.length === 0) throw new Error(tr('未选择备份文件'));
     const file = await fileIo.open(uris[0], fileIo.OpenMode.READ_ONLY);
     try {
       const size = (await fileIo.stat(file.fd)).size;
-      if (size > BackupService.MAX_BYTES) throw new Error('备份文件超过 50 MB');
-      if (size < 1) throw new Error('备份文件为空');
+      if (size > BackupService.MAX_BYTES) throw new Error(tr('备份文件超过 50 MB'));
+      if (size < 1) throw new Error(tr('备份文件为空'));
       const buffer = new ArrayBuffer(size);
       const bytesRead = await fileIo.read(file.fd, buffer, { length: size });
-      if (bytesRead !== size) throw new Error('备份文件读取不完整');
+      if (bytesRead !== size) throw new Error(tr('备份文件读取不完整'));
       // No ignoreBOM: a UTF-8 BOM decodes to U+FEFF and the strict importer
       // rejects it, matching the Android and macOS import paths.
       const decoder = util.TextDecoder.create('utf-8', { fatal: true });
@@ -122,7 +123,7 @@ export class BackupFiles {
     const expected = new util.TextEncoder().encodeInto(json).length;
     if (written !== expected) {
       try { await fileIo.unlink(temp); } catch (_) {}
-      throw new Error('备份写入不完整，导出失败');
+      throw new Error(tr('备份写入不完整，导出失败'));
     }
     await fileIo.rename(temp, target);
     return { status: SharedExportStatus.EXPORTED, path: target };

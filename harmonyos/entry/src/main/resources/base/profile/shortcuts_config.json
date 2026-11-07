@@ -1,0 +1,34 @@
+{
+  "shortcuts": [
+    {
+      "shortcutId": "capture_idea",
+      "label": "$string:shortcut_idea",
+      "icon": "$media:icon",
+      "wants": [
+        {
+          "bundleName": "com.flash.app.harmonyos",
+          "moduleName": "entry",
+          "abilityName": "EntryAbility",
+          "parameters": {
+            "flashEntry": "capture-idea"
+          }
+        }
+      ]
+    },
+    {
+      "shortcutId": "capture_log",
+      "label": "$string:shortcut_log",
+      "icon": "$media:icon",
+      "wants": [
+        {
+          "bundleName": "com.flash.app.harmonyos",
+          "moduleName": "entry",
+          "abilityName": "EntryAbility",
+          "parameters": {
+            "flashEntry": "capture-log"
+          }
+        }
+      ]
+    }
+  ]
+}

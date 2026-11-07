@@ -99,6 +99,7 @@ function createLoader(overrides = {}, options = {}) {
     } },
     'data/LocalBackupTransfer': null,
     'data/TaskReminderScheduler': { TaskReminderScheduler: { rebuild: async () => {} } },
+    'data/IdeaReminderScheduler': { IdeaReminderScheduler: { sync: async () => false } },
     '@kit.NotificationKit': { notificationManager: {
       SlotType: { UNKNOWN_TYPE: 0, SOCIAL_COMMUNICATION: 1, SERVICE_INFORMATION: 2 },
       getSlot: async () => null,

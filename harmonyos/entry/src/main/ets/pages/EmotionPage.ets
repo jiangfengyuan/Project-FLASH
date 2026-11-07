@@ -4,18 +4,22 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-import { shortDay } from '../data/DateUtils';
-import { EmotionRecord, emotionName, SubEmotion, subEmotionName } from '../models/Models';
+import { dayString, shortDay } from '../data/DateUtils';
+import { tr } from '../data/I18n';
+import { HapticEvent, playHaptic } from '../data/Haptics';
+import { EmotionRecord, emotionEmoji, emotionName, SubEmotion, subEmotionName } from '../models/Models';
 import { ThemeState, EmotionState, FeedbackState, DeleteKind } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
 import {
-  BRAND, FlashCard, EmptyState, FilterChip, brandText, dangerText, hairlineColor, emotionColor,
+  FlashCard, EmptyState, FilterChip, HandUnderline, TornDivider, brandText, brandFill, onBrandFill, dangerText, hairlineColor, emotionColor, moodColor,
+  chipSelected, chipSelectedText, displayFontFamily, pageGutter, statusText, DOCK_CLEARANCE, TOUCH_MIN, TYPE_TITLE,
   motionDuration, MOTION_PRESS,
   TYPE_SECTION, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION
 } from '../components/CommonBuilders';
 
 // 「当前状态」快捷输入：chip 一键填入，自由文本可覆盖（≤50 字，随情绪记录保存）。
 const QUICK_STATUSES: string[] = ['疲惫', '专注', '放松'];
+const WEEKDAY_LABELS: string[] = ['一', '二', '三', '四', '五', '六', '日'];
 
 // 保存成功礼花粒子：固定编排，避免每次渲染重建。
 interface FlashParticle {
@@ -41,6 +45,8 @@ export struct EmotionPage {
   @ObjectLink @Watch('onEmotionMutated') emotion: EmotionState;
   @ObjectLink feedback: FeedbackState;
   actions?: PageActions;
+  // 作为一级 Tab 时带标题并为底栏留白。
+  asTab: boolean = false;
   @State private flashVisible: boolean = false;
   @State private flashProgress: number = 1;
   private lastFlash: number = 0;
@@ -63,6 +69,10 @@ export struct EmotionPage {
     }, motionDuration(SAVED_FLASH_MS));
   }
 
+  private intensityLabel(item: EmotionRecord): string {
+    return item.intensity ? tr('强度 {0}', item.intensity) : '';
+  }
+
   private emotionSymbol(level: number): Resource {
     if (level < 0) return $r('sys.symbol.face_sading');
     if (level > 0) return $r('sys.symbol.face_laughing');
@@ -73,30 +83,41 @@ export struct EmotionPage {
   private emotionPage() {
     Scroll() {
       Column({ space: 16 }) {
-        FlashCard({ theme: this.theme, contentPadding: 20, space: 14 }) {
-          SymbolGlyph(this.emotionSymbol(this.emotion.emotionLevel))
-            .fontSize(64)
-            .fontColor([emotionColor(this.theme, this.emotion.emotionLevel)])
-          Text(emotionName(this.emotion.emotionLevel)).fontSize(TYPE_SECTION).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)
+        if (this.asTab) {
+          Text(tr('情绪')).fontSize(TYPE_TITLE).fontFamily(displayFontFamily()).fontWeight(FontWeight.Medium)
+            .fontColor(this.theme.themeText).width('100%').padding({ top: 12 })
+        }
+        FlashCard({ theme: this.theme, seed: 'emotion-hero', frayed: true, space: 14 }) {
+          Text(emotionEmoji(this.emotion.emotionLevel)).fontSize(64)
+          Text(emotionName(this.emotion.emotionLevel)).fontSize(TYPE_SECTION).fontFamily(displayFontFamily())
+            .fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)
+          HandUnderline({ seed: 'mood', color: moodColor(this.theme, this.emotion.emotionLevel), widthVp: 64 })
           Slider({ value: this.emotion.emotionLevel, min: -3, max: 3, step: 1, style: SliderStyle.OutSet })
-            .blockColor(brandText(this.theme)).selectedColor(brandText(this.theme)).trackColor(this.theme.themeControl)
-            .onChange((value: number) => this.emotion.emotionLevel = Math.round(value))
-          Row() {
-            Row() {
-              SymbolGlyph($r('sys.symbol.face_sading')).fontSize(18).fontColor([emotionColor(this.theme, -1)])
-            }.layoutWeight(1).justifyContent(FlexAlign.Start)
-            Row() {
-              SymbolGlyph($r('sys.symbol.face_smiling')).fontSize(18).fontColor([emotionColor(this.theme, 0)])
-            }.layoutWeight(1).justifyContent(FlexAlign.Center)
-            Row() {
-              SymbolGlyph($r('sys.symbol.face_laughing')).fontSize(18).fontColor([emotionColor(this.theme, 1)])
-            }.layoutWeight(1).justifyContent(FlexAlign.End)
+            .blockColor(brandText(this.theme)).selectedColor(moodColor(this.theme, this.emotion.emotionLevel)).trackColor(this.theme.themeControl)
+            .accessibilityText(emotionName(this.emotion.emotionLevel))
+            .onChange((value: number) => {
+              const next = Math.round(value);
+              if (next !== this.emotion.emotionLevel) playHaptic(HapticEvent.SELECTION);
+              this.emotion.emotionLevel = next;
+            })
+          Row({ space: 4 }) {
+            Text(tr('强度')).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).margin({ right: 8 })
+            ForEach([1, 2, 3, 4, 5], (value: number) => {
+              Stack() {
+                Circle().width(16).height(16)
+                  .fill(this.emotion.emotionIntensity >= value ? brandText(this.theme) : this.theme.themeControl)
+                  .stroke(hairlineColor(this.theme)).strokeWidth(1)
+              }
+              .width(TOUCH_MIN).height(TOUCH_MIN)
+              .accessibilityText(tr('强度 {0}', value))
+              .onClick(() => requireActions(this.actions).emotionController.selectIntensity(value))
+            }, (value: number) => `${value}`)
           }.width('100%')
         }
 
         if (this.emotion.emotionLevel < 0) {
           FlashCard({ theme: this.theme, space: 12 }) {
-            Text('更接近哪种感受？').fontSize(TYPE_GROUP).fontColor(this.theme.themeText).width('100%')
+            Text(tr('更接近哪种感受？')).fontSize(TYPE_GROUP).fontColor(this.theme.themeText).width('100%')
             Row({ space: 8 }) {
               this.subEmotionChip(SubEmotion.SAD)
               this.subEmotionChip(SubEmotion.ANGRY)
@@ -106,51 +127,59 @@ export struct EmotionPage {
         }
 
         FlashCard({ theme: this.theme, space: 12 }) {
-          Text('当前状态（可选）').fontSize(TYPE_GROUP).fontColor(this.theme.themeText).width('100%')
+          Text(tr('当前状态（可选）')).fontSize(TYPE_GROUP).fontColor(this.theme.themeText).width('100%')
           Row({ space: 8 }) {
             ForEach(QUICK_STATUSES, (status: string) => {
-              FilterChip(this.theme, status, this.emotion.emotionStatus === status,
-                () => this.emotion.emotionStatus = this.emotion.emotionStatus === status ? '' : status)
+              FilterChip(this.theme, tr(status), this.emotion.emotionStatus === tr(status),
+                () => this.emotion.emotionStatus = this.emotion.emotionStatus === tr(status) ? '' : tr(status))
             }, (status: string) => status)
           }.width('100%')
-          TextInput({ placeholder: '自定义状态，如：期待、平静', text: this.emotion.emotionStatus })
+          TextInput({ placeholder: tr('自定义状态，如：期待、平静'), text: this.emotion.emotionStatus })
             .height(44).maxLength(50).fontColor(this.theme.themeText).placeholderColor(this.theme.themeMuted)
             .backgroundColor(this.theme.themeControl).borderRadius(14)
             .onChange((value: string) => this.emotion.emotionStatus = value.slice(0, 50))
         }
 
-        TextArea({ placeholder: '想补充些什么？（可选）', text: this.emotion.emotionNote })
+        TextArea({ placeholder: tr('想补充些什么？（可选）'), text: this.emotion.emotionNote })
           .height(90).maxLength(2000).fontColor(this.theme.themeText).placeholderColor(this.theme.themeMuted)
           .backgroundColor(this.theme.themeSurface).borderRadius(16)
           .border({ width: 0.5, color: hairlineColor(this.theme) })
           .onChange((value: string) => this.emotion.emotionNote = value.slice(0, 2000))
-        Button(this.emotion.busy ? '保存中…' : '保存情绪').width('100%').height(46).backgroundColor(BRAND)
+        Button(this.emotion.busy ? tr('保存中…') : tr('记录情绪')).width('100%').height(46)
+          .fontColor(onBrandFill(this.theme)).backgroundColor(brandFill(this.theme))
           .enabled(!this.emotion.busy)
-          .onClick(() => requireActions(this.actions).emotionController.saveEmotion())
+          .onClick(() => {
+            playHaptic(HapticEvent.SUCCESS);
+            requireActions(this.actions).emotionController.saveEmotion();
+          })
 
+        this.weekRowCard()
         this.weekTrendCard()
 
         if (this.emotion.emotions.length > 0) {
           FlashCard({ theme: this.theme, space: 4 }) {
-            Text('最近情绪').fontSize(TYPE_GROUP).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).width('100%')
-            ForEach(this.emotion.emotions.slice(0, 10), (item: EmotionRecord) => {
+            Text(tr('近期记录')).fontSize(TYPE_GROUP).fontFamily(displayFontFamily()).fontColor(this.theme.themeText).width('100%')
+            ForEach(this.emotion.emotions.slice(0, 20), (item: EmotionRecord) => {
               Row({ space: 12 }) {
-                SymbolGlyph(this.emotionSymbol(item.level))
-                  .fontSize(24)
-                  .fontColor([emotionColor(this.theme, item.level)])
+                Text(emotionEmoji(item.level)).fontSize(24)
                 Column({ space: 4 }) {
-                  Text(`${emotionName(item.level)} ${subEmotionName(item.subEmotion)}`).fontSize(TYPE_BODY).fontColor(this.theme.themeText)
+                  Text(`${emotionName(item.level)} ${subEmotionName(item.subEmotion)} ${this.intensityLabel(item)}`).fontSize(TYPE_BODY).fontColor(this.theme.themeText)
                   Text(this.emotionSubtitle(item)).fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).maxLines(1)
                 }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-                Button('删除', { type: ButtonType.Normal }).fontSize(TYPE_CAPTION).fontColor(dangerText(this.theme))
+                SymbolGlyph(item.isFavorite === true ? $r('sys.symbol.star_fill') : $r('sys.symbol.star')).fontSize(18)
+                  .fontColor([item.isFavorite === true ? statusText(this.theme, 'warn') : this.theme.themeMuted])
+                  .width(TOUCH_MIN).height(TOUCH_MIN)
+                  .accessibilityText(item.isFavorite === true ? tr('取消收藏') : tr('收藏'))
+                  .onClick(() => requireActions(this.actions).emotionController.toggleFavorite(item))
+                Button(tr('删除'), { type: ButtonType.Normal }).fontSize(TYPE_CAPTION).fontColor(dangerText(this.theme))
                   .backgroundColor(this.theme.themeDanger).onClick(() => this.feedback.destructive = { kind: DeleteKind.EMOTION, id: item.id })
               }.width('100%').padding({ top: 8, bottom: 8 })
-            }, (item: EmotionRecord) => item.id)
+            }, (item: EmotionRecord) => `${item.id}-${item.isFavorite === true}`)
           }
         } else {
-          EmptyState(this.theme, '🌱', '还没有情绪记录，从当下的感受开始')
+          EmptyState(this.theme, '🌱', tr('还没有情绪记录，从当下的感受开始'))
         }
-      }.width('100%').padding({ left: 16, right: 16, bottom: 30 })
+      }.width('100%').padding({ left: pageGutter(), right: pageGutter(), bottom: this.asTab ? DOCK_CLEARANCE : 30 })
     }.width('100%').height('100%')
   }
 
@@ -163,10 +192,32 @@ export struct EmotionPage {
 
   // 本周情绪趋势：近 7 天日均值轻量 sparkline（复用 EmotionController 的日聚合 memo）。
   @Builder
+  private weekRowCard() {
+    FlashCard({ theme: this.theme, seed: 'emotion-week', space: 8 }) {
+      Text(tr('本周趋势')).fontSize(TYPE_GROUP).fontFamily(displayFontFamily()).fontColor(this.theme.themeText).width('100%')
+      Row() {
+        ForEach(requireActions(this.actions).emotionController.currentWeekDays(), (day: string, index: number) => {
+          Column({ space: 4 }) {
+            if (requireActions(this.actions).emotionController.latestLevel(day) !== undefined) {
+              Text(emotionEmoji(requireActions(this.actions).emotionController.latestLevel(day) as number)).fontSize(22)
+            } else {
+              Circle().width(22).height(22).fillOpacity(0).stroke(hairlineColor(this.theme)).strokeWidth(1).strokeDashArray([3, 3])
+            }
+            Text(tr(WEEKDAY_LABELS[index])).fontSize(TYPE_CAPTION)
+              .fontColor(day === dayString() ? brandText(this.theme) : this.theme.themeMuted)
+          }.layoutWeight(1)
+        }, (day: string) => day)
+      }.width('100%')
+      TornDivider({ theme: this.theme, seed: 'emotion-week-divider' })
+      Text(tr(requireActions(this.actions).emotionController.weekSummary())).fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%')
+    }
+  }
+
+  @Builder
   private weekTrendCard() {
     FlashCard({ theme: this.theme, space: 8 }) {
-      Text('本周情绪').fontSize(TYPE_GROUP).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).width('100%')
-      Text('近 7 天日均值 · — 表示当日未记录').fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width('100%')
+      Text(tr('本周情绪')).fontSize(TYPE_GROUP).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).width('100%')
+      Text(tr('近 7 天日均值 · — 表示当日未记录')).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width('100%')
       Row({ space: 6 }) {
         ForEach(requireActions(this.actions).emotionController.lastSevenDays(), (day: string) => {
           Column({ space: 4 }) {
@@ -191,7 +242,7 @@ export struct EmotionPage {
       }
       .width('100%')
       .accessibilityGroup(true)
-      .accessibilityText('近 7 天情绪日均值柱状图')
+      .accessibilityText(tr('近 7 天情绪日均值柱状图'))
     }
   }
 
@@ -238,9 +289,9 @@ export struct EmotionPage {
   @Builder
   private subEmotionChip(value: string) {
     Text(subEmotionName(value)).fontSize(TYPE_SECONDARY)
-      .fontColor(this.emotion.selectedSubEmotion === value ? Color.White : this.theme.themeText)
+      .fontColor(this.emotion.selectedSubEmotion === value ? chipSelectedText(this.theme) : this.theme.themeText)
       .textAlign(TextAlign.Center).layoutWeight(1).height(44)
-      .backgroundColor(this.emotion.selectedSubEmotion === value ? BRAND : this.theme.themeControl).borderRadius(22)
+      .backgroundColor(this.emotion.selectedSubEmotion === value ? chipSelected(this.theme) : this.theme.themeControl).borderRadius(22)
       .stateStyles({
         normal: { .opacity(1) },
         pressed: { .opacity(0.7) }

@@ -1,3 +1,4 @@
+import { tr } from '../data/I18n';
 import { NavigationState, ThemeState, FeedbackState, DeleteKind } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
 import {
@@ -22,9 +23,9 @@ export struct DestructiveConfirmDialog {
         Text(requireActions(this.actions).controller.destructiveTitle()).fontSize(TYPE_SECTION).fontWeight(FontWeight.Bold).fontColor(this.theme.themeText).width('100%')
         Text(requireActions(this.actions).controller.destructiveMessage()).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).lineHeight(20).width('100%')
         Row({ space: 10 }) {
-          Button('取消').layoutWeight(1).height(44).fontColor(this.theme.themeMuted).backgroundColor(this.theme.themeControl)
+          Button(tr('取消')).layoutWeight(1).height(44).fontColor(this.theme.themeMuted).backgroundColor(this.theme.themeControl)
             .onClick(() => requireActions(this.actions).controller.cancelDestructiveAction())
-          Button(this.feedback.destructive?.kind === DeleteKind.ALL ? '确认清空' : '确认删除').layoutWeight(1).height(44)
+          Button(this.feedback.destructive?.kind === DeleteKind.ALL ? tr('确认清空') : tr('确认删除')).layoutWeight(1).height(44)
             .fontColor(Color.White).backgroundColor(dangerButtonColor()).onClick(() => requireActions(this.actions).controller.confirmDestructiveAction())
         }.width('100%')
       }.width(this.navigation.isMediumWindow ? DIALOG_WIDTH : DIALOG_WIDTH_PERCENT).padding(22).backgroundColor(floatingSurface(this.theme)).borderRadius(24)

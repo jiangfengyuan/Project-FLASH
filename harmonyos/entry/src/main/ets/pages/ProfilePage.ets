@@ -1,11 +1,14 @@
-import { NavigationState, ThemeState, BackupState, FeedbackState, SettingsState, TransferPhase, ImportPhase, DeleteKind, contentLayout } from '../state/FeatureStates';
-import { LanDevice } from '../data/LocalBackupTransfer';
+import { NavigationState, ThemeState, BackupState, FeedbackState, SettingsState, ImportPhase, DeleteKind, contentLayout } from '../state/FeatureStates';
+import { IDEA_REMINDER_THRESHOLD } from '../data/IdeaReminder';
+import { tr } from '../data/I18n';
 import { PageActions, requireActions } from '../state/PageActions';
 import {
-  PageHeader, DOCK_CLEARANCE, RADIUS_CARD, BRAND, SegmentedControl, FlashCard, brandText, cardShadowColor,
+  PageHeader, DOCK_CLEARANCE, RADIUS_CARD, SegmentedControl, FlashCard, brandText, brandFill, onBrandFill, cardShadowColor, pageGutter, paperShadow,
   dangerText, hairlineColor, iconSemantic, motionDuration, MOTION_PRESS,
-  TYPE_DISPLAY, TYPE_SECTION, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION
+  TYPE_SECTION, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION
 } from '../components/CommonBuilders';
+
+const IDEA_FREQUENCIES: string[] = ['daily', 'every3days', 'weekly'];
 
 @Component
 export struct ProfilePage {
@@ -15,6 +18,8 @@ export struct ProfilePage {
   @ObjectLink feedback: FeedbackState;
   @ObjectLink settings: SettingsState;
   actions?: PageActions;
+  // 空串为设置首页；settings-idea / settings-backup / settings-transfer 为子页（对齐 iOS）。
+  section: string = '';
 
   // 840vp 或折叠屏展开态：设置分组双列排布。
   private isDual(): boolean {
@@ -25,57 +30,101 @@ export struct ProfilePage {
   private profilePage() {
     Scroll() {
       Column({ space: 16 }) {
-        PageHeader(this.theme, '设置', '数据、备份与应用设置')
-
-        FlashCard({ theme: this.theme, contentPadding: 20, space: 8 }) {
-          SymbolGlyph($r('sys.symbol.doc_text')).fontSize(24).fontColor([brandText(this.theme)])
-          Text('数据默认保存在此设备').fontSize(TYPE_GROUP).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)
-          Text('可导出备份或通过系统分享传输').fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
-        }
-
-        if (this.isDual()) {
-          Row({ space: 16 }) {
-            Column({ space: 16 }) {
-              this.appearanceGroup()
-              this.recordsGroup()
-              this.platformGroup()
-              this.aboutGroup()
-            }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-            Column({ space: 16 }) {
-              this.backupGroup()
-              this.lanGroup()
-              this.dangerGroup()
-            }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-          }.alignItems(VerticalAlign.Top).width('100%')
-        } else {
-          this.appearanceGroup()
-          this.recordsGroup()
-          this.platformGroup()
+        if (this.section === 'settings-idea') {
+          this.ideaReminderGroup()
+        } else if (this.section === 'settings-backup') {
           this.backupGroup()
-          this.lanGroup()
           this.dangerGroup()
-          this.aboutGroup()
+        } else if (this.section === 'settings-transfer') {
+          this.transferGroup()
+        } else {
+          PageHeader(this.theme, tr('设置'), tr('数据、备份与应用设置'))
+          FlashCard({ theme: this.theme, seed: 'settings-local', space: 8 }) {
+            SymbolGlyph($r('sys.symbol.doc_text')).fontSize(24).fontColor([brandText(this.theme)])
+            Text(tr('数据默认保存在此设备')).fontSize(TYPE_GROUP).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)
+            Text(tr('可导出备份或通过系统分享传输')).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
+          }
+          if (this.isDual()) {
+            Row({ space: 16 }) {
+              Column({ space: 16 }) {
+                this.appearanceGroup()
+                this.platformGroup()
+              }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+              Column({ space: 16 }) {
+                this.dataGroup()
+                this.aboutGroup()
+              }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+            }.alignItems(VerticalAlign.Top).width('100%')
+          } else {
+            this.appearanceGroup()
+            this.dataGroup()
+            this.platformGroup()
+            this.aboutGroup()
+          }
         }
-      }.width('100%').padding({ left: 20, right: 20, bottom: DOCK_CLEARANCE })
-    }.width('100%').height('100%').backgroundColor(this.theme.themeBackground)
+      }.width('100%').padding({ left: pageGutter(), right: pageGutter(), bottom: this.section === '' ? DOCK_CLEARANCE : 32 })
+    }.width('100%').height('100%')
+  }
+
+  @Builder
+  private dataGroup() {
+    this.groupLabel(tr('数据与安全'))
+    FlashCard({ theme: this.theme, contentPadding: 14, space: 2 }) {
+      this.navRow($r('sys.symbol.folder'), iconSemantic(this.theme, 'safe'), tr('备份与恢复'), tr('导出、导入与清空'),
+        () => requireActions(this.actions).openDetail('settings-backup'))
+      this.navRow($r('sys.symbol.house'), iconSemantic(this.theme, 'lan'), tr('设备间传输'), tr('暂时停用，点击查看替代方式'),
+        () => requireActions(this.actions).openDetail('settings-transfer'))
+    }
+  }
+
+  // 灵感提醒（对齐 iOS）：开关 + 频率；通知权限只在开启时申请。
+  @Builder
+  private ideaReminderGroup() {
+    this.groupLabel(tr('提醒'))
+    FlashCard({ theme: this.theme, space: 12 }) {
+      Row({ space: 12 }) {
+        Text(tr('想法等待梳理时提醒')).fontSize(TYPE_BODY).fontColor(this.theme.themeText).layoutWeight(1)
+        Toggle({ type: ToggleType.Switch, isOn: this.settings.ideaReminderEnabled })
+          .onChange((value: boolean) => requireActions(this.actions).controller.setIdeaReminder(value, this.settings.ideaReminderFrequency))
+      }.width('100%')
+      if (this.settings.ideaReminderEnabled) {
+        SegmentedControl(this.theme, [tr('每天'), tr('每 3 天'), tr('每周')], IDEA_FREQUENCIES.indexOf(this.settings.ideaReminderFrequency),
+          (index: number) => requireActions(this.actions).controller.setIdeaReminder(true, IDEA_FREQUENCIES[index]))
+      }
+      Text(tr('累计 {0} 个以上时，晚上 8 点提醒你梳理；打开查看过的想法不再计入。', IDEA_REMINDER_THRESHOLD))
+        .fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%')
+    }
+  }
+
+  // 旧 LAN 已停用：这里只说明替代方式，不提供任何发送或接收入口。
+  @Builder
+  private transferGroup() {
+    FlashCard({ theme: this.theme, seed: 'transfer-info', space: 8 }) {
+      Text(tr('局域网传输暂时停用')).fontSize(TYPE_GROUP).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).width('100%')
+      Text(tr('旧协议存在安全风险。请使用「备份与恢复」里的导出备份或系统分享，通过你信任的方式传到另一台设备。'))
+        .fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).lineHeight(20).width('100%')
+    }
   }
 
   @Builder
   private appearanceGroup() {
-    this.groupLabel('外观与使用')
+    this.groupLabel(tr('外观与使用'))
     FlashCard({ theme: this.theme, space: 12 }) {
       Row({ space: 12 }) {
         SymbolGlyph($r('sys.symbol.slider_vertical_3')).fontSize(20).fontColor([iconSemantic(this.theme, 'appearance')]).width(28)
-        Text('主题').fontSize(TYPE_BODY).fontColor(this.theme.themeText).layoutWeight(1)
+        Text(tr('主题')).fontSize(TYPE_BODY).fontColor(this.theme.themeText).layoutWeight(1)
         Text(this.themeModeLabel()).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
       }.width('100%').height(32)
-      SegmentedControl(this.theme, ['浅色', '深色', '跟随系统'], this.themeModeIndex(),
+      SegmentedControl(this.theme, [tr('浅色'), tr('深色'), tr('跟随系统')], this.themeModeIndex(),
         (index: number) => requireActions(this.actions).setThemeMode(['light', 'dark', 'system'][index]))
+      this.navRow($r('sys.symbol.lightbulb'), iconSemantic(this.theme, 'logs'), tr('灵感提醒'),
+        this.settings.ideaReminderEnabled ? this.frequencyLabel() : tr('已关闭'),
+        () => requireActions(this.actions).openDetail('settings-idea'))
       Row({ space: 12 }) {
         SymbolGlyph($r('sys.symbol.bolt')).fontSize(20).fontColor([iconSemantic(this.theme, 'appearance')]).width(28)
         Column({ space: 2 }) {
-          Text('减少动态效果').fontSize(TYPE_BODY).fontColor(this.theme.themeText).width('100%')
-          Text('系统无公开查询接口，此为应用内设置').fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%')
+          Text(tr('减少动态效果')).fontSize(TYPE_BODY).fontColor(this.theme.themeText).width('100%')
+          Text(tr('系统无公开查询接口，此为应用内设置')).fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%')
         }.layoutWeight(1).alignItems(HorizontalAlign.Start)
         Toggle({ type: ToggleType.Switch, isOn: this.settings.reduceMotion })
           .onChange((value: boolean) => {
@@ -85,11 +134,11 @@ export struct ProfilePage {
       if (this.settings.notificationSettingsSupported) {
         Row({ space: 12 }) {
           SymbolGlyph($r('sys.symbol.bell')).fontSize(20).fontColor([iconSemantic(this.theme, 'appearance')]).width(28)
-          Text('通知设置').fontSize(TYPE_BODY).fontColor(this.theme.themeText).layoutWeight(1)
+          Text(tr('通知设置')).fontSize(TYPE_BODY).fontColor(this.theme.themeText).layoutWeight(1)
           Text('›').fontSize(TYPE_SECTION).fontColor(this.theme.themeMuted)
         }.width('100%').height(44)
           .accessibilityGroup(true)
-          .accessibilityText('通知设置')
+          .accessibilityText(tr('通知设置'))
           .hoverEffect(HoverEffect.Highlight)
           .stateStyles({
             normal: { .opacity(1) },
@@ -102,66 +151,52 @@ export struct ProfilePage {
   }
 
   @Builder
-  private recordsGroup() {
-    this.groupLabel('记录与回顾')
-    FlashCard({ theme: this.theme, contentPadding: 14, space: 2 }) {
-      this.navRow($r('sys.symbol.calendar'), iconSemantic(this.theme, 'calendar'), '日历', '按日期回看日志与情绪',
-        () => requireActions(this.actions).openDetail('calendar'))
-      this.navRow($r('sys.symbol.face_smiling'), iconSemantic(this.theme, 'emotion'), '情绪记录', '七级情绪与子情绪',
-        () => requireActions(this.actions).openDetail('emotion'))
-      // 记录管理直接路由到记录页（ExplorePage），不再保留重复的精简版页面。
-      this.navRow($r('sys.symbol.doc_text'), iconSemantic(this.theme, 'logs'), '记录管理', '搜索、筛选、整理与分享记录',
-        () => requireActions(this.actions).switchTab(1))
-    }
-  }
-
-  @Builder
   private platformGroup() {
-    this.groupLabel('平台能力')
+    this.groupLabel(tr('平台能力'))
     FlashCard({ theme: this.theme, contentPadding: 14, space: 2 }) {
-      this.navRow($r('sys.symbol.bolt'), brandText(this.theme), '鸿蒙体验', '星闪、实况窗、智慧服务与多设备',
+      this.navRow($r('sys.symbol.bolt'), brandText(this.theme), tr('鸿蒙体验'), tr('星闪、实况窗、智慧服务与多设备'),
         () => requireActions(this.actions).openDetail('harmony'))
     }
   }
 
   @Builder
   private backupGroup() {
-    this.groupLabel('数据与安全')
+    this.groupLabel(tr('数据与安全'))
     FlashCard({ theme: this.theme, space: 2 }) {
-      Text('可在 Android、macOS 与 HarmonyOS 之间迁移日志、情绪和任务。备份为明文 JSON，请只保存或分享至可信位置。')
+      Text(tr('可在 Android、macOS 与 HarmonyOS 之间迁移日志、情绪和任务。备份为明文 JSON，请只保存或分享至可信位置。'))
         .fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).lineHeight(19).width('100%').padding({ top: 12, bottom: 6 })
-      this.actionRow($r('sys.symbol.doc_text'), iconSemantic(this.theme, 'safe'), '导出备份 JSON', '生成 flash-backup-v2 备份文件',
+      this.actionRow($r('sys.symbol.doc_text'), iconSemantic(this.theme, 'safe'), tr('导出备份 JSON'), tr('生成 flash-backup-v2 备份文件'),
         !this.backup.fileBusy, () => requireActions(this.actions).backupController.exportBackup())
       if (requireActions(this.actions).backupController.sharedExportAvailable()) {
-        this.actionRow($r('sys.symbol.folder'), iconSemantic(this.theme, 'safe'), '导出到下载目录', '在系统文件管理中可见（下载/Flash）',
+        this.actionRow($r('sys.symbol.folder'), iconSemantic(this.theme, 'safe'), tr('导出到下载目录'), tr('在系统文件管理中可见（下载/Flash）'),
           !this.backup.fileBusy, () => requireActions(this.actions).backupController.exportBackupToSharedDir())
       }
       if (this.settings.systemShareSupported) {
-        this.actionRow($r('sys.symbol.doc_text'), iconSemantic(this.theme, 'safe'), '分享导出', '生成备份文件并通过系统分享发送',
+        this.actionRow($r('sys.symbol.doc_text'), iconSemantic(this.theme, 'safe'), tr('分享导出'), tr('生成备份文件并通过系统分享发送'),
           !this.backup.fileBusy, () => requireActions(this.actions).backupController.shareBackupExport())
       }
-      this.actionRow($r('sys.symbol.magnifyingglass'), iconSemantic(this.theme, 'safe'), '标准导入并分析差异', '导入前先看合并与新增明细',
+      this.actionRow($r('sys.symbol.magnifyingglass'), iconSemantic(this.theme, 'safe'), tr('标准导入并分析差异'), tr('导入前先看合并与新增明细'),
         !this.backup.fileBusy && !this.backup.busy, () => requireActions(this.actions).backupController.chooseBackup())
-      this.actionRow($r('sys.symbol.clock_arrow_2_circlepath'), iconSemantic(this.theme, 'safe'), '恢复损坏或旧版备份', '尝试修复无法直接导入的备份',
+      this.actionRow($r('sys.symbol.clock_arrow_2_circlepath'), iconSemantic(this.theme, 'safe'), tr('恢复损坏或旧版备份'), tr('尝试修复无法直接导入的备份'),
         !this.backup.fileBusy && !this.backup.busy, () => requireActions(this.actions).backupController.chooseBackup(true))
       if (this.backup.recoveryAvailable) {
-        this.actionRow($r('sys.symbol.doc_text'), dangerText(this.theme), '导出旧版异常原始数据', '仅用于人工恢复，请勿公开分享',
+        this.actionRow($r('sys.symbol.doc_text'), dangerText(this.theme), tr('导出旧版异常原始数据'), tr('仅用于人工恢复，请勿公开分享'),
           true, () => requireActions(this.actions).backupController.exportRecoveryData())
-        this.actionRow($r('sys.symbol.clock_arrow_2_circlepath'), dangerText(this.theme), '清除隔离区', '删除本地保留的异常原始数据副本',
+        this.actionRow($r('sys.symbol.clock_arrow_2_circlepath'), dangerText(this.theme), tr('清除隔离区'), tr('删除本地保留的异常原始数据副本'),
           !this.backup.fileBusy, () => requireActions(this.actions).backupController.clearRecoveryData())
       }
       if (this.backup.importPhase !== ImportPhase.IDLE) {
         Column({ space: 10 }) {
-          Text('差异分析').fontSize(TYPE_BODY).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).width('100%')
+          Text(tr('差异分析')).fontSize(TYPE_BODY).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).width('100%')
           Text(this.backup.importSummary).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).lineHeight(20).width('100%')
           Row({ space: 8 }) {
-            Button('合并').layoutWeight(1).height(44).backgroundColor(BRAND)
+            Button(tr('合并')).layoutWeight(1).height(44).fontColor(onBrandFill(this.theme)).backgroundColor(brandFill(this.theme))
               .enabled(!this.backup.busy)
               .onClick(() => requireActions(this.actions).backupController.applyBackup(true))
-            Button('覆盖').layoutWeight(1).height(44).fontColor(dangerText(this.theme)).backgroundColor(this.theme.themeDanger)
+            Button(tr('覆盖')).layoutWeight(1).height(44).fontColor(dangerText(this.theme)).backgroundColor(this.theme.themeDanger)
               .enabled(!this.backup.busy)
               .onClick(() => requireActions(this.actions).backupController.applyBackup(false))
-            Button('取消').layoutWeight(1).height(44).fontColor(this.theme.themeMuted).backgroundColor(this.theme.themeControl)
+            Button(tr('取消')).layoutWeight(1).height(44).fontColor(this.theme.themeMuted).backgroundColor(this.theme.themeControl)
               .enabled(!this.backup.busy)
               .onClick(() => requireActions(this.actions).backupController.cancelImport())
           }.width('100%')
@@ -171,72 +206,26 @@ export struct ProfilePage {
   }
 
   @Builder
-  private lanGroup() {
-    this.groupLabel('局域网传输')
-    FlashCard({ theme: this.theme, space: 2 }) {
-      Text('局域网传输因旧协议安全风险暂时停用。请使用导出备份或系统分享，通过可信渠道传输 JSON 文件。')
-        .fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).lineHeight(19).width('100%').padding({ top: 12, bottom: 6 })
-      if (this.backup.lanMode === TransferPhase.IDLE) {
-        this.actionRow($r('sys.symbol.house'), iconSemantic(this.theme, 'lan'), '发送备份', '暂时停用，点击查看替代方式',
-          true, () => requireActions(this.actions).backupController.startLanSend())
-        this.actionRow($r('sys.symbol.house'), iconSemantic(this.theme, 'lan'), '接收备份', '暂时停用，点击查看替代方式',
-          true, () => requireActions(this.actions).backupController.startLanReceive())
-      } else if (this.backup.lanMode === TransferPhase.SENDING) {
-        Column({ space: 8 }) {
-          Text('配对 PIN').fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
-          Text(this.backup.lanPin).fontSize(TYPE_DISPLAY).fontWeight(FontWeight.Bold).fontColor(iconSemantic(this.theme, 'lan')).letterSpacing(6)
-          Text('请在接收设备输入此 PIN；60 秒后自动失效。').fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
-          Button('取消发送').width('100%').height(44).fontColor(this.theme.themeMuted).backgroundColor(this.theme.themeControl)
-            .onClick(() => requireActions(this.actions).backupController.stopLan())
-        }.width('100%').padding(12).backgroundColor(this.theme.themeControl).borderRadius(14).margin({ bottom: 8 })
-      } else {
-        Column({ space: 8 }) {
-          Text(this.backup.lanDevices.length === 0 ? '正在搜索发送设备…' : '选择发送设备')
-            .fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width('100%')
-          ForEach(this.backup.lanDevices, (device: LanDevice) => {
-            Button(device.name).width('100%').height(44)
-              .fontColor(this.backup.selectedLanDevice === device.id ? Color.White : this.theme.themeText)
-              .backgroundColor(this.backup.selectedLanDevice === device.id ? iconSemantic(this.theme, 'lan') : this.theme.themeControl)
-              .onClick(() => this.backup.selectedLanDevice = device.id)
-          }, (device: LanDevice) => device.id)
-          TextInput({ placeholder: '六位配对 PIN', text: this.backup.lanEnteredPin })
-            .type(InputType.Number).maxLength(6).height(44)
-            .fontColor(this.theme.themeText).placeholderColor(this.theme.themeMuted)
-            .backgroundColor(this.theme.themeControl).borderRadius(12)
-            .onChange((value: string) => this.backup.lanEnteredPin = value.replace(/\D/g, '').slice(0, 6))
-          Row({ space: 8 }) {
-            Button(this.backup.lanMode === TransferPhase.CONNECTING ? '正在接收…' : '验证并接收').layoutWeight(1).height(44)
-              .backgroundColor(iconSemantic(this.theme, 'lan')).enabled(this.backup.lanMode !== TransferPhase.CONNECTING)
-              .onClick(() => requireActions(this.actions).backupController.receiveLan())
-            Button('取消').width(80).height(44).fontColor(this.theme.themeMuted).backgroundColor(this.theme.themeControl)
-              .onClick(() => requireActions(this.actions).backupController.stopLan())
-          }.width('100%')
-        }.width('100%').padding(12).backgroundColor(this.theme.themeControl).borderRadius(14).margin({ bottom: 8 })
-      }
-    }
-  }
-
-  @Builder
   private dangerGroup() {
-    this.groupLabel('危险操作')
+    this.groupLabel(tr('危险操作'))
     FlashCard({ theme: this.theme, space: 2 }) {
-      Text('清空会删除本机全部日志、情绪和任务，且无法撤销，建议先导出备份。')
+      Text(tr('清空会删除本机全部日志、情绪和任务，且无法撤销，建议先导出备份。'))
         .fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).lineHeight(19).width('100%').padding({ top: 12, bottom: 6 })
       Row({ space: 12 }) {
         SymbolGlyph($r('sys.symbol.doc_text')).fontSize(20).fontColor([dangerText(this.theme)]).width(28)
         Column({ space: 2 }) {
-          Text('清空全部本地数据').fontSize(TYPE_BODY).fontColor(dangerText(this.theme)).width('100%')
-          Text('删除后需要再次确认，不可恢复').fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%')
+          Text(tr('清空全部本地数据')).fontSize(TYPE_BODY).fontColor(dangerText(this.theme)).width('100%')
+          Text(tr('删除后需要再次确认，不可恢复')).fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%')
         }.layoutWeight(1).alignItems(HorizontalAlign.Start)
       }
       .width('100%')
       .padding({ top: 12, bottom: 12 })
       .accessibilityGroup(true)
-      .accessibilityText('清空全部本地数据，删除后需要再次确认，不可恢复')
-      .enabled(!this.backup.busy && !this.backup.fileBusy && this.backup.lanMode === TransferPhase.IDLE)
-      .opacity(this.backup.busy || this.backup.fileBusy || this.backup.lanMode !== TransferPhase.IDLE ? 0.4 : 1)
+      .accessibilityText(tr('清空全部本地数据，删除后需要再次确认，不可恢复'))
+      .enabled(!this.backup.busy && !this.backup.fileBusy)
+      .opacity(this.backup.busy || this.backup.fileBusy ? 0.4 : 1)
       .onClick(() => {
-        if (!this.backup.busy && !this.backup.fileBusy && this.backup.lanMode === TransferPhase.IDLE) {
+        if (!this.backup.busy && !this.backup.fileBusy) {
           this.feedback.destructive = { kind: DeleteKind.ALL, id: '' };
         }
       })
@@ -245,19 +234,25 @@ export struct ProfilePage {
 
   @Builder
   private aboutGroup() {
-    this.groupLabel('关于 Flash')
+    this.groupLabel(tr('关于 Flash'))
     Column({ space: 6 }) {
       Text('Flash Aero').fontSize(TYPE_SECTION).fontWeight(FontWeight.Bold).fontColor(this.theme.themeText)
-      Text('v0.1.0 · HarmonyOS 原生版 · com.flash.app.harmonyos').fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
-      Text('让每一次闪念都有落点').fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
-    }.width('100%').height(130).justifyContent(FlexAlign.Center).backgroundColor(this.theme.themeTint).borderRadius(RADIUS_CARD)
-      .border({ width: 0.5, color: hairlineColor(this.theme) })
-      .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
+      Text(tr('v0.1.0 · HarmonyOS 原生版 · com.flash.app.harmonyos')).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
+      Text(tr('让每一次闪念都有落点 · 无云端账号')).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
+    }.width('100%').height(130).justifyContent(FlexAlign.Center).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
+      .border({ width: 0.75, color: hairlineColor(this.theme) })
+      .shadow(paperShadow(this.theme))
   }
 
   @Builder
   private groupLabel(title: string) {
     Text(title).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width('100%').padding({ left: 4 })
+  }
+
+  private frequencyLabel(): string {
+    if (this.settings.ideaReminderFrequency === 'every3days') return tr('每 3 天');
+    if (this.settings.ideaReminderFrequency === 'weekly') return tr('每周');
+    return tr('每天');
   }
 
   private themeModeIndex(): number {
@@ -267,9 +262,9 @@ export struct ProfilePage {
   }
 
   private themeModeLabel(): string {
-    if (this.theme.themeMode === 'dark') return '深色';
-    if (this.theme.themeMode === 'system') return '跟随系统';
-    return '浅色';
+    if (this.theme.themeMode === 'dark') return tr('深色');
+    if (this.theme.themeMode === 'system') return tr('跟随系统');
+    return tr('浅色');
   }
 
   @Builder
@@ -307,7 +302,7 @@ export struct ProfilePage {
     .width('100%')
     .padding({ top: 12, bottom: 12 })
     .accessibilityGroup(true)
-    .accessibilityText(`${title}，${subtitle}` + (enabled ? '' : '，当前不可用'))
+    .accessibilityText(`${title}，${subtitle}` + (enabled ? '' : tr('，当前不可用')))
     .enabled(enabled)
     .opacity(enabled ? 1 : 0.5)
     .hoverEffect(HoverEffect.Highlight)

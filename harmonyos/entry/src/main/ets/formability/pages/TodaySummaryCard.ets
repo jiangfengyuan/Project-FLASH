@@ -13,7 +13,7 @@ struct TodaySummaryCard {
         Text($r('app.string.form_today_title'))
           .fontSize(15)
           .fontWeight(FontWeight.Medium)
-          .fontColor($r('sys.color.ohos_id_color_text_primary'))
+          .fontColor($r('app.color.form_ink'))
         Blank()
         Stack()
           .width(8)
@@ -31,7 +31,7 @@ struct TodaySummaryCard {
             .fontColor($r('app.color.form_accent_records'))
           Text($r('app.string.form_stat_records'))
             .fontSize(12)
-            .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+            .fontColor($r('app.color.form_ink_secondary'))
         }
         .layoutWeight(1)
         .alignItems(HorizontalAlign.Center)
@@ -43,7 +43,7 @@ struct TodaySummaryCard {
             .fontColor($r('app.color.form_accent_ideas'))
           Text($r('app.string.form_stat_ideas'))
             .fontSize(12)
-            .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+            .fontColor($r('app.color.form_ink_secondary'))
         }
         .layoutWeight(1)
         .alignItems(HorizontalAlign.Center)
@@ -55,7 +55,7 @@ struct TodaySummaryCard {
             .fontColor($r('app.color.form_accent_tasks'))
           Text($r('app.string.form_stat_tasks'))
             .fontSize(12)
-            .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+            .fontColor($r('app.color.form_ink_secondary'))
         }
         .layoutWeight(1)
         .alignItems(HorizontalAlign.Center)
@@ -66,12 +66,14 @@ struct TodaySummaryCard {
     .width('100%')
     .height('100%')
     .padding({ left: 16, right: 16, top: 14, bottom: 14 })
-    .backgroundColor($r('sys.color.ohos_id_color_background'))
-    .borderRadius(16)
+    .backgroundColor($r('app.color.form_paper'))
+    .border({ width: 0.75, color: $r('app.color.form_border') })
+    .borderRadius(20)
     .onClick(() => {
       postCardAction(this, {
         action: 'router',
-        abilityName: 'EntryAbility'
+        abilityName: 'EntryAbility',
+        params: { flashEntry: 'today' }
       });
     })
   }

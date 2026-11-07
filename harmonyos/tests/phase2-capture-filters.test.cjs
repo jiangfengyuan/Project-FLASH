@@ -124,13 +124,20 @@ test('batch inbox retag touches only default-tag logs and preserves content', as
   state.filterCategory = 'inbox';
   controller.updateSearchResults();
   assert.deepEqual(state.searchResults.map(i => i.id), ['a', 'c']);
-  await controller.batchUpdateInbox('idea', 'idea');
+  // 只整理用户选中的记录，不再影响全部待整理。
+  state.selecting = true;
+  controller.toggleSelected('a');
+  controller.toggleSelected('c');
+  controller.toggleSelected('c');
+  controller.toggleSelected('c');
+  await controller.batchUpdateSelected('idea', 'idea');
   assert.deepEqual(calls, [['a', 'idea', 'idea'], ['c', 'idea', 'idea']]);
-  assert.ok(r.messages.some(m => m.includes('已整理 2 条记录')));
+  assert.ok(r.messages.some(m => m.includes('已整理 2 条')));
+  assert.equal(state.selecting, false);
+  assert.deepEqual(state.selectedIds, []);
   calls.length = 0;
-  state.logs = [log('b', '想法', { category: 'idea', colorTag: 'idea' })];
-  await controller.batchUpdateInbox('log', 'memo');
-  assert.deepEqual(calls, [], 'no inbox items means no writes');
+  await controller.batchUpdateSelected('log', 'memo');
+  assert.deepEqual(calls, [], 'no selection means no writes');
 });
 
 test('updateLogMeta moves category/colorTag and preserves body, importance and dates', async () => {
@@ -168,7 +175,7 @@ test('saveEditedLog persists text and category/tag meta together, then clears th
   state.editTag = 'idea';
   state.editImportance = 2;
   await controller.saveEditedLog();
-  assert.deepEqual(calls, [['a', '改写正文', 'idea', 'idea', '2026-09-05', 2]]);
+  assert.deepEqual(calls, [['a', '改写正文', 'idea', 'idea', '2026-09-05', 2, undefined]]);
   assert.equal(state.editingLogId, '');
   assert.equal(state.editCategory, '');
   assert.ok(r.messages.includes('记录已更新'));

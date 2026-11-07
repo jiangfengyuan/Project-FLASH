@@ -1,3 +1,4 @@
+import { tr } from '../data/I18n';
 import { common } from '@kit.AbilityKit';
 import { BackupState, TransferPhase, ImportPhase } from '../state/FeatureStates';
 import { BackupData } from '../models/Models';
@@ -44,7 +45,7 @@ export class BackupController {
   async exportBackup(): Promise<void> {
     if (this.state.fileBusy) return;
     if (!this.store.ready) {
-      this.runtime.notify('本地数据尚未加载完成，无法导出备份', 'error');
+      this.runtime.notify(tr('本地数据尚未加载完成，无法导出备份'), 'error');
       return;
     }
     const generation = this.generation;
@@ -54,7 +55,7 @@ export class BackupController {
       const snapshot = this.store.snapshot();
       const json = BackupService.exportJSON(snapshot.logs, snapshot.emotions, snapshot.tasks);
       await BackupFiles.exportJSON(context, json);
-      if (generation === this.generation) this.runtime.notify('备份已导出', 'success');
+      if (generation === this.generation) this.runtime.notify(tr('备份已导出'), 'success');
     } catch (error) {
       if (generation === this.generation) this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     } finally {
@@ -70,7 +71,7 @@ export class BackupController {
   async shareBackupExport(): Promise<void> {
     if (this.state.fileBusy) return;
     if (!this.store.ready) {
-      this.runtime.notify('本地数据尚未加载完成，无法导出备份', 'error');
+      this.runtime.notify(tr('本地数据尚未加载完成，无法导出备份'), 'error');
       return;
     }
     const generation = this.generation;
@@ -81,7 +82,7 @@ export class BackupController {
       const json = BackupService.exportJSON(snapshot.logs, snapshot.emotions, snapshot.tasks);
       const fileName = BackupFiles.sharedExportName('flash-aero-backup', dayString());
       await shareBackupFile(context, json, fileName);
-      if (generation === this.generation) this.runtime.notify('已调起系统分享', 'success');
+      if (generation === this.generation) this.runtime.notify(tr('已调起系统分享'), 'success');
     } catch (error) {
       if (generation === this.generation) this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     } finally {
@@ -92,7 +93,7 @@ export class BackupController {
   async exportBackupToSharedDir(): Promise<void> {
     if (this.state.fileBusy) return;
     if (!this.store.ready) {
-      this.runtime.notify('本地数据尚未加载完成，无法导出备份', 'error');
+      this.runtime.notify(tr('本地数据尚未加载完成，无法导出备份'), 'error');
       return;
     }
     const generation = this.generation;
@@ -103,11 +104,11 @@ export class BackupController {
       const result = await BackupFiles.exportToSharedDir(json);
       if (generation !== this.generation) return;
       if (result.status === SharedExportStatus.EXPORTED) {
-        this.runtime.notify('备份已导出到「文件管理」应用的下载目录', 'success');
+        this.runtime.notify(tr('备份已导出到「文件管理」应用的下载目录'), 'success');
       } else if (result.status === SharedExportStatus.DENIED) {
-        this.runtime.notify('共享目录暂不可用，请改用「选择位置导出」', 'error');
+        this.runtime.notify(tr('共享目录暂不可用，请改用「选择位置导出」'), 'error');
       } else {
-        this.runtime.notify('当前设备不支持共享目录导出，请改用「选择位置导出」', 'error');
+        this.runtime.notify(tr('当前设备不支持共享目录导出，请改用「选择位置导出」'), 'error');
       }
     } catch (error) {
       if (generation === this.generation) this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
@@ -125,7 +126,7 @@ export class BackupController {
       if (generation !== this.generation) return;
       if (!archive) {
         this.state.recoveryAvailable = false;
-        this.runtime.notify('没有可导出的恢复数据', 'error');
+        this.runtime.notify(tr('没有可导出的恢复数据'), 'error');
         return;
       }
       const context = this.runtime.context() as common.UIAbilityContext;
@@ -134,7 +135,7 @@ export class BackupController {
       // copies must not linger once a successful export exists.
       await this.store.clearQuarantine();
       this.state.recoveryAvailable = false;
-      if (generation === this.generation) this.runtime.notify('恢复原始数据已导出，请妥善保管并联系支持人员处理', 'success');
+      if (generation === this.generation) this.runtime.notify(tr('恢复原始数据已导出，请妥善保管并联系支持人员处理'), 'success');
     } catch (error) {
       if (generation === this.generation) this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     } finally {
@@ -146,7 +147,7 @@ export class BackupController {
     if (this.state.fileBusy) return;
     await this.store.clearQuarantine();
     this.state.recoveryAvailable = false;
-    this.runtime.notify('隔离区已清除', 'success');
+    this.runtime.notify(tr('隔离区已清除'), 'success');
   }
 
   async chooseBackup(recovery: boolean = false): Promise<void> {
@@ -159,7 +160,7 @@ export class BackupController {
       const incoming = recovery ? BackupService.parseRecovery(json) : BackupService.parseStrict(json);
       if (generation !== this.generation) return;
       this.stageImport(incoming);
-      this.state.importSummary = (recovery ? "部分恢复（跳过非法、重复和超限记录；原文件不变）" : "标准导入") + "\n" + this.state.importSummary;
+      this.state.importSummary = (recovery ? tr("部分恢复（跳过非法、重复和超限记录；原文件不变）") : tr("标准导入")) + "\n" + this.state.importSummary;
     } catch (error) {
       if (generation === this.generation) {
         this.cancelImport();
@@ -183,10 +184,10 @@ export class BackupController {
     const difference = BackupDiff.analyze(
       snapshot.logs, snapshot.emotions, incoming.logs, incoming.emotions,
       snapshot.tasks, incoming.tasks);
-    return `日志：新增 ${difference.logs.added}、变更 ${difference.logs.changed}、本机独有 ${difference.logs.localOnly}\n` +
-      `情绪：新增 ${difference.emotions.added}、变更 ${difference.emotions.changed}、本机独有 ${difference.emotions.localOnly}\n` +
-      `任务：新增 ${difference.tasks.added}、变更 ${difference.tasks.changed}、本机独有 ${difference.tasks.localOnly}\n` +
-      `无效项目：${incoming.skippedLogs + incoming.skippedEmotions + incoming.skippedTasks}`;
+    return tr('日志：新增 {0}、变更 {1}、本机独有 {2}\n', difference.logs.added, difference.logs.changed, difference.logs.localOnly) +
+      tr('情绪：新增 {0}、变更 {1}、本机独有 {2}\n', difference.emotions.added, difference.emotions.changed, difference.emotions.localOnly) +
+      tr('任务：新增 {0}、变更 {1}、本机独有 {2}\n', difference.tasks.added, difference.tasks.changed, difference.tasks.localOnly) +
+      tr('无效项目：{0}', incoming.skippedLogs + incoming.skippedEmotions + incoming.skippedTasks);
   }
 
   async startLanSend(): Promise<void> { this.reportLanUnavailable(); }
@@ -224,7 +225,7 @@ export class BackupController {
           this.pendingSnapshot = current;
           this.state.importSummary = this.describeImport(incoming, current);
           this.state.importPhase = ImportPhase.PREVIEW;
-          this.runtime.notify('预览后本地数据有变化，差异已重新计算，请确认后再覆盖');
+          this.runtime.notify(tr('预览后本地数据有变化，差异已重新计算，请确认后再覆盖'));
           return;
         }
         const applied = await this.store.replaceAllIfCurrent(
@@ -234,7 +235,7 @@ export class BackupController {
           this.pendingSnapshot = current;
           this.state.importSummary = this.describeImport(incoming, current);
           this.state.importPhase = ImportPhase.PREVIEW;
-          this.runtime.notify('预览后本地数据有变化，差异已重新计算，请确认后再覆盖');
+          this.runtime.notify(tr('预览后本地数据有变化，差异已重新计算，请确认后再覆盖'));
           return;
         }
       }
@@ -245,9 +246,9 @@ export class BackupController {
       const context = this.runtime.context() as common.UIAbilityContext;
       try {
         await TaskReminderScheduler.rebuild(context, this.store.snapshot().tasks, false);
-        this.runtime.notify(merge ? '备份已合并' : '本地数据已覆盖', 'success');
+        this.runtime.notify(merge ? tr('备份已合并') : tr('本地数据已覆盖'), 'success');
       } catch (_) {
-        this.runtime.notify((merge ? '备份已合并' : '本地数据已覆盖') + '，但系统提醒恢复失败', 'error');
+        this.runtime.notify((merge ? tr('备份已合并') : tr('本地数据已覆盖')) + tr('，但系统提醒恢复失败'), 'error');
       }
     } catch (error) {
       this.state.importPhase = this.pendingImport ? ImportPhase.PREVIEW : ImportPhase.IDLE;

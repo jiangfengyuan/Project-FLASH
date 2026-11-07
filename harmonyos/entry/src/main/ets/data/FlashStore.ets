@@ -1,3 +1,4 @@
+import { tr } from './I18n';
 import { common } from '@kit.AbilityKit';
 import { preferences, relationalStore } from '@kit.ArkData';
 import { util } from '@kit.ArkTS';
@@ -99,7 +100,7 @@ export class FlashStore {
    * they applied. */
   private enqueue<T>(write: () => Promise<T>): Promise<T> {
     const operation = this.writes.then(async () => {
-      if (!this.initialized) throw new Error('本地数据尚未加载完成，请稍后重试');
+      if (!this.initialized) throw new Error(tr('本地数据尚未加载完成，请稍后重试'));
       return write();
     });
     // The queue tail stays void regardless of what the current operation
@@ -212,10 +213,10 @@ export class FlashStore {
       const parsed = BackupService.parse(document);
       migratedLogs = parsed.logs;
       if (parsed.skippedLogs > 0) {
-        await this.keepLegacyRaw(QUARANTINE_LOGS_FILE, logsJson, '旧版日志有异常项目');
+        await this.keepLegacyRaw(QUARANTINE_LOGS_FILE, logsJson, tr('旧版日志有异常项目'));
       }
     } catch (_) {
-      await this.keepLegacyRaw(QUARANTINE_LOGS_FILE, logsJson, '旧版日志数据损坏');
+      await this.keepLegacyRaw(QUARANTINE_LOGS_FILE, logsJson, tr('旧版日志数据损坏'));
     }
     try {
       const document = `{"version":"${BackupService.LEGACY_VERSION}","exportedAt":"${isoNow()}",` +
@@ -223,10 +224,10 @@ export class FlashStore {
       const parsed = BackupService.parse(document);
       migratedEmotions = parsed.emotions;
       if (parsed.skippedEmotions > 0) {
-        await this.keepLegacyRaw(QUARANTINE_EMOTIONS_FILE, emotionsJson, '旧版情绪有异常项目');
+        await this.keepLegacyRaw(QUARANTINE_EMOTIONS_FILE, emotionsJson, tr('旧版情绪有异常项目'));
       }
     } catch (_) {
-      await this.keepLegacyRaw(QUARANTINE_EMOTIONS_FILE, emotionsJson, '旧版情绪数据损坏');
+      await this.keepLegacyRaw(QUARANTINE_EMOTIONS_FILE, emotionsJson, tr('旧版情绪数据损坏'));
     }
     try {
       const document = `{"version":"${BackupService.VERSION}","exportedAt":"${isoNow()}",` +
@@ -235,10 +236,10 @@ export class FlashStore {
       const parsed = BackupService.parse(document);
       migratedTasks = parsed.tasks;
       if (parsed.skippedTasks > 0) {
-        await this.keepLegacyRaw(QUARANTINE_TASKS_FILE, tasksJson, '旧版任务有异常项目');
+        await this.keepLegacyRaw(QUARANTINE_TASKS_FILE, tasksJson, tr('旧版任务有异常项目'));
       }
     } catch (_) {
-      await this.keepLegacyRaw(QUARANTINE_TASKS_FILE, tasksJson, '旧版任务数据损坏');
+      await this.keepLegacyRaw(QUARANTINE_TASKS_FILE, tasksJson, tr('旧版任务数据损坏'));
     }
     await this.replaceDatabase(migratedLogs, migratedEmotions, migratedTasks);
     await settings.put(RDB_MIGRATED_KEY, true);
@@ -288,8 +289,8 @@ export class FlashStore {
     if (rejected.length > 0) {
       this.hasRecoveryData = true;
       this.appendRecoveryWarning(quarantined ?
-        '数据库中有异常记录，原始内容已隔离并可导出' :
-        '数据库中有异常记录，但隔离副本写入失败，原始内容仍保留在数据库中');
+        tr('数据库中有异常记录，原始内容已隔离并可导出') :
+        tr('数据库中有异常记录，但隔离副本写入失败，原始内容仍保留在数据库中'));
     }
   }
 
@@ -301,7 +302,7 @@ export class FlashStore {
     this.hasRecoveryData = this.hasRecoveryData ||
       logs.length > 0 || emotions.length > 0 || tasks.length > 0 || databaseRaw.length > 0;
     if (this.hasRecoveryData && !this.recoveryWarning) {
-      this.recoveryWarning = '检测到已保留的旧版异常原始数据，可在设置中导出恢复文件';
+      this.recoveryWarning = tr('检测到已保留的旧版异常原始数据，可在设置中导出恢复文件');
     }
   }
 
@@ -335,9 +336,9 @@ export class FlashStore {
   private async keepLegacyRaw(file: string, content: string, warning: string): Promise<void> {
     this.hasRecoveryData = true;
     if (await this.writeQuarantineFile(file, content)) {
-      this.appendRecoveryWarning(`${warning}，原始数据已保留用于恢复`);
+      this.appendRecoveryWarning(tr('{0}，原始数据已保留用于恢复', warning));
     } else {
-      this.appendRecoveryWarning(`${warning}，但恢复副本写入失败，原始数据未能保留`);
+      this.appendRecoveryWarning(tr('{0}，但恢复副本写入失败，原始数据未能保留', warning));
     }
   }
 
@@ -545,8 +546,10 @@ export class FlashStore {
 
   async addLog(content: string, category: string = Category.LOG, colorTag?: string): Promise<void> {
     return this.enqueue(async () => {
-      const trimmed = content.trim().slice(0, 10000);
+      const trimmed = content.trim();
       if (!trimmed) return;
+      // 超限拒绝写入，不静默截断（对齐 Apple / Android）。
+      if (trimmed.length > 100000) throw new Error(tr('内容超过 100000 字符，请删减后保存'));
       const item: LogItem = {
         id: util.generateRandomUUID(true), content: trimmed,
         colorTag: colorTag ?? (category === Category.IDEA ? ColorTag.IDEA : ColorTag.DAILY),
@@ -573,6 +576,51 @@ export class FlashStore {
       this.viewedIdeaIds.delete(id);
       this.logs = this.logs.filter((item: LogItem) => item.id !== id);
       this.changes.publish(StorePartition.LOGS);
+    });
+  }
+
+  /** 撤销删除：原样写回记录，并恢复删除前的已读状态。 */
+  async restoreLog(item: LogItem, wasViewed: boolean): Promise<void> {
+    return this.enqueue(async () => {
+      await this.upsert(LOGS_TABLE, item.id, item.createdAt, JSON.stringify(item));
+      this.logs = [item, ...this.logs.filter((other: LogItem) => other.id !== item.id)];
+      this.logs.sort((left: LogItem, right: LogItem) => right.createdAt.localeCompare(left.createdAt));
+      if (wasViewed) await this.persistIdeaViewed(item.id, isoNow());
+      this.changes.publish(StorePartition.LOGS);
+    });
+  }
+
+  isIdeaViewed(id: string): boolean {
+    return this.viewedIdeaIds.has(id);
+  }
+
+  async setLogFavorite(id: string, favorite: boolean): Promise<void> {
+    return this.enqueue(async () => {
+      const existing = this.logs.find((item: LogItem) => item.id === id);
+      if (!existing) return;
+      const updated: LogItem = {
+        id: existing.id, content: existing.content, colorTag: existing.colorTag, category: existing.category,
+        importance: existing.importance, createdAt: existing.createdAt, recordDate: existing.recordDate,
+        isFavorite: favorite
+      };
+      await this.upsert(LOGS_TABLE, updated.id, updated.createdAt, JSON.stringify(updated));
+      this.logs = this.logs.map((item: LogItem) => item.id === id ? updated : item);
+      this.changes.publish(StorePartition.LOGS);
+    });
+  }
+
+  async setEmotionFavorite(id: string, favorite: boolean): Promise<void> {
+    return this.enqueue(async () => {
+      const existing = this.emotions.find((item: EmotionRecord) => item.id === id);
+      if (!existing) return;
+      const updated: EmotionRecord = {
+        id: existing.id, level: existing.level, subEmotion: existing.subEmotion, status: existing.status,
+        note: existing.note, recordDate: existing.recordDate, createdAt: existing.createdAt,
+        intensity: existing.intensity, isFavorite: favorite
+      };
+      await this.upsert(EMOTIONS_TABLE, updated.id, updated.createdAt, JSON.stringify(updated));
+      this.emotions = this.emotions.map((item: EmotionRecord) => item.id === id ? updated : item);
+      this.changes.publish(StorePartition.EMOTIONS);
     });
   }
 
@@ -628,20 +676,21 @@ export class FlashStore {
 
   /** One queued row write publishes only after all edited fields are persisted. */
   async updateLog(id: string, content: string, category?: string, colorTag?: string, recordDate?: string,
-    importance?: number): Promise<void> {
+    importance?: number, favorite?: boolean): Promise<void> {
     return this.enqueue(async () => {
       const trimmed = content.trim();
-      if (!trimmed) throw new Error('内容不能为空');
-      if (content.length > 100000) throw new Error('内容超过 100000 字符，请删减后保存');
-      if (recordDate !== undefined && !isValidRecordDay(recordDate)) throw new Error('请输入有效日期（YYYY-MM-DD）');
-      if (importance !== undefined && !isValidImportance(importance)) throw new Error('重要度需在 0 到 4 之间');
+      if (!trimmed) throw new Error(tr('内容不能为空'));
+      if (content.length > 100000) throw new Error(tr('内容超过 100000 字符，请删减后保存'));
+      if (recordDate !== undefined && !isValidRecordDay(recordDate)) throw new Error(tr('请输入有效日期（YYYY-MM-DD）'));
+      if (importance !== undefined && !isValidImportance(importance)) throw new Error(tr('重要度需在 0 到 4 之间'));
       const existing = this.logs.find((item: LogItem) => item.id === id);
-      if (!existing) throw new Error('这条记录已不存在');
+      if (!existing) throw new Error(tr('这条记录已不存在'));
       const updated: LogItem = {
         id: existing.id, content: trimmed, colorTag: colorTag ?? existing.colorTag, category: category ?? existing.category,
         importance: importance ?? existing.importance, createdAt: existing.createdAt, recordDate: recordDate ?? existing.recordDate
       };
       if (typeof existing.isFavorite === 'boolean') updated.isFavorite = existing.isFavorite;
+      if (favorite !== undefined) updated.isFavorite = favorite;
       await this.upsert(LOGS_TABLE, updated.id, updated.createdAt, JSON.stringify(updated));
       this.logs = this.logs.map((item: LogItem) => item.id === id ? updated : item);
       this.changes.publish(StorePartition.LOGS);
@@ -702,7 +751,7 @@ export class FlashStore {
     });
   }
 
-  async addEmotion(level: number, subEmotion?: string, note?: string, status?: string): Promise<void> {
+  async addEmotion(level: number, subEmotion?: string, note?: string, status?: string, intensity?: number): Promise<void> {
     return this.enqueue(async () => {
       const record: EmotionRecord = {
         id: util.generateRandomUUID(true), level: Math.max(-3, Math.min(3, Math.round(level))),
@@ -711,6 +760,7 @@ export class FlashStore {
         status: status?.trim().slice(0, 50) || undefined,
         note: note?.trim().slice(0, 2000) || undefined, recordDate: dayString(), createdAt: isoNow()
       };
+      if (intensity !== undefined && intensity >= 1 && intensity <= 5) record.intensity = intensity;
       await this.upsert(EMOTIONS_TABLE, record.id, record.createdAt, JSON.stringify(record));
       this.emotions.unshift(record);
       this.changes.publish(StorePartition.EMOTIONS);
@@ -841,7 +891,7 @@ export class FlashStore {
   }
 
   private requiredDatabase(): relationalStore.RdbStore {
-    if (!this.database) throw new Error('本地数据库尚未初始化');
+    if (!this.database) throw new Error(tr('本地数据库尚未初始化'));
     return this.database;
   }
 }

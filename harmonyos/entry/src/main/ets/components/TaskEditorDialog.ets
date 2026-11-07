@@ -1,6 +1,8 @@
+import { tr } from '../data/I18n';
 import { NavigationState, ThemeState, CalendarState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
 import {
+  brandFill, onBrandFill, chipSelected, chipSelectedText,
   BRAND, cardShadowColor, floatingSurface, hairlineColor, supportsBlurMaterial, scrimColor,
   DIALOG_WIDTH_FORM, DIALOG_WIDTH_PERCENT, TYPE_SECTION, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION
 } from './CommonBuilders';
@@ -20,18 +22,26 @@ export struct TaskEditorDialog {
         .onClick(() => requireActions(this.actions).calendarController.closeTaskEditor())
       Scroll() {
         Column({ space: 12 }) {
-          Text(this.calendar.editingTaskId === 'new' ? '新建任务' : '编辑任务')
+          Text(this.calendar.editingTaskId === 'new' ? tr('新建任务') : tr('编辑任务'))
             .fontSize(TYPE_SECTION).fontWeight(FontWeight.Bold).fontColor(this.theme.themeText).width('100%')
-          TextInput({ placeholder: '任务标题', text: this.calendar.taskTitle })
+          TextInput({ placeholder: tr('任务标题'), text: this.calendar.taskTitle })
             .height(44).maxLength(200).fontColor(this.theme.themeText).placeholderColor(this.theme.themeMuted)
             .backgroundColor(this.theme.themeControl).borderRadius(12)
             .onChange((value: string) => this.calendar.taskTitle = value.slice(0, 200))
-          TextArea({ placeholder: '备注（可选）', text: this.calendar.taskNotes })
+          TextArea({ placeholder: tr('备注（可选）'), text: this.calendar.taskNotes })
             .height(80).maxLength(100000).fontColor(this.theme.themeText).placeholderColor(this.theme.themeMuted)
             .backgroundColor(this.theme.themeControl).borderRadius(12)
             .onChange((value: string) => this.calendar.taskNotes = value.slice(0, 100000))
+          if (this.calendar.taskSourceLogId !== '') {
+            Text(tr('来自灵感，原灵感会保留')).fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%')
+          }
           Row() {
-            Text('全天任务').fontSize(TYPE_BODY).fontColor(this.theme.themeText).layoutWeight(1)
+            Text(tr('收藏')).fontSize(TYPE_BODY).fontColor(this.theme.themeText).layoutWeight(1)
+            Toggle({ type: ToggleType.Switch, isOn: this.calendar.taskFavorite })
+              .onChange((value: boolean) => this.calendar.taskFavorite = value)
+          }.width('100%')
+          Row() {
+            Text(tr('全天任务')).fontSize(TYPE_BODY).fontColor(this.theme.themeText).layoutWeight(1)
             Toggle({ type: ToggleType.Switch, isOn: this.calendar.taskAllDay })
               .onChange((value: boolean) => this.calendar.taskAllDay = value)
           }.width('100%')
@@ -47,27 +57,27 @@ export struct TaskEditorDialog {
                 .onChange((value: string) => this.calendar.taskTime = value.slice(0, 5))
             }
           }.width('100%')
-          Text('本地提醒').fontSize(TYPE_SECONDARY).fontColor(this.theme.themeText).width('100%')
+          Text(tr('本地提醒')).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeText).width('100%')
           Column({ space: 7 }) {
             Row({ space: 7 }) {
-              this.reminderChip(-1, '不提醒')
-              this.reminderChip(0, '到期时')
-              this.reminderChip(15, '提前15分钟')
+              this.reminderChip(-1, tr('不提醒'))
+              this.reminderChip(0, tr('到期时'))
+              this.reminderChip(15, tr('提前15分钟'))
             }.width('100%')
             Row({ space: 7 }) {
-              this.reminderChip(60, '提前1小时')
-              this.reminderChip(1440, '提前1天')
+              this.reminderChip(60, tr('提前1小时'))
+              this.reminderChip(1440, tr('提前1天'))
               if (this.isCustomReminder()) {
                 this.reminderChip(this.calendar.taskReminderMinutes, this.customReminderLabel())
               }
             }.width('100%')
           }.width('100%')
-          Text('提醒由 HarmonyOS 系统后台托管；首次启用会请求通知权限。')
+          Text(tr('提醒由 HarmonyOS 系统后台托管；首次启用会请求通知权限。'))
             .fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%')
           Row({ space: 10 }) {
-            Button('取消').layoutWeight(1).height(44).fontColor(this.theme.themeMuted).backgroundColor(this.theme.themeControl)
+            Button(tr('取消')).layoutWeight(1).height(44).fontColor(this.theme.themeMuted).backgroundColor(this.theme.themeControl)
               .onClick(() => requireActions(this.actions).calendarController.closeTaskEditor())
-            Button('保存').layoutWeight(1).height(44).backgroundColor(BRAND)
+            Button(tr('保存')).layoutWeight(1).height(44).fontColor(onBrandFill(this.theme)).backgroundColor(brandFill(this.theme))
               .enabled(this.calendar.taskTitle.trim().length > 0).onClick(() => requireActions(this.actions).calendarController.saveTaskEditor())
           }.width('100%')
         }.width('100%').padding(22)
@@ -85,8 +95,8 @@ export struct TaskEditorDialog {
   @Builder
   private reminderChip(minutes: number, label: string) {
     Button(label, { type: ButtonType.Normal }).height(44).fontSize(TYPE_CAPTION)
-      .fontColor(this.calendar.taskReminderMinutes === minutes ? Color.White : this.theme.themeText)
-      .backgroundColor(this.calendar.taskReminderMinutes === minutes ? BRAND : this.theme.themeControl)
+      .fontColor(this.calendar.taskReminderMinutes === minutes ? chipSelectedText(this.theme) : this.theme.themeText)
+      .backgroundColor(this.calendar.taskReminderMinutes === minutes ? chipSelected(this.theme) : this.theme.themeControl)
       .onClick(() => this.calendar.taskReminderMinutes = minutes)
   }
 
@@ -99,9 +109,9 @@ export struct TaskEditorDialog {
 
   private customReminderLabel(): string {
     const minutes = this.calendar.taskReminderMinutes;
-    if (minutes % 1440 === 0) return `提前${minutes / 1440}天`;
-    if (minutes % 60 === 0) return `提前${minutes / 60}小时`;
-    return `提前${minutes}分钟`;
+    if (minutes % 1440 === 0) return tr('提前{0}天', minutes / 1440);
+    if (minutes % 60 === 0) return tr('提前{0}小时', minutes / 60);
+    return tr('提前{0}分钟', minutes);
   }
 
   build() {
