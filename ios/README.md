@@ -162,3 +162,7 @@ xcodebuild -project Flash.xcodeproj -scheme Flash \
 
 共享逻辑的单测在包内跑：`cd ../shared/FlashKit && swift test`。调试灌注：启动环境变量
 `FLASH_SEED_SYNTHETIC=80`（空库时生成确定性合成数据，可走完整备份链路）。
+
+## 纸上书写候选验收
+
+Memory 导航标题已接入本地化目录。简中、阿拉伯语、德语和英语各 28 项候选测试通过，新增译文待母语者复核。

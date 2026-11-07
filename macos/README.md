@@ -151,3 +151,7 @@ FlashKit，用 `cd ../shared/FlashKit && swift test` 运行。测试数量以当
 ## 验收与发布状态（2026-09-26）
 
 设备品质结果与未验项目见 [品质矩阵](../docs/quality/device-matrix.md)，当前实际导出/原生门禁与缺项见 [审查交接](../docs/hardening/review-handoff.md)。[握手 v1.1](../docs/contracts/lan-handshake-v1.1.md) 仅作已停用历史协议记录；生产应用没有监听/发现/连接路径。安全替代协议尚未选定或实施，旧版客户端的漏洞不会因另一端更新而消失。
+
+## 纸上书写候选验收
+
+纸上书写候选的视觉更新覆盖 iOS、Android 和 HarmonyOS。macOS 使用现行中文界面与品牌基线，隔离测试数据下的界面检查待做。
