@@ -46,7 +46,7 @@ enum AppRoute: Hashable {
         switch self {
         case .logFlow: L("日志流")
         case .calendar: L("日历")
-        case .memory: "Memory"
+        case .memory: L("Memory")
         }
     }
 }

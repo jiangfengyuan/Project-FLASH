@@ -39,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -68,7 +69,9 @@ import com.flash.app.ui.paper.pageGutter
 import com.flash.app.ui.theme.FlashTokens
 import com.flash.app.ui.theme.ModuleColors
 import java.time.LocalDate
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 
 /** 全局搜索（对齐 iOS）：跨日志 / 灵感 / 情绪 / 任务，200ms 防抖，分组，命中词高亮，跨 Tab 定位。 */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -96,7 +99,11 @@ fun SearchScreen(
             applied = query
         }
     }
-    val matches = remember(applied, logs, emotions, tasks) { GlobalSearch.search(logs, emotions, tasks, applied) }
+    val matches by produceState(emptyList(), applied, logs, emotions, tasks) {
+        value = withContext(Dispatchers.Default) {
+            GlobalSearch.search(logs, emotions, tasks, applied)
+        }
+    }
     val groups = remember(matches) {
         listOf(SearchMatchKind.LOG, SearchMatchKind.EMOTION, SearchMatchKind.TASK).mapNotNull { kind ->
             matches.filter { it.kind == kind }.takeIf { it.isNotEmpty() }?.let { kind to it }

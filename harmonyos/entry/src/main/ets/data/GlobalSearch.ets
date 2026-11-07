@@ -26,8 +26,8 @@ export function searchKindName(kind: SearchMatchKind): string {
   return tr('记录');
 }
 
-function contains(text: string, needle: string): boolean {
-  return text.toLowerCase().includes(needle);
+function escapeSearchText(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 /**
@@ -36,22 +36,23 @@ function contains(text: string, needle: string): boolean {
  */
 export function globalSearch(logs: LogItem[], emotions: EmotionRecord[], tasks: TaskItem[],
   query: string, limit: number = 20): SearchMatch[] {
-  const needle = query.trim().toLowerCase();
+  const needle = query.trim();
   if (needle === '') return [];
+  const pattern = new RegExp(escapeSearchText(needle), 'iu');
   const matches: SearchMatch[] = [];
   logs.forEach((item: LogItem) => {
-    if (contains(item.content, needle) || contains(colorTagName(item.colorTag), needle)) {
+    if (pattern.test(item.content) || pattern.test(colorTagName(item.colorTag))) {
       matches.push({ id: item.id, kind: SearchMatchKind.LOG, title: item.content, createdAt: item.createdAt });
     }
   });
   emotions.forEach((item: EmotionRecord) => {
     const title = `${emotionEmoji(item.level)} ${item.note ?? emotionName(item.level)}`;
-    if (contains(title, needle)) {
+    if (pattern.test(title)) {
       matches.push({ id: item.id, kind: SearchMatchKind.EMOTION, title: title, createdAt: item.createdAt });
     }
   });
   tasks.forEach((item: TaskItem) => {
-    if (contains(item.title, needle) || contains(item.notes ?? '', needle)) {
+    if (pattern.test(item.title) || pattern.test(item.notes ?? '')) {
       matches.push({ id: item.id, kind: SearchMatchKind.TASK, title: item.title, createdAt: item.createdAt });
     }
   });
@@ -66,17 +67,17 @@ export interface HighlightPart {
 
 /** 把标题切成命中与未命中的片段（大小写不敏感） */
 export function highlightParts(title: string, query: string): HighlightPart[] {
-  const needle = query.trim().toLowerCase();
+  const needle = query.trim();
   if (needle === '') return [{ text: title, hit: false }];
-  const lower = title.toLowerCase();
+  const pattern = new RegExp(escapeSearchText(needle), 'giu');
   const parts: HighlightPart[] = [];
   let start = 0;
-  while (start < title.length) {
-    const hit = lower.indexOf(needle, start);
-    if (hit < 0) break;
-    if (hit > start) parts.push({ text: title.slice(start, hit), hit: false });
-    parts.push({ text: title.slice(hit, hit + needle.length), hit: true });
-    start = hit + needle.length;
+  let match = pattern.exec(title);
+  while (match !== null) {
+    if (match.index > start) parts.push({ text: title.slice(start, match.index), hit: false });
+    parts.push({ text: match[0], hit: true });
+    start = pattern.lastIndex;
+    match = pattern.exec(title);
   }
   if (start < title.length) parts.push({ text: title.slice(start), hit: false });
   return parts;

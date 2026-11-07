@@ -143,6 +143,10 @@ test('global search spans kinds, limits to 20 and sorts newest first', () => {
   assert.deepEqual(mixed.map(m => m.kind), [SearchMatchKind.TASK]);
   assert.deepEqual(highlightParts('Flash flash', 'FLASH').map(p => [p.text, p.hit]),
     [['Flash', true], [' ', false], ['flash', true]]);
+  assert.deepEqual(highlightParts('İ Flash', 'flash').map(p => [p.text, p.hit]),
+    [['İ ', false], ['Flash', true]]);
+  assert.deepEqual(highlightParts('a.b', '.').map(p => [p.text, p.hit]),
+    [['a', false], ['.', true], ['b', false]]);
 });
 
 test('deep links only open screens and never carry content', () => {
