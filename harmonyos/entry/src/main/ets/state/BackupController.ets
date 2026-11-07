@@ -202,9 +202,9 @@ export class BackupController {
         },
         devices: (devices: LanDevice[]) => { this.state.lanDevices = devices; },
         sent: () => this.runtime.notify('传输完成，请在接收设备另行确认导入', 'success'),
-        received: (json: string) => {
-          try { this.stageImport(BackupService.parseStrict(json)); }
-          catch (_) { this.runtime.notify('收到的备份未通过校验，请重新传输', 'error'); }
+        received: (backup: BackupImport) => {
+          try { this.stageImport(backup); }
+          catch (_) { this.runtime.notify('无法生成备份导入预览，请重试', 'error'); }
         },
         failed: (message: string) => this.runtime.notify(message, 'error')
       };

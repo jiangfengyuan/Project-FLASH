@@ -9,7 +9,9 @@ struct LegacyLANDisablementTests {
         for action in 0..<3 {
             let controller = LocalBackupTransferController()
             defer { controller.cancel() }
-            controller.receivedJSON = "fictional stale transfer"
+            controller.receivedBackup = ImportPreview(logCount: 0, emotionCount: 0,
+                skippedLogs: 0, skippedEmotions: 0, taskCount: 0, skippedTasks: 0,
+                logs: [], emotions: [], tasks: [], sourceVersion: "fictional stale transfer")
             controller.selectedDevice = LocalTransferDevice(id: "fixture", name: "Spoofed name",
                 endpoint: .hostPort(host: .ipv4(.loopback), port: 9))
             switch action {
@@ -19,7 +21,7 @@ struct LegacyLANDisablementTests {
             }
             #expect(controller.mode == .idle)
             #expect(controller.shortCode.isEmpty && controller.devices.isEmpty)
-            #expect(controller.receivedJSON == nil)
+            #expect(controller.receivedBackup == nil)
             #expect(controller.errorMessage?.contains("局域网传输暂时停用") == true)
             #expect(controller.errorMessage?.contains("导出备份") == true)
         }

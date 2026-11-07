@@ -41,7 +41,7 @@ class SecureLanConnectionTest {
                 senderChannel.await().confirm(); delay(300)
                 assertEquals(0, calls.get())
                 receiver.confirm()
-                assertEquals(json, received.await()); assertNull(sender.await())
+                assertEquals(Backup.parseStrict(json), received.await()); assertNull(sender.await())
                 assertEquals(1, calls.get())
             } finally {
                 receiver.cancel(); channelOwner.get()?.cancel(); server.close()

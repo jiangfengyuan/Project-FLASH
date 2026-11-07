@@ -3,12 +3,12 @@ import { socket } from '@kit.NetworkKit';
 import { systemDateTime } from '@kit.BasicServicesKit';
 import { util } from '@kit.ArkTS';
 import * as lan from 'libflash_lan.so';
-import { BackupService } from './BackupService';
+import { BackupImport, BackupService } from './BackupService';
 
 export function lanNow(): number { return systemDateTime.getUptime(systemDateTime.TimeType.STARTUP); }
 export interface LanConnectionEvents {
   state: (state: number, code: number[]) => void;
-  completed: (json?: string) => void;
+  completed: (backup?: BackupImport) => void;
   failed: () => void;
 }
 export class SecureLanConnection {
@@ -19,7 +19,7 @@ export class SecureLanConnection {
   private timer: number = 0;
   private writingAt: number = 0;
   private previous: number = 0;
-  private validated?: string;
+  private validated?: BackupImport;
   private stream: socket.TCPSocket | socket.TCPSocketConnection;
   private sender: boolean;
   private snapshot: () => Promise<string>;
@@ -94,9 +94,9 @@ export class SecureLanConnection {
           try {
             // UTF-8/BOM were checked by the core before this platform decoder.
             const json = new util.TextDecoder('utf-8').decodeToString(bytes);
-            BackupService.parseStrict(json);
+            const backup = BackupService.parseStrict(json);
             this.check(lan.action(this.handle, 8, lanNow(), 1));
-            this.validated = json;
+            this.validated = backup;
           } finally { bytes.fill(0); }
         }
         const packet: ArrayBuffer | null = lan.output(this.handle, lanNow());
@@ -108,9 +108,9 @@ export class SecureLanConnection {
           this.check(lan.action(this.handle, 4, lanNow(), 0));
           this.again = true;
         } else if (this.check(lan.action(this.handle, 1, lanNow(), 0)) === 13) {
-          const json = this.validated;
-          if (!this.sender && json === undefined) throw new Error('LAN backup missing');
-          this.cancel(); this.events.completed(json); return;
+          const backup = this.validated;
+          if (!this.sender && backup === undefined) throw new Error('LAN backup missing');
+          this.cancel(); this.events.completed(backup); return;
         }
       } while (this.again && !this.closed);
     } catch (_) { this.fail(); }

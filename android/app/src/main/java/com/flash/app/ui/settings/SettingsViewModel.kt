@@ -185,12 +185,11 @@ class SettingsViewModel(
         _lanTransfer.value = LanTransferState()
     }
 
-    private fun prepareLanImport(json: String) {
+    private fun prepareLanImport(result: Backup.ImportResult) {
         val generation = importSession.begin()
         _importPreview.value = null
         val operation = viewModelScope.launch(Dispatchers.IO) {
             try {
-                val result = Backup.parseStrict(json)
                 val local = repository.exportSnapshot()
                 val preview = ImportPreview(
                     logCount = result.logs.size, emotionCount = result.emotions.size,

@@ -11,7 +11,7 @@ import Testing
     var receiverCode: [UInt16] = []
     var snapshots = 0
     var sent = false
-    var received: String?
+    var received: ImportPreview?
     var failures = 0
     let listener: NWListener
     let json: String
@@ -44,7 +44,7 @@ import Testing
                 guard let self else { return }
                 switch event {
                 case .code(let code): self.receiverCode = code
-                case .received(let json): self.received = json
+                case .received(let backup): self.received = backup
                 case .failed: self.failures += 1
                 default: break
                 }
@@ -78,7 +78,7 @@ struct SecureLanIntegrationTests {
         #expect(h.snapshots == 0 && h.received == nil && !h.sent)
         h.receiver?.confirm()
         try await h.wait { h.sent && h.received != nil }
-        #expect(h.snapshots == 1 && h.received == Self.backup && h.failures == 0)
+        #expect(h.snapshots == 1 && h.received?.sourceVersion == "flash-backup-v2" && h.failures == 0)
     }
     @Test(.enabled(if: SecureLanSession.available)) @MainActor
     func strictParserRejectsWithoutReceiptOrPreview() async throws {

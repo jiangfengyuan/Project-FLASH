@@ -1,4 +1,5 @@
 // Copyright (c) 2026 Fengyuan Jiang · MPL-2.0
+import { BackupImport } from './BackupService';
 import { common } from '@kit.AbilityKit';
 import { mdns, socket } from '@kit.NetworkKit';
 import { util } from '@kit.ArkTS';
@@ -13,7 +14,7 @@ export interface LanEvents {
   phase: (phase: LanPhase, code: number[]) => void;
   devices: (devices: LanDevice[]) => void;
   sent: () => void;
-  received: (json: string) => void;
+  received: (backup: BackupImport) => void;
   failed: (message: string) => void;
 }
 export class SecureLanTransfer {
@@ -133,10 +134,10 @@ export class SecureLanTransfer {
           state === 11 ? LanPhase.VERIFYING : state >= 8 && state <= 12 ? LanPhase.TRANSFERRING : LanPhase.HANDSHAKE;
         this.events.phase(phase, code);
       },
-      completed: (json?: string) => {
+      completed: (backup?: BackupImport) => {
         if (epoch !== this.epoch || attempt !== this.attempt) return;
         const sender = this.sending; this.cancel(); this.events.phase(LanPhase.COMPLETED, []);
-        if (sender) this.events.sent(); else if (json !== undefined) this.events.received(json);
+        if (sender) this.events.sent(); else if (backup !== undefined) this.events.received(backup);
       },
       failed: () => { if (epoch === this.epoch && attempt === this.attempt) this.connectionFailed(); }
     };

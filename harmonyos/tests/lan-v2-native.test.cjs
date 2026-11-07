@@ -32,7 +32,7 @@ async function pair(json) {
   const sender = new SecureLanConnection(left,true,120000,async()=>{state.snapshots++; return json;},{
     state:(s,code)=>{if(s===6) state.codes[0]=code;}, completed:()=>{state.sent=true;}, failed:()=>{state.failures++;}});
   const receiver = new SecureLanConnection(right,false,120000,async()=>{throw Error('Receiver exported');},{
-    state:(s,code)=>{if(s===6) state.codes[1]=code;}, completed:json=>{state.received=json;}, failed:()=>{state.failures++;}});
+    state:(s,code)=>{if(s===6) state.codes[1]=code;}, completed:backup=>{state.received=backup;}, failed:()=>{state.failures++;}});
   // Install receiver before its first Hello write reaches the sender.
   sender.start(); receiver.start();
   return {state,sender,receiver,left,right};
@@ -48,7 +48,7 @@ test('N-API and ArkTS: fragmented records and close before ACK write completion'
     assert.deepEqual(state.codes[0],state.codes[1]); assert.equal(state.snapshots,0);
     sender.confirm(); await new Promise(r=>setTimeout(r,50)); assert.equal(state.snapshots,0);
     receiver.confirm(); await wait(()=>state.sent&&state.received!==undefined);
-    assert.equal(state.received,fixture); assert.equal(state.snapshots,1); assert.equal(state.failures,0);
+    assert.equal(state.received.sourceVersion,'flash-backup-v2'); assert.equal(state.snapshots,1); assert.equal(state.failures,0);
   } finally {sender.cancel();receiver.cancel();}
 });
 test('N-API and ArkTS: strict rejection produces no receipt or preview', {skip:!addon}, async()=>{
@@ -64,7 +64,7 @@ test('N-API and ArkTS: lost receipt never gives sender success', {skip:!addon}, 
   try {
     await wait(()=>state.codes.length===2); sender.confirm();receiver.confirm();
     await wait(()=>state.failures>=1&&state.received!==undefined);
-    assert.equal(state.sent,false);assert.equal(state.received,fixture);
+    assert.equal(state.sent,false);assert.equal(state.received.sourceVersion,'flash-backup-v2');
   } finally {sender.cancel();receiver.cancel();}
 });
 test('N-API and ArkTS: cancellation during code comparison never exports', {skip:!addon}, async()=>{

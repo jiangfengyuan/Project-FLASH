@@ -24,7 +24,7 @@ internal class SecureLanConnection(private val socket: Socket) {
         sender: Boolean, remaining: Long,
         snapshot: suspend () -> String,
         onState: (Int, List<Int>) -> Unit,
-    ): String? = withContext(Dispatchers.IO) {
+    ): Backup.ImportResult? = withContext(Dispatchers.IO) {
         val id = LanNative.create(if (sender) 1 else 2, SystemClock.elapsedRealtime(), remaining)
         check(id > 0) { "LAN_NATIVE_UNAVAILABLE" }
         val owner = currentCoroutineContext().job
@@ -41,7 +41,7 @@ internal class SecureLanConnection(private val socket: Socket) {
                 }
             }
         }
-        var validated: String? = null
+        var validated: Backup.ImportResult? = null
         val input = ByteArray(65_536)
         try {
             socket.soTimeout = 250
@@ -74,11 +74,11 @@ internal class SecureLanConnection(private val socket: Socket) {
                         try {
                             // Core already rejects malformed UTF-8 and BOM.
                             val json = bytes.toString(Charsets.UTF_8)
-                            Backup.parseStrict(json)
+                            val backup = Backup.parseStrict(json)
                             currentCoroutineContext().ensureActive()
                             check(!cancelled.get())
                             checked(LanNative.action(id, 8, SystemClock.elapsedRealtime(), 1))
-                            validated = json
+                            validated = backup
                         } finally { bytes.fill(0) }
                     }
                 }

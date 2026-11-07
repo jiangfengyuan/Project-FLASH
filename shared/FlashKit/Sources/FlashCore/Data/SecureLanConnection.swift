@@ -7,7 +7,7 @@ import Foundation
 /// the monotonic watchdog. No database writes belong to this object.
 @MainActor
 final class SecureLanConnection {
-    enum Event { case phase(LocalTransferPhase), code([UInt16]), sent, received(String), failed(SecureLanError) }
+    enum Event { case phase(LocalTransferPhase), code([UInt16]), sent, received(ImportPreview), failed(SecureLanError) }
     typealias Snapshot = @MainActor @Sendable () async throws -> String
     static func now() -> UInt64 { DispatchTime.now().uptimeNanoseconds / 1_000_000 }
     private let connection: NWConnection
@@ -19,7 +19,7 @@ final class SecureLanConnection {
     private var writing = false
     private var working = false
     private var presentedCode = false
-    private var validatedJSON: String?
+    private var validatedBackup: ImportPreview?
     private var watchdog: Task<Void, Never>?
     private var work: Task<Void, Never>?
     private let connectedBy: UInt64
@@ -71,7 +71,7 @@ final class SecureLanConnection {
         guard !closed else { return }
         closed = true
         watchdog?.cancel(); work?.cancel()
-        native.cancel(); validatedJSON = nil
+        native.cancel(); validatedBackup = nil
         connection.stateUpdateHandler = nil; connection.cancel()
     }
     private func fail(_ error: SecureLanError) {
@@ -88,7 +88,7 @@ final class SecureLanConnection {
                         // A receipt already authenticated on the sender is final;
                         // all other EOFs, including a lost receipt, fail closed.
                         if self.sender, try self.native.state == 13 { self.advance(); return }
-                        if !self.sender, self.writing, self.validatedJSON != nil,
+                        if !self.sender, self.writing, self.validatedBackup != nil,
                            try self.native.state == 13 { return }
                         throw SecureLanError.unconfirmed
                     }
@@ -127,14 +127,13 @@ final class SecureLanConnection {
                 let bytes = try native.received()
                 work = Task { [weak self] in
                     do {
-                        let json = try await Task.detached(priority: .userInitiated) {
+                        let backup = try await BackupImportCoordinator.background {
                             guard let json = String(data: bytes, encoding: .utf8) else { throw SecureLanError.invalidBackup }
-                            _ = try BackupService.parseStrict(json)
-                            return json
-                        }.value
+                            return try BackupService.parseStrict(json)
+                        }
                         guard let self, !self.closed, !Task.isCancelled else { return }
                         try self.native.validated(true, now: Self.now())
-                        self.validatedJSON = json; self.working = false; self.advance()
+                        self.validatedBackup = backup; self.working = false; self.advance()
                     } catch { self?.fail(.invalidBackup) }
                 }
             default: break
@@ -153,10 +152,10 @@ final class SecureLanConnection {
                     }
                 })
             } else if state == 13 {
-                let json = validatedJSON
+                let backup = validatedBackup
                 cancel()
                 if sender { event(.sent) }
-                else if let json { event(.received(json)) }
+                else if let backup { event(.received(backup)) }
                 else { event(.failed(.invalidBackup)) }
             }
         } catch { fail(error as? SecureLanError ?? .network) }

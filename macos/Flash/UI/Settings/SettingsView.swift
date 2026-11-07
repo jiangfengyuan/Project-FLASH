@@ -96,10 +96,9 @@ struct SettingsView: View {
             }
         }
         .sheet(isPresented: lanTransferPresented) { lanTransferSheet }
-        .onChange(of: lanTransfer.receivedJSON) { _, json in
-            guard let json else { return }
-            lanTransfer.receivedJSON = nil
-            prepareLanImport(json)
+        .onChange(of: lanTransfer.receivedBackup != nil) { _, ready in
+            guard ready, let backup = lanTransfer.takeReceivedBackup() else { return }
+            prepareLanImport(backup)
         }
         .onChange(of: lanTransfer.errorMessage) { _, error in
             guard let error else { return }
@@ -225,9 +224,8 @@ struct SettingsView: View {
     }
 
     private func flushLanTransferResults() {
-        if let json = lanTransfer.receivedJSON {
-            lanTransfer.receivedJSON = nil
-            prepareLanImport(json)
+        if let backup = lanTransfer.takeReceivedBackup() {
+            prepareLanImport(backup)
         }
         if let error = lanTransfer.errorMessage {
             lanTransfer.errorMessage = nil
@@ -239,14 +237,14 @@ struct SettingsView: View {
         }
     }
 
-    private func prepareLanImport(_ json: String) {
+    private func prepareLanImport(_ backup: ImportPreview) {
         recoveryImport = false
         isBusy = true
         Task {
             defer { isBusy = false }
             do {
                 let snapshot = try currentSnapshot()
-                let preview = try await BackupImportCoordinator.preview(json: json, against: snapshot)
+                let preview = try await BackupImportCoordinator.preview(validated: backup, against: snapshot)
                 pendingImport = preview
                 pendingSnapshot = snapshot
                 importPreview = preview

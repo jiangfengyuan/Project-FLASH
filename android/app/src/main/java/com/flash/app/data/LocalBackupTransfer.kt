@@ -25,7 +25,7 @@ internal class SecureLanController(
     private val onPhase: (LocalBackupTransfer.Phase, List<Int>) -> Unit,
     private val onDevices: (List<LocalBackupTransfer.Device>) -> Unit,
     private val onSent: () -> Unit,
-    private val onReceived: (String) -> Unit,
+    private val onReceived: (Backup.ImportResult) -> Unit,
     private val onFailure: (String) -> Unit,
     private val enabled: Boolean = LocalBackupTransfer.ENABLED,
 ) {
@@ -66,9 +66,14 @@ internal class SecureLanController(
         val e = begin(true) ?: return
         provider = snapshot
         operation = scope.launch {
+            var acquiredListener: ServerSocket? = null
             try {
-                val listener = withContext(Dispatchers.IO) { ServerSocket(0).apply { soTimeout = 250 } }
-                if (!current(e)) { listener.close(); return@launch }
+                // Capture ownership on IO so prompt cancellation during the
+                // dispatcher handoff cannot discard a live descriptor.
+                withContext(Dispatchers.IO) { acquiredListener = ServerSocket(0) }
+                val listener = checkNotNull(acquiredListener)
+                if (!current(e)) return@launch
+                listener.soTimeout = 250
                 server = listener
                 val registration = object : NsdManager.RegistrationListener {
                     override fun onServiceRegistered(info: NsdServiceInfo) = Unit
@@ -82,16 +87,24 @@ internal class SecureLanController(
                     serviceType = LocalBackupTransfer.SERVICE_TYPE; port = listener.localPort
                 }, NsdManager.PROTOCOL_DNS_SD, registration)
                 while (current(e) && isActive) {
-                    val accepted = withContext(Dispatchers.IO) {
-                        try { listener.accept() } catch (_: java.net.SocketTimeoutException) { null }
-                    } ?: continue
-                    val now = SystemClock.elapsedRealtime()
-                    if (now >= end || now < retryAfter || failures >= 3) { accepted.close(); continue }
-                    socket = accepted; connecting = true
-                    transfer(accepted, e)
+                    var acquiredPeer: Socket? = null
+                    try {
+                        withContext(Dispatchers.IO) {
+                            try { acquiredPeer = listener.accept() } catch (_: java.net.SocketTimeoutException) { }
+                        }
+                        val accepted = acquiredPeer ?: continue
+                        val now = SystemClock.elapsedRealtime()
+                        if (!current(e) || now >= end || now < retryAfter || failures >= 3) continue
+                        socket = accepted; connecting = true
+                        transfer(accepted, e)
+                    } finally {
+                        runCatching { acquiredPeer?.close() }
+                    }
                 }
             } catch (error: Exception) {
                 if (current(e) && error !is CancellationException) fail("无法建立安全局域网连接，请检查本地网络权限")
+            } finally {
+                runCatching { acquiredListener?.close() }
             }
         }
     }
@@ -153,7 +166,7 @@ internal class SecureLanController(
         val channel = SecureLanConnection(socket); active = channel
         onPhase(LocalBackupTransfer.Phase.HANDSHAKE, emptyList())
         try {
-            val json = channel.run(sending, (end - SystemClock.elapsedRealtime()).coerceAtLeast(1),
+            val backup = channel.run(sending, (end - SystemClock.elapsedRealtime()).coerceAtLeast(1),
                 snapshot = { provider?.invoke() ?: error("LAN_SNAPSHOT") }) { state, code -> dispatch(e) {
                 if (active !== channel) return@dispatch
                 onPhase(when (state) {
@@ -167,7 +180,7 @@ internal class SecureLanController(
             if (!current(e)) return
             val wasSending = sending
             cancel(); onPhase(LocalBackupTransfer.Phase.COMPLETED, emptyList())
-            if (wasSending) onSent() else onReceived(json ?: error("LAN_BACKUP"))
+            if (wasSending) onSent() else onReceived(backup ?: error("LAN_BACKUP"))
         } catch (error: Exception) {
             // A native watchdog cancellation is a connection failure; user
             // cancellation has already advanced the opening epoch.

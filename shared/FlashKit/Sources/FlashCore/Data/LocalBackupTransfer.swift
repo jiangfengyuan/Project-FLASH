@@ -42,7 +42,7 @@ public final class LocalBackupTransferController {
     public private(set) var shortCode: [UInt16] = []
     public private(set) var devices: [LocalTransferDevice] = []
     public var selectedDevice: LocalTransferDevice?
-    public var receivedJSON: String?
+    public internal(set) var receivedBackup: ImportPreview?
     public var errorMessage: String?
     public var sendCompleted = false
     @ObservationIgnored private let allowed: Bool
@@ -101,7 +101,8 @@ public final class LocalBackupTransferController {
         let browser = NWBrowser(for: .bonjour(type: "_flashbackup2._tcp", domain: nil), using: .tcp)
         self.browser = browser
         browser.browseResultsChangedHandler = { [weak self] results, _ in
-            let found = results.map { result in
+            // A LAN advertiser controls the number of discovery entries.
+            let found = results.prefix(64).map { result in
                 let endpoint = result.endpoint
                 let name: String
                 if case .service(let service, _, _, _) = endpoint { name = String(service.prefix(80)) }
@@ -157,8 +158,8 @@ public final class LocalBackupTransferController {
                 case .code(let code): self.shortCode = code
                 case .sent:
                     self.cleanup(); self.phase = .completed; self.sendCompleted = true
-                case .received(let json):
-                    self.cleanup(); self.phase = .completed; self.receivedJSON = json
+                case .received(let backup):
+                    self.cleanup(); self.phase = .completed; self.receivedBackup = backup
                 case .failed(let error): self.connectionFailed(error)
                 }
             }
@@ -184,7 +185,12 @@ public final class LocalBackupTransferController {
         listener?.cancel(); listener = nil; browser?.cancel(); browser = nil
         snapshot = nil; mode = .idle; shortCode = []; devices = []; selectedDevice = nil
     }
+    public func takeReceivedBackup() -> ImportPreview? {
+        defer { receivedBackup = nil }
+        return receivedBackup
+    }
+
     public func cancel() {
-        cleanup(); phase = .idle; receivedJSON = nil; sendCompleted = false
+        cleanup(); phase = .idle; receivedBackup = nil; sendCompleted = false
     }
 }
