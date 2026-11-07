@@ -11805,6 +11805,58 @@
         }
       }
     },
+    "把 ${text} 记为 ${category}": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "احفظ ${text} كـ ${category}"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "${text} als ${category} speichern"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save ${text} as ${category}"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enregistrer ${text} comme ${category}"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "${text} を ${category} として記録"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "${text}을(를) ${category}(으)로 기록"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Записать ${text} как ${category}"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "把 ${text} 记为 ${category}"
+          }
+        }
+      }
+    },
     "把刚闪过的念头直接记到 Flash，无需打开应用。": {
       "localizations": {
         "ar": {

@@ -70,8 +70,23 @@ def ios_value(text, spec_of):
     return PLACEHOLDER.sub(repl, text.replace("%", "%%"))
 
 
-def ios_catalog(table, ios_map, path):
+# 快捷指令的参数摘要：编译器不抽取，占位是 ${参数名}，语序各语言自定
+INTENT_SUMMARIES = {
+    "把 ${text} 记为 ${category}": {
+        "en": "Save ${text} as ${category}", "fr": "Enregistrer ${text} comme ${category}",
+        "ko": "${text}을(를) ${category}(으)로 기록", "de": "${text} als ${category} speichern",
+        "ru": "Записать ${text} как ${category}", "ar": "احفظ ${text} كـ ${category}",
+        "ja": "${text} を ${category} として記録",
+    },
+}
+
+
+def ios_catalog(table, ios_map, path, extras=None):
     strings = {}
+    for key, row in (extras or {}).items():
+        loc = {lang: {"stringUnit": {"state": "translated", "value": value}} for lang, value in row.items()}
+        loc["zh-Hans"] = {"stringUnit": {"state": "translated", "value": key}}
+        strings[key] = {"localizations": loc}
     for norm, raw in sorted(ios_map.items()):
         row = table.get(norm)
         if row is None:
@@ -198,7 +213,8 @@ def main():
         json.dump(table, fh, ensure_ascii=False, indent=1, sort_keys=True)
         fh.write("\n")
     for folder in ("ios/Flash", "ios/FlashWidget", "ios/FlashShare"):
-        ios_catalog(table, keys_doc["ios"], os.path.join(ROOT, folder, "Localizable.xcstrings"))
+        ios_catalog(table, keys_doc["ios"], os.path.join(ROOT, folder, "Localizable.xcstrings"),
+                    INTENT_SUMMARIES if folder == "ios/Flash" else None)
     android(table, sorted(set(keys_doc["android"]) | {k for k in keys_doc["resources"] if k in HAND_ANDROID.values()}))
     harmony(table, sorted(set(keys_doc["harmony"])))
 

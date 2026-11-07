@@ -15,10 +15,10 @@ import FlashCore
 @Suite("iOS 此刻切片")
 struct HomeSliceTests {
     @Test func tabsSurfaceEmotionAndFoldMemoryIntoReview() {
-        #expect(AppTab.allCases.map(\.title) == ["此刻", "记录", "情绪", "回顾", "设置"])
+        #expect(AppTab.allCases.map(\.title) == [L("此刻"), L("记录"), L("情绪"), L("回顾"), L("设置")])
         #expect(AppTab.home.systemImage == "house")
         #expect(AppTab.emotion.systemImage == "face.smiling")
-        #expect(AppRoute.memory.title == "Memory")
+        #expect(AppRoute.memory.title == L("Memory"))
     }
 
     @Test func databaseFallbackRaisesAlertMessage() {
@@ -36,9 +36,9 @@ struct HomeSliceTests {
         let repository = FlashRepository(container: FlashDatabase.makeContainer(inMemory: true))
         let before = repository.revision
         #expect(try QuickCaptureCommit.commit("通勤路上想到的点子!!", as: .idea, repository: repository)
-                == .saved(toast: "✓ 已保存到灵感"))
+                == .saved(toast: L("✓ 已保存到灵感")))
         #expect(try QuickCaptureCommit.commit("午饭吃了面", as: .log, repository: repository)
-                == .saved(toast: "✓ 已保存到日志"))
+                == .saved(toast: L("✓ 已保存到日志")))
         #expect(repository.revision == before + 2)
 
         let viewModel = HomeViewModel()

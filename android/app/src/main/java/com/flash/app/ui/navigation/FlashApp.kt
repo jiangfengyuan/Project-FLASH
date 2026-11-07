@@ -113,7 +113,7 @@ fun FlashApp() {
 
     var capture by remember { mutableStateOf<CaptureRequest?>(null) }
     var taskRequest by remember { mutableStateOf<TaskRequest?>(null) }
-    var pendingCalendarFocus by rememberSaveable { mutableStateOf(false) }
+    var calendarFocusDate by rememberSaveable { mutableStateOf<String?>(null) }
     var explorePresetIdeas by rememberSaveable { mutableStateOf(false) }
 
     val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -236,7 +236,7 @@ fun FlashApp() {
                         CalendarScreen(
                             onOpenRecord = actions.openRecord,
                             onBack = { navController.popBackStack() },
-                            initialDate = null,
+                            initialDate = calendarFocusDate?.let { runCatching { java.time.LocalDate.parse(it) }.getOrNull() },
                         )
                     }
                     composable(Routes.LOG_FLOW) {
@@ -254,7 +254,8 @@ fun FlashApp() {
                                 navController.popBackStack()
                                 navController.openTab(Routes.EMOTION)
                             },
-                            onOpenTask = {
+                            onOpenTask = { date ->
+                                calendarFocusDate = date
                                 navController.popBackStack()
                                 navController.navigate(Routes.CALENDAR)
                             },

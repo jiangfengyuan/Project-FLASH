@@ -77,7 +77,7 @@ fun SearchScreen(
     onBack: () -> Unit,
     onOpenLog: (String) -> Unit,
     onOpenEmotion: () -> Unit,
-    onOpenTask: () -> Unit,
+    onOpenTask: (date: String?) -> Unit,
 ) {
     val app = LocalContext.current.applicationContext as FlashApplication
     val logs by app.repository.logs.collectAsState(emptyList())
@@ -172,7 +172,7 @@ fun SearchScreen(
                                 when (match.kind) {
                                     SearchMatchKind.LOG -> onOpenLog(match.id)
                                     SearchMatchKind.EMOTION -> onOpenEmotion()
-                                    SearchMatchKind.TASK -> onOpenTask()
+                                    SearchMatchKind.TASK -> onOpenTask(tasks.firstOrNull { it.id == match.id }?.calendarDate)
                                 }
                             }
                         }
