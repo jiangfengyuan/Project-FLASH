@@ -30,14 +30,14 @@ internal fun ActivityChart(days: List<DailyActivity>) {
     val color = MaterialTheme.colorScheme.primary
     val grid = MaterialTheme.colorScheme.outlineVariant
     FlashCard(Modifier.fillMaxWidth()) {
-        Text("记录活跃度", style = MaterialTheme.typography.titleMedium)
-        Text("每天的日志、灵感与情绪次数 · 不含任务", style = MaterialTheme.typography.bodySmall)
-        Text("$active 个活跃日 · 共 ${days.sumOf { it.total }} 次",
+        Text(com.flash.app.i18n.tr("记录活跃度"), style = MaterialTheme.typography.titleMedium)
+        Text(com.flash.app.i18n.tr("每天的日志、灵感与情绪次数 · 不含任务"), style = MaterialTheme.typography.bodySmall)
+        Text(com.flash.app.i18n.tr("{0} 个活跃日 · 共 {1} 次", active, days.sumOf { it.total }),
             style = MaterialTheme.typography.bodyMedium)
         Spacer(Modifier.height(12.dp))
-        Text("$maximum 次", style = MaterialTheme.typography.labelSmall)
+        Text(com.flash.app.i18n.tr("{0} 次", maximum), style = MaterialTheme.typography.labelSmall)
         Canvas(Modifier.fillMaxWidth().height(128.dp).semantics {
-            contentDescription = "记录活跃度，${days.size} 天中 $active 天有记录，共 ${days.sumOf { it.total }} 次。可展开每日明细。"
+            contentDescription = com.flash.app.i18n.tr("记录活跃度，{0} 天中 {1} 天有记录，共 {2} 次。可展开每日明细。", days.size, active, days.sumOf { it.total })
         }) {
             if (days.isEmpty()) return@Canvas
             val slot = size.width / days.size
@@ -55,13 +55,13 @@ internal fun ActivityChart(days: List<DailyActivity>) {
             Text(days.firstOrNull()?.date?.toString().orEmpty(), style = MaterialTheme.typography.labelSmall)
             Text(days.lastOrNull()?.date?.toString().orEmpty(), style = MaterialTheme.typography.labelSmall)
         }
-        if (active == 0) Text("这段时间还没有记录，空白日期按 0 次显示。",
+        if (active == 0) Text(com.flash.app.i18n.tr("这段时间还没有记录，空白日期按 0 次显示。"),
             style = MaterialTheme.typography.bodySmall)
         TextButton(onClick = { expanded = !expanded }) {
-            Text(if (expanded) "收起每日明细" else "查看每日明细")
+            Text(if (expanded) com.flash.app.i18n.tr("收起每日明细") else com.flash.app.i18n.tr("查看每日明细"))
         }
         if (expanded) days.forEach { day ->
-            Text("${day.date}：${day.records} 条记录 · ${day.emotions} 次情绪",
+            Text(com.flash.app.i18n.tr("{0}：{1} 条记录 · {2} 次情绪", day.date, day.records, day.emotions),
                 style = MaterialTheme.typography.bodySmall)
         }
     }

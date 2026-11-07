@@ -52,7 +52,7 @@ import com.flash.app.ui.emotion.EmotionStatsSection
 /** 统计 Tab：数据概览 + 情绪走势（对应 PRD Insights） */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StatsScreen(onOpenSettings: () -> Unit, onOpenRecord: (String) -> Unit) {
+fun StatsScreen(onOpenMemory: () -> Unit, onOpenRecord: (String) -> Unit) {
     val app = LocalContext.current.applicationContext as FlashApplication
     val viewModel: StatsViewModel = viewModel(factory = StatsViewModel.factory(app.repository))
     val ui by viewModel.uiState.collectAsStateWithLifecycle()
@@ -76,25 +76,28 @@ fun StatsScreen(onOpenSettings: () -> Unit, onOpenRecord: (String) -> Unit) {
         containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
-                title = { Text("回顾") },
+                title = { Text(com.flash.app.i18n.tr("回顾")) },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                actions = {
+                    androidx.compose.material3.TextButton(onClick = onOpenMemory) { Text("Memory") }
+                },
             )
         },
     ) { innerPadding ->
         Column(Modifier.padding(innerPadding).fillMaxSize()) {
             FlashSegmentedControl(
-                options = listOf(false to "趋势", true to "日历"),
+                options = listOf(false to com.flash.app.i18n.tr("趋势"), true to com.flash.app.i18n.tr("日历")),
                 selected = calendar,
                 onSelect = { calendar = it },
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = com.flash.app.ui.paper.pageGutter(), vertical = 8.dp),
             )
             if (calendar) {
-                CalendarScreen(onOpenSettings, onOpenRecord, embedded = true, listState = calendarScroll)
+                CalendarScreen(onOpenRecord, embedded = true, listState = calendarScroll)
             } else {
         LazyColumn(
             state = trendScroll,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp,
+            contentPadding = PaddingValues(start = com.flash.app.ui.paper.pageGutter(), end = com.flash.app.ui.paper.pageGutter(), top = 8.dp,
                 bottom = 8.dp + com.flash.app.ui.navigation.LocalPageBottomPadding.current),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
@@ -112,14 +115,14 @@ fun StatsScreen(onOpenSettings: () -> Unit, onOpenRecord: (String) -> Unit) {
                     Text("$start — $end", style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                     if (insight.hasEnoughData) {
-                        Text("${window.currentName} ${insight.currentCount} 条 · ${window.previousName} ${insight.previousCount} 条",
+                        Text(com.flash.app.i18n.tr("{0} {1} 条 · {2} {3} 条", window.currentName, insight.currentCount, window.previousName, insight.previousCount),
                             style = MaterialTheme.typography.bodyMedium)
                         insight.currentEmotionMean?.let { mean ->
-                            Text("情绪均值 ${formatEmotionMean(mean)}（-3 至 +3）",
+                            Text(com.flash.app.i18n.tr("情绪均值 {0}（-3 至 +3）", formatEmotionMean(mean)),
                                 style = MaterialTheme.typography.bodyMedium)
                         }
                     } else {
-                        Text("${logs.size} 条记录 · ${emotions.size} 次情绪",
+                        Text(com.flash.app.i18n.tr("{0} 条记录 · {1} 次情绪", logs.size, emotions.size),
                             style = MaterialTheme.typography.bodyMedium)
                     }
                 }
@@ -127,16 +130,16 @@ fun StatsScreen(onOpenSettings: () -> Unit, onOpenRecord: (String) -> Unit) {
             item(key = "activity") { ActivityChart(activity) }
             item(key = "overview") {
                 FlashCard(modifier = Modifier.fillMaxWidth()) {
-                    Text("累计概览 · 全部时间", style = MaterialTheme.typography.titleSmall)
+                    Text(com.flash.app.i18n.tr("累计概览 · 全部时间"), style = MaterialTheme.typography.titleSmall)
                     Spacer(Modifier.height(8.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly,
                     ) {
-                        StatItem("${ui.totalLogs}", "日志")
-                        StatItem("${ui.totalIdeas}", "灵感")
-                        StatItem("${ui.totalEmotions}", "情绪")
-                        StatItem("${ui.activeDays}", "活跃天数")
+                        StatItem("${ui.totalLogs}", com.flash.app.i18n.tr("日志"))
+                        StatItem("${ui.totalIdeas}", com.flash.app.i18n.tr("灵感"))
+                        StatItem("${ui.totalEmotions}", com.flash.app.i18n.tr("情绪"))
+                        StatItem("${ui.activeDays}", com.flash.app.i18n.tr("活跃天数"))
                     }
                 }
             }
@@ -154,7 +157,7 @@ fun StatsScreen(onOpenSettings: () -> Unit, onOpenRecord: (String) -> Unit) {
 @Composable
 private fun StatItem(value: String, label: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(value, style = MaterialTheme.typography.titleLarge)
+        Text(value, style = MaterialTheme.typography.titleLarge.merge(com.flash.app.ui.theme.StatNumberStyle))
         Text(
             label,
             style = MaterialTheme.typography.labelSmall,
@@ -165,15 +168,15 @@ private fun StatItem(value: String, label: String) {
 
 /** 洞察卡首行结论：数据不足时不强行给趋势判断。 */
 private fun insightHeadline(insight: ReviewInsight, window: ReviewWindow): String {
-    if (!insight.hasEnoughData) return "继续记录，回顾会慢慢清晰"
+    if (!insight.hasEnoughData) return com.flash.app.i18n.tr("继续记录，回顾会慢慢清晰")
     val base = when (insight.trend) {
-        ReviewInsight.Trend.MORE -> "${window.currentName}你记录得比${window.previousName}更频繁"
-        ReviewInsight.Trend.LESS -> "${window.currentName}不如${window.previousName}活跃"
-        ReviewInsight.Trend.SAME -> "${window.currentName}与${window.previousName}持平"
+        ReviewInsight.Trend.MORE -> com.flash.app.i18n.tr("{0}你记录得比{1}更频繁", window.currentName, window.previousName)
+        ReviewInsight.Trend.LESS -> com.flash.app.i18n.tr("{0}的记录不如{1}活跃", window.currentName, window.previousName)
+        ReviewInsight.Trend.SAME -> com.flash.app.i18n.tr("{0}的记录与{1}持平", window.currentName, window.previousName)
     }
     return when (insight.emotionShift) {
-        ReviewInsight.Trend.MORE -> "$base，情绪整体更积极"
-        ReviewInsight.Trend.LESS -> "$base，情绪略偏低落"
+        ReviewInsight.Trend.MORE -> base + com.flash.app.i18n.tr("，情绪整体更好一些")
+        ReviewInsight.Trend.LESS -> base + com.flash.app.i18n.tr("，情绪整体更低落一些")
         else -> base
     }
 }

@@ -9,7 +9,7 @@ internal class StrictJson(private val text: String) {
         whitespace()
         if (index != text.length) fail()
     }
-    private fun fail(): Nothing = throw Backup.BackupFormatException("/：JSON 语法不合法（位置 $index）")
+    private fun fail(): Nothing = throw Backup.BackupFormatException(com.flash.app.i18n.tr("/：JSON 语法不合法（位置 {0}）", index))
     private fun whitespace() { while (index < text.length && text[index] in " \t\r\n") index++ }
     private fun take(c: Char): Boolean {
         whitespace()
@@ -21,7 +21,7 @@ internal class StrictJson(private val text: String) {
         // Match FlashCore's preallocation budget. A dense20MiB primitive
         // array must not expand into millions of org.json objects first.
         valueCount++
-        if (valueCount > 10_000_000) throw Backup.BackupFormatException("/：JSON 值数量超过资源上限")
+        if (valueCount > 10_000_000) throw Backup.BackupFormatException(com.flash.app.i18n.tr("/：JSON 值数量超过资源上限"))
         whitespace()
         if (depth > 128 || index == text.length) fail()
         when (text[index]) {
@@ -33,7 +33,7 @@ internal class StrictJson(private val text: String) {
                     whitespace()
                     val key = string()
                     if (!keys.add(key)) {
-                        throw Backup.BackupFormatException("/：JSON 对象包含重复键：$key")
+                        throw Backup.BackupFormatException(com.flash.app.i18n.tr("/：JSON 对象包含重复键：{0}", key))
                     }
                     expect(':')
                     value(depth + 1)

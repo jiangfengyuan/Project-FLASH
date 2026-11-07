@@ -26,7 +26,7 @@ import java.time.Instant
 @Composable
 fun RecordDateField(value: String, onChange: (String) -> Unit, enabled: Boolean = true) {
     var open by remember { mutableStateOf(false) }
-    TextButton(onClick = { open = true }, enabled = enabled) { Text("记录日期：$value") }
+    TextButton(onClick = { open = true }, enabled = enabled) { Text(com.flash.app.i18n.tr("记录日期：{0}", value)) }
     if (open) {
         val state = rememberDatePickerState(
             initialSelectedDateMillis = LocalDate.parse(value).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),
@@ -40,9 +40,9 @@ fun RecordDateField(value: String, onChange: (String) -> Unit, enabled: Boolean 
                         onChange(Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate().toString())
                     }
                     open = false
-                }) { Text("确定") }
+                }) { Text(com.flash.app.i18n.tr("确定")) }
             },
-            dismissButton = { TextButton(onClick = { open = false }) { Text("取消") } },
+            dismissButton = { TextButton(onClick = { open = false }) { Text(com.flash.app.i18n.tr("取消")) } },
         ) { DatePicker(state = state) }
     }
 }

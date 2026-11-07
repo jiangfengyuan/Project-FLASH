@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -30,27 +31,27 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.DeleteForever
-import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.FileUpload
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.Lightbulb
+import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Wifi
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -64,44 +65,239 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.flash.app.BuildConfig
 import com.flash.app.FlashApplication
+import com.flash.app.data.IdeaReminderFrequency
 import com.flash.app.data.ThemeMode
-import com.flash.app.data.UiStyle
-import com.flash.app.data.LocalBackupTransfer
+import com.flash.app.data.reminder.IdeaReminderWork
+import com.flash.app.i18n.tr
 import com.flash.app.ui.components.FlashCard
 import com.flash.app.ui.components.FlashSegmentedControl
+import com.flash.app.ui.navigation.LocalPageBottomPadding
+import com.flash.app.ui.paper.pageGutter
 import com.flash.app.ui.theme.FlashTokens
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
-/** 设置/我的 页：本地存储提示 + 外观 / 数据与安全 / 危险操作 / 关于。作为「我的」Tab 时 onBack 传 null */
+/** 设置页（对齐 iOS）：外观 / 灵感提醒 / 数据 / 关于，细节在子页。 */
 @Composable
-fun SettingsScreen(onBack: (() -> Unit)? = null) {
+fun SettingsScreen(
+    onOpenIdeaReminder: () -> Unit,
+    onOpenBackup: () -> Unit,
+    onOpenTransfer: () -> Unit,
+) {
     val context = LocalContext.current
     val app = context.applicationContext as FlashApplication
     val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.factory(app))
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
-    val uiStyle by viewModel.uiStyle.collectAsStateWithLifecycle()
+    val ideaEnabled by app.settings.ideaReminderEnabled.collectAsStateWithLifecycle()
+    val frequency by app.settings.ideaReminderFrequency.collectAsStateWithLifecycle()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = pageGutter())
+            .padding(top = FlashTokens.Spacing.SM, bottom = FlashTokens.Spacing.LG + LocalPageBottomPadding.current),
+        verticalArrangement = Arrangement.spacedBy(FlashTokens.Spacing.LG),
+    ) {
+        Text(tr("设置"), style = MaterialTheme.typography.headlineLarge)
+
+        FlashCard(modifier = Modifier.fillMaxWidth(), seed = "settings-local", contentPadding = FlashTokens.Spacing.MD) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Outlined.Shield,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(22.dp),
+                )
+                Spacer(Modifier.width(FlashTokens.Spacing.SM))
+                Column {
+                    Text(tr("数据默认保存在此设备"), style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        tr("可导出备份或通过系统分享传输"),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+
+        SettingsGroup(title = tr("外观与使用")) {
+            SettingsRow(
+                icon = Icons.Outlined.DarkMode,
+                iconTint = MaterialTheme.colorScheme.primary,
+                title = tr("主题模式"),
+                value = themeMode.displayName(),
+                showChevron = false,
+            )
+            FlashSegmentedControl(
+                options = ThemeMode.entries.map { it to it.displayName() },
+                selected = themeMode,
+                onSelect = viewModel::setThemeMode,
+            )
+            RowDivider()
+            SettingsRow(
+                icon = Icons.Outlined.Lightbulb,
+                iconTint = MaterialTheme.colorScheme.primary,
+                title = tr("灵感提醒"),
+                value = if (ideaEnabled) frequency.displayName else tr("已关闭"),
+                onClick = onOpenIdeaReminder,
+            )
+        }
+
+        SettingsGroup(title = tr("数据与安全")) {
+            SettingsRow(
+                icon = Icons.Outlined.Save,
+                iconTint = MaterialTheme.colorScheme.primary,
+                title = tr("备份与恢复"),
+                subtitle = tr("导出、导入与清空"),
+                onClick = onOpenBackup,
+            )
+            RowDivider()
+            SettingsRow(
+                icon = Icons.Outlined.Wifi,
+                iconTint = MaterialTheme.colorScheme.secondary,
+                title = tr("设备间传输"),
+                subtitle = tr("暂时停用，点击查看替代方式"),
+                onClick = onOpenTransfer,
+            )
+        }
+
+        SettingsGroup(title = tr("关于 Flash")) {
+            SettingsRow(
+                icon = Icons.Outlined.Info,
+                iconTint = MaterialTheme.colorScheme.primary,
+                title = "Flash Aero",
+                subtitle = tr("让每一次闪念都有落点 · 无云端账号"),
+                value = "v${BuildConfig.VERSION_NAME}",
+                showChevron = false,
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SettingsPageScaffold(
+    title: String,
+    onBack: () -> Unit,
+    snackbar: SnackbarHostState? = null,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Scaffold(
+        containerColor = Color.Transparent,
+        snackbarHost = { snackbar?.let { SnackbarHost(it) } },
+        topBar = {
+            TopAppBar(
+                title = { Text(title) },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr("返回"))
+                    }
+                },
+            )
+        },
+    ) { padding ->
+        Column(
+            Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = pageGutter())
+                .padding(bottom = FlashTokens.Spacing.XL),
+            verticalArrangement = Arrangement.spacedBy(FlashTokens.Spacing.LG),
+            content = content,
+        )
+    }
+}
+
+/** 灵感提醒（对齐 iOS）：开关 + 频率；通知权限只在确需提醒时申请。 */
+@Composable
+fun IdeaReminderSettingsScreen(onBack: () -> Unit) {
+    val context = LocalContext.current
+    val app = context.applicationContext as FlashApplication
+    val enabled by app.settings.ideaReminderEnabled.collectAsStateWithLifecycle()
+    val frequency by app.settings.ideaReminderFrequency.collectAsStateWithLifecycle()
+    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
+
+    SettingsPageScaffold(tr("灵感提醒"), onBack) {
+        SettingsGroup(
+            title = tr("提醒"),
+            footnote = tr("累计 {0} 个以上时，晚上 8 点提醒你梳理；打开查看过的想法不再计入。", com.flash.app.domain.IDEA_REMINDER_THRESHOLD),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                Text(tr("想法等待梳理时提醒"), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                Switch(
+                    checked = enabled,
+                    onCheckedChange = { on ->
+                        app.settings.setIdeaReminderEnabled(on)
+                        IdeaReminderWork.sync(context, on)
+                        if (on) requestNotificationPermissionIfNeeded(context) { permission.launch(it) }
+                    },
+                )
+            }
+            if (enabled) {
+                RowDivider()
+                FlashSegmentedControl(
+                    options = IdeaReminderFrequency.entries.map { it to it.displayName },
+                    selected = frequency,
+                    onSelect = {
+                        app.settings.setIdeaReminderFrequency(it)
+                        IdeaReminderWork.sync(context, true)
+                    },
+                )
+            }
+        }
+    }
+}
+
+private fun requestNotificationPermissionIfNeeded(context: android.content.Context, request: (String) -> Unit) {
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU &&
+        androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) !=
+        android.content.pm.PackageManager.PERMISSION_GRANTED
+    ) {
+        request(android.Manifest.permission.POST_NOTIFICATIONS)
+    }
+}
+
+/** 旧 LAN 已停用：这里只说明替代方式，不提供任何发送或接收入口。 */
+@Composable
+fun TransferInfoScreen(onBack: () -> Unit) {
+    SettingsPageScaffold(tr("设备间传输"), onBack) {
+        FlashCard(modifier = Modifier.fillMaxWidth(), seed = "transfer-info") {
+            Text(tr("局域网传输暂时停用"), style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.size(FlashTokens.Spacing.XS))
+            Text(
+                tr("旧协议存在安全风险。请使用「备份与恢复」里的导出备份或系统分享，通过你信任的方式传到另一台设备。"),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+/** 备份与恢复（对齐 iOS）：导出 / 系统分享 / 标准导入 / 恢复 / 清空 */
+@Composable
+fun BackupSettingsScreen(onBack: () -> Unit) {
+    val context = LocalContext.current
+    val app = context.applicationContext as FlashApplication
+    val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.factory(app))
     val message by viewModel.message.collectAsStateWithLifecycle()
     val importPreview by viewModel.importPreview.collectAsStateWithLifecycle()
     val shareUri by viewModel.shareUri.collectAsStateWithLifecycle()
     val transferInProgress by viewModel.transferInProgress.collectAsStateWithLifecycle()
-    val lanTransfer by viewModel.lanTransfer.collectAsStateWithLifecycle()
-
     var showClearConfirm by remember { mutableStateOf(false) }
-    var selectedLanDevice by remember { mutableStateOf<LocalBackupTransfer.Device?>(null) }
-    var lanPin by remember { mutableStateOf("") }
     val snackbarHostState = remember { SnackbarHostState() }
 
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json"),
     ) { uri -> uri?.let(viewModel::exportBackup) }
-
     val recoveryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
         uri -> uri?.let { viewModel.loadImport(it, recovery = true) }
     }
@@ -123,336 +319,126 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
             val sendIntent = Intent(Intent.ACTION_SEND).apply {
                 type = "application/json"
                 putExtra(Intent.EXTRA_STREAM, uri)
-                clipData = ClipData.newRawUri("Flash Aero 备份", uri)
+                clipData = ClipData.newRawUri(tr("Flash Aero 备份"), uri)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
-            context.startActivity(Intent.createChooser(sendIntent, "传输 Flash Aero 备份"))
+            context.startActivity(Intent.createChooser(sendIntent, tr("传输 Flash Aero 备份")))
         }.onFailure {
             viewModel.reportShareFailure()
         }
     }
 
-    Scaffold(
-        containerColor = Color.Transparent,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(
-                    start = FlashTokens.Spacing.PageHorizontal,
-                    end = FlashTokens.Spacing.PageHorizontal,
-                    top = FlashTokens.Spacing.XS,
-                    bottom = FlashTokens.Spacing.XS + com.flash.app.ui.navigation.LocalPageBottomPadding.current,
-                ),
-            verticalArrangement = Arrangement.spacedBy(FlashTokens.Spacing.LG),
+    SettingsPageScaffold(tr("备份与恢复"), onBack, snackbarHostState) {
+        SettingsGroup(
+            title = tr("数据与安全"),
+            note = tr("备份为明文 JSON，包含日志、情绪和任务内容；请只保存或分享至可信位置"),
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (onBack != null) {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
-                    }
-                    Spacer(Modifier.width(FlashTokens.Spacing.XS))
-                }
-                Text("设置", style = MaterialTheme.typography.headlineMedium)
-            }
+            SettingsRow(
+                icon = Icons.Outlined.FileUpload,
+                iconTint = MaterialTheme.colorScheme.primary,
+                title = tr("导出备份"),
+                subtitle = tr("保存为 JSON 文件"),
+                onClick = {
+                    // 文件名固定用与语言无关的数字，便于跨端识别
+                    val timestamp = LocalDateTime.now()
+                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HHmmss", Locale.ROOT))
+                    exportLauncher.launch("flash-backup-$timestamp.json")
+                },
+            )
+            RowDivider()
+            SettingsRow(
+                icon = Icons.Outlined.Share,
+                iconTint = MaterialTheme.colorScheme.secondary,
+                title = tr("传输到其他设备"),
+                subtitle = tr("通过系统分享发送备份"),
+                value = if (transferInProgress) tr("准备中…") else null,
+                enabled = !transferInProgress,
+                onClick = viewModel::prepareBackupTransfer,
+            )
+            RowDivider()
+            SettingsRow(
+                icon = Icons.Outlined.FileDownload,
+                iconTint = MaterialTheme.colorScheme.primary,
+                title = tr("标准导入"),
+                subtitle = tr("导入前预览与本地数据的差异"),
+                onClick = { importLauncher.launch(arrayOf("application/json", "text/*")) },
+            )
+            RowDivider()
+            SettingsRow(
+                icon = Icons.Outlined.Build,
+                iconTint = MaterialTheme.colorScheme.tertiary,
+                title = tr("恢复损坏或旧版备份"),
+                subtitle = tr("跳过异常与重复数据，不修改原文件"),
+                onClick = { recoveryLauncher.launch(arrayOf("application/json", "text/*")) },
+            )
+        }
 
-            FlashCard(modifier = Modifier.fillMaxWidth()) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Outlined.Shield,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(22.dp),
-                    )
-                    Spacer(Modifier.width(FlashTokens.Spacing.SM))
-                    Column {
-                        Text("数据默认保存在此设备", style = MaterialTheme.typography.titleSmall)
-                        Text(
-                            "可导出备份或通过系统分享传输",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-            }
-
-            SettingsGroup(title = "外观与使用") {
-                SettingsRow(
-                    icon = Icons.Outlined.DarkMode,
-                    iconTint = MaterialTheme.colorScheme.primary,
-                    title = "主题模式",
-                    value = themeMode.displayName(),
-                    showChevron = false,
-                )
-                FlashSegmentedControl(
-                    options = ThemeMode.entries.map { it to it.displayName() },
-                    selected = themeMode,
-                    onSelect = viewModel::setThemeMode,
-                )
-                RowDivider()
-                SettingsRow(
-                    icon = Icons.Outlined.Palette,
-                    iconTint = MaterialTheme.colorScheme.primary,
-                    title = "界面风格",
-                    value = uiStyle.displayName,
-                    showChevron = false,
-                )
-                FlashSegmentedControl(
-                    options = UiStyle.entries.map { it to it.displayName },
-                    selected = uiStyle,
-                    onSelect = viewModel::setUiStyle,
-                )
-                Text(
-                    if (uiStyle == UiStyle.GLASS) {
-                        "柔和渐变与轻盈玻璃质感"
-                    } else {
-                        "清晰实色与系统原生控件"
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = FlashTokens.Spacing.XS),
-                )
-            }
-
-            SettingsGroup(
-                title = "数据与安全",
-                note = "备份为明文 JSON，包含日志、情绪和任务内容；请只保存或分享至可信位置",
-                footnote = "旧版局域网传输暂时停用，请使用文件备份或系统分享",
-            ) {
-                SettingsRow(
-                    icon = Icons.Outlined.FileUpload,
-                    iconTint = MaterialTheme.colorScheme.primary,
-                    title = "导出备份",
-                    subtitle = "保存为 JSON 文件",
-                    onClick = {
-                        val timestamp = LocalDateTime.now()
-                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HHmmss"))
-                        exportLauncher.launch("flash-backup-$timestamp.json")
-                    },
-                )
-                RowDivider()
-                SettingsRow(
-                    icon = Icons.Outlined.FileDownload,
-                    iconTint = MaterialTheme.colorScheme.primary,
-                    title = "标准导入",
-                    subtitle = "导入前预览与本地数据的差异",
-                    onClick = { importLauncher.launch(arrayOf("application/json", "text/*")) },
-                )
-                RowDivider()
-                SettingsRow(
-                    icon = Icons.Outlined.Build,
-                    iconTint = MaterialTheme.colorScheme.tertiary,
-                    title = "恢复损坏或旧版备份",
-                    subtitle = "跳过异常与重复数据，不修改原文件",
-                    onClick = { recoveryLauncher.launch(arrayOf("application/json", "text/*")) },
-                )
-                RowDivider()
-                SettingsRow(
-                    icon = Icons.Outlined.Share,
-                    iconTint = MaterialTheme.colorScheme.secondary,
-                    title = "传输到其他设备",
-                    subtitle = "通过系统分享发送备份",
-                    value = if (transferInProgress) "准备中…" else null,
-                    enabled = !transferInProgress,
-                    onClick = viewModel::prepareBackupTransfer,
-                )
-                RowDivider()
-                SettingsRow(
-                    icon = Icons.Outlined.Wifi,
-                    iconTint = MaterialTheme.colorScheme.secondary,
-                    title = "局域网发送",
-                    subtitle = "暂时停用，请使用文件备份或系统分享",
-                    onClick = viewModel::startLanSend,
-                )
-                RowDivider()
-                SettingsRow(
-                    icon = Icons.Outlined.Download,
-                    iconTint = MaterialTheme.colorScheme.secondary,
-                    title = "局域网接收",
-                    subtitle = "暂时停用，点击查看替代方式",
-                    onClick = {
-                        selectedLanDevice = null
-                        lanPin = ""
-                        viewModel.startLanReceive()
-                    },
-                )
-            }
-
-            SettingsGroup(title = "危险操作") {
-                SettingsRow(
-                    icon = Icons.Outlined.DeleteForever,
-                    iconTint = MaterialTheme.colorScheme.error,
-                    title = "清空全部数据",
-                    titleColor = MaterialTheme.colorScheme.error,
-                    subtitle = "删除所有日志、情绪记录与任务，且无法恢复；建议先导出备份",
-                    onClick = { showClearConfirm = true },
-                )
-            }
-
-            SettingsGroup(title = "关于 Flash") {
-                SettingsRow(
-                    icon = Icons.Outlined.Info,
-                    iconTint = MaterialTheme.colorScheme.primary,
-                    title = "Flash Aero",
-                    subtitle = "让每一次闪念都有落点 · Android 版",
-                    value = "v${BuildConfig.VERSION_NAME}",
-                    showChevron = false,
-                )
-            }
-
-            Spacer(Modifier.width(1.dp))
+        SettingsGroup(title = tr("危险操作")) {
+            SettingsRow(
+                icon = Icons.Outlined.DeleteForever,
+                iconTint = MaterialTheme.colorScheme.error,
+                title = tr("清空全部数据"),
+                titleColor = MaterialTheme.colorScheme.error,
+                subtitle = tr("删除所有日志、情绪记录与任务，且无法恢复；建议先导出备份"),
+                onClick = { showClearConfirm = true },
+            )
         }
     }
 
     importPreview?.let { preview ->
+        val skipped = preview.skippedLogs + preview.skippedEmotions + preview.skippedTasks
+        fun line(label: String, d: com.flash.app.data.DifferenceSummary) = tr(
+            com.flash.app.i18n.tr("{0}：新增 {1} · 修改 {2} · 相同 {3} · 仅本机 {4}"), label, d.added, d.changed, d.unchanged, d.localOnly,
+        )
         AlertDialog(
             onDismissRequest = viewModel::cancelImport,
-            title = { Text(if (preview.recovery) "部分恢复预览" else "标准导入预览") },
+            title = { Text(if (preview.recovery) tr("部分恢复预览") else tr("标准导入预览")) },
             text = {
                 Text(
                     buildString {
-                        append("包含 ${preview.logCount} 条日志、${preview.emotionCount} 条情绪记录、${preview.taskCount} 个任务。")
-                        if (preview.skippedLogs + preview.skippedEmotions + preview.skippedTasks > 0) {
-                            append("\n${preview.skippedLogs + preview.skippedEmotions + preview.skippedTasks} 条数据格式异常，将被跳过。")
-                        }
-                        append("\n\n差异分析")
-                        append("\n日志：新增 ${preview.difference.logs.added} · 修改 ${preview.difference.logs.changed}" +
-                            " · 相同 ${preview.difference.logs.unchanged} · 仅本机 ${preview.difference.logs.localOnly}")
-                        append("\n情绪：新增 ${preview.difference.emotions.added} · 修改 ${preview.difference.emotions.changed}" +
-                            " · 相同 ${preview.difference.emotions.unchanged} · 仅本机 ${preview.difference.emotions.localOnly}")
-                        append("\n任务：新增 ${preview.difference.tasks.added} · 修改 ${preview.difference.tasks.changed}" +
-                            " · 相同 ${preview.difference.tasks.unchanged} · 仅本机 ${preview.difference.tasks.localOnly}")
-                        append("\n\n差异合并会新增或更新接收数据，并保留仅本机数据；覆盖会先清空本机数据。")
-                    }
+                        append(tr("包含 {0} 条日志、{1} 条情绪、{2} 个任务", preview.logCount, preview.emotionCount, preview.taskCount))
+                        if (skipped > 0) append("\n" + tr("{0} 条数据格式异常，将被跳过。", skipped))
+                        append("\n\n" + tr("差异分析"))
+                        append("\n" + line(tr("日志"), preview.difference.logs))
+                        append("\n" + line(tr("情绪"), preview.difference.emotions))
+                        append("\n" + line(tr("任务"), preview.difference.tasks))
+                        append("\n\n" + tr("差异合并会新增或更新接收数据，并保留仅本机数据；覆盖会先清空本机数据。"))
+                    },
                 )
             },
             confirmButton = {
-                TextButton(onClick = { viewModel.confirmImport(overwrite = false) }) {
-                    Text("按差异合并")
-                }
+                TextButton(onClick = { viewModel.confirmImport(overwrite = false) }) { Text(tr("按差异合并")) }
             },
             dismissButton = {
                 Row {
                     TextButton(onClick = { viewModel.confirmImport(overwrite = true) }) {
-                        Text("覆盖", color = MaterialTheme.colorScheme.error)
+                        Text(tr("覆盖"), color = MaterialTheme.colorScheme.error)
                     }
-                    TextButton(onClick = viewModel::cancelImport) { Text("取消") }
+                    TextButton(onClick = viewModel::cancelImport) { Text(tr("取消")) }
                 }
             },
         )
-    }
-
-    when (lanTransfer.mode) {
-        LanTransferMode.SENDING -> AlertDialog(
-            onDismissRequest = viewModel::cancelLanTransfer,
-            title = { Text("等待接收设备") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("在另一台设备选择“局域网接收”，然后输入配对 PIN：")
-                    Text(
-                        lanTransfer.pin,
-                        style = MaterialTheme.typography.displayMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                    Text("PIN 仅本次有效，60 秒后自动失效。")
-                    Text(
-                        "内容未做端到端加密，请仅在可信的家庭或办公局域网使用。",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = viewModel::cancelLanTransfer) { Text("取消发送") }
-            },
-        )
-
-        LanTransferMode.RECEIVING -> AlertDialog(
-            onDismissRequest = viewModel::cancelLanTransfer,
-            title = { Text("从局域网接收") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(if (lanTransfer.devices.isEmpty()) "正在查找附近的 Flash Aero…" else "选择发送设备：")
-                    lanTransfer.devices.forEach { device ->
-                        OutlinedButton(
-                            onClick = { selectedLanDevice = device },
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Text(if (selectedLanDevice?.id == device.id) "✓ ${device.name}" else device.name)
-                        }
-                    }
-                    OutlinedTextField(
-                        value = lanPin,
-                        onValueChange = { lanPin = it.filter(Char::isDigit).take(6) },
-                        label = { Text("六位配对 PIN") },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Text(
-                        "内容未做端到端加密，请仅连接可信的家庭或办公局域网设备。",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = { selectedLanDevice?.let { viewModel.receiveLanBackup(it, lanPin) } },
-                    enabled = selectedLanDevice != null && lanPin.length == 6,
-                ) { Text("配对并接收") }
-            },
-            dismissButton = {
-                TextButton(onClick = viewModel::cancelLanTransfer) { Text("取消") }
-            },
-        )
-
-        LanTransferMode.CONNECTING -> AlertDialog(
-            onDismissRequest = {},
-            title = { Text("正在配对") },
-            text = {
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    CircularProgressIndicator()
-                    Text("正在验证 PIN 并接收备份…")
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = viewModel::cancelLanTransfer) { Text("取消") }
-            },
-        )
-
-        LanTransferMode.IDLE -> Unit
     }
 
     if (showClearConfirm) {
         AlertDialog(
             onDismissRequest = { showClearConfirm = false },
-            title = { Text("清空全部数据？") },
-            text = { Text("将删除所有日志、情绪记录与任务，且无法恢复。建议先导出备份。") },
+            title = { Text(tr("清空全部数据？")) },
+            text = { Text(tr("将删除所有日志、情绪记录与任务，且无法恢复。建议先导出备份。")) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.clearAll()
                     showClearConfirm = false
-                }) {
-                    Text("确认清空", color = MaterialTheme.colorScheme.error)
-                }
+                }) { Text(tr("确认清空"), color = MaterialTheme.colorScheme.error) }
             },
-            dismissButton = {
-                TextButton(onClick = { showClearConfirm = false }) { Text("取消") }
-            },
+            dismissButton = { TextButton(onClick = { showClearConfirm = false }) { Text(tr("取消")) } },
         )
     }
 }
 
 /** 分组：弱化标题 + 可选说明文字 + 大圆角分组卡片 + 可选脚注 */
 @Composable
-private fun SettingsGroup(
+internal fun SettingsGroup(
     title: String,
     modifier: Modifier = Modifier,
     note: String? = null,
@@ -491,7 +477,7 @@ private fun SettingsGroup(
  * 色彩不是唯一信息通道：每行都有标题文字，危险行另有副标题说明后果。
  */
 @Composable
-private fun SettingsRow(
+internal fun SettingsRow(
     icon: ImageVector,
     iconTint: Color,
     title: String,
@@ -560,15 +546,15 @@ private fun SettingsRow(
 
 /** 行间分隔线，起点对齐标题文字（图标 22 + 间距 12） */
 @Composable
-private fun RowDivider() {
-    HorizontalDivider(
+internal fun RowDivider() {
+    com.flash.app.ui.paper.FlashDivider(
+        seed = "settings-row",
         modifier = Modifier.padding(start = 22.dp + FlashTokens.Spacing.SM),
-        color = MaterialTheme.colorScheme.outlineVariant,
     )
 }
 
-private fun ThemeMode.displayName(): String = when (this) {
-    ThemeMode.SYSTEM -> "跟随系统"
-    ThemeMode.LIGHT -> "浅色"
-    ThemeMode.DARK -> "深色"
+internal fun ThemeMode.displayName(): String = when (this) {
+    ThemeMode.SYSTEM -> com.flash.app.i18n.tr("跟随系统")
+    ThemeMode.LIGHT -> com.flash.app.i18n.tr("浅色")
+    ThemeMode.DARK -> com.flash.app.i18n.tr("深色")
 }

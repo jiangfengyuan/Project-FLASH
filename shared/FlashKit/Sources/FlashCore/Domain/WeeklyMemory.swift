@@ -108,11 +108,11 @@ public enum WeeklyMemory: Sendable {
         let average = (mean * 100 + 0.5).rounded(.down) / 100
         let summary: (emoji: String, text: String)
         if average >= positiveThreshold {
-            summary = ("😊", "Mostly Positive")
+            summary = ("😊", L("Mostly Positive"))
         } else if average <= negativeThreshold {
-            summary = ("😔", "Mostly Low")
+            summary = ("😔", L("Mostly Low"))
         } else {
-            summary = ("🙂", "Mostly Steady")
+            summary = ("🙂", L("Mostly Steady"))
         }
         return Report.MoodSummary(average: average, emoji: summary.emoji, text: summary.text)
     }

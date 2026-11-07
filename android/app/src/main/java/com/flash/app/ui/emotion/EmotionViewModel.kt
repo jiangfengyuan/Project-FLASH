@@ -6,6 +6,7 @@
 
 package com.flash.app.ui.emotion
 
+import com.flash.app.i18n.tr
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -75,6 +76,10 @@ class EmotionViewModel(private val repository: FlashRepository) : ViewModel() {
     var note by mutableStateOf("")
         private set
 
+    /** 可选强度 1–5：再点同一档清除（对齐 iOS） */
+    var intensity by mutableStateOf<Int?>(null)
+        private set
+
     /** 保存期间为 true，用于防连点重复提交 */
     var saving by mutableStateOf(false)
         private set
@@ -87,6 +92,17 @@ class EmotionViewModel(private val repository: FlashRepository) : ViewModel() {
 
     fun selectSubEmotion(sub: SubEmotion?) {
         selectedSubEmotion = if (selectedSubEmotion == sub) null else sub
+    }
+
+    fun selectIntensity(value: Int) {
+        intensity = if (intensity == value) null else value
+    }
+
+    fun toggleFavorite(record: EmotionRecord) {
+        viewModelScope.launch {
+            runCatching { repository.setEmotionFavorite(record, record.isFavorite != true) }
+                .onFailure { eventChannel.send(EmotionEvent.Failed(it.message ?: tr("操作失败，请重试"))) }
+        }
     }
 
     fun updateNote(value: String) {
@@ -104,7 +120,7 @@ class EmotionViewModel(private val repository: FlashRepository) : ViewModel() {
                 eventChannel.send(
                     EmotionEvent.Failed(
                         TextLimits.ContentTooLongException(noteValue.length, TextLimits.MAX_CONTENT_LENGTH).message
-                            ?: "备注过长，请删减后再保存",
+                            ?: com.flash.app.i18n.tr("备注过长，请删减后再保存"),
                     )
                 )
             }
@@ -112,13 +128,15 @@ class EmotionViewModel(private val repository: FlashRepository) : ViewModel() {
         }
         // 先同步置 saving + 清状态再 launch，防止连点产生重复记录
         saving = true
+        val savedIntensity = intensity
         note = ""
         selectedSubEmotion = null
+        intensity = null
         viewModelScope.launch {
             try {
-                runCatching { repository.addEmotion(level = level, subEmotion = sub, note = noteValue) }
+                runCatching { repository.addEmotion(level = level, subEmotion = sub, note = noteValue, intensity = savedIntensity) }
                     .onFailure {
-                        eventChannel.send(EmotionEvent.Failed(it.message ?: "保存失败，请重试"))
+                        eventChannel.send(EmotionEvent.Failed(it.message ?: com.flash.app.i18n.tr("保存失败，请重试")))
                     }
             } finally {
                 saving = false
@@ -130,13 +148,13 @@ class EmotionViewModel(private val repository: FlashRepository) : ViewModel() {
         viewModelScope.launch {
             runCatching { repository.deleteEmotion(record.id) }
                 .onFailure {
-                    eventChannel.send(EmotionEvent.Failed(it.message ?: "删除失败，请重试"))
+                    eventChannel.send(EmotionEvent.Failed(it.message ?: com.flash.app.i18n.tr("删除失败，请重试")))
                 }
         }
     }
 
     companion object {
-        const val HISTORY_PAGE_SIZE = 50
+        const val HISTORY_PAGE_SIZE = 20
 
         /** EmotionStatsSection 最长窗口为滚动 30 天 */
         private const val STATS_WINDOW_DAYS = 30

@@ -6,53 +6,21 @@
 
 package com.flash.app.ui.components
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Surface
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
+import com.flash.app.ui.paper.PaperCard
 import com.flash.app.ui.theme.FlashTokens
-import com.flash.app.ui.theme.LocalIsDarkTheme
 
-/**
- * 实体卡片：浅色 `#FFFFFF`、深色用品牌弱表面，圆角 24。
- * 两种界面风格下都是实色面——列表、表单、高密度信息不依赖玻璃模糊。
- * 与 StyleCard（风格感知）并存：需要玻璃观感的小卡片继续用 StyleCard。
- */
+/** 主卡片：圆角 24 的纸卡，用于表单与高密度信息。 */
 @Composable
 fun FlashCard(
     modifier: Modifier = Modifier,
+    seed: String = "flash-card",
     onClick: (() -> Unit)? = null,
-    contentPadding: Dp = FlashTokens.Spacing.MD,
+    contentPadding: Dp = FlashTokens.Spacing.CardPadding,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val shape = RoundedCornerShape(FlashTokens.Radius.Card)
-    val color = FlashTokens.Palette.cardSurface(LocalIsDarkTheme.current)
-    if (onClick != null) {
-        Surface(
-            onClick = onClick,
-            modifier = modifier,
-            shape = shape,
-            color = color,
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            shadowElevation = 2.dp,
-        ) {
-            Column(Modifier.padding(contentPadding), content = content)
-        }
-    } else {
-        Surface(
-            modifier = modifier,
-            shape = shape,
-            color = color,
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            shadowElevation = 2.dp,
-        ) {
-            Column(Modifier.padding(contentPadding), content = content)
-        }
-    }
+    PaperCard(modifier = modifier, seed = seed, onClick = onClick, contentPadding = contentPadding, content = content)
 }

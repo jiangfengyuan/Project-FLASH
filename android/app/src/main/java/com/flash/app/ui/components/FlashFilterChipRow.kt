@@ -57,7 +57,7 @@ fun FlashFilterChipRow(
 }
 
 @Composable
-private fun FlashFilterChip(
+fun FlashFilterChip(
     label: String,
     selected: Boolean,
     onClick: () -> Unit,
@@ -67,7 +67,7 @@ private fun FlashFilterChip(
         targetValue = if (selected) {
             FlashTokens.Palette.selectionFill(dark)
         } else {
-            androidx.compose.ui.graphics.Color.Transparent
+            com.flash.app.ui.theme.PaperColors.CardSurface.resolve(dark)
         },
         animationSpec = tween(FlashTokens.Motion.SelectionMs),
         label = "Flash chip container",

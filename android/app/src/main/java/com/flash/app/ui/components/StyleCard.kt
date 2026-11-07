@@ -6,50 +6,29 @@
 
 package com.flash.app.ui.components
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import com.flash.app.ui.theme.FlashTokens
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.flash.app.data.UiStyle
-import com.flash.app.ui.theme.LocalUiStyle
-import com.flash.app.ui.theme.glass.GlassCard
+import androidx.compose.ui.unit.Dp
+import com.flash.app.ui.paper.PaperCard
+import com.flash.app.ui.theme.FlashTokens
 
-/**
- * 风格感知卡片：GLASS → 玻璃面（模糊+半透+描边），MD3 → 标准 Material 卡片。
- * LogCard / 统计卡 / 日历详情等共用。
- */
+/** 通用纸卡：统计卡 / 日历详情等共用，等价于带行内边距的 PaperCard。 */
 @Composable
 fun StyleCard(
     modifier: Modifier = Modifier,
+    seed: String = "card",
     onClick: (() -> Unit)? = null,
+    contentPadding: Dp = FlashTokens.Spacing.MD,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    if (LocalUiStyle.current == UiStyle.GLASS) {
-        // 小卡片不启用实时模糊（滚动流畅优先），观感上保留半透+描边+高光
-        GlassCard(modifier = modifier, blur = false, onClick = onClick, content = content)
-    } else if (onClick == null) {
-        Card(
-            modifier = modifier,
-            shape = RoundedCornerShape(FlashTokens.Radius.Card),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        ) {
-            Column(Modifier.padding(12.dp), content = content)
-        }
-    } else {
-        Card(
-            modifier = modifier,
-            shape = RoundedCornerShape(FlashTokens.Radius.Card),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-            onClick = onClick,
-        ) {
-            Column(Modifier.padding(12.dp), content = content)
-        }
-    }
+    PaperCard(
+        modifier = modifier,
+        seed = seed,
+        cornerRadius = FlashTokens.Radius.CardSmall,
+        onClick = onClick,
+        contentPadding = contentPadding,
+        content = content,
+    )
 }

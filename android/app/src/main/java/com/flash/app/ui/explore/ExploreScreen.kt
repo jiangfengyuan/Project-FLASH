@@ -7,9 +7,6 @@
 package com.flash.app.ui.explore
 
 import android.app.DatePickerDialog
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.border
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,6 +49,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -71,14 +78,16 @@ import com.flash.app.ui.components.RecordCard
 import com.flash.app.ui.theme.FlashTokens
 import java.time.LocalDate
 
-private val IMPORTANCE_OPTIONS = listOf(0 to "全部", 2 to "!!", 3 to "!!!", 4 to "!!!!")
+private val IMPORTANCE_OPTIONS get() = listOf(0 to com.flash.app.i18n.tr("全部"), 2 to "!!", 3 to "!!!", 4 to "!!!!")
 
 /** 记录页（方案 §4.2）：大标题 + 搜索/筛选 → 统计摘要 → 筛选胶囊 → 记录列表 */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExploreScreen(
     onOpenLogFlow: () -> Unit,
     onOpenRecord: (String) -> Unit,
+    presetIdeas: Boolean = false,
+    onPresetConsumed: () -> Unit = {},
 ) {
     val app = LocalContext.current.applicationContext as FlashApplication
     val viewModel: ExploreViewModel = viewModel(factory = ExploreViewModel.factory(app.repository))
@@ -95,6 +104,25 @@ fun ExploreScreen(
     var filterSheetOpen by remember { mutableStateOf(false) }
     var batchDialog by remember { mutableStateOf<BatchDialog?>(null) }
 
+    val actions = com.flash.app.ui.navigation.LocalAppActions.current
+    val haptics = com.flash.app.ui.components.rememberFlashHaptics()
+    val scope = rememberCoroutineScope()
+    var selectMode by remember { mutableStateOf(false) }
+    // flash://ideas：打开灵感筛选
+    LaunchedEffect(presetIdeas) {
+        if (presetIdeas) {
+            viewModel.setFilter(ExploreFilter.IDEA)
+            onPresetConsumed()
+        }
+    }
+    fun delete(log: com.flash.app.data.model.LogItem) {
+        scope.launch {
+            val undo = viewModel.deleteWithUndo(log) ?: return@launch
+            haptics.light()
+            actions.toast(com.flash.app.i18n.tr("已删除"), com.flash.app.i18n.tr("撤销"), undo)
+        }
+    }
+
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
@@ -103,7 +131,7 @@ fun ExploreScreen(
         }
     }
 
-    val selecting = filter == ExploreFilter.UNSORTED && selection.isNotEmpty()
+    val selecting = filter == ExploreFilter.UNSORTED && (selectMode || selection.isNotEmpty())
     val anyFilterActive = filter != ExploreFilter.ALL || query.isNotBlank() || panel.isActive
 
     Scaffold(
@@ -115,8 +143,8 @@ fun ExploreScreen(
                 .padding(innerPadding)
                 .fillMaxSize(),
             contentPadding = PaddingValues(
-                start = FlashTokens.Spacing.PageHorizontal,
-                end = FlashTokens.Spacing.PageHorizontal,
+                start = com.flash.app.ui.paper.pageGutter(),
+                end = com.flash.app.ui.paper.pageGutter(),
                 top = FlashTokens.Spacing.XS,
                 bottom = FlashTokens.Spacing.XS + com.flash.app.ui.navigation.LocalPageBottomPadding.current,
             ),
@@ -130,60 +158,28 @@ fun ExploreScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        "记录",
+                        com.flash.app.i18n.tr("记录"),
                         style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.weight(1f),
                     )
-                    Surface(
-                        onClick = { searchFocus.requestFocus() },
-                        shape = RoundedCornerShape(50),
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        modifier = Modifier.heightIn(min = FlashTokens.Touch.IconButtonMin),
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(
-                                horizontal = FlashTokens.Spacing.MD,
-                                vertical = FlashTokens.Spacing.XS,
-                            ),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Icon(
-                                Icons.Filled.Search,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(18.dp),
-                            )
-                            Spacer(Modifier.width(6.dp))
-                            Text("搜索", style = MaterialTheme.typography.labelLarge)
-                        }
+                    IconButton(onClick = { filterSheetOpen = true }) {
+                        Icon(
+                            Icons.Filled.Tune,
+                            contentDescription = com.flash.app.i18n.tr("筛选"),
+                            tint = if (panel.isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
-                    Spacer(Modifier.width(FlashTokens.Spacing.XS))
-                    Surface(
-                        onClick = { filterSheetOpen = true },
-                        shape = RoundedCornerShape(50),
-                        color = if (panel.isActive) {
-                            MaterialTheme.colorScheme.primaryContainer
-                        } else {
-                            MaterialTheme.colorScheme.surfaceContainerHigh
-                        },
-                        modifier = Modifier.heightIn(min = FlashTokens.Touch.IconButtonMin),
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(
-                                horizontal = FlashTokens.Spacing.MD,
-                                vertical = FlashTokens.Spacing.XS,
-                            ),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Icon(
-                                Icons.Filled.Tune,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(18.dp),
-                            )
-                            Spacer(Modifier.width(6.dp))
-                            Text("筛选", style = MaterialTheme.typography.labelLarge)
+                    Box {
+                        var addOpen by remember { mutableStateOf(false) }
+                        IconButton(onClick = { addOpen = true }) {
+                            Icon(Icons.Filled.Add, contentDescription = com.flash.app.i18n.tr("新建"), tint = MaterialTheme.colorScheme.primary)
+                        }
+                        DropdownMenu(expanded = addOpen, onDismissRequest = { addOpen = false }) {
+                            DropdownMenuItem(text = { Text(com.flash.app.i18n.tr("新建记录")) }, onClick = { addOpen = false; actions.quickCapture(Category.LOG) })
+                            DropdownMenuItem(text = { Text(com.flash.app.i18n.tr("新建灵感")) }, onClick = { addOpen = false; actions.quickCapture(Category.IDEA) })
+                            DropdownMenuItem(text = { Text(com.flash.app.i18n.tr("日志流")) }, onClick = { addOpen = false; onOpenLogFlow() })
+                            DropdownMenuItem(text = { Text(com.flash.app.i18n.tr("全局搜索")) }, onClick = { addOpen = false; actions.openSearch() })
                         }
                     }
                 }
@@ -193,7 +189,7 @@ fun ExploreScreen(
                 OutlinedTextField(
                     value = query,
                     onValueChange = viewModel::setQuery,
-                    placeholder = { Text("输入关键词或标签") },
+                    placeholder = { Text(com.flash.app.i18n.tr("输入关键词或标签")) },
                     leadingIcon = {
                         Icon(
                             Icons.Filled.Search,
@@ -204,17 +200,18 @@ fun ExploreScreen(
                     trailingIcon = if (query.isNotEmpty()) {
                         {
                             IconButton(onClick = { viewModel.setQuery("") }) {
-                                Icon(Icons.Filled.Close, contentDescription = "清除搜索")
+                                Icon(Icons.Filled.Close, contentDescription = com.flash.app.i18n.tr("清除搜索"))
                             }
                         }
                     } else {
                         null
                     },
                     singleLine = true,
-                    shape = RoundedCornerShape(28.dp),
+                    shape = RoundedCornerShape(FlashTokens.Radius.Field),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -231,22 +228,48 @@ fun ExploreScreen(
             }
 
             item(key = "chips") {
-                FlashFilterChipRow(
-                    items = ExploreFilter.entries.map {
-                        FlashFilterChipItem(it.name, it.displayName)
-                    },
-                    selectedKey = filter.name,
-                    onSelect = { viewModel.setFilter(ExploreFilter.valueOf(it)) },
-                )
+                // 单选类型 + 可叠加的「已收藏」开关（对齐 iOS）
+                Row(
+                    Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(FlashTokens.Spacing.XS),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    ExploreFilter.entries.forEach { item ->
+                        com.flash.app.ui.components.FlashFilterChip(
+                            label = item.displayName,
+                            selected = filter == item,
+                            onClick = {
+                                viewModel.setFilter(item)
+                                haptics.selection()
+                            },
+                        )
+                    }
+                    com.flash.app.ui.paper.VerticalHandDivider("explore-chips", Modifier.height(24.dp))
+                    com.flash.app.ui.components.FlashFilterChip(
+                        label = com.flash.app.i18n.tr("★ 已收藏"),
+                        selected = panel.favoritesOnly,
+                        onClick = {
+                            viewModel.toggleFavoritesOnly()
+                            haptics.selection()
+                        },
+                    )
+                }
             }
 
             if (filter == ExploreFilter.UNSORTED) {
                 item(key = "inbox-help") {
-                    Text(
-                        "待整理：使用日常标签的日志。长按记录可批量整理。",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            com.flash.app.i18n.tr("待整理：使用日常标签的日志。长按记录可批量整理。"),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f),
+                        )
+                        TextButton(onClick = {
+                            selectMode = !selectMode
+                            if (!selectMode) viewModel.clearSelection()
+                        }) { Text(if (selectMode) com.flash.app.i18n.tr("完成") else com.flash.app.i18n.tr("选择")) }
+                    }
                 }
             }
 
@@ -256,7 +279,7 @@ fun ExploreScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        if (newestFirst) "按最新记录" else "按最早记录",
+                        if (newestFirst) com.flash.app.i18n.tr("按最新记录") else com.flash.app.i18n.tr("按最早记录"),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.weight(1f),
@@ -264,11 +287,11 @@ fun ExploreScreen(
                     IconButton(onClick = viewModel::toggleSort) {
                         Icon(
                             Icons.AutoMirrored.Filled.Sort,
-                            contentDescription = "切换排序",
+                            contentDescription = com.flash.app.i18n.tr("切换排序"),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                    TextButton(onClick = onOpenLogFlow) { Text("管理") }
+                    TextButton(onClick = onOpenLogFlow) { Text(com.flash.app.i18n.tr("管理")) }
                 }
             }
 
@@ -279,13 +302,16 @@ fun ExploreScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            "已选 ${selection.size} 项",
+                            com.flash.app.i18n.tr("已选 {0} 项", selection.size),
                             style = MaterialTheme.typography.labelLarge,
                             modifier = Modifier.weight(1f),
                         )
-                        TextButton(onClick = { batchDialog = BatchDialog.CATEGORY }) { Text("分类") }
-                        TextButton(onClick = { batchDialog = BatchDialog.TAG }) { Text("标签") }
-                        TextButton(onClick = viewModel::clearSelection) { Text("完成") }
+                        TextButton(onClick = { batchDialog = BatchDialog.CATEGORY }) { Text(com.flash.app.i18n.tr("分类")) }
+                        TextButton(onClick = { batchDialog = BatchDialog.TAG }) { Text(com.flash.app.i18n.tr("标签")) }
+                        TextButton(onClick = {
+                            selectMode = false
+                            viewModel.clearSelection()
+                        }) { Text(com.flash.app.i18n.tr("完成")) }
                     }
                 }
             }
@@ -293,9 +319,9 @@ fun ExploreScreen(
             if (logs.isEmpty()) {
                 item(key = "empty") {
                     FlashEmptyState(
-                        title = if (anyFilterActive) "没有找到相关记录" else "闪过即留，写下第一条吧",
+                        title = if (anyFilterActive) com.flash.app.i18n.tr("没有找到相关记录") else com.flash.app.i18n.tr("闪过即留，写下第一条吧"),
                         icon = Icons.Outlined.EditNote,
-                        actionLabel = if (anyFilterActive) "清除筛选" else null,
+                        actionLabel = if (anyFilterActive) com.flash.app.i18n.tr("清除筛选") else null,
                         onAction = if (anyFilterActive) {
                             { viewModel.clearFilters() }
                         } else {
@@ -305,44 +331,39 @@ fun ExploreScreen(
                 }
             } else {
                 items(items = logs, key = { it.id }) { log ->
-                    if (filter == ExploreFilter.UNSORTED) {
-                        val selected = log.id in selection
-                        Box(
-                            Modifier
-                                .animateItem()
-                                .border(
-                                    width = if (selected) 2.dp else 0.dp,
-                                    color = if (selected) {
-                                        MaterialTheme.colorScheme.primary
-                                    } else {
-                                        Color.Transparent
-                                    },
-                                    shape = RoundedCornerShape(FlashTokens.Radius.Card),
-                                )
-                                .combinedClickable(
-                                    onClick = {
-                                        if (selection.isNotEmpty()) {
-                                            viewModel.toggleSelect(log.id)
-                                        } else {
-                                            onOpenRecord(log.id)
-                                        }
-                                    },
-                                    onLongClick = { viewModel.toggleSelect(log.id) },
-                                ),
-                        ) {
-                            RecordCard(
-                                log = log,
-                                showIdeaReminder = log.id in unviewedIdeaIds,
-                            )
-                        }
-                    } else {
+                    if (selecting) {
                         RecordCard(
                             log = log,
                             modifier = Modifier.animateItem(),
-                            onClick = { onOpenRecord(log.id) },
-                            onEdit = { onOpenRecord(log.id) },
-                            showIdeaReminder = log.id in unviewedIdeaIds,
+                            isUnread = log.id in unviewedIdeaIds,
+                            selected = log.id in selection,
+                            onClick = { viewModel.toggleSelect(log.id) },
+                            onLongClick = { viewModel.toggleSelect(log.id) },
                         )
+                    } else {
+                        SwipeableRecord(
+                            log = log,
+                            modifier = Modifier.animateItem(),
+                            onFavorite = { viewModel.toggleFavorite(log) },
+                            onDelete = { delete(log) },
+                        ) {
+                            RecordCard(
+                                log = log,
+                                onClick = { onOpenRecord(log.id) },
+                                isUnread = log.id in unviewedIdeaIds,
+                                onLongClick = if (filter == ExploreFilter.UNSORTED) {
+                                    { viewModel.toggleSelect(log.id) }
+                                } else {
+                                    null
+                                },
+                                menu = com.flash.app.ui.components.RecordMenu(
+                                    onEdit = { onOpenRecord(log.id) },
+                                    onToggleFavorite = { viewModel.toggleFavorite(log) },
+                                    onConvertToTask = { actions.newTaskFromIdea(log.id, log.content) },
+                                    onDelete = { delete(log) },
+                                ),
+                            )
+                        }
                     }
                 }
             }
@@ -364,12 +385,12 @@ fun ExploreScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(FlashTokens.Spacing.MD),
             ) {
-                FlashFormSection(title = "类型") {
+                FlashFormSection(title = com.flash.app.i18n.tr("类型")) {
                     FlashFilterChipRow(
                         items = listOf(
-                            FlashFilterChipItem(ExploreFilter.ALL.name, "全部"),
-                            FlashFilterChipItem(ExploreFilter.LOG.name, "日志"),
-                            FlashFilterChipItem(ExploreFilter.IDEA.name, "灵感"),
+                            FlashFilterChipItem(ExploreFilter.ALL.name, com.flash.app.i18n.tr("全部")),
+                            FlashFilterChipItem(ExploreFilter.LOG.name, com.flash.app.i18n.tr("日志")),
+                            FlashFilterChipItem(ExploreFilter.IDEA.name, com.flash.app.i18n.tr("灵感")),
                         ),
                         selectedKey = when (filter) {
                             ExploreFilter.UNSORTED -> null
@@ -378,23 +399,21 @@ fun ExploreScreen(
                         onSelect = { viewModel.setFilter(ExploreFilter.valueOf(it)) },
                     )
                 }
-                FlashFormSection(title = "标签") {
-                    FlashFilterChipRow(
-                        items = ColorTag.entries.map {
-                            FlashFilterChipItem(it.name, it.displayName)
-                        },
-                        selectedKey = null,
-                        onSelect = { viewModel.togglePanelTag(ColorTag.valueOf(it)) },
-                    )
-                    if (panel.tags.isNotEmpty()) {
-                        Text(
-                            "已选：${panel.tags.joinToString("、") { it.displayName }}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                FlashFormSection(title = com.flash.app.i18n.tr("标签")) {
+                    Row(
+                        Modifier.horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(FlashTokens.Spacing.XS),
+                    ) {
+                        ColorTag.entries.forEach { tag ->
+                            com.flash.app.ui.components.FlashFilterChip(
+                                label = tag.displayName,
+                                selected = tag in panel.tags,
+                                onClick = { viewModel.togglePanelTag(tag) },
+                            )
+                        }
                     }
                 }
-                FlashFormSection(title = "日期范围") {
+                FlashFormSection(title = com.flash.app.i18n.tr("日期范围")) {
                     DateRangeRow(
                         startDate = panel.startDate,
                         endDate = panel.endDate,
@@ -402,7 +421,7 @@ fun ExploreScreen(
                         onEndChange = viewModel::setEndDate,
                     )
                 }
-                FlashFormSection(title = "重要度") {
+                FlashFormSection(title = com.flash.app.i18n.tr("重要度")) {
                     FlashFilterChipRow(
                         items = IMPORTANCE_OPTIONS.map { (value, label) ->
                             FlashFilterChipItem(value.toString(), label)
@@ -418,25 +437,25 @@ fun ExploreScreen(
     when (batchDialog) {
         BatchDialog.CATEGORY -> AlertDialog(
             onDismissRequest = { batchDialog = null },
-            title = { Text("批量修改分类") },
+            title = { Text(com.flash.app.i18n.tr("批量修改分类")) },
             text = {
                 Column {
                     TextButton(onClick = {
                         viewModel.batchSetCategory(Category.LOG)
                         batchDialog = null
-                    }) { Text("日志") }
+                    }) { Text(com.flash.app.i18n.tr("日志")) }
                     TextButton(onClick = {
                         viewModel.batchSetCategory(Category.IDEA)
                         batchDialog = null
-                    }) { Text("灵感") }
+                    }) { Text(com.flash.app.i18n.tr("灵感")) }
                 }
             },
             confirmButton = {},
-            dismissButton = { TextButton(onClick = { batchDialog = null }) { Text("取消") } },
+            dismissButton = { TextButton(onClick = { batchDialog = null }) { Text(com.flash.app.i18n.tr("取消")) } },
         )
         BatchDialog.TAG -> AlertDialog(
             onDismissRequest = { batchDialog = null },
-            title = { Text("批量修改标签") },
+            title = { Text(com.flash.app.i18n.tr("批量修改标签")) },
             text = {
                 Column {
                     ColorTag.entries.forEach { tag ->
@@ -448,7 +467,7 @@ fun ExploreScreen(
                 }
             },
             confirmButton = {},
-            dismissButton = { TextButton(onClick = { batchDialog = null }) { Text("取消") } },
+            dismissButton = { TextButton(onClick = { batchDialog = null }) { Text(com.flash.app.i18n.tr("取消")) } },
         )
         null -> Unit
     }
@@ -482,9 +501,9 @@ private fun DateRangeRow(
                         initial.dayOfMonth,
                     ).show()
                 },
-            ) { Text("$label：${value ?: "不限"}") }
+            ) { Text(com.flash.app.i18n.tr("{0}：{1}", label, value ?: "不限")) }
             if (value != null) {
-                TextButton(onClick = { onChange(null) }) { Text("清除") }
+                TextButton(onClick = { onChange(null) }) { Text(com.flash.app.i18n.tr("清除")) }
             }
         }
     }
@@ -493,7 +512,62 @@ private fun DateRangeRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(FlashTokens.Spacing.SM),
     ) {
-        dateButton("开始", startDate, onStartChange)
-        dateButton("结束", endDate, onEndChange)
+        dateButton(com.flash.app.i18n.tr("开始"), startDate, onStartChange)
+        dateButton(com.flash.app.i18n.tr("结束"), endDate, onEndChange)
     }
+}
+
+/** 轻扫：起始方向切换收藏（不移除），结束方向删除。从右到左时方向随布局翻转 */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun SwipeableRecord(
+    log: com.flash.app.data.model.LogItem,
+    modifier: Modifier = Modifier,
+    onFavorite: () -> Unit,
+    onDelete: () -> Unit,
+    content: @Composable () -> Unit,
+) {
+    val state = androidx.compose.material3.rememberSwipeToDismissBoxState(
+        confirmValueChange = { value ->
+            when (value) {
+                androidx.compose.material3.SwipeToDismissBoxValue.StartToEnd -> {
+                    onFavorite()
+                    false
+                }
+                androidx.compose.material3.SwipeToDismissBoxValue.EndToStart -> {
+                    onDelete()
+                    false
+                }
+                else -> true
+            }
+        },
+    )
+    androidx.compose.material3.SwipeToDismissBox(
+        state = state,
+        modifier = modifier,
+        backgroundContent = {
+            val direction = state.dismissDirection
+            val isFavorite = direction == androidx.compose.material3.SwipeToDismissBoxValue.StartToEnd
+            val isDelete = direction == androidx.compose.material3.SwipeToDismissBoxValue.EndToStart
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = FlashTokens.Spacing.LG),
+                contentAlignment = if (isDelete) Alignment.CenterEnd else Alignment.CenterStart,
+            ) {
+                when {
+                    isFavorite -> Icon(
+                        Icons.Filled.Star,
+                        contentDescription = if (log.isFavorite == true) com.flash.app.i18n.tr("取消收藏") else com.flash.app.i18n.tr("收藏"),
+                        tint = com.flash.app.ui.theme.ModuleColors.IdeaText,
+                    )
+                    isDelete -> Icon(
+                        Icons.Filled.Delete,
+                        contentDescription = com.flash.app.i18n.tr("删除"),
+                        tint = MaterialTheme.colorScheme.error,
+                    )
+                }
+            }
+        },
+    ) { content() }
 }

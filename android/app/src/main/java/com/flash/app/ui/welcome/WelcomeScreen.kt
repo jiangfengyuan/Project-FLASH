@@ -6,6 +6,7 @@
 
 package com.flash.app.ui.welcome
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,113 +14,129 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material.icons.filled.Mood
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.flash.app.ui.theme.glass.GlassPalette
+import com.flash.app.i18n.tr
+import com.flash.app.ui.components.rememberFlashHaptics
+import com.flash.app.ui.paper.HandDrawnRing
+import com.flash.app.ui.theme.FlashTokens
+import com.flash.app.ui.theme.ModuleColors
+import kotlinx.coroutines.launch
 
-/**
- * Welcome 页（PRD 10）：蓝→薰衣草→粉渐变 + 品牌 Logo + 标语。
- * 仅首次启动展示，「开始使用」后不再出现。
- */
+private data class WelcomePage(val icon: ImageVector, val tint: @Composable () -> Color, val title: String, val subtitle: String)
+
+/** 欢迎页（对齐 iOS）：首次启动三页横滑，手绘圈图标；「开始使用」后不再出现。 */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WelcomeScreen(onStart: () -> Unit) {
-    Box(
-        modifier = Modifier
+    val pages = listOf(
+        WelcomePage(Icons.Filled.Bolt, { MaterialTheme.colorScheme.primary }, tr("欢迎来到 Flash"), tr("一闪而过的想法，值得被记住")),
+        WelcomePage(Icons.Filled.EditNote, { ModuleColors.Log }, tr("随手记录"), tr("日志与灵感，一键即达")),
+        WelcomePage(Icons.Filled.Mood, { ModuleColors.Emotion }, tr("情绪觉察"), tr("七级情绪记录，看见自己的变化")),
+    )
+    val pager = rememberPagerState { pages.size }
+    val scope = rememberCoroutineScope()
+    val haptics = rememberFlashHaptics()
+    val last = pager.currentPage == pages.lastIndex
+
+    LaunchedEffect(pager) {
+        var previous = pager.currentPage
+        snapshotFlow { pager.currentPage }.collect {
+            if (it != previous) haptics.selection()
+            previous = it
+        }
+    }
+
+    Column(
+        Modifier
             .fillMaxSize()
-            .background(
-                Brush.linearGradient(
-                    listOf(
-                        Color(0xFF7EA6FF), // Sky Blue
-                        Color(0xFFB9A7F9), // Lavender
-                        Color(0xFFFFB3D1), // Pink
-                    ),
-                )
-            ),
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .padding(horizontal = FlashTokens.Spacing.XL, vertical = FlashTokens.Spacing.LG),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-        ) {
-            // 品牌标识：玻璃圆 + 闪电
-            Box(
-                modifier = Modifier
-                    .size(112.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.25f)),
-                contentAlignment = Alignment.Center,
+        HorizontalPager(state = pager, modifier = Modifier.weight(1f).fillMaxWidth()) { index ->
+            val page = pages[index]
+            val tint = page.tint()
+            Column(
+                Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
             ) {
-                Icon(
-                    Icons.Filled.Bolt,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(64.dp),
+                Box(contentAlignment = Alignment.Center) {
+                    HandDrawnRing(seed = page.title, tint = tint, modifier = Modifier.size(128.dp))
+                    Icon(page.icon, contentDescription = null, tint = tint, modifier = Modifier.size(56.dp))
+                }
+                Spacer(Modifier.height(FlashTokens.Spacing.XL))
+                Text(
+                    page.title,
+                    style = MaterialTheme.typography.headlineLarge,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.semantics { heading() },
+                )
+                Spacer(Modifier.height(FlashTokens.Spacing.SM))
+                Text(
+                    page.subtitle,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
                 )
             }
-            Spacer(Modifier.height(28.dp))
-            Text(
-                "Flash",
-                style = MaterialTheme.typography.displayMedium,
-                fontWeight = FontWeight.Bold,
-                color = GlassPalette.InkLight,
-            )
-            Text(
-                "一闪",
-                style = MaterialTheme.typography.titleLarge,
-                color = GlassPalette.InkLight.copy(alpha = 0.9f),
-            )
-            Spacer(Modifier.height(16.dp))
-            Text(
-                "记录此刻，闪现灵感",
-                style = MaterialTheme.typography.bodyLarge,
-                color = GlassPalette.InkLight.copy(alpha = 0.85f),
-                letterSpacing = 2.sp,
-            )
-            Spacer(Modifier.height(48.dp))
-            Button(
-                onClick = onStart,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-                    contentColor = GlassPalette.Purple,
-                ),
-            ) {
-                Text("开始使用", modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp))
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            repeat(pages.size) { index ->
+                Box(
+                    Modifier
+                        .size(if (index == pager.currentPage) 8.dp else 6.dp)
+                        .clip(CircleShape)
+                        .background(
+                            if (index == pager.currentPage) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.outlineVariant,
+                        ),
+                )
             }
-            Spacer(Modifier.height(32.dp))
-            // 装饰页点
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                repeat(3) { index ->
-                    Box(
-                        modifier = Modifier
-                            .size(if (index == 0) 8.dp else 6.dp)
-                            .clip(CircleShape)
-                            .background(
-                                Color.White.copy(alpha = if (index == 0) 0.95f else 0.5f)
-                            ),
-                    )
-                }
-            }
+        }
+        Spacer(Modifier.height(FlashTokens.Spacing.LG))
+        Button(
+            onClick = {
+                if (last) onStart() else scope.launch { pager.animateScrollToPage(pager.currentPage + 1) }
+            },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+            ),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(if (last) tr("开始使用") else tr("下一步"), modifier = Modifier.padding(vertical = 4.dp))
         }
     }
 }

@@ -6,6 +6,7 @@
 
 package com.flash.app
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -18,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.flash.app.data.ThemeMode
+import com.flash.app.ui.navigation.AppEntry
 import com.flash.app.ui.navigation.FlashApp
 import com.flash.app.ui.theme.FlashTheme
 
@@ -25,9 +27,21 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // 配置变更重建时不重复消费同一个 Intent
+        if (savedInstanceState == null) deliver(intent)
         setContent {
             FlashRoot()
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        deliver(intent)
+    }
+
+    private fun deliver(intent: Intent?) {
+        AppEntry.from(intent)?.let { (application as FlashApplication).pendingEntry.value = it }
     }
 }
 
@@ -35,7 +49,6 @@ class MainActivity : ComponentActivity() {
 private fun FlashRoot() {
     val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as FlashApplication
     val themeMode by app.settings.themeMode.collectAsStateWithLifecycle()
-    val uiStyle by app.settings.uiStyle.collectAsStateWithLifecycle()
 
     val systemDark = isSystemInDarkTheme()
     val darkTheme = when (themeMode) {
@@ -47,27 +60,16 @@ private fun FlashRoot() {
     // 系统栏图标颜色跟随 App 主题（onCreate 的 enableEdgeToEdge 只按系统主题设一次）
     val view = LocalView.current
     SideEffect {
-        (view.context as? ComponentActivity)?.enableEdgeToEdge(
-            statusBarStyle = if (darkTheme) {
-                SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
-            } else {
-                SystemBarStyle.light(
-                    android.graphics.Color.TRANSPARENT,
-                    android.graphics.Color.TRANSPARENT,
-                )
-            },
-            navigationBarStyle = if (darkTheme) {
-                SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
-            } else {
-                SystemBarStyle.light(
-                    android.graphics.Color.TRANSPARENT,
-                    android.graphics.Color.TRANSPARENT,
-                )
-            },
-        )
+        val transparent = android.graphics.Color.TRANSPARENT
+        val style = if (darkTheme) {
+            SystemBarStyle.dark(transparent)
+        } else {
+            SystemBarStyle.light(transparent, transparent)
+        }
+        (view.context as? ComponentActivity)?.enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
     }
 
-    FlashTheme(darkTheme = darkTheme, uiStyle = uiStyle) {
-        FlashApp(darkTheme = darkTheme, uiStyle = uiStyle)
+    FlashTheme(darkTheme = darkTheme) {
+        FlashApp()
     }
 }

@@ -23,8 +23,12 @@ class FlashApplication : Application() {
     lateinit var taskReminders: TaskReminderScheduler
         private set
 
+    /** 深链、通知与系统分享交给界面层的待处理入口 */
+    val pendingEntry = kotlinx.coroutines.flow.MutableStateFlow<com.flash.app.ui.navigation.AppEntry?>(null)
+
     override fun onCreate() {
         super.onCreate()
+        com.flash.app.i18n.Strings.install(this)
         BackupTransfer.cleanupExpired(this)
         // 数据库名与 Capacitor 版保持一致
         val db = Room.databaseBuilder(this, FlashDatabase::class.java, "flash-db")
@@ -36,5 +40,7 @@ class FlashApplication : Application() {
         repository = FlashRepository(db)
         settings = SettingsStore(this)
         taskReminders = TaskReminderScheduler(this)
+        com.flash.app.data.reminder.IdeaReminderWork.sync(this, settings.ideaReminderEnabled.value)
+        com.flash.app.widget.TodayWidgetUpdater.observe(this, repository)
     }
 }

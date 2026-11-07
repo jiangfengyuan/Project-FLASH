@@ -24,14 +24,22 @@ enum class ThemeMode(val storageKey: String) {
     }
 }
 
-/** 界面风格：MD3（Material Design 3 规范）或 GLASS（插画 × 玻璃拟态） */
-enum class UiStyle(val storageKey: String, val displayName: String) {
-    MD3("md3", "Material Design 3"),
-    GLASS("glass", "玻璃拟态");
+/** 灵感提醒频率（对齐 iOS：每天 / 每 3 天 / 每周，晚上 8 点） */
+enum class IdeaReminderFrequency(val storageKey: String, val intervalDays: Long) {
+    DAILY("daily", 1),
+    EVERY_THREE_DAYS("every3days", 3),
+    WEEKLY("weekly", 7);
+
+    val displayName: String
+        get() = when (this) {
+            DAILY -> com.flash.app.i18n.tr("每天")
+            EVERY_THREE_DAYS -> com.flash.app.i18n.tr("每 3 天")
+            WEEKLY -> com.flash.app.i18n.tr("每周")
+        }
 
     companion object {
-        fun fromStorage(key: String?): UiStyle =
-            entries.firstOrNull { it.storageKey == key } ?: GLASS
+        fun fromStorage(key: String?): IdeaReminderFrequency =
+            entries.firstOrNull { it.storageKey == key } ?: DAILY
     }
 }
 
@@ -46,11 +54,6 @@ class SettingsStore(context: Context) {
     )
     val themeMode: StateFlow<ThemeMode> = _themeMode.asStateFlow()
 
-    private val _uiStyle = MutableStateFlow(
-        UiStyle.fromStorage(prefs.getString(KEY_UI_STYLE, null))
-    )
-    val uiStyle: StateFlow<UiStyle> = _uiStyle.asStateFlow()
-
     private val _welcomed = MutableStateFlow(prefs.getBoolean(KEY_WELCOMED, false))
     val welcomed: StateFlow<Boolean> = _welcomed.asStateFlow()
 
@@ -59,10 +62,33 @@ class SettingsStore(context: Context) {
         prefs.edit { putString(KEY_THEME_MODE, mode.storageKey) }
     }
 
-    fun setUiStyle(style: UiStyle) {
-        _uiStyle.value = style
-        prefs.edit { putString(KEY_UI_STYLE, style.storageKey) }
+    private val _ideaReminderEnabled = MutableStateFlow(prefs.getBoolean(KEY_IDEA_REMINDER_ENABLED, true))
+    val ideaReminderEnabled: StateFlow<Boolean> = _ideaReminderEnabled.asStateFlow()
+
+    private val _ideaReminderFrequency = MutableStateFlow(
+        IdeaReminderFrequency.fromStorage(prefs.getString(KEY_IDEA_REMINDER_FREQUENCY, null))
+    )
+    val ideaReminderFrequency: StateFlow<IdeaReminderFrequency> = _ideaReminderFrequency.asStateFlow()
+
+    fun setIdeaReminderEnabled(enabled: Boolean) {
+        _ideaReminderEnabled.value = enabled
+        prefs.edit { putBoolean(KEY_IDEA_REMINDER_ENABLED, enabled) }
     }
+
+    fun setIdeaReminderFrequency(frequency: IdeaReminderFrequency) {
+        _ideaReminderFrequency.value = frequency
+        prefs.edit { putString(KEY_IDEA_REMINDER_FREQUENCY, frequency.storageKey) }
+    }
+
+    /** 上次发出灵感提醒的时刻（毫秒），控制「每 3 天 / 每周」的间隔 */
+    var ideaReminderLastFiredAt: Long
+        get() = prefs.getLong(KEY_IDEA_REMINDER_LAST_FIRED, 0L)
+        set(value) = prefs.edit { putLong(KEY_IDEA_REMINDER_LAST_FIRED, value) }
+
+    /** 快速记录草稿（未提交时保留）；只存本机，不进备份 */
+    var quickCaptureDraft: String
+        get() = prefs.getString(KEY_QUICK_DRAFT, "").orEmpty()
+        set(value) = prefs.edit { putString(KEY_QUICK_DRAFT, value) }
 
     /** Welcome 页完成后调用 */
     fun setWelcomed() {
@@ -72,7 +98,10 @@ class SettingsStore(context: Context) {
 
     private companion object {
         const val KEY_THEME_MODE = "themeMode"
-        const val KEY_UI_STYLE = "uiStyle"
+        const val KEY_IDEA_REMINDER_ENABLED = "ideaReminderEnabled"
+        const val KEY_IDEA_REMINDER_FREQUENCY = "ideaReminderFrequency"
+        const val KEY_IDEA_REMINDER_LAST_FIRED = "ideaReminderLastFiredAt"
+        const val KEY_QUICK_DRAFT = "quickCaptureDraft"
         const val KEY_WELCOMED = "welcomed"
     }
 }

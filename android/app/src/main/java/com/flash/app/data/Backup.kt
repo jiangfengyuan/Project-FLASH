@@ -157,7 +157,7 @@ object Backup {
             if (read < 0) break
             total += read
             if (total > maxBytes) {
-                throw BackupFormatException("备份文件超过 ${MAX_FILE_BYTES / 1024 / 1024} MB，无法导入")
+                throw BackupFormatException(com.flash.app.i18n.tr("备份文件超过 {0} MB，无法导入", MAX_FILE_BYTES / 1024 / 1024))
             }
             output.write(buffer, 0, read)
         }
@@ -168,7 +168,7 @@ object Backup {
                 .decode(ByteBuffer.wrap(output.toByteArray()))
                 .toString()
         } catch (_: Exception) {
-            throw BackupFormatException("备份文件不是有效的 UTF-8 JSON")
+            throw BackupFormatException(com.flash.app.i18n.tr("备份文件不是有效的 UTF-8 JSON"))
         }
     }
 
@@ -192,7 +192,7 @@ object Backup {
     private fun canonicalTimeZone(id: String): String? {
         if (id !in CanonicalTimeZones.ALL) return null
         if (CanonicalTimeZones.zoneId(id) == null) {
-            throw BackupFormatException("此设备不支持备份中的任务时区，请更新系统后重试；未导入任何数据")
+            throw BackupFormatException(com.flash.app.i18n.tr("此设备不支持备份中的任务时区，请更新系统后重试；未导入任何数据"))
         }
         return id
     }
@@ -200,40 +200,40 @@ object Backup {
     /** @throws BackupFormatException 文件整体不合法时抛出；单条非法数据跳过。 */
     fun parse(json: String): ImportResult {
         if (json.toByteArray(Charsets.UTF_8).size > MAX_FILE_BYTES) {
-            throw BackupFormatException("备份文件超过 ${MAX_FILE_BYTES / 1024 / 1024} MB，无法导入")
+            throw BackupFormatException(com.flash.app.i18n.tr("备份文件超过 {0} MB，无法导入", MAX_FILE_BYTES / 1024 / 1024))
         }
         val root = try {
             JSONObject(json)
         } catch (e: Exception) {
-            throw BackupFormatException("备份文件不是有效的 JSON 对象")
+            throw BackupFormatException(com.flash.app.i18n.tr("备份文件不是有效的 JSON 对象"))
         }
 
         val version = root.stringOrNull("version")
-            ?: throw BackupFormatException("备份版本不兼容：缺少 version 字段")
+            ?: throw BackupFormatException(com.flash.app.i18n.tr("备份版本不兼容：缺少 version 字段"))
         val sectionRoot = when (version) {
             LEGACY_BACKUP_VERSION -> root
             BACKUP_VERSION -> {
                 val schemas = root.optJSONObject("schemas")
-                    ?: throw BackupFormatException("schemas 必须是对象")
+                    ?: throw BackupFormatException(com.flash.app.i18n.tr("schemas 必须是对象"))
                 listOf("logs", "emotions", "tasks").forEach { section ->
                     val schema = schemas.integerOrNull(section)
                     if (schema == null || schema !in SECTION_SCHEMA_V1..SECTION_SCHEMA_V2) {
-                        throw BackupFormatException("不支持的 $section 分区版本")
+                        throw BackupFormatException(com.flash.app.i18n.tr("不支持的 {0} 分区版本", section))
                     }
                 }
                 root.optJSONObject("data")
-                    ?: throw BackupFormatException("data 必须是对象")
+                    ?: throw BackupFormatException(com.flash.app.i18n.tr("data 必须是对象"))
             }
-            else -> throw BackupFormatException("备份版本不兼容：期望 $BACKUP_VERSION，实际 $version")
+            else -> throw BackupFormatException(com.flash.app.i18n.tr("备份版本不兼容：期望 {0}，实际 {1}", BACKUP_VERSION, version))
         }
         val logsJson = sectionRoot.optJSONArray("logs")
-            ?: throw BackupFormatException("logs 必须是数组")
+            ?: throw BackupFormatException(com.flash.app.i18n.tr("logs 必须是数组"))
         val emotionsJson = sectionRoot.optJSONArray("emotions")
-            ?: throw BackupFormatException("emotions 必须是数组")
+            ?: throw BackupFormatException(com.flash.app.i18n.tr("emotions 必须是数组"))
         val tasksJson = if (version == LEGACY_BACKUP_VERSION) {
             JSONArray()
         } else {
-            sectionRoot.optJSONArray("tasks") ?: throw BackupFormatException("tasks 必须是数组")
+            sectionRoot.optJSONArray("tasks") ?: throw BackupFormatException(com.flash.app.i18n.tr("tasks 必须是数组"))
         }
 
         val logs = mutableListOf<LogItem>()
@@ -284,16 +284,16 @@ object Backup {
 
     /** Standard v2 import: validate the entire snapshot before any repository write. */
     fun parseStrict(json: String): ImportResult {
-        if (json.startsWith("\uFEFF")) throw BackupFormatException("/：不允许 UTF-8 BOM")
-        if (json.toByteArray(Charsets.UTF_8).size > MAX_FILE_BYTES) throw BackupFormatException("文件超过 50 MiB")
+        if (json.startsWith("\uFEFF")) throw BackupFormatException(com.flash.app.i18n.tr("/：不允许 UTF-8 BOM"))
+        if (json.toByteArray(Charsets.UTF_8).size > MAX_FILE_BYTES) throw BackupFormatException(com.flash.app.i18n.tr("文件超过 50 MiB"))
         StrictJson(json).validate()
         val result = parse(json)
         val root = JSONObject(json)
         root.checkFields(setOf("version", "exportedAt", "appVersion", "notes", "schemas", "data"), "/")
-        if (result.sourceVersion != BACKUP_VERSION) throw BackupFormatException("/version：旧版文件请使用兼容恢复入口")
+        if (result.sourceVersion != BACKUP_VERSION) throw BackupFormatException(com.flash.app.i18n.tr("/version：旧版文件请使用兼容恢复入口"))
         if (normalizeIsoDate(root.stringOrNull("exportedAt")) == null || root.stringOrNull("appVersion") == null ||
             root.stringOrNull("notes")?.let { it.length <= MAX_FIELD_LENGTH } != true) {
-            throw BackupFormatException("/：导出元信息不合法")
+            throw BackupFormatException(com.flash.app.i18n.tr("/：导出元信息不合法"))
         }
         val sections = setOf("logs", "emotions", "tasks")
         root.getJSONObject("schemas").checkFields(sections, "/schemas")
@@ -301,9 +301,9 @@ object Backup {
         data.checkFields(sections, "/data")
         for (section in sections) {
             val array = data.getJSONArray(section)
-            if (array.length() > MAX_ENTRY_COUNT) throw BackupFormatException("/data/$section：数组超过上限")
+            if (array.length() > MAX_ENTRY_COUNT) throw BackupFormatException(com.flash.app.i18n.tr("/data/{0}：数组超过上限", section))
             for (i in 0 until array.length()) {
-                val item = array.optJSONObject(i) ?: throw BackupFormatException("/data/$section/$i：记录必须是对象")
+                val item = array.optJSONObject(i) ?: throw BackupFormatException(com.flash.app.i18n.tr("/data/{0}/{1}：记录必须是对象", section, i))
                 val required = when (section) {
                     "logs" -> setOf("id", "content", "colorTag", "category", "importance", "createdAt", "recordDate")
                     "emotions" -> setOf("id", "level", "createdAt", "recordDate")
@@ -316,13 +316,13 @@ object Backup {
                 }
                 item.checkFields(required, "/data/$section/$i", optional + schema2Fields(root, section))
                 if (section == "tasks") {
-                    val due = item.optJSONObject("due") ?: throw BackupFormatException("/data/tasks/$i/due：必须是对象")
+                    val due = item.optJSONObject("due") ?: throw BackupFormatException(com.flash.app.i18n.tr("/data/tasks/{0}/due：必须是对象", i))
                     due.checkFields(if (due.optString("kind") == "allDay") setOf("kind", "date") else setOf("kind", "at", "timeZone"), "/data/tasks/$i/due")
                 }
             }
         }
         if (result.skippedLogs + result.skippedEmotions + result.skippedTasks != 0) {
-            throw BackupFormatException("/data：存在非法或重复记录，请使用损坏文件恢复入口查看可恢复内容")
+            throw BackupFormatException(com.flash.app.i18n.tr("/data：存在非法或重复记录，请使用损坏文件恢复入口查看可恢复内容"))
         }
         return result
     }
@@ -374,7 +374,7 @@ object Backup {
 
     private fun JSONObject.checkFields(required: Set<String>, path: String, optional: Set<String> = emptySet()) {
         if (!required.all { has(it) } || keys().asSequence().any { it !in required && it !in optional }) {
-            throw BackupFormatException("$path：缺少必填字段或包含未知字段")
+            throw BackupFormatException(com.flash.app.i18n.tr("{0}：缺少必填字段或包含未知字段", path))
         }
     }
 
@@ -545,7 +545,7 @@ object Backup {
     private fun String.trimContract(): String = trim { it in "\u0009\u000A\u000B\u000C\u000D\u0020\u00A0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF" }
 
     internal fun normalizedTimestamp(value: String): String =
-        normalizeIsoDate(value) ?: throw BackupFormatException("任务时间不合法")
+        normalizeIsoDate(value) ?: throw BackupFormatException(com.flash.app.i18n.tr("任务时间不合法"))
 
     private fun normalizedForExport(value: String): String =
         normalizeIsoDate(value) ?: value

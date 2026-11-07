@@ -70,12 +70,12 @@ fun EmotionStatsSection(
     StyleCard(modifier = Modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                "情绪走势",
+                com.flash.app.i18n.tr("情绪走势"),
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.weight(1f),
             )
             if (window == null) SingleChoiceSegmentedButtonRow {
-                listOf(if (weekAligned) "本周" else "7天", "30天").forEachIndexed { index, label ->
+                listOf(if (weekAligned) com.flash.app.i18n.tr("本周") else com.flash.app.i18n.tr("7天"), com.flash.app.i18n.tr("30天")).forEachIndexed { index, label ->
                     SegmentedButton(
                         selected = selection == index,
                         onClick = { selection = index },
@@ -89,18 +89,18 @@ fun EmotionStatsSection(
         Spacer(Modifier.height(12.dp))
         if (!hasData) {
             Text(
-                "时间窗内暂无记录",
+                com.flash.app.i18n.tr("时间窗内暂无记录"),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         } else {
-            Text("日均情绪 · -3 至 +3（0 为中性）", style = MaterialTheme.typography.bodySmall)
+            Text(com.flash.app.i18n.tr("日均情绪 · -3 至 +3（0 为中性）"), style = MaterialTheme.typography.bodySmall)
             TrendChart(averages, modifier = Modifier.fillMaxWidth().height(120.dp))
-            Text("$start — $end · 无记录日期不计入均值", style = MaterialTheme.typography.bodySmall)
+            Text(com.flash.app.i18n.tr("{0} — {1} · 无记录日期不计入均值", start, end), style = MaterialTheme.typography.bodySmall)
         }
         if (distribution.isNotEmpty()) {
             Spacer(Modifier.height(12.dp))
-            Text("负面子情绪分布", style = MaterialTheme.typography.labelLarge)
+            Text(com.flash.app.i18n.tr("负面子情绪分布"), style = MaterialTheme.typography.labelLarge)
             Spacer(Modifier.height(8.dp))
             val max = distribution.maxOf { it.second }.coerceAtLeast(1)
             distribution.forEach { (name, count) ->
@@ -143,7 +143,7 @@ private fun TrendChart(
 
     val description = averages.filter { it.second != null }
         .joinToString("；") { "${it.first}：${it.second}" }
-    Canvas(modifier = modifier.semantics { contentDescription = "每日情绪均值：$description" }) {
+    Canvas(modifier = modifier.semantics { contentDescription = com.flash.app.i18n.tr("每日情绪均值：{0}", description) }) {
         if (averages.isEmpty()) return@Canvas
         val width = size.width
         val height = size.height

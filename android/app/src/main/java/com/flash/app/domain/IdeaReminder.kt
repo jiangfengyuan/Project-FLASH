@@ -11,3 +11,7 @@ const val IDEA_REMINDER_THRESHOLD = 3
 
 fun shouldShowIdeaReminder(unviewedCount: Int): Boolean =
     unviewedCount >= IDEA_REMINDER_THRESHOLD
+
+/** 距上次提醒是否已满频率间隔（从未提醒过视为到期）。 */
+fun ideaReminderDue(lastFired: java.time.LocalDate?, today: java.time.LocalDate, intervalDays: Long): Boolean =
+    lastFired == null || java.time.temporal.ChronoUnit.DAYS.between(lastFired, today) >= intervalDays

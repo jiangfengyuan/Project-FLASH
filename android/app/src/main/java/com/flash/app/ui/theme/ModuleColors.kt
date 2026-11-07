@@ -8,32 +8,28 @@ package com.flash.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 
-/**
- * 四大模块品牌色（PRD 14 色板：功能识别色）。
- * 用户看到黄色联想到 Idea，粉色联想到 Emotion。
- */
+/** 四大模块色（图标与点缀，≥ 3:1；文字用 *Text 变体）。见 PaperColors。 */
 object ModuleColors {
-    val Log = Color(0xFF8B5CF6)      // 紫
-    val Idea = Color(0xFFF5B800)     // 黄
-    val Calendar = Color(0xFF22B573) // 绿
-    val Emotion = Color(0xFFFF6B9D)  // 粉
+    val Log: Color @Composable @ReadOnlyComposable get() = PaperColors.LogPurple.resolve(LocalIsDarkTheme.current)
+    val Idea: Color @Composable @ReadOnlyComposable get() = PaperColors.IdeaYellow.resolve(LocalIsDarkTheme.current)
+    val IdeaText: Color @Composable @ReadOnlyComposable get() = PaperColors.IdeaYellowText.resolve(LocalIsDarkTheme.current)
+    val Calendar: Color @Composable @ReadOnlyComposable get() = PaperColors.CalendarGreen.resolve(LocalIsDarkTheme.current)
+    val CalendarText: Color @Composable @ReadOnlyComposable get() = PaperColors.AccessibleGreen.resolve(LocalIsDarkTheme.current)
+    val Emotion: Color @Composable @ReadOnlyComposable get() = PaperColors.EmotionPink.resolve(LocalIsDarkTheme.current)
+    val EmotionText: Color @Composable @ReadOnlyComposable get() = PaperColors.EmotionPinkText.resolve(LocalIsDarkTheme.current)
 
-    /**
-     * 模块色底上的可读内容色：按 WCAG 对比度在深墨与白之间取更高者。
-     * 黄/绿/粉等浅亮色上白字对比不足 3:1，统一收敛到该判定，不用固定阈值拍亮度。
-     */
+    /** 模块色底上的可读内容色：按 WCAG 对比度在炭墨与纸白之间取更高者。 */
     fun contentOn(background: Color): Color {
-        val dark = FlashTokens.Palette.InkPrimary
+        val dark = PaperColors.TextPrimary.light
+        val light = PaperColors.CardSurface.light
         fun contrast(a: Color, b: Color): Float {
             val hi = maxOf(a.luminance(), b.luminance()) + 0.05f
             val lo = minOf(a.luminance(), b.luminance()) + 0.05f
             return hi / lo
         }
-        return if (contrast(dark, background) >= contrast(Color.White, background)) {
-            dark
-        } else {
-            Color.White
-        }
+        return if (contrast(dark, background) >= contrast(light, background)) dark else light
     }
 }

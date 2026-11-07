@@ -44,20 +44,24 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-private enum class ReminderOption(val label: String, val minutesBefore: Long?) {
+private enum class ReminderOption(private val labelSource: String, val minutesBefore: Long?) {
     NONE("不提醒", null),
     AT_TIME("到期时", 0),
     FIFTEEN_MINUTES("提前 15 分钟", 15),
     ONE_HOUR("提前 1 小时", 60),
-    ONE_DAY("提前 1 天", 24 * 60),
+    ONE_DAY("提前 1 天", 24 * 60);
+
+    val label: String get() = com.flash.app.i18n.tr(labelSource)
 }
 
-private val IMPORTANCE_OPTIONS = listOf(0 to "无", 2 to "!!", 3 to "!!!", 4 to "!!!!")
+private val IMPORTANCE_OPTIONS get() = listOf(0 to com.flash.app.i18n.tr("无"), 1 to "!", 2 to "!!", 3 to "!!!", 4 to "!!!!")
 
 @Composable
 fun TaskEditorDialog(
     selectedDate: LocalDate,
     existing: TaskItem?,
+    initialTitle: String = "",
+    sourceLogId: String? = null,
     onDismiss: () -> Unit,
     onSave: (TaskDraft) -> Unit,
 ) {
@@ -70,7 +74,7 @@ fun TaskEditorDialog(
         runCatching { Instant.parse(due).atZone(initialZone).toLocalTime() }.getOrNull()
     } ?: LocalTime.of(9, 0)
 
-    var title by remember(existing?.id) { mutableStateOf(existing?.title.orEmpty()) }
+    var title by remember(existing?.id) { mutableStateOf(existing?.title ?: initialTitle.take(200)) }
     var notes by remember(existing?.id) { mutableStateOf(existing?.notes.orEmpty()) }
     var tag by remember(existing?.id) { mutableStateOf(existing?.colorTag ?: ColorTag.MEMO) }
     var importance by remember(existing?.id) { mutableIntStateOf(existing?.importance ?: 0) }
@@ -79,13 +83,14 @@ fun TaskEditorDialog(
     }
     var dueDate by remember(existing?.id) { mutableStateOf(initialDate) }
     var dueTime by remember(existing?.id) { mutableStateOf(initialTime) }
+    var favorite by remember(existing?.id) { mutableStateOf(existing?.isFavorite == true) }
     var reminder by remember(existing?.id) {
         mutableStateOf(inferReminder(existing, initialDate, initialTime, initialZone))
     }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (existing == null) "新建任务" else "编辑任务") },
+        title = { Text(if (existing == null) com.flash.app.i18n.tr("新建任务") else com.flash.app.i18n.tr("编辑任务")) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
@@ -94,7 +99,7 @@ fun TaskEditorDialog(
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it.take(200) },
-                    label = { Text("任务") },
+                    label = { Text(com.flash.app.i18n.tr("任务")) },
                     supportingText = { Text("${title.length}/200") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
@@ -102,7 +107,7 @@ fun TaskEditorDialog(
                 OutlinedTextField(
                     value = notes,
                     onValueChange = { notes = it.take(Backup.MAX_FIELD_LENGTH) },
-                    label = { Text("备注（可选）") },
+                    label = { Text(com.flash.app.i18n.tr("备注（可选）")) },
                     minLines = 2,
                     maxLines = 4,
                     modifier = Modifier.fillMaxWidth(),
@@ -131,8 +136,19 @@ fun TaskEditorDialog(
                         )
                     }
                 }
+                if (sourceLogId != null || existing?.sourceLogId != null) {
+                    Text(
+                        com.flash.app.i18n.tr("来自灵感，原灵感会保留"),
+                        style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("全天任务", modifier = Modifier.weight(1f))
+                    Text(com.flash.app.i18n.tr("收藏"), modifier = Modifier.weight(1f))
+                    Switch(checked = favorite, onCheckedChange = { favorite = it })
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(com.flash.app.i18n.tr("全天任务"), modifier = Modifier.weight(1f))
                     Switch(checked = allDay, onCheckedChange = { allDay = it })
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -160,10 +176,10 @@ fun TaskEditorDialog(
                                 ).show()
                             },
                             modifier = Modifier.weight(1f),
-                        ) { Text(dueTime.format(DateTimeFormatter.ofPattern("HH:mm"))) }
+                        ) { Text(dueTime.format(DateTimeFormatter.ofPattern("HH:mm", java.util.Locale.ROOT))) }
                     }
                 }
-                Text("本地提醒")
+                Text(com.flash.app.i18n.tr("本地提醒"))
                 Row(
                     modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -176,7 +192,7 @@ fun TaskEditorDialog(
                         )
                     }
                 }
-                Text("提醒由系统后台调度，省电模式下可能略有延迟。")
+                Text(com.flash.app.i18n.tr("提醒由系统后台调度，省电模式下可能略有延迟。"))
             }
         },
         confirmButton = {
@@ -200,12 +216,13 @@ fun TaskEditorDialog(
                             dueAt = if (allDay) null else anchor.toString(),
                             timeZone = if (allDay) null else existing?.timeZone ?: zone.id,
                             reminderAt = reminderAt,
+                            isFavorite = if (favorite) true else existing?.isFavorite?.let { false },
                         )
                     )
                 },
-            ) { Text("保存") }
+            ) { Text(com.flash.app.i18n.tr("保存")) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(com.flash.app.i18n.tr("取消")) } },
     )
 }
 

@@ -10,11 +10,19 @@ import java.time.LocalDate
 import com.flash.app.data.model.LogItem
 import com.flash.app.data.model.EmotionRecord
 
-enum class ReviewWindow(val label: String, val currentName: String, val previousName: String) {
+enum class ReviewWindow(
+    private val labelSource: String,
+    private val currentSource: String,
+    private val previousSource: String,
+) {
     WEEK("本周", "这周", "上周"),
     MONTH("本月", "这个月", "上个月"),
-    DAYS_30("近30天", "近30天", "前30天"),
-    DAYS_90("近90天", "近90天", "前90天");
+    DAYS_30("近30天", "近 30 天", "之前 30 天"),
+    DAYS_90("近90天", "近 90 天", "之前 90 天");
+
+    val label: String get() = com.flash.app.i18n.tr(labelSource)
+    val currentName: String get() = com.flash.app.i18n.tr(currentSource)
+    val previousName: String get() = com.flash.app.i18n.tr(previousSource)
 
     fun days(today: LocalDate): Int = when (this) {
         WEEK -> today.dayOfWeek.value

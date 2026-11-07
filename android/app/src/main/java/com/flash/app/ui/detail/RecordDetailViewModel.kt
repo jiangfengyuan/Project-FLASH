@@ -6,6 +6,7 @@
 
 package com.flash.app.ui.detail
 
+import com.flash.app.i18n.tr
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -33,7 +34,6 @@ data class RecordDetailUiState(
 
 sealed interface RecordDetailEvent {
     data object Saved : RecordDetailEvent
-    data object Deleted : RecordDetailEvent
     data class Failed(val message: String) : RecordDetailEvent
 }
 
@@ -57,7 +57,14 @@ class RecordDetailViewModel(
         viewModelScope.launch { repository.markIdeaViewed(recordId) }
     }
 
-    fun save(content: String, colorTag: ColorTag, category: Category, importance: Int, recordDate: String) {
+    fun save(
+        content: String,
+        colorTag: ColorTag,
+        category: Category,
+        importance: Int,
+        recordDate: String,
+        isFavorite: Boolean,
+    ) {
         val current = uiState.value.record ?: return
         // 超限不静默截断：repository.updateLog 会拒绝并抛出带可读信息的异常，
         // 由 Failed 事件提示；编辑框自身也已禁用超限保存。
@@ -73,30 +80,29 @@ class RecordDetailViewModel(
                         category = category,
                         importance = importance.coerceIn(0, 4),
                         recordDate = recordDate,
+                        isFavorite = if (isFavorite) true else current.isFavorite?.let { false },
                     ),
                     markViewed = true,
                 )
             }.onSuccess {
                 eventChannel.send(RecordDetailEvent.Saved)
             }.onFailure {
-                eventChannel.send(RecordDetailEvent.Failed(it.message ?: "保存失败，请重试"))
+                eventChannel.send(RecordDetailEvent.Failed(it.message ?: com.flash.app.i18n.tr("保存失败，请重试")))
             }
             busy.value = false
         }
     }
 
-    fun delete() {
-        val id = uiState.value.record?.id ?: return
-        if (busy.value) return
+    /** 删除即生效并返回撤销动作；失败返回 null */
+    suspend fun deleteWithUndo(): (suspend () -> Unit)? {
+        val record = uiState.value.record ?: return null
+        if (busy.value) return null
         busy.value = true
-        viewModelScope.launch {
-            runCatching { repository.deleteLog(id) }
-                .onSuccess { eventChannel.send(RecordDetailEvent.Deleted) }
-                .onFailure {
-                    eventChannel.send(RecordDetailEvent.Failed(it.message ?: "删除失败，请重试"))
-                }
-            busy.value = false
-        }
+        val undo = runCatching { repository.deleteLogWithUndo(record) }
+            .onFailure { eventChannel.send(RecordDetailEvent.Failed(it.message ?: tr("删除失败，请重试"))) }
+            .getOrNull()
+        busy.value = false
+        return undo
     }
 
     companion object {

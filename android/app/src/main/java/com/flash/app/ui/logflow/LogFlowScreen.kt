@@ -72,7 +72,6 @@ import com.flash.app.data.Backup
 import com.flash.app.data.TextLimits
 import com.flash.app.data.model.ColorTag
 import com.flash.app.data.model.LogItem
-import com.flash.app.ui.components.LogCard
 import java.time.Instant
 import java.time.ZoneOffset
 
@@ -97,8 +96,8 @@ fun LogFlowScreen(onBack: () -> Unit, onOpenRecord: (String) -> Unit) {
             when (event) {
                 is LogFlowEvent.Deleted -> {
                     val result = snackbar.showSnackbar(
-                        message = "已删除日志",
-                        actionLabel = "撤销",
+                        message = com.flash.app.i18n.tr("已删除日志"),
+                        actionLabel = com.flash.app.i18n.tr("撤销"),
                         duration = SnackbarDuration.Short,
                     )
                     if (result == SnackbarResult.ActionPerformed) {
@@ -115,11 +114,11 @@ fun LogFlowScreen(onBack: () -> Unit, onOpenRecord: (String) -> Unit) {
         snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
-                title = { Text("日志管理") },
+                title = { Text(com.flash.app.i18n.tr("日志管理")) },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = com.flash.app.i18n.tr("返回"))
                     }
                 },
             )
@@ -133,25 +132,31 @@ fun LogFlowScreen(onBack: () -> Unit, onOpenRecord: (String) -> Unit) {
             OutlinedTextField(
                 value = filter.query,
                 onValueChange = viewModel::setQuery,
-                placeholder = { Text("搜索日志...") },
+                placeholder = { Text(com.flash.app.i18n.tr("搜索日志...")) },
                 leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = com.flash.app.ui.paper.pageGutter()),
             )
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .horizontalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = com.flash.app.ui.paper.pageGutter(), vertical = 8.dp),
             ) {
-                ColorTag.entries.forEach { tag ->
-                    FilterChip(
+                com.flash.app.ui.components.FlashFilterChip(
+                    label = com.flash.app.i18n.tr("★ 已收藏"),
+                    selected = filter.favoritesOnly,
+                    onClick = viewModel::toggleFavoritesOnly,
+                )
+                // 日志流只含日志，不提供「想法」标签（对齐 iOS）
+                ColorTag.entries.filter { it != ColorTag.IDEA }.forEach { tag ->
+                    com.flash.app.ui.components.FlashFilterChip(
+                        label = tag.displayName,
                         selected = tag in filter.tags,
                         onClick = { viewModel.toggleTag(tag) },
-                        label = { Text(tag.displayName) },
                     )
                 }
             }
@@ -161,24 +166,24 @@ fun LogFlowScreen(onBack: () -> Unit, onOpenRecord: (String) -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = com.flash.app.ui.paper.pageGutter()),
             ) {
                 OutlinedButton(onClick = { showStartPicker = true }) {
-                    Text(filter.startDate?.let { "自 $it" } ?: "开始日期")
+                    Text(filter.startDate?.let { com.flash.app.i18n.tr("自 {0}", it) } ?: com.flash.app.i18n.tr("开始日期"))
                 }
                 OutlinedButton(onClick = { showEndPicker = true }) {
-                    Text(filter.endDate?.let { "至 $it" } ?: "结束日期")
+                    Text(filter.endDate?.let { com.flash.app.i18n.tr("至 {0}", it) } ?: com.flash.app.i18n.tr("结束日期"))
                 }
                 if (filter.startDate != null || filter.endDate != null) {
                     TextButton(onClick = { viewModel.setDateRange(null, null) }) {
-                        Text("清除")
+                        Text(com.flash.app.i18n.tr("清除"))
                     }
                 }
             }
             SingleChoiceSegmentedButtonRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = com.flash.app.ui.paper.pageGutter()),
             ) {
                 LogSort.entries.forEachIndexed { index, sort ->
                     SegmentedButton(
@@ -194,10 +199,10 @@ fun LogFlowScreen(onBack: () -> Unit, onOpenRecord: (String) -> Unit) {
                 }
             }
             Text(
-                "$totalCount 条",
+                com.flash.app.i18n.tr("{0} 条", totalCount),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = com.flash.app.ui.paper.pageGutter(), vertical = 8.dp),
             )
             val listState = rememberLazyListState()
             val hasMore = logs.size < totalCount
@@ -215,13 +220,13 @@ fun LogFlowScreen(onBack: () -> Unit, onOpenRecord: (String) -> Unit) {
             LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+                contentPadding = PaddingValues(horizontal = com.flash.app.ui.paper.pageGutter(), vertical = 4.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) { 
                 if (logs.isEmpty()) {
                     item(key = "empty") {
                         Text(
-                            "没有符合条件的日志",
+                            com.flash.app.i18n.tr("没有符合条件的日志"),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
@@ -229,27 +234,19 @@ fun LogFlowScreen(onBack: () -> Unit, onOpenRecord: (String) -> Unit) {
                     }
                 }
                 items(items = logs, key = { it.id }) { log ->
-                    LogCard(
+                    com.flash.app.ui.components.RecordCard(
                         log = log,
                         onClick = { onOpenRecord(log.id) },
-                        actions = {
-                            IconButton(onClick = { editingLog = log }) {
-                                Icon(Icons.Filled.Edit, contentDescription = "编辑")
-                            }
-                            IconButton(onClick = { deletingLog = log }) {
-                                Icon(
-                                    Icons.Filled.Delete,
-                                    contentDescription = "删除",
-                                    tint = MaterialTheme.colorScheme.error,
-                                )
-                            }
-                        },
+                        menu = com.flash.app.ui.components.RecordMenu(
+                            onEdit = { editingLog = log },
+                            onDelete = { deletingLog = log },
+                        ),
                     )
                 }
                 if (hasMore) {
                     item(key = "loading") {
                         Text(
-                            "正在加载更多…",
+                            com.flash.app.i18n.tr("正在加载更多…"),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
@@ -272,7 +269,7 @@ fun LogFlowScreen(onBack: () -> Unit, onOpenRecord: (String) -> Unit) {
 
     if (showStartPicker) {
         DatePickDialog(
-            title = "开始日期",
+            title = com.flash.app.i18n.tr("开始日期"),
             onConfirm = { date ->
                 viewModel.setDateRange(date, filter.endDate)
                 showStartPicker = false
@@ -283,7 +280,7 @@ fun LogFlowScreen(onBack: () -> Unit, onOpenRecord: (String) -> Unit) {
 
     if (showEndPicker) {
         DatePickDialog(
-            title = "结束日期",
+            title = com.flash.app.i18n.tr("结束日期"),
             onConfirm = { date ->
                 viewModel.setDateRange(filter.startDate, date)
                 showEndPicker = false
@@ -295,18 +292,18 @@ fun LogFlowScreen(onBack: () -> Unit, onOpenRecord: (String) -> Unit) {
     deletingLog?.let { log ->
         AlertDialog(
             onDismissRequest = { deletingLog = null },
-            title = { Text("删除这条日志？") },
+            title = { Text(com.flash.app.i18n.tr("删除这条日志？")) },
             text = { Text(log.content.take(50)) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.deleteLog(log)
                     deletingLog = null
                 }) {
-                    Text("删除", color = MaterialTheme.colorScheme.error)
+                    Text(com.flash.app.i18n.tr("删除"), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { deletingLog = null }) { Text("取消") }
+                TextButton(onClick = { deletingLog = null }) { Text(com.flash.app.i18n.tr("取消")) }
             },
         )
     }
@@ -331,14 +328,14 @@ private fun EditLogDialog(log: LogItem, onDismiss: () -> Unit, onSave: suspend (
 
     AlertDialog(
         onDismissRequest = close,
-        title = { Text("编辑记录") },
+        title = { Text(com.flash.app.i18n.tr("编辑记录")) },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 if (error != null) Text(error!!, color = MaterialTheme.colorScheme.error)
                 OutlinedTextField(
                     value = content,
                     onValueChange = { if (!saving) content = it },
-                    label = { Text("内容") },
+                    label = { Text(com.flash.app.i18n.tr("内容")) },
                     isError = overLimit,
                     supportingText = {
                         Text(
@@ -363,7 +360,7 @@ private fun EditLogDialog(log: LogItem, onDismiss: () -> Unit, onSave: suspend (
                 Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
                     Category.entries.forEach { value ->
                         FilterChip(selected = category == value, enabled = !saving,
-                            onClick = { category = value }, label = { Text(if (value == Category.IDEA) "灵感" else "日志") })
+                            onClick = { category = value }, label = { Text(if (value == Category.IDEA) com.flash.app.i18n.tr("灵感") else com.flash.app.i18n.tr("日志")) })
                     }
                 }
                 RecordDateField(date, { date = it }, !saving)
@@ -372,12 +369,12 @@ private fun EditLogDialog(log: LogItem, onDismiss: () -> Unit, onSave: suspend (
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text("重要性", style = MaterialTheme.typography.bodyMedium)
+                    Text(com.flash.app.i18n.tr("重要性"), style = MaterialTheme.typography.bodyMedium)
                     IMPORTANCE_OPTIONS.forEach { (value, label) ->
                         FilterChip(
                             selected = importance == value,
                             onClick = { if (!saving) importance = value },
-                            label = { Text(label.ifEmpty { "无" }) },
+                            label = { Text(label.ifEmpty { com.flash.app.i18n.tr("无") }) },
                         )
                     }
                 }
@@ -395,26 +392,26 @@ private fun EditLogDialog(log: LogItem, onDismiss: () -> Unit, onSave: suspend (
                         scope.launch {
                             try { onSave(updated); onDismiss() }
                             catch (e: CancellationException) { throw e }
-                            catch (e: Exception) { error = e.message ?: "保存失败，请重试" }
+                            catch (e: Exception) { error = e.message ?: com.flash.app.i18n.tr("保存失败，请重试") }
                             finally { saving = false }
                         }
                     }
                 },
-            ) { Text(if (saving) "保存中…" else "保存") }
+            ) { Text(if (saving) com.flash.app.i18n.tr("保存中…") else com.flash.app.i18n.tr("保存")) }
         },
         dismissButton = {
-            TextButton(onClick = close, enabled = !saving) { Text("取消") }
+            TextButton(onClick = close, enabled = !saving) { Text(com.flash.app.i18n.tr("取消")) }
         },
     )
     if (discard) {
         AlertDialog(onDismissRequest = { discard = false },
-            title = { Text("放弃未保存的修改？") },
-            confirmButton = { TextButton(onClick = onDismiss) { Text("放弃修改") } },
-            dismissButton = { TextButton(onClick = { discard = false }) { Text("继续编辑") } })
+            title = { Text(com.flash.app.i18n.tr("放弃未保存的修改？")) },
+            confirmButton = { TextButton(onClick = onDismiss) { Text(com.flash.app.i18n.tr("放弃修改")) } },
+            dismissButton = { TextButton(onClick = { discard = false }) { Text(com.flash.app.i18n.tr("继续编辑")) } })
     }
 }
 
-private val IMPORTANCE_OPTIONS = listOf(0 to "", 2 to "!!", 3 to "!!!", 4 to "!!!!")
+private val IMPORTANCE_OPTIONS get() = listOf(0 to "", 2 to "!!", 3 to "!!!", 4 to "!!!!")
 
 private const val MAX_CONTENT_LENGTH = Backup.MAX_FIELD_LENGTH
 
@@ -435,10 +432,10 @@ private fun DatePickDialog(
                     Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate().toString()
                 }
                 onConfirm(date)
-            }) { Text("确定") }
+            }) { Text(com.flash.app.i18n.tr("确定")) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("取消") }
+            TextButton(onClick = onDismiss) { Text(com.flash.app.i18n.tr("取消")) }
         },
     ) {
         Column {

@@ -124,20 +124,20 @@ public struct MemoryView: View {
                     // 一行四列放不下（窄屏 + 大字号）时退为 2×2，英文标签不被截断
                     ViewThatFits(in: .horizontal) {
                         HStack(spacing: Spacing.sm) {
-                            countCard("moments", report.moments, "note.text", tint: BrandColors.logPurple)
-                            countCard("ideas", report.ideas, "lightbulb", tint: BrandColors.ideaYellow)
-                            countCard("tasks", report.tasks, "checkmark.circle", tint: BrandColors.calendarGreen)
-                            countCard("emotions", report.emotions, "face.smiling", tint: BrandColors.emotionPink)
+                            countCard(L("moments"), report.moments, "note.text", tint: BrandColors.logPurple)
+                            countCard(L("ideas"), report.ideas, "lightbulb", tint: BrandColors.ideaYellow)
+                            countCard(L("tasks"), report.tasks, "checkmark.circle", tint: BrandColors.calendarGreen)
+                            countCard(L("emotions"), report.emotions, "face.smiling", tint: BrandColors.emotionPink)
                         }
                         .fixedSize(horizontal: false, vertical: true)
                         Grid(horizontalSpacing: Spacing.sm, verticalSpacing: Spacing.sm) {
                             GridRow {
-                                countCard("moments", report.moments, "note.text", tint: BrandColors.logPurple)
-                                countCard("ideas", report.ideas, "lightbulb", tint: BrandColors.ideaYellow)
+                                countCard(L("moments"), report.moments, "note.text", tint: BrandColors.logPurple)
+                                countCard(L("ideas"), report.ideas, "lightbulb", tint: BrandColors.ideaYellow)
                             }
                             GridRow {
-                                countCard("tasks", report.tasks, "checkmark.circle", tint: BrandColors.calendarGreen)
-                                countCard("emotions", report.emotions, "face.smiling", tint: BrandColors.emotionPink)
+                                countCard(L("tasks"), report.tasks, "checkmark.circle", tint: BrandColors.calendarGreen)
+                                countCard(L("emotions"), report.emotions, "face.smiling", tint: BrandColors.emotionPink)
                             }
                         }
                     }
@@ -204,11 +204,13 @@ public struct MemoryView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .accessibilityElement(children: .combine)
         .flashPaperCard(seed: "memory")
+        #if !os(iOS)
         .overlay {
             RoundedRectangle(cornerRadius: Radius.card)
                 .stroke(BrandColors.weakBorder, lineWidth: 0.5)
         }
         .flashCardShadow()
+        #endif
     }
 
     /// 聚合缓存键：数据写代际 + 周偏移 + 基准日（同 StatsView 键语义）

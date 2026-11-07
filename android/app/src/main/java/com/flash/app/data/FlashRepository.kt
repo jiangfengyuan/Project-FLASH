@@ -122,10 +122,10 @@ class FlashRepository(private val db: FlashDatabase) {
     suspend fun updateLog(log: LogItem, markViewed: Boolean = false) = db.withTransaction {
         require(Regex("\\d{4}-\\d{2}-\\d{2}").matches(log.recordDate) &&
             runCatching { LocalDate.parse(log.recordDate).year in 1..9999 }.getOrDefault(false)) {
-            "请输入有效的记录日期"
+            com.flash.app.i18n.tr("请输入有效的记录日期")
         }
         val normalized = log.content.trim()
-        require(normalized.isNotEmpty()) { "内容不能为空" }
+        require(normalized.isNotEmpty()) { com.flash.app.i18n.tr("内容不能为空") }
         TextLimits.requireFits(normalized)
         db.logDao().upsert(
             log.copy(content = normalized, importance = log.importance.coerceIn(0, 4)).toEntity()
@@ -134,6 +134,34 @@ class FlashRepository(private val db: FlashDatabase) {
     }
 
     suspend fun deleteLog(id: String) = db.logDao().deleteById(id)
+
+    /** 收藏切换（与 Apple 端同义：显式写入 true / false） */
+    suspend fun setLogFavorite(log: LogItem, favorite: Boolean) {
+        db.logDao().upsert(log.copy(isFavorite = favorite).toEntity())
+    }
+
+    suspend fun setEmotionFavorite(emotion: EmotionRecord, favorite: Boolean) {
+        db.emotionDao().upsert(emotion.copy(isFavorite = favorite).toEntity())
+    }
+
+    /**
+     * 删除一条记录并返回撤销动作：删除会级联清掉 idea_view_state，
+     * 先记住已读状态，撤销时一并恢复。
+     */
+    suspend fun deleteLogWithUndo(log: LogItem): suspend () -> Unit {
+        val wasViewed = log.category == Category.IDEA && isIdeaViewed(log.id)
+        deleteLog(log.id)
+        return {
+            db.withTransaction {
+                db.logDao().upsert(log.toEntity())
+                if (wasViewed) markIdeaViewed(log.id)
+            }
+        }
+    }
+
+    suspend fun restoreEmotion(emotion: EmotionRecord) {
+        db.emotionDao().upsert(emotion.toEntity())
+    }
 
     /** 批量修改分类（记录页「待整理」整理动作用） */
     suspend fun updateLogCategories(ids: List<String>, category: Category) {
@@ -156,6 +184,7 @@ class FlashRepository(private val db: FlashDatabase) {
         subEmotion: SubEmotion?,
         status: String? = null,
         note: String? = null,
+        intensity: Int? = null,
     ) {
         val normalizedStatus = status?.trim()?.ifEmpty { null }
         val normalizedNote = note?.trim()?.ifEmpty { null }
@@ -170,6 +199,7 @@ class FlashRepository(private val db: FlashDatabase) {
                 note = normalizedNote,
                 recordDate = LocalDate.now().toString(),
                 createdAt = isoNow(),
+                intensity = intensity?.coerceIn(1, 5),
             ).toEntity()
         )
     }
@@ -206,6 +236,8 @@ class FlashRepository(private val db: FlashDatabase) {
         dueAt: String?,
         timeZone: String?,
         reminderAt: String?,
+        sourceLogId: String? = null,
+        isFavorite: Boolean? = null,
     ): TaskItem {
         val now = isoNow()
         return TaskItem(
@@ -222,6 +254,8 @@ class FlashRepository(private val db: FlashDatabase) {
             completedAt = null,
             createdAt = now,
             updatedAt = now,
+            sourceLogId = sourceLogId,
+            isFavorite = isFavorite,
         )
     }
 

@@ -27,7 +27,7 @@ internal class BackupImportSession {
     @Synchronized fun attachResource(expected: Long, input: Closeable) {
         if (expected != generation) {
             runCatching { input.close() }
-            throw CancellationException("导入已取消")
+            throw CancellationException(com.flash.app.i18n.tr("导入已取消"))
         }
         resource = input
     }

@@ -26,7 +26,7 @@ object BackupTransfer {
 
     fun createShareUri(context: Context, json: String): Uri {
         val directory = File(context.cacheDir, SHARE_DIRECTORY).apply {
-            check(exists() || mkdirs()) { "无法创建备份传输目录" }
+            check(exists() || mkdirs()) { com.flash.app.i18n.tr("无法创建备份传输目录") }
         }
         cleanupExpired(context)
         val suffix = UUID.randomUUID().toString().take(8)

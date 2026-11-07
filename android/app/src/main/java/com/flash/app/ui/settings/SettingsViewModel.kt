@@ -22,7 +22,6 @@ import com.flash.app.data.BackupImportSession
 import com.flash.app.data.LocalBackupTransfer
 import com.flash.app.data.SettingsStore
 import com.flash.app.data.ThemeMode
-import com.flash.app.data.UiStyle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -69,7 +68,6 @@ class SettingsViewModel(
     private val taskReminders get() = (app as FlashApplication).taskReminders
 
     val themeMode = settings.themeMode
-    val uiStyle = settings.uiStyle
 
     private val _message = MutableStateFlow<String?>(null)
     val message: StateFlow<String?> = _message.asStateFlow()
@@ -89,7 +87,6 @@ class SettingsViewModel(
     val lanTransfer: StateFlow<LanTransferState> = _lanTransfer.asStateFlow()
 
     fun setThemeMode(mode: ThemeMode) = settings.setThemeMode(mode)
-    fun setUiStyle(style: UiStyle) = settings.setUiStyle(style)
 
     fun clearMessage() {
         _message.value = null
@@ -102,11 +99,11 @@ class SettingsViewModel(
                 val json = Backup.exportJson(snapshot.logs, snapshot.emotions, snapshot.tasks)
                 app.contentResolver.openOutputStream(target, "wt")?.use { out ->
                     out.write(json.toByteArray(Charsets.UTF_8))
-                } ?: error("无法写入文件")
+                } ?: error(com.flash.app.i18n.tr("无法写入文件"))
             }.onSuccess {
-                _message.value = "备份已导出"
+                _message.value = com.flash.app.i18n.tr("备份已导出")
             }.onFailure {
-                _message.value = "导出失败：${it.message}"
+                _message.value = com.flash.app.i18n.tr("导出失败：{0}", it.message)
             }
         }
     }
@@ -122,7 +119,7 @@ class SettingsViewModel(
             }.onSuccess {
                 _shareUri.value = it
             }.onFailure {
-                _message.value = "生成传输文件失败：${it.message}"
+                _message.value = com.flash.app.i18n.tr("生成传输文件失败：{0}", it.message)
             }
             _transferInProgress.value = false
         }
@@ -133,7 +130,7 @@ class SettingsViewModel(
     }
 
     fun reportShareFailure() {
-        _message.value = "无法打开系统分享，请先安装可接收文件的应用"
+        _message.value = com.flash.app.i18n.tr("无法打开系统分享，请先安装可接收文件的应用")
     }
 
     private fun reportLanUnavailable() {
@@ -168,14 +165,14 @@ class SettingsViewModel(
                     } else 0L
                 } ?: 0L
                 if (size > Backup.MAX_FILE_BYTES) {
-                    throw Backup.BackupFormatException("备份文件超过 ${Backup.MAX_FILE_BYTES / 1024 / 1024} MB，无法导入")
+                    throw Backup.BackupFormatException(com.flash.app.i18n.tr("备份文件超过 {0} MB，无法导入", Backup.MAX_FILE_BYTES / 1024 / 1024))
                 }
 
                 val text = app.contentResolver.openInputStream(source)?.use { input ->
                     importSession.attachResource(generation, input)
                     try { Backup.readJson(input) } finally { importSession.releaseResource(generation, input) }
                 }
-                    ?: error("无法读取文件")
+                    ?: error(com.flash.app.i18n.tr("无法读取文件"))
                 currentCoroutineContext().ensureActive()
                 val result = if (recovery) Backup.parseRecovery(text) else Backup.parseStrict(text)
                 val local = repository.exportSnapshot()
@@ -203,7 +200,7 @@ class SettingsViewModel(
                 importSession.publish(generation) {
                     _message.value = when (e) {
                         is Backup.BackupFormatException -> e.message
-                        else -> "导入失败：${e.message}"
+                        else -> com.flash.app.i18n.tr("导入失败：{0}", e.message)
                     }
                 }
             }
@@ -233,7 +230,7 @@ class SettingsViewModel(
                                     ),
                                     localSnapshot = current,
                                 )
-                                _message.value = "预览后本地数据有变化，差异已重新计算，请确认后再覆盖"
+                                _message.value = com.flash.app.i18n.tr("预览后本地数据有变化，差异已重新计算，请确认后再覆盖")
                             }
                             return@launch
                         }
@@ -244,15 +241,15 @@ class SettingsViewModel(
                 if (databaseResult.isFailure) {
                     if (databaseResult.exceptionOrNull() is CancellationException) return@launch
                     importSession.publish(generation) {
-                        _message.value = "导入失败：${databaseResult.exceptionOrNull()?.message}"
+                        _message.value = com.flash.app.i18n.tr("导入失败：{0}", databaseResult.exceptionOrNull()?.message)
                     }
                     return@launch
                 }
 
-                val importedMessage = "已导入 ${preview.logCount} 条日志、${preview.emotionCount} 条情绪、" +
-                    "${preview.taskCount} 个任务" +
+                val importedMessage = com.flash.app.i18n.tr("已导入 {0} 条日志、{1} 条情绪、", preview.logCount, preview.emotionCount) +
+                    com.flash.app.i18n.tr("{0} 个任务", preview.taskCount) +
                     if (preview.skippedLogs + preview.skippedEmotions + preview.skippedTasks > 0) {
-                        "（跳过异常数据 ${preview.skippedLogs + preview.skippedEmotions + preview.skippedTasks} 条）"
+                        com.flash.app.i18n.tr("（跳过异常数据 {0} 条）", preview.skippedLogs + preview.skippedEmotions + preview.skippedTasks)
                     } else {
                         ""
                     }
@@ -263,7 +260,7 @@ class SettingsViewModel(
                 }
                 importSession.publish(generation) {
                     _message.value = if (reminderFailure == null) importedMessage
-                        else "$importedMessage，但系统提醒恢复失败，请稍后重试"
+                        else com.flash.app.i18n.tr("{0}，但系统提醒恢复失败，请稍后重试", importedMessage)
                 }
             }
         }
@@ -279,14 +276,14 @@ class SettingsViewModel(
         viewModelScope.launch {
             val databaseResult = runCatching { repository.clearAll() }
             if (databaseResult.isFailure) {
-                _message.value = "清空失败：${databaseResult.exceptionOrNull()?.message}"
+                _message.value = com.flash.app.i18n.tr("清空失败：{0}", databaseResult.exceptionOrNull()?.message)
                 return@launch
             }
             val reminderFailure = runCatching { taskReminders.rebuild(emptyList()) }.exceptionOrNull()
             _message.value = if (reminderFailure == null) {
-                "已清空全部数据"
+                com.flash.app.i18n.tr("已清空全部数据")
             } else {
-                "已清空全部数据，但系统提醒清理失败，请重启应用后重试"
+                com.flash.app.i18n.tr("已清空全部数据，但系统提醒清理失败，请重启应用后重试")
             }
         }
     }

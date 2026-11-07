@@ -17,7 +17,7 @@ object TextLimits {
     const val MAX_CONTENT_LENGTH = Backup.MAX_FIELD_LENGTH
 
     class ContentTooLongException(val actual: Int, val limit: Int) :
-        IllegalArgumentException("内容过长（$actual 字），最多 $limit 字，请删减后再保存")
+        IllegalArgumentException(com.flash.app.i18n.tr("内容过长（{0} 字），最多 {1} 字，请删减后再保存", actual, limit))
 
     fun fits(value: String, limit: Int = MAX_CONTENT_LENGTH): Boolean = value.length <= limit
 

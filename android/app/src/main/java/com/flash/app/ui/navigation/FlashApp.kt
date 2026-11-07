@@ -6,26 +6,35 @@
 
 package com.flash.app.ui.navigation
 
-import androidx.activity.compose.BackHandler
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -40,148 +49,215 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.flash.app.FlashApplication
-import com.flash.app.data.UiStyle
 import com.flash.app.data.model.Category
 import com.flash.app.domain.quickAdd
 import com.flash.app.domain.shouldShowIdeaReminder
+import com.flash.app.i18n.tr
 import com.flash.app.ui.calendar.CalendarScreen
 import com.flash.app.ui.calendar.TaskEditorDialog
-import com.flash.app.ui.components.QuickCreateFab
-import com.flash.app.ui.components.QuickInputDialog
+import com.flash.app.ui.capture.QuickCaptureSheet
 import com.flash.app.ui.detail.RecordDetailScreen
 import com.flash.app.ui.emotion.EmotionScreen
 import com.flash.app.ui.explore.ExploreScreen
 import com.flash.app.ui.home.HomeScreen
 import com.flash.app.ui.logflow.LogFlowScreen
+import com.flash.app.ui.memory.MemoryScreen
+import com.flash.app.ui.paper.paperBackground
+import com.flash.app.ui.search.SearchScreen
+import com.flash.app.ui.settings.BackupSettingsScreen
+import com.flash.app.ui.settings.IdeaReminderSettingsScreen
 import com.flash.app.ui.settings.SettingsScreen
+import com.flash.app.ui.settings.TransferInfoScreen
 import com.flash.app.ui.stats.StatsScreen
 import com.flash.app.ui.theme.FlashTokens
-import com.flash.app.ui.theme.LocalUiStyle
-import com.flash.app.ui.theme.glass.GlassBackground
-import com.flash.app.ui.theme.glass.LocalHazeState
 import com.flash.app.ui.welcome.WelcomeScreen
-import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
+
+private data class TaskRequest(val sourceLogId: String? = null, val title: String = "")
+
+private data class CaptureRequest(val category: Category, val sharedText: String? = null)
+
+private fun NavHostController.openTab(route: String) {
+    navigate(route) {
+        popUpTo(graph.findStartDestination().id) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
+    }
+}
 
 @Composable
-fun FlashApp(darkTheme: Boolean, uiStyle: UiStyle) {
-    val app = LocalContext.current.applicationContext as FlashApplication
+fun FlashApp() {
+    val context = LocalContext.current
+    val app = context.applicationContext as FlashApplication
     val welcomed by app.settings.welcomed.collectAsStateWithLifecycle()
     val unviewedIdeas by app.repository.unviewedIdeas.collectAsStateWithLifecycle(emptyList())
     val showIdeaReminder = shouldShowIdeaReminder(unviewedIdeas.size)
+    val pendingEntry by app.pendingEntry.collectAsStateWithLifecycle()
 
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
     val showBottomBar = currentRoute in TABS.map { it.route }
-    val hazeState = remember { HazeState() }
-    val isGlass = uiStyle == UiStyle.GLASS
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    var fabExpanded by remember { mutableStateOf(false) }
-    var quickCreateKey by rememberSaveable { mutableStateOf<String?>(null) }
-    val quickCreate = quickCreateKey?.let { Category.valueOf(it) }
-    // FAB「任务」直达任务编辑器（方案 §4.5），不再绕道日历页
-    var taskEditorOpen by rememberSaveable { mutableStateOf(false) }
+    var capture by remember { mutableStateOf<CaptureRequest?>(null) }
+    var taskRequest by remember { mutableStateOf<TaskRequest?>(null) }
+    var pendingCalendarFocus by rememberSaveable { mutableStateOf(false) }
+    var explorePresetIdeas by rememberSaveable { mutableStateOf(false) }
 
-    // Dock 悬浮于内容之上：为一级页面预留底部空间，内容不被 Dock 或系统手势区遮挡
-    val dockReserve = FlashTokens.Dock.BottomMargin * 2 + FlashTokens.Dock.Height
-
-    // 离开一级页面（Dock 隐藏）时收起展开菜单
-    LaunchedEffect(showBottomBar) {
-        if (!showBottomBar) fabExpanded = false
+    val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (!granted) scope.launch { snackbar.showSnackbar(tr("任务已保存；允许通知后才能收到提醒")) }
     }
 
-    CompositionLocalProvider(
-        LocalHazeState provides hazeState,
-        LocalUiStyle provides uiStyle,
-        LocalPageBottomPadding provides if (showBottomBar) dockReserve else 0.dp,
-    ) {
-        Box(Modifier.fillMaxSize()) {
-            // 玻璃风格：渐变天空作为模糊源；MD3 风格：纯色背景即可
-            if (isGlass) {
-                GlassBackground(darkTheme = darkTheme, hazeState = hazeState)
+    fun toast(message: String, actionLabel: String?, action: (suspend () -> Unit)?) {
+        scope.launch {
+            snackbar.currentSnackbarData?.dismiss()
+            val result = withTimeoutOrNull(if (action == null) 1600L else 4000L) {
+                snackbar.showSnackbar(message, actionLabel, withDismissAction = false, duration = SnackbarDuration.Indefinite)
             }
+            if (result == SnackbarResult.ActionPerformed) action?.invoke()
+        }
+    }
 
+    val actions = remember(navController) {
+        AppActions(
+            quickCapture = { capture = CaptureRequest(it) },
+            newTask = { taskRequest = TaskRequest() },
+            newTaskFromIdea = { id, title -> taskRequest = TaskRequest(id, title) },
+            openTab = { navController.openTab(it) },
+            openSearch = { navController.navigate(Routes.SEARCH) { launchSingleTop = true } },
+            openRecord = { navController.navigate(Routes.recordDetail(it)) },
+            toast = ::toast,
+        )
+    }
+
+    // 深链 / 通知 / 系统分享：首启欢迎页完成后才处理，避免把用户从欢迎页带走
+    LaunchedEffect(pendingEntry, welcomed) {
+        val entry = pendingEntry ?: return@LaunchedEffect
+        if (!welcomed) return@LaunchedEffect
+        app.pendingEntry.value = null
+        when (entry) {
+            is AppEntry.Capture -> capture = CaptureRequest(entry.category)
+            is AppEntry.Shared -> capture = CaptureRequest(Category.IDEA, entry.text)
+            AppEntry.Today -> navController.openTab(Routes.HOME)
+            AppEntry.Ideas -> {
+                explorePresetIdeas = true
+                navController.openTab(Routes.EXPLORE)
+            }
+            is AppEntry.OpenRecord -> navController.navigate(Routes.recordDetail(entry.id))
+        }
+    }
+
+    BoxWithConstraints(Modifier.fillMaxSize().paperBackground()) {
+        val wide = maxWidth >= 600.dp
+        // 底栏悬浮于内容之上：一级页面预留底部空间
+        val navBar = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+        val chromeReserve = navBar + FlashTokens.Dock.BottomMargin * 2 + FlashTokens.Dock.Height +
+            if (wide) 0.dp else FlashTokens.Dock.CaptureBarHeight + FlashTokens.Spacing.XS
+        CompositionLocalProvider(
+            LocalAppActions provides actions,
+            LocalPageBottomPadding provides if (showBottomBar) chromeReserve else 0.dp,
+        ) {
             Scaffold(
-                containerColor = if (isGlass) Color.Transparent else MaterialTheme.colorScheme.background,
+                containerColor = Color.Transparent,
                 contentColor = MaterialTheme.colorScheme.onSurface,
-                snackbarHost = { SnackbarHost(snackbar) },
+                // 内容铺到屏幕边缘（纸面连续），由各页处理系统栏
+                contentWindowInsets = WindowInsets(0, 0, 0, 0),
+                snackbarHost = {
+                    SnackbarHost(
+                        snackbar,
+                        Modifier.padding(bottom = if (showBottomBar) chromeReserve else navBar),
+                    )
+                },
             ) { innerPadding ->
                 NavHost(
                     navController = navController,
                     startDestination = if (welcomed) Routes.HOME else Routes.WELCOME,
-                    modifier = Modifier
-                        .padding(innerPadding)
-                        .consumeWindowInsets(innerPadding),
-                    // 轻微横移配合淡入淡出，保留页面连续性并避免纯交叉淡化的闪屏感。
+                    modifier = Modifier.padding(innerPadding).consumeWindowInsets(innerPadding),
                     enterTransition = {
-                        fadeIn(animationSpec = tween(240)) +
-                            slideInHorizontally(animationSpec = tween(240)) { it / 14 }
+                        fadeIn(animationSpec = tween(240)) + slideInHorizontally(animationSpec = tween(240)) { it / 14 }
                     },
                     exitTransition = {
-                        fadeOut(animationSpec = tween(180)) +
-                            slideOutHorizontally(animationSpec = tween(180)) { -it / 20 }
+                        fadeOut(animationSpec = tween(180)) + slideOutHorizontally(animationSpec = tween(180)) { -it / 20 }
                     },
                     popEnterTransition = {
-                        fadeIn(animationSpec = tween(240)) +
-                            slideInHorizontally(animationSpec = tween(240)) { -it / 14 }
+                        fadeIn(animationSpec = tween(240)) + slideInHorizontally(animationSpec = tween(240)) { -it / 14 }
                     },
                     popExitTransition = {
-                        fadeOut(animationSpec = tween(180)) +
-                            slideOutHorizontally(animationSpec = tween(180)) { it / 20 }
+                        fadeOut(animationSpec = tween(180)) + slideOutHorizontally(animationSpec = tween(180)) { it / 20 }
                     },
                 ) {
                     composable(Routes.WELCOME) {
                         WelcomeScreen(onStart = {
                             app.settings.setWelcomed()
-                            navController.navigate(Routes.HOME) {
-                                popUpTo(Routes.WELCOME) { inclusive = true }
-                            }
+                            navController.navigate(Routes.HOME) { popUpTo(Routes.WELCOME) { inclusive = true } }
                         })
                     }
-                    composable(Routes.HOME) {
-                        HomeScreen(
-                            onOpenSearch = { navController.navigate(Routes.EXPLORE) },
-                            onOpenRecord = { navController.navigate(Routes.recordDetail(it)) },
-                        )
-                    }
+                    composable(Routes.HOME) { HomeScreen() }
                     composable(Routes.EXPLORE) {
                         ExploreScreen(
                             onOpenLogFlow = { navController.navigate(Routes.LOG_FLOW) },
-                            onOpenRecord = { navController.navigate(Routes.recordDetail(it)) },
+                            onOpenRecord = actions.openRecord,
+                            presetIdeas = explorePresetIdeas,
+                            onPresetConsumed = { explorePresetIdeas = false },
                         )
                     }
+                    composable(Routes.EMOTION) { EmotionScreen() }
                     composable(Routes.STATS) {
                         StatsScreen(
-                            onOpenSettings = { navController.navigate(Routes.PROFILE) },
-                            onOpenRecord = { navController.navigate(Routes.recordDetail(it)) },
+                            onOpenMemory = { navController.navigate(Routes.MEMORY) },
+                            onOpenRecord = actions.openRecord,
                         )
                     }
                     composable(Routes.PROFILE) {
-                        SettingsScreen()
+                        SettingsScreen(
+                            onOpenIdeaReminder = { navController.navigate(Routes.SETTINGS_IDEA_REMINDER) },
+                            onOpenBackup = { navController.navigate(Routes.SETTINGS_BACKUP) },
+                            onOpenTransfer = { navController.navigate(Routes.SETTINGS_TRANSFER) },
+                        )
                     }
-                    composable(Routes.EMOTION) {
-                        EmotionScreen(onBack = { navController.popBackStack() })
+                    composable(Routes.SETTINGS_IDEA_REMINDER) {
+                        IdeaReminderSettingsScreen(onBack = { navController.popBackStack() })
                     }
+                    composable(Routes.SETTINGS_BACKUP) { BackupSettingsScreen(onBack = { navController.popBackStack() }) }
+                    composable(Routes.SETTINGS_TRANSFER) { TransferInfoScreen(onBack = { navController.popBackStack() }) }
                     composable(Routes.CALENDAR) {
                         CalendarScreen(
-                            onOpenSettings = { navController.navigate(Routes.PROFILE) },
-                            onOpenRecord = { navController.navigate(Routes.recordDetail(it)) },
+                            onOpenRecord = actions.openRecord,
+                            onBack = { navController.popBackStack() },
+                            initialDate = null,
                         )
                     }
                     composable(Routes.LOG_FLOW) {
-                        LogFlowScreen(
+                        LogFlowScreen(onBack = { navController.popBackStack() }, onOpenRecord = actions.openRecord)
+                    }
+                    composable(Routes.MEMORY) { MemoryScreen(onBack = { navController.popBackStack() }) }
+                    composable(Routes.SEARCH) {
+                        SearchScreen(
                             onBack = { navController.popBackStack() },
-                            onOpenRecord = { navController.navigate(Routes.recordDetail(it)) },
+                            onOpenLog = { id ->
+                                navController.popBackStack()
+                                actions.openRecord(id)
+                            },
+                            onOpenEmotion = {
+                                navController.popBackStack()
+                                navController.openTab(Routes.EMOTION)
+                            },
+                            onOpenTask = {
+                                navController.popBackStack()
+                                navController.navigate(Routes.CALENDAR)
+                            },
                         )
                     }
                     composable(Routes.RECORD_DETAIL_PATTERN) { entry ->
@@ -192,102 +268,84 @@ fun FlashApp(darkTheme: Boolean, uiStyle: UiStyle) {
             }
 
             if (showBottomBar) {
-                // FAB 展开时的遮罩：渐入，点击或返回键收起
-                AnimatedVisibility(
-                    visible = fabExpanded,
-                    enter = fadeIn(tween(FlashTokens.Motion.SelectionMs)),
-                    exit = fadeOut(tween(150)),
-                ) {
-                    Box(
-                        Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.32f))
-                            .clickable { fabExpanded = false },
-                    )
-                }
-                // 悬浮 Dock + 右侧独立圆形 “+” FAB
-                Row(
+                Column(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .navigationBarsPadding()
-                        .padding(
-                            horizontal = FlashTokens.Spacing.PageHorizontal,
-                            vertical = FlashTokens.Dock.BottomMargin,
-                        ),
-                    horizontalArrangement = Arrangement.spacedBy(FlashTokens.Spacing.SM),
-                    verticalAlignment = Alignment.Bottom,
+                        .padding(horizontal = FlashTokens.Spacing.PageHorizontal, vertical = FlashTokens.Dock.BottomMargin)
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(FlashTokens.Spacing.XS),
                 ) {
+                    AnimatedVisibility(visible = !wide) {
+                        QuickCaptureBar(onClick = { capture = CaptureRequest(Category.IDEA) })
+                    }
                     FlashDock(
                         currentRoute = currentRoute,
-                        onSelect = { tab ->
-                            navController.navigate(tab.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
+                        onSelect = { navController.openTab(it.route) },
                         badgeCount = { route ->
                             if (route == Routes.EXPLORE && showIdeaReminder) unviewedIdeas.size else 0
                         },
-                        modifier = Modifier.weight(1f),
                     )
-                    QuickCreateFab(
-                        expanded = fabExpanded,
-                        onExpandedChange = { fabExpanded = it },
-                        onCreateLog = { quickCreateKey = Category.LOG.name },
-                        onCreateIdea = { quickCreateKey = Category.IDEA.name },
-                        onCreateEmotion = { navController.navigate(Routes.EMOTION) },
-                        onCreateTask = { taskEditorOpen = true },
+                }
+                if (wide) {
+                    QuickCaptureFab(
+                        onClick = { capture = CaptureRequest(Category.IDEA) },
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .navigationBarsPadding()
+                            .padding(end = FlashTokens.Spacing.PageHorizontal, bottom = FlashTokens.Dock.BottomMargin * 2 + FlashTokens.Dock.Height + FlashTokens.Spacing.SM),
                     )
                 }
             }
         }
     }
 
-    BackHandler(enabled = fabExpanded && showBottomBar) { fabExpanded = false }
-
-    quickCreate?.let { category ->
-        QuickInputDialog(
-            category = category,
-            onDismiss = { quickCreateKey = null },
-            onSave = { text ->
-                quickCreateKey = null
-                // 与 HomeViewModel.quickAdd 同一用例：domain/QuickAdd.kt
-                scope.launch {
-                    runCatching { app.repository.quickAdd(text, category) }.onFailure {
-                        snackbar.showSnackbar(it.message ?: "保存失败，请重试")
-                    }
-                }
+    capture?.let { request ->
+        var draft by remember { mutableStateOf(app.settings.quickCaptureDraft) }
+        QuickCaptureSheet(
+            initialCategory = request.category,
+            initialText = request.sharedText,
+            draft = draft,
+            onDraftChange = {
+                draft = it
+                app.settings.quickCaptureDraft = it
+            },
+            onDismiss = { capture = null },
+            onSave = { text, category ->
+                app.repository.quickAdd(text, category)
+                toast(if (category == Category.IDEA) tr("✓ 已保存到灵感") else tr("✓ 已保存到日志"), null, null)
             },
         )
     }
 
-    if (taskEditorOpen) {
+    taskRequest?.let { request ->
         TaskEditorDialog(
             selectedDate = java.time.LocalDate.now(),
             existing = null,
-            onDismiss = { taskEditorOpen = false },
+            initialTitle = request.title,
+            sourceLogId = request.sourceLogId,
+            onDismiss = { taskRequest = null },
             onSave = { draft ->
-                taskEditorOpen = false
+                taskRequest = null
                 scope.launch {
                     runCatching {
                         val task = app.repository.newTask(
-                            draft.title,
-                            draft.notes,
-                            draft.colorTag,
-                            draft.importance,
-                            draft.dueKind,
-                            draft.dueDate,
-                            draft.dueAt,
-                            draft.timeZone,
-                            draft.reminderAt,
+                            draft.title, draft.notes, draft.colorTag, draft.importance, draft.dueKind,
+                            draft.dueDate, draft.dueAt, draft.timeZone, draft.reminderAt,
+                            sourceLogId = request.sourceLogId,
+                            isFavorite = draft.isFavorite,
                         )
                         app.repository.addTask(task)
                         app.taskReminders.schedule(task)
+                        // 从「+」创建的任务同样要申请通知权限，否则提醒会静默丢失
+                        if (draft.reminderAt != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+                            PackageManager.PERMISSION_GRANTED
+                        ) {
+                            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        }
                     }.onFailure {
-                        snackbar.showSnackbar(it.message ?: "任务保存失败")
+                        snackbar.showSnackbar(it.message ?: tr("任务保存失败"))
                     }
                 }
             },

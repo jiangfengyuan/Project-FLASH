@@ -8,7 +8,6 @@ activityCompose = "1.10.1"
 lifecycle = "2.9.1"
 room = "2.7.2"
 navigationCompose = "2.9.1"
-haze = "1.7.2"
 junit = "4.13.2"
 json = "20231013"
 work = "2.10.1"
@@ -32,8 +31,6 @@ androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
-haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
-haze-materials = { module = "dev.chrisbanes.haze:haze-materials", version.ref = "haze" }
 junit = { module = "junit:junit", version.ref = "junit" }
 json = { module = "org.json:json", version.ref = "json" }
 androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }

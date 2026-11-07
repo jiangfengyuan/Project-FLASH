@@ -38,6 +38,8 @@ fun TaskCard(
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
+    /** 灵感转的任务：回到来源灵感（来源已删时为 null） */
+    onOpenSource: (() -> Unit)? = null,
 ) {
     StyleCard(modifier = modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -58,18 +60,21 @@ fun TaskCard(
                     },
                 )
                 Text(
-                    taskDueLabel(task) + if (task.reminderAt != null) " · 有提醒" else "",
+                    taskDueLabel(task) + if (task.reminderAt != null) com.flash.app.i18n.tr(" · 有提醒") else "",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                onOpenSource?.let {
+                    androidx.compose.material3.TextButton(onClick = it) { Text(com.flash.app.i18n.tr("查看灵感")) }
+                }
             }
             IconButton(onClick = onEdit) {
-                Icon(Icons.Filled.Edit, contentDescription = "编辑任务")
+                Icon(Icons.Filled.Edit, contentDescription = com.flash.app.i18n.tr("编辑任务"))
             }
             IconButton(onClick = onDelete) {
                 Icon(
                     Icons.Filled.Delete,
-                    contentDescription = "删除任务",
+                    contentDescription = com.flash.app.i18n.tr("删除任务"),
                     tint = MaterialTheme.colorScheme.error,
                 )
             }
@@ -78,10 +83,10 @@ fun TaskCard(
 }
 
 private fun taskDueLabel(task: TaskItem): String = when (task.dueKind) {
-    TaskDueKind.ALL_DAY -> "全天"
+    TaskDueKind.ALL_DAY -> com.flash.app.i18n.tr("全天")
     TaskDueKind.DATE_TIME -> runCatching {
         Instant.parse(requireNotNull(task.dueAt))
             .atZone(requireNotNull(CanonicalTimeZones.zoneId(requireNotNull(task.timeZone))))
-            .format(DateTimeFormatter.ofPattern("HH:mm"))
-    }.getOrDefault("具体时间")
+            .format(DateTimeFormatter.ofPattern("HH:mm", java.util.Locale.ROOT))
+    }.getOrDefault(com.flash.app.i18n.tr("具体时间"))
 }

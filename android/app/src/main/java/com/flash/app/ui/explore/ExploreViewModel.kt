@@ -6,6 +6,7 @@
 
 package com.flash.app.ui.explore
 
+import com.flash.app.i18n.tr
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -28,11 +29,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
-enum class ExploreFilter(val displayName: String) {
+enum class ExploreFilter(private val sourceName: String) {
     ALL("全部"),
     LOG("日志"),
     IDEA("灵感"),
-    UNSORTED("待整理"),
+    UNSORTED("待整理");
+
+    val displayName: String get() = tr(sourceName)
 }
 
 /** 筛选面板状态：标签、日期范围、最低重要度；关闭面板后保留 */
@@ -41,6 +44,8 @@ data class ExplorePanel(
     val startDate: String? = null,
     val endDate: String? = null,
     val minImportance: Int = 0,
+    /** 已收藏：可与类型筛选叠加（对齐 iOS） */
+    val favoritesOnly: Boolean = false,
 ) {
     val isActive: Boolean
         get() = tags.isNotEmpty() || startDate != null || endDate != null || minImportance > 0
@@ -74,7 +79,8 @@ internal fun filterExploreLogs(
         (panel.tags.isEmpty() || item.colorTag in panel.tags) &&
             (panel.startDate == null || item.recordDate >= panel.startDate) &&
             (panel.endDate == null || item.recordDate <= panel.endDate) &&
-            item.importance >= panel.minImportance
+            item.importance >= panel.minImportance &&
+            (!panel.favoritesOnly || item.isFavorite == true)
     }
     return if (newestFirst) panelMatches else panelMatches.asReversed()
 }
@@ -84,7 +90,7 @@ internal fun buildExploreSummary(logs: List<LogItem>, today: LocalDate): String 
     val weekStart = today.minusDays((today.dayOfWeek.value - 1).toLong()).toString()
     val weekCount = logs.count { it.recordDate >= weekStart && it.recordDate <= today.toString() }
     val unsortedCount = logs.count { it.category == Category.LOG && it.colorTag == ColorTag.DAILY }
-    return "本周 $weekCount 条记录 · $unsortedCount 条待整理"
+    return tr("本周 {0} 条记录 · {1} 条待整理", weekCount, unsortedCount)
 }
 
 sealed interface ExploreEvent {
@@ -158,6 +164,23 @@ class ExploreViewModel(private val repository: FlashRepository) : ViewModel() {
         _panel.value = _panel.value.copy(endDate = date)
     }
 
+    fun toggleFavoritesOnly() {
+        _panel.value = _panel.value.copy(favoritesOnly = !_panel.value.favoritesOnly)
+    }
+
+    fun toggleFavorite(log: LogItem) {
+        viewModelScope.launch {
+            runCatching { repository.setLogFavorite(log, log.isFavorite != true) }
+                .onFailure { eventChannel.send(ExploreEvent.Failed(it.message ?: tr("操作失败，请重试"))) }
+        }
+    }
+
+    /** 删除即生效，返回撤销动作；失败返回 null */
+    suspend fun deleteWithUndo(log: LogItem): (suspend () -> Unit)? =
+        runCatching { repository.deleteLogWithUndo(log) }
+            .onFailure { eventChannel.send(ExploreEvent.Failed(it.message ?: tr("删除失败，请重试"))) }
+            .getOrNull()
+
     fun setMinImportance(value: Int) {
         _panel.value = _panel.value.copy(minImportance = value)
     }
@@ -188,7 +211,7 @@ class ExploreViewModel(private val repository: FlashRepository) : ViewModel() {
         viewModelScope.launch {
             runCatching { repository.updateLogCategories(ids, category) }
                 .onFailure {
-                    eventChannel.send(ExploreEvent.Failed(it.message ?: "批量修改失败，请重试"))
+                    eventChannel.send(ExploreEvent.Failed(it.message ?: com.flash.app.i18n.tr("批量修改失败，请重试")))
                 }
         }
     }
@@ -200,7 +223,7 @@ class ExploreViewModel(private val repository: FlashRepository) : ViewModel() {
         viewModelScope.launch {
             runCatching { repository.updateLogColorTags(ids, tag) }
                 .onFailure {
-                    eventChannel.send(ExploreEvent.Failed(it.message ?: "批量修改失败，请重试"))
+                    eventChannel.send(ExploreEvent.Failed(it.message ?: com.flash.app.i18n.tr("批量修改失败，请重试")))
                 }
         }
     }

@@ -77,21 +77,26 @@ import com.flash.app.FlashApplication
 import com.flash.app.data.model.TaskItem
 import com.flash.app.ui.components.LogCard
 import com.flash.app.ui.components.StyleCard
-import com.flash.app.ui.components.hexToColor
+import com.flash.app.ui.theme.moodColor
+import com.flash.app.data.model.emoji
+import androidx.compose.animation.togetherWith
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.ui.unit.sp
 import java.time.LocalDate
 import java.time.YearMonth
 import kotlinx.coroutines.launch
 
-private val WEEKDAYS = listOf("一", "二", "三", "四", "五", "六", "日")
+private val WEEKDAYS get() = listOf("一", "二", "三", "四", "五", "六", "日")
 
 /** Calendar Tab：真实月视图 + 选中日详情 */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarScreen(
-    onOpenSettings: () -> Unit,
     onOpenRecord: (String) -> Unit,
     embedded: Boolean = false,
     listState: LazyListState = rememberLazyListState(),
+    onBack: (() -> Unit)? = null,
+    initialDate: LocalDate? = null,
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as FlashApplication
@@ -108,9 +113,11 @@ fun CalendarScreen(
         ActivityResultContracts.RequestPermission(),
     ) { granted ->
         if (!granted) scope.launch {
-            snackbar.showSnackbar("任务已保存；允许通知后才能收到提醒")
+            snackbar.showSnackbar(com.flash.app.i18n.tr("任务已保存；允许通知后才能收到提醒"))
         }
     }
+
+    LaunchedEffect(initialDate) { initialDate?.let(viewModel::selectDate) }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
@@ -125,17 +132,21 @@ fun CalendarScreen(
         contentWindowInsets = if (embedded) WindowInsets(0, 0, 0, 0) else ScaffoldDefaults.contentWindowInsets,
         topBar = {
             if (!embedded) TopAppBar(
-                title = { Text("日历") },
+                title = { Text(com.flash.app.i18n.tr("日历")) },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                navigationIcon = {
+                    if (onBack != null) {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = com.flash.app.i18n.tr("返回"))
+                        }
+                    }
+                },
                 actions = {
                     IconButton(onClick = {
                         editingTask = null
                         editorOpen = true
                     }) {
-                        Icon(Icons.Filled.Add, contentDescription = "新建任务")
-                    }
-                    IconButton(onClick = onOpenSettings) {
-                        Icon(Icons.Filled.Settings, contentDescription = "设置")
+                        Icon(Icons.Filled.Add, contentDescription = com.flash.app.i18n.tr("新建任务"))
                     }
                 },
             )
@@ -147,21 +158,24 @@ fun CalendarScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp,
+            contentPadding = PaddingValues(start = com.flash.app.ui.paper.pageGutter(), end = com.flash.app.ui.paper.pageGutter(), top = 8.dp,
                 bottom = 8.dp + com.flash.app.ui.navigation.LocalPageBottomPadding.current),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            if (embedded) {
-                item(key = "new-task") {
-                    TextButton(onClick = { editingTask = null; editorOpen = true }) { Text("新建任务") }
-                }
-            }
             item(key = "month-header") {
                 MonthHeader(
                     month = uiState.month,
                     onPrev = viewModel::prevMonth,
                     onNext = viewModel::nextMonth,
                     onToday = viewModel::backToToday,
+                    onNewTask = if (embedded) {
+                        {
+                            editingTask = null
+                            editorOpen = true
+                        }
+                    } else {
+                        null
+                    },
                 )
             }
             item(key = "weekdays") {
@@ -178,15 +192,25 @@ fun CalendarScreen(
                 }
             }
             item(key = "grid") {
-                MonthGrid(
-                    uiState = uiState,
-                    onSelect = viewModel::selectDate,
-                )
+                // 换月：方向性横移（减弱动画时由系统动画缩放归零）
+                val monthState = uiState
+                androidx.compose.animation.AnimatedContent(
+                    targetState = monthState.month,
+                    transitionSpec = {
+                        val forward = targetState > initialState
+                        (androidx.compose.animation.slideInHorizontally(androidx.compose.animation.core.tween(220)) { if (forward) it / 14 else -it / 14 } +
+                            androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(220)))
+                            .togetherWith(androidx.compose.animation.fadeOut(androidx.compose.animation.core.tween(120)))
+                    },
+                    label = "calendar-month",
+                ) { _ ->
+                    MonthGrid(uiState = monthState, onSelect = viewModel::selectDate)
+                }
             }
             item(key = "detail-header") {
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "${uiState.selectedDate} 详情",
+                    com.flash.app.i18n.tr("{0} 详情", uiState.selectedDate),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
@@ -195,6 +219,7 @@ fun CalendarScreen(
                 DayDetail(
                     aggregate = uiState.selectedAggregate,
                     onOpenRecord = onOpenRecord,
+                    ideaExists = { id -> uiState.ideaIds.contains(id) },
                     onCompletedChange = viewModel::setCompleted,
                     onEditTask = { task ->
                         editingTask = task
@@ -228,16 +253,16 @@ fun CalendarScreen(
     deletingTask?.let { task ->
         AlertDialog(
             onDismissRequest = { deletingTask = null },
-            title = { Text("删除任务？") },
+            title = { Text(com.flash.app.i18n.tr("删除任务？")) },
             text = { Text(task.title) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.deleteTask(task)
                     deletingTask = null
-                }) { Text("删除", color = MaterialTheme.colorScheme.error) }
+                }) { Text(com.flash.app.i18n.tr("删除"), color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = {
-                TextButton(onClick = { deletingTask = null }) { Text("取消") }
+                TextButton(onClick = { deletingTask = null }) { Text(com.flash.app.i18n.tr("取消")) }
             },
         )
     }
@@ -249,22 +274,27 @@ private fun MonthHeader(
     onPrev: () -> Unit,
     onNext: () -> Unit,
     onToday: () -> Unit,
+    onNewTask: (() -> Unit)? = null,
 ) {
+    val rtl = androidx.compose.ui.platform.LocalLayoutDirection.current == androidx.compose.ui.unit.LayoutDirection.Rtl
     Row(verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = onPrev) {
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "上一月", tint = MaterialTheme.colorScheme.onSurface)
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = com.flash.app.i18n.tr("上一月"), tint = MaterialTheme.colorScheme.onSurface)
         }
         Text(
-            "${month.year} 年 ${month.monthValue} 月",
+            monthTitle(month),
             color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1f),
             textAlign = TextAlign.Center,
         )
-        TextButton(onClick = onToday) { Text("今天") }
+        TextButton(onClick = onToday) { Text(com.flash.app.i18n.tr("回到今天")) }
+        onNewTask?.let {
+            IconButton(onClick = it) { Icon(Icons.Filled.Add, contentDescription = com.flash.app.i18n.tr("新建任务"), tint = MaterialTheme.colorScheme.primary) }
+        }
         IconButton(onClick = onNext) {
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "下一月", tint = MaterialTheme.colorScheme.onSurface)
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = com.flash.app.i18n.tr("下一月"), tint = MaterialTheme.colorScheme.onSurface)
         }
     }
 }
@@ -309,12 +339,12 @@ private fun DayCell(
         modifier = modifier
             .heightIn(min = 48.dp)
             .padding(2.dp)
-            .border(1.dp, borderColor, MaterialTheme.shapes.small)
+            .border(1.dp, borderColor, androidx.compose.foundation.shape.RoundedCornerShape(com.flash.app.ui.theme.FlashTokens.Radius.Field))
             .selectable(selected = isSelected, role = Role.Button, onClick = onClick)
             .semantics {
-                contentDescription = "$date，${aggregate?.logs?.size ?: 0} 条记录，" +
-                    "${aggregate?.emotions?.size ?: 0} 次情绪，${aggregate?.tasks?.size ?: 0} 项任务" +
-                    if (isToday) "，今天" else ""
+                contentDescription = com.flash.app.i18n.tr("{0}，{1} 条记录，", date, aggregate?.logs?.size ?: 0) +
+                    com.flash.app.i18n.tr("{0} 次情绪，{1} 项任务", aggregate?.emotions?.size ?: 0, aggregate?.tasks?.size ?: 0) +
+                    if (isToday) com.flash.app.i18n.tr("，今天") else ""
             }
             .padding(2.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -331,37 +361,45 @@ private fun DayCell(
             },
         )
         if (aggregate != null) {
-            // 情绪圆点（最多 3 个）+ 当天内容数
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.padding(top = 2.dp),
-            ) {
-                aggregate.emotions.take(3).forEach { emotion ->
-                    Box(
-                        Modifier
-                            .size(5.dp)
-                            .clip(CircleShape)
-                            .background(emotion.level.colorHex.hexToColor())
-                    )
-                    Spacer(Modifier.width(1.dp))
+            // 记录数 · 任务数 + 当天第一个情绪 emoji（对齐 iOS）
+            val tasks = aggregate.tasks.count { !it.isCompleted }
+            if (aggregate.logs.isNotEmpty() || tasks > 0) {
+                Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                    if (aggregate.logs.isNotEmpty()) {
+                        Text(
+                            "${aggregate.logs.size}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = com.flash.app.ui.theme.ModuleColors.Log,
+                        )
+                    }
+                    if (tasks > 0) {
+                        Text(
+                            "$tasks",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = com.flash.app.ui.theme.ModuleColors.CalendarText,
+                        )
+                    }
                 }
             }
-            val itemCount = aggregate.logs.size + aggregate.tasks.count { !it.isCompleted }
-            if (itemCount > 0) {
-                Text(
-                    "$itemCount",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+            aggregate.emotions.firstOrNull()?.let { emotion ->
+                Text(emotion.level.emoji, fontSize = 11.sp)
             }
         }
     }
+}
+
+/** 月份标题：按当前语言的习惯排列（只用于显示） */
+private fun monthTitle(month: YearMonth): String {
+    val locale = java.util.Locale.getDefault()
+    val pattern = android.text.format.DateFormat.getBestDateTimePattern(locale, "yMMMM")
+    return java.time.format.DateTimeFormatter.ofPattern(pattern, locale).format(month)
 }
 
 @Composable
 private fun DayDetail(
     aggregate: DayAggregate?,
     onOpenRecord: (String) -> Unit,
+    ideaExists: (String) -> Boolean,
     onCompletedChange: (TaskItem, Boolean) -> Unit,
     onEditTask: (TaskItem) -> Unit,
     onDeleteTask: (TaskItem) -> Unit,
@@ -370,7 +408,7 @@ private fun DayDetail(
         (aggregate.logs.isEmpty() && aggregate.emotions.isEmpty() && aggregate.tasks.isEmpty())
     ) {
         Text(
-            "这一天还没有计划或记录",
+            com.flash.app.i18n.tr("这一天还没有计划或记录"),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(vertical = 16.dp),
@@ -386,6 +424,7 @@ private fun DayDetail(
                 onCompletedChange = { onCompletedChange(task, it) },
                 onEdit = { onEditTask(task) },
                 onDelete = { onDeleteTask(task) },
+                onOpenSource = task.sourceLogId?.takeIf(ideaExists)?.let { id -> { onOpenRecord(id) } },
             )
         }
         if (aggregate.logs.isNotEmpty() || aggregate.emotions.isNotEmpty()) {
@@ -393,7 +432,7 @@ private fun DayDetail(
                 if (aggregate.emotions.isNotEmpty()) {
                     val avg = aggregate.emotions.map { it.level.value }.average()
                     Text(
-                        "平均情绪 %.1f · 共 %d 条".format(avg, aggregate.emotions.size),
+                        com.flash.app.i18n.tr("平均情绪 {0} · 共 {1} 条", "%.1f".format(java.util.Locale.ROOT, avg), aggregate.emotions.size),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -406,7 +445,7 @@ private fun DayDetail(
                                 Modifier
                                     .size(10.dp)
                                     .clip(CircleShape)
-                                    .background(emotion.level.colorHex.hexToColor())
+                                    .background(emotion.level.moodColor(com.flash.app.ui.theme.LocalIsDarkTheme.current))
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(

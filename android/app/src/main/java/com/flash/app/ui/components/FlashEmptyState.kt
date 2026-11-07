@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.flash.app.ui.theme.FlashTokens
 
@@ -39,6 +40,8 @@ fun FlashEmptyState(
     description: String? = null,
     actionLabel: String? = null,
     onAction: (() -> Unit)? = null,
+    /** 给定时图标落在一笔勾成的手绘圈里（种子决定形状） */
+    ringSeed: String? = null,
 ) {
     Column(
         modifier = modifier
@@ -50,12 +53,19 @@ fun FlashEmptyState(
         if (emoji != null) {
             Text(emoji, fontSize = 56.sp)
         } else if (icon != null) {
-            Icon(
-                icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(FlashTokens.IconSize.EmptyState),
-            )
+            androidx.compose.foundation.layout.Box(contentAlignment = Alignment.Center) {
+                com.flash.app.ui.paper.HandDrawnRing(
+                    seed = ringSeed ?: title,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(76.dp),
+                )
+                Icon(
+                    icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(32.dp),
+                )
+            }
         }
         Spacer(Modifier.height(FlashTokens.Spacing.SM))
         Text(

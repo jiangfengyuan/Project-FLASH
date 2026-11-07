@@ -75,6 +75,7 @@ data class TaskDraft(
     val dueAt: String?,
     val timeZone: String?,
     val reminderAt: String?,
+    val isFavorite: Boolean? = null,
 )
 
 sealed interface CalendarEvent {
@@ -136,6 +137,7 @@ class CalendarViewModel(
             selectedDate = selected,
             selectedAggregate = map[selected.toString()],
             today = todayDate,
+            ideaIds = map.values.flatMapTo(mutableSetOf()) { day -> day.logs.map { it.id } },
         )
     }.stateIn(
         viewModelScope,
@@ -185,6 +187,7 @@ class CalendarViewModel(
                         draft.dueAt,
                         draft.timeZone,
                         draft.reminderAt,
+                        isFavorite = draft.isFavorite,
                     ).also { repository.addTask(it) }
                 } else {
                     existing.copy(
@@ -197,11 +200,12 @@ class CalendarViewModel(
                         dueAt = draft.dueAt,
                         timeZone = draft.timeZone,
                         reminderAt = draft.reminderAt,
+                        isFavorite = draft.isFavorite,
                     ).also { repository.updateTask(it) }
                 }
                 reminders.schedule(task)
             }.onFailure {
-                eventChannel.send(CalendarEvent.Failed(it.message ?: "任务保存失败"))
+                eventChannel.send(CalendarEvent.Failed(it.message ?: com.flash.app.i18n.tr("任务保存失败")))
             }
         }
     }
@@ -212,7 +216,7 @@ class CalendarViewModel(
                 .onSuccess { updated ->
                     if (completed) reminders.cancel(task.id) else reminders.schedule(updated)
                 }
-                .onFailure { eventChannel.send(CalendarEvent.Failed(it.message ?: "任务更新失败")) }
+                .onFailure { eventChannel.send(CalendarEvent.Failed(it.message ?: com.flash.app.i18n.tr("任务更新失败"))) }
         }
     }
 
@@ -220,7 +224,7 @@ class CalendarViewModel(
         viewModelScope.launch {
             runCatching { repository.deleteTask(task.id) }
                 .onSuccess { reminders.cancel(task.id) }
-                .onFailure { eventChannel.send(CalendarEvent.Failed(it.message ?: "任务删除失败")) }
+                .onFailure { eventChannel.send(CalendarEvent.Failed(it.message ?: com.flash.app.i18n.tr("任务删除失败"))) }
         }
     }
 
@@ -241,4 +245,6 @@ data class CalendarUiState(
     val selectedDate: LocalDate,
     val selectedAggregate: DayAggregate?,
     val today: LocalDate,
+    /** 仍存在的记录 id：任务的「查看灵感」回链只在来源还在时显示 */
+    val ideaIds: Set<String> = emptySet(),
 )

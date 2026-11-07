@@ -6,6 +6,7 @@
 
 package com.flash.app.data.reminder
 
+import com.flash.app.i18n.tr
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -31,6 +32,8 @@ import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -87,7 +90,7 @@ class TaskReminderScheduler(
         // fails halfway, reminders not yet replaced remain intact.
         val desired = tasks.mapNotNull(::scheduledTask)
         if (desired.isNotEmpty() && !canNotify()) {
-            throw IllegalStateException("系统通知或任务提醒频道已关闭")
+            throw IllegalStateException(tr("系统通知或任务提醒频道已关闭"))
         }
         val previous = workManager.getWorkInfosByTag(TAG).awaitValue()
         for (scheduled in desired) {
@@ -166,7 +169,7 @@ class TaskReminderWorker(
 
         createChannel()
         val taskId = inputData.getString(KEY_TASK_ID) ?: return Result.failure()
-        val title = inputData.getString(KEY_TITLE) ?: "待办任务"
+        val title = inputData.getString(KEY_TITLE) ?: tr("待办任务")
         val intent = Intent(applicationContext, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
@@ -176,13 +179,25 @@ class TaskReminderWorker(
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
+        fun action(action: String, requestOffset: Int): PendingIntent = PendingIntent.getBroadcast(
+            applicationContext,
+            taskId.hashCode() + requestOffset,
+            Intent(applicationContext, TaskReminderActionReceiver::class.java)
+                .setAction(action)
+                .putExtra(KEY_TASK_ID, taskId),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
         val notification = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("Flash 任务提醒")
+            .setSmallIcon(com.flash.app.R.drawable.ic_notification)
+            .setContentTitle(tr("Flash 任务提醒"))
             .setContentText(title)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            // 锁屏只显示通用标题，任务名在解锁后才可见
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+            .addAction(0, tr("完成"), action(TaskReminderActionReceiver.ACTION_COMPLETE, 1))
+            .addAction(0, tr("稍后 {0} 分钟", TaskReminderActionReceiver.SNOOZE_MINUTES), action(TaskReminderActionReceiver.ACTION_SNOOZE, 2))
             .build()
         manager.notify(taskId.hashCode(), notification)
         return Result.success()
@@ -191,9 +206,9 @@ class TaskReminderWorker(
     private fun createChannel() {
         val channel = NotificationChannel(
             CHANNEL_ID,
-            "任务提醒",
+            tr("任务提醒"),
             NotificationManager.IMPORTANCE_DEFAULT,
-        ).apply { description = "Calendar 任务的本地提醒" }
+        ).apply { description = tr("日历任务的本地提醒") }
         applicationContext.getSystemService(NotificationManager::class.java)
             .createNotificationChannel(channel)
     }
@@ -202,5 +217,41 @@ class TaskReminderWorker(
         const val KEY_TASK_ID = "taskId"
         const val KEY_TITLE = "title"
         private const val CHANNEL_ID = "flash-task-reminders"
+    }
+}
+
+/**
+ * 通知上的「完成 / 稍后 10 分钟」：不打开 App 直接写库（对齐 iOS）。不导出，只接收本 App 的 PendingIntent。
+ */
+class TaskReminderActionReceiver : android.content.BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) {
+        val taskId = intent.getStringExtra(TaskReminderWorker.KEY_TASK_ID) ?: return
+        val app = context.applicationContext as com.flash.app.FlashApplication
+        val pending = goAsync()
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+            try {
+                NotificationManagerCompat.from(context).cancel(taskId.hashCode())
+                val task = app.repository.tasks.first().firstOrNull { it.id == taskId } ?: return@launch
+                when (intent.action) {
+                    ACTION_COMPLETE -> {
+                        val done = app.repository.setTaskCompleted(task, true)
+                        app.taskReminders.schedule(done)
+                    }
+                    ACTION_SNOOZE -> {
+                        val snoozed = task.copy(reminderAt = Instant.now().plusSeconds(SNOOZE_MINUTES * 60L).toString())
+                        app.repository.updateTask(snoozed)
+                        app.taskReminders.schedule(snoozed)
+                    }
+                }
+            } finally {
+                pending.finish()
+            }
+        }
+    }
+
+    companion object {
+        const val ACTION_COMPLETE = "com.flash.app.action.TASK_COMPLETE"
+        const val ACTION_SNOOZE = "com.flash.app.action.TASK_SNOOZE"
+        const val SNOOZE_MINUTES = 10
     }
 }

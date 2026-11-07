@@ -23,14 +23,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-enum class LogSort(val displayName: String) {
+enum class LogSort(private val sourceName: String) {
     NEWEST("最新"),
     OLDEST("最早"),
-    TAG("按标签"),
+    TAG("按标签");
+
+    val displayName: String get() = com.flash.app.i18n.tr(sourceName)
 }
 
 data class LogFilter(
@@ -39,6 +42,7 @@ data class LogFilter(
     val startDate: String? = null, // yyyy-MM-dd，含当天
     val endDate: String? = null,
     val sort: LogSort = LogSort.NEWEST,
+    val favoritesOnly: Boolean = false,
 )
 
 sealed interface LogFlowEvent {
@@ -83,7 +87,7 @@ class LogFlowViewModel(private val repository: FlashRepository) : ViewModel() {
             endDate = filter.endDate,
             sort = filter.sort.toSortKey(),
             limit = limit,
-        )
+        ).map { page -> if (filter.favoritesOnly) page.filter { it.isFavorite == true } else page }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     /** 当前过滤条件下的命中总数（"N 条"展示 + 是否还有更多） */
@@ -116,6 +120,10 @@ class LogFlowViewModel(private val repository: FlashRepository) : ViewModel() {
         }
     }
 
+    fun toggleFavoritesOnly() {
+        updateFilter { it.copy(favoritesOnly = !it.favoritesOnly) }
+    }
+
     fun setSort(sort: LogSort) {
         updateFilter { it.copy(sort = sort) }
     }
@@ -137,7 +145,7 @@ class LogFlowViewModel(private val repository: FlashRepository) : ViewModel() {
             runCatching { repository.deleteLog(log.id) }
                 .onSuccess { eventChannel.send(LogFlowEvent.Deleted(log, wasIdeaViewed)) }
                 .onFailure {
-                    eventChannel.send(LogFlowEvent.Failed(it.message ?: "删除失败，请重试"))
+                    eventChannel.send(LogFlowEvent.Failed(it.message ?: com.flash.app.i18n.tr("删除失败，请重试")))
                 }
         }
     }
@@ -148,7 +156,7 @@ class LogFlowViewModel(private val repository: FlashRepository) : ViewModel() {
                 repository.updateLog(log)
                 if (wasIdeaViewed) repository.markIdeaViewed(log.id)
             }.onFailure {
-                eventChannel.send(LogFlowEvent.Failed(it.message ?: "撤销失败，请重试"))
+                eventChannel.send(LogFlowEvent.Failed(it.message ?: com.flash.app.i18n.tr("撤销失败，请重试")))
             }
         }
     }

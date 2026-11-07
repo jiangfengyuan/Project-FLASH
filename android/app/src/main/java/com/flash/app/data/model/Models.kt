@@ -14,13 +14,16 @@ import java.time.Instant
  * storageKey 与 SQLite/Capacitor 端存储值保持一致，保证数据互通。
  */
 
-enum class ColorTag(val storageKey: String, val displayName: String, val colorHex: String) {
+enum class ColorTag(val storageKey: String, private val sourceName: String, val colorHex: String) {
     URGENT("urgent", "紧急", "#FF6B6B"),
     INSPIRATION("inspiration", "灵感", "#FFD93D"),
     DAILY("daily", "日常", "#4D96FF"),
     MEMO("memo", "备忘", "#6BCB77"),
     EMOTION("emotion", "情绪", "#9B59B6"),
     IDEA("idea", "想法", "#FF9F43");
+
+    /** 界面名称（storageKey 才是稳定键） */
+    val displayName: String get() = com.flash.app.i18n.tr(sourceName)
 
     companion object {
         fun fromStorage(key: String): ColorTag =
@@ -38,7 +41,7 @@ enum class Category(val storageKey: String) {
     }
 }
 
-enum class EmotionLevel(val value: Int, val displayName: String, val colorHex: String) {
+enum class EmotionLevel(val value: Int, private val sourceName: String, val colorHex: String) {
     VERY_UNHAPPY(-3, "非常不开心", "#800080"),
     UNHAPPY(-2, "很不开心", "#DDA0DD"),
     SLIGHTLY_UNHAPPY(-1, "不开心", "#B0C4DE"),
@@ -48,6 +51,7 @@ enum class EmotionLevel(val value: Int, val displayName: String, val colorHex: S
     VERY_HAPPY(3, "非常开心", "#FFB347");
 
     val isNegative: Boolean get() = value < 0
+    val displayName: String get() = com.flash.app.i18n.tr(sourceName)
 
     companion object {
         fun fromValue(value: Int): EmotionLevel =
@@ -55,10 +59,12 @@ enum class EmotionLevel(val value: Int, val displayName: String, val colorHex: S
     }
 }
 
-enum class SubEmotion(val storageKey: String, val displayName: String, val colorHex: String) {
+enum class SubEmotion(val storageKey: String, private val sourceName: String, val colorHex: String) {
     SAD("sad", "伤心", "#A78BFA"),
     ANGRY("angry", "生气", "#F87171"),
     UNCOMFORTABLE("uncomfortable", "难受", "#FB923C");
+
+    val displayName: String get() = com.flash.app.i18n.tr(sourceName)
 
     companion object {
         fun fromStorage(key: String): SubEmotion? =
