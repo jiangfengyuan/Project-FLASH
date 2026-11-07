@@ -90,20 +90,27 @@ public struct LogCardView: View {
             }
             Text(log.content)
                 .font(Typography.body)
-                .foregroundStyle(.primary)
+                .lineSpacing(Typography.bodyLineSpacing)
+                .foregroundStyle(BrandColors.textPrimary)
                 .textSelection(.enabled)
         }
-        .padding(14) // 卡片内边距：sm 与 md 之间的特调值
+        .padding(Spacing.row)
         .frame(maxWidth: .infinity, alignment: .leading)
+        #if os(iOS)
+        // 列表行只做轻微起伏，毛边留给主卡片，保证滚动流畅
+        .background(PaperCardShape(seed: log.id, cornerRadius: Radius.row).fill(BrandColors.cardSurface))
+        .overlay {
+            PaperCardShape(seed: log.id, cornerRadius: Radius.row)
+                .stroke(BrandColors.weakBorder, lineWidth: cardBorderWidth)
+        }
+        .flashCardShadow()
+        #else
         .background(BrandColors.cardSurface)
         .clipShape(RoundedRectangle(cornerRadius: Radius.row, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: Radius.row, style: .continuous)
                 .stroke(BrandColors.weakBorder, lineWidth: cardBorderWidth)
         }
-        #if os(iOS)
-        // 暖调手作：纸卡轻放在纸面上的柔和暖影
-        .flashCardShadow()
         #endif
         .scaleEffect(deletePulse ? 0.97 : 1)
         .cardFloat(reduceMotion: reduceMotion)
@@ -165,7 +172,7 @@ public struct LogCardView: View {
     /// 文案用 textColor（同色系加深变体），浅色模式下达到正文对比度
     private var tagBadge: some View {
         #if os(iOS)
-        // 暖调手作：「印章」式徽章——小圆角方框、标签色细描边、极淡底
+        // 纸上书写：「印章」式徽章——小圆角方框、标签色细描边、极淡底
         Text(log.colorTag.displayName)
             .font(Typography.caption.weight(.medium))
             .padding(.horizontal, Spacing.xs)
@@ -197,8 +204,8 @@ public struct LogCardView: View {
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(isFavorite ? BrandColors.ideaYellowText : .secondary)
-                .help(isFavorite ? "取消收藏" : "收藏")
-                .accessibilityLabel(isFavorite ? "取消收藏" : "收藏")
+                .help(isFavorite ? L("取消收藏") : L("收藏"))
+                .accessibilityLabel(isFavorite ? L("取消收藏") : L("收藏"))
             }
             if let onEdit {
                 Button(action: onEdit) {

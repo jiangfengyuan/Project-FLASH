@@ -31,7 +31,7 @@ public enum QuickCaptureCommit {
         let content = draft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !content.isEmpty else { return .empty }
         guard TextLimits.fits(content) else {
-            return .tooLong(message: "内容超出 \(TextLimits.maxContentUTF16) 字上限，请删减后再保存")
+            return .tooLong(message: L("内容超出 \(TextLimits.maxContentUTF16) 字上限，请删减后再保存"))
         }
         return .ready(content)
     }
@@ -53,6 +53,6 @@ public enum QuickCaptureCommit {
             try repository.addLog(id: id, content: content, colorTag: .idea, category: .idea,
                                   importance: importanceFromContent(content))
         }
-        return .saved(toast: category == .idea ? "✓ 已保存到灵感" : "✓ 已保存到日志")
+        return .saved(toast: category == .idea ? L("✓ 已保存到灵感") : L("✓ 已保存到日志"))
     }
 }

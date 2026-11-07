@@ -4,7 +4,7 @@ import Observation
 @preconcurrency import Network
 
 public enum LocalBackupAvailability {
-    public static let message = "局域网传输暂时停用：旧协议存在安全风险。请使用‘导出备份’或‘系统分享’，通过可信渠道传输 JSON 文件。"
+    public static let message = L("局域网传输暂时停用：旧协议存在安全风险。请使用‘导出备份’或‘系统分享’，通过可信渠道传输 JSON 文件。")
 }
 
 public struct LocalTransferDevice: Identifiable, Hashable, @unchecked Sendable {

@@ -26,7 +26,7 @@ public struct AppearanceSection: View {
                     Text($0.displayName).tag($0)
                 }
             } label: {
-                SettingsRowLabel(title: "主题", systemImage: "circle.lefthalf.filled", color: .blue)
+                SettingsRowLabel(title: L("主题"), systemImage: "circle.lefthalf.filled", color: .blue)
             }
             .pickerStyle(.segmented)
         }

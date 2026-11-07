@@ -12,7 +12,7 @@ public actor TaskReminderScheduler {
     public static let snoozeMinutes = 10
 
     /// 隐藏预览时（锁屏且系统「显示预览」为「解锁时」——iOS 默认）代替任务标题显示的正文（F-17）
-    public static let hiddenPreviewBodyPlaceholder = "你有一个任务提醒"
+    public static let hiddenPreviewBodyPlaceholder = L("你有一个任务提醒")
 
     /// 注册任务提醒的通知类别（App 启动时调用一次）
     public nonisolated static func registerCategories() {
@@ -22,9 +22,9 @@ public actor TaskReminderScheduler {
     /// 任务提醒类别：「完成 / 稍后」操作 + 锁屏隐私。
     /// 任务标题只在正文里；隐藏预览时系统显示通用标题与占位正文，不泄露标题（F-17）
     public nonisolated static func makeCategory() -> UNNotificationCategory {
-        let complete = UNNotificationAction(identifier: completeActionIdentifier, title: "完成",
+        let complete = UNNotificationAction(identifier: completeActionIdentifier, title: L("完成"),
                                             options: [], icon: UNNotificationActionIcon(systemImageName: "checkmark"))
-        let snooze = UNNotificationAction(identifier: snoozeActionIdentifier, title: "稍后 \(snoozeMinutes) 分钟",
+        let snooze = UNNotificationAction(identifier: snoozeActionIdentifier, title: L("稍后 \(snoozeMinutes) 分钟"),
                                           options: [], icon: UNNotificationActionIcon(systemImageName: "clock"))
         return UNNotificationCategory(identifier: categoryIdentifier, actions: [complete, snooze],
                                       intentIdentifiers: [],
@@ -144,7 +144,7 @@ struct SystemReminderCenter: ReminderNotificationCenter {
 
     func add(_ request: ReminderRequest) async throws {
         let content = UNMutableNotificationContent()
-        content.title = "Flash 任务提醒"
+        content.title = L("Flash 任务提醒")
         content.body = request.title
         content.sound = .default
         // 通知操作（iOS 注册「完成 / 稍后」；未注册类别的平台只显示普通通知）

@@ -74,7 +74,7 @@ struct SearchScreen: View {
             .navigationTitle("搜索")
             .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always),
-                        prompt: "关键词或标签")
+                        prompt: L("关键词或标签"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("关闭") { dismiss() }
@@ -135,8 +135,8 @@ struct SearchScreen: View {
         let dayString = String(createdAt.prefix(10))
         guard let date = DateFormatting.parseDay(dayString) else { return dayString }
         let calendar = Calendar.current
-        if calendar.isDateInToday(date) { return "今天" }
-        if calendar.isDateInYesterday(date) { return "昨天" }
+        if calendar.isDateInToday(date) { return L("今天") }
+        if calendar.isDateInYesterday(date) { return L("昨天") }
         let sameYear = calendar.isDate(date, equalTo: Date(), toGranularity: .year)
         return date.formatted(sameYear ? .dateTime.month(.defaultDigits).day()
                                        : .dateTime.year().month(.defaultDigits).day())

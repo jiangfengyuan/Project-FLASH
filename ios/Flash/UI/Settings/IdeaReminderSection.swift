@@ -17,7 +17,7 @@ struct IdeaReminderSection: View {
     var body: some View {
         Section {
             Toggle(isOn: enabledBinding) {
-                SettingsRowLabel(title: "灵感提醒", systemImage: "lightbulb.max", color: BrandColors.ideaYellowText)
+                SettingsRowLabel(title: L("灵感提醒"), systemImage: "lightbulb.max", color: BrandColors.ideaYellowText)
             }
             .tint(BrandColors.brandPrimary)
             if settings.ideaReminderEnabled {
@@ -37,9 +37,9 @@ struct IdeaReminderSection: View {
 
     private var footerText: String {
         let status = ideaReminders.unreadCount > 0
-            ? "当前有 \(ideaReminders.unreadCount) 个未查看的想法。"
-            : "目前没有未查看的想法。"
-        return status + "累计 \(IdeaReminder.threshold) 个以上时，晚上 8 点提醒你梳理；打开查看过的想法不再计入。"
+            ? L("当前有 \(ideaReminders.unreadCount) 个未查看的想法。")
+            : L("目前没有未查看的想法。")
+        return status + L("累计 \(IdeaReminder.threshold) 个以上时，晚上 8 点提醒你梳理；打开查看过的想法不再计入。")
     }
 
     private var enabledBinding: Binding<Bool> {

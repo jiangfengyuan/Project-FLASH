@@ -83,17 +83,17 @@ public enum ReviewInsights: Sendable {
         let labels = labels(for: window)
         let conclusion: String
         if !hasEnoughData {
-            conclusion = "继续记录，回顾会慢慢清晰"
+            conclusion = L("继续记录，回顾会慢慢清晰")
         } else {
             var text: String
             switch activityTrend {
-            case .more: text = "\(labels.current)你记录得比\(labels.previous)更频繁"
-            case .less: text = "\(labels.current)的记录不如\(labels.previous)活跃"
-            case .same: text = "\(labels.current)的记录与\(labels.previous)持平"
+            case .more: text = L("\(labels.current)你记录得比\(labels.previous)更频繁")
+            case .less: text = L("\(labels.current)的记录不如\(labels.previous)活跃")
+            case .same: text = L("\(labels.current)的记录与\(labels.previous)持平")
             }
             switch moodTrend {
-            case .better: text += "，情绪整体更好一些"
-            case .lower: text += "，情绪整体更低落一些"
+            case .better: text += L("，情绪整体更好一些")
+            case .lower: text += L("，情绪整体更低落一些")
             case .same, .unknown: break
             }
             conclusion = text
@@ -108,10 +108,10 @@ public enum ReviewInsights: Sendable {
 
     private static func labels(for window: ReviewWindow) -> (current: String, previous: String) {
         switch window {
-        case .week: return ("这周", "上周")
-        case .month: return ("这个月", "上个月")
-        case .days30: return ("近 30 天", "之前 30 天")
-        case .days90: return ("近 90 天", "之前 90 天")
+        case .week: return (L("这周"), L("上周"))
+        case .month: return (L("这个月"), L("上个月"))
+        case .days30: return (L("近 30 天"), L("之前 30 天"))
+        case .days90: return (L("近 90 天"), L("之前 90 天"))
         }
     }
 

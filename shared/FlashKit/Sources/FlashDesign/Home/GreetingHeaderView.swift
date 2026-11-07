@@ -65,9 +65,9 @@ public struct GreetingHeaderView: View {
     private var greeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
         switch hour {
-        case 5..<11: return "早上好 ☀️"
-        case 11..<18: return "下午好 🌤"
-        default: return "晚上好 🌙"
+        case 5..<11: return L("早上好 ☀️")
+        case 11..<18: return L("下午好 🌤")
+        default: return L("晚上好 🌙")
         }
     }
 

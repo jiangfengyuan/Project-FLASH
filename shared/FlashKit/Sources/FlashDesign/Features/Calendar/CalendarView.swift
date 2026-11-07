@@ -137,7 +137,7 @@ public struct CalendarView: View {
                 selectedDate = today
             }
         }
-        .padding(.horizontal, Spacing.md)
+        .flashPageGutter()
         .padding(.vertical, 10)
     }
 
@@ -167,13 +167,13 @@ public struct CalendarView: View {
                 selectedDate = today
             }
         }
-        .padding(.horizontal, Spacing.md)
+        .flashPageGutter()
         .padding(.vertical, 10) // 头部纵向内距：紧凑特调值（无对应令牌）
     }
 
     private var weekdayHeader: some View {
         HStack(spacing: usesAccessibleLayout ? Spacing.xxs : nil) {
-            ForEach(["一", "二", "三", "四", "五", "六", "日"], id: \.self) { day in
+            ForEach([L("一"), L("二"), L("三"), L("四"), L("五"), L("六"), L("日")], id: \.self) { day in
                 Text(day)
                     .font(Typography.caption)
                     .foregroundStyle(.secondary)
@@ -181,7 +181,7 @@ public struct CalendarView: View {
                            maxWidth: usesAccessibleLayout ? accessibleDayWidth : .infinity)
             }
         }
-        .padding(.horizontal, Spacing.md)
+        .flashPageGutter()
         .padding(.bottom, 6) // 表头与网格的紧凑间距
     }
 
@@ -193,7 +193,7 @@ public struct CalendarView: View {
                 dayCell(date, aggregates: aggregates)
             }
         }
-        .padding(.horizontal, Spacing.md)
+        .flashPageGutter()
         .id(displayedMonth)
         .transition(monthTransition)
         .animation(reduceMotion ? Motion.reducedFade(true) : Motion.emphasize(false),
@@ -223,7 +223,7 @@ public struct CalendarView: View {
                 Text("这一天没有记录").foregroundStyle(.secondary)
             }
         }
-        .padding(Spacing.md)
+        .padding(Spacing.card)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
@@ -299,8 +299,8 @@ public struct CalendarView: View {
                 Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(task.isCompleted ? "标记为未完成" : "标记为完成")
-            .help(task.isCompleted ? "标记为未完成" : "标记为完成")
+            .accessibilityLabel(task.isCompleted ? L("标记为未完成") : L("标记为完成"))
+            .help(task.isCompleted ? L("标记为未完成") : L("标记为完成"))
             VStack(alignment: .leading, spacing: 2) { // 2：标题与备注的极小间距
                 Text(task.title).strikethrough(task.isCompleted)
                 if let notes = task.notes, !notes.isEmpty {
@@ -346,14 +346,14 @@ public struct CalendarView: View {
                 do {
                     try await TaskReminderScheduler.shared.schedule(task)
                     if warnPastReminder, TaskReminderScheduler.hasPastReminder(task) {
-                        message = "任务已保存，但提醒时间已过，将不会提醒"
+                        message = L("任务已保存，但提醒时间已过，将不会提醒")
                     }
                 } catch {
-                    message = "任务已保存，但系统提醒未启用"
+                    message = L("任务已保存，但系统提醒未启用")
                 }
             }
         } catch {
-            message = "任务保存失败，请重试"
+            message = L("任务保存失败，请重试")
         }
     }
 
@@ -363,7 +363,7 @@ public struct CalendarView: View {
             try repository.deleteTask(id: task.id)
             Task { await TaskReminderScheduler.shared.cancel(task.id) }
         } catch {
-            message = "任务删除失败，请重试"
+            message = L("任务删除失败，请重试")
         }
     }
 
@@ -371,7 +371,7 @@ public struct CalendarView: View {
         do { try repository?.setLogFavorite(id: log.id, !(log.isFavorite ?? false)) }
         catch {
             FlashLog.failure("favorite_toggle_failed", error)
-            message = "操作失败，请重试"
+            message = L("操作失败，请重试")
         }
     }
 

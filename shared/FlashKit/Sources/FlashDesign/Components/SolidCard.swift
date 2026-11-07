@@ -13,14 +13,29 @@ import FlashCore
 /// 圆角默认 24（常规卡片），焦点卡片 / 底部面板传 `Radius.focus`（32）。
 public struct SolidCard<Content: View>: View {
     public let cornerRadius: CGFloat
+    /// 主卡片的撕开毛边（iOS）；决定形状的种子同时让每张卡的起伏不同
+    public let seed: String
+    public let frayed: Bool
     private let content: Content
 
-    public init(cornerRadius: CGFloat = Radius.card, @ViewBuilder content: () -> Content) {
+    public init(cornerRadius: CGFloat = Radius.card, seed: String = "card", frayed: Bool = false,
+                @ViewBuilder content: () -> Content) {
         self.cornerRadius = cornerRadius
+        self.seed = seed
+        self.frayed = frayed
         self.content = content()
     }
 
     public var body: some View {
+        #if os(iOS)
+        let shape = PaperCardShape(seed: seed, cornerRadius: cornerRadius, frayed: frayed)
+        content
+            .background { shape.fill(BrandColors.cardSurface) }
+            .overlay { shape.stroke(BrandColors.weakBorder, lineWidth: 0.75) }
+            .clipShape(shape)
+            // 长而弥散的暖影：纸张微微浮在桌面上
+            .flashCardShadow()
+        #else
         content
             .background {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
@@ -28,20 +43,11 @@ public struct SolidCard<Content: View>: View {
             }
             .overlay {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .strokeBorder(BrandColors.weakBorder, lineWidth: borderWidth)
+                    .strokeBorder(BrandColors.weakBorder, lineWidth: 0.5)
             }
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-            #if os(iOS)
-            // 暖调手作：纸卡的柔和暖影
-            .flashCardShadow()
-            #endif
+        #endif
     }
-
-    #if os(iOS)
-    private let borderWidth: CGFloat = 0.75
-    #else
-    private let borderWidth: CGFloat = 0.5
-    #endif
 }
 
 #Preview {
@@ -54,7 +60,7 @@ public struct SolidCard<Content: View>: View {
                 .font(Typography.secondary)
                 .foregroundStyle(BrandColors.textSecondary)
         }
-        .padding(Spacing.md)
+        .padding(Spacing.card)
     }
     .padding(Spacing.lg)
     .flashPageBackground()

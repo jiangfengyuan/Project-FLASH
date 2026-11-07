@@ -128,7 +128,7 @@ struct RootView: View {
     private func drainCaptureInbox() {
         guard let repository else { return }
         let imported = CaptureInboxImporter.drain(.shared, into: repository)
-        if imported > 0 { inboxToast = FlashToast("✓ 已收入 \(imported) 条分享内容") }
+        if imported > 0 { inboxToast = FlashToast(L("✓ 已收入 \(imported) 条分享内容")) }
     }
 
     private func refreshIdeaReminders() {

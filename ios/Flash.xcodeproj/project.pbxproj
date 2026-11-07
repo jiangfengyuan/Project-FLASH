@@ -13,6 +13,7 @@
 		FB00000000000000000000B4 /* FlashDesign in Frameworks */ = {isa = PBXBuildFile; productRef = FB00000000000000000000B2 /* FlashDesign */; };
 		FB00000000000000000000B5 /* FlashWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FB0000000000000000000032 /* FlashWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		FB00000000000000000000C2 /* FlashCore in Frameworks */ = {isa = PBXBuildFile; productRef = FB00000000000000000000C5 /* FlashCore */; };
+		FB00000000000000000000E1 /* FlashDesign in Frameworks */ = {isa = PBXBuildFile; productRef = FB00000000000000000000E2 /* FlashDesign */; };
 		FB00000000000000000000C3 /* FlashShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FB00000000000000000000C0 /* FlashShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
@@ -96,6 +97,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FB00000000000000000000C2 /* FlashCore in Frameworks */,
+				FB00000000000000000000E1 /* FlashDesign in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -245,6 +247,7 @@
 			name = FlashShareExtension;
 			packageProductDependencies = (
 				FB00000000000000000000C5 /* FlashCore */,
+				FB00000000000000000000E2 /* FlashDesign */,
 			);
 			productName = FlashShareExtension;
 			productReference = FB00000000000000000000C0 /* FlashShareExtension.appex */;
@@ -682,6 +685,10 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		FB00000000000000000000E2 /* FlashDesign */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = FlashDesign;
+		};
 		FB00000000000000000000C5 /* FlashCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = FlashCore;

@@ -164,8 +164,11 @@ public struct EmotionView: View {
                  : AnyLayout(HStackLayout(spacing: 10))) {
                     TextField("想说点什么？（可选）", text: $note)
                         .textFieldStyle(.roundedBorder)
-                    Button("记录情绪") { save() }
+                    Button { save() } label: {
+                        Text("记录情绪").foregroundStyle(BrandColors.onBrandPrimary)
+                    }
                         .buttonStyle(.borderedProminent)
+                        .tint(BrandColors.brandPrimary)
                         .controlSize(.large)
                 }
                 .frame(maxWidth: 420) // 输入行最大宽度（几何值）
@@ -229,7 +232,7 @@ public struct EmotionView: View {
         let noteValue = note.isEmpty ? nil : note
         // 契约上限（与首页/菜单栏伴侣/日志/任务编辑统一口径）：超限可见提示、不入库
         guard TextLimits.fits(note) else {
-            errorMessage = "内容超出 \(TextLimits.maxContentUTF16) 字上限，请删减后再保存"
+            errorMessage = L("内容超出 \(TextLimits.maxContentUTF16) 字上限，请删减后再保存")
             return
         }
         // 包一层动画，让下方历史列表对新增记录做柔和的插入过渡
@@ -244,7 +247,7 @@ public struct EmotionView: View {
             } catch {
                 // 固定文案，详情仅输出到控制台，避免向用户暴露内部路径
                 FlashLog.failure("emotion_save_failed", error)
-                errorMessage = "保存失败，请重试"
+                errorMessage = L("保存失败，请重试")
             }
         }
     }
@@ -270,7 +273,7 @@ private struct EmotionWeekView: View {
             .map { (date: $0.0, average: $0.1) }
     }
 
-    private static let weekdaySymbols = ["日", "一", "二", "三", "四", "五", "六"]
+    private static let weekdaySymbols = [L("日"), L("一"), L("二"), L("三"), L("四"), L("五"), L("六")]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) { // 10：标题行与卡片的紧凑节奏（无对应令牌）
@@ -298,7 +301,7 @@ private struct EmotionWeekView: View {
                                 value: contentAppeared
                             )
                     }
-                    .padding(Spacing.md)
+                    .padding(Spacing.card)
                 }
             } else {
                 Text("本周还没有情绪记录，从上方开始吧")
@@ -342,15 +345,15 @@ private struct EmotionWeekView: View {
         let values = daily.compactMap(\.average)
         guard !values.isEmpty else { return "" }
         let mean = values.reduce(0, +) / Double(values.count)
-        if mean > 0.5 { return "多数积极" }
-        if mean < -0.5 { return "整体偏低落，记得照顾自己" }
-        return "整体平稳"
+        if mean > 0.5 { return L("多数积极") }
+        if mean < -0.5 { return L("整体偏低落，记得照顾自己") }
+        return L("整体平稳")
     }
 
     private func weekdayLabel(_ day: String) -> String {
         guard let date = DateFormatting.parseDay(day) else { return "" }
         let weekday = Calendar(identifier: .gregorian).component(.weekday, from: date)
-        return "周" + Self.weekdaySymbols[weekday - 1]
+        return L("周") + Self.weekdaySymbols[weekday - 1]
     }
 }
 
@@ -402,7 +405,7 @@ private struct EmotionHistoryView: View {
                         do { try repository?.deleteEmotion(id: record.id) }
                         catch {
                             FlashLog.failure("emotion_delete_failed", error)
-                            errorMessage = "删除失败，请重试"
+                            errorMessage = L("删除失败，请重试")
                         }
                     }
                 }
@@ -448,15 +451,15 @@ private struct EmotionHistoryView: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .help(record.isFavorite == true ? "取消收藏" : "收藏")
-            .accessibilityLabel(record.isFavorite == true ? "取消收藏" : "收藏")
+            .help(record.isFavorite == true ? L("取消收藏") : L("收藏"))
+            .accessibilityLabel(record.isFavorite == true ? L("取消收藏") : L("收藏"))
             Text(record.recordDate).font(Typography.caption).foregroundStyle(.secondary)
         }
         .padding(10) // 行内边距：紧凑特调值（无对应令牌）
         .background(BrandColors.cardSurface)
         .clipShape(RoundedRectangle(cornerRadius: Radius.field))
         .contextMenu {
-            Button(record.isFavorite == true ? "取消收藏" : "收藏") { toggleFavorite(record) }
+            Button(record.isFavorite == true ? L("取消收藏") : L("收藏")) { toggleFavorite(record) }
             Button("删除", role: .destructive) { deletingRecord = record }
         }
     }
@@ -479,7 +482,7 @@ private struct EmotionHistoryView: View {
         do { try repository?.setEmotionFavorite(id: record.id, !(record.isFavorite ?? false)) }
         catch {
             FlashLog.failure("favorite_toggle_failed", error)
-            errorMessage = "操作失败，请重试"
+            errorMessage = L("操作失败，请重试")
         }
     }
 
@@ -497,6 +500,12 @@ private struct EmotionHistoryView: View {
 /// 七级情绪调色板的连续插值：light/dark 双变体分别线性插值，
 /// 保证明暗外观下色彩过渡都无断层。
 private enum EmotionPalette {
+    #if os(iOS)
+    private static let inkHex = PaperPalette.textPrimary.light
+    #else
+    private static let inkHex = "#2D3436"
+    #endif
+
     /// value 连续（1...7），返回相邻两级之间的插值色
     static func color(for value: Double) -> Color {
         let (light, dark) = pair(for: value)
@@ -508,7 +517,7 @@ private enum EmotionPalette {
     /// 深色变体本身为浅粉彩色，深底可读，保持原值。
     static func textColor(for value: Double) -> Color {
         let (light, dark) = pair(for: value)
-        return BrandColors.dynamic(light: lerpHex(light, "#2D3436", 0.55), dark: dark)
+        return BrandColors.dynamic(light: lerpHex(light, inkHex, 0.55), dark: dark)
     }
 
     /// value 连续（1...7），返回相邻两级插值后的 (light, dark) hex

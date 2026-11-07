@@ -59,13 +59,13 @@ public struct ExploreFilterPanel: View {
                     Text("日期范围")
                         .font(Typography.secondary)
                         .foregroundStyle(BrandColors.textSecondary)
-                    OptionalDateRow(title: "开始日期", date: $criteria.startDate)
-                    OptionalDateRow(title: "结束日期", date: $criteria.endDate)
+                    OptionalDateRow(title: L("开始日期"), date: $criteria.startDate)
+                    OptionalDateRow(title: L("结束日期"), date: $criteria.endDate)
                 }
-                .padding(Spacing.md)
+                .padding(Spacing.card)
             }
         }
-        .padding(Spacing.md)
+        .padding(Spacing.card)
         .flashPanelWidth(280) // 浮层固有宽度（几何值，仅 macOS）
         // popover 浮层：玻璃背景（macOS 26+ Liquid Glass / 15 回退 regularMaterial + 细边框）
         .flashGlassBackground(in: RoundedRectangle(cornerRadius: Radius.panel, style: .continuous))

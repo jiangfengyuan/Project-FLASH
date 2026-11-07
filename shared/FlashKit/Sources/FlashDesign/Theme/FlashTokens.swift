@@ -21,6 +21,18 @@ public enum Spacing {
     public static let lg: CGFloat = 24
     public static let xl: CGFloat = 32
     public static let xxl: CGFloat = 48
+    #if os(iOS)
+    /// 纸上书写：页面边距较通行的 16 宽 25%（最大字号档位由 flashPageGutter 退回 16）
+    public static let page: CGFloat = 20
+    /// 卡片内边距
+    public static let card: CGFloat = 20
+    /// 列表行卡内边距
+    public static let row: CGFloat = 16
+    #else
+    public static let page: CGFloat = 16
+    public static let card: CGFloat = 16
+    public static let row: CGFloat = 14
+    #endif
 }
 
 /// 圆角梯度（品牌标准 §31 Shape System：Small 12–16 / Card 20–24 / Hero 28–32）
@@ -30,7 +42,7 @@ public enum Radius {
     /// 小控件（侧栏选中胶囊）
     public static let control: CGFloat = 6
     #if os(iOS)
-    // iOS 暖调手作主题：触屏卡片更圆润，贴近手作纸卡的柔和边角
+    // 纸上书写：触屏卡片更圆润，贴近手作纸卡的柔和边角
     public static let field: CGFloat = 12
     public static let row: CGFloat = 16
     public static let panel: CGFloat = 14
@@ -68,29 +80,39 @@ public enum Metrics {
 /// 必须固定基准尺寸的展示字形（hero emoji、图标、PIN）走 `View.scaledSystemFont`（@ScaledMetric）。
 public enum Typography {
     #if os(iOS)
-    // iOS 暖调手作主题：展示性标题用随包的霞鹜文楷（OFL，只含 GB2312 常用字，
-    // 缺字由系统回退到苹方），正文与控件仍是系统字体（品牌标准 §04 / §08）。
+    // 纸上书写（品牌标准 §08）：中文展示性标题用随包的霞鹜文楷（OFL，GB2312 子集）；
+    // 其他语言该子集覆盖不足，用系统衬线。正文与控件仍是系统字体。
     // 扩展（小组件、分享）未打包字体，Font.custom 自动回退系统字体。
 
     /// 随包手写感展示字体的 PostScript 名（app/ios/Flash/Fonts/LXGWWenKai-Medium.ttf）
     public static let displayFontName = "LXGWWenKai-Medium"
 
+    /// 当前界面语言是否用霞鹜文楷（只取一次：改系统语言会重启进程）
+    public static let usesBundledDisplayFont =
+        Bundle.main.preferredLocalizations.first?.hasPrefix("zh") ?? true
+
     /// 页面大标题（此刻问候 / 回顾 / 设置）
-    public static let pageTitle = Font.custom(displayFontName, size: 34, relativeTo: .largeTitle)
+    public static let pageTitle = display(.largeTitle)
     /// 欢迎页标题
-    public static let heroTitle = Font.custom(displayFontName, size: 28, relativeTo: .title)
+    public static let heroTitle = display(.title)
     /// 页面/面板区块标题（记录页标题、任务编辑器、LAN 面板）
-    public static let sectionTitle = Font.custom(displayFontName, size: 22, relativeTo: .title2)
+    public static let sectionTitle = display(.title2)
     /// 统计数值：New York 衬线数字，带一点印刷的温度
     public static let statValue = Font.system(.title3, design: .serif).bold()
     /// 大号统计数值（回顾 / 记忆页的主数字）
     public static let statValueLarge = Font.system(.title2, design: .serif).bold()
     /// 卡片内区块标题（本周趋势、近期记录……）：手写感展示字体
-    public static let blockTitle = Font.custom(displayFontName, size: 18, relativeTo: .headline)
+    public static let blockTitle = display(.headline)
+    /// 单行关键摘录（Memory 亮点等），同样只用于短文本
+    public static let quote = display(.body)
+    /// 正文额外行距：约 1.5 倍行高的阅读节奏
+    public static let bodyLineSpacing: CGFloat = 5
 
-    /// 短标题（≤ 12 字，如「最近闪念」）用手写感展示字体，按给定文本样式缩放
+    /// 短标题（如「最近闪念」）用展示字体，按给定文本样式缩放
     public static func display(_ style: Font.TextStyle) -> Font {
-        Font.custom(displayFontName, size: displaySize(style), relativeTo: style)
+        usesBundledDisplayFont
+            ? Font.custom(displayFontName, size: displaySize(style), relativeTo: style)
+            : Font.system(style, design: .serif).weight(.semibold)
     }
 
     private static func displaySize(_ style: Font.TextStyle) -> CGFloat {
@@ -121,6 +143,8 @@ public enum Typography {
     public static let statValueLarge = Font.title2.bold()
     /// 卡片内区块标题（本周趋势、近期记录……）
     public static let blockTitle = Font.headline
+    public static let quote = Font.body
+    public static let bodyLineSpacing: CGFloat = 0
 
     /// 短标题：macOS 沿用系统字体加粗
     public static func display(_ style: Font.TextStyle) -> Font {
@@ -197,10 +221,10 @@ public enum Shadow {
     }
 
     #if os(iOS)
-    /// 柔和卡片阴影（暖褐色、更散，像纸卡轻放在桌面）
-    public static let card = Spec(radius: 12, y: 4, opacity: 0.07, darkOpacity: 0.28)
+    /// 长而弥散的卡片阴影（暖褐色，纸张微微浮在桌面上）
+    public static let card = Spec(radius: 28, y: 12, opacity: 0.08, darkOpacity: 0.34)
     /// 悬浮层阴影（Toast、浮层面板）
-    public static let elevated = Spec(radius: 16, y: 8, opacity: 0.12, darkOpacity: 0.34)
+    public static let elevated = Spec(radius: 36, y: 16, opacity: 0.12, darkOpacity: 0.42)
     #else
     /// 柔和卡片阴影
     public static let card = Spec(radius: 8, y: 2, opacity: 0.06, darkOpacity: 0.25)
@@ -210,14 +234,37 @@ public enum Shadow {
 }
 
 extension View {
+    /// 页面左右边距：iOS 20，最大字号档位退回 16 避免裁切；macOS 16
+    public func flashPageGutter() -> some View {
+        modifier(PageGutterModifier())
+    }
+
     /// 柔和卡片阴影（Shadow.card）
     public func flashCardShadow() -> some View {
         modifier(FlashShadowModifier(spec: Shadow.card))
     }
 
+    /// 只在 macOS 叠加卡片阴影（iOS 纸卡的阴影已在 flashPaperCard 内）
+    @ViewBuilder
+    public func flashMacCardShadow() -> some View {
+        #if os(iOS)
+        self
+        #else
+        flashCardShadow()
+        #endif
+    }
+
     /// 悬浮层阴影（Shadow.elevated）
     public func flashElevatedShadow() -> some View {
         modifier(FlashShadowModifier(spec: Shadow.elevated))
+    }
+}
+
+private struct PageGutterModifier: ViewModifier {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    func body(content: Content) -> some View {
+        content.padding(.horizontal, dynamicTypeSize.isAccessibilitySize ? Spacing.md : Spacing.page)
     }
 }
 

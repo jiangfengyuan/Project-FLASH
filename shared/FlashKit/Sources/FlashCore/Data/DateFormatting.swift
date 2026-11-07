@@ -37,8 +37,14 @@ public enum DateFormatting: Sendable {
     private static let monthTitleFormatter: DateFormatter = {
         let f = DateFormatter()
         f.calendar = Calendar(identifier: .gregorian)
+        #if os(iOS)
+        // 只用于显示：跟随界面语言（存储用的日期格式固定 en_US_POSIX）
+        f.locale = Locale(identifier: Bundle.main.preferredLocalizations.first ?? "en")
+        f.setLocalizedDateFormatFromTemplate("yMMMM")
+        #else
         f.locale = Locale(identifier: "zh_CN")
         f.dateFormat = "yyyy年M月"
+        #endif
         return f
     }()
 

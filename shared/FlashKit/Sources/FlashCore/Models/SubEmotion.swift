@@ -12,9 +12,9 @@ public enum SubEmotion: String, CaseIterable, Codable, Sendable {
 
     public var displayName: String {
         switch self {
-        case .sad: "伤心"
-        case .angry: "生气"
-        case .uncomfortable: "难受"
+        case .sad: L("伤心")
+        case .angry: L("生气")
+        case .uncomfortable: L("难受")
         }
     }
 

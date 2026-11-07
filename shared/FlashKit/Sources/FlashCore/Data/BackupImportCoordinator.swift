@@ -127,8 +127,8 @@ public enum BackupImportCoordinator {
             return .importedRemindersFailed
         }
         let skipped = preview.skippedLogs + preview.skippedEmotions + preview.skippedTasks
-        var message = "已导入 \(preview.logCount) 条日志、\(preview.emotionCount) 条情绪、\(preview.taskCount) 个任务"
-        if skipped > 0 { message += "（跳过异常数据 \(skipped) 条）" }
+        var message = L("已导入 \(preview.logCount) 条日志、\(preview.emotionCount) 条情绪、\(preview.taskCount) 个任务")
+        if skipped > 0 { message += L("（跳过异常数据 \(skipped) 条）") }
         return .imported(message: message, hasSkipped: skipped > 0)
     }
 
@@ -136,18 +136,18 @@ public enum BackupImportCoordinator {
 
     /// 导入预览弹窗正文：条目数、跳过数与三分区差异
     public static func analysisText(_ preview: ImportPreview) -> String {
-        var text = "包含 \(preview.logCount) 条日志、\(preview.emotionCount) 条情绪、\(preview.taskCount) 个任务"
+        var text = L("包含 \(preview.logCount) 条日志、\(preview.emotionCount) 条情绪、\(preview.taskCount) 个任务")
         let skipped = preview.skippedLogs + preview.skippedEmotions + preview.skippedTasks
-        if skipped > 0 { text += "\n跳过异常数据 \(skipped) 条" }
+        if skipped > 0 { text += L("\n跳过异常数据 \(skipped) 条") }
         if let difference = preview.difference {
-            text += "\n\n差异分析"
-            text += "\n日志：新增 \(difference.logs.added) · 修改 \(difference.logs.changed)" +
-                " · 相同 \(difference.logs.unchanged) · 仅本机 \(difference.logs.localOnly)"
-            text += "\n情绪：新增 \(difference.emotions.added) · 修改 \(difference.emotions.changed)" +
-                " · 相同 \(difference.emotions.unchanged) · 仅本机 \(difference.emotions.localOnly)"
-            text += "\n任务：新增 \(difference.tasks.added) · 修改 \(difference.tasks.changed)" +
-                " · 相同 \(difference.tasks.unchanged) · 仅本机 \(difference.tasks.localOnly)"
-            text += "\n\n差异合并会新增或更新接收数据，并保留仅本机数据；覆盖会先清空本机数据。"
+            text += L("\n\n差异分析")
+            text += L("\n日志：新增 \(difference.logs.added) · 修改 \(difference.logs.changed)") +
+                L(" · 相同 \(difference.logs.unchanged) · 仅本机 \(difference.logs.localOnly)")
+            text += L("\n情绪：新增 \(difference.emotions.added) · 修改 \(difference.emotions.changed)") +
+                L(" · 相同 \(difference.emotions.unchanged) · 仅本机 \(difference.emotions.localOnly)")
+            text += L("\n任务：新增 \(difference.tasks.added) · 修改 \(difference.tasks.changed)") +
+                L(" · 相同 \(difference.tasks.unchanged) · 仅本机 \(difference.tasks.localOnly)")
+            text += L("\n\n差异合并会新增或更新接收数据，并保留仅本机数据；覆盖会先清空本机数据。")
         }
         return text
     }

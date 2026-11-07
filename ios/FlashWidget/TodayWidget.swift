@@ -97,7 +97,7 @@ struct FlashTodayView: View {
                     .foregroundStyle(.secondary)
             } else {
                 Text("\(entry.logCount)")
-                    .font(.system(.largeTitle, design: .rounded, weight: .bold))
+                    .font(.system(.largeTitle, design: .serif, weight: .bold))
                     .contentTransition(.numericText())
                     .widgetAccentable()
                 Text("今日记录")
@@ -113,8 +113,8 @@ struct FlashTodayView: View {
     }
 
     private var secondaryLine: String {
-        if entry.unreadIdeaCount >= IdeaReminder.threshold { return "\(entry.unreadIdeaCount) 个想法待梳理" }
-        return "\(entry.openTaskCount) 项待办"
+        if entry.unreadIdeaCount >= IdeaReminder.threshold { return L("\(entry.unreadIdeaCount) 个想法待梳理") }
+        return L("\(entry.openTaskCount) 项待办")
     }
 
     private var medium: some View {
@@ -123,16 +123,16 @@ struct FlashTodayView: View {
                 header
                 Spacer(minLength: 0)
                 HStack(alignment: .firstTextBaseline, spacing: Spacing.md) {
-                    stat(entry.logCount, "今日记录")
-                    stat(entry.openTaskCount, "待办")
+                    stat(entry.logCount, L("今日记录"))
+                    stat(entry.openTaskCount, L("待办"))
                     if entry.unreadIdeaCount > 0 {
-                        stat(entry.unreadIdeaCount, "待梳理")
+                        stat(entry.unreadIdeaCount, L("待梳理"))
                     }
                 }
             }
             VStack(spacing: Spacing.xs) {
-                captureLink("灵感", systemImage: "lightbulb", category: .idea, tint: BrandColors.ideaYellow)
-                captureLink("日志", systemImage: "square.and.pencil", category: .log, tint: BrandColors.logPurple)
+                captureLink(L("灵感"), systemImage: "lightbulb", category: .idea, tint: BrandColors.ideaYellow)
+                captureLink(L("日志"), systemImage: "square.and.pencil", category: .log, tint: BrandColors.logPurple)
             }
             .frame(width: 104) // 记录按钮列宽（几何值）
         }
@@ -141,7 +141,7 @@ struct FlashTodayView: View {
     private func stat(_ value: Int, _ label: String) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             Text("\(value)")
-                .font(.system(.title, design: .rounded, weight: .bold))
+                .font(.system(.title, design: .serif, weight: .bold))
                 .widgetAccentable()
             Text(label)
                 .font(.caption2)
@@ -191,7 +191,7 @@ struct FlashLockScreenView: View {
                 AccessoryWidgetBackground()
                 VStack(spacing: 0) {
                     Text("\(entry.logCount)")
-                        .font(.system(.title2, design: .rounded, weight: .bold))
+                        .font(.system(.title2, design: .serif, weight: .bold))
                         .widgetAccentable()
                     Text("记录").font(.caption2)
                 }

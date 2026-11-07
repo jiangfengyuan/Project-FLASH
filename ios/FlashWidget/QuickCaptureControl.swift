@@ -6,6 +6,7 @@
 
 import AppIntents
 import SwiftUI
+import FlashCore
 import WidgetKit
 
 /// 控制中心 / 锁屏 / 操作按钮「快速记录」控件（iOS 版全局热键）：

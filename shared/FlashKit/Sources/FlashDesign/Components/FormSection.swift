@@ -40,7 +40,7 @@ public struct FormSection<Content: View>: View {
                 .font(Typography.secondary)
                 .foregroundStyle(BrandColors.textSecondary)
         }
-        .padding(Spacing.md)
+        .padding(Spacing.card)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
     .padding(Spacing.lg)
@@ -48,7 +48,7 @@ public struct FormSection<Content: View>: View {
 }
 
 extension View {
-    /// 系统 Form / List 分组行的底色：iOS 暖调手作主题用纸白卡面（替代系统冷灰白），macOS 保持系统默认。
+    /// 系统 Form / List 分组行的底色：iOS 纸上书写用纸白卡面（替代系统冷灰白），macOS 保持系统默认。
     /// 加在 Form 内包住各 Section 的 Group 上：Group 会把它分发给每个 Section 的行。
     @ViewBuilder
     public func flashFormRowBackground() -> some View {

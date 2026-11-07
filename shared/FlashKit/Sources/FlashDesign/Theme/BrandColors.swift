@@ -31,11 +31,11 @@ public enum BrandColors {
     public static let systemControlBackground = Color(uiColor: .secondarySystemBackground)
     #endif
 
-    /// 平台语义色：破坏性/错误提示红。macOS systemRed ↔ iOS systemRed
+    /// 破坏性/错误提示红。macOS systemRed；iOS 用纸面上达标的低饱和砖红
     #if canImport(AppKit)
     public static let destructive = Color(nsColor: .systemRed)
     #else
-    public static let destructive = Color(uiColor: .systemRed)
+    public static let destructive = dynamic(light: PaperPalette.destructive.light, dark: PaperPalette.destructive.dark)
     #endif
 
     /// 平台语义色：选中内容底（日历选中日）。macOS selectedContentBackgroundColor ↔ iOS tintColor 同系
@@ -49,7 +49,7 @@ public enum BrandColors {
     #if canImport(AppKit)
     public static let systemSeparator = Color(nsColor: .separatorColor)
     #else
-    public static let systemSeparator = Color(uiColor: .separator)
+    public static let systemSeparator = dynamic(light: PaperPalette.weakBorder.light, dark: PaperPalette.weakBorder.dark)
     #endif
 
     /// light/dark 双 hex 的动态色（spec §10.4 三变体中的前两个；
@@ -72,30 +72,35 @@ public enum BrandColors {
     public static func emotionColor(_ level: EmotionLevel) -> Color { level.color }
 
     #if os(iOS)
-    // MARK: - iOS「暖调手作」主题（色值见 WarmPalette；macOS 保持下方品牌标准原值）
+    // MARK: - iOS「纸上书写」（色值见 PaperPalette；macOS 保持下方品牌标准原值）
 
-    private static func warm(_ pair: WarmPalette.Pair) -> Color {
+    private static func paper(_ pair: PaperPalette.Pair) -> Color {
         dynamic(light: pair.light, dark: pair.dark)
     }
 
-    public static let logPurple = warm(WarmPalette.logPurple)
-    public static let ideaYellow = warm(WarmPalette.ideaYellow)
-    public static let ideaYellowText = warm(WarmPalette.ideaYellowText)
-    public static let calendarGreen = warm(WarmPalette.calendarGreen)
-    public static let emotionPink = warm(WarmPalette.emotionPink)
-    public static let pageBackground = warm(WarmPalette.pageBackground)
-    public static let cardSurface = warm(WarmPalette.cardSurface)
-    public static let weakSurface = warm(WarmPalette.weakSurface)
-    public static let weakBorder = warm(WarmPalette.weakBorder)
-    public static let chipSelectedBackground = warm(WarmPalette.chipSelectedBackground)
-    public static let chipSelectedForeground = warm(WarmPalette.chipSelectedForeground)
-    public static let textPrimary = warm(WarmPalette.textPrimary)
-    public static let textSecondary = warm(WarmPalette.textSecondary)
-    public static let brandPrimary = warm(WarmPalette.brandPrimary)
-    public static let onBrandPrimary = warm(WarmPalette.onBrandPrimary)
-    public static let accessibleGreen = warm(WarmPalette.accessibleGreen)
-    /// 阴影色：浅色暖褐、深色黑（不透明度由 Shadow 令牌控制）
-    public static let shadowTint = warm(WarmPalette.shadowTint)
+    public static let logPurple = paper(PaperPalette.logPurple)
+    public static let ideaYellow = paper(PaperPalette.ideaYellow)
+    public static let ideaYellowText = paper(PaperPalette.ideaYellowText)
+    public static let calendarGreen = paper(PaperPalette.calendarGreen)
+    public static let emotionPink = paper(PaperPalette.emotionPink)
+    public static let emotionPinkText = paper(PaperPalette.emotionPinkText)
+    public static let pageBackground = paper(PaperPalette.pageBackground)
+    public static let cardSurface = paper(PaperPalette.cardSurface)
+    public static let weakSurface = paper(PaperPalette.weakSurface)
+    public static let parchment = paper(PaperPalette.parchment)
+    public static let weakBorder = paper(PaperPalette.weakBorder)
+    public static let chipSelectedBackground = paper(PaperPalette.chipSelectedBackground)
+    public static let chipSelectedForeground = paper(PaperPalette.chipSelectedForeground)
+    public static let textPrimary = paper(PaperPalette.textPrimary)
+    public static let textSecondary = paper(PaperPalette.textSecondary)
+    public static let textTertiary = paper(PaperPalette.textTertiary)
+    public static let brandPrimary = paper(PaperPalette.brandPrimary)
+    public static let brandFill = paper(PaperPalette.brandFill)
+    public static let onBrandPrimary = paper(PaperPalette.onBrandPrimary)
+    public static let accessibleGreen = paper(PaperPalette.accessibleGreen)
+    /// 阴影色：暖褐（不透明度由 Shadow 令牌控制），任何外观都不用纯黑
+    public static let shadowTint = paper(PaperPalette.shadowTint)
+    public static let scrim = paper(PaperPalette.scrim)
     #else
     // MARK: - Home 此刻页模块强调色（Aero PRD，低饱和柔和色）
 
@@ -158,5 +163,12 @@ public enum BrandColors {
 
     /// 阴影色（不透明度由 Shadow 令牌控制）
     public static let shadowTint = Color.black
+    public static let scrim = Color.black
+
+    // 纸上书写新增令牌在 macOS 映射到现有基线，共用组件无需分支
+    public static let parchment = weakSurface
+    public static let textTertiary = textSecondary
+    public static let brandFill = brandPrimary
+    public static let emotionPinkText = emotionPink
     #endif
 }

@@ -82,6 +82,15 @@ public enum EmotionStats: Sendable {
 public enum ReviewWindow: String, CaseIterable, Identifiable, Sendable {
     case week = "本周", month = "本月", days30 = "近30天", days90 = "近90天"
     public var id: String { rawValue }
+    /// 界面标题（rawValue 是稳定键，不随语言变化）
+    public var title: String {
+        switch self {
+        case .week: L("本周")
+        case .month: L("本月")
+        case .days30: L("近30天")
+        case .days90: L("近90天")
+        }
+    }
     public func days(today: Date) -> Int {
         let calendar = Calendar(identifier: .gregorian)
         switch self {

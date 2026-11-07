@@ -10,7 +10,7 @@ import FlashCore
 import UIKit
 #endif
 
-// iOS「暖调手作」主题的手绘元素（品牌标准 §08）：略带起伏的线、两笔勾成的圈、纸张颗粒。
+// iOS「纸上书写」的手作元素（品牌标准 §08）：手绘线与圈、毛边、折叠信纸、便签、纸张颗粒。
 // 抖动由种子字符串决定（同一元素每次重绘形状一致，滚动时不会「抖」）；
 // macOS 下 FlashDivider / flashPageBackground 与原生 Divider / 纯色底完全等价。
 
@@ -136,7 +136,96 @@ public struct HandDrawnRing: View {
     }
 }
 
-/// 分隔线：iOS 为暖色手绘线，macOS 为系统 Divider
+/// 毛边线：比手绘线更碎、更短的起伏，像撕开的纸边。开放路径，只能描边
+public struct TornLine: Shape {
+    public var seed: String
+    public var amplitude: CGFloat
+    public var step: CGFloat
+
+    public init(seed: String, amplitude: CGFloat = 1.6, step: CGFloat = 7) {
+        self.seed = seed
+        self.amplitude = amplitude
+        self.step = step
+    }
+
+    public func path(in rect: CGRect) -> Path {
+        var jitter = SeededJitter(seed: seed)
+        var path = Path()
+        var x = rect.minX
+        path.move(to: CGPoint(x: x, y: rect.midY + jitter.next() * amplitude))
+        while x < rect.maxX {
+            x = min(rect.maxX, x + step * (0.7 + (jitter.next() + 1) * 0.3))
+            path.addLine(to: CGPoint(x: x, y: rect.midY + jitter.next() * amplitude))
+        }
+        return path
+    }
+}
+
+/// 纸卡外形：圆角矩形，边缘带极轻起伏；`frayed` 时底边是撕开的毛边。
+/// 形状由种子决定、重绘一致；只在布局变化时重算，列表滚动不受影响
+public struct PaperCardShape: Shape {
+    public var seed: String
+    public var cornerRadius: CGFloat
+    public var frayed: Bool
+    /// 三条光滑边的起伏幅度
+    public var wobble: CGFloat
+
+    public init(seed: String, cornerRadius: CGFloat, frayed: Bool = false, wobble: CGFloat = 0.6) {
+        self.seed = seed
+        self.cornerRadius = cornerRadius
+        self.frayed = frayed
+        self.wobble = wobble
+    }
+
+    public func path(in rect: CGRect) -> Path {
+        guard rect.width > 0, rect.height > 0 else { return Path() }
+        var jitter = SeededJitter(seed: seed)
+        let r = min(cornerRadius, min(rect.width, rect.height) / 2)
+        let (minX, minY, maxX, maxY) = (rect.minX, rect.minY, rect.maxX, rect.maxY)
+        var path = Path()
+
+        // 一条低频起伏的边：沿 start → end，法向偏移 ±wobble
+        func wavyEdge(to end: CGPoint, from start: CGPoint) {
+            let length = hypot(end.x - start.x, end.y - start.y)
+            let segments = max(1, Int(length / 48))
+            let (nx, ny) = length > 0 ? (-(end.y - start.y) / length, (end.x - start.x) / length) : (0, 0)
+            for index in 1...segments {
+                let t = CGFloat(index) / CGFloat(segments)
+                let target = CGPoint(x: start.x + (end.x - start.x) * t, y: start.y + (end.y - start.y) * t)
+                let midT = (CGFloat(index) - 0.5) / CGFloat(segments)
+                let offset = jitter.next() * wobble
+                let control = CGPoint(x: start.x + (end.x - start.x) * midT + nx * offset,
+                                      y: start.y + (end.y - start.y) * midT + ny * offset)
+                path.addQuadCurve(to: target, control: control)
+            }
+        }
+
+        path.move(to: CGPoint(x: minX + r, y: minY))
+        wavyEdge(to: CGPoint(x: maxX - r, y: minY), from: CGPoint(x: minX + r, y: minY))
+        path.addQuadCurve(to: CGPoint(x: maxX, y: minY + r), control: CGPoint(x: maxX, y: minY))
+        if frayed {
+            wavyEdge(to: CGPoint(x: maxX, y: maxY - 3), from: CGPoint(x: maxX, y: minY + r))
+            // 底边：短促不规则的撕口
+            var x = maxX
+            while x > minX {
+                x = max(minX, x - 7 * (0.7 + (jitter.next() + 1) * 0.3))
+                path.addLine(to: CGPoint(x: x, y: maxY - 2.4 + jitter.next() * 2.4))
+            }
+            wavyEdge(to: CGPoint(x: minX, y: minY + r), from: CGPoint(x: minX, y: maxY - 3))
+        } else {
+            wavyEdge(to: CGPoint(x: maxX, y: maxY - r), from: CGPoint(x: maxX, y: minY + r))
+            path.addQuadCurve(to: CGPoint(x: maxX - r, y: maxY), control: CGPoint(x: maxX, y: maxY))
+            wavyEdge(to: CGPoint(x: minX + r, y: maxY), from: CGPoint(x: maxX - r, y: maxY))
+            path.addQuadCurve(to: CGPoint(x: minX, y: maxY - r), control: CGPoint(x: minX, y: maxY))
+            wavyEdge(to: CGPoint(x: minX, y: minY + r), from: CGPoint(x: minX, y: maxY - r))
+        }
+        path.addQuadCurve(to: CGPoint(x: minX + r, y: minY), control: CGPoint(x: minX, y: minY))
+        path.closeSubpath()
+        return path
+    }
+}
+
+/// 分隔线：iOS 横向为毛边、纵向为手绘线；macOS 为系统 Divider
 public struct FlashDivider: View {
     public var seed: String
     public var axis: Axis
@@ -148,15 +237,134 @@ public struct FlashDivider: View {
 
     public var body: some View {
         #if os(iOS)
-        HandDrawnLine(seed: seed, amplitude: 0.8, axis: axis)
-            .stroke(BrandColors.weakBorder, style: StrokeStyle(lineWidth: 1.2, lineCap: .round))
-            .frame(width: axis == .vertical ? 3 : nil, height: axis == .horizontal ? 3 : nil)
-            .accessibilityHidden(true)
+        Group {
+            if axis == .horizontal {
+                TornLine(seed: seed)
+                    .stroke(BrandColors.weakBorder, style: StrokeStyle(lineWidth: 1.1, lineCap: .round, lineJoin: .round))
+            } else {
+                HandDrawnLine(seed: seed, amplitude: 0.8, axis: axis)
+                    .stroke(BrandColors.weakBorder, style: StrokeStyle(lineWidth: 1.2, lineCap: .round))
+            }
+        }
+        .frame(width: axis == .vertical ? 3 : nil, height: axis == .horizontal ? 4 : nil)
+        .accessibilityHidden(true)
         #else
         Divider()
         #endif
     }
 }
+
+#if os(iOS)
+/// 撕开的区块断口：一条窄窄的羊皮纸带，上下都是毛边
+public struct TornSectionBreak: View {
+    public var seed: String
+
+    public init(seed: String) { self.seed = seed }
+
+    public var body: some View {
+        ZStack {
+            PaperCardShape(seed: seed, cornerRadius: 1, frayed: true, wobble: 1)
+                .fill(BrandColors.parchment.opacity(0.55))
+            TornLine(seed: seed + "·top", amplitude: 1.2)
+                .stroke(BrandColors.weakBorder, style: StrokeStyle(lineWidth: 0.8, lineCap: .round))
+        }
+        .frame(height: 8)
+        .accessibilityHidden(true)
+    }
+}
+
+/// 折角：信纸右上角折起的小三角（从右到左时随布局翻转）
+private struct DogEar: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        path.closeSubpath()
+        return path
+    }
+}
+
+/// 按下时轻微下陷（拟物按压：缩小 + 内影），减弱动态时只有内影
+public struct PaperPressStyle: ButtonStyle {
+    public var cornerRadius: CGFloat
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    public init(cornerRadius: CGFloat = 999) { self.cornerRadius = cornerRadius }
+
+    public func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .overlay {
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(BrandColors.shadowTint.opacity(configuration.isPressed ? 0.10 : 0))
+                    .allowsHitTesting(false)
+            }
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.97 : 1)
+            .animation(Motion.quick(reduceMotion), value: configuration.isPressed)
+    }
+}
+
+private struct FoldedLetterModifier: ViewModifier {
+    let cornerRadius: CGFloat
+
+    func body(content: Content) -> some View {
+        content
+            .background {
+                // 折痕：一暗一亮两条细线，只作装饰，压在内容之下
+                GeometryReader { proxy in
+                    VStack(spacing: 0) {
+                        Rectangle().fill(BrandColors.shadowTint.opacity(0.07)).frame(height: 0.75)
+                        Rectangle().fill(BrandColors.cardSurface.opacity(0.8)).frame(height: 0.75)
+                    }
+                    .offset(y: proxy.size.height * 0.5)
+                }
+                .allowsHitTesting(false)
+            }
+            .overlay(alignment: .topTrailing) {
+                DogEar()
+                    .fill(BrandColors.parchment)
+                    .frame(width: 22, height: 22)
+                    .shadow(color: BrandColors.shadowTint.opacity(0.14), radius: 3, x: -1, y: 2)
+                    .flipsForRightToLeftLayoutDirection(true)
+                    .allowsHitTesting(false)
+            }
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .accessibilityElement(children: .contain)
+    }
+}
+
+private struct StickyStackModifier: ViewModifier {
+    let seed: String
+    let cornerRadius: CGFloat
+
+    func body(content: Content) -> some View {
+        var jitter = SeededJitter(seed: seed)
+        let angle = Double(jitter.next()) * 1.4
+        let dx = jitter.next() * 3
+        return content.background {
+            PaperCardShape(seed: seed + "·under", cornerRadius: cornerRadius, wobble: 1)
+                .fill(BrandColors.parchment.opacity(0.7))
+                .rotationEffect(.degrees(angle == 0 ? 1 : angle))
+                .offset(x: dx, y: 4)
+                .accessibilityHidden(true)
+        }
+    }
+}
+
+private struct VellumModifier<S: Shape>: ViewModifier {
+    let shape: S
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    func body(content: Content) -> some View {
+        content.background {
+            ZStack {
+                shape.fill(BrandColors.cardSurface.opacity(reduceTransparency ? 1 : 0.92))
+                shape.stroke(BrandColors.weakBorder, lineWidth: 0.75)
+            }
+        }
+    }
+}
+#endif
 
 extension View {
     /// 标题下的手绘下划线（iOS）；macOS 不绘制
@@ -178,7 +386,52 @@ extension View {
         #endif
     }
 
-    /// 页面底：iOS 为纸张底色 + 极淡颗粒；macOS 等价于 `.background(BrandColors.pageBackground)`
+    /// 纸卡容器：iOS 为带起伏的纸卡 + 细边 + 弥散暖影（frayed 时底边撕开）；macOS 为圆角实色卡
+    @ViewBuilder
+    public func flashPaperCard(seed: String, cornerRadius: CGFloat = Radius.card, frayed: Bool = false) -> some View {
+        #if os(iOS)
+        let shape = PaperCardShape(seed: seed, cornerRadius: cornerRadius, frayed: frayed)
+        self.background { shape.fill(BrandColors.cardSurface) }
+            .overlay { shape.stroke(BrandColors.weakBorder, lineWidth: 0.75) }
+            .clipShape(shape)
+            .flashCardShadow()
+        #else
+        self.background(BrandColors.cardSurface)
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+        #endif
+    }
+
+    /// 折叠信纸：折痕 + 折角（iOS）；macOS 不绘制
+    @ViewBuilder
+    public func flashFoldedLetter(cornerRadius: CGFloat = Radius.card) -> some View {
+        #if os(iOS)
+        modifier(FoldedLetterModifier(cornerRadius: cornerRadius))
+        #else
+        self
+        #endif
+    }
+
+    /// 叠放便签：身后错开一张羊皮纸底页（iOS）；macOS 不绘制
+    @ViewBuilder
+    public func flashStickyStack(seed: String, cornerRadius: CGFloat = Radius.row) -> some View {
+        #if os(iOS)
+        modifier(StickyStackModifier(seed: seed, cornerRadius: cornerRadius))
+        #else
+        self
+        #endif
+    }
+
+    /// 硫酸纸：浮动表面的半透明纸（≥ 92% 不透明，减弱透明度时不透明）；macOS 用卡面实色
+    @ViewBuilder
+    public func flashVellum<S: Shape>(in shape: S) -> some View {
+        #if os(iOS)
+        modifier(VellumModifier(shape: shape))
+        #else
+        self.background(shape.fill(BrandColors.cardSurface))
+        #endif
+    }
+
+    /// 页面底：iOS 为纸张底色 + 纤维颗粒；macOS 等价于 `.background(BrandColors.pageBackground)`
     @ViewBuilder
     public func flashPageBackground() -> some View {
         #if os(iOS)
@@ -190,16 +443,16 @@ extension View {
 }
 
 #if os(iOS)
-/// 纸张底：底色 + 平铺的确定性颗粒纹理（各外观一张 128pt 贴图，只生成一次）
+/// 纸张底：底色 + 平铺的纤维颗粒贴图（tools/design/generate_paper_assets.py 生成，三端同一张）
 private struct PaperBackground: View {
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         ZStack {
             BrandColors.pageBackground
-            Image(uiImage: colorScheme == .dark ? PaperGrain.dark : PaperGrain.light)
-                .resizable(resizingMode: .tile)
-                .opacity(colorScheme == .dark ? 0.03 : 0.045)
+            if let grain = colorScheme == .dark ? PaperGrain.dark : PaperGrain.light {
+                Image(uiImage: grain).resizable(resizingMode: .tile)
+            }
         }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
@@ -207,38 +460,14 @@ private struct PaperBackground: View {
 }
 
 private enum PaperGrain {
-    static let light = make(ink: UIColor(red: 0.23, green: 0.16, blue: 0.11, alpha: 1))
-    static let dark = make(ink: UIColor(white: 1, alpha: 1))
+    static let light = load("paper_grain_light")
+    static let dark = load("paper_grain_dark")
 
-    private static func make(ink: UIColor) -> UIImage {
-        let size = CGSize(width: 128, height: 128)
-        let format = UIGraphicsImageRendererFormat()
-        format.scale = 2
-        format.opaque = false
-        return UIGraphicsImageRenderer(size: size, format: format).image { context in
-            var jitter = SeededJitter(seed: "flash-paper")
-            let cg = context.cgContext
-            // 细颗粒
-            for _ in 0..<2200 {
-                let x = (jitter.next() + 1) / 2 * size.width
-                let y = (jitter.next() + 1) / 2 * size.height
-                let alpha = 0.25 + (jitter.next() + 1) / 2 * 0.75
-                cg.setFillColor(ink.withAlphaComponent(alpha).cgColor)
-                cg.fill(CGRect(x: x, y: y, width: 0.5, height: 0.5))
-            }
-            // 少量纤维短痕
-            cg.setLineWidth(0.35)
-            for _ in 0..<40 {
-                let x = (jitter.next() + 1) / 2 * size.width
-                let y = (jitter.next() + 1) / 2 * size.height
-                let angle = jitter.next() * .pi
-                let length = 2 + (jitter.next() + 1) * 2.5
-                cg.setStrokeColor(ink.withAlphaComponent(0.6).cgColor)
-                cg.move(to: CGPoint(x: x, y: y))
-                cg.addLine(to: CGPoint(x: x + cos(angle) * length, y: y + sin(angle) * length))
-                cg.strokePath()
-            }
-        }
+    /// 贴图 256px 对应 128pt
+    private static func load(_ name: String) -> UIImage? {
+        guard let url = Bundle.module.url(forResource: name, withExtension: "png"),
+              let data = try? Data(contentsOf: url) else { return nil }
+        return UIImage(data: data, scale: 2)
     }
 }
 #endif

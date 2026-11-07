@@ -21,15 +21,15 @@ public enum BackupError: Error, Equatable, Sendable {
 
     public var userMessage: String {
         switch self {
-        case .invalidJSON: "备份文件不是有效的 JSON 对象"
-        case .missingVersion: "备份版本不兼容：缺少 version 字段"
-        case .incompatibleVersion(let v): "备份版本不兼容：期望 flash-backup-v2 或 v1，实际 \(v)"
-        case .invalidArray(let name): "\(name) 必须是数组"
-        case .invalidObject(let name): "\(name) 必须是对象"
-        case .contract(let path): "\(path)：不符合备份契约，请检查文件或使用恢复入口"
-        case .fileTooLarge: "文件过大，不是有效的备份"
-        case .unsupportedTimeZone: "此设备不支持备份中的任务时区，请更新系统后重试；未导入任何数据"
-        case .temporaryStore: "本地数据库暂时无法打开，当前只有本次启动后的临时内容，不能导出或导入。原有数据未被改动，请完全退出 Flash 后重新打开再试"
+        case .invalidJSON: L("备份文件不是有效的 JSON 对象")
+        case .missingVersion: L("备份版本不兼容：缺少 version 字段")
+        case .incompatibleVersion(let v): L("备份版本不兼容：期望 flash-backup-v2 或 v1，实际 \(v)")
+        case .invalidArray(let name): L("\(name) 必须是数组")
+        case .invalidObject(let name): L("\(name) 必须是对象")
+        case .contract(let path): L("\(path)：不符合备份契约，请检查文件或使用恢复入口")
+        case .fileTooLarge: L("文件过大，不是有效的备份")
+        case .unsupportedTimeZone: L("此设备不支持备份中的任务时区，请更新系统后重试；未导入任何数据")
+        case .temporaryStore: L("本地数据库暂时无法打开，当前只有本次启动后的临时内容，不能导出或导入。原有数据未被改动，请完全退出 Flash 后重新打开再试")
         }
     }
 }
@@ -93,7 +93,7 @@ private struct StrictJSONScanner {
             repeat {
                 whitespace()
                 let key = try string()
-                guard keys.insert(key).inserted else { throw BackupError.contract("/：JSON 对象包含重复键") }
+                guard keys.insert(key).inserted else { throw BackupError.contract(L("/：JSON 对象包含重复键")) }
                 try expect(0x3A)
                 try value(depth: depth + 1)
             } while take(0x2C)

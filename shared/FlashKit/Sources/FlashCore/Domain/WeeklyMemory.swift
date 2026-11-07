@@ -123,6 +123,6 @@ public enum WeeklyMemory: Sendable {
             .split(separator: "\n", maxSplits: 1, omittingEmptySubsequences: false)
             .first.map(String.init) ?? ""
         let trimmed = firstLine.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.isEmpty ? "（无标题）" : trimmed
+        return trimmed.isEmpty ? L("（无标题）") : trimmed
     }
 }

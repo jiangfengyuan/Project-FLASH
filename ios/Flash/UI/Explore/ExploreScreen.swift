@@ -58,7 +58,7 @@ struct ExploreScreen: View {
         .navigationSubtitleIfAvailable(statsSummary)
         // 搜索栏常显（不必下拉才出现）
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always),
-                    prompt: "输入关键词或标签")
+                    prompt: L("输入关键词或标签"))
         .toolbar { toolbarContent }
         .toolbar { batchToolbar }
         .toolbar(batchMode ? .hidden : .automatic, for: .tabBar)
@@ -86,7 +86,7 @@ struct ExploreScreen: View {
             NavigationStack {
                 ScrollView {
                     ExploreFilterPanel(criteria: $criteria, onClear: clearFilters)
-                        .padding(Spacing.md)
+                        .padding(Spacing.card)
                 }
                 .flashPageBackground()
                 .navigationTitle("筛选")
@@ -101,13 +101,13 @@ struct ExploreScreen: View {
         }
         .sheet(item: $newLogDraft) { draftItem in
             LogEditSheet(log: draftItem,
-                         title: draftItem.category == .idea ? "新建灵感" : "新建记录") { updated in
+                         title: draftItem.category == .idea ? L("新建灵感") : L("新建记录")) { updated in
                 try saveNewLog(updated)
             }
         }
         .sheet(item: $focusedLog) { log in
             LogEditSheet(log: log,
-                         title: log.category == .idea ? "编辑灵感" : "编辑记录",
+                         title: log.category == .idea ? L("编辑灵感") : L("编辑记录"),
                          onSave: { updated in
                              guard let repository else { throw SaveError() }
                              try repository.updateLog(updated)
@@ -135,7 +135,7 @@ struct ExploreScreen: View {
         // 「待整理」：系统惯用的「选择 / 完成」进入批量模式
         if filter == .unsorted {
             ToolbarItem(placement: .topBarLeading) {
-                Button(batchMode ? "完成" : "选择") {
+                Button(batchMode ? L("完成") : L("选择")) {
                     batchMode.toggle()
                     if !batchMode { selection = [] }
                 }
@@ -150,7 +150,7 @@ struct ExploreScreen: View {
                       ? "line.3.horizontal.decrease.circle.fill"
                       : "line.3.horizontal.decrease.circle")
             }
-            .accessibilityLabel(criteria.isActive ? "筛选（已启用条件）" : "筛选")
+            .accessibilityLabel(criteria.isActive ? L("筛选（已启用条件）") : L("筛选"))
 
             Menu {
                 Button("新建记录", systemImage: "square.and.pencil") { presentNewLog(category: .log) }
@@ -181,14 +181,14 @@ struct ExploreScreen: View {
                 FlashDivider(seed: "explore-chips", axis: .vertical)
                     .frame(height: 20) // 分隔线高度约等于胶囊文字行高（几何值）
                     .padding(.horizontal, Spacing.xxs)
-                FilterChipView(title: "已收藏", isSelected: favoritesOnly,
+                FilterChipView(title: L("已收藏"), isSelected: favoritesOnly,
                                accent: BrandColors.ideaYellow, accentText: BrandColors.ideaYellowText,
                                systemImage: favoritesOnly ? "star.fill" : "star") {
                     favoritesOnly.toggle()
                 }
                 .accessibilityHint("与分类筛选叠加")
             }
-            .padding(.horizontal, Spacing.md)
+            .flashPageGutter()
             .padding(.vertical, Spacing.sm)
         }
         .sensoryFeedback(.selection, trigger: filter)
@@ -197,11 +197,11 @@ struct ExploreScreen: View {
     // MARK: - 待整理 / 批量
 
     private var unsortedBar: some View {
-        Text(batchMode ? "点选要整理的日志，在底部批量修改。" : "待整理：仍挂「日常」标签的日志。点「选择」可批量整理。")
+        Text(batchMode ? L("点选要整理的日志，在底部批量修改。") : L("待整理：仍挂「日常」标签的日志。点「选择」可批量整理。"))
             .font(Typography.caption)
             .foregroundStyle(BrandColors.textSecondary)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, Spacing.md)
+            .flashPageGutter()
             .padding(.bottom, Spacing.xs)
     }
 
@@ -216,7 +216,7 @@ struct ExploreScreen: View {
                 .disabled(selection.isEmpty)
             }
             ToolbarItem(placement: .status) {
-                Text(selection.isEmpty ? "未选择" : "已选 \(selection.count) 条")
+                Text(selection.isEmpty ? L("未选择") : L("已选 \(selection.count) 条"))
                     .font(Typography.caption)
                     .foregroundStyle(BrandColors.textSecondary)
                     .contentTransition(.numericText())
@@ -241,7 +241,7 @@ struct ExploreScreen: View {
             let logs = allLogEntities.map { $0.toModel() }
             let logCount = logs.filter { $0.category == .log }.count
             let ideaCount = logs.filter { $0.category == .idea }.count
-            return "共 \(logs.count) 条 · 日志 \(logCount) · 灵感 \(ideaCount)"
+            return L("共 \(logs.count) 条 · 日志 \(logCount) · 灵感 \(ideaCount)")
         }
     }
 
@@ -296,7 +296,7 @@ struct ExploreScreen: View {
 
     @discardableResult
     private func saveTask(_ task: TaskItem) -> Bool {
-        guard let repository else { errorMessage = "内部错误：存储未就绪"; return false }
+        guard let repository else { errorMessage = L("内部错误：存储未就绪"); return false }
         do {
             try repository.saveTask(task)
             Task {
@@ -305,14 +305,14 @@ struct ExploreScreen: View {
             return true
         } catch {
             FlashLog.failure("task_save_failed", error)
-            errorMessage = "任务保存失败，请重试"
+            errorMessage = L("任务保存失败，请重试")
             return false
         }
     }
 
     /// 批量修改：逐条 updateLog，任一条失败即中断并提示（已写入的不回滚，与单条编辑粒度一致）
     private func batchUpdate(_ mutate: (inout LogItem) -> Void) {
-        guard let repository else { errorMessage = "内部错误：存储未就绪"; return }
+        guard let repository else { errorMessage = L("内部错误：存储未就绪"); return }
         let snapshotLogs = (try? repository.allLogs()) ?? []
         for id in selection {
             guard var log = snapshotLogs.first(where: { $0.id == id }) else { continue }
@@ -320,11 +320,11 @@ struct ExploreScreen: View {
             do { try repository.updateLog(log) }
             catch {
                 FlashLog.failure("batch_update_failed", error)
-                errorMessage = "批量修改失败，请重试"
+                errorMessage = L("批量修改失败，请重试")
                 return
             }
         }
-        toast = FlashToast("✓ 已整理 \(selection.count) 条")
+        toast = FlashToast(L("✓ 已整理 \(selection.count) 条"))
         selection = []
         batchMode = false
     }

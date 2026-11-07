@@ -11,9 +11,9 @@ public enum LogSort: String, CaseIterable, Sendable {
 
     public var displayName: String {
         switch self {
-        case .newest: "最新"
-        case .oldest: "最早"
-        case .tag: "按标签"
+        case .newest: L("最新")
+        case .oldest: L("最早")
+        case .tag: L("按标签")
         }
     }
 }

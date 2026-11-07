@@ -24,7 +24,7 @@ public struct DangerZoneSection: View {
             Text("将删除本机全部日志、灵感、情绪与任务，清空后无法撤销，建议先导出备份。")
                 .font(Typography.caption).foregroundStyle(.secondary)
             Button(role: .destructive, action: onClear) {
-                SettingsRowLabel(title: "清空全部数据…", systemImage: "trash", color: .red)
+                SettingsRowLabel(title: L("清空全部数据…"), systemImage: "trash", color: .red)
             }
         } header: {
             Label("危险操作", systemImage: "exclamationmark.triangle")

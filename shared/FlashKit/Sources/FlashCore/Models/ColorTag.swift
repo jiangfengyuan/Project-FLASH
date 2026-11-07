@@ -13,12 +13,12 @@ public enum ColorTag: String, CaseIterable, Codable, Sendable {
 
     public var displayName: String {
         switch self {
-        case .urgent: "紧急"
-        case .inspiration: "灵感"
-        case .daily: "日常"
-        case .memo: "备忘"
-        case .emotion: "情绪"
-        case .idea: "想法"
+        case .urgent: L("紧急")
+        case .inspiration: L("灵感")
+        case .daily: L("日常")
+        case .memo: L("备忘")
+        case .emotion: L("情绪")
+        case .idea: L("想法")
         }
     }
 

@@ -31,7 +31,7 @@ public struct FilterChipView: View {
     private var usesAccent: Bool { isSelected && accent != nil }
 
     #if os(iOS)
-    // 暖调手作：未选中为纸白胶囊 + 暖色细边，选中为墨色实心
+    // 纸上书写：未选中为纸白胶囊 + 暖色细边，选中为炭墨实心
     private var unselectedBackground: Color { BrandColors.cardSurface }
     private let unselectedBorderWidth: CGFloat = 0.75
     #else
@@ -82,7 +82,11 @@ public struct FilterChipView: View {
                     }
                 }
         }
+        #if os(iOS)
+        .buttonStyle(PaperPressStyle())
+        #else
         .buttonStyle(.plain)
+        #endif
         .onHover { hovering = $0 }
         .animation(Motion.quick(reduceMotion), value: hovering)
         .animation(Motion.soft(reduceMotion), value: isSelected)

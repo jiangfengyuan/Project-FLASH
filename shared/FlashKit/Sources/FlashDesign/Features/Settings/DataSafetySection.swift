@@ -42,7 +42,7 @@ public struct DataSafetySection: View {
         Section("数据与安全") {
             // 主操作：导出备份（ prominent 胶囊，图标/文字反白）。
             // 图标显式用主色底上的前景色：iOS 表单行会把 Label 图标染成强调色，与胶囊同色而看不见
-            //（iOS 暖调主题深色下为暖墨，macOS 为白）
+            //（iOS 纸上书写深色下为炭墨，macOS 为白）
             Button(action: onExport) {
                 Label {
                     Text("导出备份…")
@@ -55,23 +55,23 @@ public struct DataSafetySection: View {
             .tint(BrandColors.brandPrimary)
 
             Button(action: onShare) {
-                SettingsRowLabel(title: "通过系统分享…", systemImage: "square.and.arrow.up", color: BrandColors.accessibleGreen)
+                SettingsRowLabel(title: L("通过系统分享…"), systemImage: "square.and.arrow.up", color: BrandColors.accessibleGreen)
             }
             .hoverFeedback(reduceMotion: reduceMotion)
             Button(action: onLanSend) {
-                SettingsRowLabel(title: "局域网发送（暂时停用）…", systemImage: "paperplane", color: BrandColors.accessibleGreen)
+                SettingsRowLabel(title: L("局域网发送（暂时停用）…"), systemImage: "paperplane", color: BrandColors.accessibleGreen)
             }
             .hoverFeedback(reduceMotion: reduceMotion)
             Button(action: onLanReceive) {
-                SettingsRowLabel(title: "局域网接收（暂时停用）…", systemImage: "antenna.radiowaves.left.and.right", color: BrandColors.accessibleGreen)
+                SettingsRowLabel(title: L("局域网接收（暂时停用）…"), systemImage: "antenna.radiowaves.left.and.right", color: BrandColors.accessibleGreen)
             }
             .hoverFeedback(reduceMotion: reduceMotion)
             Button(action: onImport) {
-                SettingsRowLabel(title: "标准导入…", systemImage: "tray.and.arrow.down", color: BrandColors.accessibleGreen)
+                SettingsRowLabel(title: L("标准导入…"), systemImage: "tray.and.arrow.down", color: BrandColors.accessibleGreen)
             }
             .hoverFeedback(reduceMotion: reduceMotion)
             Button(action: onRecoveryImport) {
-                SettingsRowLabel(title: "恢复损坏或旧版备份…", systemImage: "bandage", color: BrandColors.accessibleGreen)
+                SettingsRowLabel(title: L("恢复损坏或旧版备份…"), systemImage: "bandage", color: BrandColors.accessibleGreen)
             }
             .hoverFeedback(reduceMotion: reduceMotion)
             Text("导出的 JSON 文件未加密，仅保存或分享给可信设备或联系人。旧版局域网传输暂时停用。")

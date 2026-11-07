@@ -57,6 +57,8 @@ struct QuickCaptureSheet: View {
         }
         .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : (contentHeight > 0 ? [.height(contentHeight), .large] : [.medium, .large]))
         .presentationDragIndicator(.visible)
+        // 硫酸纸面板：半透明纸（减弱透明度时不透明）
+        .presentationBackground { QuickCapturePaperBackground() }
         .sensoryFeedback(.success, trigger: saveCount)
         .sensoryFeedback(.selection, trigger: category)
         .animation(Motion.soft(reduceMotion), value: errorMessage)
@@ -85,7 +87,7 @@ struct QuickCaptureSheet: View {
             if let remaining = remainingHint {
                 Text(remaining)
                     .font(Typography.caption.monospacedDigit())
-                    .foregroundStyle(remaining.hasPrefix("超出") ? BrandColors.destructive : BrandColors.textSecondary)
+                    .foregroundStyle(remaining.hasPrefix(L("超出")) ? BrandColors.destructive : BrandColors.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .transition(.appear(reduceMotion: reduceMotion))
             }
@@ -136,8 +138,8 @@ struct QuickCaptureSheet: View {
             }
             if !dynamicTypeSize.isAccessibilitySize { Spacer() }
             SegmentedPicker(selection: $category, options: [
-                .init(value: Category.idea, title: "灵感"),
-                .init(value: Category.log, title: "日志"),
+                .init(value: Category.idea, title: L("灵感")),
+                .init(value: Category.log, title: L("日志")),
             ])
             .frame(maxWidth: dynamicTypeSize.isAccessibilitySize ? .infinity : 150)
             .tint(category == .idea ? BrandColors.ideaYellow : BrandColors.logPurple)
@@ -149,8 +151,8 @@ struct QuickCaptureSheet: View {
     private var remainingHint: String? {
         let limit = TextLimits.maxContentUTF16
         let remaining = limit - text.utf16.count
-        if remaining < 0 { return "超出 \(-remaining) 字" }
-        return remaining < limit / 10 ? "还可输入 \(remaining) 字" : nil
+        if remaining < 0 { return L("超出 \(-remaining) 字") }
+        return remaining < limit / 10 ? L("还可输入 \(remaining) 字") : nil
     }
 
     /// 多行输入下回车会插入换行：只在「末尾敲入单个换行」时视为提交，粘贴的多行文本不受影响
@@ -184,7 +186,7 @@ struct QuickCaptureSheet: View {
     // MARK: - 提交
 
     private func commit() {
-        guard let repository else { errorMessage = "内部错误：存储未就绪"; return }
+        guard let repository else { errorMessage = L("内部错误：存储未就绪"); return }
         do {
             switch try QuickCaptureCommit.commit(text, as: category, repository: repository) {
             case .saved:
@@ -199,7 +201,15 @@ struct QuickCaptureSheet: View {
             }
         } catch {
             FlashLog.failure("quick_capture_save_failed", error)
-            errorMessage = "保存失败，请重试"
+            errorMessage = L("保存失败，请重试")
         }
+    }
+}
+
+private struct QuickCapturePaperBackground: View {
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    var body: some View {
+        BrandColors.cardSurface.opacity(reduceTransparency ? 1 : 0.92)
     }
 }

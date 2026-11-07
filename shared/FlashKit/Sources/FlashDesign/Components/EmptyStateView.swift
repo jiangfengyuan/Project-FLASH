@@ -39,7 +39,7 @@ public struct EmptyStateView: View {
     public var body: some View {
         VStack(spacing: Spacing.sm) {
             #if os(iOS)
-            // 暖调手作：图标落在一笔勾成的圈里，标题用手写感展示字体
+            // 纸上书写：图标落在一笔勾成的圈里，标题用手写感展示字体
             Image(systemName: systemImage)
                 .scaledSystemFont(size: 28, relativeTo: .title)
                 .foregroundStyle(iconTint ?? BrandColors.brandPrimary)

@@ -23,7 +23,7 @@ struct IdeaReminderSettingsPage: View {
             Group {
                 IdeaReminderSection()
             }
-            // 暖调手作：分组行用纸白卡面
+            // 纸上书写：分组行用纸白卡面
             .flashFormRowBackground()
         }
         .scrollContentBackground(.hidden)
@@ -89,11 +89,11 @@ struct BackupSettingsPage: View {
 
                 Section {
                     Button(action: onExport) {
-                        SettingsRowLabel(title: "导出到「文件」…", systemImage: "tray.and.arrow.up",
+                        SettingsRowLabel(title: L("导出到「文件」…"), systemImage: "tray.and.arrow.up",
                                          color: BrandColors.brandPrimary)
                     }
                     Button(action: onShare) {
-                        SettingsRowLabel(title: "通过系统分享…", systemImage: "square.and.arrow.up",
+                        SettingsRowLabel(title: L("通过系统分享…"), systemImage: "square.and.arrow.up",
                                          color: BrandColors.accessibleGreen)
                     }
                 } header: {
@@ -105,11 +105,11 @@ struct BackupSettingsPage: View {
 
                 Section {
                     Button(action: onImport) {
-                        SettingsRowLabel(title: "从备份导入…", systemImage: "tray.and.arrow.down",
+                        SettingsRowLabel(title: L("从备份导入…"), systemImage: "tray.and.arrow.down",
                                          color: BrandColors.accessibleGreen)
                     }
                     Button(action: onRecoveryImport) {
-                        SettingsRowLabel(title: "恢复损坏或旧版备份…", systemImage: "bandage",
+                        SettingsRowLabel(title: L("恢复损坏或旧版备份…"), systemImage: "bandage",
                                          color: BrandColors.accessibleGreen)
                     }
                 } header: {
@@ -121,7 +121,7 @@ struct BackupSettingsPage: View {
 
                 DangerZoneSection(isDisabled: isClearDisabled || isTemporaryStore, onClear: onClearAll)
             }
-            // 暖调手作：分组行用纸白卡面
+            // 纸上书写：分组行用纸白卡面
             .flashFormRowBackground()
         }
         .scrollContentBackground(.hidden)
@@ -147,11 +147,11 @@ struct TransferSettingsPage: View {
                 }
                 Section {
                     Button(action: onSend) {
-                        SettingsRowLabel(title: "发送到另一台设备…", systemImage: "paperplane",
+                        SettingsRowLabel(title: L("发送到另一台设备…"), systemImage: "paperplane",
                                          color: BrandColors.accessibleGreen)
                     }
                     Button(action: onReceive) {
-                        SettingsRowLabel(title: "从另一台设备接收…", systemImage: "antenna.radiowaves.left.and.right",
+                        SettingsRowLabel(title: L("从另一台设备接收…"), systemImage: "antenna.radiowaves.left.and.right",
                                          color: BrandColors.accessibleGreen)
                     }
                 } header: {
@@ -161,7 +161,7 @@ struct TransferSettingsPage: View {
                 }
                 .disabled(isDisabled || isTemporaryStore)
             }
-            // 暖调手作：分组行用纸白卡面
+            // 纸上书写：分组行用纸白卡面
             .flashFormRowBackground()
         }
         .scrollContentBackground(.hidden)

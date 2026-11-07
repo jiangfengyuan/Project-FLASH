@@ -32,7 +32,7 @@ public struct SpotlightRecord: Equatable, Sendable {
         title = Self.clipped(lines.first ?? log.content, to: Self.titleLimit)
         let rest = lines.dropFirst().joined(separator: " ")
         contentDescription = rest.isEmpty ? nil : Self.clipped(rest, to: Self.descriptionLimit)
-        keywords = [log.category == .idea ? "灵感" : "日志", log.colorTag.displayName]
+        keywords = [log.category == .idea ? L("灵感") : L("日志"), log.colorTag.displayName]
         createdAt = DateFormatting.parseISO(log.createdAt)
     }
 

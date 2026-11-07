@@ -17,11 +17,11 @@ enum AppTab: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .home: "此刻"
-        case .explore: "记录"
-        case .emotion: "情绪"
-        case .stats: "回顾"
-        case .settings: "设置"
+        case .home: L("此刻")
+        case .explore: L("记录")
+        case .emotion: L("情绪")
+        case .stats: L("回顾")
+        case .settings: L("设置")
         }
     }
 
@@ -44,8 +44,8 @@ enum AppRoute: Hashable {
 
     var title: String {
         switch self {
-        case .logFlow: "日志流"
-        case .calendar: "日历"
+        case .logFlow: L("日志流")
+        case .calendar: L("日历")
         case .memory: "Memory"
         }
     }

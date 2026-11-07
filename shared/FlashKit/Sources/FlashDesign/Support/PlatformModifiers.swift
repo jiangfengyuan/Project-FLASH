@@ -5,6 +5,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import SwiftUI
+import FlashCore
 
 /// 跨平台差异修饰器：共享视图只在这里分平台，调用点保持一行。
 public extension View {
@@ -39,7 +40,7 @@ public extension View {
     /// 编辑弹层外壳：iOS 包进 NavigationStack，标题与「取消 / 保存」进导航栏（键盘弹出时仍可点）；
     /// macOS 原样返回（弹层自带标题与底部按钮行）
     @ViewBuilder
-    func flashEditorChrome(title: String, saveTitle: String = "保存", saveDisabled: Bool,
+    func flashEditorChrome(title: String, saveTitle: String = L("保存"), saveDisabled: Bool,
                            onCancel: @escaping () -> Void, onSave: @escaping () -> Void) -> some View {
         #if os(iOS)
         NavigationStack {

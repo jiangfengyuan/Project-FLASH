@@ -43,7 +43,11 @@ public struct ToastView: View {
         }
         .padding(.horizontal, 14) // 胶囊横向呼吸：无对应间距令牌（sm 偏紧、md 偏宽）
         .padding(.vertical, Spacing.xs)
+        #if os(iOS)
+        .flashVellum(in: Capsule())
+        #else
         .flashGlassBackground(in: Capsule())
+        #endif
         .flashElevatedShadow()
         .accessibilityElement(children: .contain)
         .transition(.pop(reduceMotion: reduceMotion))

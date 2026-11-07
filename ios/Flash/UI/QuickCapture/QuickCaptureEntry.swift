@@ -28,7 +28,7 @@ struct QuickCaptureEntryModifier: ViewModifier {
                                 .foregroundStyle(BrandColors.textSecondary)
                             Spacer()
                         }
-                        .padding(.horizontal, Spacing.md)
+                        .flashPageGutter()
                         .contentShape(Rectangle())
                         // 底部配件高度固定（同标签栏）：字号封顶，超大字号下不溢出截断
                         .dynamicTypeSize(...DynamicTypeSize.xxLarge)

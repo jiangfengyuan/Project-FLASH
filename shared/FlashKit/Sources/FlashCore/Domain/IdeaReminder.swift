@@ -17,9 +17,9 @@ public enum IdeaReminder {
 
         public var displayName: String {
             switch self {
-            case .daily: "每天"
-            case .every3Days: "每 3 天"
-            case .weekly: "每周"
+            case .daily: L("每天")
+            case .every3Days: L("每 3 天")
+            case .weekly: L("每周")
             }
         }
 
@@ -44,7 +44,7 @@ public enum IdeaReminder {
 
     /// 通知正文（PRD 文案）
     public static func notificationBody(unreadCount: Int) -> String {
-        "你还有\(unreadCount)个想法等待梳理，去看看吧"
+        L("你还有\(unreadCount)个想法等待梳理，去看看吧")
     }
 
     /// 下一次提醒时刻：不早于 now 之后的第一个 hour:00；若上次已提醒，还需与上次间隔满 frequency 天。

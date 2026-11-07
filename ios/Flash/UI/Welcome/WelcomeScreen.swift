@@ -5,6 +5,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import SwiftUI
+import FlashCore
 import FlashDesign
 
 /// 首次启动欢迎页（iOS）：三页横滑（文案与 macOS WelcomeView、Android WelcomeScreen 同源），
@@ -22,11 +23,11 @@ struct WelcomeScreen: View {
 
     private let pages: [Page] = [
         Page(id: 0, symbol: "bolt.fill", tint: BrandColors.brandPrimary,
-             title: "欢迎来到 Flash", subtitle: "一闪而过的想法，值得被记住"),
+             title: L("欢迎来到 Flash"), subtitle: L("一闪而过的想法，值得被记住")),
         Page(id: 1, symbol: "square.and.pencil", tint: BrandColors.logPurple,
-             title: "随手记录", subtitle: "日志与灵感，一键即达"),
+             title: L("随手记录"), subtitle: L("日志与灵感，一键即达")),
         Page(id: 2, symbol: "face.smiling", tint: BrandColors.emotionPink,
-             title: "情绪觉察", subtitle: "七级情绪记录，看见自己的变化"),
+             title: L("情绪觉察"), subtitle: L("七级情绪记录，看见自己的变化")),
     ]
 
     @State private var page = 0
@@ -74,7 +75,7 @@ struct WelcomeScreen: View {
                     Motion.animate(Motion.soft(), reduceMotion: reduceMotion) { page += 1 }
                 }
             } label: {
-                Text(isLastPage ? "开始使用" : "下一步")
+                Text(isLastPage ? L("开始使用") : L("下一步"))
                     .font(Typography.body.weight(.semibold))
                     .foregroundStyle(BrandColors.onBrandPrimary)
                     .frame(maxWidth: .infinity)

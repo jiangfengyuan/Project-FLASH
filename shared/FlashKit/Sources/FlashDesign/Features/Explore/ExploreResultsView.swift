@@ -94,7 +94,7 @@ public struct ExploreLogListView: View {
                             row(log)
                         }
                     }
-                    .padding(.horizontal, Spacing.md)
+                    .flashPageGutter()
                     .padding(.vertical, Spacing.sm)
                 }
                 #endif
@@ -110,7 +110,7 @@ public struct ExploreLogListView: View {
         .animation(Motion.soft(reduceMotion), value: displayedLogs.isEmpty)
         .sheet(item: $editingLog) { log in
             LogEditSheet(log: log,
-                         title: log.category == .idea ? "编辑灵感" : "编辑记录",
+                         title: log.category == .idea ? L("编辑灵感") : L("编辑记录"),
                          onSave: { updated in
                              guard let repository else { throw ExploreSaveError.repositoryUnavailable }
                              try repository.updateLog(updated)
@@ -132,7 +132,7 @@ public struct ExploreLogListView: View {
                     do { try repository?.deleteLog(id: log.id); deleteCount += 1 }
                     catch {
                         FlashLog.failure("log_delete_failed", error)
-                        errorMessage = "删除失败，请重试"
+                        errorMessage = L("删除失败，请重试")
                     }
                 }
             }
@@ -170,7 +170,7 @@ public struct ExploreLogListView: View {
                 .transition(.card(reduceMotion: reduceMotion))
                 .contextMenu {
                     Button("编辑…") { openEditor(log) }
-                    Button(log.isFavorite == true ? "取消收藏" : "收藏") { toggleFavorite(log) }
+                    Button(log.isFavorite == true ? L("取消收藏") : L("收藏")) { toggleFavorite(log) }
                     if log.category == .idea {
                         Button("转为任务") {
                             ideaTaskDraft = IdeaTaskDraft(sourceLogId: log.id, title: log.content)
@@ -191,12 +191,12 @@ public struct ExploreLogListView: View {
             .contentShape(Rectangle())
             .onTapGesture { openEditor(log) }
             .accessibilityAddTraits(.isButton)
-            .accessibilityAction(named: "编辑") { openEditor(log) }
+            .accessibilityAction(named: L("编辑")) { openEditor(log) }
             .swipeActions(edge: .leading, allowsFullSwipe: true) {
                 Button {
                     toggleFavorite(log)
                 } label: {
-                    Label(log.isFavorite == true ? "取消收藏" : "收藏",
+                    Label(log.isFavorite == true ? L("取消收藏") : L("收藏"),
                           systemImage: log.isFavorite == true ? "star.slash" : "star")
                 }
                 .tint(BrandColors.ideaYellow)
@@ -231,16 +231,16 @@ public struct ExploreLogListView: View {
         do {
             try repository.deleteLog(id: log.id)
             deleteCount += 1
-            toast = FlashToast(log.category == .idea ? "已删除灵感" : "已删除记录", actionTitle: "撤销") {
+            toast = FlashToast(log.category == .idea ? L("已删除灵感") : L("已删除记录"), actionTitle: L("撤销")) {
                 do { try repository.updateLog(log) }
                 catch {
                     FlashLog.failure("undo_delete_failed", error)
-                    errorMessage = "撤销失败，请重试"
+                    errorMessage = L("撤销失败，请重试")
                 }
             }
         } catch {
             FlashLog.failure("log_delete_failed", error)
-            errorMessage = "删除失败，请重试"
+            errorMessage = L("删除失败，请重试")
         }
         #else
         deletingLog = log
@@ -248,7 +248,7 @@ public struct ExploreLogListView: View {
     }
 
     private var deleteTitle: String {
-        deletingLog?.category == .idea ? "删除这条灵感？" : "删除这条记录？"
+        deletingLog?.category == .idea ? L("删除这条灵感？") : L("删除这条记录？")
     }
 
     private var deletePresented: Binding<Bool> {
@@ -297,7 +297,7 @@ public struct ExploreLogListView: View {
         do { try repository?.setLogFavorite(id: log.id, !(log.isFavorite ?? false)) }
         catch {
             FlashLog.failure("favorite_toggle_failed", error)
-            errorMessage = "操作失败，请重试"
+            errorMessage = L("操作失败，请重试")
         }
     }
 
@@ -312,16 +312,16 @@ public struct ExploreLogListView: View {
                 do {
                     try await TaskReminderScheduler.shared.schedule(task)
                     if TaskReminderScheduler.hasPastReminder(task) {
-                        errorMessage = "任务已保存，但提醒时间已过，将不会提醒"
+                        errorMessage = L("任务已保存，但提醒时间已过，将不会提醒")
                     }
                 } catch {
-                    errorMessage = "任务已保存，但系统提醒未启用"
+                    errorMessage = L("任务已保存，但系统提醒未启用")
                 }
             }
             return true
         } catch {
             FlashLog.failure("task_save_failed", error)
-            errorMessage = "任务保存失败，请重试"
+            errorMessage = L("任务保存失败，请重试")
             return false
         }
     }
@@ -333,22 +333,22 @@ public struct ExploreLogListView: View {
         if hasActiveFilter {
             EmptyStateView(
                 systemImage: "magnifyingglass",
-                title: "没有找到相关记录",
-                actionTitle: "清除筛选",
+                title: L("没有找到相关记录"),
+                actionTitle: L("清除筛选"),
                 action: onClearFilters
             )
         } else if filter == .unsorted {
             EmptyStateView(
                 systemImage: "tray",
-                title: "没有待整理的记录",
-                message: "所有日常记录都已经分拣好了。"
+                title: L("没有待整理的记录"),
+                message: L("所有日常记录都已经分拣好了。")
             )
         } else {
             let isIdea = filter == .idea
             EmptyStateView(
                 systemImage: isIdea ? "lightbulb" : "book",
-                title: isIdea ? "灵感还没出现，先给它留个位置。" : "今天还没有故事。",
-                message: isIdea ? "在「此刻」页记下第一束灵感" : "在「此刻」页写下第一条记录",
+                title: isIdea ? L("灵感还没出现，先给它留个位置。") : L("今天还没有故事。"),
+                message: isIdea ? L("在「此刻」页记下第一束灵感") : L("在「此刻」页写下第一条记录"),
                 iconTint: isIdea ? BrandColors.ideaYellow : BrandColors.logPurple
             )
         }

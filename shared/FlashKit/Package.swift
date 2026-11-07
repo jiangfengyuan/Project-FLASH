@@ -19,7 +19,7 @@ let package = Package(
     ],
     targets: [
         .target(name: "FlashCore"),
-        .target(name: "FlashDesign", dependencies: ["FlashCore"]),
+        .target(name: "FlashDesign", dependencies: ["FlashCore"], resources: [.process("Resources")]),
         .testTarget(name: "FlashCoreTests", dependencies: ["FlashCore"]),
         .testTarget(name: "FlashDesignTests", dependencies: ["FlashDesign", "FlashCore"]),
     ]

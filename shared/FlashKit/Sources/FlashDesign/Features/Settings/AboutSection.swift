@@ -26,7 +26,7 @@ public struct AboutSection: View {
             LabeledContent {
                 Text(version)
             } label: {
-                SettingsRowLabel(title: "版本", systemImage: "info.circle", color: .secondary)
+                SettingsRowLabel(title: L("版本"), systemImage: "info.circle", color: .secondary)
             }
             Label("无云端账号，备份与传输由你主动发起。", systemImage: "lock.shield")
                 .font(Typography.caption)

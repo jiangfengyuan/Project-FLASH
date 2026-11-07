@@ -8,6 +8,7 @@ import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
 import FlashCore
+import FlashDesign
 
 /// 分享扩展入口：取出分享来的文字 / 链接，交给 SwiftUI 面板编辑与选类型。
 /// 扩展不打开 SwiftData 主库（不在 App Group 内），保存只投递到 `CaptureInboxStore`，
@@ -66,22 +67,22 @@ final class ShareCaptureModel {
     func save() {
         switch QuickCaptureCommit.prepare(text) {
         case .empty:
-            errorMessage = "内容为空"
+            errorMessage = L("内容为空")
         case .tooLong(let message):
             errorMessage = message
         case .ready(let content):
             guard let inbox else {
-                errorMessage = "暂时无法保存到 Flash：共享容器不可用"
+                errorMessage = L("暂时无法保存到 Flash：共享容器不可用")
                 return
             }
             do {
                 try inbox.enqueue(CaptureInboxEntry(text: content, category: category))
                 onFinish?(true)
             } catch CaptureInboxError.full {
-                errorMessage = "待收入的分享已满 \(CaptureInboxStore.maxPending) 条，请先打开 Flash"
+                errorMessage = L("待收入的分享已满 \(CaptureInboxStore.maxPending) 条，请先打开 Flash")
             } catch {
                 FlashLog.failure("share_extension_enqueue_failed", error)
-                errorMessage = "保存失败，请重试"
+                errorMessage = L("保存失败，请重试")
             }
         }
     }
@@ -115,15 +116,22 @@ struct ShareCaptureView: View {
                     } else {
                         TextEditor(text: $model.text)
                             .frame(minHeight: 160)
+                            .lineSpacing(Typography.bodyLineSpacing)
+                            .scrollContentBackground(.hidden)
                     }
                 } footer: {
                     if let message = model.errorMessage {
-                        Text(message).foregroundStyle(.red)
+                        Text(message).foregroundStyle(BrandColors.destructive)
                     } else {
                         Text("下次打开 Flash 时收入。")
+                            .foregroundStyle(BrandColors.textSecondary)
                     }
                 }
+                .listRowBackground(BrandColors.cardSurface)
             }
+            .scrollContentBackground(.hidden)
+            .flashPageBackground()
+            .tint(BrandColors.brandPrimary)
             .navigationTitle("记到 Flash")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

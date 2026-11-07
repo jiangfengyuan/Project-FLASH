@@ -65,9 +65,9 @@ struct SettingsScreen: View {
                     Section("通知") {
                         NavigationLink(value: SettingsPage.ideaReminder) {
                             LabeledContent {
-                                Text(settings.ideaReminderEnabled ? settings.ideaReminderFrequency.displayName : "已关闭")
+                                Text(settings.ideaReminderEnabled ? settings.ideaReminderFrequency.displayName : L("已关闭"))
                             } label: {
-                                SettingsRowLabel(title: "灵感提醒", systemImage: "lightbulb.max",
+                                SettingsRowLabel(title: L("灵感提醒"), systemImage: "lightbulb.max",
                                                  color: BrandColors.ideaYellowText)
                             }
                         }
@@ -76,7 +76,7 @@ struct SettingsScreen: View {
                     Section {
                         Toggle(isOn: Binding(get: { settings.spotlightIndexingEnabled },
                                              set: { settings.setSpotlightIndexingEnabled($0) })) {
-                            SettingsRowLabel(title: "在系统搜索中显示", systemImage: "magnifyingglass",
+                            SettingsRowLabel(title: L("在系统搜索中显示"), systemImage: "magnifyingglass",
                                              color: BrandColors.accessibleGreen)
                         }
                         .tint(BrandColors.brandPrimary)
@@ -88,24 +88,24 @@ struct SettingsScreen: View {
 
                     Section {
                         NavigationLink(value: SettingsPage.backup) {
-                            SettingsRowLabel(title: "备份与恢复", systemImage: "externaldrive",
+                            SettingsRowLabel(title: L("备份与恢复"), systemImage: "externaldrive",
                                              color: BrandColors.accessibleGreen)
                         }
                         NavigationLink(value: SettingsPage.transfer) {
-                            SettingsRowLabel(title: "设备间传输", systemImage: "arrow.left.arrow.right",
+                            SettingsRowLabel(title: L("设备间传输"), systemImage: "arrow.left.arrow.right",
                                              color: BrandColors.accessibleGreen)
                         }
                     } header: {
                         Text("数据")
                     } footer: {
                         Text(isTemporaryStore
-                         ? "本地数据库暂时无法打开：导出、导入、传输与清空已暂停，原有数据未被改动。"
-                         : "数据只保存在此设备。导出、分享与传输都由你主动发起。")
+                         ? L("本地数据库暂时无法打开：导出、导入、传输与清空已暂停，原有数据未被改动。")
+                         : L("数据只保存在此设备。导出、分享与传输都由你主动发起。"))
                     }
 
                     AboutSection(version: BackupImportCoordinator.appVersion, appeared: true)
                 }
-                // 暖调手作：分组行用纸白卡面
+                // 纸上书写：分组行用纸白卡面
                 .flashFormRowBackground()
             }
             .scrollContentBackground(.hidden)
@@ -121,10 +121,10 @@ struct SettingsScreen: View {
                       defaultFilename: "flash-backup-\(DateFormatting.today()).json") { result in
             exportDocument = nil
             switch result {
-            case .success: showToast("✓ 备份已导出")
+            case .success: showToast(L("✓ 备份已导出"))
             case .failure(let error):
                 FlashLog.failure("backup_export_failed", error)
-                message = "导出失败，请检查目标位置后重试"
+                message = L("导出失败，请检查目标位置后重试")
             }
         }
         .fileImporter(isPresented: $importerPresented, allowedContentTypes: [.json]) { result in
@@ -132,7 +132,7 @@ struct SettingsScreen: View {
             case .success(let url): prepareFileImport(url)
             case .failure(let error):
                 FlashLog.failure("backup_file_pick_failed", error)
-                message = "无法打开所选文件，请重试"
+                message = L("无法打开所选文件，请重试")
             }
         }
         .sheet(item: $shareFile) { file in
@@ -156,9 +156,9 @@ struct SettingsScreen: View {
         .onChange(of: lanTransfer.sendCompleted) { _, completed in
             guard completed else { return }
             lanTransfer.sendCompleted = false
-            showToast("✓ 备份已发送至对方设备，请在对端确认导入")
+            showToast(L("✓ 备份已发送至对方设备，请在对端确认导入"))
         }
-        .alert(recoveryImport ? "部分恢复预览（原文件不变）" : "标准导入预览", isPresented: previewPresented) {
+        .alert(recoveryImport ? L("部分恢复预览（原文件不变）") : L("标准导入预览"), isPresented: previewPresented) {
             Button("按差异合并") { pendingImport = importPreview; confirmImport(overwrite: false) }
             Button("覆盖导入", role: .destructive) { pendingImport = importPreview; showOverwriteConfirm = true }
             Button("取消", role: .cancel) { importPreview = nil; pendingImport = nil; pendingSnapshot = nil }
@@ -243,7 +243,7 @@ struct SettingsScreen: View {
                 message = error.userMessage
             } catch {
                 FlashLog.failure("backup_export_failed", error)
-                message = "生成备份失败，请重试"
+                message = L("生成备份失败，请重试")
             }
         }
     }
@@ -264,7 +264,7 @@ struct SettingsScreen: View {
                 message = error.userMessage
             } catch {
                 FlashLog.failure("backup_share_failed", error)
-                message = "生成传输文件失败，请重试"
+                message = L("生成传输文件失败，请重试")
             }
         }
     }
@@ -303,7 +303,7 @@ struct SettingsScreen: View {
                 message = error.userMessage
             } catch {
                 FlashLog.failure("backup_import_failed", error)
-                message = "导入失败，请确认选择的是 Flash 备份文件后重试"
+                message = L("导入失败，请确认选择的是 Flash 备份文件后重试")
             }
         }
     }
@@ -322,7 +322,7 @@ struct SettingsScreen: View {
             } catch let error as BackupError {
                 message = error.userMessage
             } catch {
-                message = "接收到的内容不是有效的 Flash 备份"
+                message = L("接收到的内容不是有效的 Flash 备份")
             }
         }
     }
@@ -341,10 +341,10 @@ struct SettingsScreen: View {
                     pendingSnapshot = current
                     pendingImport = refreshed
                     importPreview = refreshed
-                    showToast("本地数据在预览后有变化，差异已重新计算，请确认后再覆盖")
+                    showToast(L("本地数据在预览后有变化，差异已重新计算，请确认后再覆盖"))
                     return
                 case .importedRemindersFailed:
-                    message = "数据已导入，但系统提醒恢复失败，请稍后重试"
+                    message = L("数据已导入，但系统提醒恢复失败，请稍后重试")
                 case .imported(let text, let hasSkipped):
                     if hasSkipped { message = text } else { showToast("✓ " + text) }
                 }
@@ -352,7 +352,7 @@ struct SettingsScreen: View {
                 message = error.userMessage
             } catch {
                 FlashLog.failure("backup_import_write_failed", error)
-                message = "导入失败：写入数据库时出错，请重试"
+                message = L("导入失败：写入数据库时出错，请重试")
             }
             pendingImport = nil
             pendingSnapshot = nil
@@ -368,19 +368,19 @@ struct SettingsScreen: View {
                 guard let repository else { throw SettingsDataError.repositoryUnavailable }
                 // 临时存储下清空后的 rebuild([]) 会撤掉磁盘上真实任务的全部提醒（F-07）
                 guard !repository.isTemporaryStore else {
-                    message = "本地数据库暂时无法打开，当前只有临时内容，清空已暂停。原有数据未被改动，请完全退出 Flash 后重新打开再试"
+                    message = L("本地数据库暂时无法打开，当前只有临时内容，清空已暂停。原有数据未被改动，请完全退出 Flash 后重新打开再试")
                     return
                 }
                 try repository.clearAll()
                 do {
                     try await TaskReminderScheduler.shared.rebuild([])
-                    showToast("✓ 已清空全部数据")
+                    showToast(L("✓ 已清空全部数据"))
                 } catch {
-                    message = "数据已清空，但系统提醒清理失败，请重启应用后重试"
+                    message = L("数据已清空，但系统提醒清理失败，请重启应用后重试")
                 }
             } catch {
                 FlashLog.failure("clear_all_failed", error)
-                message = "清空失败，请重试"
+                message = L("清空失败，请重试")
             }
         }
     }
@@ -443,7 +443,7 @@ private struct ShareBackupSheet: View {
             Text("明文 JSON，仅分享给可信设备或联系人。")
                 .font(Typography.caption)
                 .foregroundStyle(.secondary)
-            ShareLink(item: url, preview: SharePreview("Flash 备份", image: Image(systemName: "doc"))) {
+            ShareLink(item: url, preview: SharePreview(L("Flash 备份"), image: Image(systemName: "doc"))) {
                 Label("分享备份…", systemImage: "square.and.arrow.up")
                     .frame(maxWidth: .infinity)
             }

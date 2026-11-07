@@ -74,10 +74,11 @@ struct HomeView: View {
                     }
                 } else {
                     overviewCard
+                    TornSectionBreak(seed: "home-break")
                     recentSection
                 }
             }
-            .padding(.horizontal, Spacing.md)
+            .flashPageGutter()
             .padding(.vertical, Spacing.lg)
             // 与 macOS 此刻页同一上限：超宽窗口不把卡片拉成细长条
             .frame(maxWidth: Metrics.toolMaxWidth)
@@ -100,7 +101,7 @@ struct HomeView: View {
         .flashToast($toast)
         .sheet(item: $editingLog) { log in
             LogEditSheet(log: log,
-                         title: log.category == .idea ? "编辑灵感" : "编辑记录",
+                         title: log.category == .idea ? L("编辑灵感") : L("编辑记录"),
                          onSave: { updated in
                              guard let repository else { throw SaveError() }
                              try repository.updateLog(updated)
@@ -159,13 +160,9 @@ struct HomeView: View {
                     .font(Typography.caption)
                     .foregroundStyle(.tertiary)
             }
-            .padding(Spacing.md)
-            .background(BrandColors.cardSurface, in: RoundedRectangle(cornerRadius: Radius.cardSmall, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: Radius.cardSmall, style: .continuous)
-                    .stroke(BrandColors.ideaYellow.opacity(0.55), lineWidth: 0.75)
-            }
-            .flashCardShadow()
+            .padding(Spacing.card)
+            .flashPaperCard(seed: "idea-reminder", cornerRadius: Radius.cardSmall)
+            .flashStickyStack(seed: "idea-reminder", cornerRadius: Radius.cardSmall)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -194,8 +191,8 @@ struct HomeView: View {
         if viewModel.recentLogs.isEmpty {
             EmptyStateView(
                 systemImage: "sparkles",
-                title: "今天还没有记录。",
-                actionTitle: "记下第一个念头"
+                title: L("今天还没有记录。"),
+                actionTitle: L("记下第一个念头")
             ) {
                 appState.presentQuickCapture()
             }
@@ -214,13 +211,15 @@ struct HomeView: View {
                     ForEach(viewModel.recentLogs) { log in
                         LogCardView(log: log, actionsVisibility: .hidden,
                                     isUnread: ideaReminders.unreadIDs.contains(log.id))
+                            // 灵感是叠放的便签：身后错开一张底页
+                            .modifier(StickyIfIdea(log: log))
                             .flashZoomSource(id: log.id, in: zoomNamespace)
                             .contentShape(Rectangle())
                             .onTapGesture { openEditor(log) }
                             .accessibilityAddTraits(.isButton)
                             .contextMenu {
                                 Button("编辑", systemImage: "pencil") { openEditor(log) }
-                                Button(log.isFavorite == true ? "取消收藏" : "收藏",
+                                Button(log.isFavorite == true ? L("取消收藏") : L("收藏"),
                                        systemImage: log.isFavorite == true ? "star.slash" : "star") {
                                     toggleFavorite(log)
                                 }
@@ -252,7 +251,7 @@ struct HomeView: View {
         do { try repository?.setLogFavorite(id: log.id, !(log.isFavorite ?? false)) }
         catch {
             FlashLog.failure("favorite_toggle_failed", error)
-            errorMessage = "操作失败，请重试"
+            errorMessage = L("操作失败，请重试")
         }
     }
 
@@ -262,16 +261,16 @@ struct HomeView: View {
         do {
             try repository.deleteLog(id: log.id)
             deleteCount += 1
-            toast = FlashToast(log.category == .idea ? "已删除灵感" : "已删除记录", actionTitle: "撤销") {
+            toast = FlashToast(log.category == .idea ? L("已删除灵感") : L("已删除记录"), actionTitle: L("撤销")) {
                 do { try repository.updateLog(log) }
                 catch {
                     FlashLog.failure("undo_delete_failed", error)
-                    errorMessage = "撤销失败，请重试"
+                    errorMessage = L("撤销失败，请重试")
                 }
             }
         } catch {
             FlashLog.failure("log_delete_failed", error)
-            errorMessage = "删除失败，请重试"
+            errorMessage = L("删除失败，请重试")
         }
     }
 
@@ -280,22 +279,35 @@ struct HomeView: View {
     /// 任务入库 + 异步安排系统提醒（TaskSaving 与记录页、日历页同一契约）
     @discardableResult
     private func saveTask(_ task: TaskItem) -> Bool {
-        guard let repository else { errorMessage = "内部错误：存储未就绪"; return false }
+        guard let repository else { errorMessage = L("内部错误：存储未就绪"); return false }
         do {
             try repository.saveTask(task)
-            toast = FlashToast("✓ 已保存任务")
+            toast = FlashToast(L("✓ 已保存任务"))
             Task {
                 if let warning = await TaskSaving.scheduleReminder(for: task) { errorMessage = warning }
             }
             return true
         } catch {
             FlashLog.failure("task_save_failed", error)
-            errorMessage = "任务保存失败，请重试"
+            errorMessage = L("任务保存失败，请重试")
             return false
         }
     }
 
     private var errorPresented: Binding<Bool> {
         Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })
+    }
+}
+
+/// 最近闪念里的灵感卡身后错开一张便签底页
+private struct StickyIfIdea: ViewModifier {
+    let log: LogItem
+
+    func body(content: Content) -> some View {
+        if log.category == .idea {
+            content.flashStickyStack(seed: log.id)
+        } else {
+            content
+        }
     }
 }

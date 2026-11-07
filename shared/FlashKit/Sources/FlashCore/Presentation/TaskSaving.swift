@@ -13,9 +13,9 @@ public enum TaskSaving {
     public static func scheduleReminder(for task: TaskItem) async -> String? {
         do {
             try await TaskReminderScheduler.shared.schedule(task)
-            return TaskReminderScheduler.hasPastReminder(task) ? "任务已保存，但提醒时间已过，将不会提醒" : nil
+            return TaskReminderScheduler.hasPastReminder(task) ? L("任务已保存，但提醒时间已过，将不会提醒") : nil
         } catch {
-            return "任务已保存，但系统提醒未启用"
+            return L("任务已保存，但系统提醒未启用")
         }
     }
 }

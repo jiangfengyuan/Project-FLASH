@@ -50,7 +50,7 @@ public final class HomeViewModel {
 
     /// 无情绪记录时的占位快照
     private static let placeholderSnapshot = EmotionSnapshot(
-        emoji: "🙂", title: "还没有记录", summary: "记录第一条情绪吧",
+        emoji: "🙂", title: L("还没有记录"), summary: L("记录第一条情绪吧"),
         points: Array(repeating: nil, count: 7))
 
     public init(logs: [LogItem] = [], emotions: [EmotionRecord] = [], today: Date = Date()) {
@@ -94,14 +94,14 @@ public final class HomeViewModel {
         let summary: String
         if let average = last7EmotionAverage() {
             if average >= 3.5 {
-                summary = "本周整体偏积极"
+                summary = L("本周整体偏积极")
             } else if average <= 2.5 {
-                summary = "本周情绪偏低落"
+                summary = L("本周情绪偏低落")
             } else {
-                summary = "本周情绪平稳"
+                summary = L("本周情绪平稳")
             }
         } else {
-            summary = "本周暂无记录"
+            summary = L("本周暂无记录")
         }
         return EmotionSnapshot(emoji: latest.level.emoji,
                                title: latest.level.displayName,

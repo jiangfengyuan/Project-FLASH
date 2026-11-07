@@ -29,7 +29,7 @@ public struct GlassCard<Content: View>: View {
 
     private var surface: some ShapeStyle {
         #if os(iOS)
-        // 暖调手作：与实色卡同一张纸白卡面（不再用系统冷灰控件底）
+        // 纸上书写：与实色卡同一张纸白卡面（不再用系统冷灰控件底）
         BrandColors.cardSurface
         #else
         // 浅色：极浅灰白；深色：深色控件底，两者都足够「内容优先」
@@ -91,7 +91,7 @@ public struct GlassCard<Content: View>: View {
                 .font(Typography.secondary)
                 .foregroundStyle(Color.secondary)
         }
-        .padding(Spacing.md)
+        .padding(Spacing.card)
     }
     .padding(Spacing.lg)
 }

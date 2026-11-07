@@ -1,0 +1,434 @@
+{
+  "name": "Paper-Writing",
+  "version": 1,
+  "colors": {
+    "pageBackground": {
+      "light": "#FFF9ED",
+      "dark": "#1F1A16"
+    },
+    "cardSurface": {
+      "light": "#FFFDF6",
+      "dark": "#2B2520"
+    },
+    "weakSurface": {
+      "light": "#F3EADA",
+      "dark": "#362E28"
+    },
+    "parchment": {
+      "light": "#EADFCB",
+      "dark": "#40372F"
+    },
+    "weakBorder": {
+      "light": "#E4D8C2",
+      "dark": "#4A4039"
+    },
+    "textPrimary": {
+      "light": "#2E2A26",
+      "dark": "#F4ECDF"
+    },
+    "textSecondary": {
+      "light": "#5E5044",
+      "dark": "#BFB2A3"
+    },
+    "textTertiary": {
+      "light": "#6B655E",
+      "dark": "#A89C8F"
+    },
+    "brandPrimary": {
+      "light": "#A84A24",
+      "dark": "#E9926C"
+    },
+    "onBrandPrimary": {
+      "light": "#FFFDF6",
+      "dark": "#26201B"
+    },
+    "brandFill": {
+      "light": "#D0683C",
+      "dark": "#E9926C"
+    },
+    "chipSelectedBackground": {
+      "light": "#2E2A26",
+      "dark": "#F4ECDF"
+    },
+    "chipSelectedForeground": {
+      "light": "#FFFDF6",
+      "dark": "#26201B"
+    },
+    "logPurple": {
+      "light": "#8A6A9E",
+      "dark": "#B79BC9"
+    },
+    "ideaYellow": {
+      "light": "#A9812A",
+      "dark": "#DDB565"
+    },
+    "ideaYellowText": {
+      "light": "#7A5A12",
+      "dark": "#DDB565"
+    },
+    "calendarGreen": {
+      "light": "#74906B",
+      "dark": "#A6C09C"
+    },
+    "accessibleGreen": {
+      "light": "#55714F",
+      "dark": "#A6C09C"
+    },
+    "emotionPink": {
+      "light": "#B47A80",
+      "dark": "#D9A5A8"
+    },
+    "emotionPinkText": {
+      "light": "#9C5560",
+      "dark": "#D9A5A8"
+    },
+    "destructive": {
+      "light": "#A63A2E",
+      "dark": "#E89A8E"
+    },
+    "shadowTint": {
+      "light": "#3B2A1E",
+      "dark": "#120D0A"
+    },
+    "scrim": {
+      "light": "#3B2A1E",
+      "dark": "#120D0A"
+    }
+  },
+  "tags": {
+    "urgent": {
+      "fill": {
+        "light": "#C96A5E",
+        "dark": "#DB8C80"
+      },
+      "text": {
+        "light": "#A63A2E",
+        "dark": "#E89A8E"
+      }
+    },
+    "inspiration": {
+      "fill": {
+        "light": "#D6B04E",
+        "dark": "#C9A54F"
+      },
+      "text": {
+        "light": "#7A5A12",
+        "dark": "#DDB565"
+      }
+    },
+    "daily": {
+      "fill": {
+        "light": "#6E8FB3",
+        "dark": "#8FA9C6"
+      },
+      "text": {
+        "light": "#476A8F",
+        "dark": "#A5BBD3"
+      }
+    },
+    "memo": {
+      "fill": {
+        "light": "#7FA276",
+        "dark": "#9DB894"
+      },
+      "text": {
+        "light": "#55714F",
+        "dark": "#A6C09C"
+      }
+    },
+    "emotion": {
+      "fill": {
+        "light": "#94739F",
+        "dark": "#B79BC9"
+      },
+      "text": {
+        "light": "#7A5A86",
+        "dark": "#C4ACD3"
+      }
+    },
+    "idea": {
+      "fill": {
+        "light": "#D08A4E",
+        "dark": "#DDA26E"
+      },
+      "text": {
+        "light": "#94531C",
+        "dark": "#E5B288"
+      }
+    }
+  },
+  "moods": {
+    "-3": {
+      "light": "#7A5A86",
+      "dark": "#A98BB5"
+    },
+    "-2": {
+      "light": "#B08FB8",
+      "dark": "#C3A8CB"
+    },
+    "-1": {
+      "light": "#9FB0C3",
+      "dark": "#A5B5C7"
+    },
+    "0": {
+      "light": "#A9C7C8",
+      "dark": "#A3C2C3"
+    },
+    "1": {
+      "light": "#A5C49A",
+      "dark": "#9DBB92"
+    },
+    "2": {
+      "light": "#DDC57A",
+      "dark": "#DCC47C"
+    },
+    "3": {
+      "light": "#E0A25E",
+      "dark": "#E3A768"
+    }
+  },
+  "subEmotions": {
+    "sad": {
+      "light": "#A393C2",
+      "dark": "#BCAED4"
+    },
+    "angry": {
+      "light": "#C97B70",
+      "dark": "#DB9A90"
+    },
+    "uncomfortable": {
+      "light": "#D59A62",
+      "dark": "#E0AF80"
+    }
+  },
+  "contrast": [
+    {
+      "fg": "textPrimary",
+      "bg": [
+        "pageBackground",
+        "cardSurface",
+        "weakSurface",
+        "parchment"
+      ],
+      "min": 4.5
+    },
+    {
+      "fg": "textSecondary",
+      "bg": [
+        "pageBackground",
+        "cardSurface",
+        "weakSurface",
+        "parchment"
+      ],
+      "min": 4.5
+    },
+    {
+      "fg": "textTertiary",
+      "bg": [
+        "pageBackground",
+        "cardSurface",
+        "weakSurface"
+      ],
+      "min": 4.5
+    },
+    {
+      "fg": "brandPrimary",
+      "bg": [
+        "pageBackground",
+        "cardSurface",
+        "weakSurface"
+      ],
+      "min": 4.5
+    },
+    {
+      "fg": "ideaYellowText",
+      "bg": [
+        "pageBackground",
+        "cardSurface",
+        "weakSurface"
+      ],
+      "min": 4.5
+    },
+    {
+      "fg": "accessibleGreen",
+      "bg": [
+        "pageBackground",
+        "cardSurface",
+        "weakSurface"
+      ],
+      "min": 4.5
+    },
+    {
+      "fg": "emotionPinkText",
+      "bg": [
+        "pageBackground",
+        "cardSurface",
+        "weakSurface"
+      ],
+      "min": 4.5
+    },
+    {
+      "fg": "destructive",
+      "bg": [
+        "pageBackground",
+        "cardSurface",
+        "weakSurface"
+      ],
+      "min": 4.5
+    },
+    {
+      "fg": "onBrandPrimary",
+      "bg": [
+        "brandPrimary"
+      ],
+      "min": 4.5
+    },
+    {
+      "fg": "chipSelectedForeground",
+      "bg": [
+        "chipSelectedBackground"
+      ],
+      "min": 4.5
+    },
+    {
+      "fg": "logPurple",
+      "bg": [
+        "pageBackground",
+        "cardSurface"
+      ],
+      "min": 3.0
+    },
+    {
+      "fg": "ideaYellow",
+      "bg": [
+        "pageBackground",
+        "cardSurface"
+      ],
+      "min": 3.0
+    },
+    {
+      "fg": "calendarGreen",
+      "bg": [
+        "pageBackground",
+        "cardSurface"
+      ],
+      "min": 3.0
+    },
+    {
+      "fg": "emotionPink",
+      "bg": [
+        "pageBackground",
+        "cardSurface"
+      ],
+      "min": 3.0
+    },
+    {
+      "fg": "brandFill",
+      "bg": [
+        "pageBackground",
+        "cardSurface"
+      ],
+      "min": 3.0
+    }
+  ],
+  "spacing": {
+    "xxs": 4,
+    "xs": 8,
+    "sm": 12,
+    "md": 16,
+    "lg": 24,
+    "xl": 32,
+    "xxl": 48,
+    "pageGutter": 20,
+    "pageGutterCompact": 16,
+    "cardPadding": 20
+  },
+  "radius": {
+    "hairline": 4,
+    "control": 6,
+    "field": 12,
+    "panel": 14,
+    "row": 16,
+    "cardSmall": 20,
+    "card": 24,
+    "focus": 32
+  },
+  "shadow": {
+    "card": {
+      "radius": 28,
+      "y": 12,
+      "opacityLight": 0.08,
+      "opacityDark": 0.34
+    },
+    "elevated": {
+      "radius": 36,
+      "y": 16,
+      "opacityLight": 0.12,
+      "opacityDark": 0.42
+    }
+  },
+  "vellumOpacity": 0.92,
+  "underSheetOpacity": 0.7,
+  "bodyLineHeight": 1.5,
+  "tornEdge": {
+    "amplitude": 2.4,
+    "step": 7
+  },
+  "jitterVectors": [
+    {
+      "seed": "flash-paper",
+      "values": [
+        -0.982233670567,
+        0.368487652795,
+        -0.775967391526,
+        0.266966294388,
+        0.091149286118,
+        -0.514202902023
+      ]
+    },
+    {
+      "seed": "greeting",
+      "values": [
+        -0.874910726782,
+        0.001605837378,
+        0.994395751895,
+        -0.626196844578,
+        0.548171099762,
+        -0.430429007954
+      ]
+    },
+    {
+      "seed": "divider",
+      "values": [
+        0.213430027025,
+        -0.493921076812,
+        0.467724740845,
+        0.959495160697,
+        -0.044455513836,
+        -0.683175029768
+      ]
+    },
+    {
+      "seed": "闪念",
+      "values": [
+        0.380059831804,
+        0.214518968611,
+        -0.634469463858,
+        0.38034835957,
+        0.59299632763,
+        0.097051314227
+      ]
+    },
+    {
+      "seed": "",
+      "values": [
+        0.527389050191,
+        -0.874607720993,
+        -0.337779353407,
+        -0.653150316727,
+        -0.209798218155,
+        0.937084757923
+      ]
+    }
+  ]
+}

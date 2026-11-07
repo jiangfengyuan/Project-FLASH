@@ -42,7 +42,7 @@ public struct LogFlowView: View {
             VStack(spacing: 10) { // 10：工具区行距特调（xs 偏紧、sm 偏松）
                 HStack(spacing: Spacing.xs) {
                     // 「已收藏」胶囊：FilterChipView 标准样式（星标金点缀，与记录页一致）
-                    FilterChipView(title: "已收藏", isSelected: filter.favoritesOnly,
+                    FilterChipView(title: L("已收藏"), isSelected: filter.favoritesOnly,
                                    accent: BrandColors.ideaYellow,
                                    accentText: BrandColors.ideaYellowText) {
                         filter.favoritesOnly.toggle()
@@ -92,15 +92,15 @@ public struct LogFlowView: View {
                 if logEntities.isEmpty {
                     EmptyStateView(
                         systemImage: "square.and.pencil",
-                        title: "今天还没有故事。",
-                        message: "在「此刻」页写下第一条记录",
+                        title: L("今天还没有故事。"),
+                        message: L("在「此刻」页写下第一条记录"),
                         iconTint: BrandColors.logPurple
                     )
                 } else {
                     EmptyStateView(
                         systemImage: "magnifyingglass",
-                        title: "没有匹配的记录",
-                        message: "换个关键词或调整筛选条件试试。"
+                        title: L("没有匹配的记录"),
+                        message: L("换个关键词或调整筛选条件试试。")
                     )
                 }
             } else {
@@ -113,14 +113,14 @@ public struct LogFlowView: View {
                                         onToggleFavorite: { toggleFavorite(log) })
                                 .contextMenu {
                                     Button("编辑…") { editingLog = log }
-                                    Button(log.isFavorite == true ? "取消收藏" : "收藏") {
+                                    Button(log.isFavorite == true ? L("取消收藏") : L("收藏")) {
                                         toggleFavorite(log)
                                     }
                                     Button("删除", role: .destructive) { deletingLog = log }
                                 }
                         }
                     }
-                    .padding(Spacing.md)
+                    .padding(Spacing.card)
                     // 列表插入/删除/筛选切换统一 Motion.soft；行重排走默认 move
                     .animation(Motion.soft(reduceMotion), value: filtered)
                 }
@@ -129,7 +129,7 @@ public struct LogFlowView: View {
         }
         // 空态 ↔ 列表切换的过渡动画
         .animation(Motion.soft(reduceMotion), value: filtered.isEmpty)
-        .searchable(text: $searchInput, placement: .toolbar, prompt: "搜索记录内容")
+        .searchable(text: $searchInput, placement: .toolbar, prompt: L("搜索记录内容"))
         // 搜索防抖：清空立即生效（语义不变），输入停顿 200ms 后才驱动全表过滤排序
         .task(id: searchInput) {
             if searchInput.isEmpty {
@@ -151,7 +151,7 @@ public struct LogFlowView: View {
                     do { try repository?.deleteLog(id: log.id) }
                     catch {
                         FlashLog.failure("log_delete_failed", error)
-                        errorMessage = "删除失败，请重试"
+                        errorMessage = L("删除失败，请重试")
                     }
                 }
             }
@@ -191,7 +191,7 @@ public struct LogFlowView: View {
         do { try repository?.setLogFavorite(id: log.id, !(log.isFavorite ?? false)) }
         catch {
             FlashLog.failure("favorite_toggle_failed", error)
-            errorMessage = "操作失败，请重试"
+            errorMessage = L("操作失败，请重试")
         }
     }
 

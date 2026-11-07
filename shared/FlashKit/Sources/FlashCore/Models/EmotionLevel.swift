@@ -19,13 +19,13 @@ public enum EmotionLevel: Int, CaseIterable, Codable, Sendable {
 
     public var displayName: String {
         switch self {
-        case .veryUnhappy: "非常不开心"
-        case .unhappy: "很不开心"
-        case .slightlyUnhappy: "不开心"
-        case .neutral: "中性"
-        case .slightlyHappy: "开心"
-        case .happy: "很开心"
-        case .veryHappy: "非常开心"
+        case .veryUnhappy: L("非常不开心")
+        case .unhappy: L("很不开心")
+        case .slightlyUnhappy: L("不开心")
+        case .neutral: L("中性")
+        case .slightlyHappy: L("开心")
+        case .happy: L("很开心")
+        case .veryHappy: L("非常开心")
         }
     }
 

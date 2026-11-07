@@ -13,9 +13,9 @@ public enum SearchMatchKind: String, Equatable, Sendable {
     /// 结果列表的类型徽章文案
     public var displayName: String {
         switch self {
-        case .log: "记录"
-        case .emotion: "情绪"
-        case .task: "任务"
+        case .log: L("记录")
+        case .emotion: L("情绪")
+        case .task: L("任务")
         }
     }
 }

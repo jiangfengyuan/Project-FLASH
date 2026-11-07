@@ -46,7 +46,7 @@ struct FlashApp: App {
         UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
         // 任务提醒通知上的「完成 / 稍后 10 分钟」
         TaskReminderScheduler.registerCategories()
-        // 暖调手作主题：导航栏标题字体与颜色
+        // 纸上书写：导航栏标题字体与颜色
         CraftedAppearance.apply()
     }
 
@@ -83,7 +83,7 @@ struct FlashApp: App {
                         // 用户拒绝通知权限只影响系统提醒，不误报存储故障
                     } catch {
                         appState.databaseFallbackMessage =
-                            "无法读取任务并恢复系统提醒；本地内容仍然安全，请稍后重启应用重试"
+                            L("无法读取任务并恢复系统提醒；本地内容仍然安全，请稍后重启应用重试")
                     }
                 }
         }

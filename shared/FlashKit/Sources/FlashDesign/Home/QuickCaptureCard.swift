@@ -38,8 +38,8 @@ public struct QuickCaptureCard: View {
             VStack(alignment: .leading, spacing: Spacing.sm) {
                 HStack {
                     SegmentedPicker(selection: $category, options: [
-                        .init(value: Category.log, title: "日志"),
-                        .init(value: Category.idea, title: "灵感"),
+                        .init(value: Category.log, title: L("日志")),
+                        .init(value: Category.idea, title: L("灵感")),
                     ])
                     .frame(maxWidth: 220) // 分段控件固有宽度（几何值）
                     // 四模块色：分段选中色跟随类别（日志紫 / 灵感黄）
@@ -65,7 +65,7 @@ public struct QuickCaptureCard: View {
                         .animation(Motion.quick(reduceMotion), value: hasDraft)
                 }
             }
-            .padding(Spacing.md)
+            .padding(Spacing.card)
         }
         .cardFloat(reduceMotion: reduceMotion)
     }

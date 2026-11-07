@@ -11,6 +11,19 @@ import FlashCore
 /// 以下扩展保持与历史实现完全相同的 `color` API 与色值来源（colorHex/darkColorHex），
 /// 所有 View 与测试无需改动。
 extension ColorTag {
+    #if os(iOS)
+    /// iOS 纸上书写：低饱和显示色（备份只存键名，不受影响）
+    public var color: Color { paperColor(\.fill) }
+    /// 小号文字用的可读变体（纸面上 ≥ 4.5:1）
+    public var textColor: Color { paperColor(\.text) }
+
+    private func paperColor(_ keyPath: KeyPath<PaperPalette.TagTone, PaperPalette.Pair>) -> Color {
+        guard let pair = PaperPalette.tags[rawValue]?[keyPath: keyPath] else {
+            return BrandColors.dynamic(light: colorHex, dark: darkColorHex)
+        }
+        return BrandColors.dynamic(light: pair.light, dark: pair.dark)
+    }
+    #else
     /// 跟随系统外观的动态色（light/dark 双变体）
     public var color: Color { BrandColors.dynamic(light: colorHex, dark: darkColorHex) }
 
@@ -30,14 +43,33 @@ extension ColorTag {
         case .idea: "#B46300"
         }
     }
+    #endif
 }
 
 extension EmotionLevel {
     /// 跟随系统外观的动态色（light/dark 双变体）
+    #if os(iOS)
+    public var color: Color {
+        guard let pair = PaperPalette.moods[rawValue] else {
+            return BrandColors.dynamic(light: colorHex, dark: darkColorHex)
+        }
+        return BrandColors.dynamic(light: pair.light, dark: pair.dark)
+    }
+    #else
     public var color: Color { BrandColors.dynamic(light: colorHex, dark: darkColorHex) }
+    #endif
 }
 
 extension SubEmotion {
     /// 跟随系统外观的动态色（light/dark 双变体）
+    #if os(iOS)
+    public var color: Color {
+        guard let pair = PaperPalette.subEmotions[rawValue] else {
+            return BrandColors.dynamic(light: colorHex, dark: darkColorHex)
+        }
+        return BrandColors.dynamic(light: pair.light, dark: pair.dark)
+    }
+    #else
     public var color: Color { BrandColors.dynamic(light: colorHex, dark: darkColorHex) }
+    #endif
 }

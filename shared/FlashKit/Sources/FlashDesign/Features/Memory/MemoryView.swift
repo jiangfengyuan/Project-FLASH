@@ -50,8 +50,8 @@ public struct MemoryView: View {
                 // PRD §34：Memory 空态文案
                 EmptyStateView(
                     systemImage: "clock.arrow.circlepath",
-                    title: "再记录一点，未来的你会看到。",
-                    message: "这一周还没有记录",
+                    title: L("再记录一点，未来的你会看到。"),
+                    message: L("这一周还没有记录"),
                     iconTint: BrandColors.logPurple
                 )
             }
@@ -153,9 +153,8 @@ public struct MemoryView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(20) // 情绪卡内边距：md 与 lg 之间的特调值
-                    .background(BrandColors.cardSurface)
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.card))
-                    .flashCardShadow()
+                    .flashPaperCard(seed: "memory")
+                    .flashMacCardShadow()
                 }
 
                 if !report.highlights.isEmpty {
@@ -164,15 +163,14 @@ public struct MemoryView: View {
                         ForEach(Array(report.highlights.enumerated()), id: \.offset) { _, title in
                             HStack(alignment: .firstTextBaseline, spacing: Spacing.xs) {
                                 Text("•").foregroundStyle(.secondary)
-                                Text(title).font(Typography.body)
+                                Text(title).font(Typography.quote).lineLimit(2)
                             }
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(20) // 亮点卡内边距：md 与 lg 之间的特调值
-                    .background(BrandColors.cardSurface)
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.card))
-                    .flashCardShadow()
+                    .flashPaperCard(seed: "memory")
+                    .flashMacCardShadow()
                 }
 
                 Text("A week worth remembering. ✦")
@@ -205,8 +203,7 @@ public struct MemoryView: View {
         // 同行卡片等高（HStack 由 fixedSize 定高，Grid 由行高定高）
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .accessibilityElement(children: .combine)
-        .background(BrandColors.cardSurface)
-        .clipShape(RoundedRectangle(cornerRadius: Radius.card))
+        .flashPaperCard(seed: "memory")
         .overlay {
             RoundedRectangle(cornerRadius: Radius.card)
                 .stroke(BrandColors.weakBorder, lineWidth: 0.5)

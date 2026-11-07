@@ -39,7 +39,7 @@ public struct LogEditSheet: View {
     @State private var errorMessage: String? = nil
     @FocusState private var contentFocused: Bool
 
-    public init(log: LogItem, title: String = "编辑记录",
+    public init(log: LogItem, title: String = L("编辑记录"),
          onSave: @escaping (LogItem) async throws -> Void,
          onConvertToTask: ((LogItem) -> Void)? = nil) {
         self.log = log
@@ -78,11 +78,11 @@ public struct LogEditSheet: View {
                     .staggeredIn(index: 0, appeared: appeared, reduceMotion: reduceMotion)
                 #endif
 
-                FormSection("正文与类型") {
+                FormSection(L("正文与类型")) {
                     VStack(alignment: .leading, spacing: Spacing.sm) {
                         SegmentedPicker(selection: $category, options: [
-                            .init(value: Category.log, title: "日志"),
-                            .init(value: Category.idea, title: "灵感"),
+                            .init(value: Category.log, title: L("日志")),
+                            .init(value: Category.idea, title: L("灵感")),
                         ])
                         .frame(maxWidth: 220) // 分段控件固有宽度（几何值）
                         // 四模块色：分段选中色跟随类别（日志紫 / 灵感黄）
@@ -118,11 +118,11 @@ public struct LogEditSheet: View {
                                 .foregroundStyle(BrandColors.destructive)
                         }
                     }
-                    .padding(Spacing.md)
+                    .padding(Spacing.card)
                 }
                 .staggeredIn(index: 1, appeared: appeared, reduceMotion: reduceMotion)
 
-                FormSection("标签、重要度、日期") {
+                FormSection(L("标签、重要度、日期")) {
                     VStack(alignment: .leading, spacing: Spacing.sm) {
                         Picker("标签", selection: $colorTag) {
                             ForEach(ColorTag.allCases, id: \.self) { Text($0.displayName).tag($0) }
@@ -146,7 +146,7 @@ public struct LogEditSheet: View {
                         Toggle("收藏", isOn: $isFavorite)
                             .flashCheckboxToggleStyle()
                     }
-                    .padding(Spacing.md)
+                    .padding(Spacing.card)
                 }
                 .staggeredIn(index: 2, appeared: appeared, reduceMotion: reduceMotion)
 
@@ -170,14 +170,14 @@ public struct LogEditSheet: View {
                         Button("取消") { close() }
                             .disabled(isSaving)
                             .keyboardShortcut(.cancelAction)
-                        Button(isSaving ? "保存中…" : "保存") { save() }
+                        Button(isSaving ? L("保存中…") : L("保存")) { save() }
                             .buttonStyle(.borderedProminent)
                             .tint(BrandColors.brandPrimary)
                             .keyboardShortcut(.return, modifiers: .command)
                             .disabled(content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                                       || contentExceedsLimit || isSaving)
                             .help(content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                                  ? "正文为空，无法保存" : "")
+                                  ? L("正文为空，无法保存") : "")
                         #endif
                     }
                 }
@@ -193,7 +193,7 @@ public struct LogEditSheet: View {
         }
         .flashPanelWidth(480) // 编辑面板固有宽度（几何值，仅 macOS）
         .flashPageBackground()
-        .flashEditorChrome(title: title, saveTitle: isSaving ? "保存中…" : "保存",
+        .flashEditorChrome(title: title, saveTitle: isSaving ? L("保存中…") : L("保存"),
                            saveDisabled: content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                                || contentExceedsLimit || isSaving || saved,
                            onCancel: close, onSave: save)
@@ -260,7 +260,7 @@ public struct LogEditSheet: View {
             } catch {
                 await MainActor.run {
                     isSaving = false
-                    self.errorMessage = "保存失败，请重试"
+                    self.errorMessage = L("保存失败，请重试")
                 }
             }
         }

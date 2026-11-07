@@ -29,7 +29,7 @@ public struct HomeTodayOverviewCard: View {
     }
 
     public var body: some View {
-        SolidCard {
+        SolidCard(seed: "today", frayed: true) {
             // 三档，依次取第一个放得下的，标签永远完整显示（不截断成「今日…」「还没…」）：
             // 1. 宽：图标在左、数值/标签在右（macOS 主窗口原样）
             // 2. 紧凑：图标与数值同行、标签在下，列距收紧（iPhone 竖屏常规字号）
@@ -54,8 +54,9 @@ public struct HomeTodayOverviewCard: View {
                     }
                 }
             }
-            .padding(Spacing.md)
+            .padding(Spacing.card)
             .frame(maxWidth: .infinity, alignment: .leading)
+            .flashFoldedLetter()
         }
     }
 
@@ -69,9 +70,9 @@ public struct HomeTodayOverviewCard: View {
     private var entries: [Entry] {
         [
             Entry(icon: "square.and.pencil", tint: BrandColors.logPurple,
-                  value: "\(recordCount)", label: "今日记录"),
+                  value: "\(recordCount)", label: L("今日记录")),
             Entry(icon: "checkmark.circle", tint: BrandColors.calendarGreen,
-                  value: "\(openTaskCount)", label: "待办"),
+                  value: "\(openTaskCount)", label: L("待办")),
             Entry(icon: "face.smiling", tint: BrandColors.emotionPink,
                   value: emotionEmoji, label: emotionTitle),
         ]
@@ -152,6 +153,6 @@ public struct HomeTodayOverviewCard: View {
     HomeTodayOverviewCard(recordCount: 0, openTaskCount: 0,
                           emotionEmoji: "🙂", emotionTitle: "还没有记录")
         .frame(width: 370)
-        .padding(Spacing.md)
+        .padding(Spacing.card)
         .flashPageBackground()
 }

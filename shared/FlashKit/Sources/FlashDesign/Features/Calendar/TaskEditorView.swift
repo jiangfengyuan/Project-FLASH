@@ -51,17 +51,17 @@ public struct TaskEditorView: View {
             Group {
                 Section { fields }
             }
-            // 暖调手作：分组行用纸白卡面（macOS 不变）
+            // 纸上书写：分组行用纸白卡面（macOS 不变）
             .flashFormRowBackground()
         }
         .scrollContentBackground(.hidden)
         .flashPageBackground()
-        .flashEditorChrome(title: task == nil ? "新建任务" : "编辑任务", saveDisabled: saveDisabled,
+        .flashEditorChrome(title: task == nil ? L("新建任务") : L("编辑任务"), saveDisabled: saveDisabled,
                            onCancel: { dismiss() }, onSave: { onSave(makeTask()) })
         .environment(\.timeZone, editorTimeZone)
         #else
         VStack(alignment: .leading, spacing: Spacing.md) {
-            Text(task == nil ? "新建任务" : "编辑任务").font(Typography.sectionTitle)
+            Text(task == nil ? L("新建任务") : L("编辑任务")).font(Typography.sectionTitle)
             fields
             HStack {
                 Button("取消") { dismiss() }

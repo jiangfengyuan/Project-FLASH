@@ -77,7 +77,7 @@ public struct StatsView: View {
         return ScrollView {
             VStack(alignment: .leading, spacing: Spacing.lg) {
                 Picker("时间范围", selection: $window) {
-                    ForEach(ReviewWindow.allCases) { Text($0.rawValue).tag($0) }
+                    ForEach(ReviewWindow.allCases) { Text($0.title).tag($0) }
                 }.pickerStyle(.segmented).frame(maxWidth: 400) // 窗口选择器最大宽度（几何值）
 
                 VStack(alignment: .leading, spacing: Spacing.xs) {
@@ -90,8 +90,7 @@ public struct StatsView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(20) // 洞察卡内边距：md 与 lg 之间的特调值
-                .background(BrandColors.cardSurface)
-                .clipShape(RoundedRectangle(cornerRadius: Radius.card))
+                .flashPaperCard(seed: "stats")
 
                 activityChart(stats.activity)
                 Text("累计概览 · 全部时间").font(Typography.blockTitle)
@@ -99,20 +98,20 @@ public struct StatsView: View {
                 // 一行四列放不下（iPhone 竖屏）时退为 2×2，数字与标签不被挤压截断
                 ViewThatFits(in: .horizontal) {
                     HStack(spacing: Spacing.sm) {
-                        kpiCard("累计日志", stats.totalLogs, "note.text", tint: BrandColors.logPurple, index: 0)
-                        kpiCard("累计灵感", stats.totalIdeas, "lightbulb", tint: BrandColors.ideaYellow, index: 1)
-                        kpiCard("累计情绪", stats.totalEmotions, "face.smiling", tint: BrandColors.emotionPink, index: 2)
-                        kpiCard("活跃天数", stats.activeDays, "calendar", tint: BrandColors.calendarGreen, index: 3)
+                        kpiCard(L("累计日志"), stats.totalLogs, "note.text", tint: BrandColors.logPurple, index: 0)
+                        kpiCard(L("累计灵感"), stats.totalIdeas, "lightbulb", tint: BrandColors.ideaYellow, index: 1)
+                        kpiCard(L("累计情绪"), stats.totalEmotions, "face.smiling", tint: BrandColors.emotionPink, index: 2)
+                        kpiCard(L("活跃天数"), stats.activeDays, "calendar", tint: BrandColors.calendarGreen, index: 3)
                     }
                     .frame(minWidth: 520) // 四列各约 120pt 才不挤压（几何值）
                     Grid(horizontalSpacing: Spacing.sm, verticalSpacing: Spacing.sm) {
                         GridRow {
-                            kpiCard("累计日志", stats.totalLogs, "note.text", tint: BrandColors.logPurple, index: 0)
-                            kpiCard("累计灵感", stats.totalIdeas, "lightbulb", tint: BrandColors.ideaYellow, index: 1)
+                            kpiCard(L("累计日志"), stats.totalLogs, "note.text", tint: BrandColors.logPurple, index: 0)
+                            kpiCard(L("累计灵感"), stats.totalIdeas, "lightbulb", tint: BrandColors.ideaYellow, index: 1)
                         }
                         GridRow {
-                            kpiCard("累计情绪", stats.totalEmotions, "face.smiling", tint: BrandColors.emotionPink, index: 2)
-                            kpiCard("活跃天数", stats.activeDays, "calendar", tint: BrandColors.calendarGreen, index: 3)
+                            kpiCard(L("累计情绪"), stats.totalEmotions, "face.smiling", tint: BrandColors.emotionPink, index: 2)
+                            kpiCard(L("活跃天数"), stats.activeDays, "calendar", tint: BrandColors.calendarGreen, index: 3)
                         }
                     }
                 }
@@ -123,19 +122,19 @@ public struct StatsView: View {
                         Text("情绪趋势 · 日均值").font(Typography.blockTitle)
                         Text("-3 至 +3，0 为中性；无记录日期不计入均值").font(Typography.caption).foregroundStyle(.secondary)
                         Chart {
-                            RuleMark(y: .value("中性", 0))
+                            RuleMark(y: .value(L("中性"), 0))
                                 .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
                                 .foregroundStyle(BrandColors.weakBorder)
                             ForEach(Array(daily.enumerated()), id: \.offset) { _, item in
                                 if let average = item.average {
                                     LineMark(
-                                        x: .value("日期", item.date),
-                                        y: .value("均值", average)
+                                        x: .value(L("日期"), item.date),
+                                        y: .value(L("均值"), average)
                                     )
                                     .foregroundStyle(BrandColors.accent)
                                     PointMark(
-                                        x: .value("日期", item.date),
-                                        y: .value("均值", average)
+                                        x: .value(L("日期"), item.date),
+                                        y: .value(L("均值"), average)
                                     )
                                     .foregroundStyle(BrandColors.accent)
                                 }
@@ -157,8 +156,8 @@ public struct StatsView: View {
                                 .font(Typography.caption).foregroundStyle(.secondary)
                             Chart(stats.distribution, id: \.name) { item in
                                 BarMark(
-                                    x: .value("次数", item.count),
-                                    y: .value("类型", item.name)
+                                    x: .value(L("次数"), item.count),
+                                    y: .value(L("类型"), item.name)
                                 )
                                 .foregroundStyle(BrandColors.brandPrimary)
                                 .cornerRadius(Radius.hairline)
@@ -175,8 +174,8 @@ public struct StatsView: View {
                     // PRD §34：回顾页空态用品牌化 EmptyStateView（内置 .appear 过渡）
                     EmptyStateView(
                         systemImage: "chart.line.uptrend.xyaxis",
-                        title: "再记录一点，未来的你会看到。",
-                        message: "先在「情绪」页记录几天吧",
+                        title: L("再记录一点，未来的你会看到。"),
+                        message: L("先在「情绪」页记录几天吧"),
                         iconTint: BrandColors.emotionPink
                     )
                     .frame(minHeight: 180) // 嵌入 ScrollView 内容流，给空态最小高度
@@ -289,7 +288,7 @@ public struct StatsView: View {
             Text("每天的日志、灵感与情绪次数 · 不含任务").font(Typography.caption).foregroundStyle(.secondary)
             Text("\(active) 个活跃日 · 共 \(days.reduce(0) { $0 + $1.total }) 次")
             Chart(days) { day in
-                BarMark(x: .value("日期", day.date), y: .value("次数", day.total))
+                BarMark(x: .value(L("日期"), day.date), y: .value(L("次数"), day.total))
                     .foregroundStyle(BrandColors.brandPrimary)
                     .accessibilityLabel(day.date)
                     .accessibilityValue("\(day.records) 条记录，\(day.emotions) 次情绪")
@@ -307,16 +306,15 @@ public struct StatsView: View {
             }
         }
         .padding(20) // 图表卡内边距：md 与 lg 之间的特调值
-        .background(BrandColors.cardSurface)
-        .clipShape(RoundedRectangle(cornerRadius: Radius.card))
+        .flashPaperCard(seed: "stats")
     }
 
     /// 洞察卡数据行：记录数 + 情绪均值（有情绪记录时）
     private func insightDataLine(comparison: ReviewInsights.Comparison,
                                  logs: Int, emotions: Int) -> String {
-        var line = "\(logs) 条记录 · \(emotions) 次情绪"
+        var line = L("\(logs) 条记录 · \(emotions) 次情绪")
         if let average = comparison.currentEmotionAverage {
-            line += " · 情绪均值 \(formatAverage(average))"
+            line += L(" · 情绪均值 \(formatAverage(average))")
         }
         return line
     }
@@ -343,8 +341,7 @@ public struct StatsView: View {
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)
         .padding(.vertical, Spacing.md)
-        .background(BrandColors.cardSurface)
-        .clipShape(RoundedRectangle(cornerRadius: Radius.card))
+        .flashPaperCard(seed: "stats")
         .overlay {
             RoundedRectangle(cornerRadius: Radius.card)
                 .stroke(BrandColors.weakBorder, lineWidth: 0.5)

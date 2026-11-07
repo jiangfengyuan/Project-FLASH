@@ -13,10 +13,10 @@ public enum ExploreFilter: String, CaseIterable, Sendable {
 
     public var displayName: String {
         switch self {
-        case .all: "全部"
-        case .log: "日志"
-        case .idea: "灵感"
-        case .unsorted: "待整理"
+        case .all: L("全部")
+        case .log: L("日志")
+        case .idea: L("灵感")
+        case .unsorted: L("待整理")
         }
     }
 }
