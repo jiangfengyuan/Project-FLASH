@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 由 tools/i18n/generate.py 生成，勿手改 -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="ExtraTranslation,MissingTranslation">
+    <string name="share_target_label">Save to Flash</string>
+    <string name="widget_label">Flash Now</string>
+    <string name="widget_description">Today\'s records and to-dos</string>
+    <string name="tile_label">Flash Quick Capture</string>
+    <string name="shortcut_idea">New idea</string>
+    <string name="shortcut_log">New log</string>
+    <string name="s_c9414111" formatted="false">" · Reminder set"</string>
+    <string name="s_94fc7b8e" formatted="false">/data/tasks/{0}/due: must be an object</string>
+    <string name="s_aafdda63" formatted="false">/data/{0}/{1}: entry must be an object</string>
+    <string name="s_10db0315" formatted="false">/data/{0}: array exceeds the limit</string>
+    <string name="s_b7cc858a" formatted="false">/data: invalid or duplicate entries. Use the recovery import to see what can be restored</string>
+    <string name="s_90ef682e" formatted="false">/version: use the recovery import for older files</string>
+    <string name="s_b9ce0fb9" formatted="false">/: too many JSON values</string>
+    <string name="s_307d96fc" formatted="false">/: JSON object has a duplicate key: {0}</string>
+    <string name="s_b414e614" formatted="false">/: invalid JSON syntax (position {0})</string>
+    <string name="s_7038ec28" formatted="false">/: UTF-8 BOM is not allowed</string>
+    <string name="s_4aa2d855" formatted="false">/: invalid export metadata</string>
+    <string name="s_5ddd2d8d" formatted="false">30 days</string>
+    <string name="s_a96eed0d" formatted="false">7 days</string>
+    <string name="s_355b83a3" formatted="false">A week worth remembering. ✦</string>
+    <string name="s_a1486dba" formatted="false">Flash Aero backup</string>
+    <string name="s_eeecd281" formatted="false">Flash task reminder</string>
+    <string name="s_f6ff76b6" formatted="false">Flash Quick Capture</string>
+    <string name="s_9a2b6832" formatted="false">Flash Now</string>
+    <string name="s_2a0b1ddf" formatted="false">Flash idea</string>
+    <string name="s_de22df1c" formatted="false">Flash record</string>
+    <string name="s_8d6bfa5c" formatted="false">Highlights</string>
+    <string name="s_58f879ce" formatted="false">Memory</string>
+    <string name="s_879db2fb" formatted="false">Mostly low</string>
+    <string name="s_db9c822c" formatted="false">Mostly positive</string>
+    <string name="s_f3498d7d" formatted="false">Mostly steady</string>
+    <string name="s_244cff4e" formatted="false">This week felt...</string>
+    <string name="s_fe948398" formatted="false">You recorded</string>
+    <string name="s_b053c6ce" formatted="false">data must be an object</string>
+    <string name="s_70c34463" formatted="false">moods</string>
+    <string name="s_0dbf59c2" formatted="false">emotions must be an array</string>
+    <string name="s_f22ee8cb" formatted="false">ideas</string>
+    <string name="s_be7aa09b" formatted="false">logs must be an array</string>
+    <string name="s_62852daa" formatted="false">moments</string>
+    <string name="s_22c3caa0" formatted="false">schemas must be an object</string>
+    <string name="s_ad2e48cd" formatted="false">tasks</string>
+    <string name="s_002e97a4" formatted="false">tasks must be an array</string>
+    <string name="s_6e425eba" formatted="false">{0}: {1} · {2}: {3}</string>
+    <string name="s_39ac061e" formatted="false">{0} — {1} · days with no entries aren\'t averaged</string>
+    <string name="s_e2a8c96b" formatted="false">Tasks: {0}</string>
+    <string name="s_409ddff6" formatted="false">Active days: {0} · Total: {1}</string>
+    <string name="s_79fc376e" formatted="false">Items: {0}</string>
+    <string name="s_a06e31ba" formatted="false">Invalid items that will be skipped: {0}.</string>
+    <string name="s_aeb06eb3" formatted="false">Records: {0} · Moods: {1}</string>
+    <string name="s_ba02e82e" formatted="false">{0}×</string>
+    <string name="s_852bf53d" formatted="false">Moods: {0}, tasks: {1}</string>
+    <string name="s_1f0ab446" formatted="false">{0} details</string>
+    <string name="s_7f7d2285" formatted="false">To-dos: {0}</string>
+    <string name="s_2e763a14" formatted="false">You recorded more often {0} than {1}</string>
+    <string name="s_10e8d2b4" formatted="false">You recorded less {0} than {1}</string>
+    <string name="s_8d74a879" formatted="false">You recorded about the same {0} as {1}</string>
+    <string name="s_1879232a" formatted="false">"{0}, records: {1}, "</string>
+    <string name="s_e168d4f4" formatted="false">{0}, but system reminders couldn\'t be restored. Try again later</string>
+    <string name="s_245af589" formatted="false">{0}: records {1} · moods {2}</string>
+    <string name="s_7db427be" formatted="false">{0}: {1} new · {2} changed · {3} same · {4} only here</string>
+    <string name="s_0009cc0b" formatted="false">{0}: missing required fields or has unknown fields</string>
+    <string name="s_7dad93fd" formatted="false">★ Favorites</string>
+    <string name="s_745e890f" formatted="false">✓ Saved to logs</string>
+    <string name="s_a248a677" formatted="false">✓ Saved to ideas</string>
+    <string name="s_67fc93c3" formatted="false">✦ Flash</string>
+    <string name="s_05615f1f" formatted="false">Mon</string>
+    <string name="s_e50a5759" formatted="false">Fleeting thoughts are worth remembering</string>
+    <string name="s_8bcbbc86" formatted="false">Seven mood levels to see how you change</string>
+    <string name="s_0c616a24" formatted="false">Wed</string>
+    <string name="s_508b1e1d" formatted="false">Previous week</string>
+    <string name="s_b06dcc3d" formatted="false">Previous month</string>
+    <string name="s_8be194e7" formatted="false">last month</string>
+    <string name="s_eb0f6aef" formatted="false">last week</string>
+    <string name="s_0bb3bda2" formatted="false">Next week</string>
+    <string name="s_6bcf17c2" formatted="false">Next month</string>
+    <string name="s_10c83c81" formatted="false">Next</string>
+    <string name="s_82b6cabb" formatted="false">Good afternoon 🌤</string>
+    <string name="s_1344f491" formatted="false">Unhappy</string>
+    <string name="s_4cc036be" formatted="false">No reminder</string>
+    <string name="s_12e8587a" formatted="false">Unsupported {0} section version</string>
+    <string name="s_ba358518" formatted="false">Any</string>
+    <string name="s_b13672cd" formatted="false">Neutral</string>
+    <string name="s_51f6517e" formatted="false">Theme</string>
+    <string name="s_0a416847" formatted="false">the previous 30 days</string>
+    <string name="s_0c6445c1" formatted="false">the previous 90 days</string>
+    <string name="s_89609beb" formatted="false">Tue</string>
+    <string name="s_9160a883" formatted="false">Fri</string>
+    <string name="s_a848765c" formatted="false">Today</string>
+    <string name="s_6f3c2b2c" formatted="false">Note something down today.</string>
+    <string name="s_1f2bd289" formatted="false">Nothing recorded yet today.</string>
+    <string name="s_cfccbae7" formatted="false">Today</string>
+    <string name="s_5bfe853c" formatted="false">Today\'s records and to-dos</string>
+    <string name="s_2d7464e1" formatted="false">Tasks</string>
+    <string name="s_3f7946be" formatted="false">Couldn\'t save the task</string>
+    <string name="s_bc3ceaab" formatted="false">Couldn\'t delete the task</string>
+    <string name="s_cd07ba17" formatted="false">Task saved. Allow notifications to get reminders</string>
+    <string name="s_d3190fa3" formatted="false">Task reminders</string>
+    <string name="s_d8bb8799" formatted="false">Invalid task time</string>
+    <string name="s_86da87a3" formatted="false">Couldn\'t update the task</string>
+    <string name="s_97815f19" formatted="false">Send Flash Aero backup</string>
+    <string name="s_6b17ba8f" formatted="false">Send to another device</string>
+    <string name="s_79955ed0" formatted="false">Sad</string>
+    <string name="s_d7974514" formatted="false">Ideas waiting: {0}. Start with the oldest</string>
+    <string name="s_d908f279" formatted="false">Ideas waiting for review: {0}. Take a look</string>
+    <string name="s_ad5b82b0" formatted="false">Save</string>
+    <string name="s_9b95e293" formatted="false">Saving…</string>
+    <string name="s_64911de5" formatted="false">Save as a JSON file</string>
+    <string name="s_46ca88f1" formatted="false">Couldn\'t save. Try again</string>
+    <string name="s_1d0e5d5a" formatted="false">All day</string>
+    <string name="s_0c14a696" formatted="false">All-day task</string>
+    <string name="s_05eb990b" formatted="false">Search everything</string>
+    <string name="s_5e6558ad" formatted="false">All</string>
+    <string name="s_e8562c78" formatted="false">Sat</string>
+    <string name="s_72a18f8e" formatted="false">About Flash</string>
+    <string name="s_87dadb5a" formatted="false">Keyword or tag</string>
+    <string name="s_39b523bd" formatted="false">Close</string>
+    <string name="s_05f5920d" formatted="false">Specific time</string>
+    <string name="s_801be77b" formatted="false">Content</string>
+    <string name="s_dc24135d" formatted="false">Content can\'t be empty</string>
+    <string name="s_043cda7f" formatted="false">Too long ({0} characters, max {1}). Shorten it before saving</string>
+    <string name="s_87000edc" formatted="false">Keep recording; future you will see it.</string>
+    <string name="s_95a71bc9" formatted="false">Preparing…</string>
+    <string name="s_9aa7d416" formatted="false">Share</string>
+    <string name="s_4ae3c205" formatted="false">Share record</string>
+    <string name="s_caf6d5a6" formatted="false">Type</string>
+    <string name="s_a0b5ccaf" formatted="false">Change sort order</string>
+    <string name="s_ea8d5381" formatted="false">Delete</string>
+    <string name="s_6b93827d" formatted="false">Delete task</string>
+    <string name="s_bb2e6146" formatted="false">Delete task?</string>
+    <string name="s_309b2b90" formatted="false">Couldn\'t delete. Try again</string>
+    <string name="s_e4d23002" formatted="false">Deletes all logs, moods and tasks permanently. Export a backup first</string>
+    <string name="s_e6dedfa0" formatted="false">Delete this mood?</string>
+    <string name="s_98f7e648" formatted="false">Delete this log?</string>
+    <string name="s_c51f5912" formatted="false">At due time</string>
+    <string name="s_c628e28d" formatted="false">Contains logs: {0}, moods: {1}, tasks: {2}</string>
+    <string name="s_60b4c5ae" formatted="false">Danger zone</string>
+    <string name="s_949856b3" formatted="false">Cancel</string>
+    <string name="s_d1d62fb0" formatted="false">Remove favorite</string>
+    <string name="s_4d55cb75" formatted="false">Export a backup or send it with system share</string>
+    <string name="s_5e53c03a" formatted="false">Thu</string>
+    <string name="s_40163b46" formatted="false">Back to today</string>
+    <string name="s_bed63d2f" formatted="false">This week</string>
+    <string name="s_c2e1aa6d" formatted="false">Review</string>
+    <string name="s_fbac6f20" formatted="false">Backup &amp; Restore</string>
+    <string name="s_bb48fdba" formatted="false">Backups are plain JSON with your logs, moods and tasks. Only save or share them somewhere you trust</string>
+    <string name="s_20fe814f" formatted="false">Backup exported</string>
+    <string name="s_c90a7947" formatted="false">The backup file isn\'t a valid JSON object</string>
+    <string name="s_88f39f13" formatted="false">The backup file isn\'t valid UTF-8 JSON</string>
+    <string name="s_269e4097" formatted="false">The backup file is larger than {0} MB and can\'t be imported</string>
+    <string name="s_cc139297" formatted="false">Incompatible backup version: expected {0}, got {1}</string>
+    <string name="s_d3de3f52" formatted="false">Incompatible backup: the version field is missing</string>
+    <string name="s_584ff11a" formatted="false">Memo</string>
+    <string name="s_d82fe22c" formatted="false">Note is too long. Shorten it before saving</string>
+    <string name="s_d9dac7dd" formatted="false">Notes (optional)</string>
+    <string name="s_e4a4815a" formatted="false">Appearance &amp; use</string>
+    <string name="s_1e13bd21" formatted="false">Done</string>
+    <string name="s_dd03e6ad" formatted="false">Preview differences from local data before importing</string>
+    <string name="s_9b60ff74" formatted="false">Import failed: {0}</string>
+    <string name="s_da193966" formatted="false">Import cancelled</string>
+    <string name="s_7fdaf616" formatted="false">Export, import and clear</string>
+    <string name="s_f97fded3" formatted="false">Export backup</string>
+    <string name="s_7436fb8d" formatted="false">Export failed: {0}</string>
+    <string name="s_b1632a8b" formatted="false">All logs, moods and tasks will be deleted permanently. Export a backup first.</string>
+    <string name="s_479481d2" formatted="false">Local network transfer is turned off for now</string>
+    <string name="s_f8eef707" formatted="false">Local network transfer is off because the old protocol has security risks. Use Export backup or system share to send the JSON file through a channel you trust.</string>
+    <string name="s_531320d2" formatted="false">Details</string>
+    <string name="s_b1368837" formatted="false">Differences</string>
+    <string name="s_c2d9a3f9" formatted="false">Merge adds or updates incoming data and keeps data only on this device. Overwrite clears this device first.</string>
+    <string name="s_d0fcf500" formatted="false">Saved</string>
+    <string name="s_5dbcdf6d" formatted="false">Off</string>
+    <string name="s_bee374d1" formatted="false">Deleted</string>
+    <string name="s_8b122251" formatted="false">Log deleted</string>
+    <string name="s_74e8cc38" formatted="false">"Imported logs: {0}, moods: {1}, "</string>
+    <string name="s_a8126b62" formatted="false">Favorited</string>
+    <string name="s_2266e2ec" formatted="false">All data cleared</string>
+    <string name="s_c13b3522" formatted="false">All data cleared, but system reminders couldn\'t be removed. Restart the app and try again</string>
+    <string name="s_c8fa62c1" formatted="false">Selected: {0}</string>
+    <string name="s_01133500" formatted="false">Average mood {0} · Total {1}</string>
+    <string name="s_22696cbc" formatted="false">Start</string>
+    <string name="s_499be303" formatted="false">Get started</string>
+    <string name="s_5d62764c" formatted="false">Start date</string>
+    <string name="s_2a665354" formatted="false">Happy</string>
+    <string name="s_673d4a91" formatted="false">Intensity</string>
+    <string name="s_6a19ddcf" formatted="false">Intensity {0}</string>
+    <string name="s_4b8edbfa" formatted="false">To-do</string>
+    <string name="s_dfcdb4b6" formatted="false">To-do task</string>
+    <string name="s_e83d11ae" formatted="false">To sort</string>
+    <string name="s_5660c655" formatted="false">To sort: logs tagged Daily. Long-press a record to sort several.</string>
+    <string name="s_2367642b" formatted="false">Very unhappy</string>
+    <string name="s_fb903262" formatted="false">Very happy</string>
+    <string name="s_e70923c8" formatted="false">Quick Capture</string>
+    <string name="s_abf33a8f" formatted="false">Restore a damaged or old backup</string>
+    <string name="s_a9612b5e" formatted="false">Mood</string>
+    <string name="s_7bd3df69" formatted="false">Average mood {0} (−3 to +3)</string>
+    <string name="s_643f1ede" formatted="false">Mood awareness</string>
+    <string name="s_8de4274f" formatted="false">Mood trend</string>
+    <string name="s_99812275" formatted="false">Thought</string>
+    <string name="s_d9f8afc2" formatted="false">Ideas to review</string>
+    <string name="s_6deefec2" formatted="false">Remind me when ideas are waiting</string>
+    <string name="s_4e89a8ad" formatted="false">Want to say something? (optional)</string>
+    <string name="s_eae146ff" formatted="false">Change type for selected</string>
+    <string name="s_c9ddd465" formatted="false">Couldn\'t update the selection. Try again</string>
+    <string name="s_803499dd" formatted="false">Change tag for selected</string>
+    <string name="s_b4b9bfa6" formatted="false">Merge differences</string>
+    <string name="s_8523e97b" formatted="false">Newest first</string>
+    <string name="s_791c2e78" formatted="false">Oldest first</string>
+    <string name="s_6ef98325" formatted="false">By tag</string>
+    <string name="s_da39e076" formatted="false">1 day before</string>
+    <string name="s_0c4452fe" formatted="false">1 hour before</string>
+    <string name="s_74d32173" formatted="false">15 minutes before</string>
+    <string name="s_6d40d527" formatted="false">Reminder</string>
+    <string name="s_545f8675" formatted="false">Reminders are scheduled by the system and may be slightly late in battery saver.</string>
+    <string name="s_0b6efa3b" formatted="false">Search</string>
+    <string name="s_18fca433" formatted="false">Search logs...</string>
+    <string name="s_c8a90aa9" formatted="false">Search records, ideas, moods and tasks</string>
+    <string name="s_1b9e8bc9" formatted="false">Undo</string>
+    <string name="s_aff00db8" formatted="false">Couldn\'t undo. Try again</string>
+    <string name="s_87aed705" formatted="false">That didn\'t work. Try again</string>
+    <string name="s_839d4732" formatted="false">Favorite</string>
+    <string name="s_cf8b8d02" formatted="false">Hide daily details</string>
+    <string name="s_e1598b13" formatted="false">Discard</string>
+    <string name="s_0ac91ecb" formatted="false">Discard unsaved changes?</string>
+    <string name="s_6344fa26" formatted="false">Data &amp; security</string>
+    <string name="s_b464971d" formatted="false">Data is saved on this device</string>
+    <string name="s_95b69a6d" formatted="false">File is larger than 50 MiB</string>
+    <string name="s_b8c8a94f" formatted="false">New</string>
+    <string name="s_b0f36447" formatted="false">New task</string>
+    <string name="s_d2c53483" formatted="false">New idea</string>
+    <string name="s_160eb028" formatted="false">New record</string>
+    <string name="s_659aa23f" formatted="false">None</string>
+    <string name="s_fd8b1ba9" formatted="false">Couldn\'t write the file</string>
+    <string name="s_e9ebd81b" formatted="false">Couldn\'t create the backup transfer folder</string>
+    <string name="s_59c97404" formatted="false">Couldn\'t open system share. Install an app that can receive files</string>
+    <string name="s_6776e896" formatted="false">Couldn\'t read the file</string>
+    <string name="s_609a9a60" formatted="false">Sun</string>
+    <string name="s_f9abd512" formatted="false">Calendar</string>
+    <string name="s_afdd356c" formatted="false">Local reminders for calendar tasks</string>
+    <string name="s_2eeb970b" formatted="false">Daily average mood · −3 to +3 (0 is neutral)</string>
+    <string name="s_6ba31688" formatted="false">Daily</string>
+    <string name="s_caa53f15" formatted="false">Logs</string>
+    <string name="s_923b0270" formatted="false">Logs and ideas, one tap away</string>
+    <string name="s_56409a3c" formatted="false">Log Flow</string>
+    <string name="s_203436ae" formatted="false">Manage logs</string>
+    <string name="s_92fd0eed" formatted="false">Date</string>
+    <string name="s_432f74fa" formatted="false">Date range</string>
+    <string name="s_7203eec6" formatted="false">The old protocol has security risks. Use Export backup or system share in Backup &amp; Restore to send it to another device in a way you trust.</string>
+    <string name="s_d7034b36" formatted="false">Good morning ☀️</string>
+    <string name="s_cb28b11e" formatted="false">No entries in this period</string>
+    <string name="s_12263e9a" formatted="false">Yesterday</string>
+    <string name="s_c18f71ef" formatted="false">Good evening 🌙</string>
+    <string name="s_bf13f8b5" formatted="false">Off for now. Tap to see alternatives</string>
+    <string name="s_16a3eebb" formatted="false">More</string>
+    <string name="s_89192933" formatted="false">Changing the date also updates the calendar and review.</string>
+    <string name="s_87b8867d" formatted="false">Newest</string>
+    <string name="s_ceb8f642" formatted="false">Oldest</string>
+    <string name="s_56b38d0f" formatted="false">Recent moments</string>
+    <string name="s_be2c2eb2" formatted="false">Unread</string>
+    <string name="s_27c37899" formatted="false">This week</string>
+    <string name="s_ccb42197" formatted="false">This week: records {0} · to sort {1}</string>
+    <string name="s_b70e17ea" formatted="false">Mood is low this week</string>
+    <string name="s_24d17368" formatted="false">Mood is steady this week</string>
+    <string name="s_e3f61599" formatted="false">Mostly positive this week</string>
+    <string name="s_63d2d484" formatted="false">Nothing recorded this week</string>
+    <string name="s_db0049cb" formatted="false">This week\'s trend</string>
+    <string name="s_3750d663" formatted="false">Local reminder</string>
+    <string name="s_47af33f9" formatted="false">This month</string>
+    <string name="s_37272be9" formatted="false">From an idea. The idea stays</string>
+    <string name="s_7e5242cd" formatted="false">Show daily details</string>
+    <string name="s_495fd6a9" formatted="false">View idea</string>
+    <string name="s_198c9fe3" formatted="false">Import</string>
+    <string name="s_5606df17" formatted="false">Import preview</string>
+    <string name="s_2b1626c8" formatted="false">Tag</string>
+    <string name="s_f7d7a0ce" formatted="false">Welcome to Flash</string>
+    <string name="s_aef45eb7" formatted="false">Loading more…</string>
+    <string name="s_6af40858" formatted="false">Now</string>
+    <string name="s_b060afd3" formatted="false">This device doesn\'t support a task time zone in the backup. Update the system and try again. Nothing was imported</string>
+    <string name="s_f4958768" formatted="false">Every 3 days</string>
+    <string name="s_41be2fe2" formatted="false">Weekly</string>
+    <string name="s_02c285b5" formatted="false">Daily</string>
+    <string name="s_18fa51bd" formatted="false">Daily logs, ideas and moods · tasks not included</string>
+    <string name="s_6d03477d" formatted="false">Daily average mood: {0}</string>
+    <string name="s_5816c303" formatted="false">No app available to share with</string>
+    <string name="s_43c975df" formatted="false">No records found</string>
+    <string name="s_f8bc527e" formatted="false">No logs match</string>
+    <string name="s_0fed9772" formatted="false">Active days</string>
+    <string name="s_11b5fdf6" formatted="false">Light</string>
+    <string name="s_2a8baaea" formatted="false">Dark</string>
+    <string name="s_da340c1c" formatted="false">Clear all data</string>
+    <string name="s_845a8db9" formatted="false">Clear all data?</string>
+    <string name="s_115677d8" formatted="false">Couldn\'t clear: {0}</string>
+    <string name="s_0b9d2bac" formatted="false">Clear</string>
+    <string name="s_9c43ebb6" formatted="false">Clear search</string>
+    <string name="s_0fba4654" formatted="false">Clear filters</string>
+    <string name="s_b8b74e9d" formatted="false">Ideas</string>
+    <string name="s_4604d6bf" formatted="false">Idea reminders</string>
+    <string name="s_436e2c82" formatted="false">What\'s on your mind?</string>
+    <string name="s_78fe07cc" formatted="false">Couldn\'t create the transfer file: {0}</string>
+    <string name="s_f60bb44e" formatted="false">Angry</string>
+    <string name="s_621a8231" formatted="false">OK</string>
+    <string name="s_869f8d0c" formatted="false">Clear everything</string>
+    <string name="s_5716f5ef" formatted="false">In {0} minutes</string>
+    <string name="s_f5e087c9" formatted="false">Filter</string>
+    <string name="s_5db367de" formatted="false">Manage</string>
+    <string name="s_26640f43" formatted="false">Type</string>
+    <string name="s_f8ede304" formatted="false">System notifications or the task reminder channel are turned off</string>
+    <string name="s_235f3e59" formatted="false">Urgent</string>
+    <string name="s_64db55af" formatted="false">When {0} or more ideas are waiting, you\'ll get a reminder at 8 PM. Opened ideas no longer count.</string>
+    <string name="s_78a510f0" formatted="false">Overview · all time</string>
+    <string name="s_1da8a247" formatted="false">End</string>
+    <string name="s_476d405b" formatted="false">End date</string>
+    <string name="s_010e135c" formatted="false">Keep editing</string>
+    <string name="s_e60fd56d" formatted="false">Keep recording and your review will take shape</string>
+    <string name="s_607348a8" formatted="false">Edit</string>
+    <string name="s_1d5b5e98" formatted="false">Edit task</string>
+    <string name="s_c9ab4c68" formatted="false">Edit idea</string>
+    <string name="s_a5db4a27" formatted="false">Edit record</string>
+    <string name="s_72ecf883" formatted="false">From {0}</string>
+    <string name="s_85b25df8" formatted="false">To {0}</string>
+    <string name="s_a6317c7d" formatted="false">Overwrite</string>
+    <string name="s_5521c6a5" formatted="false">A place for every passing thought · no cloud account</string>
+    <string name="s_dad3d89f" formatted="false">Note your first thought</string>
+    <string name="s_6dfa9df7" formatted="false">Save to Flash</string>
+    <string name="s_2c9d9f0e" formatted="false">Records</string>
+    <string name="s_a48657a1" formatted="false">Record mood</string>
+    <string name="s_b1bc3a6a" formatted="false">Record date: {0}</string>
+    <string name="s_6de25c07" formatted="false">Record this moment…</string>
+    <string name="s_d1e82646" formatted="false">Recording activity</string>
+    <string name="s_7a550e3e" formatted="false">Recording activity: {1} of {0} days had entries, {2} total. Daily details can be expanded.</string>
+    <string name="s_e54eaf8b" formatted="false">New log</string>
+    <string name="s_e8b414a3" formatted="false">New idea</string>
+    <string name="s_0102647f" formatted="false">Device transfer</string>
+    <string name="s_f3c259dd" formatted="false">Settings</string>
+    <string name="s_95b0de98" formatted="false">Enter some content</string>
+    <string name="s_f3462b06" formatted="false">Enter a valid record date</string>
+    <string name="s_b0f4e934" formatted="false">How low moods felt</string>
+    <string name="s_8678f5d9" formatted="false">Over by {0} characters</string>
+    <string name="s_b45e202f" formatted="false">Trends</string>
+    <string name="s_b494a385" formatted="false">System</string>
+    <string name="s_0af75da1" formatted="false">Skips invalid and duplicate data; the original file isn\'t changed</string>
+    <string name="s_ebbcb10b" formatted="false">Turn into task</string>
+    <string name="s_13f1b81a" formatted="false">Enter a keyword or tag</string>
+    <string name="s_7cd6a835" formatted="false">Enter a keyword or tag name</string>
+    <string name="s_214cb43c" formatted="false">the last 30 days</string>
+    <string name="s_9ea79282" formatted="false">the last 90 days</string>
+    <string name="s_4ed18a1a" formatted="false">Last 30 days</string>
+    <string name="s_8ab0bb3c" formatted="false">Last 90 days</string>
+    <string name="s_863fb33a" formatted="false">Recent</string>
+    <string name="s_58cbffa7" formatted="false">Back</string>
+    <string name="s_a7f085b7" formatted="false">{0} characters left</string>
+    <string name="s_4cabb422" formatted="false">No entries yet</string>
+    <string name="s_fa547131" formatted="false">No plans or records on this day</string>
+    <string name="s_6d67abd6" formatted="false">this month</string>
+    <string name="s_09e1a534" formatted="false">this week</string>
+    <string name="s_d3ce76c1" formatted="false">This record no longer exists</string>
+    <string name="s_1a959a39" formatted="false">Nothing recorded in this period yet. Empty days show as 0.</string>
+    <string name="s_5fe370b7" formatted="false">Select</string>
+    <string name="s_cbdfcc99" formatted="false">Send the backup with system share</string>
+    <string name="s_daf5a276" formatted="false">Partial restore preview</string>
+    <string name="s_cf3e4247" formatted="false">Importance</string>
+    <string name="s_4de22934" formatted="false">Importance</string>
+    <string name="s_490a6afa" formatted="false">Catch it as it passes. Write your first one</string>
+    <string name="s_aef2df88" formatted="false">Capture on the go</string>
+    <string name="s_80390cc2" formatted="false">Unwell</string>
+    <string name="s_99546fff" formatted="false">Very upset</string>
+    <string name="s_22566806" formatted="false">Delighted</string>
+    <string name="s_9a63360d" formatted="false">Local data changed after the preview. Differences were recalculated. Confirm before overwriting</string>
+    <string name="s_a14edc19" formatted="false">(Untitled)</string>
+    <string name="s_12cea83b" formatted="false">(skipped invalid items: {0})</string>
+    <string name="s_be6a75ae" formatted="false">, today</string>
+    <string name="s_a495d14b" formatted="false">, and your mood was a bit lower</string>
+    <string name="s_3193d3c7" formatted="false">, and your mood was a bit better</string>
+</resources>

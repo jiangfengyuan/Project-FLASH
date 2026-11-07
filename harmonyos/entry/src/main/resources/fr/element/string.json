@@ -1,0 +1,1792 @@
+{
+ "string": [
+  {
+   "name": "module_desc",
+   "value": "Flash Aero pour HarmonyOS"
+  },
+  {
+   "name": "EntryAbility_desc",
+   "value": "Fenêtre principale de Flash Aero"
+  },
+  {
+   "name": "EntryAbility_label",
+   "value": "Flash Aero"
+  },
+  {
+   "name": "EntryFormAbility_label",
+   "value": "Aujourd'hui"
+  },
+  {
+   "name": "EntryFormAbility_desc",
+   "value": "Carte du jour de Flash Aero"
+  },
+  {
+   "name": "form_today_summary_display_name",
+   "value": "Aujourd'hui"
+  },
+  {
+   "name": "form_today_summary_desc",
+   "value": "Voyez les entrées, idées et tâches du jour"
+  },
+  {
+   "name": "form_today_title",
+   "value": "Aujourd'hui"
+  },
+  {
+   "name": "form_stat_records",
+   "value": "Entrées"
+  },
+  {
+   "name": "form_stat_ideas",
+   "value": "Idées"
+  },
+  {
+   "name": "form_stat_tasks",
+   "value": "À faire"
+  },
+  {
+   "name": "form_today_capture_display_name",
+   "value": "Aujourd'hui et capture rapide"
+  },
+  {
+   "name": "form_today_capture_desc",
+   "value": "Aperçu du jour, et capture d'une idée ou d'une entrée de journal en un geste"
+  },
+  {
+   "name": "shortcut_idea",
+   "value": "Nouvelle idée"
+  },
+  {
+   "name": "shortcut_log",
+   "value": "Nouveau journal"
+  },
+  {
+   "name": "form_action_idea",
+   "value": "Idées"
+  },
+  {
+   "name": "form_action_log",
+   "value": "Journal"
+  },
+  {
+   "name": "s_349a6396",
+   "value": " · Importance {0}"
+  },
+  {
+   "name": "s_2f0fbd80",
+   "value": "−3 à +3, 0 est neutre ; — signifie aucune entrée ce jour-là"
+  },
+  {
+   "name": "s_d78803b1",
+   "value": "/data/emotions : entrées non valides ou en double. Corrigez-les avant d'exporter"
+  },
+  {
+   "name": "s_92fe6094",
+   "value": "/data/logs : entrées non valides ou en double. Corrigez-les avant d'exporter"
+  },
+  {
+   "name": "s_cc6625e3",
+   "value": "/data/tasks : entrées non valides ou en double. Corrigez-les avant d'exporter"
+  },
+  {
+   "name": "s_76da33b4",
+   "value": "/data : entrées non valides ou en double. Utilisez la restauration"
+  },
+  {
+   "name": "s_bfb6aa12",
+   "value": "/data : le tableau dépasse la limite"
+  },
+  {
+   "name": "s_d40dfcbc",
+   "value": "/updatedAt : heure de tâche non valide"
+  },
+  {
+   "name": "s_b9ce0fb9",
+   "value": "/ : trop de valeurs JSON"
+  },
+  {
+   "name": "s_307d96fc",
+   "value": "/ : clé en double dans l'objet JSON : {0}"
+  },
+  {
+   "name": "s_b414e614",
+   "value": "/ : syntaxe JSON non valide (position {0})"
+  },
+  {
+   "name": "s_d8026ec4",
+   "value": "/ : BOM non autorisé"
+  },
+  {
+   "name": "s_4be9c949",
+   "value": "/ : version ou métadonnées de sauvegarde non valides"
+  },
+  {
+   "name": "s_67596dc6",
+   "value": "/ : le fichier dépasse 50 Mio"
+  },
+  {
+   "name": "s_355b83a3",
+   "value": "Une semaine à retenir. ✦"
+  },
+  {
+   "name": "s_2a0b1ddf",
+   "value": "Idée Flash"
+  },
+  {
+   "name": "s_de22df1c",
+   "value": "Entrée Flash"
+  },
+  {
+   "name": "s_8d6bfa5c",
+   "value": "Temps forts"
+  },
+  {
+   "name": "s_a60503ed",
+   "value": "Sauvegarde JSON|.json"
+  },
+  {
+   "name": "s_58f879ce",
+   "value": "Mémoire"
+  },
+  {
+   "name": "s_879db2fb",
+   "value": "Plutôt bas"
+  },
+  {
+   "name": "s_db9c822c",
+   "value": "Plutôt positif"
+  },
+  {
+   "name": "s_f3498d7d",
+   "value": "Plutôt stable"
+  },
+  {
+   "name": "s_244cff4e",
+   "value": "Cette semaine, c'était..."
+  },
+  {
+   "name": "s_fe948398",
+   "value": "Vous avez noté"
+  },
+  {
+   "name": "s_70c34463",
+   "value": "humeurs"
+  },
+  {
+   "name": "s_f22ee8cb",
+   "value": "idées"
+  },
+  {
+   "name": "s_62852daa",
+   "value": "moments"
+  },
+  {
+   "name": "s_ad2e48cd",
+   "value": "tâches"
+  },
+  {
+   "name": "s_48dce70c",
+   "value": "v0.1.0 · HarmonyOS · com.flash.app.harmonyos"
+  },
+  {
+   "name": "s_6e425eba",
+   "value": "{0} : {1} · {2} : {3}"
+  },
+  {
+   "name": "s_ad1bbef7",
+   "value": "Idées à revoir : {0}. Ouvrir la plus ancienne"
+  },
+  {
+   "name": "s_409ddff6",
+   "value": "Jours actifs : {0} · Total : {1}"
+  },
+  {
+   "name": "s_ae7c912e",
+   "value": "{1}/{0}"
+  },
+  {
+   "name": "s_79fc376e",
+   "value": "Éléments : {0}"
+  },
+  {
+   "name": "s_ba02e82e",
+   "value": "{0} fois"
+  },
+  {
+   "name": "s_1f0ab446",
+   "value": "Détails du {0}"
+  },
+  {
+   "name": "s_1d2f42b7",
+   "value": "{0} a été moins actif que {1}"
+  },
+  {
+   "name": "s_2712f5b4",
+   "value": "{0} est au même niveau que {1}"
+  },
+  {
+   "name": "s_2e763a14",
+   "value": "Vous avez noté plus souvent {0} que {1}"
+  },
+  {
+   "name": "s_ae5c9fd5",
+   "value": "{1}/{0}"
+  },
+  {
+   "name": "s_ce181c99",
+   "value": "{0}, éléments : {1}"
+  },
+  {
+   "name": "s_662e559c",
+   "value": "{0}, mais la copie de récupération n'a pas pu être écrite et les données d'origine n'ont pas été conservées"
+  },
+  {
+   "name": "s_deca74ba",
+   "value": "{0}. Les données d'origine sont conservées pour la récupération"
+  },
+  {
+   "name": "s_245af589",
+   "value": "{0} : entrées {1} · humeurs {2}"
+  },
+  {
+   "name": "s_509d59f4",
+   "value": "{0} : doit être un objet"
+  },
+  {
+   "name": "s_0009cc0b",
+   "value": "{0} : champs obligatoires manquants ou champs inconnus"
+  },
+  {
+   "name": "s_c76c65d2",
+   "value": "‹ Retour"
+  },
+  {
+   "name": "s_7dad93fd",
+   "value": "★ Favoris"
+  },
+  {
+   "name": "s_745e890f",
+   "value": "✓ Enregistré dans le journal"
+  },
+  {
+   "name": "s_a248a677",
+   "value": "✓ Enregistré dans les idées"
+  },
+  {
+   "name": "s_8d102943",
+   "value": "✓ Triés : {0}"
+  },
+  {
+   "name": "s_05615f1f",
+   "value": "Lun"
+  },
+  {
+   "name": "s_e50a5759",
+   "value": "Les pensées fugaces méritent d'être retenues"
+  },
+  {
+   "name": "s_8bcbbc86",
+   "value": "Sept niveaux d'humeur pour voir votre évolution"
+  },
+  {
+   "name": "s_0c616a24",
+   "value": "Mer"
+  },
+  {
+   "name": "s_508b1e1d",
+   "value": "Semaine précédente"
+  },
+  {
+   "name": "s_b06dcc3d",
+   "value": "Mois précédent"
+  },
+  {
+   "name": "s_8be194e7",
+   "value": "le mois dernier"
+  },
+  {
+   "name": "s_eb0f6aef",
+   "value": "la semaine dernière"
+  },
+  {
+   "name": "s_0bb3bda2",
+   "value": "Semaine suivante"
+  },
+  {
+   "name": "s_6bcf17c2",
+   "value": "Mois suivant"
+  },
+  {
+   "name": "s_10c83c81",
+   "value": "Suivant"
+  },
+  {
+   "name": "s_82b6cabb",
+   "value": "Bon après-midi 🌤"
+  },
+  {
+   "name": "s_1344f491",
+   "value": "Pas content"
+  },
+  {
+   "name": "s_1f28bc53",
+   "value": "Ressenti des moments difficiles"
+  },
+  {
+   "name": "s_4cc036be",
+   "value": "Pas de rappel"
+  },
+  {
+   "name": "s_44d41ebe",
+   "value": "Concentré"
+  },
+  {
+   "name": "s_bfa55e52",
+   "value": "Mise en page écran moyen"
+  },
+  {
+   "name": "s_b13672cd",
+   "value": "Neutre"
+  },
+  {
+   "name": "s_15a81f9c",
+   "value": "Pourquoi certaines fonctions ne sont-elles pas activées ?"
+  },
+  {
+   "name": "s_74e5c7e6",
+   "value": "Thème"
+  },
+  {
+   "name": "s_5a9c8a19",
+   "value": "Impossible d'enregistrer le thème : {0}"
+  },
+  {
+   "name": "s_0a416847",
+   "value": "les 30 jours précédents"
+  },
+  {
+   "name": "s_0c6445c1",
+   "value": "les 90 jours précédents"
+  },
+  {
+   "name": "s_89609beb",
+   "value": "Mar"
+  },
+  {
+   "name": "s_9160a883",
+   "value": "Ven"
+  },
+  {
+   "name": "s_e835fb8e",
+   "value": "Affiche uniquement ce qui a été réellement détecté et connecté. Les autorisations soumises à examen ne sont utilisées qu'après approbation."
+  },
+  {
+   "name": "s_946c250b",
+   "value": "Pour la récupération manuelle uniquement. Ne pas partager publiquement"
+  },
+  {
+   "name": "s_a848765c",
+   "value": "Aujourd'hui"
+  },
+  {
+   "name": "s_6f3c2b2c",
+   "value": "Notez quelque chose aujourd'hui."
+  },
+  {
+   "name": "s_1f2bd289",
+   "value": "Rien de noté aujourd'hui."
+  },
+  {
+   "name": "s_cfccbae7",
+   "value": "Aujourd'hui"
+  },
+  {
+   "name": "s_2d7464e1",
+   "value": "Tâches"
+  },
+  {
+   "name": "s_1915b50d",
+   "value": "Tâche bientôt due"
+  },
+  {
+   "name": "s_9dba36cc",
+   "value": "Tâche enregistrée"
+  },
+  {
+   "name": "s_9e20fc67",
+   "value": "Tâche enregistrée, mais les rappels système ne sont pas activés"
+  },
+  {
+   "name": "s_991e9b9d",
+   "value": "Tâche supprimée"
+  },
+  {
+   "name": "s_d5f54072",
+   "value": "Tâche supprimée, mais les rappels système n'ont pas pu être synchronisés"
+  },
+  {
+   "name": "s_534ff12d",
+   "value": "Impossible de restaurer les rappels. Vos tâches sont en sécurité. Redémarrez l'app plus tard"
+  },
+  {
+   "name": "s_a961bb3e",
+   "value": "Titre de la tâche"
+  },
+  {
+   "name": "s_e7cf88d5",
+   "value": "Tâche mise à jour, mais les rappels système n'ont pas pu être synchronisés"
+  },
+  {
+   "name": "s_c185d41b",
+   "value": "Tâches : {0} nouvelles, {1} modifiées, {2} uniquement ici\n"
+  },
+  {
+   "name": "s_79955ed0",
+   "value": "Triste"
+  },
+  {
+   "name": "s_d7974514",
+   "value": "Idées en attente : {0}. Commencez par la plus ancienne"
+  },
+  {
+   "name": "s_d908f279",
+   "value": "Idées à revoir : {0}. Jetez-y un œil"
+  },
+  {
+   "name": "s_ad5b82b0",
+   "value": "Enregistrer"
+  },
+  {
+   "name": "s_9b95e293",
+   "value": "Enregistrement…"
+  },
+  {
+   "name": "s_1d0e5d5a",
+   "value": "Toute la journée"
+  },
+  {
+   "name": "s_0c14a696",
+   "value": "Tâche sur toute la journée"
+  },
+  {
+   "name": "s_05eb990b",
+   "value": "Recherche globale"
+  },
+  {
+   "name": "s_5e6558ad",
+   "value": "Tout"
+  },
+  {
+   "name": "s_e8562c78",
+   "value": "Sam"
+  },
+  {
+   "name": "s_e161dfa6",
+   "value": "Total {0} · Journal {1} · Idées {2}"
+  },
+  {
+   "name": "s_c5603acc",
+   "value": "Le dossier partagé n'est pas disponible. Utilisez « Choisir l'emplacement »"
+  },
+  {
+   "name": "s_72a18f8e",
+   "value": "À propos de Flash"
+  },
+  {
+   "name": "s_87dadb5a",
+   "value": "Mot-clé ou étiquette"
+  },
+  {
+   "name": "s_39b523bd",
+   "value": "Fermer"
+  },
+  {
+   "name": "s_dc24135d",
+   "value": "Le contenu ne peut pas être vide"
+  },
+  {
+   "name": "s_e67132b8",
+   "value": "Le contenu ne peut pas être vide. Saisissez du texte avant d'enregistrer"
+  },
+  {
+   "name": "s_f3b7b450",
+   "value": "Plus de 100 000 caractères. Raccourcissez avant d'enregistrer"
+  },
+  {
+   "name": "s_87000edc",
+   "value": "Continuez à noter, votre futur vous le verra."
+  },
+  {
+   "name": "s_308e704e",
+   "value": "Réduire les animations"
+  },
+  {
+   "name": "s_f6d47411",
+   "value": "Impossible d'enregistrer Réduire les animations : {0}"
+  },
+  {
+   "name": "s_9aa7d416",
+   "value": "Partager"
+  },
+  {
+   "name": "s_081c9fc0",
+   "value": "Échec du partage"
+  },
+  {
+   "name": "s_6ba0562c",
+   "value": "Partager l'exportation"
+  },
+  {
+   "name": "s_ea8d5381",
+   "value": "Supprimer"
+  },
+  {
+   "name": "s_04235540",
+   "value": "Cette action est irréversible."
+  },
+  {
+   "name": "s_9b7a515f",
+   "value": "Demande une confirmation et est irréversible"
+  },
+  {
+   "name": "s_4ccb1394",
+   "value": "Supprime la copie conservée des données d'origine non valides"
+  },
+  {
+   "name": "s_5bfa5877",
+   "value": "Supprimer cette tâche ?"
+  },
+  {
+   "name": "s_e6dedfa0",
+   "value": "Supprimer cette humeur ?"
+  },
+  {
+   "name": "s_409819b9",
+   "value": "Supprimer cette entrée ?"
+  },
+  {
+   "name": "s_c51f5912",
+   "value": "À l'échéance"
+  },
+  {
+   "name": "s_c6dda34e",
+   "value": "Charger plus ({0} restants)"
+  },
+  {
+   "name": "s_60b4c5ae",
+   "value": "Zone sensible"
+  },
+  {
+   "name": "s_949856b3",
+   "value": "Annuler"
+  },
+  {
+   "name": "s_d1d62fb0",
+   "value": "Retirer des favoris"
+  },
+  {
+   "name": "s_8b70a958",
+   "value": "Transférez journal, humeurs et tâches entre Android, macOS et HarmonyOS. Les sauvegardes sont en JSON non chiffré : enregistrez-les ou partagez-les uniquement dans un lieu de confiance."
+  },
+  {
+   "name": "s_4d55cb75",
+   "value": "Exportez une sauvegarde ou envoyez-la via le partage système"
+  },
+  {
+   "name": "s_b902b8d3",
+   "value": "Fusionner"
+  },
+  {
+   "name": "s_5e53c03a",
+   "value": "Jeu"
+  },
+  {
+   "name": "s_40163b46",
+   "value": "Revenir à aujourd'hui"
+  },
+  {
+   "name": "s_bed63d2f",
+   "value": "Cette semaine"
+  },
+  {
+   "name": "s_c2e1aa6d",
+   "value": "Bilan"
+  },
+  {
+   "name": "s_5a543946",
+   "value": "Visible dans l'app Fichiers (Téléchargements/Flash)"
+  },
+  {
+   "name": "s_fbac6f20",
+   "value": "Sauvegarde et restauration"
+  },
+  {
+   "name": "s_ad4d7827",
+   "value": "Sauvegarde incomplète, partage annulé"
+  },
+  {
+   "name": "s_c5eb49de",
+   "value": "Sauvegarde incomplète, échec de l'exportation"
+  },
+  {
+   "name": "s_a1b093ff",
+   "value": "Sauvegarde fusionnée"
+  },
+  {
+   "name": "s_20fe814f",
+   "value": "Sauvegarde exportée"
+  },
+  {
+   "name": "s_09ecc21d",
+   "value": "Sauvegarde exportée dans Téléchargements de l'app Fichiers"
+  },
+  {
+   "name": "s_55769b97",
+   "value": "Structure de sauvegarde incomplète"
+  },
+  {
+   "name": "s_0420eb69",
+   "value": "Structure incomplète ou version de section incompatible"
+  },
+  {
+   "name": "s_c90a7947",
+   "value": "Le fichier de sauvegarde n'est pas un objet JSON valide"
+  },
+  {
+   "name": "s_364b46a8",
+   "value": "Le fichier de sauvegarde est vide"
+  },
+  {
+   "name": "s_c4981a8c",
+   "value": "Lecture incomplète du fichier de sauvegarde"
+  },
+  {
+   "name": "s_245f47d8",
+   "value": "Le fichier de sauvegarde dépasse 50 Mo"
+  },
+  {
+   "name": "s_fc4f6b0f",
+   "value": "Version de sauvegarde incompatible"
+  },
+  {
+   "name": "s_584ff11a",
+   "value": "Mémo"
+  },
+  {
+   "name": "s_d9dac7dd",
+   "value": "Notes (facultatif)"
+  },
+  {
+   "name": "s_e4a4815a",
+   "value": "Apparence et utilisation"
+  },
+  {
+   "name": "s_e665350f",
+   "value": "Mises en page multi-appareils"
+  },
+  {
+   "name": "s_d590eab1",
+   "value": "Navigation latérale sur grand écran"
+  },
+  {
+   "name": "s_1e13bd21",
+   "value": "Terminé"
+  },
+  {
+   "name": "s_bb58d8d1",
+   "value": "Live View"
+  },
+  {
+   "name": "s_513bdfd7",
+   "value": "Live View, la bulle flottante, le partage par contact et les intentions Celia nécessitent un examen (scénario, signature, appareil ou plateforme). Flash les activera une fois approuvés et ne demande pas d'autorisations restreintes inutiles."
+  },
+  {
+   "name": "s_4353e306",
+   "value": "Voyez ce qui sera fusionné ou ajouté avant d'importer"
+  },
+  {
+   "name": "s_7fdaf616",
+   "value": "Exporter, importer et effacer"
+  },
+  {
+   "name": "s_7af59148",
+   "value": "Exporter vers Téléchargements"
+  },
+  {
+   "name": "s_03150537",
+   "value": "Exporter la sauvegarde JSON"
+  },
+  {
+   "name": "s_026223aa",
+   "value": "Exporter les anciennes données brutes non valides"
+  },
+  {
+   "name": "s_e29f076f",
+   "value": "Tenter de réparer une sauvegarde impossible à importer"
+  },
+  {
+   "name": "s_479481d2",
+   "value": "Le transfert par réseau local est désactivé pour le moment"
+  },
+  {
+   "name": "s_f959f4af",
+   "value": "Le transfert par réseau local est désactivé en raison des risques de l'ancien protocole. Utilisez l'exportation ou le partage système pour envoyer le fichier JSON par un canal de confiance."
+  },
+  {
+   "name": "s_cb51ae33",
+   "value": "Ouvrir les filtres"
+  },
+  {
+   "name": "s_b1368837",
+   "value": "Différences"
+  },
+  {
+   "name": "s_5dbcdf6d",
+   "value": "Désactivé"
+  },
+  {
+   "name": "s_bee374d1",
+   "value": "Supprimé"
+  },
+  {
+   "name": "s_84f30bbf",
+   "value": "Connecté (dans Réglages)"
+  },
+  {
+   "name": "s_26942e0f",
+   "value": "Connecté, limité par les autorisations de dossier"
+  },
+  {
+   "name": "s_a8126b62",
+   "value": "Favori"
+  },
+  {
+   "name": "s_6933b472",
+   "value": "Partage système ouvert"
+  },
+  {
+   "name": "s_c8fa62c1",
+   "value": "Sélectionnés : {0}"
+  },
+  {
+   "name": "s_23ed437e",
+   "value": "Fonctions de la plateforme"
+  },
+  {
+   "name": "s_fea8398c",
+   "value": "Humeur moyenne"
+  },
+  {
+   "name": "s_499be303",
+   "value": "Commencer"
+  },
+  {
+   "name": "s_5d62764c",
+   "value": "Date de début"
+  },
+  {
+   "name": "s_2a665354",
+   "value": "Content"
+  },
+  {
+   "name": "s_673d4a91",
+   "value": "Intensité"
+  },
+  {
+   "name": "s_6a19ddcf",
+   "value": "Intensité {0}"
+  },
+  {
+   "name": "s_09229c97",
+   "value": "État actuel (facultatif)"
+  },
+  {
+   "name": "s_13cca53d",
+   "value": "Non pris en charge sur cet appareil"
+  },
+  {
+   "name": "s_1b4ae1a8",
+   "value": "Cet appareil ne peut pas exporter vers le dossier partagé. Utilisez « Choisir l'emplacement »"
+  },
+  {
+   "name": "s_91049175",
+   "value": "Cet appareil ne prend pas en charge les réglages de notification dans l'app"
+  },
+  {
+   "name": "s_1a0a2c38",
+   "value": "Cet appareil ne prend pas en charge le partage système"
+  },
+  {
+   "name": "s_4b8edbfa",
+   "value": "À faire"
+  },
+  {
+   "name": "s_e83d11ae",
+   "value": "À trier"
+  },
+  {
+   "name": "s_243c3959",
+   "value": "À trier : entrées étiquetées Quotidien."
+  },
+  {
+   "name": "s_2367642b",
+   "value": "Très mécontent"
+  },
+  {
+   "name": "s_fb903262",
+   "value": "Très content"
+  },
+  {
+   "name": "s_e70923c8",
+   "value": "Capture rapide"
+  },
+  {
+   "name": "s_9f0dc65e",
+   "value": "Intentions de capture rapide en attente d'examen"
+  },
+  {
+   "name": "s_53d60ffd",
+   "value": "Données brutes de récupération exportées. Conservez-les et contactez l'assistance"
+  },
+  {
+   "name": "s_abf33a8f",
+   "value": "Restaurer une sauvegarde endommagée ou ancienne"
+  },
+  {
+   "name": "s_a9612b5e",
+   "value": "Humeur"
+  },
+  {
+   "name": "s_f3061bd1",
+   "value": "Répartition des humeurs"
+  },
+  {
+   "name": "s_35dbb46b",
+   "value": "Humeur notée"
+  },
+  {
+   "name": "s_643f1ede",
+   "value": "Conscience de l'humeur"
+  },
+  {
+   "name": "s_ff9f8889",
+   "value": "Humeur supprimée"
+  },
+  {
+   "name": "s_8ac3df35",
+   "value": "Tendance de l'humeur · moyenne quotidienne"
+  },
+  {
+   "name": "s_fe05f6f8",
+   "value": "Humeurs : {0} nouvelles, {1} modifiées, {2} uniquement ici\n"
+  },
+  {
+   "name": "s_99812275",
+   "value": "Pensée"
+  },
+  {
+   "name": "s_d9f8afc2",
+   "value": "Idées à revoir"
+  },
+  {
+   "name": "s_6deefec2",
+   "value": "Me rappeler quand des idées attendent"
+  },
+  {
+   "name": "s_4f5176ed",
+   "value": "Quelque chose à ajouter ? (facultatif)"
+  },
+  {
+   "name": "s_b5d25fe7",
+   "value": "Mise en page compacte"
+  },
+  {
+   "name": "s_8523e97b",
+   "value": "Plus récentes d'abord"
+  },
+  {
+   "name": "s_791c2e78",
+   "value": "Plus anciennes d'abord"
+  },
+  {
+   "name": "s_6ef98325",
+   "value": "Par étiquette"
+  },
+  {
+   "name": "s_43bc98a3",
+   "value": "API disponible ; approbation de l'appareil requise"
+  },
+  {
+   "name": "s_392df5d7",
+   "value": "15 minutes avant"
+  },
+  {
+   "name": "s_401bd3d4",
+   "value": "1 jour avant"
+  },
+  {
+   "name": "s_25b72168",
+   "value": "1 heure avant"
+  },
+  {
+   "name": "s_669f23ff",
+   "value": "{0} minutes avant"
+  },
+  {
+   "name": "s_355f82e3",
+   "value": "{0} jours avant"
+  },
+  {
+   "name": "s_222759b9",
+   "value": "{0} heures avant"
+  },
+  {
+   "name": "s_6d40d527",
+   "value": "Rappel"
+  },
+  {
+   "name": "s_24035981",
+   "value": "Les rappels sont gérés par HarmonyOS en arrière-plan. L'autorisation de notification est demandée la première fois."
+  },
+  {
+   "name": "s_0b6efa3b",
+   "value": "Rechercher"
+  },
+  {
+   "name": "s_c8a90aa9",
+   "value": "Rechercher entrées, idées, humeurs et tâches"
+  },
+  {
+   "name": "s_1b9e8bc9",
+   "value": "Annuler"
+  },
+  {
+   "name": "s_7be8ae06",
+   "value": "Échec de l'opération"
+  },
+  {
+   "name": "s_839d4732",
+   "value": "Favori"
+  },
+  {
+   "name": "s_cf8b8d02",
+   "value": "Masquer le détail quotidien"
+  },
+  {
+   "name": "s_f3386881",
+   "value": "Fermer les filtres"
+  },
+  {
+   "name": "s_e1598b13",
+   "value": "Abandonner"
+  },
+  {
+   "name": "s_0ac91ecb",
+   "value": "Abandonner les modifications ?"
+  },
+  {
+   "name": "s_34ea918d",
+   "value": "Détendu"
+  },
+  {
+   "name": "s_4502142c",
+   "value": "Données, sauvegardes et réglages"
+  },
+  {
+   "name": "s_6344fa26",
+   "value": "Données et sécurité"
+  },
+  {
+   "name": "s_b6537954",
+   "value": "La base contient des entrées non valides. La copie de quarantaine a échoué, les originaux restent dans la base"
+  },
+  {
+   "name": "s_121fd605",
+   "value": "La base contient des entrées non valides. Les originaux sont en quarantaine et exportables"
+  },
+  {
+   "name": "s_b464971d",
+   "value": "Les données sont enregistrées sur cet appareil"
+  },
+  {
+   "name": "s_b8c8a94f",
+   "value": "Nouveau"
+  },
+  {
+   "name": "s_b0f36447",
+   "value": "Nouvelle tâche"
+  },
+  {
+   "name": "s_d2c53483",
+   "value": "Nouvelle idée"
+  },
+  {
+   "name": "s_160eb028",
+   "value": "Nouvelle entrée"
+  },
+  {
+   "name": "s_659aa23f",
+   "value": "Aucun"
+  },
+  {
+   "name": "s_40c77de6",
+   "value": "Éléments non valides : {0}"
+  },
+  {
+   "name": "s_74421189",
+   "value": "Sans importance"
+  },
+  {
+   "name": "s_609a9a60",
+   "value": "Dim"
+  },
+  {
+   "name": "s_f9abd512",
+   "value": "Calendrier"
+  },
+  {
+   "name": "s_6ba31688",
+   "value": "Quotidien"
+  },
+  {
+   "name": "s_caa53f15",
+   "value": "Journal"
+  },
+  {
+   "name": "s_6c39f636",
+   "value": "Le journal, les idées, les humeurs et les tâches seront supprimés. Action irréversible. Exportez d'abord une sauvegarde."
+  },
+  {
+   "name": "s_923b0270",
+   "value": "Journal et idées, en un geste"
+  },
+  {
+   "name": "s_92771dae",
+   "value": "Entrée de journal enregistrée"
+  },
+  {
+   "name": "s_56409a3c",
+   "value": "Fil du journal"
+  },
+  {
+   "name": "s_50a1db67",
+   "value": "Journal : {0} nouvelles, {1} modifiées, {2} uniquement ici\n"
+  },
+  {
+   "name": "s_449056e4",
+   "value": "La date détermine sa place dans le calendrier et le bilan. L'importance sert aux filtres et aux détails."
+  },
+  {
+   "name": "s_432f74fa",
+   "value": "Plage de dates"
+  },
+  {
+   "name": "s_7203eec6",
+   "value": "L'ancien protocole présente des risques. Utilisez l'exportation ou le partage système dans Sauvegarde et restauration pour envoyer les données par un moyen de confiance."
+  },
+  {
+   "name": "s_43a7036a",
+   "value": "Anciennes données de tâches endommagées"
+  },
+  {
+   "name": "s_f5a97704",
+   "value": "Anciennes tâches avec éléments non valides"
+  },
+  {
+   "name": "s_9c3b2801",
+   "value": "Anciennes données d'humeur endommagées"
+  },
+  {
+   "name": "s_3bddc601",
+   "value": "Anciennes humeurs avec éléments non valides"
+  },
+  {
+   "name": "s_454e9392",
+   "value": "Anciennes données de journal endommagées"
+  },
+  {
+   "name": "s_a628514c",
+   "value": "Ancien journal avec éléments non valides"
+  },
+  {
+   "name": "s_d7034b36",
+   "value": "Bonjour ☀️"
+  },
+  {
+   "name": "s_4b302bcb",
+   "value": "Fréquence des humeurs positives, neutres ou négatives sur la période ; la longueur des barres est proportionnelle"
+  },
+  {
+   "name": "s_50080995",
+   "value": "Aucune humeur sur cette période"
+  },
+  {
+   "name": "s_b8d35720",
+   "value": "Aucune humeur sur cette période. La répartition se dessinera avec le temps"
+  },
+  {
+   "name": "s_af564b8c",
+   "value": "NearLink"
+  },
+  {
+   "name": "s_0aaf4aa4",
+   "value": "NearLink, Live View, services intelligents et multi-appareils"
+  },
+  {
+   "name": "s_12263e9a",
+   "value": "Hier"
+  },
+  {
+   "name": "s_c18f71ef",
+   "value": "Bonsoir 🌙"
+  },
+  {
+   "name": "s_c14d82e9",
+   "value": "Environnement d'agent"
+  },
+  {
+   "name": "s_bf13f8b5",
+   "value": "Désactivé. Touchez pour voir les alternatives"
+  },
+  {
+   "name": "s_a3b4475f",
+   "value": "Quel ressenti s'en rapproche le plus ?"
+  },
+  {
+   "name": "s_87b8867d",
+   "value": "Plus récent"
+  },
+  {
+   "name": "s_ceb8f642",
+   "value": "Plus ancien"
+  },
+  {
+   "name": "s_56b38d0f",
+   "value": "Moments récents"
+  },
+  {
+   "name": "s_81364f08",
+   "value": "Avec importance"
+  },
+  {
+   "name": "s_be2c2eb2",
+   "value": "Non lu"
+  },
+  {
+   "name": "s_f2dc2311",
+   "value": "Aucun emplacement choisi"
+  },
+  {
+   "name": "s_9eb7e19a",
+   "value": "Aucun fichier de sauvegarde choisi"
+  },
+  {
+   "name": "s_27c37899",
+   "value": "Cette semaine"
+  },
+  {
+   "name": "s_8b09339a",
+   "value": "Humeur de la semaine"
+  },
+  {
+   "name": "s_b70e17ea",
+   "value": "Humeur plutôt basse cette semaine"
+  },
+  {
+   "name": "s_24d17368",
+   "value": "Humeur stable cette semaine"
+  },
+  {
+   "name": "s_e3f61599",
+   "value": "Plutôt positif cette semaine"
+  },
+  {
+   "name": "s_63d2d484",
+   "value": "Rien de noté cette semaine"
+  },
+  {
+   "name": "s_db0049cb",
+   "value": "Tendance de la semaine"
+  },
+  {
+   "name": "s_3750d663",
+   "value": "Rappel local"
+  },
+  {
+   "name": "s_5a3b670a",
+   "value": "Échec du chargement des données locales : {0}"
+  },
+  {
+   "name": "s_36f7c12d",
+   "value": "Données locales en cours de chargement : exportation impossible pour le moment"
+  },
+  {
+   "name": "s_3bc73a70",
+   "value": "Données locales en cours de chargement. Réessayez bientôt"
+  },
+  {
+   "name": "s_a30af19c",
+   "value": "Données locales effacées"
+  },
+  {
+   "name": "s_5c414af2",
+   "value": "Données locales effacées, mais les rappels n'ont pas pu être retirés. Redémarrez l'app et réessayez"
+  },
+  {
+   "name": "s_caefb3d7",
+   "value": "Données locales remplacées"
+  },
+  {
+   "name": "s_ed1cc69e",
+   "value": "La base locale n'est pas encore prête"
+  },
+  {
+   "name": "s_47af33f9",
+   "value": "Ce mois-ci"
+  },
+  {
+   "name": "s_37272be9",
+   "value": "Issu d'une idée. L'idée est conservée"
+  },
+  {
+   "name": "s_7e5242cd",
+   "value": "Voir le détail quotidien"
+  },
+  {
+   "name": "s_495fd6a9",
+   "value": "Voir l'idée"
+  },
+  {
+   "name": "s_c5a41a4d",
+   "value": "Importer et comparer"
+  },
+  {
+   "name": "s_2b1626c8",
+   "value": "Étiquette"
+  },
+  {
+   "name": "s_6fa75608",
+   "value": "Marquer comme idée"
+  },
+  {
+   "name": "s_da8c43e5",
+   "value": "Marquer comme mémo"
+  },
+  {
+   "name": "s_6642d94e",
+   "value": "Marquer comme urgent"
+  },
+  {
+   "name": "s_20532441",
+   "value": "Des données non valides d'une ancienne version ont été conservées. Exportez un fichier de récupération dans Réglages"
+  },
+  {
+   "name": "s_f7d7a0ce",
+   "value": "Bienvenue dans Flash"
+  },
+  {
+   "name": "s_b87694cc",
+   "value": "Chargement des données locales…"
+  },
+  {
+   "name": "s_f489ed09",
+   "value": "Texte et type"
+  },
+  {
+   "name": "s_6af40858",
+   "value": "Maintenant"
+  },
+  {
+   "name": "s_eb842c00",
+   "value": "Cet appareil ne prend pas en charge le fuseau horaire de la tâche. Mettez à jour le système et réessayez"
+  },
+  {
+   "name": "s_b060afd3",
+   "value": "Cet appareil ne prend pas en charge un fuseau horaire de la sauvegarde. Mettez à jour le système et réessayez. Rien n'a été importé"
+  },
+  {
+   "name": "s_a46dce44",
+   "value": "Pris en charge sur cet appareil"
+  },
+  {
+   "name": "s_4c75c431",
+   "value": "Pas encore pris en charge sur cet appareil"
+  },
+  {
+   "name": "s_f4958768",
+   "value": "Tous les 3 jours"
+  },
+  {
+   "name": "s_41be2fe2",
+   "value": "Chaque semaine"
+  },
+  {
+   "name": "s_02c285b5",
+   "value": "Chaque jour"
+  },
+  {
+   "name": "s_18fa51bd",
+   "value": "Journal, idées et humeurs par jour · tâches non incluses"
+  },
+  {
+   "name": "s_10c2c6ea",
+   "value": "Graphique des entrées par jour, "
+  },
+  {
+   "name": "s_8189ce25",
+   "value": "Exportation partagée sandbox"
+  },
+  {
+   "name": "s_412c1bc9",
+   "value": "Aucune donnée de récupération à exporter"
+  },
+  {
+   "name": "s_43c975df",
+   "value": "Aucune entrée trouvée"
+  },
+  {
+   "name": "s_f8bc527e",
+   "value": "Aucune entrée de journal ne correspond"
+  },
+  {
+   "name": "s_a1589567",
+   "value": "Jours actifs : {0} · Humeur moyenne {1}"
+  },
+  {
+   "name": "s_11b5fdf6",
+   "value": "Clair"
+  },
+  {
+   "name": "s_2a8baaea",
+   "value": "Sombre"
+  },
+  {
+   "name": "s_2d2662ca",
+   "value": "Ajouter une tâche"
+  },
+  {
+   "name": "s_efb3530b",
+   "value": "L'effacement supprime le journal, les humeurs et les tâches de cet appareil, sans retour possible. Exportez d'abord une sauvegarde."
+  },
+  {
+   "name": "s_7c21f688",
+   "value": "Effacer toutes les données locales"
+  },
+  {
+   "name": "s_0f228eb2",
+   "value": "Effacer toutes les données locales. Confirmation demandée, action irréversible"
+  },
+  {
+   "name": "s_ff0218b5",
+   "value": "Effacer toutes les données locales ?"
+  },
+  {
+   "name": "s_0b9d2bac",
+   "value": "Effacer"
+  },
+  {
+   "name": "s_0fba4654",
+   "value": "Effacer les filtres"
+  },
+  {
+   "name": "s_82e960a9",
+   "value": "Vider la quarantaine"
+  },
+  {
+   "name": "s_b8b74e9d",
+   "value": "Idées"
+  },
+  {
+   "name": "s_a25c48e8",
+   "value": "Idée enregistrée"
+  },
+  {
+   "name": "s_4604d6bf",
+   "value": "Rappels d'idées"
+  },
+  {
+   "name": "s_436e2c82",
+   "value": "Qu'avez-vous en tête ?"
+  },
+  {
+   "name": "s_494f6f35",
+   "value": "Crée un fichier de sauvegarde flash-backup-v2"
+  },
+  {
+   "name": "s_2ef507d3",
+   "value": "Crée une sauvegarde et l'envoie via le partage système"
+  },
+  {
+   "name": "s_f60bb44e",
+   "value": "En colère"
+  },
+  {
+   "name": "s_9efb941a",
+   "value": "Fatigué"
+  },
+  {
+   "name": "s_5b8de6f4",
+   "value": "Voyez le rythme et les humeurs derrière vos entrées"
+  },
+  {
+   "name": "s_2f530b5b",
+   "value": "Confirmer la suppression"
+  },
+  {
+   "name": "s_869f8d0c",
+   "value": "Tout effacer"
+  },
+  {
+   "name": "s_78876d37",
+   "value": "Partage par contact"
+  },
+  {
+   "name": "s_5716f5ef",
+   "value": "Dans {0} minutes"
+  },
+  {
+   "name": "s_7ed1d395",
+   "value": "Agent local A2A"
+  },
+  {
+   "name": "s_d742f801",
+   "value": "En attente d'approbation du scénario"
+  },
+  {
+   "name": "s_6fbf1709",
+   "value": "En attente de la signature manuelle et d'App Linking"
+  },
+  {
+   "name": "s_f5e087c9",
+   "value": "Filtrer"
+  },
+  {
+   "name": "s_26640f43",
+   "value": "Type"
+  },
+  {
+   "name": "s_5d44879d",
+   "value": "Pris en charge par le système ; en attente d'autorisation"
+  },
+  {
+   "name": "s_77cc2953",
+   "value": "Le système n'offre pas d'API publique : c'est un réglage de l'app"
+  },
+  {
+   "name": "s_ae26d9e7",
+   "value": "Capacités du système"
+  },
+  {
+   "name": "s_b68d1af4",
+   "value": "Échec de la vérification du système : l'état des fonctions peut être inexact"
+  },
+  {
+   "name": "s_235f3e59",
+   "value": "Urgent"
+  },
+  {
+   "name": "s_64db55af",
+   "value": "Quand {0} idées ou plus attendent, vous recevez un rappel à 20 h. Les idées ouvertes ne comptent plus."
+  },
+  {
+   "name": "s_77dacc26",
+   "value": "Répartition · depuis le début"
+  },
+  {
+   "name": "s_476d405b",
+   "value": "Date de fin"
+  },
+  {
+   "name": "s_010e135c",
+   "value": "Continuer"
+  },
+  {
+   "name": "s_e60fd56d",
+   "value": "Continuez à noter, votre bilan se précisera"
+  },
+  {
+   "name": "s_607348a8",
+   "value": "Modifier"
+  },
+  {
+   "name": "s_1d5b5e98",
+   "value": "Modifier la tâche"
+  },
+  {
+   "name": "s_c9ab4c68",
+   "value": "Modifier l'idée"
+  },
+  {
+   "name": "s_a5db4a27",
+   "value": "Modifier l'entrée"
+  },
+  {
+   "name": "s_d157cf32",
+   "value": "État personnalisé, comme confiant ou calme"
+  },
+  {
+   "name": "s_cf266f5e",
+   "value": "Entrées sur la période"
+  },
+  {
+   "name": "s_a6317c7d",
+   "value": "Remplacer"
+  },
+  {
+   "name": "s_5521c6a5",
+   "value": "Une place pour chaque pensée · sans compte cloud"
+  },
+  {
+   "name": "s_dad3d89f",
+   "value": "Notez votre première pensée"
+  },
+  {
+   "name": "s_2c9d9f0e",
+   "value": "Entrées"
+  },
+  {
+   "name": "s_57cc90b8",
+   "value": "Contenu"
+  },
+  {
+   "name": "s_a7c9e948",
+   "value": "Entrée supprimée"
+  },
+  {
+   "name": "s_25548f50",
+   "value": "Entrée mise à jour"
+  },
+  {
+   "name": "s_a48657a1",
+   "value": "Noter l'humeur"
+  },
+  {
+   "name": "s_8c8316a6",
+   "value": "Date de l'entrée AAAA-MM-JJ"
+  },
+  {
+   "name": "s_d1e82646",
+   "value": "Activité de saisie"
+  },
+  {
+   "name": "s_e49ad9fc",
+   "value": "Pris en charge ; en attente du scénario"
+  },
+  {
+   "name": "s_0102647f",
+   "value": "Transfert entre appareils"
+  },
+  {
+   "name": "s_f3c259dd",
+   "value": "Réglages"
+  },
+  {
+   "name": "s_6c53e15d",
+   "value": "Saisissez un titre de tâche"
+  },
+  {
+   "name": "s_b1313650",
+   "value": "Saisissez une date valide (AAAA-MM-JJ)"
+  },
+  {
+   "name": "s_796026c5",
+   "value": "Saisissez une date et une heure valides"
+  },
+  {
+   "name": "s_8678f5d9",
+   "value": "{0} caractères de trop"
+  },
+  {
+   "name": "s_b45e202f",
+   "value": "Tendances"
+  },
+  {
+   "name": "s_b494a385",
+   "value": "Système"
+  },
+  {
+   "name": "s_ebbcb10b",
+   "value": "Convertir en tâche"
+  },
+  {
+   "name": "s_13f1b81a",
+   "value": "Saisissez un mot-clé ou une étiquette"
+  },
+  {
+   "name": "s_7cd6a835",
+   "value": "Saisissez un mot-clé ou un nom d'étiquette"
+  },
+  {
+   "name": "s_214cb43c",
+   "value": "les 30 derniers jours"
+  },
+  {
+   "name": "s_27712c0e",
+   "value": "Graphique de l'humeur moyenne sur 7 jours"
+  },
+  {
+   "name": "s_511bc8b4",
+   "value": "Moyenne quotidienne sur 7 jours · — signifie aucune entrée"
+  },
+  {
+   "name": "s_9ea79282",
+   "value": "les 90 derniers jours"
+  },
+  {
+   "name": "s_4ed18a1a",
+   "value": "30 derniers jours"
+  },
+  {
+   "name": "s_6ae50c28",
+   "value": "7 derniers jours"
+  },
+  {
+   "name": "s_8ab0bb3c",
+   "value": "90 derniers jours"
+  },
+  {
+   "name": "s_863fb33a",
+   "value": "Récent"
+  },
+  {
+   "name": "s_a7f085b7",
+   "value": "{0} caractères restants"
+  },
+  {
+   "name": "s_91cae70c",
+   "value": "Aucune humeur. Commencez par ce que vous ressentez"
+  },
+  {
+   "name": "s_4cabb422",
+   "value": "Aucune entrée"
+  },
+  {
+   "name": "s_fa547131",
+   "value": "Aucun projet ni entrée ce jour-là"
+  },
+  {
+   "name": "s_6d67abd6",
+   "value": "ce mois-ci"
+  },
+  {
+   "name": "s_09e1a534",
+   "value": "cette semaine"
+  },
+  {
+   "name": "s_d3ce76c1",
+   "value": "Cette entrée n'existe plus"
+  },
+  {
+   "name": "s_5aa52714",
+   "value": "Sur cette période : entrées {0} · humeurs {1}"
+  },
+  {
+   "name": "s_5fe370b7",
+   "value": "Sélectionner"
+  },
+  {
+   "name": "s_b59b6994",
+   "value": "Réglages des notifications"
+  },
+  {
+   "name": "s_00b88ac0",
+   "value": "Panneau des notifications"
+  },
+  {
+   "name": "s_cf3e4247",
+   "value": "Importance"
+  },
+  {
+   "name": "s_b53d490f",
+   "value": "Importance et date"
+  },
+  {
+   "name": "s_e63fba86",
+   "value": "L'importance doit être comprise entre 0 et 4"
+  },
+  {
+   "name": "s_4e941a37",
+   "value": "Réessayer"
+  },
+  {
+   "name": "s_954316f6",
+   "value": "Bulle / fenêtre flottante"
+  },
+  {
+   "name": "s_aef2df88",
+   "value": "Notez à la volée"
+  },
+  {
+   "name": "s_a87d7d3d",
+   "value": "Quarantaine vidée"
+  },
+  {
+   "name": "s_80390cc2",
+   "value": "Mal à l'aise"
+  },
+  {
+   "name": "s_99546fff",
+   "value": "Très contrarié"
+  },
+  {
+   "name": "s_22566806",
+   "value": "Ravi"
+  },
+  {
+   "name": "s_b6819d11",
+   "value": "La page n'est pas encore prête. Réessayez bientôt"
+  },
+  {
+   "name": "s_1f54be7c",
+   "value": "Actions de la page non configurées"
+  },
+  {
+   "name": "s_9a63360d",
+   "value": "Les données locales ont changé après l'aperçu. Différences recalculées. Confirmez avant de remplacer"
+  },
+  {
+   "name": "s_39f2623a",
+   "value": "Fonctions HarmonyOS"
+  },
+  {
+   "name": "s_a14edc19",
+   "value": "(Sans titre)"
+  },
+  {
+   "name": "s_d6d10170",
+   "value": "+ Nouveau"
+  },
+  {
+   "name": "s_25af9b9f",
+   "value": ", idées non lues : {0}"
+  },
+  {
+   "name": "s_60b362bc",
+   "value": ", mais les rappels n'ont pas pu être restaurés"
+  },
+  {
+   "name": "s_9b38261d",
+   "value": ", le détail quotidien peut être affiché"
+  },
+  {
+   "name": "s_e014a361",
+   "value": ", sélectionné"
+  },
+  {
+   "name": "s_b5a68109",
+   "value": ", indisponible"
+  },
+  {
+   "name": "s_67d80aae",
+   "value": ", avec une humeur notée"
+  },
+  {
+   "name": "s_1e2ec103",
+   "value": ", et l'humeur a un peu baissé"
+  },
+  {
+   "name": "s_2122a6c6",
+   "value": ", et l'humeur a été un peu plus positive"
+  }
+ ]
+}

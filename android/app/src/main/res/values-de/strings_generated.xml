@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 由 tools/i18n/generate.py 生成，勿手改 -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="ExtraTranslation,MissingTranslation">
+    <string name="share_target_label">In Flash sichern</string>
+    <string name="widget_label">Flash Jetzt</string>
+    <string name="widget_description">Einträge und offene Aufgaben von heute</string>
+    <string name="tile_label">Flash-Schnellerfassung</string>
+    <string name="shortcut_idea">Idee notieren</string>
+    <string name="shortcut_log">Tagebuch schreiben</string>
+    <string name="s_c9414111" formatted="false">" · Erinnerung aktiv"</string>
+    <string name="s_94fc7b8e" formatted="false">/data/tasks/{0}/due: muss ein Objekt sein</string>
+    <string name="s_aafdda63" formatted="false">/data/{0}/{1}: Eintrag muss ein Objekt sein</string>
+    <string name="s_10db0315" formatted="false">/data/{0}: Array überschreitet das Limit</string>
+    <string name="s_b7cc858a" formatted="false">/data: ungültige oder doppelte Einträge. Über die Wiederherstellung sehen, was sich retten lässt</string>
+    <string name="s_90ef682e" formatted="false">/version: Für ältere Dateien die Wiederherstellung verwenden</string>
+    <string name="s_b9ce0fb9" formatted="false">/: zu viele JSON-Werte</string>
+    <string name="s_307d96fc" formatted="false">/: doppelter Schlüssel im JSON-Objekt: {0}</string>
+    <string name="s_b414e614" formatted="false">/: ungültige JSON-Syntax (Position {0})</string>
+    <string name="s_7038ec28" formatted="false">/: UTF-8-BOM ist nicht erlaubt</string>
+    <string name="s_4aa2d855" formatted="false">/: ungültige Export-Metadaten</string>
+    <string name="s_5ddd2d8d" formatted="false">30 Tage</string>
+    <string name="s_a96eed0d" formatted="false">7 Tage</string>
+    <string name="s_355b83a3" formatted="false">Eine Woche, die in Erinnerung bleibt. ✦</string>
+    <string name="s_a1486dba" formatted="false">Flash Aero-Backup</string>
+    <string name="s_eeecd281" formatted="false">Flash-Aufgabenerinnerung</string>
+    <string name="s_f6ff76b6" formatted="false">Flash-Schnellerfassung</string>
+    <string name="s_9a2b6832" formatted="false">Flash Jetzt</string>
+    <string name="s_2a0b1ddf" formatted="false">Flash-Idee</string>
+    <string name="s_de22df1c" formatted="false">Flash-Eintrag</string>
+    <string name="s_8d6bfa5c" formatted="false">Highlights</string>
+    <string name="s_58f879ce" formatted="false">Erinnerung</string>
+    <string name="s_879db2fb" formatted="false">Eher gedrückt</string>
+    <string name="s_db9c822c" formatted="false">Eher positiv</string>
+    <string name="s_f3498d7d" formatted="false">Eher ausgeglichen</string>
+    <string name="s_244cff4e" formatted="false">Diese Woche war...</string>
+    <string name="s_fe948398" formatted="false">Das hast du erfasst</string>
+    <string name="s_b053c6ce" formatted="false">data muss ein Objekt sein</string>
+    <string name="s_70c34463" formatted="false">Stimmungen</string>
+    <string name="s_0dbf59c2" formatted="false">emotions muss ein Array sein</string>
+    <string name="s_f22ee8cb" formatted="false">Ideen</string>
+    <string name="s_be7aa09b" formatted="false">logs muss ein Array sein</string>
+    <string name="s_62852daa" formatted="false">Momente</string>
+    <string name="s_22c3caa0" formatted="false">schemas muss ein Objekt sein</string>
+    <string name="s_ad2e48cd" formatted="false">Aufgaben</string>
+    <string name="s_002e97a4" formatted="false">tasks muss ein Array sein</string>
+    <string name="s_6e425eba" formatted="false">{0}: {1} · {2}: {3}</string>
+    <string name="s_39ac061e" formatted="false">{0} — {1} · Tage ohne Einträge zählen nicht</string>
+    <string name="s_e2a8c96b" formatted="false">Aufgaben: {0}</string>
+    <string name="s_409ddff6" formatted="false">Aktive Tage: {0} · Gesamt: {1}</string>
+    <string name="s_79fc376e" formatted="false">Einträge: {0}</string>
+    <string name="s_a06e31ba" formatted="false">Ungültige Einträge, die übersprungen werden: {0}.</string>
+    <string name="s_aeb06eb3" formatted="false">Einträge: {0} · Stimmungen: {1}</string>
+    <string name="s_ba02e82e" formatted="false">{0}-mal</string>
+    <string name="s_852bf53d" formatted="false">Stimmungen: {0}, Aufgaben: {1}</string>
+    <string name="s_1f0ab446" formatted="false">Details zu {0}</string>
+    <string name="s_7f7d2285" formatted="false">Offen: {0}</string>
+    <string name="s_2e763a14" formatted="false">{0} hast du öfter erfasst als {1}</string>
+    <string name="s_10e8d2b4" formatted="false">{0} hast du weniger erfasst als {1}</string>
+    <string name="s_8d74a879" formatted="false">{0} hast du etwa so viel erfasst wie {1}</string>
+    <string name="s_1879232a" formatted="false">"{0}, Einträge: {1}, "</string>
+    <string name="s_e168d4f4" formatted="false">{0}, aber Systemerinnerungen konnten nicht wiederhergestellt werden. Später erneut versuchen</string>
+    <string name="s_245af589" formatted="false">{0}: Einträge {1} · Stimmungen {2}</string>
+    <string name="s_7db427be" formatted="false">{0}: {1} neu · {2} geändert · {3} gleich · {4} nur hier</string>
+    <string name="s_0009cc0b" formatted="false">{0}: Pflichtfelder fehlen oder unbekannte Felder vorhanden</string>
+    <string name="s_7dad93fd" formatted="false">★ Favoriten</string>
+    <string name="s_745e890f" formatted="false">✓ Im Tagebuch gespeichert</string>
+    <string name="s_a248a677" formatted="false">✓ Bei den Ideen gespeichert</string>
+    <string name="s_67fc93c3" formatted="false">✦ Flash</string>
+    <string name="s_05615f1f" formatted="false">Mo</string>
+    <string name="s_e50a5759" formatted="false">Flüchtige Gedanken sind es wert, festgehalten zu werden</string>
+    <string name="s_8bcbbc86" formatted="false">Sieben Stimmungsstufen zeigen, wie du dich veränderst</string>
+    <string name="s_0c616a24" formatted="false">Mi</string>
+    <string name="s_508b1e1d" formatted="false">Vorige Woche</string>
+    <string name="s_b06dcc3d" formatted="false">Voriger Monat</string>
+    <string name="s_8be194e7" formatted="false">letzten Monat</string>
+    <string name="s_eb0f6aef" formatted="false">letzte Woche</string>
+    <string name="s_0bb3bda2" formatted="false">Nächste Woche</string>
+    <string name="s_6bcf17c2" formatted="false">Nächster Monat</string>
+    <string name="s_10c83c81" formatted="false">Weiter</string>
+    <string name="s_82b6cabb" formatted="false">Guten Tag 🌤</string>
+    <string name="s_1344f491" formatted="false">Unglücklich</string>
+    <string name="s_4cc036be" formatted="false">Keine Erinnerung</string>
+    <string name="s_12e8587a" formatted="false">Nicht unterstützte Version des Abschnitts {0}</string>
+    <string name="s_ba358518" formatted="false">Alle</string>
+    <string name="s_b13672cd" formatted="false">Neutral</string>
+    <string name="s_51f6517e" formatted="false">Design</string>
+    <string name="s_0a416847" formatted="false">die 30 Tage davor</string>
+    <string name="s_0c6445c1" formatted="false">die 90 Tage davor</string>
+    <string name="s_89609beb" formatted="false">Di</string>
+    <string name="s_9160a883" formatted="false">Fr</string>
+    <string name="s_a848765c" formatted="false">Heute</string>
+    <string name="s_6f3c2b2c" formatted="false">Halte heute etwas fest.</string>
+    <string name="s_1f2bd289" formatted="false">Heute noch nichts erfasst.</string>
+    <string name="s_cfccbae7" formatted="false">Heute</string>
+    <string name="s_5bfe853c" formatted="false">Einträge und offene Aufgaben von heute</string>
+    <string name="s_2d7464e1" formatted="false">Aufgaben</string>
+    <string name="s_3f7946be" formatted="false">Aufgabe konnte nicht gespeichert werden</string>
+    <string name="s_bc3ceaab" formatted="false">Aufgabe konnte nicht gelöscht werden</string>
+    <string name="s_cd07ba17" formatted="false">Aufgabe gespeichert. Mitteilungen erlauben, um Erinnerungen zu erhalten</string>
+    <string name="s_d3190fa3" formatted="false">Aufgabenerinnerungen</string>
+    <string name="s_d8bb8799" formatted="false">Ungültige Aufgabenzeit</string>
+    <string name="s_86da87a3" formatted="false">Aufgabe konnte nicht aktualisiert werden</string>
+    <string name="s_97815f19" formatted="false">Flash Aero-Backup senden</string>
+    <string name="s_6b17ba8f" formatted="false">An anderes Gerät senden</string>
+    <string name="s_79955ed0" formatted="false">Traurig</string>
+    <string name="s_d7974514" formatted="false">Wartende Ideen: {0}. Fang mit der ältesten an</string>
+    <string name="s_d908f279" formatted="false">Ideen zum Durchgehen: {0}. Schau mal rein</string>
+    <string name="s_ad5b82b0" formatted="false">Speichern</string>
+    <string name="s_9b95e293" formatted="false">Wird gespeichert…</string>
+    <string name="s_64911de5" formatted="false">Als JSON-Datei speichern</string>
+    <string name="s_46ca88f1" formatted="false">Speichern fehlgeschlagen. Bitte erneut versuchen</string>
+    <string name="s_1d0e5d5a" formatted="false">Ganztägig</string>
+    <string name="s_0c14a696" formatted="false">Ganztägige Aufgabe</string>
+    <string name="s_05eb990b" formatted="false">Alles durchsuchen</string>
+    <string name="s_5e6558ad" formatted="false">Alle</string>
+    <string name="s_e8562c78" formatted="false">Sa</string>
+    <string name="s_72a18f8e" formatted="false">Über Flash</string>
+    <string name="s_87dadb5a" formatted="false">Stichwort oder Schlagwort</string>
+    <string name="s_39b523bd" formatted="false">Schließen</string>
+    <string name="s_05f5920d" formatted="false">Bestimmte Uhrzeit</string>
+    <string name="s_801be77b" formatted="false">Inhalt</string>
+    <string name="s_dc24135d" formatted="false">Inhalt darf nicht leer sein</string>
+    <string name="s_043cda7f" formatted="false">Zu lang ({0} Zeichen, max. {1}). Vor dem Speichern kürzen</string>
+    <string name="s_87000edc" formatted="false">Schreib weiter, dein künftiges Ich wird es sehen.</string>
+    <string name="s_95a71bc9" formatted="false">Wird vorbereitet…</string>
+    <string name="s_9aa7d416" formatted="false">Teilen</string>
+    <string name="s_4ae3c205" formatted="false">Eintrag teilen</string>
+    <string name="s_caf6d5a6" formatted="false">Typ</string>
+    <string name="s_a0b5ccaf" formatted="false">Sortierung ändern</string>
+    <string name="s_ea8d5381" formatted="false">Löschen</string>
+    <string name="s_6b93827d" formatted="false">Aufgabe löschen</string>
+    <string name="s_bb2e6146" formatted="false">Aufgabe löschen?</string>
+    <string name="s_309b2b90" formatted="false">Löschen fehlgeschlagen. Bitte erneut versuchen</string>
+    <string name="s_e4d23002" formatted="false">Löscht alle Tagebucheinträge, Stimmungen und Aufgaben endgültig. Zuerst ein Backup exportieren</string>
+    <string name="s_e6dedfa0" formatted="false">Diese Stimmung löschen?</string>
+    <string name="s_98f7e648" formatted="false">Diesen Tagebucheintrag löschen?</string>
+    <string name="s_c51f5912" formatted="false">Bei Fälligkeit</string>
+    <string name="s_c628e28d" formatted="false">Enthält Tagebuch: {0}, Stimmungen: {1}, Aufgaben: {2}</string>
+    <string name="s_60b4c5ae" formatted="false">Gefahrenbereich</string>
+    <string name="s_949856b3" formatted="false">Abbrechen</string>
+    <string name="s_d1d62fb0" formatted="false">Aus Favoriten entfernen</string>
+    <string name="s_4d55cb75" formatted="false">Backup exportieren oder über „Teilen“ senden</string>
+    <string name="s_5e53c03a" formatted="false">Do</string>
+    <string name="s_40163b46" formatted="false">Zurück zu heute</string>
+    <string name="s_bed63d2f" formatted="false">Diese Woche</string>
+    <string name="s_c2e1aa6d" formatted="false">Rückblick</string>
+    <string name="s_fbac6f20" formatted="false">Sichern &amp; Wiederherstellen</string>
+    <string name="s_bb48fdba" formatted="false">Backups sind unverschlüsseltes JSON mit Tagebuch, Stimmungen und Aufgaben. Nur an vertrauenswürdigen Orten speichern oder teilen</string>
+    <string name="s_20fe814f" formatted="false">Backup exportiert</string>
+    <string name="s_c90a7947" formatted="false">Die Backup-Datei ist kein gültiges JSON-Objekt</string>
+    <string name="s_88f39f13" formatted="false">Die Backup-Datei ist kein gültiges UTF-8-JSON</string>
+    <string name="s_269e4097" formatted="false">Die Backup-Datei ist größer als {0} MB und kann nicht importiert werden</string>
+    <string name="s_cc139297" formatted="false">Inkompatible Version: {0} erwartet, {1} erhalten</string>
+    <string name="s_d3de3f52" formatted="false">Inkompatibles Backup: Feld „version“ fehlt</string>
+    <string name="s_584ff11a" formatted="false">Notiz</string>
+    <string name="s_d82fe22c" formatted="false">Notiz zu lang. Vor dem Speichern kürzen</string>
+    <string name="s_d9dac7dd" formatted="false">Notizen (optional)</string>
+    <string name="s_e4a4815a" formatted="false">Darstellung &amp; Nutzung</string>
+    <string name="s_1e13bd21" formatted="false">Fertig</string>
+    <string name="s_dd03e6ad" formatted="false">Vor dem Import Unterschiede zu lokalen Daten ansehen</string>
+    <string name="s_9b60ff74" formatted="false">Import fehlgeschlagen: {0}</string>
+    <string name="s_da193966" formatted="false">Import abgebrochen</string>
+    <string name="s_7fdaf616" formatted="false">Exportieren, importieren, löschen</string>
+    <string name="s_f97fded3" formatted="false">Backup exportieren</string>
+    <string name="s_7436fb8d" formatted="false">Export fehlgeschlagen: {0}</string>
+    <string name="s_b1632a8b" formatted="false">Alle Tagebucheinträge, Stimmungen und Aufgaben werden endgültig gelöscht. Zuerst ein Backup exportieren.</string>
+    <string name="s_479481d2" formatted="false">Übertragung im lokalen Netzwerk ist vorerst deaktiviert</string>
+    <string name="s_f8eef707" formatted="false">Die Übertragung im lokalen Netzwerk ist wegen Sicherheitsrisiken des alten Protokolls aus. Sende die JSON-Datei per Backup-Export oder „Teilen“ über einen vertrauenswürdigen Weg.</string>
+    <string name="s_531320d2" formatted="false">Details</string>
+    <string name="s_b1368837" formatted="false">Unterschiede</string>
+    <string name="s_c2d9a3f9" formatted="false">Zusammenführen fügt empfangene Daten hinzu oder aktualisiert sie und behält Daten, die nur auf diesem Gerät sind. Überschreiben löscht zuerst dieses Gerät.</string>
+    <string name="s_d0fcf500" formatted="false">Gespeichert</string>
+    <string name="s_5dbcdf6d" formatted="false">Aus</string>
+    <string name="s_bee374d1" formatted="false">Gelöscht</string>
+    <string name="s_8b122251" formatted="false">Tagebucheintrag gelöscht</string>
+    <string name="s_74e8cc38" formatted="false">"Importiert Tagebuch: {0}, Stimmungen: {1}, "</string>
+    <string name="s_a8126b62" formatted="false">Favorit</string>
+    <string name="s_2266e2ec" formatted="false">Alle Daten gelöscht</string>
+    <string name="s_c13b3522" formatted="false">Alle Daten gelöscht, aber Systemerinnerungen konnten nicht entfernt werden. App neu starten und erneut versuchen</string>
+    <string name="s_c8fa62c1" formatted="false">Ausgewählt: {0}</string>
+    <string name="s_01133500" formatted="false">Durchschnittsstimmung {0} · Gesamt {1}</string>
+    <string name="s_22696cbc" formatted="false">Start</string>
+    <string name="s_499be303" formatted="false">Loslegen</string>
+    <string name="s_5d62764c" formatted="false">Startdatum</string>
+    <string name="s_2a665354" formatted="false">Glücklich</string>
+    <string name="s_673d4a91" formatted="false">Intensität</string>
+    <string name="s_6a19ddcf" formatted="false">Intensität {0}</string>
+    <string name="s_4b8edbfa" formatted="false">Offen</string>
+    <string name="s_dfcdb4b6" formatted="false">Offene Aufgabe</string>
+    <string name="s_e83d11ae" formatted="false">Zu sortieren</string>
+    <string name="s_5660c655" formatted="false">Zu sortieren: Tagebucheinträge mit „Alltag“. Lange drücken für mehrere.</string>
+    <string name="s_2367642b" formatted="false">Sehr unglücklich</string>
+    <string name="s_fb903262" formatted="false">Sehr glücklich</string>
+    <string name="s_e70923c8" formatted="false">Schnellerfassung</string>
+    <string name="s_abf33a8f" formatted="false">Beschädigtes oder altes Backup wiederherstellen</string>
+    <string name="s_a9612b5e" formatted="false">Stimmung</string>
+    <string name="s_7bd3df69" formatted="false">Durchschnittsstimmung {0} (−3 bis +3)</string>
+    <string name="s_643f1ede" formatted="false">Stimmung wahrnehmen</string>
+    <string name="s_8de4274f" formatted="false">Stimmungsverlauf</string>
+    <string name="s_99812275" formatted="false">Gedanke</string>
+    <string name="s_d9f8afc2" formatted="false">Ideen zum Durchgehen</string>
+    <string name="s_6deefec2" formatted="false">Erinnern, wenn Ideen warten</string>
+    <string name="s_4e89a8ad" formatted="false">Möchtest du etwas sagen? (optional)</string>
+    <string name="s_eae146ff" formatted="false">Typ der Auswahl ändern</string>
+    <string name="s_c9ddd465" formatted="false">Auswahl konnte nicht geändert werden. Bitte erneut versuchen</string>
+    <string name="s_803499dd" formatted="false">Schlagwort der Auswahl ändern</string>
+    <string name="s_b4b9bfa6" formatted="false">Unterschiede zusammenführen</string>
+    <string name="s_8523e97b" formatted="false">Neueste zuerst</string>
+    <string name="s_791c2e78" formatted="false">Älteste zuerst</string>
+    <string name="s_6ef98325" formatted="false">Nach Schlagwort</string>
+    <string name="s_da39e076" formatted="false">1 Tag vorher</string>
+    <string name="s_0c4452fe" formatted="false">1 Stunde vorher</string>
+    <string name="s_74d32173" formatted="false">15 Minuten vorher</string>
+    <string name="s_6d40d527" formatted="false">Erinnerung</string>
+    <string name="s_545f8675" formatted="false">Erinnerungen plant das System; im Energiesparmodus können sie etwas später kommen.</string>
+    <string name="s_0b6efa3b" formatted="false">Suchen</string>
+    <string name="s_18fca433" formatted="false">Tagebuch durchsuchen...</string>
+    <string name="s_c8a90aa9" formatted="false">Einträge, Ideen, Stimmungen und Aufgaben durchsuchen</string>
+    <string name="s_1b9e8bc9" formatted="false">Rückgängig</string>
+    <string name="s_aff00db8" formatted="false">Rückgängig fehlgeschlagen. Bitte erneut versuchen</string>
+    <string name="s_87aed705" formatted="false">Vorgang fehlgeschlagen. Bitte erneut versuchen</string>
+    <string name="s_839d4732" formatted="false">Favorit</string>
+    <string name="s_cf8b8d02" formatted="false">Tagesdetails ausblenden</string>
+    <string name="s_e1598b13" formatted="false">Verwerfen</string>
+    <string name="s_0ac91ecb" formatted="false">Nicht gespeicherte Änderungen verwerfen?</string>
+    <string name="s_6344fa26" formatted="false">Daten &amp; Sicherheit</string>
+    <string name="s_b464971d" formatted="false">Daten werden auf diesem Gerät gespeichert</string>
+    <string name="s_95b69a6d" formatted="false">Datei ist größer als 50 MiB</string>
+    <string name="s_b8c8a94f" formatted="false">Neu</string>
+    <string name="s_b0f36447" formatted="false">Neue Aufgabe</string>
+    <string name="s_d2c53483" formatted="false">Neue Idee</string>
+    <string name="s_160eb028" formatted="false">Neuer Eintrag</string>
+    <string name="s_659aa23f" formatted="false">Keine</string>
+    <string name="s_fd8b1ba9" formatted="false">Datei konnte nicht geschrieben werden</string>
+    <string name="s_e9ebd81b" formatted="false">Backup-Übertragungsordner konnte nicht erstellt werden</string>
+    <string name="s_59c97404" formatted="false">„Teilen“ konnte nicht geöffnet werden. Installiere eine App, die Dateien empfangen kann</string>
+    <string name="s_6776e896" formatted="false">Datei konnte nicht gelesen werden</string>
+    <string name="s_609a9a60" formatted="false">So</string>
+    <string name="s_f9abd512" formatted="false">Kalender</string>
+    <string name="s_afdd356c" formatted="false">Lokale Erinnerungen für Kalenderaufgaben</string>
+    <string name="s_2eeb970b" formatted="false">Tagesdurchschnitt · −3 bis +3 (0 ist neutral)</string>
+    <string name="s_6ba31688" formatted="false">Alltag</string>
+    <string name="s_caa53f15" formatted="false">Tagebuch</string>
+    <string name="s_923b0270" formatted="false">Tagebuch und Ideen mit einem Tipp</string>
+    <string name="s_56409a3c" formatted="false">Tagebuch-Verlauf</string>
+    <string name="s_203436ae" formatted="false">Tagebuch verwalten</string>
+    <string name="s_92fd0eed" formatted="false">Datum</string>
+    <string name="s_432f74fa" formatted="false">Zeitraum</string>
+    <string name="s_7203eec6" formatted="false">Das alte Protokoll birgt Sicherheitsrisiken. Nutze unter „Sichern &amp; Wiederherstellen“ den Backup-Export oder „Teilen“, um auf vertrauenswürdigem Weg zu übertragen.</string>
+    <string name="s_d7034b36" formatted="false">Guten Morgen ☀️</string>
+    <string name="s_cb28b11e" formatted="false">Keine Einträge in diesem Zeitraum</string>
+    <string name="s_12263e9a" formatted="false">Gestern</string>
+    <string name="s_c18f71ef" formatted="false">Guten Abend 🌙</string>
+    <string name="s_bf13f8b5" formatted="false">Vorerst aus. Tippen für Alternativen</string>
+    <string name="s_16a3eebb" formatted="false">Mehr</string>
+    <string name="s_89192933" formatted="false">Eine Datumsänderung passt auch Kalender und Rückblick an.</string>
+    <string name="s_87b8867d" formatted="false">Neueste</string>
+    <string name="s_ceb8f642" formatted="false">Älteste</string>
+    <string name="s_56b38d0f" formatted="false">Letzte Momente</string>
+    <string name="s_be2c2eb2" formatted="false">Ungelesen</string>
+    <string name="s_27c37899" formatted="false">Diese Woche</string>
+    <string name="s_ccb42197" formatted="false">Diese Woche: Einträge {0} · zu sortieren {1}</string>
+    <string name="s_b70e17ea" formatted="false">Diese Woche eher gedrückt</string>
+    <string name="s_24d17368" formatted="false">Diese Woche ausgeglichen</string>
+    <string name="s_e3f61599" formatted="false">Diese Woche eher positiv</string>
+    <string name="s_63d2d484" formatted="false">Diese Woche noch nichts erfasst</string>
+    <string name="s_db0049cb" formatted="false">Wochenverlauf</string>
+    <string name="s_3750d663" formatted="false">Lokale Erinnerung</string>
+    <string name="s_47af33f9" formatted="false">Diesen Monat</string>
+    <string name="s_37272be9" formatted="false">Aus einer Idee. Die Idee bleibt erhalten</string>
+    <string name="s_7e5242cd" formatted="false">Tagesdetails anzeigen</string>
+    <string name="s_495fd6a9" formatted="false">Idee ansehen</string>
+    <string name="s_198c9fe3" formatted="false">Importieren</string>
+    <string name="s_5606df17" formatted="false">Import-Vorschau</string>
+    <string name="s_2b1626c8" formatted="false">Schlagwort</string>
+    <string name="s_f7d7a0ce" formatted="false">Willkommen bei Flash</string>
+    <string name="s_aef45eb7" formatted="false">Mehr wird geladen…</string>
+    <string name="s_6af40858" formatted="false">Jetzt</string>
+    <string name="s_b060afd3" formatted="false">Dieses Gerät unterstützt eine Aufgaben-Zeitzone im Backup nicht. System aktualisieren und erneut versuchen. Es wurde nichts importiert</string>
+    <string name="s_f4958768" formatted="false">Alle 3 Tage</string>
+    <string name="s_41be2fe2" formatted="false">Wöchentlich</string>
+    <string name="s_02c285b5" formatted="false">Täglich</string>
+    <string name="s_18fa51bd" formatted="false">Tagebuch, Ideen und Stimmungen pro Tag · ohne Aufgaben</string>
+    <string name="s_6d03477d" formatted="false">Tagesdurchschnitt: {0}</string>
+    <string name="s_5816c303" formatted="false">Keine App zum Teilen verfügbar</string>
+    <string name="s_43c975df" formatted="false">Keine Einträge gefunden</string>
+    <string name="s_f8bc527e" formatted="false">Keine passenden Tagebucheinträge</string>
+    <string name="s_0fed9772" formatted="false">Aktive Tage</string>
+    <string name="s_11b5fdf6" formatted="false">Hell</string>
+    <string name="s_2a8baaea" formatted="false">Dunkel</string>
+    <string name="s_da340c1c" formatted="false">Alle Daten löschen</string>
+    <string name="s_845a8db9" formatted="false">Alle Daten löschen?</string>
+    <string name="s_115677d8" formatted="false">Löschen fehlgeschlagen: {0}</string>
+    <string name="s_0b9d2bac" formatted="false">Löschen</string>
+    <string name="s_9c43ebb6" formatted="false">Suche löschen</string>
+    <string name="s_0fba4654" formatted="false">Filter löschen</string>
+    <string name="s_b8b74e9d" formatted="false">Ideen</string>
+    <string name="s_4604d6bf" formatted="false">Ideen-Erinnerungen</string>
+    <string name="s_436e2c82" formatted="false">Was geht dir durch den Kopf?</string>
+    <string name="s_78fe07cc" formatted="false">Übertragungsdatei konnte nicht erstellt werden: {0}</string>
+    <string name="s_f60bb44e" formatted="false">Wütend</string>
+    <string name="s_621a8231" formatted="false">OK</string>
+    <string name="s_869f8d0c" formatted="false">Alles löschen</string>
+    <string name="s_5716f5ef" formatted="false">In {0} Minuten</string>
+    <string name="s_f5e087c9" formatted="false">Filter</string>
+    <string name="s_5db367de" formatted="false">Verwalten</string>
+    <string name="s_26640f43" formatted="false">Typ</string>
+    <string name="s_f8ede304" formatted="false">Systemmitteilungen oder der Erinnerungskanal sind deaktiviert</string>
+    <string name="s_235f3e59" formatted="false">Dringend</string>
+    <string name="s_64db55af" formatted="false">Warten {0} oder mehr Ideen, wirst du um 20 Uhr erinnert. Geöffnete Ideen zählen nicht mehr.</string>
+    <string name="s_78a510f0" formatted="false">Überblick · gesamt</string>
+    <string name="s_1da8a247" formatted="false">Ende</string>
+    <string name="s_476d405b" formatted="false">Enddatum</string>
+    <string name="s_010e135c" formatted="false">Weiter bearbeiten</string>
+    <string name="s_e60fd56d" formatted="false">Schreib weiter, dann wird dein Rückblick klarer</string>
+    <string name="s_607348a8" formatted="false">Bearbeiten</string>
+    <string name="s_1d5b5e98" formatted="false">Aufgabe bearbeiten</string>
+    <string name="s_c9ab4c68" formatted="false">Idee bearbeiten</string>
+    <string name="s_a5db4a27" formatted="false">Eintrag bearbeiten</string>
+    <string name="s_72ecf883" formatted="false">Ab {0}</string>
+    <string name="s_85b25df8" formatted="false">Bis {0}</string>
+    <string name="s_a6317c7d" formatted="false">Überschreiben</string>
+    <string name="s_5521c6a5" formatted="false">Ein Platz für jeden Gedanken · kein Cloud-Konto</string>
+    <string name="s_dad3d89f" formatted="false">Ersten Gedanken festhalten</string>
+    <string name="s_6dfa9df7" formatted="false">In Flash sichern</string>
+    <string name="s_2c9d9f0e" formatted="false">Einträge</string>
+    <string name="s_a48657a1" formatted="false">Stimmung erfassen</string>
+    <string name="s_b1bc3a6a" formatted="false">Eintragsdatum: {0}</string>
+    <string name="s_6de25c07" formatted="false">Halte diesen Moment fest…</string>
+    <string name="s_d1e82646" formatted="false">Erfassungsaktivität</string>
+    <string name="s_7a550e3e" formatted="false">Aktivität: an {1} von {0} Tagen Einträge, insgesamt {2}. Tagesdetails lassen sich einblenden.</string>
+    <string name="s_e54eaf8b" formatted="false">Tagebuch schreiben</string>
+    <string name="s_e8b414a3" formatted="false">Idee notieren</string>
+    <string name="s_0102647f" formatted="false">Geräteübertragung</string>
+    <string name="s_f3c259dd" formatted="false">Einstellungen</string>
+    <string name="s_95b0de98" formatted="false">Gib einen Inhalt ein</string>
+    <string name="s_f3462b06" formatted="false">Gib ein gültiges Eintragsdatum ein</string>
+    <string name="s_b0f4e934" formatted="false">Verteilung negativer Gefühle</string>
+    <string name="s_8678f5d9" formatted="false">{0} Zeichen zu viel</string>
+    <string name="s_b45e202f" formatted="false">Verlauf</string>
+    <string name="s_b494a385" formatted="false">System</string>
+    <string name="s_0af75da1" formatted="false">Überspringt ungültige und doppelte Daten; die Originaldatei bleibt unverändert</string>
+    <string name="s_ebbcb10b" formatted="false">In Aufgabe umwandeln</string>
+    <string name="s_13f1b81a" formatted="false">Stichwort oder Schlagwort eingeben</string>
+    <string name="s_7cd6a835" formatted="false">Stichwort oder Schlagwortnamen eingeben</string>
+    <string name="s_214cb43c" formatted="false">die letzten 30 Tage</string>
+    <string name="s_9ea79282" formatted="false">die letzten 90 Tage</string>
+    <string name="s_4ed18a1a" formatted="false">Letzte 30 Tage</string>
+    <string name="s_8ab0bb3c" formatted="false">Letzte 90 Tage</string>
+    <string name="s_863fb33a" formatted="false">Zuletzt</string>
+    <string name="s_58cbffa7" formatted="false">Zurück</string>
+    <string name="s_a7f085b7" formatted="false">Noch {0} Zeichen</string>
+    <string name="s_4cabb422" formatted="false">Noch keine Einträge</string>
+    <string name="s_fa547131" formatted="false">Keine Pläne oder Einträge an diesem Tag</string>
+    <string name="s_6d67abd6" formatted="false">diesen Monat</string>
+    <string name="s_09e1a534" formatted="false">diese Woche</string>
+    <string name="s_d3ce76c1" formatted="false">Dieser Eintrag existiert nicht mehr</string>
+    <string name="s_1a959a39" formatted="false">In diesem Zeitraum noch nichts erfasst. Leere Tage zeigen 0.</string>
+    <string name="s_5fe370b7" formatted="false">Auswählen</string>
+    <string name="s_cbdfcc99" formatted="false">Backup über „Teilen“ senden</string>
+    <string name="s_daf5a276" formatted="false">Vorschau der Teilwiederherstellung</string>
+    <string name="s_cf3e4247" formatted="false">Wichtigkeit</string>
+    <string name="s_4de22934" formatted="false">Wichtigkeit</string>
+    <string name="s_490a6afa" formatted="false">Halte es fest, wenn es vorbeizieht. Schreib deinen ersten Eintrag</string>
+    <string name="s_aef2df88" formatted="false">Unterwegs erfassen</string>
+    <string name="s_80390cc2" formatted="false">Unwohl</string>
+    <string name="s_99546fff" formatted="false">Sehr aufgebracht</string>
+    <string name="s_22566806" formatted="false">Begeistert</string>
+    <string name="s_9a63360d" formatted="false">Lokale Daten haben sich nach der Vorschau geändert. Unterschiede neu berechnet. Vor dem Überschreiben bestätigen</string>
+    <string name="s_a14edc19" formatted="false">(Ohne Titel)</string>
+    <string name="s_12cea83b" formatted="false">(übersprungene ungültige Einträge: {0})</string>
+    <string name="s_be6a75ae" formatted="false">, heute</string>
+    <string name="s_a495d14b" formatted="false">, und die Stimmung war etwas gedrückter</string>
+    <string name="s_3193d3c7" formatted="false">, und die Stimmung war etwas besser</string>
+</resources>

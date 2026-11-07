@@ -288,7 +288,7 @@ test('generated language resources are complete when present', () => {
   const base = path.join(res, 'base/element/string.json');
   const names = file => new Map(JSON.parse(fs.readFileSync(file, 'utf8')).string.map(e => [e.name, e.value]));
   const expected = names(base);
-  for (const locale of ['zh_CN', 'fr', 'ko', 'de', 'ru', 'ar', 'ja']) {
+  for (const locale of ['zh', 'fr', 'ko', 'de', 'ru', 'ar', 'ja']) {
     const file = path.join(res, locale, 'element/string.json');
     if (!fs.existsSync(file)) continue;
     const actual = names(file);

@@ -1,10 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Flash Aero</string>
-    <string name="share_target_label">记到 Flash</string>
-    <string name="widget_label">Flash 此刻</string>
-    <string name="widget_description">今日记录与待办</string>
-    <string name="tile_label">Flash 快速记录</string>
-    <string name="shortcut_idea">记灵感</string>
-    <string name="shortcut_log">记日志</string>
 </resources>

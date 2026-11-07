@@ -93,7 +93,7 @@ class EntryAndLocaleTest {
                 .associate { m -> m.groupValues[1] to Regex("\\{\\d+\\}").findAll(m.groupValues[2]).map { it.value }.toSet().sorted() }
         }
         val expected = keys(base)
-        for (lang in listOf("zh-rCN", "fr", "ko", "de", "ru", "ar", "ja")) {
+        for (lang in listOf("zh", "fr", "ko", "de", "ru", "ar", "ja")) {
             val actual = keys(File(res, "values-$lang/strings_generated.xml"))
             assertEquals("values-$lang keys", expected.keys, actual.keys)
             expected.forEach { (key, placeholders) -> assertEquals("$lang $key", placeholders, actual[key]) }

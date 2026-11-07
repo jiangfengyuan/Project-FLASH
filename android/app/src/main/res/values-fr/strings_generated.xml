@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 由 tools/i18n/generate.py 生成，勿手改 -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="ExtraTranslation,MissingTranslation">
+    <string name="share_target_label">Enregistrer dans Flash</string>
+    <string name="widget_label">Flash Maintenant</string>
+    <string name="widget_description">Entrées et tâches du jour</string>
+    <string name="tile_label">Capture rapide Flash</string>
+    <string name="shortcut_idea">Nouvelle idée</string>
+    <string name="shortcut_log">Nouveau journal</string>
+    <string name="s_c9414111" formatted="false">" · Rappel activé"</string>
+    <string name="s_94fc7b8e" formatted="false">/data/tasks/{0}/due : doit être un objet</string>
+    <string name="s_aafdda63" formatted="false">/data/{0}/{1} : l\'entrée doit être un objet</string>
+    <string name="s_10db0315" formatted="false">/data/{0} : le tableau dépasse la limite</string>
+    <string name="s_b7cc858a" formatted="false">/data : entrées non valides ou en double. Utilisez la restauration pour voir ce qui peut être récupéré</string>
+    <string name="s_90ef682e" formatted="false">/version : utilisez la restauration pour les anciens fichiers</string>
+    <string name="s_b9ce0fb9" formatted="false">/ : trop de valeurs JSON</string>
+    <string name="s_307d96fc" formatted="false">/ : clé en double dans l\'objet JSON : {0}</string>
+    <string name="s_b414e614" formatted="false">/ : syntaxe JSON non valide (position {0})</string>
+    <string name="s_7038ec28" formatted="false">/ : BOM UTF-8 non autorisé</string>
+    <string name="s_4aa2d855" formatted="false">/ : métadonnées d\'exportation non valides</string>
+    <string name="s_5ddd2d8d" formatted="false">30 jours</string>
+    <string name="s_a96eed0d" formatted="false">7 jours</string>
+    <string name="s_355b83a3" formatted="false">Une semaine à retenir. ✦</string>
+    <string name="s_a1486dba" formatted="false">Sauvegarde Flash Aero</string>
+    <string name="s_eeecd281" formatted="false">Rappel de tâche Flash</string>
+    <string name="s_f6ff76b6" formatted="false">Capture rapide Flash</string>
+    <string name="s_9a2b6832" formatted="false">Flash Maintenant</string>
+    <string name="s_2a0b1ddf" formatted="false">Idée Flash</string>
+    <string name="s_de22df1c" formatted="false">Entrée Flash</string>
+    <string name="s_8d6bfa5c" formatted="false">Temps forts</string>
+    <string name="s_58f879ce" formatted="false">Mémoire</string>
+    <string name="s_879db2fb" formatted="false">Plutôt bas</string>
+    <string name="s_db9c822c" formatted="false">Plutôt positif</string>
+    <string name="s_f3498d7d" formatted="false">Plutôt stable</string>
+    <string name="s_244cff4e" formatted="false">Cette semaine, c\'était...</string>
+    <string name="s_fe948398" formatted="false">Vous avez noté</string>
+    <string name="s_b053c6ce" formatted="false">data doit être un objet</string>
+    <string name="s_70c34463" formatted="false">humeurs</string>
+    <string name="s_0dbf59c2" formatted="false">emotions doit être un tableau</string>
+    <string name="s_f22ee8cb" formatted="false">idées</string>
+    <string name="s_be7aa09b" formatted="false">logs doit être un tableau</string>
+    <string name="s_62852daa" formatted="false">moments</string>
+    <string name="s_22c3caa0" formatted="false">schemas doit être un objet</string>
+    <string name="s_ad2e48cd" formatted="false">tâches</string>
+    <string name="s_002e97a4" formatted="false">tasks doit être un tableau</string>
+    <string name="s_6e425eba" formatted="false">{0} : {1} · {2} : {3}</string>
+    <string name="s_39ac061e" formatted="false">{0} — {1} · les jours sans entrée ne comptent pas</string>
+    <string name="s_e2a8c96b" formatted="false">Tâches : {0}</string>
+    <string name="s_409ddff6" formatted="false">Jours actifs : {0} · Total : {1}</string>
+    <string name="s_79fc376e" formatted="false">Éléments : {0}</string>
+    <string name="s_a06e31ba" formatted="false">Éléments non valides qui seront ignorés : {0}.</string>
+    <string name="s_aeb06eb3" formatted="false">Entrées : {0} · Humeurs : {1}</string>
+    <string name="s_ba02e82e" formatted="false">{0} fois</string>
+    <string name="s_852bf53d" formatted="false">Humeurs : {0}, tâches : {1}</string>
+    <string name="s_1f0ab446" formatted="false">Détails du {0}</string>
+    <string name="s_7f7d2285" formatted="false">À faire : {0}</string>
+    <string name="s_2e763a14" formatted="false">Vous avez noté plus souvent {0} que {1}</string>
+    <string name="s_10e8d2b4" formatted="false">Vous avez moins noté {0} que {1}</string>
+    <string name="s_8d74a879" formatted="false">Vous avez noté autant {0} que {1}</string>
+    <string name="s_1879232a" formatted="false">"{0}, entrées : {1}, "</string>
+    <string name="s_e168d4f4" formatted="false">{0}, mais les rappels n\'ont pas pu être restaurés. Réessayez plus tard</string>
+    <string name="s_245af589" formatted="false">{0} : entrées {1} · humeurs {2}</string>
+    <string name="s_7db427be" formatted="false">{0} : {1} nouvelles · {2} modifiées · {3} identiques · {4} uniquement ici</string>
+    <string name="s_0009cc0b" formatted="false">{0} : champs obligatoires manquants ou champs inconnus</string>
+    <string name="s_7dad93fd" formatted="false">★ Favoris</string>
+    <string name="s_745e890f" formatted="false">✓ Enregistré dans le journal</string>
+    <string name="s_a248a677" formatted="false">✓ Enregistré dans les idées</string>
+    <string name="s_67fc93c3" formatted="false">✦ Flash</string>
+    <string name="s_05615f1f" formatted="false">Lun</string>
+    <string name="s_e50a5759" formatted="false">Les pensées fugaces méritent d\'être retenues</string>
+    <string name="s_8bcbbc86" formatted="false">Sept niveaux d\'humeur pour voir votre évolution</string>
+    <string name="s_0c616a24" formatted="false">Mer</string>
+    <string name="s_508b1e1d" formatted="false">Semaine précédente</string>
+    <string name="s_b06dcc3d" formatted="false">Mois précédent</string>
+    <string name="s_8be194e7" formatted="false">le mois dernier</string>
+    <string name="s_eb0f6aef" formatted="false">la semaine dernière</string>
+    <string name="s_0bb3bda2" formatted="false">Semaine suivante</string>
+    <string name="s_6bcf17c2" formatted="false">Mois suivant</string>
+    <string name="s_10c83c81" formatted="false">Suivant</string>
+    <string name="s_82b6cabb" formatted="false">Bon après-midi 🌤</string>
+    <string name="s_1344f491" formatted="false">Pas content</string>
+    <string name="s_4cc036be" formatted="false">Pas de rappel</string>
+    <string name="s_12e8587a" formatted="false">Version de la section {0} non prise en charge</string>
+    <string name="s_ba358518" formatted="false">Tous</string>
+    <string name="s_b13672cd" formatted="false">Neutre</string>
+    <string name="s_51f6517e" formatted="false">Thème</string>
+    <string name="s_0a416847" formatted="false">les 30 jours précédents</string>
+    <string name="s_0c6445c1" formatted="false">les 90 jours précédents</string>
+    <string name="s_89609beb" formatted="false">Mar</string>
+    <string name="s_9160a883" formatted="false">Ven</string>
+    <string name="s_a848765c" formatted="false">Aujourd\'hui</string>
+    <string name="s_6f3c2b2c" formatted="false">Notez quelque chose aujourd\'hui.</string>
+    <string name="s_1f2bd289" formatted="false">Rien de noté aujourd\'hui.</string>
+    <string name="s_cfccbae7" formatted="false">Aujourd\'hui</string>
+    <string name="s_5bfe853c" formatted="false">Entrées et tâches du jour</string>
+    <string name="s_2d7464e1" formatted="false">Tâches</string>
+    <string name="s_3f7946be" formatted="false">Impossible d\'enregistrer la tâche</string>
+    <string name="s_bc3ceaab" formatted="false">Impossible de supprimer la tâche</string>
+    <string name="s_cd07ba17" formatted="false">Tâche enregistrée. Autorisez les notifications pour recevoir les rappels</string>
+    <string name="s_d3190fa3" formatted="false">Rappels de tâches</string>
+    <string name="s_d8bb8799" formatted="false">Heure de tâche non valide</string>
+    <string name="s_86da87a3" formatted="false">Impossible de mettre à jour la tâche</string>
+    <string name="s_97815f19" formatted="false">Envoyer la sauvegarde Flash Aero</string>
+    <string name="s_6b17ba8f" formatted="false">Envoyer vers un autre appareil</string>
+    <string name="s_79955ed0" formatted="false">Triste</string>
+    <string name="s_d7974514" formatted="false">Idées en attente : {0}. Commencez par la plus ancienne</string>
+    <string name="s_d908f279" formatted="false">Idées à revoir : {0}. Jetez-y un œil</string>
+    <string name="s_ad5b82b0" formatted="false">Enregistrer</string>
+    <string name="s_9b95e293" formatted="false">Enregistrement…</string>
+    <string name="s_64911de5" formatted="false">Enregistrer en fichier JSON</string>
+    <string name="s_46ca88f1" formatted="false">Échec de l\'enregistrement. Réessayez</string>
+    <string name="s_1d0e5d5a" formatted="false">Toute la journée</string>
+    <string name="s_0c14a696" formatted="false">Tâche sur toute la journée</string>
+    <string name="s_05eb990b" formatted="false">Recherche globale</string>
+    <string name="s_5e6558ad" formatted="false">Tout</string>
+    <string name="s_e8562c78" formatted="false">Sam</string>
+    <string name="s_72a18f8e" formatted="false">À propos de Flash</string>
+    <string name="s_87dadb5a" formatted="false">Mot-clé ou étiquette</string>
+    <string name="s_39b523bd" formatted="false">Fermer</string>
+    <string name="s_05f5920d" formatted="false">Heure précise</string>
+    <string name="s_801be77b" formatted="false">Contenu</string>
+    <string name="s_dc24135d" formatted="false">Le contenu ne peut pas être vide</string>
+    <string name="s_043cda7f" formatted="false">Trop long ({0} caractères, max {1}). Raccourcissez avant d\'enregistrer</string>
+    <string name="s_87000edc" formatted="false">Continuez à noter, votre futur vous le verra.</string>
+    <string name="s_95a71bc9" formatted="false">Préparation…</string>
+    <string name="s_9aa7d416" formatted="false">Partager</string>
+    <string name="s_4ae3c205" formatted="false">Partager l\'entrée</string>
+    <string name="s_caf6d5a6" formatted="false">Type</string>
+    <string name="s_a0b5ccaf" formatted="false">Changer le tri</string>
+    <string name="s_ea8d5381" formatted="false">Supprimer</string>
+    <string name="s_6b93827d" formatted="false">Supprimer la tâche</string>
+    <string name="s_bb2e6146" formatted="false">Supprimer la tâche ?</string>
+    <string name="s_309b2b90" formatted="false">Échec de la suppression. Réessayez</string>
+    <string name="s_e4d23002" formatted="false">Supprime définitivement le journal, les humeurs et les tâches. Exportez d\'abord une sauvegarde</string>
+    <string name="s_e6dedfa0" formatted="false">Supprimer cette humeur ?</string>
+    <string name="s_98f7e648" formatted="false">Supprimer cette entrée de journal ?</string>
+    <string name="s_c51f5912" formatted="false">À l\'échéance</string>
+    <string name="s_c628e28d" formatted="false">Contient journal : {0}, humeurs : {1}, tâches : {2}</string>
+    <string name="s_60b4c5ae" formatted="false">Zone sensible</string>
+    <string name="s_949856b3" formatted="false">Annuler</string>
+    <string name="s_d1d62fb0" formatted="false">Retirer des favoris</string>
+    <string name="s_4d55cb75" formatted="false">Exportez une sauvegarde ou envoyez-la via le partage système</string>
+    <string name="s_5e53c03a" formatted="false">Jeu</string>
+    <string name="s_40163b46" formatted="false">Revenir à aujourd\'hui</string>
+    <string name="s_bed63d2f" formatted="false">Cette semaine</string>
+    <string name="s_c2e1aa6d" formatted="false">Bilan</string>
+    <string name="s_fbac6f20" formatted="false">Sauvegarde et restauration</string>
+    <string name="s_bb48fdba" formatted="false">Les sauvegardes sont en JSON non chiffré avec votre journal, vos humeurs et vos tâches. Enregistrez-les ou partagez-les uniquement dans un lieu de confiance</string>
+    <string name="s_20fe814f" formatted="false">Sauvegarde exportée</string>
+    <string name="s_c90a7947" formatted="false">Le fichier de sauvegarde n\'est pas un objet JSON valide</string>
+    <string name="s_88f39f13" formatted="false">Le fichier de sauvegarde n\'est pas du JSON UTF-8 valide</string>
+    <string name="s_269e4097" formatted="false">Le fichier de sauvegarde dépasse {0} Mo et ne peut pas être importé</string>
+    <string name="s_cc139297" formatted="false">Version incompatible : {0} attendu, {1} reçu</string>
+    <string name="s_d3de3f52" formatted="false">Sauvegarde incompatible : champ version manquant</string>
+    <string name="s_584ff11a" formatted="false">Mémo</string>
+    <string name="s_d82fe22c" formatted="false">Note trop longue. Raccourcissez avant d\'enregistrer</string>
+    <string name="s_d9dac7dd" formatted="false">Notes (facultatif)</string>
+    <string name="s_e4a4815a" formatted="false">Apparence et utilisation</string>
+    <string name="s_1e13bd21" formatted="false">Terminé</string>
+    <string name="s_dd03e6ad" formatted="false">Aperçu des différences avec les données locales avant l\'importation</string>
+    <string name="s_9b60ff74" formatted="false">Échec de l\'importation : {0}</string>
+    <string name="s_da193966" formatted="false">Importation annulée</string>
+    <string name="s_7fdaf616" formatted="false">Exporter, importer et effacer</string>
+    <string name="s_f97fded3" formatted="false">Exporter une sauvegarde</string>
+    <string name="s_7436fb8d" formatted="false">Échec de l\'exportation : {0}</string>
+    <string name="s_b1632a8b" formatted="false">Le journal, les humeurs et les tâches seront définitivement supprimés. Exportez d\'abord une sauvegarde.</string>
+    <string name="s_479481d2" formatted="false">Le transfert par réseau local est désactivé pour le moment</string>
+    <string name="s_f8eef707" formatted="false">Le transfert par réseau local est désactivé en raison des risques de l\'ancien protocole. Utilisez l\'exportation ou le partage système pour envoyer le fichier JSON par un canal de confiance.</string>
+    <string name="s_531320d2" formatted="false">Détails</string>
+    <string name="s_b1368837" formatted="false">Différences</string>
+    <string name="s_c2d9a3f9" formatted="false">La fusion ajoute ou met à jour les données reçues et conserve celles présentes uniquement sur cet appareil. Le remplacement efface d\'abord cet appareil.</string>
+    <string name="s_d0fcf500" formatted="false">Enregistré</string>
+    <string name="s_5dbcdf6d" formatted="false">Désactivé</string>
+    <string name="s_bee374d1" formatted="false">Supprimé</string>
+    <string name="s_8b122251" formatted="false">Entrée de journal supprimée</string>
+    <string name="s_74e8cc38" formatted="false">"Importé journal : {0}, humeurs : {1}, "</string>
+    <string name="s_a8126b62" formatted="false">Favori</string>
+    <string name="s_2266e2ec" formatted="false">Toutes les données ont été effacées</string>
+    <string name="s_c13b3522" formatted="false">Toutes les données ont été effacées, mais les rappels système n\'ont pas pu être retirés. Redémarrez l\'app et réessayez</string>
+    <string name="s_c8fa62c1" formatted="false">Sélectionnés : {0}</string>
+    <string name="s_01133500" formatted="false">Humeur moyenne {0} · Total {1}</string>
+    <string name="s_22696cbc" formatted="false">Début</string>
+    <string name="s_499be303" formatted="false">Commencer</string>
+    <string name="s_5d62764c" formatted="false">Date de début</string>
+    <string name="s_2a665354" formatted="false">Content</string>
+    <string name="s_673d4a91" formatted="false">Intensité</string>
+    <string name="s_6a19ddcf" formatted="false">Intensité {0}</string>
+    <string name="s_4b8edbfa" formatted="false">À faire</string>
+    <string name="s_dfcdb4b6" formatted="false">Tâche à faire</string>
+    <string name="s_e83d11ae" formatted="false">À trier</string>
+    <string name="s_5660c655" formatted="false">À trier : entrées étiquetées Quotidien. Appuyez longuement pour en trier plusieurs.</string>
+    <string name="s_2367642b" formatted="false">Très mécontent</string>
+    <string name="s_fb903262" formatted="false">Très content</string>
+    <string name="s_e70923c8" formatted="false">Capture rapide</string>
+    <string name="s_abf33a8f" formatted="false">Restaurer une sauvegarde endommagée ou ancienne</string>
+    <string name="s_a9612b5e" formatted="false">Humeur</string>
+    <string name="s_7bd3df69" formatted="false">Humeur moyenne {0} (−3 à +3)</string>
+    <string name="s_643f1ede" formatted="false">Conscience de l\'humeur</string>
+    <string name="s_8de4274f" formatted="false">Tendance de l\'humeur</string>
+    <string name="s_99812275" formatted="false">Pensée</string>
+    <string name="s_d9f8afc2" formatted="false">Idées à revoir</string>
+    <string name="s_6deefec2" formatted="false">Me rappeler quand des idées attendent</string>
+    <string name="s_4e89a8ad" formatted="false">Envie de dire quelque chose ? (facultatif)</string>
+    <string name="s_eae146ff" formatted="false">Changer le type de la sélection</string>
+    <string name="s_c9ddd465" formatted="false">Impossible de modifier la sélection. Réessayez</string>
+    <string name="s_803499dd" formatted="false">Changer l\'étiquette de la sélection</string>
+    <string name="s_b4b9bfa6" formatted="false">Fusionner les différences</string>
+    <string name="s_8523e97b" formatted="false">Plus récentes d\'abord</string>
+    <string name="s_791c2e78" formatted="false">Plus anciennes d\'abord</string>
+    <string name="s_6ef98325" formatted="false">Par étiquette</string>
+    <string name="s_da39e076" formatted="false">1 jour avant</string>
+    <string name="s_0c4452fe" formatted="false">1 heure avant</string>
+    <string name="s_74d32173" formatted="false">15 minutes avant</string>
+    <string name="s_6d40d527" formatted="false">Rappel</string>
+    <string name="s_545f8675" formatted="false">Les rappels sont planifiés par le système et peuvent être légèrement retardés en économie d\'énergie.</string>
+    <string name="s_0b6efa3b" formatted="false">Rechercher</string>
+    <string name="s_18fca433" formatted="false">Rechercher dans le journal...</string>
+    <string name="s_c8a90aa9" formatted="false">Rechercher entrées, idées, humeurs et tâches</string>
+    <string name="s_1b9e8bc9" formatted="false">Annuler</string>
+    <string name="s_aff00db8" formatted="false">Annulation impossible. Réessayez</string>
+    <string name="s_87aed705" formatted="false">Échec de l\'opération. Réessayez</string>
+    <string name="s_839d4732" formatted="false">Favori</string>
+    <string name="s_cf8b8d02" formatted="false">Masquer le détail quotidien</string>
+    <string name="s_e1598b13" formatted="false">Abandonner</string>
+    <string name="s_0ac91ecb" formatted="false">Abandonner les modifications ?</string>
+    <string name="s_6344fa26" formatted="false">Données et sécurité</string>
+    <string name="s_b464971d" formatted="false">Les données sont enregistrées sur cet appareil</string>
+    <string name="s_95b69a6d" formatted="false">Le fichier dépasse 50 Mio</string>
+    <string name="s_b8c8a94f" formatted="false">Nouveau</string>
+    <string name="s_b0f36447" formatted="false">Nouvelle tâche</string>
+    <string name="s_d2c53483" formatted="false">Nouvelle idée</string>
+    <string name="s_160eb028" formatted="false">Nouvelle entrée</string>
+    <string name="s_659aa23f" formatted="false">Aucun</string>
+    <string name="s_fd8b1ba9" formatted="false">Écriture du fichier impossible</string>
+    <string name="s_e9ebd81b" formatted="false">Impossible de créer le dossier de transfert</string>
+    <string name="s_59c97404" formatted="false">Impossible d\'ouvrir le partage. Installez une app capable de recevoir des fichiers</string>
+    <string name="s_6776e896" formatted="false">Lecture du fichier impossible</string>
+    <string name="s_609a9a60" formatted="false">Dim</string>
+    <string name="s_f9abd512" formatted="false">Calendrier</string>
+    <string name="s_afdd356c" formatted="false">Rappels locaux des tâches du calendrier</string>
+    <string name="s_2eeb970b" formatted="false">Humeur moyenne quotidienne · −3 à +3 (0 est neutre)</string>
+    <string name="s_6ba31688" formatted="false">Quotidien</string>
+    <string name="s_caa53f15" formatted="false">Journal</string>
+    <string name="s_923b0270" formatted="false">Journal et idées, en un geste</string>
+    <string name="s_56409a3c" formatted="false">Fil du journal</string>
+    <string name="s_203436ae" formatted="false">Gérer le journal</string>
+    <string name="s_92fd0eed" formatted="false">Date</string>
+    <string name="s_432f74fa" formatted="false">Plage de dates</string>
+    <string name="s_7203eec6" formatted="false">L\'ancien protocole présente des risques. Utilisez l\'exportation ou le partage système dans Sauvegarde et restauration pour envoyer les données par un moyen de confiance.</string>
+    <string name="s_d7034b36" formatted="false">Bonjour ☀️</string>
+    <string name="s_cb28b11e" formatted="false">Aucune entrée sur cette période</string>
+    <string name="s_12263e9a" formatted="false">Hier</string>
+    <string name="s_c18f71ef" formatted="false">Bonsoir 🌙</string>
+    <string name="s_bf13f8b5" formatted="false">Désactivé. Touchez pour voir les alternatives</string>
+    <string name="s_16a3eebb" formatted="false">Plus</string>
+    <string name="s_89192933" formatted="false">Changer la date met aussi à jour le calendrier et le bilan.</string>
+    <string name="s_87b8867d" formatted="false">Plus récent</string>
+    <string name="s_ceb8f642" formatted="false">Plus ancien</string>
+    <string name="s_56b38d0f" formatted="false">Moments récents</string>
+    <string name="s_be2c2eb2" formatted="false">Non lu</string>
+    <string name="s_27c37899" formatted="false">Cette semaine</string>
+    <string name="s_ccb42197" formatted="false">Cette semaine : entrées {0} · à trier {1}</string>
+    <string name="s_b70e17ea" formatted="false">Humeur plutôt basse cette semaine</string>
+    <string name="s_24d17368" formatted="false">Humeur stable cette semaine</string>
+    <string name="s_e3f61599" formatted="false">Plutôt positif cette semaine</string>
+    <string name="s_63d2d484" formatted="false">Rien de noté cette semaine</string>
+    <string name="s_db0049cb" formatted="false">Tendance de la semaine</string>
+    <string name="s_3750d663" formatted="false">Rappel local</string>
+    <string name="s_47af33f9" formatted="false">Ce mois-ci</string>
+    <string name="s_37272be9" formatted="false">Issu d\'une idée. L\'idée est conservée</string>
+    <string name="s_7e5242cd" formatted="false">Voir le détail quotidien</string>
+    <string name="s_495fd6a9" formatted="false">Voir l\'idée</string>
+    <string name="s_198c9fe3" formatted="false">Importer</string>
+    <string name="s_5606df17" formatted="false">Aperçu de l\'importation</string>
+    <string name="s_2b1626c8" formatted="false">Étiquette</string>
+    <string name="s_f7d7a0ce" formatted="false">Bienvenue dans Flash</string>
+    <string name="s_aef45eb7" formatted="false">Chargement…</string>
+    <string name="s_6af40858" formatted="false">Maintenant</string>
+    <string name="s_b060afd3" formatted="false">Cet appareil ne prend pas en charge un fuseau horaire de la sauvegarde. Mettez à jour le système et réessayez. Rien n\'a été importé</string>
+    <string name="s_f4958768" formatted="false">Tous les 3 jours</string>
+    <string name="s_41be2fe2" formatted="false">Chaque semaine</string>
+    <string name="s_02c285b5" formatted="false">Chaque jour</string>
+    <string name="s_18fa51bd" formatted="false">Journal, idées et humeurs par jour · tâches non incluses</string>
+    <string name="s_6d03477d" formatted="false">Humeur moyenne quotidienne : {0}</string>
+    <string name="s_5816c303" formatted="false">Aucune app disponible pour le partage</string>
+    <string name="s_43c975df" formatted="false">Aucune entrée trouvée</string>
+    <string name="s_f8bc527e" formatted="false">Aucune entrée de journal ne correspond</string>
+    <string name="s_0fed9772" formatted="false">Jours actifs</string>
+    <string name="s_11b5fdf6" formatted="false">Clair</string>
+    <string name="s_2a8baaea" formatted="false">Sombre</string>
+    <string name="s_da340c1c" formatted="false">Effacer toutes les données</string>
+    <string name="s_845a8db9" formatted="false">Effacer toutes les données ?</string>
+    <string name="s_115677d8" formatted="false">Échec de l\'effacement : {0}</string>
+    <string name="s_0b9d2bac" formatted="false">Effacer</string>
+    <string name="s_9c43ebb6" formatted="false">Effacer la recherche</string>
+    <string name="s_0fba4654" formatted="false">Effacer les filtres</string>
+    <string name="s_b8b74e9d" formatted="false">Idées</string>
+    <string name="s_4604d6bf" formatted="false">Rappels d\'idées</string>
+    <string name="s_436e2c82" formatted="false">Qu\'avez-vous en tête ?</string>
+    <string name="s_78fe07cc" formatted="false">Impossible de créer le fichier de transfert : {0}</string>
+    <string name="s_f60bb44e" formatted="false">En colère</string>
+    <string name="s_621a8231" formatted="false">OK</string>
+    <string name="s_869f8d0c" formatted="false">Tout effacer</string>
+    <string name="s_5716f5ef" formatted="false">Dans {0} minutes</string>
+    <string name="s_f5e087c9" formatted="false">Filtrer</string>
+    <string name="s_5db367de" formatted="false">Gérer</string>
+    <string name="s_26640f43" formatted="false">Type</string>
+    <string name="s_f8ede304" formatted="false">Les notifications système ou le canal de rappels sont désactivés</string>
+    <string name="s_235f3e59" formatted="false">Urgent</string>
+    <string name="s_64db55af" formatted="false">Quand {0} idées ou plus attendent, vous recevez un rappel à 20 h. Les idées ouvertes ne comptent plus.</string>
+    <string name="s_78a510f0" formatted="false">Aperçu · depuis le début</string>
+    <string name="s_1da8a247" formatted="false">Fin</string>
+    <string name="s_476d405b" formatted="false">Date de fin</string>
+    <string name="s_010e135c" formatted="false">Continuer</string>
+    <string name="s_e60fd56d" formatted="false">Continuez à noter, votre bilan se précisera</string>
+    <string name="s_607348a8" formatted="false">Modifier</string>
+    <string name="s_1d5b5e98" formatted="false">Modifier la tâche</string>
+    <string name="s_c9ab4c68" formatted="false">Modifier l\'idée</string>
+    <string name="s_a5db4a27" formatted="false">Modifier l\'entrée</string>
+    <string name="s_72ecf883" formatted="false">Depuis {0}</string>
+    <string name="s_85b25df8" formatted="false">Jusqu\'au {0}</string>
+    <string name="s_a6317c7d" formatted="false">Remplacer</string>
+    <string name="s_5521c6a5" formatted="false">Une place pour chaque pensée · sans compte cloud</string>
+    <string name="s_dad3d89f" formatted="false">Notez votre première pensée</string>
+    <string name="s_6dfa9df7" formatted="false">Enregistrer dans Flash</string>
+    <string name="s_2c9d9f0e" formatted="false">Entrées</string>
+    <string name="s_a48657a1" formatted="false">Noter l\'humeur</string>
+    <string name="s_b1bc3a6a" formatted="false">Date de l\'entrée : {0}</string>
+    <string name="s_6de25c07" formatted="false">Notez cet instant…</string>
+    <string name="s_d1e82646" formatted="false">Activité de saisie</string>
+    <string name="s_7a550e3e" formatted="false">Activité : {1} jours sur {0} avec des entrées, {2} au total. Le détail quotidien peut être affiché.</string>
+    <string name="s_e54eaf8b" formatted="false">Nouveau journal</string>
+    <string name="s_e8b414a3" formatted="false">Nouvelle idée</string>
+    <string name="s_0102647f" formatted="false">Transfert entre appareils</string>
+    <string name="s_f3c259dd" formatted="false">Réglages</string>
+    <string name="s_95b0de98" formatted="false">Saisissez du contenu</string>
+    <string name="s_f3462b06" formatted="false">Saisissez une date d\'entrée valide</string>
+    <string name="s_b0f4e934" formatted="false">Répartition des ressentis négatifs</string>
+    <string name="s_8678f5d9" formatted="false">{0} caractères de trop</string>
+    <string name="s_b45e202f" formatted="false">Tendances</string>
+    <string name="s_b494a385" formatted="false">Système</string>
+    <string name="s_0af75da1" formatted="false">Ignore les données non valides et en double ; le fichier d\'origine n\'est pas modifié</string>
+    <string name="s_ebbcb10b" formatted="false">Convertir en tâche</string>
+    <string name="s_13f1b81a" formatted="false">Saisissez un mot-clé ou une étiquette</string>
+    <string name="s_7cd6a835" formatted="false">Saisissez un mot-clé ou un nom d\'étiquette</string>
+    <string name="s_214cb43c" formatted="false">les 30 derniers jours</string>
+    <string name="s_9ea79282" formatted="false">les 90 derniers jours</string>
+    <string name="s_4ed18a1a" formatted="false">30 derniers jours</string>
+    <string name="s_8ab0bb3c" formatted="false">90 derniers jours</string>
+    <string name="s_863fb33a" formatted="false">Récent</string>
+    <string name="s_58cbffa7" formatted="false">Retour</string>
+    <string name="s_a7f085b7" formatted="false">{0} caractères restants</string>
+    <string name="s_4cabb422" formatted="false">Aucune entrée</string>
+    <string name="s_fa547131" formatted="false">Aucun projet ni entrée ce jour-là</string>
+    <string name="s_6d67abd6" formatted="false">ce mois-ci</string>
+    <string name="s_09e1a534" formatted="false">cette semaine</string>
+    <string name="s_d3ce76c1" formatted="false">Cette entrée n\'existe plus</string>
+    <string name="s_1a959a39" formatted="false">Rien de noté sur cette période. Les jours vides affichent 0.</string>
+    <string name="s_5fe370b7" formatted="false">Sélectionner</string>
+    <string name="s_cbdfcc99" formatted="false">Envoyer la sauvegarde via le partage système</string>
+    <string name="s_daf5a276" formatted="false">Aperçu de la restauration partielle</string>
+    <string name="s_cf3e4247" formatted="false">Importance</string>
+    <string name="s_4de22934" formatted="false">Importance</string>
+    <string name="s_490a6afa" formatted="false">Saisissez-la au vol. Écrivez la première</string>
+    <string name="s_aef2df88" formatted="false">Notez à la volée</string>
+    <string name="s_80390cc2" formatted="false">Mal à l\'aise</string>
+    <string name="s_99546fff" formatted="false">Très contrarié</string>
+    <string name="s_22566806" formatted="false">Ravi</string>
+    <string name="s_9a63360d" formatted="false">Les données locales ont changé après l\'aperçu. Différences recalculées. Confirmez avant de remplacer</string>
+    <string name="s_a14edc19" formatted="false">(Sans titre)</string>
+    <string name="s_12cea83b" formatted="false">(éléments non valides ignorés : {0})</string>
+    <string name="s_be6a75ae" formatted="false">, aujourd\'hui</string>
+    <string name="s_a495d14b" formatted="false">, et l\'humeur a un peu baissé</string>
+    <string name="s_3193d3c7" formatted="false">, et l\'humeur a été un peu meilleure</string>
+</resources>

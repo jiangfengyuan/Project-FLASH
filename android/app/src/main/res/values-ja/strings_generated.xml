@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 由 tools/i18n/generate.py 生成，勿手改 -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="ExtraTranslation,MissingTranslation">
+    <string name="share_target_label">Flash に保存</string>
+    <string name="widget_label">Flash いま</string>
+    <string name="widget_description">今日の記録と未完了</string>
+    <string name="tile_label">Flash クイック記録</string>
+    <string name="shortcut_idea">アイデアを書く</string>
+    <string name="shortcut_log">ログを書く</string>
+    <string name="s_c9414111" formatted="false">" · リマインダーあり"</string>
+    <string name="s_94fc7b8e" formatted="false">/data/tasks/{0}/due: オブジェクトである必要があります</string>
+    <string name="s_aafdda63" formatted="false">/data/{0}/{1}: 記録はオブジェクトである必要があります</string>
+    <string name="s_10db0315" formatted="false">/data/{0}: 配列が上限を超えています</string>
+    <string name="s_b7cc858a" formatted="false">/data: 不正または重複したデータがあります。復元読み込みで復元できる内容をご確認ください</string>
+    <string name="s_90ef682e" formatted="false">/version: 古いファイルは復元読み込みをお使いください</string>
+    <string name="s_b9ce0fb9" formatted="false">/: JSON の値が多すぎます</string>
+    <string name="s_307d96fc" formatted="false">/: JSON オブジェクトに重複キーがあります: {0}</string>
+    <string name="s_b414e614" formatted="false">/: JSON の構文エラー (位置 {0})</string>
+    <string name="s_7038ec28" formatted="false">/: UTF-8 BOM は使用できません</string>
+    <string name="s_4aa2d855" formatted="false">/: 書き出しのメタ情報が不正です</string>
+    <string name="s_5ddd2d8d" formatted="false">30日</string>
+    <string name="s_a96eed0d" formatted="false">7日</string>
+    <string name="s_355b83a3" formatted="false">心に残る一週間でした。✦</string>
+    <string name="s_a1486dba" formatted="false">Flash Aero バックアップ</string>
+    <string name="s_eeecd281" formatted="false">Flash タスクのリマインダー</string>
+    <string name="s_f6ff76b6" formatted="false">Flash クイック記録</string>
+    <string name="s_9a2b6832" formatted="false">Flash いま</string>
+    <string name="s_2a0b1ddf" formatted="false">Flash アイデア</string>
+    <string name="s_de22df1c" formatted="false">Flash 記録</string>
+    <string name="s_8d6bfa5c" formatted="false">ハイライト</string>
+    <string name="s_58f879ce" formatted="false">メモリー</string>
+    <string name="s_879db2fb" formatted="false">やや落ち込み気味</string>
+    <string name="s_db9c822c" formatted="false">おおむね前向き</string>
+    <string name="s_f3498d7d" formatted="false">おおむね安定</string>
+    <string name="s_244cff4e" formatted="false">今週は...</string>
+    <string name="s_fe948398" formatted="false">記録したこと</string>
+    <string name="s_b053c6ce" formatted="false">data はオブジェクトである必要があります</string>
+    <string name="s_70c34463" formatted="false">気分</string>
+    <string name="s_0dbf59c2" formatted="false">emotions は配列である必要があります</string>
+    <string name="s_f22ee8cb" formatted="false">アイデア</string>
+    <string name="s_be7aa09b" formatted="false">logs は配列である必要があります</string>
+    <string name="s_62852daa" formatted="false">ひらめき</string>
+    <string name="s_22c3caa0" formatted="false">schemas はオブジェクトである必要があります</string>
+    <string name="s_ad2e48cd" formatted="false">タスク</string>
+    <string name="s_002e97a4" formatted="false">tasks は配列である必要があります</string>
+    <string name="s_6e425eba" formatted="false">{0}: {1} · {2}: {3}</string>
+    <string name="s_39ac061e" formatted="false">{0} — {1} · 記録のない日は平均に含みません</string>
+    <string name="s_e2a8c96b" formatted="false">タスク {0} 件</string>
+    <string name="s_409ddff6" formatted="false">活動日 {0} 日 · 合計 {1} 回</string>
+    <string name="s_79fc376e" formatted="false">{0} 件</string>
+    <string name="s_a06e31ba" formatted="false">スキップされる不正データ: {0} 件。</string>
+    <string name="s_aeb06eb3" formatted="false">記録 {0} 件 · 気分 {1} 回</string>
+    <string name="s_ba02e82e" formatted="false">{0} 回</string>
+    <string name="s_852bf53d" formatted="false">気分 {0} 回、タスク {1} 件</string>
+    <string name="s_1f0ab446" formatted="false">{0} の詳細</string>
+    <string name="s_7f7d2285" formatted="false">未完了 {0} 件</string>
+    <string name="s_2e763a14" formatted="false">{0}は{1}より多く記録しました</string>
+    <string name="s_10e8d2b4" formatted="false">{0}の記録は{1}より少なめです</string>
+    <string name="s_8d74a879" formatted="false">{0}の記録は{1}と同じくらいです</string>
+    <string name="s_1879232a" formatted="false">{0}、記録 {1} 件、</string>
+    <string name="s_e168d4f4" formatted="false">{0}、ただしシステムのリマインダーを復元できませんでした。後でもう一度お試しください</string>
+    <string name="s_245af589" formatted="false">{0}: 記録 {1} 件 · 気分 {2} 回</string>
+    <string name="s_7db427be" formatted="false">{0}: 新規 {1} · 変更 {2} · 同一 {3} · この端末のみ {4}</string>
+    <string name="s_0009cc0b" formatted="false">{0}: 必須項目がないか不明な項目があります</string>
+    <string name="s_7dad93fd" formatted="false">★ お気に入り</string>
+    <string name="s_745e890f" formatted="false">✓ ログに保存しました</string>
+    <string name="s_a248a677" formatted="false">✓ アイデアに保存しました</string>
+    <string name="s_67fc93c3" formatted="false">✦ Flash</string>
+    <string name="s_05615f1f" formatted="false">月</string>
+    <string name="s_e50a5759" formatted="false">ふとした思いつきは、残す価値があります</string>
+    <string name="s_8bcbbc86" formatted="false">7 段階の気分記録で自分の変化が見えます</string>
+    <string name="s_0c616a24" formatted="false">水</string>
+    <string name="s_508b1e1d" formatted="false">前の週</string>
+    <string name="s_b06dcc3d" formatted="false">前の月</string>
+    <string name="s_8be194e7" formatted="false">先月</string>
+    <string name="s_eb0f6aef" formatted="false">先週</string>
+    <string name="s_0bb3bda2" formatted="false">次の週</string>
+    <string name="s_6bcf17c2" formatted="false">次の月</string>
+    <string name="s_10c83c81" formatted="false">次へ</string>
+    <string name="s_82b6cabb" formatted="false">こんにちは 🌤</string>
+    <string name="s_1344f491" formatted="false">悲しい</string>
+    <string name="s_4cc036be" formatted="false">通知なし</string>
+    <string name="s_12e8587a" formatted="false">未対応の {0} セクションのバージョン</string>
+    <string name="s_ba358518" formatted="false">指定なし</string>
+    <string name="s_b13672cd" formatted="false">ふつう</string>
+    <string name="s_51f6517e" formatted="false">テーマ</string>
+    <string name="s_0a416847" formatted="false">その前の 30 日</string>
+    <string name="s_0c6445c1" formatted="false">その前の 90 日</string>
+    <string name="s_89609beb" formatted="false">火</string>
+    <string name="s_9160a883" formatted="false">金</string>
+    <string name="s_a848765c" formatted="false">今日</string>
+    <string name="s_6f3c2b2c" formatted="false">今日も何か書き留めましょう。</string>
+    <string name="s_1f2bd289" formatted="false">今日はまだ記録がありません。</string>
+    <string name="s_cfccbae7" formatted="false">今日の記録</string>
+    <string name="s_5bfe853c" formatted="false">今日の記録と未完了</string>
+    <string name="s_2d7464e1" formatted="false">タスク</string>
+    <string name="s_3f7946be" formatted="false">タスクを保存できませんでした</string>
+    <string name="s_bc3ceaab" formatted="false">タスクを削除できませんでした</string>
+    <string name="s_cd07ba17" formatted="false">タスクを保存しました。通知を許可するとリマインダーが届きます</string>
+    <string name="s_d3190fa3" formatted="false">タスクのリマインダー</string>
+    <string name="s_d8bb8799" formatted="false">タスクの時刻が不正です</string>
+    <string name="s_86da87a3" formatted="false">タスクを更新できませんでした</string>
+    <string name="s_97815f19" formatted="false">Flash Aero バックアップを送信</string>
+    <string name="s_6b17ba8f" formatted="false">別の端末へ送信</string>
+    <string name="s_79955ed0" formatted="false">悲しい</string>
+    <string name="s_d7974514" formatted="false">待っているアイデアが {0} 件あります。古いものから見てみましょう</string>
+    <string name="s_d908f279" formatted="false">整理を待つアイデアが {0} 件あります。見てみましょう</string>
+    <string name="s_ad5b82b0" formatted="false">保存</string>
+    <string name="s_9b95e293" formatted="false">保存中…</string>
+    <string name="s_64911de5" formatted="false">JSON ファイルとして保存</string>
+    <string name="s_46ca88f1" formatted="false">保存できませんでした。もう一度お試しください</string>
+    <string name="s_1d0e5d5a" formatted="false">終日</string>
+    <string name="s_0c14a696" formatted="false">終日タスク</string>
+    <string name="s_05eb990b" formatted="false">全体を検索</string>
+    <string name="s_5e6558ad" formatted="false">すべて</string>
+    <string name="s_e8562c78" formatted="false">土</string>
+    <string name="s_72a18f8e" formatted="false">Flash について</string>
+    <string name="s_87dadb5a" formatted="false">キーワードまたはタグ</string>
+    <string name="s_39b523bd" formatted="false">閉じる</string>
+    <string name="s_05f5920d" formatted="false">時刻指定</string>
+    <string name="s_801be77b" formatted="false">内容</string>
+    <string name="s_dc24135d" formatted="false">内容を入力してください</string>
+    <string name="s_043cda7f" formatted="false">長すぎます ({0} 文字、上限 {1} 文字)。短くしてから保存してください</string>
+    <string name="s_87000edc" formatted="false">もう少し記録しましょう。未来のあなたが見返します。</string>
+    <string name="s_95a71bc9" formatted="false">準備中…</string>
+    <string name="s_9aa7d416" formatted="false">共有</string>
+    <string name="s_4ae3c205" formatted="false">記録を共有</string>
+    <string name="s_caf6d5a6" formatted="false">種類</string>
+    <string name="s_a0b5ccaf" formatted="false">並び順を変更</string>
+    <string name="s_ea8d5381" formatted="false">削除</string>
+    <string name="s_6b93827d" formatted="false">タスクを削除</string>
+    <string name="s_bb2e6146" formatted="false">タスクを削除しますか?</string>
+    <string name="s_309b2b90" formatted="false">削除できませんでした。もう一度お試しください</string>
+    <string name="s_e4d23002" formatted="false">すべてのログ・気分・タスクを完全に削除します。先にバックアップを書き出してください</string>
+    <string name="s_e6dedfa0" formatted="false">この気分の記録を削除しますか?</string>
+    <string name="s_98f7e648" formatted="false">このログを削除しますか?</string>
+    <string name="s_c51f5912" formatted="false">期限時刻</string>
+    <string name="s_c628e28d" formatted="false">ログ {0} 件、気分 {1} 件、タスク {2} 件を含みます</string>
+    <string name="s_60b4c5ae" formatted="false">危険な操作</string>
+    <string name="s_949856b3" formatted="false">キャンセル</string>
+    <string name="s_d1d62fb0" formatted="false">お気に入りを解除</string>
+    <string name="s_4d55cb75" formatted="false">バックアップを書き出すか、システムの共有で送信できます</string>
+    <string name="s_5e53c03a" formatted="false">木</string>
+    <string name="s_40163b46" formatted="false">今日に戻る</string>
+    <string name="s_bed63d2f" formatted="false">今週に戻る</string>
+    <string name="s_c2e1aa6d" formatted="false">振り返り</string>
+    <string name="s_fbac6f20" formatted="false">バックアップと復元</string>
+    <string name="s_bb48fdba" formatted="false">バックアップは暗号化されない JSON で、ログ・気分・タスクを含みます。信頼できる場所にのみ保存・共有してください</string>
+    <string name="s_20fe814f" formatted="false">バックアップを書き出しました</string>
+    <string name="s_c90a7947" formatted="false">バックアップファイルが有効な JSON オブジェクトではありません</string>
+    <string name="s_88f39f13" formatted="false">バックアップファイルが有効な UTF-8 JSON ではありません</string>
+    <string name="s_269e4097" formatted="false">バックアップファイルが {0} MB を超えているため読み込めません</string>
+    <string name="s_cc139297" formatted="false">互換性のないバージョン: {0} が必要ですが {1} でした</string>
+    <string name="s_d3de3f52" formatted="false">互換性なし: version フィールドがありません</string>
+    <string name="s_584ff11a" formatted="false">メモ</string>
+    <string name="s_d82fe22c" formatted="false">メモが長すぎます。短くしてから保存してください</string>
+    <string name="s_d9dac7dd" formatted="false">メモ (任意)</string>
+    <string name="s_e4a4815a" formatted="false">外観と操作</string>
+    <string name="s_1e13bd21" formatted="false">完了</string>
+    <string name="s_dd03e6ad" formatted="false">読み込み前にローカルデータとの差分を確認</string>
+    <string name="s_9b60ff74" formatted="false">読み込みに失敗しました: {0}</string>
+    <string name="s_da193966" formatted="false">読み込みをキャンセルしました</string>
+    <string name="s_7fdaf616" formatted="false">書き出し・読み込み・消去</string>
+    <string name="s_f97fded3" formatted="false">バックアップを書き出す</string>
+    <string name="s_7436fb8d" formatted="false">書き出しに失敗しました: {0}</string>
+    <string name="s_b1632a8b" formatted="false">すべてのログ・気分・タスクが完全に削除されます。先にバックアップを書き出してください。</string>
+    <string name="s_479481d2" formatted="false">ローカルネットワーク転送は現在停止中です</string>
+    <string name="s_f8eef707" formatted="false">旧プロトコルにセキュリティ上のリスクがあるため LAN 転送は停止中です。書き出しまたはシステムの共有で、信頼できる経路から JSON ファイルを送ってください。</string>
+    <string name="s_531320d2" formatted="false">属性</string>
+    <string name="s_b1368837" formatted="false">差分</string>
+    <string name="s_c2d9a3f9" formatted="false">統合は受信データを追加・更新し、この端末だけのデータを残します。上書きは先にこの端末のデータを消去します。</string>
+    <string name="s_d0fcf500" formatted="false">保存しました</string>
+    <string name="s_5dbcdf6d" formatted="false">オフ</string>
+    <string name="s_bee374d1" formatted="false">削除しました</string>
+    <string name="s_8b122251" formatted="false">ログを削除しました</string>
+    <string name="s_74e8cc38" formatted="false">ログ {0} 件、気分 {1} 件、</string>
+    <string name="s_a8126b62" formatted="false">お気に入り済み</string>
+    <string name="s_2266e2ec" formatted="false">すべてのデータを消去しました</string>
+    <string name="s_c13b3522" formatted="false">すべて消去しましたが、システム通知を消せませんでした。アプリを再起動してお試しください</string>
+    <string name="s_c8fa62c1" formatted="false">{0} 件を選択</string>
+    <string name="s_01133500" formatted="false">平均の気分 {0} · 合計 {1} 件</string>
+    <string name="s_22696cbc" formatted="false">開始</string>
+    <string name="s_499be303" formatted="false">はじめる</string>
+    <string name="s_5d62764c" formatted="false">開始日</string>
+    <string name="s_2a665354" formatted="false">うれしい</string>
+    <string name="s_673d4a91" formatted="false">強さ</string>
+    <string name="s_6a19ddcf" formatted="false">強さ {0}</string>
+    <string name="s_4b8edbfa" formatted="false">未完了</string>
+    <string name="s_dfcdb4b6" formatted="false">未完了タスク</string>
+    <string name="s_e83d11ae" formatted="false">未整理</string>
+    <string name="s_5660c655" formatted="false">未整理:「日常」タグのログ。長押しでまとめて整理できます。</string>
+    <string name="s_2367642b" formatted="false">とても悲しい</string>
+    <string name="s_fb903262" formatted="false">とてもうれしい</string>
+    <string name="s_e70923c8" formatted="false">クイック記録</string>
+    <string name="s_abf33a8f" formatted="false">破損または旧版のバックアップを復元</string>
+    <string name="s_a9612b5e" formatted="false">気分</string>
+    <string name="s_7bd3df69" formatted="false">平均の気分 {0} (−3〜+3)</string>
+    <string name="s_643f1ede" formatted="false">気分への気づき</string>
+    <string name="s_8de4274f" formatted="false">気分の推移</string>
+    <string name="s_99812275" formatted="false">考え</string>
+    <string name="s_d9f8afc2" formatted="false">整理待ちのアイデア</string>
+    <string name="s_6deefec2" formatted="false">整理待ちのアイデアがあれば通知</string>
+    <string name="s_4e89a8ad" formatted="false">何か書きますか? (任意)</string>
+    <string name="s_eae146ff" formatted="false">選択項目の種類を変更</string>
+    <string name="s_c9ddd465" formatted="false">選択項目を変更できませんでした。もう一度お試しください</string>
+    <string name="s_803499dd" formatted="false">選択項目のタグを変更</string>
+    <string name="s_b4b9bfa6" formatted="false">差分を統合</string>
+    <string name="s_8523e97b" formatted="false">新しい順</string>
+    <string name="s_791c2e78" formatted="false">古い順</string>
+    <string name="s_6ef98325" formatted="false">タグ順</string>
+    <string name="s_da39e076" formatted="false">1 日前</string>
+    <string name="s_0c4452fe" formatted="false">1 時間前</string>
+    <string name="s_74d32173" formatted="false">15 分前</string>
+    <string name="s_6d40d527" formatted="false">リマインダー</string>
+    <string name="s_545f8675" formatted="false">リマインダーはシステムが管理し、省電力モードでは少し遅れることがあります。</string>
+    <string name="s_0b6efa3b" formatted="false">検索</string>
+    <string name="s_18fca433" formatted="false">ログを検索...</string>
+    <string name="s_c8a90aa9" formatted="false">記録・アイデア・気分・タスクを検索</string>
+    <string name="s_1b9e8bc9" formatted="false">取り消す</string>
+    <string name="s_aff00db8" formatted="false">取り消せませんでした。もう一度お試しください</string>
+    <string name="s_87aed705" formatted="false">操作に失敗しました。もう一度お試しください</string>
+    <string name="s_839d4732" formatted="false">お気に入り</string>
+    <string name="s_cf8b8d02" formatted="false">日別の詳細を閉じる</string>
+    <string name="s_e1598b13" formatted="false">破棄</string>
+    <string name="s_0ac91ecb" formatted="false">未保存の変更を破棄しますか?</string>
+    <string name="s_6344fa26" formatted="false">データとセキュリティ</string>
+    <string name="s_b464971d" formatted="false">データはこの端末に保存されます</string>
+    <string name="s_95b69a6d" formatted="false">ファイルが 50 MiB を超えています</string>
+    <string name="s_b8c8a94f" formatted="false">新規</string>
+    <string name="s_b0f36447" formatted="false">新規タスク</string>
+    <string name="s_d2c53483" formatted="false">新規アイデア</string>
+    <string name="s_160eb028" formatted="false">新規記録</string>
+    <string name="s_659aa23f" formatted="false">なし</string>
+    <string name="s_fd8b1ba9" formatted="false">ファイルに書き込めませんでした</string>
+    <string name="s_e9ebd81b" formatted="false">転送用フォルダを作成できませんでした</string>
+    <string name="s_59c97404" formatted="false">共有を開けません。ファイルを受け取れるアプリをインストールしてください</string>
+    <string name="s_6776e896" formatted="false">ファイルを読み込めませんでした</string>
+    <string name="s_609a9a60" formatted="false">日</string>
+    <string name="s_f9abd512" formatted="false">カレンダー</string>
+    <string name="s_afdd356c" formatted="false">カレンダータスクのローカル通知</string>
+    <string name="s_2eeb970b" formatted="false">日平均の気分 · −3〜+3 (0 は中立)</string>
+    <string name="s_6ba31688" formatted="false">日常</string>
+    <string name="s_caa53f15" formatted="false">ログ</string>
+    <string name="s_923b0270" formatted="false">ログもアイデアもワンタップで</string>
+    <string name="s_56409a3c" formatted="false">ログフロー</string>
+    <string name="s_203436ae" formatted="false">ログの管理</string>
+    <string name="s_92fd0eed" formatted="false">日付</string>
+    <string name="s_432f74fa" formatted="false">日付の範囲</string>
+    <string name="s_7203eec6" formatted="false">旧プロトコルにはセキュリティ上のリスクがあります。「バックアップと復元」の書き出しかシステムの共有で、信頼できる方法で別の端末に送ってください。</string>
+    <string name="s_d7034b36" formatted="false">おはようございます ☀️</string>
+    <string name="s_cb28b11e" formatted="false">この期間の記録はありません</string>
+    <string name="s_12263e9a" formatted="false">昨日</string>
+    <string name="s_c18f71ef" formatted="false">こんばんは 🌙</string>
+    <string name="s_bf13f8b5" formatted="false">現在停止中。タップして代替手段を確認</string>
+    <string name="s_16a3eebb" formatted="false">その他</string>
+    <string name="s_89192933" formatted="false">日付を変えるとカレンダーと振り返りも更新されます。</string>
+    <string name="s_87b8867d" formatted="false">新しい順</string>
+    <string name="s_ceb8f642" formatted="false">古い順</string>
+    <string name="s_56b38d0f" formatted="false">最近のひらめき</string>
+    <string name="s_be2c2eb2" formatted="false">未読</string>
+    <string name="s_27c37899" formatted="false">今週</string>
+    <string name="s_ccb42197" formatted="false">今週の記録 {0} 件 · 未整理 {1} 件</string>
+    <string name="s_b70e17ea" formatted="false">今週は落ち込み気味です</string>
+    <string name="s_24d17368" formatted="false">今週は安定しています</string>
+    <string name="s_e3f61599" formatted="false">今週はおおむね前向きです</string>
+    <string name="s_63d2d484" formatted="false">今週の記録はありません</string>
+    <string name="s_db0049cb" formatted="false">今週の推移</string>
+    <string name="s_3750d663" formatted="false">ローカル通知</string>
+    <string name="s_47af33f9" formatted="false">今月</string>
+    <string name="s_37272be9" formatted="false">アイデアから作成。アイデアは残ります</string>
+    <string name="s_7e5242cd" formatted="false">日別の詳細を表示</string>
+    <string name="s_495fd6a9" formatted="false">アイデアを見る</string>
+    <string name="s_198c9fe3" formatted="false">読み込み</string>
+    <string name="s_5606df17" formatted="false">読み込みのプレビュー</string>
+    <string name="s_2b1626c8" formatted="false">タグ</string>
+    <string name="s_f7d7a0ce" formatted="false">Flash へようこそ</string>
+    <string name="s_aef45eb7" formatted="false">読み込み中…</string>
+    <string name="s_6af40858" formatted="false">いま</string>
+    <string name="s_b060afd3" formatted="false">この端末はバックアップ内のタイムゾーンに対応していません。システムを更新してお試しください。何も読み込まれていません</string>
+    <string name="s_f4958768" formatted="false">3 日ごと</string>
+    <string name="s_41be2fe2" formatted="false">毎週</string>
+    <string name="s_02c285b5" formatted="false">毎日</string>
+    <string name="s_18fa51bd" formatted="false">日別のログ・アイデア・気分の回数 · タスクは含みません</string>
+    <string name="s_6d03477d" formatted="false">日平均の気分: {0}</string>
+    <string name="s_5816c303" formatted="false">共有できるアプリがありません</string>
+    <string name="s_43c975df" formatted="false">記録が見つかりません</string>
+    <string name="s_f8bc527e" formatted="false">条件に合うログはありません</string>
+    <string name="s_0fed9772" formatted="false">活動日数</string>
+    <string name="s_11b5fdf6" formatted="false">ライト</string>
+    <string name="s_2a8baaea" formatted="false">ダーク</string>
+    <string name="s_da340c1c" formatted="false">すべてのデータを消去</string>
+    <string name="s_845a8db9" formatted="false">すべてのデータを消去しますか?</string>
+    <string name="s_115677d8" formatted="false">消去できませんでした: {0}</string>
+    <string name="s_0b9d2bac" formatted="false">クリア</string>
+    <string name="s_9c43ebb6" formatted="false">検索をクリア</string>
+    <string name="s_0fba4654" formatted="false">絞り込みを解除</string>
+    <string name="s_b8b74e9d" formatted="false">アイデア</string>
+    <string name="s_4604d6bf" formatted="false">アイデアのリマインダー</string>
+    <string name="s_436e2c82" formatted="false">今、何を記録しますか?</string>
+    <string name="s_78fe07cc" formatted="false">転送ファイルを作成できませんでした: {0}</string>
+    <string name="s_f60bb44e" formatted="false">怒り</string>
+    <string name="s_621a8231" formatted="false">OK</string>
+    <string name="s_869f8d0c" formatted="false">すべて消去</string>
+    <string name="s_5716f5ef" formatted="false">{0} 分後</string>
+    <string name="s_f5e087c9" formatted="false">絞り込み</string>
+    <string name="s_5db367de" formatted="false">管理</string>
+    <string name="s_26640f43" formatted="false">種類</string>
+    <string name="s_f8ede304" formatted="false">システム通知またはタスク通知チャンネルがオフです</string>
+    <string name="s_235f3e59" formatted="false">緊急</string>
+    <string name="s_64db55af" formatted="false">アイデアが {0} 件以上たまると夜 8 時に通知します。開いたアイデアは数えません。</string>
+    <string name="s_78a510f0" formatted="false">累計の概要 · 全期間</string>
+    <string name="s_1da8a247" formatted="false">終了</string>
+    <string name="s_476d405b" formatted="false">終了日</string>
+    <string name="s_010e135c" formatted="false">編集を続ける</string>
+    <string name="s_e60fd56d" formatted="false">記録を続けると振り返りがはっきりしてきます</string>
+    <string name="s_607348a8" formatted="false">編集</string>
+    <string name="s_1d5b5e98" formatted="false">タスクを編集</string>
+    <string name="s_c9ab4c68" formatted="false">アイデアを編集</string>
+    <string name="s_a5db4a27" formatted="false">記録を編集</string>
+    <string name="s_72ecf883" formatted="false">{0} から</string>
+    <string name="s_85b25df8" formatted="false">{0} まで</string>
+    <string name="s_a6317c7d" formatted="false">上書き</string>
+    <string name="s_5521c6a5" formatted="false">すべての思いつきに居場所を · クラウドアカウントなし</string>
+    <string name="s_dad3d89f" formatted="false">最初の思いつきを書く</string>
+    <string name="s_6dfa9df7" formatted="false">Flash に保存</string>
+    <string name="s_2c9d9f0e" formatted="false">記録</string>
+    <string name="s_a48657a1" formatted="false">気分を記録</string>
+    <string name="s_b1bc3a6a" formatted="false">記録日: {0}</string>
+    <string name="s_6de25c07" formatted="false">この瞬間を記録…</string>
+    <string name="s_d1e82646" formatted="false">記録のアクティビティ</string>
+    <string name="s_7a550e3e" formatted="false">アクティビティ: {0} 日中 {1} 日に記録、合計 {2} 回。日別の詳細を開けます。</string>
+    <string name="s_e54eaf8b" formatted="false">ログを書く</string>
+    <string name="s_e8b414a3" formatted="false">アイデアを書く</string>
+    <string name="s_0102647f" formatted="false">端末間の転送</string>
+    <string name="s_f3c259dd" formatted="false">設定</string>
+    <string name="s_95b0de98" formatted="false">内容を入力してください</string>
+    <string name="s_f3462b06" formatted="false">有効な記録日を入力してください</string>
+    <string name="s_b0f4e934" formatted="false">ネガティブな感情の分布</string>
+    <string name="s_8678f5d9" formatted="false">{0} 文字オーバー</string>
+    <string name="s_b45e202f" formatted="false">推移</string>
+    <string name="s_b494a385" formatted="false">システムに従う</string>
+    <string name="s_0af75da1" formatted="false">不正・重複データをスキップします。元のファイルは変更しません</string>
+    <string name="s_ebbcb10b" formatted="false">タスクにする</string>
+    <string name="s_13f1b81a" formatted="false">キーワードまたはタグを入力</string>
+    <string name="s_7cd6a835" formatted="false">キーワードまたはタグ名を入力</string>
+    <string name="s_214cb43c" formatted="false">直近 30 日</string>
+    <string name="s_9ea79282" formatted="false">直近 90 日</string>
+    <string name="s_4ed18a1a" formatted="false">直近 30 日</string>
+    <string name="s_8ab0bb3c" formatted="false">直近 90 日</string>
+    <string name="s_863fb33a" formatted="false">最近の記録</string>
+    <string name="s_58cbffa7" formatted="false">戻る</string>
+    <string name="s_a7f085b7" formatted="false">残り {0} 文字</string>
+    <string name="s_4cabb422" formatted="false">まだ記録がありません</string>
+    <string name="s_fa547131" formatted="false">この日の予定や記録はありません</string>
+    <string name="s_6d67abd6" formatted="false">今月</string>
+    <string name="s_09e1a534" formatted="false">今週</string>
+    <string name="s_d3ce76c1" formatted="false">この記録はもうありません</string>
+    <string name="s_1a959a39" formatted="false">この期間の記録はまだありません。空の日は 0 と表示されます。</string>
+    <string name="s_5fe370b7" formatted="false">選択</string>
+    <string name="s_cbdfcc99" formatted="false">バックアップをシステムの共有で送信</string>
+    <string name="s_daf5a276" formatted="false">部分復元のプレビュー</string>
+    <string name="s_cf3e4247" formatted="false">重要度</string>
+    <string name="s_4de22934" formatted="false">重要度</string>
+    <string name="s_490a6afa" formatted="false">ひらめいたら残しましょう。最初の 1 件を書いてみましょう</string>
+    <string name="s_aef2df88" formatted="false">すぐに記録</string>
+    <string name="s_80390cc2" formatted="false">つらい</string>
+    <string name="s_99546fff" formatted="false">とてもつらい</string>
+    <string name="s_22566806" formatted="false">最高にうれしい</string>
+    <string name="s_9a63360d" formatted="false">プレビュー後にローカルデータが変わったため差分を再計算しました。確認してから上書きしてください</string>
+    <string name="s_a14edc19" formatted="false">(無題)</string>
+    <string name="s_12cea83b" formatted="false">(スキップした不正データ: {0} 件)</string>
+    <string name="s_be6a75ae" formatted="false">、今日</string>
+    <string name="s_a495d14b" formatted="false">、気分は少し落ち込み気味でした</string>
+    <string name="s_3193d3c7" formatted="false">、気分は少し良くなりました</string>
+</resources>

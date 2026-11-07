@@ -1,0 +1,262 @@
+未选择	Not selected	Non sélectionné	선택 안 함	Nicht ausgewählt	Не выбрано	غير محدد	未選択
+未选择保存位置	No save location chosen	Aucun emplacement choisi	저장 위치를 선택하지 않았습니다	Kein Speicherort gewählt	Место сохранения не выбрано	لم يُحدد موقع الحفظ	保存先が選択されていません
+未选择备份文件	No backup file chosen	Aucun fichier de sauvegarde choisi	백업 파일을 선택하지 않았습니다	Keine Backup-Datei gewählt	Файл копии не выбран	لم يُحدد ملف نسخة	バックアップファイルが選択されていません
+本周	This week	Cette semaine	이번 주	Diese Woche	Эта неделя	هذا الأسبوع	今週
+本周 Memory	This week's Memory	Mémoire de la semaine	이번 주 메모리	Wochenerinnerung	Память за неделю	ذاكرة هذا الأسبوع	今週のメモリー
+本周 {0} 条记录 · {1} 条待整理	This week: records {0} · to sort {1}	Cette semaine : entrées {0} · à trier {1}	이번 주 기록 {0}개 · 정리 대기 {1}개	Diese Woche: Einträge {0} · zu sortieren {1}	На этой неделе: записей {0} · разобрать {1}	هذا الأسبوع: السجلات {0} · للفرز {1}	今週の記録 {0} 件 · 未整理 {1} 件
+本周情绪	This week's mood	Humeur de la semaine	이번 주 기분	Stimmung der Woche	Настроение за неделю	مزاج هذا الأسبوع	今週の気分
+本周情绪偏低落	Mood is low this week	Humeur plutôt basse cette semaine	이번 주 기분이 가라앉아 있어요	Diese Woche eher gedrückt	На этой неделе настроение подавленное	المزاج منخفض هذا الأسبوع	今週は落ち込み気味です
+本周情绪平稳	Mood is steady this week	Humeur stable cette semaine	이번 주 기분이 안정적이에요	Diese Woche ausgeglichen	На этой неделе настроение ровное	المزاج مستقر هذا الأسبوع	今週は安定しています
+本周整体偏积极	Mostly positive this week	Plutôt positif cette semaine	이번 주는 대체로 긍정적이에요	Diese Woche eher positiv	На этой неделе в основном позитивно	إيجابي غالبًا هذا الأسبوع	今週はおおむね前向きです
+本周暂无记录	Nothing recorded this week	Rien de noté cette semaine	이번 주 기록이 없습니다	Diese Woche noch nichts erfasst	На этой неделе нет записей	لا تسجيل هذا الأسبوع	今週の記録はありません
+本周趋势	This week's trend	Tendance de la semaine	이번 주 추이	Wochenverlauf	Тренд недели	اتجاه هذا الأسبوع	今週の推移
+本周还没有情绪记录，从上方开始吧	No moods this week. Start above	Aucune humeur cette semaine. Commencez ci-dessus	이번 주 기분 기록이 없습니다. 위에서 시작하세요	Diese Woche keine Stimmungen. Fang oben an	На этой неделе нет настроения. Начните выше	لا مزاج هذا الأسبوع. ابدأ من الأعلى	今週の気分の記録はありません。上から始めましょう
+本地提醒	Local reminder	Rappel local	로컬 알림	Lokale Erinnerung	Локальное напоминание	تذكير محلي	ローカル通知
+本地数据加载失败：{0}	Couldn't load local data: {0}	Échec du chargement des données locales : {0}	로컬 데이터를 불러오지 못했습니다: {0}	Lokale Daten konnten nicht geladen werden: {0}	Не удалось загрузить локальные данные: {0}	تعذر تحميل البيانات المحلية: {0}	ローカルデータを読み込めませんでした: {0}
+本地数据在预览后有变化，差异已重新计算，请确认后再覆盖	Local data changed after the preview. Differences were recalculated. Confirm before overwriting	Les données locales ont changé après l'aperçu. Différences recalculées. Confirmez avant de remplacer	미리 보기 후 로컬 데이터가 바뀌어 차이를 다시 계산했습니다. 확인 후 덮어쓰세요	Lokale Daten haben sich nach der Vorschau geändert. Unterschiede neu berechnet. Vor dem Überschreiben bestätigen	Локальные данные изменились после предпросмотра. Различия пересчитаны. Подтвердите перед заменой	تغيرت البيانات المحلية بعد المعاينة. أُعيد حساب الفروق. أكّد قبل الاستبدال	プレビュー後にローカルデータが変わったため差分を再計算しました。確認してから上書きしてください
+本地数据尚未加载完成，无法导出备份	Local data is still loading, so a backup can't be exported yet	Données locales en cours de chargement : exportation impossible pour le moment	로컬 데이터를 불러오는 중이라 백업을 내보낼 수 없습니다	Lokale Daten werden noch geladen, Backup-Export noch nicht möglich	Локальные данные ещё загружаются, экспорт пока невозможен	البيانات المحلية قيد التحميل، فلا يمكن التصدير بعد	ローカルデータの読み込み中のため書き出せません
+本地数据尚未加载完成，请稍后重试	Local data is still loading. Try again shortly	Données locales en cours de chargement. Réessayez bientôt	로컬 데이터를 불러오는 중입니다. 잠시 후 다시 시도하세요	Lokale Daten werden noch geladen. Bitte gleich erneut versuchen	Локальные данные ещё загружаются. Повторите чуть позже	البيانات المحلية قيد التحميل. حاول بعد قليل	ローカルデータの読み込み中です。少し後でお試しください
+本地数据已清空	Local data cleared	Données locales effacées	로컬 데이터를 지웠습니다	Lokale Daten gelöscht	Локальные данные удалены	مُسحت البيانات المحلية	ローカルデータを消去しました
+本地数据已清空，但系统提醒清理失败，请重启应用后重试	Local data cleared, but system reminders couldn't be removed. Restart the app and try again	Données locales effacées, mais les rappels n'ont pas pu être retirés. Redémarrez l'app et réessayez	로컬 데이터를 지웠지만 시스템 알림을 지우지 못했습니다. 앱을 다시 시작해 보세요	Lokale Daten gelöscht, aber Systemerinnerungen konnten nicht entfernt werden. App neu starten und erneut versuchen	Локальные данные удалены, но напоминания убрать не удалось. Перезапустите приложение и повторите	مُسحت البيانات المحلية، لكن تعذرت إزالة التذكيرات. أعد تشغيل التطبيق وحاول مجددًا	ローカルデータを消去しましたが、通知を消せませんでした。アプリを再起動してお試しください
+本地数据已覆盖	Local data overwritten	Données locales remplacées	로컬 데이터를 덮어썼습니다	Lokale Daten überschrieben	Локальные данные заменены	استُبدلت البيانات المحلية	ローカルデータを上書きしました
+本地数据库尚未初始化	The local database isn't ready yet	La base locale n'est pas encore prête	로컬 데이터베이스가 아직 준비되지 않았습니다	Die lokale Datenbank ist noch nicht bereit	Локальная база ещё не готова	قاعدة البيانات المحلية غير جاهزة بعد	ローカルデータベースの準備ができていません
+本地数据库暂时无法打开，你原有的数据仍在本机、未被改动。	The local database can't be opened right now. Your existing data is still on this device, unchanged.	La base locale ne peut pas être ouverte pour le moment. Vos données restent sur cet appareil, inchangées.	로컬 데이터베이스를 지금 열 수 없습니다. 기존 데이터는 이 기기에 그대로 있습니다.	Die lokale Datenbank lässt sich gerade nicht öffnen. Deine Daten sind unverändert auf diesem Gerät.	Локальную базу сейчас не открыть. Ваши данные остаются на устройстве без изменений.	يتعذر فتح قاعدة البيانات المحلية حاليًا. بياناتك باقية على هذا الجهاز دون تغيير.	ローカルデータベースを開けません。既存のデータはこの端末にそのまま残っています。
+本地数据库暂时无法打开，原有数据未被改动。本次新写的内容退出后不会保留；请完全退出 Flash 后重新打开。	The local database can't be opened. Existing data is unchanged. Anything new won't be kept after you quit. Fully quit Flash and reopen it.	La base locale ne peut pas être ouverte. Les données existantes sont inchangées. Le nouveau contenu ne sera pas conservé. Quittez complètement Flash puis rouvrez-le.	로컬 데이터베이스를 열 수 없습니다. 기존 데이터는 그대로입니다. 새 내용은 종료 후 유지되지 않습니다. Flash를 완전히 종료한 뒤 다시 여세요.	Die lokale Datenbank lässt sich nicht öffnen. Vorhandene Daten sind unverändert. Neues bleibt nach dem Beenden nicht erhalten. Flash vollständig beenden und neu öffnen.	Локальную базу не открыть. Данные не изменены. Новое не сохранится после выхода. Полностью закройте Flash и откройте снова.	يتعذر فتح قاعدة البيانات المحلية. البيانات الحالية دون تغيير، ولن يُحفظ الجديد بعد الخروج. أغلق Flash تمامًا وأعد فتحه.	ローカルデータベースを開けません。既存データは変更されていません。新しい内容は終了後に残りません。Flash を完全に終了して開き直してください。
+本地数据库暂时无法打开，当前只有临时内容，清空已暂停。原有数据未被改动，请完全退出 Flash 后重新打开再试	The local database can't be opened and only temporary content is here, so clearing is paused. Existing data is unchanged. Fully quit Flash, reopen it and try again	La base locale ne peut pas être ouverte et seul du contenu temporaire est présent : l'effacement est en pause. Données inchangées. Quittez Flash, rouvrez-le et réessayez	로컬 데이터베이스를 열 수 없어 임시 내용만 있으므로 지우기를 일시 중지했습니다. 기존 데이터는 그대로입니다. Flash를 완전히 종료하고 다시 열어 시도하세요	Die lokale Datenbank lässt sich nicht öffnen, es gibt nur temporäre Inhalte; Löschen ist pausiert. Daten unverändert. Flash vollständig beenden, neu öffnen und erneut versuchen	Локальную базу не открыть, здесь только временное содержимое, очистка приостановлена. Данные не изменены. Закройте Flash, откройте снова и повторите	يتعذر فتح القاعدة المحلية وهنا محتوى مؤقت فقط، فالمسح متوقف. البيانات دون تغيير. أغلق Flash تمامًا وأعد فتحه ثم حاول	ローカルデータベースを開けず一時的な内容のみのため、消去を停止しています。既存データは変更されていません。Flash を完全に終了して開き直してからお試しください
+本地数据库暂时无法打开，当前只有本次启动后的临时内容，不能导出或导入。原有数据未被改动，请完全退出 Flash 后重新打开再试	The local database can't be opened and only temporary content from this launch is here, so export and import are off. Existing data is unchanged. Fully quit Flash, reopen it and try again	La base locale ne peut pas être ouverte et seul le contenu temporaire de ce lancement est présent : exportation et importation désactivées. Données inchangées. Quittez Flash, rouvrez-le et réessayez	로컬 데이터베이스를 열 수 없어 이번 실행의 임시 내용만 있으므로 내보내기와 가져오기를 할 수 없습니다. 기존 데이터는 그대로입니다. Flash를 완전히 종료하고 다시 열어 시도하세요	Die lokale Datenbank lässt sich nicht öffnen, es gibt nur temporäre Inhalte dieses Starts; Export und Import sind aus. Daten unverändert. Flash vollständig beenden, neu öffnen und erneut versuchen	Локальную базу не открыть, здесь только временное содержимое этого запуска, экспорт и импорт отключены. Данные не изменены. Закройте Flash, откройте снова и повторите	يتعذر فتح القاعدة المحلية وهنا محتوى مؤقت من هذا التشغيل فقط، فالتصدير والاستيراد متوقفان. البيانات دون تغيير. أغلق Flash تمامًا وأعد فتحه ثم حاول	ローカルデータベースを開けず、今回の起動後の一時的な内容のみのため書き出し・読み込みはできません。既存データは変更されていません。Flash を完全に終了して開き直してからお試しください
+本地数据库暂时无法打开，这里只有本次启动后的临时内容，不是完整备份。原有数据仍在本机、未被改动；请完全退出 Flash 后重新打开。	The local database can't be opened. This is only temporary content from this launch, not a full backup. Existing data is still on this device, unchanged. Fully quit Flash and reopen it.	La base locale ne peut pas être ouverte. Ceci n'est que le contenu temporaire de ce lancement, pas une sauvegarde complète. Vos données restent sur cet appareil, inchangées. Quittez Flash puis rouvrez-le.	로컬 데이터베이스를 열 수 없습니다. 이번 실행의 임시 내용일 뿐 전체 백업이 아닙니다. 기존 데이터는 이 기기에 그대로 있습니다. Flash를 완전히 종료한 뒤 다시 여세요.	Die lokale Datenbank lässt sich nicht öffnen. Das sind nur temporäre Inhalte dieses Starts, kein vollständiges Backup. Deine Daten sind unverändert auf dem Gerät. Flash vollständig beenden und neu öffnen.	Локальную базу не открыть. Здесь только временное содержимое этого запуска, а не полная копия. Данные на устройстве не изменены. Закройте Flash и откройте снова.	يتعذر فتح القاعدة المحلية. هذا محتوى مؤقت من هذا التشغيل وليس نسخة كاملة. بياناتك باقية على الجهاز دون تغيير. أغلق Flash تمامًا وأعد فتحه.	ローカルデータベースを開けません。これは今回の起動後の一時的な内容で、完全なバックアップではありません。既存データはこの端末にそのまま残っています。Flash を完全に終了して開き直してください。
+本地数据库暂时无法打开：导出、导入、传输与清空已暂停，原有数据未被改动。	The local database can't be opened: export, import, transfer and clear are paused. Existing data is unchanged.	La base locale ne peut pas être ouverte : exportation, importation, transfert et effacement en pause. Données inchangées.	로컬 데이터베이스를 열 수 없습니다: 내보내기, 가져오기, 전송, 지우기가 일시 중지되었습니다. 기존 데이터는 그대로입니다.	Die lokale Datenbank lässt sich nicht öffnen: Export, Import, Übertragung und Löschen sind pausiert. Daten unverändert.	Локальную базу не открыть: экспорт, импорт, передача и очистка приостановлены. Данные не изменены.	يتعذر فتح القاعدة المحلية: التصدير والاستيراد والنقل والمسح متوقفة. البيانات دون تغيير.	ローカルデータベースを開けません: 書き出し・読み込み・転送・消去を停止しています。既存データは変更されていません。
+本月	This month	Ce mois-ci	이번 달	Diesen Monat	Этот месяц	هذا الشهر	今月
+本次启动改用临时存储：新写的内容退出后不会保留；为避免用不完整的数据覆盖原有记录，导出与导入已暂停，	This launch is using temporary storage: anything new won't be kept after you quit. To avoid overwriting your records with incomplete data, export and import are paused, 	Ce lancement utilise un stockage temporaire : le nouveau contenu ne sera pas conservé. Pour éviter d'écraser vos entrées avec des données incomplètes, l'exportation et l'importation sont en pause, 	이번 실행은 임시 저장소를 사용합니다: 새 내용은 종료 후 유지되지 않습니다. 불완전한 데이터로 덮어쓰지 않도록 내보내기와 가져오기를 일시 중지했으며, 	Dieser Start nutzt temporären Speicher: Neues bleibt nach dem Beenden nicht erhalten. Damit unvollständige Daten nichts überschreiben, sind Export und Import pausiert, 	Этот запуск использует временное хранилище: новое не сохранится после выхода. Чтобы неполные данные ничего не заменили, экспорт и импорт приостановлены, 	يستخدم هذا التشغيل تخزينًا مؤقتًا: لن يُحفظ الجديد بعد الخروج. ولتجنب الكتابة فوق سجلاتك ببيانات ناقصة، أُوقف التصدير والاستيراد، 	今回の起動は一時ストレージを使用しています。新しい内容は終了後に残りません。不完全なデータでの上書きを防ぐため書き出しと読み込みを停止し、
+来源：灵感	Source: idea	Source : idée	출처: 아이디어	Quelle: Idee	Источник: идея	المصدر: فكرة	元: アイデア
+来自灵感，原灵感会保留	From an idea. The idea stays	Issu d'une idée. L'idée est conservée	아이디어에서 만들었으며 아이디어는 유지됩니다	Aus einer Idee. Die Idee bleibt erhalten	Из идеи. Идея сохраняется	من فكرة، وتبقى الفكرة	アイデアから作成。アイデアは残ります
+查看每日明细	Show daily details	Voir le détail quotidien	일별 내역 보기	Tagesdetails anzeigen	Показать по дням	عرض التفاصيل اليومية	日別の詳細を表示
+查看灵感	View idea	Voir l'idée	아이디어 보기	Idee ansehen	Открыть идею	عرض الفكرة	アイデアを見る
+标准导入	Import	Importer	가져오기	Importieren	Импорт	استيراد	読み込み
+标准导入…	Import…	Importer…	가져오기…	Importieren…	Импорт…	استيراد…	読み込み…
+标准导入并分析差异	Import and compare	Importer et comparer	가져오기 및 차이 분석	Importieren und vergleichen	Импорт и сравнение	الاستيراد والمقارنة	読み込みと差分確認
+标准导入预览	Import preview	Aperçu de l'importation	가져오기 미리 보기	Import-Vorschau	Предпросмотр импорта	معاينة الاستيراد	読み込みのプレビュー
+标签	Tag	Étiquette	태그	Schlagwort	Метка	الوسم	タグ
+标签、重要度、日期	Tag, importance, date	Étiquette, importance, date	태그, 중요도, 날짜	Schlagwort, Wichtigkeit, Datum	Метка, важность, дата	الوسم والأهمية والتاريخ	タグ・重要度・日付
+标记为完成	Mark as done	Marquer comme terminé	완료로 표시	Als erledigt markieren	Отметить выполненным	وضع علامة منجز	完了にする
+标记为未完成	Mark as not done	Marquer comme non terminé	미완료로 표시	Als nicht erledigt markieren	Отметить невыполненным	وضع علامة غير منجز	未完了にする
+标记为灵感	Mark as idea	Marquer comme idée	아이디어로 표시	Als Idee markieren	Отметить как идею	وضع علامة فكرة	アイデアにする
+标记备忘	Mark as memo	Marquer comme mémo	메모로 표시	Als Notiz markieren	Отметить как заметку	وضع علامة مذكرة	メモにする
+标记紧急	Mark as urgent	Marquer comme urgent	긴급으로 표시	Als dringend markieren	Отметить срочным	وضع علامة عاجل	緊急にする
+标题超出上限（{0}/{1}）	Title is over the limit ({0}/{1})	Titre trop long ({0}/{1})	제목이 한도를 넘었습니다({0}/{1})	Titel über dem Limit ({0}/{1})	Название превышает лимит ({0}/{1})	العنوان يتجاوز الحد ({0}/{1})	タイトルが上限を超えています ({0}/{1})
+检测到已保留的旧版异常原始数据，可在设置中导出恢复文件	Kept invalid data from an old version was found. You can export a recovery file in Settings	Des données non valides d'une ancienne version ont été conservées. Exportez un fichier de récupération dans Réglages	보관된 이전 버전의 잘못된 데이터가 있습니다. 설정에서 복구 파일을 내보낼 수 있습니다	Aufbewahrte ungültige Daten einer alten Version gefunden. In den Einstellungen als Wiederherstellungsdatei exportieren	Найдены сохранённые неверные данные старой версии. Экспортируйте файл восстановления в настройках	عُثر على بيانات غير صالحة محفوظة من إصدار قديم. يمكنك تصدير ملف استعادة من الإعدادات	旧版の不正データが保持されています。設定から復元ファイルを書き出せます
+次数	Count	Nombre	횟수	Anzahl	Количество	العدد	回数
+欢迎来到 Flash	Welcome to Flash	Bienvenue dans Flash	Flash에 오신 것을 환영합니다	Willkommen bei Flash	Добро пожаловать во Flash	مرحبًا بك في Flash	Flash へようこそ
+正在加载更多…	Loading more…	Chargement…	더 불러오는 중…	Mehr wird geladen…	Загрузка…	جارٍ تحميل المزيد…	読み込み中…
+正在处理…	Working…	En cours…	처리 중…	Wird verarbeitet…	Обработка…	جارٍ المعالجة…	処理中…
+正在查找附近的 Flash Aero…	Looking for Flash Aero nearby…	Recherche de Flash Aero à proximité…	근처의 Flash Aero를 찾는 중…	Suche Flash Aero in der Nähe…	Поиск Flash Aero поблизости…	جارٍ البحث عن Flash Aero قريبًا…	近くの Flash Aero を検索中…
+正在载入本地数据…	Loading local data…	Chargement des données locales…	로컬 데이터를 불러오는 중…	Lokale Daten werden geladen…	Загрузка локальных данных…	جارٍ تحميل البيانات المحلية…	ローカルデータを読み込み中…
+正在配对	Pairing	Association	페어링 중	Kopplung läuft	Сопряжение	جارٍ الإقران	ペアリング中
+正在验证 PIN 并接收备份…	Checking the PIN and receiving the backup…	Vérification du code PIN et réception…	PIN을 확인하고 백업을 받는 중…	PIN wird geprüft, Backup wird empfangen…	Проверка PIN и получение копии…	جارٍ التحقق من الرمز واستلام النسخة…	PIN を確認してバックアップを受信中…
+正文与类型	Text and type	Texte et type	본문 및 유형	Text und Typ	Текст и тип	النص والنوع	本文と種類
+此任务由灵感转化而来	This task came from an idea	Cette tâche vient d'une idée	이 할 일은 아이디어에서 왔습니다	Diese Aufgabe stammt aus einer Idee	Эта задача создана из идеи	نشأت هذه المهمة من فكرة	このタスクはアイデアから作成されました
+此刻	Now	Maintenant	지금	Jetzt	Сейчас	الآن	いま
+此设备不支持任务时区，请更新系统后重试	This device doesn't support the task's time zone. Update the system and try again	Cet appareil ne prend pas en charge le fuseau horaire de la tâche. Mettez à jour le système et réessayez	이 기기는 할 일의 시간대를 지원하지 않습니다. 시스템을 업데이트한 뒤 다시 시도하세요	Dieses Gerät unterstützt die Zeitzone der Aufgabe nicht. System aktualisieren und erneut versuchen	Это устройство не поддерживает часовой пояс задачи. Обновите систему и повторите	لا يدعم هذا الجهاز المنطقة الزمنية للمهمة. حدّث النظام وحاول مجددًا	この端末はタスクのタイムゾーンに対応していません。システムを更新してお試しください
+此设备不支持备份中的任务时区，请更新系统后重试；未导入任何数据	This device doesn't support a task time zone in the backup. Update the system and try again. Nothing was imported	Cet appareil ne prend pas en charge un fuseau horaire de la sauvegarde. Mettez à jour le système et réessayez. Rien n'a été importé	이 기기는 백업의 할 일 시간대를 지원하지 않습니다. 시스템을 업데이트한 뒤 다시 시도하세요. 아무것도 가져오지 않았습니다	Dieses Gerät unterstützt eine Aufgaben-Zeitzone im Backup nicht. System aktualisieren und erneut versuchen. Es wurde nichts importiert	Это устройство не поддерживает часовой пояс задачи из копии. Обновите систему и повторите. Ничего не импортировано	لا يدعم هذا الجهاز منطقة زمنية في النسخة. حدّث النظام وحاول مجددًا. لم يُستورد شيء	この端末はバックアップ内のタイムゾーンに対応していません。システムを更新してお試しください。何も読み込まれていません
+此设备支持	Supported on this device	Pris en charge sur cet appareil	이 기기에서 지원됨	Auf diesem Gerät unterstützt	Поддерживается на этом устройстве	مدعوم على هذا الجهاز	この端末で対応
+此设备暂不支持	Not supported on this device yet	Pas encore pris en charge sur cet appareil	이 기기에서 아직 지원되지 않음	Auf diesem Gerät noch nicht unterstützt	Пока не поддерживается на этом устройстве	غير مدعوم على هذا الجهاز بعد	この端末では未対応
+每 3 天	Every 3 days	Tous les 3 jours	3일마다	Alle 3 Tage	Каждые 3 дня	كل 3 أيام	3 日ごと
+每周	Weekly	Chaque semaine	매주	Wöchentlich	Еженедельно	أسبوعيًا	毎週
+每天	Daily	Chaque jour	매일	Täglich	Ежедневно	يوميًا	毎日
+每天的日志、灵感与情绪次数 · 不含任务	Daily logs, ideas and moods · tasks not included	Journal, idées et humeurs par jour · tâches non incluses	일별 일지, 아이디어, 기분 횟수 · 할 일 제외	Tagebuch, Ideen und Stimmungen pro Tag · ohne Aufgaben	Журнал, идеи и настроение по дням · без задач	اليوميات والأفكار والمزاج يوميًا · دون المهام	日別のログ・アイデア・気分の回数 · タスクは含みません
+每日情绪均值：{0}	Daily average mood: {0}	Humeur moyenne quotidienne : {0}	일 평균 기분: {0}	Tagesdurchschnitt: {0}	Среднее за день: {0}	متوسط المزاج اليومي: {0}	日平均の気分: {0}
+每日明细	Daily details	Détail quotidien	일별 내역	Tagesdetails	По дням	التفاصيل اليومية	日別の詳細
+每日记录次数柱状图，	Daily record count chart, 	Graphique des entrées par jour, 	일별 기록 횟수 차트, 	Diagramm der täglichen Einträge, 	График записей по дням, 	مخطط السجلات اليومية، 	日別の記録回数グラフ、
+沙箱共享导出	Sandbox share export	Exportation partagée sandbox	샌드박스 공유 내보내기	Sandbox-Export zum Teilen	Экспорт из песочницы	تصدير مشترك من البيئة المعزولة	サンドボックス共有の書き出し
+没有匹配的记录	No matching records	Aucune entrée correspondante	일치하는 기록이 없습니다	Keine passenden Einträge	Нет подходящих записей	لا سجلات مطابقة	一致する記録はありません
+没有可导出的恢复数据	No recovery data to export	Aucune donnée de récupération à exporter	내보낼 복구 데이터가 없습니다	Keine Wiederherstellungsdaten zum Exportieren	Нет данных восстановления для экспорта	لا بيانات استعادة للتصدير	書き出せる復元データはありません
+没有可用的分享应用	No app available to share with	Aucune app disponible pour le partage	공유할 수 있는 앱이 없습니다	Keine App zum Teilen verfügbar	Нет приложения, чтобы поделиться	لا تطبيق متاح للمشاركة	共有できるアプリがありません
+没有待整理的记录	Nothing to sort	Rien à trier	정리할 기록이 없습니다	Nichts zu sortieren	Нечего разбирать	لا شيء للفرز	未整理の記録はありません
+没有找到相关记录	No records found	Aucune entrée trouvée	기록을 찾지 못했습니다	Keine Einträge gefunden	Записи не найдены	لم يُعثر على سجلات	記録が見つかりません
+没有符合条件的日志	No logs match	Aucune entrée de journal ne correspond	조건에 맞는 일지가 없습니다	Keine passenden Tagebucheinträge	Нет подходящих записей журнала	لا يوميات مطابقة	条件に合うログはありません
+活跃 {0} 天 · 平均情绪 {1}	Active days: {0} · Average mood {1}	Jours actifs : {0} · Humeur moyenne {1}	활동일 {0}일 · 평균 기분 {1}	Aktive Tage: {0} · Durchschnittsstimmung {1}	Активных дней: {0} · Среднее настроение {1}	الأيام النشطة: {0} · متوسط المزاج {1}	活動日 {0} 日 · 平均の気分 {1}
+活跃天数	Active days	Jours actifs	활동일	Aktive Tage	Активные дни	الأيام النشطة	活動日数
+浅色	Light	Clair	라이트	Hell	Светлая	فاتح	ライト
+浮层面板	Panel	Panneau	패널	Bereich	Панель	لوحة	パネル
+深色	Dark	Sombre	다크	Dunkel	Тёмная	داكن	ダーク
+添加任务	Add task	Ajouter une tâche	할 일 추가	Aufgabe hinzufügen	Добавить задачу	إضافة مهمة	タスクを追加
+清空	Clear	Effacer	지우기	Löschen	Очистить	مسح	消去
+清空会删除本机全部日志、情绪和任务，且无法撤销，建议先导出备份。	Clearing deletes all logs, moods and tasks on this device and can't be undone. Export a backup first.	L'effacement supprime le journal, les humeurs et les tâches de cet appareil, sans retour possible. Exportez d'abord une sauvegarde.	지우면 이 기기의 모든 일지, 기분, 할 일이 삭제되며 되돌릴 수 없습니다. 먼저 백업을 내보내세요.	Löschen entfernt alle Tagebucheinträge, Stimmungen und Aufgaben auf diesem Gerät unwiderruflich. Zuerst ein Backup exportieren.	Очистка удалит все записи журнала, настроение и задачи на этом устройстве без возврата. Сначала экспортируйте копию.	يحذف المسح كل اليوميات والمزاج والمهام على هذا الجهاز دون رجعة. صدّر نسخة احتياطية أولًا.	消去するとこの端末のログ・気分・タスクがすべて削除され、元に戻せません。先にバックアップを書き出してください。
+清空全部数据	Clear all data	Effacer toutes les données	모든 데이터 지우기	Alle Daten löschen	Очистить все данные	مسح كل البيانات	すべてのデータを消去
+清空全部数据…	Clear all data…	Effacer toutes les données…	모든 데이터 지우기…	Alle Daten löschen…	Очистить все данные…	مسح كل البيانات…	すべてのデータを消去…
+清空全部数据？	Clear all data?	Effacer toutes les données ?	모든 데이터를 지울까요?	Alle Daten löschen?	Очистить все данные?	مسح كل البيانات؟	すべてのデータを消去しますか?
+清空全部数据？此操作不可撤销。	Clear all data? This can't be undone.	Effacer toutes les données ? Action irréversible.	모든 데이터를 지울까요? 되돌릴 수 없습니다.	Alle Daten löschen? Das kann nicht rückgängig gemacht werden.	Очистить все данные? Это необратимо.	مسح كل البيانات؟ لا يمكن التراجع.	すべて消去しますか? 元に戻せません。
+清空全部本地数据	Clear all local data	Effacer toutes les données locales	모든 로컬 데이터 지우기	Alle lokalen Daten löschen	Очистить все локальные данные	مسح كل البيانات المحلية	すべてのローカルデータを消去
+清空全部本地数据，删除后需要再次确认，不可恢复	Clear all local data. Asks you to confirm again and can't be recovered	Effacer toutes les données locales. Confirmation demandée, action irréversible	모든 로컬 데이터 지우기. 다시 확인이 필요하며 복구할 수 없습니다	Alle lokalen Daten löschen. Muss bestätigt werden und ist nicht wiederherstellbar	Очистить все локальные данные. Потребует подтверждения, восстановить нельзя	مسح كل البيانات المحلية. يتطلب تأكيدًا ولا يمكن الاسترجاع	すべてのローカルデータを消去。再確認が必要で、復元できません
+清空全部本地数据？	Clear all local data?	Effacer toutes les données locales ?	모든 로컬 데이터를 지울까요?	Alle lokalen Daten löschen?	Очистить все локальные данные?	مسح كل البيانات المحلية؟	すべてのローカルデータを消去しますか?
+清空失败，请重试	Couldn't clear. Try again	Échec de l'effacement. Réessayez	지우지 못했습니다. 다시 시도하세요	Löschen fehlgeschlagen. Bitte erneut versuchen	Не удалось очистить. Повторите попытку	تعذر المسح. حاول مجددًا	消去できませんでした。もう一度お試しください
+清空失败：{0}	Couldn't clear: {0}	Échec de l'effacement : {0}	지우지 못했습니다: {0}	Löschen fehlgeschlagen: {0}	Не удалось очистить: {0}	تعذر المسح: {0}	消去できませんでした: {0}
+清除	Clear	Effacer	지우기	Löschen	Очистить	مسح	クリア
+清除搜索	Clear search	Effacer la recherche	검색 지우기	Suche löschen	Очистить поиск	مسح البحث	検索をクリア
+清除日期	Clear date	Effacer la date	날짜 지우기	Datum löschen	Очистить дату	مسح التاريخ	日付をクリア
+清除筛选	Clear filters	Effacer les filtres	필터 지우기	Filter löschen	Сбросить фильтры	مسح عوامل التصفية	絞り込みを解除
+清除隔离区	Clear quarantine	Vider la quarantaine	격리 영역 지우기	Quarantäne leeren	Очистить карантин	مسح الحجر	隔離領域を消去
+灵感	Ideas	Idées	아이디어	Ideen	Идеи	الأفكار	アイデア
+灵感已保存	Idea saved	Idée enregistrée	아이디어를 저장했습니다	Idee gespeichert	Идея сохранена	حُفظت الفكرة	アイデアを保存しました
+灵感提醒	Idea reminders	Rappels d'idées	아이디어 알림	Ideen-Erinnerungen	Напоминания об идеях	تذكيرات الأفكار	アイデアのリマインダー
+灵感还没出现，先给它留个位置。	No ideas yet. Keep a place for them.	Pas encore d'idée. Gardez-leur une place.	아직 아이디어가 없어요. 자리를 남겨 두세요.	Noch keine Ideen. Halte ihnen einen Platz frei.	Идей пока нет. Оставьте для них место.	لا أفكار بعد. احتفظ لها بمكان.	アイデアはまだありません。場所を空けておきましょう。
+点选要整理的日志，在底部批量修改。	Tap logs to sort, then change them at the bottom.	Touchez les entrées à trier, puis modifiez-les en bas.	정리할 일지를 눌러 선택하고 아래에서 변경하세요.	Einträge antippen und unten gemeinsam ändern.	Выберите записи и измените их внизу.	اضغط اليوميات للفرز ثم غيّرها في الأسفل.	整理するログをタップし、下部でまとめて変更します。
+版本	Version	Version	버전	Version	Версия	الإصدار	バージョン
+现在想记录什么？	What's on your mind?	Qu'avez-vous en tête ?	지금 무엇을 기록할까요?	Was geht dir durch den Kopf?	О чём вы думаете?	بماذا تفكر الآن؟	今、何を記録しますか?
+现在感觉怎么样？	How do you feel now?	Comment vous sentez-vous ?	지금 기분이 어떤가요?	Wie fühlst du dich gerade?	Как вы себя чувствуете?	كيف تشعر الآن؟	今の気分は?
+生成 flash-backup-v2 备份文件	Creates a flash-backup-v2 backup file	Crée un fichier de sauvegarde flash-backup-v2	flash-backup-v2 백업 파일을 만듭니다	Erstellt eine flash-backup-v2-Backup-Datei	Создаёт файл копии flash-backup-v2	ينشئ ملف نسخة flash-backup-v2	flash-backup-v2 のバックアップファイルを作成
+生成传输文件失败，请重试	Couldn't create the transfer file. Try again	Impossible de créer le fichier de transfert. Réessayez	전송 파일을 만들지 못했습니다. 다시 시도하세요	Übertragungsdatei konnte nicht erstellt werden. Bitte erneut versuchen	Не удалось создать файл передачи. Повторите попытку	تعذر إنشاء ملف النقل. حاول مجددًا	転送ファイルを作成できませんでした。もう一度お試しください
+生成传输文件失败：{0}	Couldn't create the transfer file: {0}	Impossible de créer le fichier de transfert : {0}	전송 파일을 만들지 못했습니다: {0}	Übertragungsdatei konnte nicht erstellt werden: {0}	Не удалось создать файл передачи: {0}	تعذر إنشاء ملف النقل: {0}	転送ファイルを作成できませんでした: {0}
+生成备份失败，请重试	Couldn't create the backup. Try again	Impossible de créer la sauvegarde. Réessayez	백업을 만들지 못했습니다. 다시 시도하세요	Backup konnte nicht erstellt werden. Bitte erneut versuchen	Не удалось создать копию. Повторите попытку	تعذر إنشاء النسخة. حاول مجددًا	バックアップを作成できませんでした。もう一度お試しください
+生成备份文件并通过系统分享发送	Creates a backup file and sends it with system share	Crée une sauvegarde et l'envoie via le partage système	백업 파일을 만들어 시스템 공유로 보냅니다	Erstellt ein Backup und sendet es über „Teilen“	Создаёт копию и отправляет через «Поделиться»	ينشئ ملف نسخة ويرسله عبر مشاركة النظام	バックアップを作成しシステムの共有で送信します
+生气	Angry	En colère	화남	Wütend	Злость	غاضب	怒り
+疲惫	Tired	Fatigué	피곤함	Müde	Усталость	متعب	疲れ
+目前没有未查看的想法。	No unopened ideas right now.	Aucune idée non ouverte pour le moment.	지금은 열어 보지 않은 아이디어가 없습니다.	Derzeit keine ungeöffneten Ideen.	Сейчас нет неоткрытых идей.	لا أفكار غير مفتوحة الآن.	未確認のアイデアは今ありません。
+看见记录背后的节奏与情绪	See the rhythm and moods behind your records	Voyez le rythme et les humeurs derrière vos entrées	기록 뒤의 리듬과 기분을 살펴보세요	Sieh Rhythmus und Stimmung hinter deinen Einträgen	Ритм и настроение за вашими записями	اكتشف الإيقاع والمزاج وراء سجلاتك	記録の背後にあるリズムと気分を見てみましょう
+确定	OK	OK	확인	OK	ОК	حسنًا	OK
+确认删除	Confirm delete	Confirmer la suppression	삭제 확인	Löschen bestätigen	Подтвердить удаление	تأكيد الحذف	削除を確定
+确认清空	Clear everything	Tout effacer	모두 지우기	Alles löschen	Очистить всё	مسح الكل	すべて消去
+碰一碰	Tap to share	Partage par contact	탭 공유	Tippen zum Teilen	Передача касанием	المشاركة باللمس	タッチ共有
+稍后 {0} 分钟	In {0} minutes	Dans {0} minutes	{0}분 후	In {0} Minuten	Через {0} мин	بعد {0} دقيقة	{0} 分後
+端侧智能体 A2A	On-device agent A2A	Agent local A2A	기기 내 에이전트 A2A	Geräteinterner Agent A2A	Агент на устройстве A2A	وكيل على الجهاز A2A	端末内エージェント A2A
+等待场景准入	Waiting for scenario approval	En attente d'approbation du scénario	시나리오 승인 대기 중	Wartet auf Szenario-Freigabe	Ожидает одобрения сценария	بانتظار الموافقة على السيناريو	シナリオの承認待ち
+等待手动签名与 App Linking 配置	Waiting for manual signing and App Linking setup	En attente de la signature manuelle et d'App Linking	수동 서명 및 App Linking 설정 대기 중	Wartet auf manuelle Signatur und App Linking	Ожидает ручной подписи и настройки App Linking	بانتظار التوقيع اليدوي وإعداد App Linking	手動署名と App Linking の設定待ち
+等待接收设备	Waiting for the other device	En attente de l'autre appareil	다른 기기를 기다리는 중	Warten auf das andere Gerät	Ожидание другого устройства	بانتظار الجهاز الآخر	受信端末を待っています
+筛选	Filter	Filtrer	필터	Filter	Фильтр	تصفية	絞り込み
+筛选（已启用条件）	Filter (active)	Filtrer (actif)	필터(사용 중)	Filter (aktiv)	Фильтр (активен)	تصفية (مفعّلة)	絞り込み (有効)
+管理	Manage	Gérer	관리	Verwalten	Управление	إدارة	管理
+类型	Type	Type	유형	Typ	Тип	النوع	種類
+系统提醒与小组件保持原样。请完全退出 Flash 后重新打开。	System reminders and widgets stay as they are. Fully quit Flash and reopen it.	Les rappels et widgets restent inchangés. Quittez complètement Flash puis rouvrez-le.	시스템 알림과 위젯은 그대로 유지됩니다. Flash를 완전히 종료한 뒤 다시 여세요.	Systemerinnerungen und Widgets bleiben unverändert. Flash vollständig beenden und neu öffnen.	Напоминания и виджеты остаются без изменений. Полностью закройте Flash и откройте снова.	تبقى تذكيرات النظام والأدوات كما هي. أغلق Flash تمامًا وأعد فتحه.	システム通知とウィジェットはそのままです。Flash を完全に終了して開き直してください。
+系统支持，等待权限准入	Supported by the system; waiting for permission approval	Pris en charge par le système ; en attente d'autorisation	시스템에서 지원, 권한 승인 대기 중	Vom System unterstützt; wartet auf Berechtigung	Поддерживается системой; ожидает разрешения	مدعوم من النظام؛ بانتظار الإذن	システムは対応、権限の承認待ち
+系统无公开查询接口，此为应用内设置	The system has no public API for this, so it's an in-app setting	Le système n'offre pas d'API publique : c'est un réglage de l'app	시스템 공개 API가 없어 앱 내 설정입니다	Das System bietet keine öffentliche API dafür, daher eine App-Einstellung	В системе нет публичного API, поэтому это настройка приложения	لا يوفر النظام واجهة عامة لذلك، فهذا إعداد داخل التطبيق	システムに公開 API がないためアプリ内設定です
+系统能力	System capabilities	Capacités du système	시스템 기능	Systemfunktionen	Возможности системы	قدرات النظام	システム機能
+系统能力检测失败，能力入口状态可能不准确	Couldn't check system capabilities, so feature status may be inaccurate	Échec de la vérification du système : l'état des fonctions peut être inexact	시스템 기능을 확인하지 못해 상태가 정확하지 않을 수 있습니다	Systemfunktionen konnten nicht geprüft werden; der Status ist evtl. ungenau	Не удалось проверить возможности системы, статус может быть неточным	تعذر فحص قدرات النظام، وقد لا تكون الحالة دقيقة	システム機能を確認できず、状態が正確でない可能性があります
+系统通知或任务提醒频道已关闭	System notifications or the task reminder channel are turned off	Les notifications système ou le canal de rappels sont désactivés	시스템 알림 또는 할 일 알림 채널이 꺼져 있습니다	Systemmitteilungen oder der Erinnerungskanal sind deaktiviert	Системные уведомления или канал напоминаний отключены	إشعارات النظام أو قناة التذكيرات متوقفة	システム通知またはタスク通知チャンネルがオフです
+紧急	Urgent	Urgent	긴급	Dringend	Срочно	عاجل	緊急
+累计 {0} 个以上时，晚上 8 点提醒你梳理；打开查看过的想法不再计入。	When {0} or more ideas are waiting, you'll get a reminder at 8 PM. Opened ideas no longer count.	Quand {0} idées ou plus attendent, vous recevez un rappel à 20 h. Les idées ouvertes ne comptent plus.	아이디어가 {0}개 이상 쌓이면 저녁 8시에 알립니다. 열어 본 아이디어는 세지 않습니다.	Warten {0} oder mehr Ideen, wirst du um 20 Uhr erinnert. Geöffnete Ideen zählen nicht mehr.	Когда ждут {0} и более идей, в 20:00 придёт напоминание. Открытые идеи не считаются.	عند وجود {0} أفكار أو أكثر بانتظارك، يصلك تذكير في الثامنة مساءً. الأفكار المفتوحة لا تُحسب.	アイデアが {0} 件以上たまると夜 8 時に通知します。開いたアイデアは数えません。
+累计情绪	Total moods	Total des humeurs	누적 기분	Stimmungen gesamt	Всего настроений	إجمالي المزاج	気分の累計
+累计日志	Total logs	Total du journal	누적 일지	Tagebucheinträge gesamt	Всего журнала	إجمالي اليوميات	ログの累計
+累计构成 · 全部时间	Breakdown · all time	Répartition · depuis le début	누적 구성 · 전체 기간	Aufteilung · gesamt	Состав · за всё время	التوزيع · كل الوقت	累計の内訳 · 全期間
+累计概览 · 全部时间	Overview · all time	Aperçu · depuis le début	누적 요약 · 전체 기간	Überblick · gesamt	Обзор · за всё время	نظرة عامة · كل الوقت	累計の概要 · 全期間
+累计灵感	Total ideas	Total des idées	누적 아이디어	Ideen gesamt	Всего идей	إجمالي الأفكار	アイデアの累計
+结束	End	Fin	종료	Ende	Конец	النهاية	終了
+结束日期	End date	Date de fin	종료 날짜	Enddatum	Дата окончания	تاريخ الانتهاء	終了日
+继续编辑	Keep editing	Continuer	계속 편집	Weiter bearbeiten	Продолжить	متابعة التحرير	編集を続ける
+继续记录，回顾会慢慢清晰	Keep recording and your review will take shape	Continuez à noter, votre bilan se précisera	계속 기록하면 회고가 점점 또렷해져요	Schreib weiter, dann wird dein Rückblick klarer	Продолжайте записывать, и итоги станут яснее	واصل التسجيل وستتضح مراجعتك	記録を続けると振り返りがはっきりしてきます
+编辑	Edit	Modifier	편집	Bearbeiten	Изменить	تعديل	編集
+编辑…	Edit…	Modifier…	편집…	Bearbeiten…	Изменить…	تعديل…	編集…
+编辑任务	Edit task	Modifier la tâche	할 일 편집	Aufgabe bearbeiten	Изменить задачу	تعديل المهمة	タスクを編集
+编辑灵感	Edit idea	Modifier l'idée	아이디어 편집	Idee bearbeiten	Изменить идею	تعديل الفكرة	アイデアを編集
+编辑记录	Edit record	Modifier l'entrée	기록 편집	Eintrag bearbeiten	Изменить запись	تعديل السجل	記録を編集
+自 {0}	From {0}	Depuis {0}	{0}부터	Ab {0}	С {0}	من {0}	{0} から
+自定义状态，如：期待、平静	Custom state, like hopeful or calm	État personnalisé, comme confiant ou calme	직접 입력 (예: 기대, 평온)	Eigener Zustand, z. B. hoffnungsvoll oder ruhig	Своё состояние, например надежда или спокойствие	حالة مخصصة، مثل متفائل أو هادئ	自由入力 (例: 期待、穏やか)
+至	to	à	~	bis	по	إلى	〜
+至 {0}	To {0}	Jusqu'au {0}	{0}까지	Bis {0}	По {0}	إلى {0}	{0} まで
+范围内记录	Records in range	Entrées sur la période	기간 내 기록	Einträge im Zeitraum	Записей за период	السجلات في الفترة	期間内の記録
+表单与高密度列表的实色容器。	A solid container for forms and dense lists.	Un conteneur plein pour les formulaires et les listes denses.	양식과 조밀한 목록을 위한 컨테이너입니다.	Ein fester Container für Formulare und dichte Listen.	Контейнер для форм и плотных списков.	حاوية للنماذج والقوائم الكثيفة.	フォームや密なリストのためのコンテナです。
+覆盖	Overwrite	Remplacer	덮어쓰기	Überschreiben	Заменить	استبدال	上書き
+覆盖导入	Overwrite import	Importer en remplaçant	덮어쓰기 가져오기	Import mit Überschreiben	Импорт с заменой	استيراد بالاستبدال	上書き読み込み
+覆盖导入将清空现有全部数据，确定继续？	Overwriting clears all existing data. Continue?	Le remplacement efface toutes les données existantes. Continuer ?	덮어쓰면 기존 데이터가 모두 지워집니다. 계속할까요?	Überschreiben löscht alle vorhandenen Daten. Fortfahren?	Замена удалит все текущие данные. Продолжить?	سيمسح الاستبدال كل البيانات الحالية. هل تتابع؟	上書きすると既存データがすべて消去されます。続けますか?
+让每一次闪念都有落点 · 无云端账号	A place for every passing thought · no cloud account	Une place pour chaque pensée · sans compte cloud	스치는 모든 생각에 자리를 · 클라우드 계정 없음	Ein Platz für jeden Gedanken · kein Cloud-Konto	Место для каждой мысли · без облачного аккаунта	مكان لكل فكرة عابرة · بلا حساب سحابي	すべての思いつきに居場所を · クラウドアカウントなし
+记一闪	Capture a moment	Noter un moment	순간 기록	Moment festhalten	Записать момент	التقط لحظة	ひらめきを記録
+记下第一个念头	Note your first thought	Notez votre première pensée	첫 생각 기록하기	Ersten Gedanken festhalten	Запишите первую мысль	دوّن فكرتك الأولى	最初の思いつきを書く
+记到 Flash	Save to Flash	Enregistrer dans Flash	Flash에 저장	In Flash sichern	Сохранить во Flash	احفظ في Flash	Flash に保存
+记录	Records	Entrées	기록	Einträge	Записи	السجلات	記録
+记录内容	Content	Contenu	기록 내용	Inhalt	Содержание	المحتوى	記録内容
+记录内容…	Content…	Contenu…	기록 내용…	Inhalt…	Содержание…	المحتوى…	記録内容…
+记录已删除	Record deleted	Entrée supprimée	기록을 삭제했습니다	Eintrag gelöscht	Запись удалена	حُذف السجل	記録を削除しました
+记录已更新	Record updated	Entrée mise à jour	기록을 업데이트했습니다	Eintrag aktualisiert	Запись обновлена	حُدّث السجل	記録を更新しました
+记录情绪	Record mood	Noter l'humeur	기분 기록	Stimmung erfassen	Записать настроение	سجّل المزاج	気分を記録
+记录日期	Record date	Date de l'entrée	기록 날짜	Eintragsdatum	Дата записи	تاريخ السجل	記録日
+记录日期 YYYY-MM-DD	Record date YYYY-MM-DD	Date de l'entrée AAAA-MM-JJ	기록 날짜 YYYY-MM-DD	Eintragsdatum JJJJ-MM-TT	Дата записи ГГГГ-ММ-ДД	تاريخ السجل YYYY-MM-DD	記録日 YYYY-MM-DD
+记录日期：{0}	Record date: {0}	Date de l'entrée : {0}	기록 날짜: {0}	Eintragsdatum: {0}	Дата записи: {0}	تاريخ السجل: {0}	記録日: {0}
+记录此刻……	Record this moment…	Notez cet instant…	이 순간을 기록하세요…	Halte diesen Moment fest…	Запишите этот момент…	سجّل هذه اللحظة…	この瞬間を記録…
+记录活跃度	Recording activity	Activité de saisie	기록 활동	Erfassungsaktivität	Активность записей	نشاط التسجيل	記録のアクティビティ
+记录活跃度，{0} 天中 {1} 天有记录，共 {2} 次。可展开每日明细。	Recording activity: {1} of {0} days had entries, {2} total. Daily details can be expanded.	Activité : {1} jours sur {0} avec des entrées, {2} au total. Le détail quotidien peut être affiché.	기록 활동: {0}일 중 {1}일 기록, 총 {2}회. 일별 내역을 펼칠 수 있습니다.	Aktivität: an {1} von {0} Tagen Einträge, insgesamt {2}. Tagesdetails lassen sich einblenden.	Активность: записи в {1} из {0} дней, всего {2}. Можно раскрыть по дням.	النشاط: سجلات في {1} من {0} يومًا، والإجمالي {2}. يمكن توسيع التفاصيل اليومية.	アクティビティ: {0} 日中 {1} 日に記録、合計 {2} 回。日別の詳細を開けます。
+记录第一条情绪吧	Record your first mood	Notez votre première humeur	첫 기분을 기록해 보세요	Erfasse deine erste Stimmung	Запишите первое настроение	سجّل مزاجك الأول	最初の気分を記録しましょう
+记录类型	Record type	Type d'entrée	기록 유형	Eintragstyp	Тип записи	نوع السجل	記録の種類
+记日志	New log	Nouveau journal	일지 쓰기	Tagebuch schreiben	Новая запись журнала	يومية جديدة	ログを書く
+记灵感	New idea	Nouvelle idée	아이디어 쓰기	Idee notieren	Новая идея	فكرة جديدة	アイデアを書く
+设备支持，待场景接入	Device supports it; waiting for scenario setup	Pris en charge ; en attente du scénario	기기에서 지원, 시나리오 연결 대기 중	Gerät unterstützt es; wartet auf Szenario	Устройство поддерживает; ожидает настройки	الجهاز يدعمه؛ بانتظار السيناريو	端末は対応、シナリオ接続待ち
+设备间传输	Device transfer	Transfert entre appareils	기기 간 전송	Geräteübertragung	Передача между устройствами	النقل بين الأجهزة	端末間の転送
+设置	Settings	Réglages	설정	Einstellungen	Настройки	الإعدادات	設定
+请输入任务标题	Enter a task title	Saisissez un titre de tâche	할 일 제목을 입력하세요	Gib einen Aufgabentitel ein	Введите название задачи	أدخل عنوان المهمة	タスク名を入力してください
+请输入内容	Enter some content	Saisissez du contenu	내용을 입력하세요	Gib einen Inhalt ein	Введите содержание	أدخل المحتوى	内容を入力してください
+请输入有效日期（YYYY-MM-DD）	Enter a valid date (YYYY-MM-DD)	Saisissez une date valide (AAAA-MM-JJ)	올바른 날짜를 입력하세요(YYYY-MM-DD)	Gib ein gültiges Datum ein (JJJJ-MM-TT)	Введите верную дату (ГГГГ-ММ-ДД)	أدخل تاريخًا صالحًا (YYYY-MM-DD)	有効な日付を入力してください (YYYY-MM-DD)
+请输入有效的日期和时间	Enter a valid date and time	Saisissez une date et une heure valides	올바른 날짜와 시간을 입력하세요	Gib ein gültiges Datum und eine gültige Uhrzeit ein	Введите верные дату и время	أدخل تاريخًا ووقتًا صالحين	有効な日付と時刻を入力してください
+请输入有效的记录日期	Enter a valid record date	Saisissez une date d'entrée valide	올바른 기록 날짜를 입력하세요	Gib ein gültiges Eintragsdatum ein	Введите верную дату записи	أدخل تاريخ سجل صالحًا	有効な記録日を入力してください
+负面子情绪分布	How low moods felt	Répartition des ressentis négatifs	부정적 세부 감정 분포	Verteilung negativer Gefühle	Распределение негативных чувств	توزيع المشاعر السلبية	ネガティブな感情の分布
+负面情绪构成	Low mood breakdown	Détail des humeurs négatives	부정적 기분 구성	Aufschlüsselung negativer Stimmung	Состав плохого настроения	تفصيل المزاج المنخفض	ネガティブな気分の内訳
+超出	Over	Dépassement	초과	Über	Сверх	تجاوز	超過
+超出 {0} 字	Over by {0} characters	{0} caractères de trop	{0}자 초과	{0} Zeichen zu viel	Лишних символов: {0}	تجاوز بمقدار {0} حرف	{0} 文字オーバー
+趋势	Trends	Tendances	추이	Verlauf	Тренды	الاتجاهات	推移
+跟随系统	System	Système	시스템 설정	System	Как в системе	النظام	システムに従う
+跳转到来源灵感	Go to source idea	Aller à l'idée d'origine	원본 아이디어로 이동	Zur Ursprungsidee	К исходной идее	الانتقال إلى الفكرة الأصلية	元のアイデアへ
+跳过异常与重复数据，不修改原文件	Skips invalid and duplicate data; the original file isn't changed	Ignore les données non valides et en double ; le fichier d'origine n'est pas modifié	잘못된 데이터와 중복을 건너뛰며 원본 파일은 바꾸지 않습니다	Überspringt ungültige und doppelte Daten; die Originaldatei bleibt unverändert	Пропускает неверные и повторяющиеся данные; файл не меняется	يتخطى البيانات غير الصالحة والمكررة ولا يغير الملف الأصلي	不正・重複データをスキップします。元のファイルは変更しません
+转为任务	Turn into task	Convertir en tâche	할 일로 전환	In Aufgabe umwandeln	Сделать задачей	تحويل إلى مهمة	タスクにする
+输入关键词或标签	Enter a keyword or tag	Saisissez un mot-clé ou une étiquette	키워드 또는 태그 입력	Stichwort oder Schlagwort eingeben	Введите слово или метку	أدخل كلمة أو وسمًا	キーワードまたはタグを入力
+输入关键词或标签名	Enter a keyword or tag name	Saisissez un mot-clé ou un nom d'étiquette	키워드 또는 태그 이름 입력	Stichwort oder Schlagwortnamen eingeben	Введите слово или имя метки	أدخل كلمة أو اسم وسم	キーワードまたはタグ名を入力
+近 30 天	the last 30 days	les 30 derniers jours	최근 30일	die letzten 30 Tage	за последние 30 дней	آخر 30 يومًا	直近 30 日
+近 7 天情绪日均值柱状图	Bar chart of daily average mood for the last 7 days	Graphique de l'humeur moyenne sur 7 jours	최근 7일 일 평균 기분 막대 차트	Balkendiagramm der Tagesstimmung der letzten 7 Tage	Диаграмма среднего настроения за 7 дней	مخطط متوسط المزاج اليومي لآخر 7 أيام	直近 7 日の日平均の気分グラフ
+近 7 天日均值 · — 表示当日未记录	Daily average, last 7 days · — means nothing recorded	Moyenne quotidienne sur 7 jours · — signifie aucune entrée	최근 7일 일 평균 · —는 기록 없음	Tagesdurchschnitt, letzte 7 Tage · — bedeutet: nichts erfasst	Среднее за 7 дней · — значит нет записей	المتوسط اليومي لآخر 7 أيام · — يعني لا تسجيل	直近 7 日の日平均 · — は記録なし
+近 90 天	the last 90 days	les 90 derniers jours	최근 90일	die letzten 90 Tage	за последние 90 дней	آخر 90 يومًا	直近 90 日
+近30天	Last 30 days	30 derniers jours	최근 30일	Letzte 30 Tage	30 дней	آخر 30 يومًا	直近 30 日
+近7天	Last 7 days	7 derniers jours	최근 7일	Letzte 7 Tage	7 дней	آخر 7 أيام	直近 7 日
+近90天	Last 90 days	90 derniers jours	최근 90일	Letzte 90 Tage	90 дней	آخر 90 يومًا	直近 90 日
+近期记录	Recent	Récent	최근 기록	Zuletzt	Недавние	الأخيرة	最近の記録
+返回	Back	Retour	뒤로	Zurück	Назад	رجوع	戻る
+还可输入 {0} 字	{0} characters left	{0} caractères restants	{0}자 남음	Noch {0} Zeichen	Осталось символов: {0}	متبقٍ {0} حرف	残り {0} 文字
+还没有情绪记录，从上方开始吧	No moods yet. Start above	Aucune humeur. Commencez ci-dessus	아직 기분 기록이 없습니다. 위에서 시작하세요	Noch keine Stimmungen. Fang oben an	Настроения пока нет. Начните выше	لا مزاج بعد. ابدأ من الأعلى	気分の記録はまだありません。上から始めましょう
+还没有情绪记录，从当下的感受开始	No moods yet. Start with how you feel now	Aucune humeur. Commencez par ce que vous ressentez	아직 기분 기록이 없습니다. 지금 느낌부터 시작하세요	Noch keine Stimmungen. Fang damit an, wie du dich fühlst	Настроения пока нет. Начните с того, что чувствуете	لا مزاج بعد. ابدأ بما تشعر به الآن	気分の記録はまだありません。今の気持ちから始めましょう
+还没有记录	No entries yet	Aucune entrée	아직 기록 없음	Noch keine Einträge	Записей пока нет	لا تسجيل بعد	まだ記録がありません
+这一周还没有记录	Nothing recorded this week	Rien de noté cette semaine	이번 주 기록이 아직 없습니다	In dieser Woche noch nichts erfasst	На этой неделе нет записей	لا تسجيل هذا الأسبوع	この週の記録はまだありません
+这一天没有记录	Nothing recorded on this day	Rien de noté ce jour-là	이날 기록이 없습니다	An diesem Tag nichts erfasst	В этот день нет записей	لا تسجيل في هذا اليوم	この日の記録はありません
+这一天还没有计划或记录	No plans or records on this day	Aucun projet ni entrée ce jour-là	이날 계획이나 기록이 없습니다	Keine Pläne oder Einträge an diesem Tag	В этот день нет планов и записей	لا خطط أو سجلات في هذا اليوم	この日の予定や記録はありません
+这个月	this month	ce mois-ci	이번 달	diesen Monat	в этом месяце	هذا الشهر	今月
+这周	this week	cette semaine	이번 주	diese Woche	на этой неделе	هذا الأسبوع	今週
+这条记录已不存在	This record no longer exists	Cette entrée n'existe plus	이 기록은 더 이상 없습니다	Dieser Eintrag existiert nicht mehr	Этой записи больше нет	لم يعد هذا السجل موجودًا	この記録はもうありません
+这段时间有 {0} 条记录 · {1} 次情绪	This period: records {0} · moods {1}	Sur cette période : entrées {0} · humeurs {1}	이 기간: 기록 {0}개 · 기분 {1}회	In diesem Zeitraum: Einträge {0} · Stimmungen {1}	За этот период: записей {0} · настроений {1}	هذه الفترة: السجلات {0} · المزاج {1}	この期間: 記録 {0} 件 · 気分 {1} 回
+这段时间还没有记录，空白日期按 0 次显示。	Nothing recorded in this period yet. Empty days show as 0.	Rien de noté sur cette période. Les jours vides affichent 0.	이 기간에 기록이 아직 없습니다. 빈 날짜는 0으로 표시됩니다.	In diesem Zeitraum noch nichts erfasst. Leere Tage zeigen 0.	За этот период нет записей. Пустые дни показаны как 0.	لا تسجيل في هذه الفترة بعد. تظهر الأيام الفارغة بقيمة 0.	この期間の記録はまだありません。空の日は 0 と表示されます。
+选择	Select	Sélectionner	선택	Auswählen	Выбрать	تحديد	選択
+选择发送设备：	Choose the sending device:	Choisissez l'appareil expéditeur :	보내는 기기 선택:	Sendegerät auswählen:	Выберите устройство-отправитель:	اختر الجهاز المرسل:	送信端末を選択:
+通知	Notifications	Notifications	알림	Mitteilungen	Уведомления	الإشعارات	通知
+通知设置	Notification settings	Réglages des notifications	알림 설정	Mitteilungseinstellungen	Настройки уведомлений	إعدادات الإشعارات	通知設定
+通知设置半模态	Notification settings sheet	Panneau des notifications	알림 설정 시트	Mitteilungseinstellungen-Blatt	Панель настроек уведомлений	لوحة إعدادات الإشعارات	通知設定シート
+通过系统分享…	Send with system share…	Envoyer via le partage système…	시스템 공유로 보내기…	Über „Teilen“ senden…	Отправить через «Поделиться»…	إرسال عبر مشاركة النظام…	システムの共有で送信…
+通过系统分享发送备份	Send the backup with system share	Envoyer la sauvegarde via le partage système	시스템 공유로 백업 보내기	Backup über „Teilen“ senden	Отправить копию через «Поделиться»	إرسال النسخة عبر مشاركة النظام	バックアップをシステムの共有で送信
+部分恢复预览	Partial restore preview	Aperçu de la restauration partielle	부분 복구 미리 보기	Vorschau der Teilwiederherstellung	Предпросмотр частичного восстановления	معاينة الاستعادة الجزئية	部分復元のプレビュー
+部分恢复预览（原文件不变）	Partial restore preview (original file unchanged)	Aperçu de la restauration partielle (fichier d'origine inchangé)	부분 복구 미리 보기(원본 파일 유지)	Vorschau der Teilwiederherstellung (Originaldatei unverändert)	Предпросмотр частичного восстановления (файл не меняется)	معاينة الاستعادة الجزئية (الملف الأصلي دون تغيير)	部分復元のプレビュー (元のファイルは変更されません)
+配对并接收	Pair and receive	Associer et recevoir	페어링 후 받기	Koppeln und empfangen	Сопрячь и получить	الإقران والاستلام	ペアリングして受信
+重要度	Importance	Importance	중요도	Wichtigkeit	Важность	الأهمية	重要度
+重要度与日期	Importance and date	Importance et date	중요도 및 날짜	Wichtigkeit und Datum	Важность и дата	الأهمية والتاريخ	重要度と日付
+重要度需在 0 到 4 之间	Importance must be between 0 and 4	L'importance doit être comprise entre 0 et 4	중요도는 0~4 사이여야 합니다	Wichtigkeit muss zwischen 0 und 4 liegen	Важность должна быть от 0 до 4	يجب أن تكون الأهمية بين 0 و4	重要度は 0〜4 で指定してください
+重要度：{0}	Importance: {0}	Importance : {0}	중요도: {0}	Wichtigkeit: {0}	Важность: {0}	الأهمية: {0}	重要度: {0}
+重要性	Importance	Importance	중요도	Wichtigkeit	Важность	الأهمية	重要度
+重试	Retry	Réessayer	다시 시도	Erneut versuchen	Повторить	إعادة المحاولة	再試行
+闪控球 / 闪控窗	Floating ball / window	Bulle / fenêtre flottante	플로팅 볼 / 창	Schwebender Ball / Fenster	Плавающая кнопка / окно	الكرة / النافذة العائمة	フローティングボール / ウィンドウ
+闪过即留，写下第一条吧	Catch it as it passes. Write your first one	Saisissez-la au vol. Écrivez la première	스치는 순간을 남겨요. 첫 기록을 써 보세요	Halte es fest, wenn es vorbeizieht. Schreib deinen ersten Eintrag	Поймайте момент. Сделайте первую запись	التقطها وهي تمر. اكتب أولاها	ひらめいたら残しましょう。最初の 1 件を書いてみましょう
+随手记录	Capture on the go	Notez à la volée	바로바로 기록	Unterwegs erfassen	Записывайте на ходу	سجّل أينما كنت	すぐに記録
+隐私	Privacy	Confidentialité	개인정보	Datenschutz	Конфиденциальность	الخصوصية	プライバシー
+隔离区已清除	Quarantine cleared	Quarantaine vidée	격리 영역을 지웠습니다	Quarantäne geleert	Карантин очищен	مُسح الحجر	隔離領域を消去しました
+难受	Unwell	Mal à l'aise	불편함	Unwohl	Плохо	متضايق	つらい
+非常不开心	Very upset	Très contrarié	아주 나쁨	Sehr aufgebracht	Очень плохо	مستاء جدًا	とてもつらい
+非常开心	Delighted	Ravi	아주 기쁨	Begeistert	Очень счастливо	مسرور جدًا	最高にうれしい
+页面尚未准备完成，请稍后重试	The page isn't ready yet. Try again shortly	La page n'est pas encore prête. Réessayez bientôt	페이지가 아직 준비되지 않았습니다. 잠시 후 다시 시도하세요	Die Seite ist noch nicht bereit. Bitte gleich erneut versuchen	Страница ещё не готова. Повторите чуть позже	الصفحة غير جاهزة بعد. حاول بعد قليل	ページの準備ができていません。少し後でお試しください
+页面操作依赖未装配	Page actions aren't set up	Actions de la page non configurées	페이지 동작이 설정되지 않았습니다	Seitenaktionen sind nicht eingerichtet	Действия страницы не настроены	إجراءات الصفحة غير مهيأة	ページ操作が設定されていません
+预览后本地数据有变化，差异已重新计算，请确认后再覆盖	Local data changed after the preview. Differences were recalculated. Confirm before overwriting	Les données locales ont changé après l'aperçu. Différences recalculées. Confirmez avant de remplacer	미리 보기 후 로컬 데이터가 바뀌어 차이를 다시 계산했습니다. 확인 후 덮어쓰세요	Lokale Daten haben sich nach der Vorschau geändert. Unterschiede neu berechnet. Vor dem Überschreiben bestätigen	Локальные данные изменились после предпросмотра. Различия пересчитаны. Подтвердите перед заменой	تغيرت البيانات المحلية بعد المعاينة. أُعيد حساب الفروق. أكّد قبل الاستبدال	プレビュー後にローカルデータが変わったため差分を再計算しました。確認してから上書きしてください
+鸿蒙体验	HarmonyOS features	Fonctions HarmonyOS	HarmonyOS 기능	HarmonyOS-Funktionen	Возможности HarmonyOS	ميزات HarmonyOS	HarmonyOS の機能
+（无标题）	(Untitled)	(Sans titre)	(제목 없음)	(Ohne Titel)	(Без названия)	(بلا عنوان)	(無題)
+（跳过异常数据 {0} 条）	(skipped invalid items: {0})	(éléments non valides ignorés : {0})	(건너뛴 잘못된 항목: {0})	(übersprungene ungültige Einträge: {0})	(пропущено неверных: {0})	(العناصر غير الصالحة المتخطاة: {0})	(スキップした不正データ: {0} 件)
+＋ 新建	+ New	+ Nouveau	+ 새로 만들기	+ Neu	+ Создать	+ جديد	+ 新規
+，{0} 条未读灵感	, unread ideas: {0}	, idées non lues : {0}	, 읽지 않은 아이디어 {0}개	, ungelesene Ideen: {0}	, непрочитанных идей: {0}	، أفكار غير مقروءة: {0}	、未読のアイデア {0} 件
+，今天	, today	, aujourd'hui	, 오늘	, heute	, сегодня	، اليوم	、今日
+，但系统提醒恢复失败	, but system reminders couldn't be restored	, mais les rappels n'ont pas pu être restaurés	, 하지만 시스템 알림을 복구하지 못했습니다	, aber Systemerinnerungen konnten nicht wiederhergestellt werden	, но напоминания восстановить не удалось	، لكن تعذرت استعادة تذكيرات النظام	、ただしシステムの通知を復元できませんでした
+，可展开每日明细	, daily details can be expanded	, le détail quotidien peut être affiché	, 일별 내역을 펼칠 수 있습니다	, Tagesdetails lassen sich einblenden	, можно раскрыть по дням	، يمكن توسيع التفاصيل اليومية	、日別の詳細を開けます
+，已选中	, selected	, sélectionné	, 선택됨	, ausgewählt	, выбрано	، محدد	、選択中
+，当前不可用	, unavailable	, indisponible	, 사용할 수 없음	, nicht verfügbar	, недоступно	، غير متاح	、利用不可
+，当日有情绪记录	, has a mood entry	, avec une humeur notée	, 기분 기록 있음	, mit Stimmungseintrag	, есть запись настроения	، يوجد تسجيل مزاج	、気分の記録あり
+，情绪整体低落了一些	, and your mood was a bit lower	, et l'humeur a un peu baissé	, 기분은 조금 가라앉았어요	, und die Stimmung war etwas gedrückter	, и настроение было немного хуже	، وكان المزاج أقل قليلًا	、気分は少し落ち込み気味でした
+，情绪整体更低落一些	, and your mood was a bit lower	, et l'humeur a un peu baissé	, 기분은 조금 가라앉았어요	, und die Stimmung war etwas gedrückter	, и настроение было немного хуже	، وكان المزاج أقل قليلًا	、気分は少し落ち込み気味でした
+，情绪整体更好一些	, and your mood was a bit better	, et l'humeur a été un peu meilleure	, 기분은 조금 나아졌어요	, und die Stimmung war etwas besser	, и настроение было немного лучше	، وكان المزاج أفضل قليلًا	、気分は少し良くなりました
+，情绪整体更积极了一些	, and your mood was a bit more positive	, et l'humeur a été un peu plus positive	, 기분은 조금 더 긍정적이었어요	, und die Stimmung war etwas positiver	, и настроение было немного позитивнее	، وكان المزاج أكثر إيجابية قليلًا	、気分は少し前向きになりました
+先在「情绪」页记录几天吧	Record your mood for a few days first	Notez votre humeur quelques jours d’abord	먼저 며칠간 기분을 기록해 보세요	Erfasse zuerst ein paar Tage deine Stimmung	Сначала запишите настроение за несколько дней	سجّل مزاجك بضعة أيام أولًا	まず数日間、気分を記録しましょう

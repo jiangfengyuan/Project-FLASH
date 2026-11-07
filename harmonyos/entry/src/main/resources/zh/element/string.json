@@ -1,0 +1,1792 @@
+{
+ "string": [
+  {
+   "name": "module_desc",
+   "value": "Flash Aero HarmonyOS 原生版本"
+  },
+  {
+   "name": "EntryAbility_desc",
+   "value": "Flash Aero 主窗口"
+  },
+  {
+   "name": "EntryAbility_label",
+   "value": "Flash Aero"
+  },
+  {
+   "name": "EntryFormAbility_label",
+   "value": "今日概览"
+  },
+  {
+   "name": "EntryFormAbility_desc",
+   "value": "Flash Aero 今日概览服务卡片"
+  },
+  {
+   "name": "form_today_summary_display_name",
+   "value": "今日概览"
+  },
+  {
+   "name": "form_today_summary_desc",
+   "value": "一览今日记录、灵感与待办任务"
+  },
+  {
+   "name": "form_today_title",
+   "value": "今日概览"
+  },
+  {
+   "name": "form_stat_records",
+   "value": "记录"
+  },
+  {
+   "name": "form_stat_ideas",
+   "value": "灵感"
+  },
+  {
+   "name": "form_stat_tasks",
+   "value": "待办"
+  },
+  {
+   "name": "form_today_capture_display_name",
+   "value": "今日与快速记录"
+  },
+  {
+   "name": "form_today_capture_desc",
+   "value": "今日概览，并可一键记录灵感或日志"
+  },
+  {
+   "name": "shortcut_idea",
+   "value": "记灵感"
+  },
+  {
+   "name": "shortcut_log",
+   "value": "记日志"
+  },
+  {
+   "name": "form_action_idea",
+   "value": "灵感"
+  },
+  {
+   "name": "form_action_log",
+   "value": "日志"
+  },
+  {
+   "name": "s_349a6396",
+   "value": " · 重要度 {0}"
+  },
+  {
+   "name": "s_2f0fbd80",
+   "value": "-3 至 +3，0 为中性；— 表示当日未记录"
+  },
+  {
+   "name": "s_d78803b1",
+   "value": "/data/emotions：存在非法或重复记录，请先处理异常数据再导出"
+  },
+  {
+   "name": "s_92fe6094",
+   "value": "/data/logs：存在非法或重复记录，请先处理异常数据再导出"
+  },
+  {
+   "name": "s_cc6625e3",
+   "value": "/data/tasks：存在非法或重复记录，请先处理异常数据再导出"
+  },
+  {
+   "name": "s_76da33b4",
+   "value": "/data：存在非法或重复记录，请使用损坏文件恢复入口"
+  },
+  {
+   "name": "s_bfb6aa12",
+   "value": "/data：数组超过上限"
+  },
+  {
+   "name": "s_d40dfcbc",
+   "value": "/updatedAt：任务时间不合法"
+  },
+  {
+   "name": "s_b9ce0fb9",
+   "value": "/：JSON 值数量超过资源上限"
+  },
+  {
+   "name": "s_307d96fc",
+   "value": "/：JSON 对象包含重复键：{0}"
+  },
+  {
+   "name": "s_b414e614",
+   "value": "/：JSON 语法不合法（位置 {0}）"
+  },
+  {
+   "name": "s_d8026ec4",
+   "value": "/：不允许 BOM"
+  },
+  {
+   "name": "s_4be9c949",
+   "value": "/：备份版本或元信息不合法"
+  },
+  {
+   "name": "s_67596dc6",
+   "value": "/：文件超过 50 MiB"
+  },
+  {
+   "name": "s_355b83a3",
+   "value": "值得记住的一周。✦"
+  },
+  {
+   "name": "s_2a0b1ddf",
+   "value": "Flash 灵感"
+  },
+  {
+   "name": "s_de22df1c",
+   "value": "Flash 记录"
+  },
+  {
+   "name": "s_8d6bfa5c",
+   "value": "亮点"
+  },
+  {
+   "name": "s_a60503ed",
+   "value": "JSON 备份|.json"
+  },
+  {
+   "name": "s_58f879ce",
+   "value": "Memory"
+  },
+  {
+   "name": "s_879db2fb",
+   "value": "大体低落"
+  },
+  {
+   "name": "s_db9c822c",
+   "value": "大体积极"
+  },
+  {
+   "name": "s_f3498d7d",
+   "value": "大体平稳"
+  },
+  {
+   "name": "s_244cff4e",
+   "value": "这周感觉……"
+  },
+  {
+   "name": "s_fe948398",
+   "value": "本周记录"
+  },
+  {
+   "name": "s_70c34463",
+   "value": "情绪"
+  },
+  {
+   "name": "s_f22ee8cb",
+   "value": "灵感"
+  },
+  {
+   "name": "s_62852daa",
+   "value": "闪念"
+  },
+  {
+   "name": "s_ad2e48cd",
+   "value": "任务"
+  },
+  {
+   "name": "s_48dce70c",
+   "value": "v0.1.0 · HarmonyOS 原生版 · com.flash.app.harmonyos"
+  },
+  {
+   "name": "s_6e425eba",
+   "value": "{0} {1} 条 · {2} {3} 条"
+  },
+  {
+   "name": "s_ad1bbef7",
+   "value": "{0} 个想法等待梳理，打开最早的一条"
+  },
+  {
+   "name": "s_409ddff6",
+   "value": "{0} 个活跃日 · 共 {1} 次"
+  },
+  {
+   "name": "s_ae7c912e",
+   "value": "{0} 年 {1} 月"
+  },
+  {
+   "name": "s_79fc376e",
+   "value": "{0} 条"
+  },
+  {
+   "name": "s_ba02e82e",
+   "value": "{0} 次"
+  },
+  {
+   "name": "s_1f0ab446",
+   "value": "{0} 详情"
+  },
+  {
+   "name": "s_1d2f42b7",
+   "value": "{0}不如{1}活跃"
+  },
+  {
+   "name": "s_2712f5b4",
+   "value": "{0}与{1}持平"
+  },
+  {
+   "name": "s_2e763a14",
+   "value": "{0}你记录得比{1}更频繁"
+  },
+  {
+   "name": "s_ae5c9fd5",
+   "value": "{0}月{1}日"
+  },
+  {
+   "name": "s_ce181c99",
+   "value": "{0}，{1} 项"
+  },
+  {
+   "name": "s_662e559c",
+   "value": "{0}，但恢复副本写入失败，原始数据未能保留"
+  },
+  {
+   "name": "s_deca74ba",
+   "value": "{0}，原始数据已保留用于恢复"
+  },
+  {
+   "name": "s_245af589",
+   "value": "{0}：{1} 条记录 · {2} 次情绪"
+  },
+  {
+   "name": "s_509d59f4",
+   "value": "{0}：必须是对象"
+  },
+  {
+   "name": "s_0009cc0b",
+   "value": "{0}：缺少必填字段或包含未知字段"
+  },
+  {
+   "name": "s_c76c65d2",
+   "value": "‹ 返回"
+  },
+  {
+   "name": "s_7dad93fd",
+   "value": "★ 已收藏"
+  },
+  {
+   "name": "s_745e890f",
+   "value": "✓ 已保存到日志"
+  },
+  {
+   "name": "s_a248a677",
+   "value": "✓ 已保存到灵感"
+  },
+  {
+   "name": "s_8d102943",
+   "value": "✓ 已整理 {0} 条"
+  },
+  {
+   "name": "s_05615f1f",
+   "value": "一"
+  },
+  {
+   "name": "s_e50a5759",
+   "value": "一闪而过的想法，值得被记住"
+  },
+  {
+   "name": "s_8bcbbc86",
+   "value": "七级情绪记录，看见自己的变化"
+  },
+  {
+   "name": "s_0c616a24",
+   "value": "三"
+  },
+  {
+   "name": "s_508b1e1d",
+   "value": "上一周"
+  },
+  {
+   "name": "s_b06dcc3d",
+   "value": "上一月"
+  },
+  {
+   "name": "s_8be194e7",
+   "value": "上个月"
+  },
+  {
+   "name": "s_eb0f6aef",
+   "value": "上周"
+  },
+  {
+   "name": "s_0bb3bda2",
+   "value": "下一周"
+  },
+  {
+   "name": "s_6bcf17c2",
+   "value": "下一月"
+  },
+  {
+   "name": "s_10c83c81",
+   "value": "下一步"
+  },
+  {
+   "name": "s_82b6cabb",
+   "value": "下午好 🌤"
+  },
+  {
+   "name": "s_1344f491",
+   "value": "不开心"
+  },
+  {
+   "name": "s_1f28bc53",
+   "value": "不开心时的具体感受"
+  },
+  {
+   "name": "s_4cc036be",
+   "value": "不提醒"
+  },
+  {
+   "name": "s_44d41ebe",
+   "value": "专注"
+  },
+  {
+   "name": "s_bfa55e52",
+   "value": "中屏响应式布局"
+  },
+  {
+   "name": "s_b13672cd",
+   "value": "中性"
+  },
+  {
+   "name": "s_15a81f9c",
+   "value": "为什么部分能力没有直接开启？"
+  },
+  {
+   "name": "s_74e5c7e6",
+   "value": "主题"
+  },
+  {
+   "name": "s_5a9c8a19",
+   "value": "主题设置保存失败：{0}"
+  },
+  {
+   "name": "s_0a416847",
+   "value": "之前 30 天"
+  },
+  {
+   "name": "s_0c6445c1",
+   "value": "之前 90 天"
+  },
+  {
+   "name": "s_89609beb",
+   "value": "二"
+  },
+  {
+   "name": "s_9160a883",
+   "value": "五"
+  },
+  {
+   "name": "s_e835fb8e",
+   "value": "仅展示真实检测与当前接入状态；需审核的系统权限不会在未获准时调用。"
+  },
+  {
+   "name": "s_946c250b",
+   "value": "仅用于人工恢复，请勿公开分享"
+  },
+  {
+   "name": "s_a848765c",
+   "value": "今天"
+  },
+  {
+   "name": "s_6f3c2b2c",
+   "value": "今天也记录一点什么吧。"
+  },
+  {
+   "name": "s_1f2bd289",
+   "value": "今天还没有记录。"
+  },
+  {
+   "name": "s_cfccbae7",
+   "value": "今日记录"
+  },
+  {
+   "name": "s_2d7464e1",
+   "value": "任务"
+  },
+  {
+   "name": "s_1915b50d",
+   "value": "任务即将到期"
+  },
+  {
+   "name": "s_9dba36cc",
+   "value": "任务已保存"
+  },
+  {
+   "name": "s_9e20fc67",
+   "value": "任务已保存，但系统提醒未启用"
+  },
+  {
+   "name": "s_991e9b9d",
+   "value": "任务已删除"
+  },
+  {
+   "name": "s_d5f54072",
+   "value": "任务已删除，但系统提醒同步失败"
+  },
+  {
+   "name": "s_534ff12d",
+   "value": "任务提醒恢复失败；任务数据仍然安全，请稍后重启应用重试"
+  },
+  {
+   "name": "s_a961bb3e",
+   "value": "任务标题"
+  },
+  {
+   "name": "s_e7cf88d5",
+   "value": "任务状态已更新，但系统提醒同步失败"
+  },
+  {
+   "name": "s_c185d41b",
+   "value": "任务：新增 {0}、变更 {1}、本机独有 {2}\n"
+  },
+  {
+   "name": "s_79955ed0",
+   "value": "伤心"
+  },
+  {
+   "name": "s_d7974514",
+   "value": "你还有 {0} 个想法，先看看最早的一条"
+  },
+  {
+   "name": "s_d908f279",
+   "value": "你还有{0}个想法等待梳理，去看看吧"
+  },
+  {
+   "name": "s_ad5b82b0",
+   "value": "保存"
+  },
+  {
+   "name": "s_9b95e293",
+   "value": "保存中…"
+  },
+  {
+   "name": "s_1d0e5d5a",
+   "value": "全天"
+  },
+  {
+   "name": "s_0c14a696",
+   "value": "全天任务"
+  },
+  {
+   "name": "s_05eb990b",
+   "value": "全局搜索"
+  },
+  {
+   "name": "s_5e6558ad",
+   "value": "全部"
+  },
+  {
+   "name": "s_e8562c78",
+   "value": "六"
+  },
+  {
+   "name": "s_e161dfa6",
+   "value": "共 {0} 条 · 日志 {1} · 灵感 {2}"
+  },
+  {
+   "name": "s_c5603acc",
+   "value": "共享目录暂不可用，请改用「选择位置导出」"
+  },
+  {
+   "name": "s_72a18f8e",
+   "value": "关于 Flash"
+  },
+  {
+   "name": "s_87dadb5a",
+   "value": "关键词或标签"
+  },
+  {
+   "name": "s_39b523bd",
+   "value": "关闭"
+  },
+  {
+   "name": "s_dc24135d",
+   "value": "内容不能为空"
+  },
+  {
+   "name": "s_e67132b8",
+   "value": "内容不能为空，请输入后再保存"
+  },
+  {
+   "name": "s_f3b7b450",
+   "value": "内容超过 100000 字符，请删减后保存"
+  },
+  {
+   "name": "s_87000edc",
+   "value": "再记录一点，未来的你会看到。"
+  },
+  {
+   "name": "s_308e704e",
+   "value": "减少动态效果"
+  },
+  {
+   "name": "s_f6d47411",
+   "value": "减少动态效果设置保存失败：{0}"
+  },
+  {
+   "name": "s_9aa7d416",
+   "value": "分享"
+  },
+  {
+   "name": "s_081c9fc0",
+   "value": "分享失败"
+  },
+  {
+   "name": "s_6ba0562c",
+   "value": "分享导出"
+  },
+  {
+   "name": "s_ea8d5381",
+   "value": "删除"
+  },
+  {
+   "name": "s_04235540",
+   "value": "删除后无法撤销。"
+  },
+  {
+   "name": "s_9b7a515f",
+   "value": "删除后需要再次确认，不可恢复"
+  },
+  {
+   "name": "s_4ccb1394",
+   "value": "删除本地保留的异常原始数据副本"
+  },
+  {
+   "name": "s_5bfa5877",
+   "value": "删除这个任务？"
+  },
+  {
+   "name": "s_e6dedfa0",
+   "value": "删除这条情绪记录？"
+  },
+  {
+   "name": "s_409819b9",
+   "value": "删除这条记录？"
+  },
+  {
+   "name": "s_c51f5912",
+   "value": "到期时"
+  },
+  {
+   "name": "s_c6dda34e",
+   "value": "加载更多（剩余 {0} 条）"
+  },
+  {
+   "name": "s_60b4c5ae",
+   "value": "危险操作"
+  },
+  {
+   "name": "s_949856b3",
+   "value": "取消"
+  },
+  {
+   "name": "s_d1d62fb0",
+   "value": "取消收藏"
+  },
+  {
+   "name": "s_8b70a958",
+   "value": "可在 Android、macOS 与 HarmonyOS 之间迁移日志、情绪和任务。备份为明文 JSON，请只保存或分享至可信位置。"
+  },
+  {
+   "name": "s_4d55cb75",
+   "value": "可导出备份或通过系统分享传输"
+  },
+  {
+   "name": "s_b902b8d3",
+   "value": "合并"
+  },
+  {
+   "name": "s_5e53c03a",
+   "value": "四"
+  },
+  {
+   "name": "s_40163b46",
+   "value": "回到今天"
+  },
+  {
+   "name": "s_bed63d2f",
+   "value": "回到本周"
+  },
+  {
+   "name": "s_c2e1aa6d",
+   "value": "回顾"
+  },
+  {
+   "name": "s_5a543946",
+   "value": "在系统文件管理中可见（下载/Flash）"
+  },
+  {
+   "name": "s_fbac6f20",
+   "value": "备份与恢复"
+  },
+  {
+   "name": "s_ad4d7827",
+   "value": "备份写入不完整，分享已取消"
+  },
+  {
+   "name": "s_c5eb49de",
+   "value": "备份写入不完整，导出失败"
+  },
+  {
+   "name": "s_a1b093ff",
+   "value": "备份已合并"
+  },
+  {
+   "name": "s_20fe814f",
+   "value": "备份已导出"
+  },
+  {
+   "name": "s_09ecc21d",
+   "value": "备份已导出到「文件管理」应用的下载目录"
+  },
+  {
+   "name": "s_55769b97",
+   "value": "备份数据结构不完整"
+  },
+  {
+   "name": "s_0420eb69",
+   "value": "备份数据结构不完整或分区版本不兼容"
+  },
+  {
+   "name": "s_c90a7947",
+   "value": "备份文件不是有效的 JSON 对象"
+  },
+  {
+   "name": "s_364b46a8",
+   "value": "备份文件为空"
+  },
+  {
+   "name": "s_c4981a8c",
+   "value": "备份文件读取不完整"
+  },
+  {
+   "name": "s_245f47d8",
+   "value": "备份文件超过 50 MB"
+  },
+  {
+   "name": "s_fc4f6b0f",
+   "value": "备份版本不兼容"
+  },
+  {
+   "name": "s_584ff11a",
+   "value": "备忘"
+  },
+  {
+   "name": "s_d9dac7dd",
+   "value": "备注（可选）"
+  },
+  {
+   "name": "s_e4a4815a",
+   "value": "外观与使用"
+  },
+  {
+   "name": "s_e665350f",
+   "value": "多设备适配"
+  },
+  {
+   "name": "s_d590eab1",
+   "value": "大屏侧边导航"
+  },
+  {
+   "name": "s_1e13bd21",
+   "value": "完成"
+  },
+  {
+   "name": "s_bb58d8d1",
+   "value": "实况窗"
+  },
+  {
+   "name": "s_513bdfd7",
+   "value": "实况窗、闪控球、碰一碰和小艺意图均涉及场景、签名、真机或平台审核。Flash 会在取得正式资格后启用，不申请与产品场景不符的受限权限。"
+  },
+  {
+   "name": "s_4353e306",
+   "value": "导入前先看合并与新增明细"
+  },
+  {
+   "name": "s_7fdaf616",
+   "value": "导出、导入与清空"
+  },
+  {
+   "name": "s_7af59148",
+   "value": "导出到下载目录"
+  },
+  {
+   "name": "s_03150537",
+   "value": "导出备份 JSON"
+  },
+  {
+   "name": "s_026223aa",
+   "value": "导出旧版异常原始数据"
+  },
+  {
+   "name": "s_e29f076f",
+   "value": "尝试修复无法直接导入的备份"
+  },
+  {
+   "name": "s_479481d2",
+   "value": "局域网传输暂时停用"
+  },
+  {
+   "name": "s_f959f4af",
+   "value": "局域网传输暂时停用：旧协议存在安全风险。请使用“导出备份”或“系统分享”，通过可信渠道传输 JSON 文件。"
+  },
+  {
+   "name": "s_cb51ae33",
+   "value": "展开筛选面板"
+  },
+  {
+   "name": "s_b1368837",
+   "value": "差异分析"
+  },
+  {
+   "name": "s_5dbcdf6d",
+   "value": "已关闭"
+  },
+  {
+   "name": "s_bee374d1",
+   "value": "已删除"
+  },
+  {
+   "name": "s_84f30bbf",
+   "value": "已接入（设置页入口）"
+  },
+  {
+   "name": "s_26942e0f",
+   "value": "已接入，受目录权限约束"
+  },
+  {
+   "name": "s_a8126b62",
+   "value": "已收藏"
+  },
+  {
+   "name": "s_6933b472",
+   "value": "已调起系统分享"
+  },
+  {
+   "name": "s_c8fa62c1",
+   "value": "已选 {0} 项"
+  },
+  {
+   "name": "s_23ed437e",
+   "value": "平台能力"
+  },
+  {
+   "name": "s_fea8398c",
+   "value": "平均情绪"
+  },
+  {
+   "name": "s_499be303",
+   "value": "开始使用"
+  },
+  {
+   "name": "s_5d62764c",
+   "value": "开始日期"
+  },
+  {
+   "name": "s_2a665354",
+   "value": "开心"
+  },
+  {
+   "name": "s_673d4a91",
+   "value": "强度"
+  },
+  {
+   "name": "s_6a19ddcf",
+   "value": "强度 {0}"
+  },
+  {
+   "name": "s_09229c97",
+   "value": "当前状态（可选）"
+  },
+  {
+   "name": "s_13cca53d",
+   "value": "当前设备不支持"
+  },
+  {
+   "name": "s_1b4ae1a8",
+   "value": "当前设备不支持共享目录导出，请改用「选择位置导出」"
+  },
+  {
+   "name": "s_91049175",
+   "value": "当前设备不支持应用内通知设置"
+  },
+  {
+   "name": "s_1a0a2c38",
+   "value": "当前设备不支持系统分享"
+  },
+  {
+   "name": "s_4b8edbfa",
+   "value": "待办"
+  },
+  {
+   "name": "s_e83d11ae",
+   "value": "待整理"
+  },
+  {
+   "name": "s_243c3959",
+   "value": "待整理：使用日常标签的日志。"
+  },
+  {
+   "name": "s_2367642b",
+   "value": "很不开心"
+  },
+  {
+   "name": "s_fb903262",
+   "value": "很开心"
+  },
+  {
+   "name": "s_e70923c8",
+   "value": "快速记录"
+  },
+  {
+   "name": "s_9f0dc65e",
+   "value": "快速记录意图待平台审核"
+  },
+  {
+   "name": "s_53d60ffd",
+   "value": "恢复原始数据已导出，请妥善保管并联系支持人员处理"
+  },
+  {
+   "name": "s_abf33a8f",
+   "value": "恢复损坏或旧版备份"
+  },
+  {
+   "name": "s_a9612b5e",
+   "value": "情绪"
+  },
+  {
+   "name": "s_f3061bd1",
+   "value": "情绪分布"
+  },
+  {
+   "name": "s_35dbb46b",
+   "value": "情绪已记录"
+  },
+  {
+   "name": "s_643f1ede",
+   "value": "情绪觉察"
+  },
+  {
+   "name": "s_ff9f8889",
+   "value": "情绪记录已删除"
+  },
+  {
+   "name": "s_8ac3df35",
+   "value": "情绪趋势 · 日均值"
+  },
+  {
+   "name": "s_fe05f6f8",
+   "value": "情绪：新增 {0}、变更 {1}、本机独有 {2}\n"
+  },
+  {
+   "name": "s_99812275",
+   "value": "想法"
+  },
+  {
+   "name": "s_d9f8afc2",
+   "value": "想法等待梳理"
+  },
+  {
+   "name": "s_6deefec2",
+   "value": "想法等待梳理时提醒"
+  },
+  {
+   "name": "s_4f5176ed",
+   "value": "想补充些什么？（可选）"
+  },
+  {
+   "name": "s_b5d25fe7",
+   "value": "手机紧凑布局"
+  },
+  {
+   "name": "s_8523e97b",
+   "value": "按最新记录"
+  },
+  {
+   "name": "s_791c2e78",
+   "value": "按最早记录"
+  },
+  {
+   "name": "s_6ef98325",
+   "value": "按标签"
+  },
+  {
+   "name": "s_43bc98a3",
+   "value": "接口可用，仍需真机准入"
+  },
+  {
+   "name": "s_392df5d7",
+   "value": "提前15分钟"
+  },
+  {
+   "name": "s_401bd3d4",
+   "value": "提前1天"
+  },
+  {
+   "name": "s_25b72168",
+   "value": "提前1小时"
+  },
+  {
+   "name": "s_669f23ff",
+   "value": "提前{0}分钟"
+  },
+  {
+   "name": "s_355f82e3",
+   "value": "提前{0}天"
+  },
+  {
+   "name": "s_222759b9",
+   "value": "提前{0}小时"
+  },
+  {
+   "name": "s_6d40d527",
+   "value": "提醒"
+  },
+  {
+   "name": "s_24035981",
+   "value": "提醒由 HarmonyOS 系统后台托管；首次启用会请求通知权限。"
+  },
+  {
+   "name": "s_0b6efa3b",
+   "value": "搜索"
+  },
+  {
+   "name": "s_c8a90aa9",
+   "value": "搜索记录、灵感、情绪与任务"
+  },
+  {
+   "name": "s_1b9e8bc9",
+   "value": "撤销"
+  },
+  {
+   "name": "s_7be8ae06",
+   "value": "操作失败"
+  },
+  {
+   "name": "s_839d4732",
+   "value": "收藏"
+  },
+  {
+   "name": "s_cf8b8d02",
+   "value": "收起每日明细"
+  },
+  {
+   "name": "s_f3386881",
+   "value": "收起筛选面板"
+  },
+  {
+   "name": "s_e1598b13",
+   "value": "放弃修改"
+  },
+  {
+   "name": "s_0ac91ecb",
+   "value": "放弃未保存的修改？"
+  },
+  {
+   "name": "s_34ea918d",
+   "value": "放松"
+  },
+  {
+   "name": "s_4502142c",
+   "value": "数据、备份与应用设置"
+  },
+  {
+   "name": "s_6344fa26",
+   "value": "数据与安全"
+  },
+  {
+   "name": "s_b6537954",
+   "value": "数据库中有异常记录，但隔离副本写入失败，原始内容仍保留在数据库中"
+  },
+  {
+   "name": "s_121fd605",
+   "value": "数据库中有异常记录，原始内容已隔离并可导出"
+  },
+  {
+   "name": "s_b464971d",
+   "value": "数据默认保存在此设备"
+  },
+  {
+   "name": "s_b8c8a94f",
+   "value": "新建"
+  },
+  {
+   "name": "s_b0f36447",
+   "value": "新建任务"
+  },
+  {
+   "name": "s_d2c53483",
+   "value": "新建灵感"
+  },
+  {
+   "name": "s_160eb028",
+   "value": "新建记录"
+  },
+  {
+   "name": "s_659aa23f",
+   "value": "无"
+  },
+  {
+   "name": "s_40c77de6",
+   "value": "无效项目：{0}"
+  },
+  {
+   "name": "s_74421189",
+   "value": "无重要度"
+  },
+  {
+   "name": "s_609a9a60",
+   "value": "日"
+  },
+  {
+   "name": "s_f9abd512",
+   "value": "日历"
+  },
+  {
+   "name": "s_6ba31688",
+   "value": "日常"
+  },
+  {
+   "name": "s_caa53f15",
+   "value": "日志"
+  },
+  {
+   "name": "s_6c39f636",
+   "value": "日志、灵感、情绪和任务将全部删除。此操作无法撤销，建议先导出备份。"
+  },
+  {
+   "name": "s_923b0270",
+   "value": "日志与灵感，一键即达"
+  },
+  {
+   "name": "s_92771dae",
+   "value": "日志已记录"
+  },
+  {
+   "name": "s_56409a3c",
+   "value": "日志流"
+  },
+  {
+   "name": "s_50a1db67",
+   "value": "日志：新增 {0}、变更 {1}、本机独有 {2}\n"
+  },
+  {
+   "name": "s_449056e4",
+   "value": "日期决定日历归属与回顾统计；重要度用于筛选与详情展示。"
+  },
+  {
+   "name": "s_432f74fa",
+   "value": "日期范围"
+  },
+  {
+   "name": "s_7203eec6",
+   "value": "旧协议存在安全风险。请使用「备份与恢复」里的导出备份或系统分享，通过你信任的方式传到另一台设备。"
+  },
+  {
+   "name": "s_43a7036a",
+   "value": "旧版任务数据损坏"
+  },
+  {
+   "name": "s_f5a97704",
+   "value": "旧版任务有异常项目"
+  },
+  {
+   "name": "s_9c3b2801",
+   "value": "旧版情绪数据损坏"
+  },
+  {
+   "name": "s_3bddc601",
+   "value": "旧版情绪有异常项目"
+  },
+  {
+   "name": "s_454e9392",
+   "value": "旧版日志数据损坏"
+  },
+  {
+   "name": "s_a628514c",
+   "value": "旧版日志有异常项目"
+  },
+  {
+   "name": "s_d7034b36",
+   "value": "早上好 ☀️"
+  },
+  {
+   "name": "s_4b302bcb",
+   "value": "时间范围内开心 / 中性 / 不开心的次数，条形长度按比例"
+  },
+  {
+   "name": "s_50080995",
+   "value": "时间范围内暂无情绪记录"
+  },
+  {
+   "name": "s_b8d35720",
+   "value": "时间范围内暂无情绪记录，分布会慢慢成形"
+  },
+  {
+   "name": "s_af564b8c",
+   "value": "星闪"
+  },
+  {
+   "name": "s_0aaf4aa4",
+   "value": "星闪、实况窗、智慧服务与多设备"
+  },
+  {
+   "name": "s_12263e9a",
+   "value": "昨天"
+  },
+  {
+   "name": "s_c18f71ef",
+   "value": "晚上好 🌙"
+  },
+  {
+   "name": "s_c14d82e9",
+   "value": "智能体运行时"
+  },
+  {
+   "name": "s_bf13f8b5",
+   "value": "暂时停用，点击查看替代方式"
+  },
+  {
+   "name": "s_a3b4475f",
+   "value": "更接近哪种感受？"
+  },
+  {
+   "name": "s_87b8867d",
+   "value": "最新"
+  },
+  {
+   "name": "s_ceb8f642",
+   "value": "最早"
+  },
+  {
+   "name": "s_56b38d0f",
+   "value": "最近闪念"
+  },
+  {
+   "name": "s_81364f08",
+   "value": "有重要度"
+  },
+  {
+   "name": "s_be2c2eb2",
+   "value": "未读"
+  },
+  {
+   "name": "s_f2dc2311",
+   "value": "未选择保存位置"
+  },
+  {
+   "name": "s_9eb7e19a",
+   "value": "未选择备份文件"
+  },
+  {
+   "name": "s_27c37899",
+   "value": "本周"
+  },
+  {
+   "name": "s_8b09339a",
+   "value": "本周情绪"
+  },
+  {
+   "name": "s_b70e17ea",
+   "value": "本周情绪偏低落"
+  },
+  {
+   "name": "s_24d17368",
+   "value": "本周情绪平稳"
+  },
+  {
+   "name": "s_e3f61599",
+   "value": "本周整体偏积极"
+  },
+  {
+   "name": "s_63d2d484",
+   "value": "本周暂无记录"
+  },
+  {
+   "name": "s_db0049cb",
+   "value": "本周趋势"
+  },
+  {
+   "name": "s_3750d663",
+   "value": "本地提醒"
+  },
+  {
+   "name": "s_5a3b670a",
+   "value": "本地数据加载失败：{0}"
+  },
+  {
+   "name": "s_36f7c12d",
+   "value": "本地数据尚未加载完成，无法导出备份"
+  },
+  {
+   "name": "s_3bc73a70",
+   "value": "本地数据尚未加载完成，请稍后重试"
+  },
+  {
+   "name": "s_a30af19c",
+   "value": "本地数据已清空"
+  },
+  {
+   "name": "s_5c414af2",
+   "value": "本地数据已清空，但系统提醒清理失败，请重启应用后重试"
+  },
+  {
+   "name": "s_caefb3d7",
+   "value": "本地数据已覆盖"
+  },
+  {
+   "name": "s_ed1cc69e",
+   "value": "本地数据库尚未初始化"
+  },
+  {
+   "name": "s_47af33f9",
+   "value": "本月"
+  },
+  {
+   "name": "s_37272be9",
+   "value": "来自灵感，原灵感会保留"
+  },
+  {
+   "name": "s_7e5242cd",
+   "value": "查看每日明细"
+  },
+  {
+   "name": "s_495fd6a9",
+   "value": "查看灵感"
+  },
+  {
+   "name": "s_c5a41a4d",
+   "value": "标准导入并分析差异"
+  },
+  {
+   "name": "s_2b1626c8",
+   "value": "标签"
+  },
+  {
+   "name": "s_6fa75608",
+   "value": "标记为灵感"
+  },
+  {
+   "name": "s_da8c43e5",
+   "value": "标记备忘"
+  },
+  {
+   "name": "s_6642d94e",
+   "value": "标记紧急"
+  },
+  {
+   "name": "s_20532441",
+   "value": "检测到已保留的旧版异常原始数据，可在设置中导出恢复文件"
+  },
+  {
+   "name": "s_f7d7a0ce",
+   "value": "欢迎来到 Flash"
+  },
+  {
+   "name": "s_b87694cc",
+   "value": "正在载入本地数据…"
+  },
+  {
+   "name": "s_f489ed09",
+   "value": "正文与类型"
+  },
+  {
+   "name": "s_6af40858",
+   "value": "此刻"
+  },
+  {
+   "name": "s_eb842c00",
+   "value": "此设备不支持任务时区，请更新系统后重试"
+  },
+  {
+   "name": "s_b060afd3",
+   "value": "此设备不支持备份中的任务时区，请更新系统后重试；未导入任何数据"
+  },
+  {
+   "name": "s_a46dce44",
+   "value": "此设备支持"
+  },
+  {
+   "name": "s_4c75c431",
+   "value": "此设备暂不支持"
+  },
+  {
+   "name": "s_f4958768",
+   "value": "每 3 天"
+  },
+  {
+   "name": "s_41be2fe2",
+   "value": "每周"
+  },
+  {
+   "name": "s_02c285b5",
+   "value": "每天"
+  },
+  {
+   "name": "s_18fa51bd",
+   "value": "每天的日志、灵感与情绪次数 · 不含任务"
+  },
+  {
+   "name": "s_10c2c6ea",
+   "value": "每日记录次数柱状图，"
+  },
+  {
+   "name": "s_8189ce25",
+   "value": "沙箱共享导出"
+  },
+  {
+   "name": "s_412c1bc9",
+   "value": "没有可导出的恢复数据"
+  },
+  {
+   "name": "s_43c975df",
+   "value": "没有找到相关记录"
+  },
+  {
+   "name": "s_f8bc527e",
+   "value": "没有符合条件的日志"
+  },
+  {
+   "name": "s_a1589567",
+   "value": "活跃 {0} 天 · 平均情绪 {1}"
+  },
+  {
+   "name": "s_11b5fdf6",
+   "value": "浅色"
+  },
+  {
+   "name": "s_2a8baaea",
+   "value": "深色"
+  },
+  {
+   "name": "s_2d2662ca",
+   "value": "添加任务"
+  },
+  {
+   "name": "s_efb3530b",
+   "value": "清空会删除本机全部日志、情绪和任务，且无法撤销，建议先导出备份。"
+  },
+  {
+   "name": "s_7c21f688",
+   "value": "清空全部本地数据"
+  },
+  {
+   "name": "s_0f228eb2",
+   "value": "清空全部本地数据，删除后需要再次确认，不可恢复"
+  },
+  {
+   "name": "s_ff0218b5",
+   "value": "清空全部本地数据？"
+  },
+  {
+   "name": "s_0b9d2bac",
+   "value": "清除"
+  },
+  {
+   "name": "s_0fba4654",
+   "value": "清除筛选"
+  },
+  {
+   "name": "s_82e960a9",
+   "value": "清除隔离区"
+  },
+  {
+   "name": "s_b8b74e9d",
+   "value": "灵感"
+  },
+  {
+   "name": "s_a25c48e8",
+   "value": "灵感已保存"
+  },
+  {
+   "name": "s_4604d6bf",
+   "value": "灵感提醒"
+  },
+  {
+   "name": "s_436e2c82",
+   "value": "现在想记录什么？"
+  },
+  {
+   "name": "s_494f6f35",
+   "value": "生成 flash-backup-v2 备份文件"
+  },
+  {
+   "name": "s_2ef507d3",
+   "value": "生成备份文件并通过系统分享发送"
+  },
+  {
+   "name": "s_f60bb44e",
+   "value": "生气"
+  },
+  {
+   "name": "s_9efb941a",
+   "value": "疲惫"
+  },
+  {
+   "name": "s_5b8de6f4",
+   "value": "看见记录背后的节奏与情绪"
+  },
+  {
+   "name": "s_2f530b5b",
+   "value": "确认删除"
+  },
+  {
+   "name": "s_869f8d0c",
+   "value": "确认清空"
+  },
+  {
+   "name": "s_78876d37",
+   "value": "碰一碰"
+  },
+  {
+   "name": "s_5716f5ef",
+   "value": "稍后 {0} 分钟"
+  },
+  {
+   "name": "s_7ed1d395",
+   "value": "端侧智能体 A2A"
+  },
+  {
+   "name": "s_d742f801",
+   "value": "等待场景准入"
+  },
+  {
+   "name": "s_6fbf1709",
+   "value": "等待手动签名与 App Linking 配置"
+  },
+  {
+   "name": "s_f5e087c9",
+   "value": "筛选"
+  },
+  {
+   "name": "s_26640f43",
+   "value": "类型"
+  },
+  {
+   "name": "s_5d44879d",
+   "value": "系统支持，等待权限准入"
+  },
+  {
+   "name": "s_77cc2953",
+   "value": "系统无公开查询接口，此为应用内设置"
+  },
+  {
+   "name": "s_ae26d9e7",
+   "value": "系统能力"
+  },
+  {
+   "name": "s_b68d1af4",
+   "value": "系统能力检测失败，能力入口状态可能不准确"
+  },
+  {
+   "name": "s_235f3e59",
+   "value": "紧急"
+  },
+  {
+   "name": "s_64db55af",
+   "value": "累计 {0} 个以上时，晚上 8 点提醒你梳理；打开查看过的想法不再计入。"
+  },
+  {
+   "name": "s_77dacc26",
+   "value": "累计构成 · 全部时间"
+  },
+  {
+   "name": "s_476d405b",
+   "value": "结束日期"
+  },
+  {
+   "name": "s_010e135c",
+   "value": "继续编辑"
+  },
+  {
+   "name": "s_e60fd56d",
+   "value": "继续记录，回顾会慢慢清晰"
+  },
+  {
+   "name": "s_607348a8",
+   "value": "编辑"
+  },
+  {
+   "name": "s_1d5b5e98",
+   "value": "编辑任务"
+  },
+  {
+   "name": "s_c9ab4c68",
+   "value": "编辑灵感"
+  },
+  {
+   "name": "s_a5db4a27",
+   "value": "编辑记录"
+  },
+  {
+   "name": "s_d157cf32",
+   "value": "自定义状态，如：期待、平静"
+  },
+  {
+   "name": "s_cf266f5e",
+   "value": "范围内记录"
+  },
+  {
+   "name": "s_a6317c7d",
+   "value": "覆盖"
+  },
+  {
+   "name": "s_5521c6a5",
+   "value": "让每一次闪念都有落点 · 无云端账号"
+  },
+  {
+   "name": "s_dad3d89f",
+   "value": "记下第一个念头"
+  },
+  {
+   "name": "s_2c9d9f0e",
+   "value": "记录"
+  },
+  {
+   "name": "s_57cc90b8",
+   "value": "记录内容"
+  },
+  {
+   "name": "s_a7c9e948",
+   "value": "记录已删除"
+  },
+  {
+   "name": "s_25548f50",
+   "value": "记录已更新"
+  },
+  {
+   "name": "s_a48657a1",
+   "value": "记录情绪"
+  },
+  {
+   "name": "s_8c8316a6",
+   "value": "记录日期 YYYY-MM-DD"
+  },
+  {
+   "name": "s_d1e82646",
+   "value": "记录活跃度"
+  },
+  {
+   "name": "s_e49ad9fc",
+   "value": "设备支持，待场景接入"
+  },
+  {
+   "name": "s_0102647f",
+   "value": "设备间传输"
+  },
+  {
+   "name": "s_f3c259dd",
+   "value": "设置"
+  },
+  {
+   "name": "s_6c53e15d",
+   "value": "请输入任务标题"
+  },
+  {
+   "name": "s_b1313650",
+   "value": "请输入有效日期（YYYY-MM-DD）"
+  },
+  {
+   "name": "s_796026c5",
+   "value": "请输入有效的日期和时间"
+  },
+  {
+   "name": "s_8678f5d9",
+   "value": "超出 {0} 字"
+  },
+  {
+   "name": "s_b45e202f",
+   "value": "趋势"
+  },
+  {
+   "name": "s_b494a385",
+   "value": "跟随系统"
+  },
+  {
+   "name": "s_ebbcb10b",
+   "value": "转为任务"
+  },
+  {
+   "name": "s_13f1b81a",
+   "value": "输入关键词或标签"
+  },
+  {
+   "name": "s_7cd6a835",
+   "value": "输入关键词或标签名"
+  },
+  {
+   "name": "s_214cb43c",
+   "value": "近 30 天"
+  },
+  {
+   "name": "s_27712c0e",
+   "value": "近 7 天情绪日均值柱状图"
+  },
+  {
+   "name": "s_511bc8b4",
+   "value": "近 7 天日均值 · — 表示当日未记录"
+  },
+  {
+   "name": "s_9ea79282",
+   "value": "近 90 天"
+  },
+  {
+   "name": "s_4ed18a1a",
+   "value": "近30天"
+  },
+  {
+   "name": "s_6ae50c28",
+   "value": "近7天"
+  },
+  {
+   "name": "s_8ab0bb3c",
+   "value": "近90天"
+  },
+  {
+   "name": "s_863fb33a",
+   "value": "近期记录"
+  },
+  {
+   "name": "s_a7f085b7",
+   "value": "还可输入 {0} 字"
+  },
+  {
+   "name": "s_91cae70c",
+   "value": "还没有情绪记录，从当下的感受开始"
+  },
+  {
+   "name": "s_4cabb422",
+   "value": "还没有记录"
+  },
+  {
+   "name": "s_fa547131",
+   "value": "这一天还没有计划或记录"
+  },
+  {
+   "name": "s_6d67abd6",
+   "value": "这个月"
+  },
+  {
+   "name": "s_09e1a534",
+   "value": "这周"
+  },
+  {
+   "name": "s_d3ce76c1",
+   "value": "这条记录已不存在"
+  },
+  {
+   "name": "s_5aa52714",
+   "value": "这段时间有 {0} 条记录 · {1} 次情绪"
+  },
+  {
+   "name": "s_5fe370b7",
+   "value": "选择"
+  },
+  {
+   "name": "s_b59b6994",
+   "value": "通知设置"
+  },
+  {
+   "name": "s_00b88ac0",
+   "value": "通知设置半模态"
+  },
+  {
+   "name": "s_cf3e4247",
+   "value": "重要度"
+  },
+  {
+   "name": "s_b53d490f",
+   "value": "重要度与日期"
+  },
+  {
+   "name": "s_e63fba86",
+   "value": "重要度需在 0 到 4 之间"
+  },
+  {
+   "name": "s_4e941a37",
+   "value": "重试"
+  },
+  {
+   "name": "s_954316f6",
+   "value": "闪控球 / 闪控窗"
+  },
+  {
+   "name": "s_aef2df88",
+   "value": "随手记录"
+  },
+  {
+   "name": "s_a87d7d3d",
+   "value": "隔离区已清除"
+  },
+  {
+   "name": "s_80390cc2",
+   "value": "难受"
+  },
+  {
+   "name": "s_99546fff",
+   "value": "非常不开心"
+  },
+  {
+   "name": "s_22566806",
+   "value": "非常开心"
+  },
+  {
+   "name": "s_b6819d11",
+   "value": "页面尚未准备完成，请稍后重试"
+  },
+  {
+   "name": "s_1f54be7c",
+   "value": "页面操作依赖未装配"
+  },
+  {
+   "name": "s_9a63360d",
+   "value": "预览后本地数据有变化，差异已重新计算，请确认后再覆盖"
+  },
+  {
+   "name": "s_39f2623a",
+   "value": "鸿蒙体验"
+  },
+  {
+   "name": "s_a14edc19",
+   "value": "（无标题）"
+  },
+  {
+   "name": "s_d6d10170",
+   "value": "＋ 新建"
+  },
+  {
+   "name": "s_25af9b9f",
+   "value": "，{0} 条未读灵感"
+  },
+  {
+   "name": "s_60b362bc",
+   "value": "，但系统提醒恢复失败"
+  },
+  {
+   "name": "s_9b38261d",
+   "value": "，可展开每日明细"
+  },
+  {
+   "name": "s_e014a361",
+   "value": "，已选中"
+  },
+  {
+   "name": "s_b5a68109",
+   "value": "，当前不可用"
+  },
+  {
+   "name": "s_67d80aae",
+   "value": "，当日有情绪记录"
+  },
+  {
+   "name": "s_1e2ec103",
+   "value": "，情绪整体低落了一些"
+  },
+  {
+   "name": "s_2122a6c6",
+   "value": "，情绪整体更积极了一些"
+  }
+ ]
+}

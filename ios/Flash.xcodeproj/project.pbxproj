@@ -279,12 +279,18 @@
 				};
 			};
 			buildConfigurationList = FB0000000000000000000062 /* Build configuration list for PBXProject "Flash" */;
-			developmentRegion = "zh-Hans";
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 				"zh-Hans",
+				fr,
+				ko,
+				de,
+				ru,
+				ar,
+				ja,
 			);
 			mainGroup = FB0000000000000000000001;
 			minimizedProjectReferenceProxies = 1;

@@ -1,0 +1,17 @@
+{
+  "note": "Fixed terms for the seven translations. Keys in translations are the Simplified Chinese source text. Machine-assisted; needs native-speaker review before release.",
+  "terms": {
+    "闪念": { "en": "moment", "fr": "moment", "ko": "순간", "de": "Moment", "ru": "момент", "ar": "لحظة", "ja": "ひらめき" },
+    "灵感": { "en": "idea", "fr": "idée", "ko": "아이디어", "de": "Idee", "ru": "идея", "ar": "فكرة", "ja": "アイデア" },
+    "日志": { "en": "log", "fr": "journal", "ko": "일지", "de": "Tagebuch", "ru": "журнал", "ar": "يومية", "ja": "ログ" },
+    "记录": { "en": "record", "fr": "entrée", "ko": "기록", "de": "Eintrag", "ru": "запись", "ar": "سجل", "ja": "記録" },
+    "情绪": { "en": "mood", "fr": "humeur", "ko": "기분", "de": "Stimmung", "ru": "настроение", "ar": "مزاج", "ja": "気分" },
+    "任务": { "en": "task", "fr": "tâche", "ko": "할 일", "de": "Aufgabe", "ru": "задача", "ar": "مهمة", "ja": "タスク" },
+    "待办": { "en": "to-do", "fr": "à faire", "ko": "할 일", "de": "offen", "ru": "к выполнению", "ar": "قيد الإنجاز", "ja": "未完了" },
+    "此刻": { "en": "Now", "fr": "Maintenant", "ko": "지금", "de": "Jetzt", "ru": "Сейчас", "ar": "الآن", "ja": "いま" },
+    "回顾": { "en": "Review", "fr": "Bilan", "ko": "회고", "de": "Rückblick", "ru": "Итоги", "ar": "مراجعة", "ja": "振り返り" },
+    "待整理": { "en": "To sort", "fr": "À trier", "ko": "정리 대기", "de": "Zu sortieren", "ru": "Разобрать", "ar": "للفرز", "ja": "未整理" },
+    "收藏": { "en": "favorite", "fr": "favori", "ko": "즐겨찾기", "de": "Favorit", "ru": "избранное", "ar": "مفضلة", "ja": "お気に入り" },
+    "重要度": { "en": "importance", "fr": "importance", "ko": "중요도", "de": "Wichtigkeit", "ru": "важность", "ar": "الأهمية", "ja": "重要度" }
+  }
+}

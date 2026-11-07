@@ -1,0 +1,1792 @@
+{
+ "string": [
+  {
+   "name": "module_desc",
+   "value": "Flash Aero für HarmonyOS"
+  },
+  {
+   "name": "EntryAbility_desc",
+   "value": "Flash Aero-Hauptfenster"
+  },
+  {
+   "name": "EntryAbility_label",
+   "value": "Flash Aero"
+  },
+  {
+   "name": "EntryFormAbility_label",
+   "value": "Heute"
+  },
+  {
+   "name": "EntryFormAbility_desc",
+   "value": "Flash Aero-Karte „Heute im Überblick“"
+  },
+  {
+   "name": "form_today_summary_display_name",
+   "value": "Heute"
+  },
+  {
+   "name": "form_today_summary_desc",
+   "value": "Einträge, Ideen und offene Aufgaben von heute sehen"
+  },
+  {
+   "name": "form_today_title",
+   "value": "Heute"
+  },
+  {
+   "name": "form_stat_records",
+   "value": "Einträge"
+  },
+  {
+   "name": "form_stat_ideas",
+   "value": "Ideen"
+  },
+  {
+   "name": "form_stat_tasks",
+   "value": "Offen"
+  },
+  {
+   "name": "form_today_capture_display_name",
+   "value": "Heute & Schnellerfassung"
+  },
+  {
+   "name": "form_today_capture_desc",
+   "value": "Heute im Überblick, Idee oder Tagebucheintrag mit einem Tipp erfassen"
+  },
+  {
+   "name": "shortcut_idea",
+   "value": "Idee notieren"
+  },
+  {
+   "name": "shortcut_log",
+   "value": "Tagebuch schreiben"
+  },
+  {
+   "name": "form_action_idea",
+   "value": "Ideen"
+  },
+  {
+   "name": "form_action_log",
+   "value": "Tagebuch"
+  },
+  {
+   "name": "s_349a6396",
+   "value": " · Wichtigkeit {0}"
+  },
+  {
+   "name": "s_2f0fbd80",
+   "value": "−3 bis +3, 0 ist neutral; — bedeutet: an dem Tag nichts erfasst"
+  },
+  {
+   "name": "s_d78803b1",
+   "value": "/data/emotions: ungültige oder doppelte Einträge. Vor dem Export beheben"
+  },
+  {
+   "name": "s_92fe6094",
+   "value": "/data/logs: ungültige oder doppelte Einträge. Vor dem Export beheben"
+  },
+  {
+   "name": "s_cc6625e3",
+   "value": "/data/tasks: ungültige oder doppelte Einträge. Vor dem Export beheben"
+  },
+  {
+   "name": "s_76da33b4",
+   "value": "/data: ungültige oder doppelte Einträge. Bitte Wiederherstellung verwenden"
+  },
+  {
+   "name": "s_bfb6aa12",
+   "value": "/data: Array überschreitet das Limit"
+  },
+  {
+   "name": "s_d40dfcbc",
+   "value": "/updatedAt: ungültige Aufgabenzeit"
+  },
+  {
+   "name": "s_b9ce0fb9",
+   "value": "/: zu viele JSON-Werte"
+  },
+  {
+   "name": "s_307d96fc",
+   "value": "/: doppelter Schlüssel im JSON-Objekt: {0}"
+  },
+  {
+   "name": "s_b414e614",
+   "value": "/: ungültige JSON-Syntax (Position {0})"
+  },
+  {
+   "name": "s_d8026ec4",
+   "value": "/: BOM ist nicht erlaubt"
+  },
+  {
+   "name": "s_4be9c949",
+   "value": "/: ungültige Backup-Version oder Metadaten"
+  },
+  {
+   "name": "s_67596dc6",
+   "value": "/: Datei ist größer als 50 MiB"
+  },
+  {
+   "name": "s_355b83a3",
+   "value": "Eine Woche, die in Erinnerung bleibt. ✦"
+  },
+  {
+   "name": "s_2a0b1ddf",
+   "value": "Flash-Idee"
+  },
+  {
+   "name": "s_de22df1c",
+   "value": "Flash-Eintrag"
+  },
+  {
+   "name": "s_8d6bfa5c",
+   "value": "Highlights"
+  },
+  {
+   "name": "s_a60503ed",
+   "value": "JSON-Backup|.json"
+  },
+  {
+   "name": "s_58f879ce",
+   "value": "Erinnerung"
+  },
+  {
+   "name": "s_879db2fb",
+   "value": "Eher gedrückt"
+  },
+  {
+   "name": "s_db9c822c",
+   "value": "Eher positiv"
+  },
+  {
+   "name": "s_f3498d7d",
+   "value": "Eher ausgeglichen"
+  },
+  {
+   "name": "s_244cff4e",
+   "value": "Diese Woche war..."
+  },
+  {
+   "name": "s_fe948398",
+   "value": "Das hast du erfasst"
+  },
+  {
+   "name": "s_70c34463",
+   "value": "Stimmungen"
+  },
+  {
+   "name": "s_f22ee8cb",
+   "value": "Ideen"
+  },
+  {
+   "name": "s_62852daa",
+   "value": "Momente"
+  },
+  {
+   "name": "s_ad2e48cd",
+   "value": "Aufgaben"
+  },
+  {
+   "name": "s_48dce70c",
+   "value": "v0.1.0 · HarmonyOS · com.flash.app.harmonyos"
+  },
+  {
+   "name": "s_6e425eba",
+   "value": "{0}: {1} · {2}: {3}"
+  },
+  {
+   "name": "s_ad1bbef7",
+   "value": "Ideen zum Durchgehen: {0}. Älteste öffnen"
+  },
+  {
+   "name": "s_409ddff6",
+   "value": "Aktive Tage: {0} · Gesamt: {1}"
+  },
+  {
+   "name": "s_ae7c912e",
+   "value": "{1}/{0}"
+  },
+  {
+   "name": "s_79fc376e",
+   "value": "Einträge: {0}"
+  },
+  {
+   "name": "s_ba02e82e",
+   "value": "{0}-mal"
+  },
+  {
+   "name": "s_1f0ab446",
+   "value": "Details zu {0}"
+  },
+  {
+   "name": "s_1d2f42b7",
+   "value": "{0} war weniger aktiv als {1}"
+  },
+  {
+   "name": "s_2712f5b4",
+   "value": "{0} lag gleichauf mit {1}"
+  },
+  {
+   "name": "s_2e763a14",
+   "value": "{0} hast du öfter erfasst als {1}"
+  },
+  {
+   "name": "s_ae5c9fd5",
+   "value": "{1}.{0}."
+  },
+  {
+   "name": "s_ce181c99",
+   "value": "{0}, Einträge: {1}"
+  },
+  {
+   "name": "s_662e559c",
+   "value": "{0}, aber die Wiederherstellungskopie konnte nicht geschrieben werden; die Originaldaten wurden nicht behalten"
+  },
+  {
+   "name": "s_deca74ba",
+   "value": "{0}. Die Originaldaten wurden für die Wiederherstellung behalten"
+  },
+  {
+   "name": "s_245af589",
+   "value": "{0}: Einträge {1} · Stimmungen {2}"
+  },
+  {
+   "name": "s_509d59f4",
+   "value": "{0}: muss ein Objekt sein"
+  },
+  {
+   "name": "s_0009cc0b",
+   "value": "{0}: Pflichtfelder fehlen oder unbekannte Felder vorhanden"
+  },
+  {
+   "name": "s_c76c65d2",
+   "value": "‹ Zurück"
+  },
+  {
+   "name": "s_7dad93fd",
+   "value": "★ Favoriten"
+  },
+  {
+   "name": "s_745e890f",
+   "value": "✓ Im Tagebuch gespeichert"
+  },
+  {
+   "name": "s_a248a677",
+   "value": "✓ Bei den Ideen gespeichert"
+  },
+  {
+   "name": "s_8d102943",
+   "value": "✓ Sortiert: {0}"
+  },
+  {
+   "name": "s_05615f1f",
+   "value": "Mo"
+  },
+  {
+   "name": "s_e50a5759",
+   "value": "Flüchtige Gedanken sind es wert, festgehalten zu werden"
+  },
+  {
+   "name": "s_8bcbbc86",
+   "value": "Sieben Stimmungsstufen zeigen, wie du dich veränderst"
+  },
+  {
+   "name": "s_0c616a24",
+   "value": "Mi"
+  },
+  {
+   "name": "s_508b1e1d",
+   "value": "Vorige Woche"
+  },
+  {
+   "name": "s_b06dcc3d",
+   "value": "Voriger Monat"
+  },
+  {
+   "name": "s_8be194e7",
+   "value": "letzten Monat"
+  },
+  {
+   "name": "s_eb0f6aef",
+   "value": "letzte Woche"
+  },
+  {
+   "name": "s_0bb3bda2",
+   "value": "Nächste Woche"
+  },
+  {
+   "name": "s_6bcf17c2",
+   "value": "Nächster Monat"
+  },
+  {
+   "name": "s_10c83c81",
+   "value": "Weiter"
+  },
+  {
+   "name": "s_82b6cabb",
+   "value": "Guten Tag 🌤"
+  },
+  {
+   "name": "s_1344f491",
+   "value": "Unglücklich"
+  },
+  {
+   "name": "s_1f28bc53",
+   "value": "Wie sich schlechte Stimmung anfühlte"
+  },
+  {
+   "name": "s_4cc036be",
+   "value": "Keine Erinnerung"
+  },
+  {
+   "name": "s_44d41ebe",
+   "value": "Fokussiert"
+  },
+  {
+   "name": "s_bfa55e52",
+   "value": "Layout für mittlere Bildschirme"
+  },
+  {
+   "name": "s_b13672cd",
+   "value": "Neutral"
+  },
+  {
+   "name": "s_15a81f9c",
+   "value": "Warum sind manche Funktionen nicht aktiv?"
+  },
+  {
+   "name": "s_74e5c7e6",
+   "value": "Design"
+  },
+  {
+   "name": "s_5a9c8a19",
+   "value": "Design konnte nicht gespeichert werden: {0}"
+  },
+  {
+   "name": "s_0a416847",
+   "value": "die 30 Tage davor"
+  },
+  {
+   "name": "s_0c6445c1",
+   "value": "die 90 Tage davor"
+  },
+  {
+   "name": "s_89609beb",
+   "value": "Di"
+  },
+  {
+   "name": "s_9160a883",
+   "value": "Fr"
+  },
+  {
+   "name": "s_e835fb8e",
+   "value": "Zeigt nur, was tatsächlich erkannt und verbunden ist. Prüfpflichtige Systemrechte werden erst nach Genehmigung genutzt."
+  },
+  {
+   "name": "s_946c250b",
+   "value": "Nur für manuelle Wiederherstellung. Nicht öffentlich teilen"
+  },
+  {
+   "name": "s_a848765c",
+   "value": "Heute"
+  },
+  {
+   "name": "s_6f3c2b2c",
+   "value": "Halte heute etwas fest."
+  },
+  {
+   "name": "s_1f2bd289",
+   "value": "Heute noch nichts erfasst."
+  },
+  {
+   "name": "s_cfccbae7",
+   "value": "Heute"
+  },
+  {
+   "name": "s_2d7464e1",
+   "value": "Aufgaben"
+  },
+  {
+   "name": "s_1915b50d",
+   "value": "Aufgabe ist bald fällig"
+  },
+  {
+   "name": "s_9dba36cc",
+   "value": "Aufgabe gespeichert"
+  },
+  {
+   "name": "s_9e20fc67",
+   "value": "Aufgabe gespeichert, aber Systemerinnerungen sind nicht aktiv"
+  },
+  {
+   "name": "s_991e9b9d",
+   "value": "Aufgabe gelöscht"
+  },
+  {
+   "name": "s_d5f54072",
+   "value": "Aufgabe gelöscht, aber Systemerinnerungen konnten nicht synchronisiert werden"
+  },
+  {
+   "name": "s_534ff12d",
+   "value": "Aufgabenerinnerungen konnten nicht wiederhergestellt werden. Deine Aufgaben sind sicher. App später neu starten"
+  },
+  {
+   "name": "s_a961bb3e",
+   "value": "Aufgabentitel"
+  },
+  {
+   "name": "s_e7cf88d5",
+   "value": "Aufgabe aktualisiert, aber Systemerinnerungen konnten nicht synchronisiert werden"
+  },
+  {
+   "name": "s_c185d41b",
+   "value": "Aufgaben: {0} neu, {1} geändert, {2} nur hier\n"
+  },
+  {
+   "name": "s_79955ed0",
+   "value": "Traurig"
+  },
+  {
+   "name": "s_d7974514",
+   "value": "Wartende Ideen: {0}. Fang mit der ältesten an"
+  },
+  {
+   "name": "s_d908f279",
+   "value": "Ideen zum Durchgehen: {0}. Schau mal rein"
+  },
+  {
+   "name": "s_ad5b82b0",
+   "value": "Speichern"
+  },
+  {
+   "name": "s_9b95e293",
+   "value": "Wird gespeichert…"
+  },
+  {
+   "name": "s_1d0e5d5a",
+   "value": "Ganztägig"
+  },
+  {
+   "name": "s_0c14a696",
+   "value": "Ganztägige Aufgabe"
+  },
+  {
+   "name": "s_05eb990b",
+   "value": "Alles durchsuchen"
+  },
+  {
+   "name": "s_5e6558ad",
+   "value": "Alle"
+  },
+  {
+   "name": "s_e8562c78",
+   "value": "Sa"
+  },
+  {
+   "name": "s_e161dfa6",
+   "value": "Gesamt {0} · Tagebuch {1} · Ideen {2}"
+  },
+  {
+   "name": "s_c5603acc",
+   "value": "Der freigegebene Ordner ist nicht verfügbar. Stattdessen „Speicherort wählen“ verwenden"
+  },
+  {
+   "name": "s_72a18f8e",
+   "value": "Über Flash"
+  },
+  {
+   "name": "s_87dadb5a",
+   "value": "Stichwort oder Schlagwort"
+  },
+  {
+   "name": "s_39b523bd",
+   "value": "Schließen"
+  },
+  {
+   "name": "s_dc24135d",
+   "value": "Inhalt darf nicht leer sein"
+  },
+  {
+   "name": "s_e67132b8",
+   "value": "Inhalt darf nicht leer sein. Vor dem Speichern etwas eingeben"
+  },
+  {
+   "name": "s_f3b7b450",
+   "value": "Über 100.000 Zeichen. Vor dem Speichern kürzen"
+  },
+  {
+   "name": "s_87000edc",
+   "value": "Schreib weiter, dein künftiges Ich wird es sehen."
+  },
+  {
+   "name": "s_308e704e",
+   "value": "Bewegung reduzieren"
+  },
+  {
+   "name": "s_f6d47411",
+   "value": "„Bewegung reduzieren“ konnte nicht gespeichert werden: {0}"
+  },
+  {
+   "name": "s_9aa7d416",
+   "value": "Teilen"
+  },
+  {
+   "name": "s_081c9fc0",
+   "value": "Teilen fehlgeschlagen"
+  },
+  {
+   "name": "s_6ba0562c",
+   "value": "Export teilen"
+  },
+  {
+   "name": "s_ea8d5381",
+   "value": "Löschen"
+  },
+  {
+   "name": "s_04235540",
+   "value": "Das kann nicht rückgängig gemacht werden."
+  },
+  {
+   "name": "s_9b7a515f",
+   "value": "Muss erneut bestätigt werden und ist nicht wiederherstellbar"
+  },
+  {
+   "name": "s_4ccb1394",
+   "value": "Löscht die aufbewahrte Kopie ungültiger Originaldaten"
+  },
+  {
+   "name": "s_5bfa5877",
+   "value": "Diese Aufgabe löschen?"
+  },
+  {
+   "name": "s_e6dedfa0",
+   "value": "Diese Stimmung löschen?"
+  },
+  {
+   "name": "s_409819b9",
+   "value": "Diesen Eintrag löschen?"
+  },
+  {
+   "name": "s_c51f5912",
+   "value": "Bei Fälligkeit"
+  },
+  {
+   "name": "s_c6dda34e",
+   "value": "Mehr laden ({0} übrig)"
+  },
+  {
+   "name": "s_60b4c5ae",
+   "value": "Gefahrenbereich"
+  },
+  {
+   "name": "s_949856b3",
+   "value": "Abbrechen"
+  },
+  {
+   "name": "s_d1d62fb0",
+   "value": "Aus Favoriten entfernen"
+  },
+  {
+   "name": "s_8b70a958",
+   "value": "Tagebuch, Stimmungen und Aufgaben zwischen Android, macOS und HarmonyOS übertragen. Backups sind unverschlüsseltes JSON, also nur an vertrauenswürdigen Orten speichern oder teilen."
+  },
+  {
+   "name": "s_4d55cb75",
+   "value": "Backup exportieren oder über „Teilen“ senden"
+  },
+  {
+   "name": "s_b902b8d3",
+   "value": "Zusammenführen"
+  },
+  {
+   "name": "s_5e53c03a",
+   "value": "Do"
+  },
+  {
+   "name": "s_40163b46",
+   "value": "Zurück zu heute"
+  },
+  {
+   "name": "s_bed63d2f",
+   "value": "Diese Woche"
+  },
+  {
+   "name": "s_c2e1aa6d",
+   "value": "Rückblick"
+  },
+  {
+   "name": "s_5a543946",
+   "value": "In der Dateien-App sichtbar (Downloads/Flash)"
+  },
+  {
+   "name": "s_fbac6f20",
+   "value": "Sichern & Wiederherstellen"
+  },
+  {
+   "name": "s_ad4d7827",
+   "value": "Backup unvollständig geschrieben, Teilen abgebrochen"
+  },
+  {
+   "name": "s_c5eb49de",
+   "value": "Backup unvollständig geschrieben, Export fehlgeschlagen"
+  },
+  {
+   "name": "s_a1b093ff",
+   "value": "Backup zusammengeführt"
+  },
+  {
+   "name": "s_20fe814f",
+   "value": "Backup exportiert"
+  },
+  {
+   "name": "s_09ecc21d",
+   "value": "Backup in „Downloads“ der Dateien-App exportiert"
+  },
+  {
+   "name": "s_55769b97",
+   "value": "Backup-Struktur ist unvollständig"
+  },
+  {
+   "name": "s_0420eb69",
+   "value": "Backup-Struktur unvollständig oder Abschnittsversion inkompatibel"
+  },
+  {
+   "name": "s_c90a7947",
+   "value": "Die Backup-Datei ist kein gültiges JSON-Objekt"
+  },
+  {
+   "name": "s_364b46a8",
+   "value": "Die Backup-Datei ist leer"
+  },
+  {
+   "name": "s_c4981a8c",
+   "value": "Backup-Datei konnte nicht vollständig gelesen werden"
+  },
+  {
+   "name": "s_245f47d8",
+   "value": "Die Backup-Datei ist größer als 50 MB"
+  },
+  {
+   "name": "s_fc4f6b0f",
+   "value": "Inkompatible Backup-Version"
+  },
+  {
+   "name": "s_584ff11a",
+   "value": "Notiz"
+  },
+  {
+   "name": "s_d9dac7dd",
+   "value": "Notizen (optional)"
+  },
+  {
+   "name": "s_e4a4815a",
+   "value": "Darstellung & Nutzung"
+  },
+  {
+   "name": "s_e665350f",
+   "value": "Layouts für mehrere Geräte"
+  },
+  {
+   "name": "s_d590eab1",
+   "value": "Seitennavigation auf großen Bildschirmen"
+  },
+  {
+   "name": "s_1e13bd21",
+   "value": "Fertig"
+  },
+  {
+   "name": "s_bb58d8d1",
+   "value": "Live-Ansicht"
+  },
+  {
+   "name": "s_513bdfd7",
+   "value": "Live-Ansicht, schwebender Ball, Tippen-zum-Teilen und Celia-Intents erfordern eine Prüfung (Szenario, Signatur, Gerät oder Plattform). Flash aktiviert sie nach der Freigabe und fordert keine unnötigen eingeschränkten Rechte an."
+  },
+  {
+   "name": "s_4353e306",
+   "value": "Vor dem Import sehen, was zusammengeführt oder hinzugefügt wird"
+  },
+  {
+   "name": "s_7fdaf616",
+   "value": "Exportieren, importieren, löschen"
+  },
+  {
+   "name": "s_7af59148",
+   "value": "In „Downloads“ exportieren"
+  },
+  {
+   "name": "s_03150537",
+   "value": "Backup-JSON exportieren"
+  },
+  {
+   "name": "s_026223aa",
+   "value": "Alte ungültige Rohdaten exportieren"
+  },
+  {
+   "name": "s_e29f076f",
+   "value": "Versucht, ein nicht importierbares Backup zu reparieren"
+  },
+  {
+   "name": "s_479481d2",
+   "value": "Übertragung im lokalen Netzwerk ist vorerst deaktiviert"
+  },
+  {
+   "name": "s_f959f4af",
+   "value": "Die Übertragung im lokalen Netzwerk ist wegen Sicherheitsrisiken des alten Protokolls aus. Sende die JSON-Datei per Backup-Export oder „Teilen“ über einen vertrauenswürdigen Weg."
+  },
+  {
+   "name": "s_cb51ae33",
+   "value": "Filter öffnen"
+  },
+  {
+   "name": "s_b1368837",
+   "value": "Unterschiede"
+  },
+  {
+   "name": "s_5dbcdf6d",
+   "value": "Aus"
+  },
+  {
+   "name": "s_bee374d1",
+   "value": "Gelöscht"
+  },
+  {
+   "name": "s_84f30bbf",
+   "value": "Verbunden (in den Einstellungen)"
+  },
+  {
+   "name": "s_26942e0f",
+   "value": "Verbunden, durch Ordnerrechte eingeschränkt"
+  },
+  {
+   "name": "s_a8126b62",
+   "value": "Favorit"
+  },
+  {
+   "name": "s_6933b472",
+   "value": "Teilen geöffnet"
+  },
+  {
+   "name": "s_c8fa62c1",
+   "value": "Ausgewählt: {0}"
+  },
+  {
+   "name": "s_23ed437e",
+   "value": "Plattformfunktionen"
+  },
+  {
+   "name": "s_fea8398c",
+   "value": "Durchschnittsstimmung"
+  },
+  {
+   "name": "s_499be303",
+   "value": "Loslegen"
+  },
+  {
+   "name": "s_5d62764c",
+   "value": "Startdatum"
+  },
+  {
+   "name": "s_2a665354",
+   "value": "Glücklich"
+  },
+  {
+   "name": "s_673d4a91",
+   "value": "Intensität"
+  },
+  {
+   "name": "s_6a19ddcf",
+   "value": "Intensität {0}"
+  },
+  {
+   "name": "s_09229c97",
+   "value": "Aktueller Zustand (optional)"
+  },
+  {
+   "name": "s_13cca53d",
+   "value": "Auf diesem Gerät nicht unterstützt"
+  },
+  {
+   "name": "s_1b4ae1a8",
+   "value": "Dieses Gerät kann nicht in den freigegebenen Ordner exportieren. Stattdessen „Speicherort wählen“ verwenden"
+  },
+  {
+   "name": "s_91049175",
+   "value": "Dieses Gerät unterstützt keine Mitteilungseinstellungen in der App"
+  },
+  {
+   "name": "s_1a0a2c38",
+   "value": "Dieses Gerät unterstützt „Teilen“ nicht"
+  },
+  {
+   "name": "s_4b8edbfa",
+   "value": "Offen"
+  },
+  {
+   "name": "s_e83d11ae",
+   "value": "Zu sortieren"
+  },
+  {
+   "name": "s_243c3959",
+   "value": "Zu sortieren: Tagebucheinträge mit „Alltag“."
+  },
+  {
+   "name": "s_2367642b",
+   "value": "Sehr unglücklich"
+  },
+  {
+   "name": "s_fb903262",
+   "value": "Sehr glücklich"
+  },
+  {
+   "name": "s_e70923c8",
+   "value": "Schnellerfassung"
+  },
+  {
+   "name": "s_9f0dc65e",
+   "value": "Schnellerfassungs-Intents warten auf Plattformprüfung"
+  },
+  {
+   "name": "s_53d60ffd",
+   "value": "Rohdaten zur Wiederherstellung exportiert. Sicher aufbewahren und Support kontaktieren"
+  },
+  {
+   "name": "s_abf33a8f",
+   "value": "Beschädigtes oder altes Backup wiederherstellen"
+  },
+  {
+   "name": "s_a9612b5e",
+   "value": "Stimmung"
+  },
+  {
+   "name": "s_f3061bd1",
+   "value": "Stimmungsverteilung"
+  },
+  {
+   "name": "s_35dbb46b",
+   "value": "Stimmung erfasst"
+  },
+  {
+   "name": "s_643f1ede",
+   "value": "Stimmung wahrnehmen"
+  },
+  {
+   "name": "s_ff9f8889",
+   "value": "Stimmung gelöscht"
+  },
+  {
+   "name": "s_8ac3df35",
+   "value": "Stimmungsverlauf · Tagesdurchschnitt"
+  },
+  {
+   "name": "s_fe05f6f8",
+   "value": "Stimmungen: {0} neu, {1} geändert, {2} nur hier\n"
+  },
+  {
+   "name": "s_99812275",
+   "value": "Gedanke"
+  },
+  {
+   "name": "s_d9f8afc2",
+   "value": "Ideen zum Durchgehen"
+  },
+  {
+   "name": "s_6deefec2",
+   "value": "Erinnern, wenn Ideen warten"
+  },
+  {
+   "name": "s_4f5176ed",
+   "value": "Noch etwas hinzufügen? (optional)"
+  },
+  {
+   "name": "s_b5d25fe7",
+   "value": "Kompaktes Telefon-Layout"
+  },
+  {
+   "name": "s_8523e97b",
+   "value": "Neueste zuerst"
+  },
+  {
+   "name": "s_791c2e78",
+   "value": "Älteste zuerst"
+  },
+  {
+   "name": "s_6ef98325",
+   "value": "Nach Schlagwort"
+  },
+  {
+   "name": "s_43bc98a3",
+   "value": "API verfügbar; Gerätefreigabe nötig"
+  },
+  {
+   "name": "s_392df5d7",
+   "value": "15 Minuten vorher"
+  },
+  {
+   "name": "s_401bd3d4",
+   "value": "1 Tag vorher"
+  },
+  {
+   "name": "s_25b72168",
+   "value": "1 Stunde vorher"
+  },
+  {
+   "name": "s_669f23ff",
+   "value": "{0} Minuten vorher"
+  },
+  {
+   "name": "s_355f82e3",
+   "value": "{0} Tage vorher"
+  },
+  {
+   "name": "s_222759b9",
+   "value": "{0} Stunden vorher"
+  },
+  {
+   "name": "s_6d40d527",
+   "value": "Erinnerung"
+  },
+  {
+   "name": "s_24035981",
+   "value": "Erinnerungen laufen im Hintergrund über HarmonyOS. Beim ersten Mal wird nach der Mitteilungsberechtigung gefragt."
+  },
+  {
+   "name": "s_0b6efa3b",
+   "value": "Suchen"
+  },
+  {
+   "name": "s_c8a90aa9",
+   "value": "Einträge, Ideen, Stimmungen und Aufgaben durchsuchen"
+  },
+  {
+   "name": "s_1b9e8bc9",
+   "value": "Rückgängig"
+  },
+  {
+   "name": "s_7be8ae06",
+   "value": "Vorgang fehlgeschlagen"
+  },
+  {
+   "name": "s_839d4732",
+   "value": "Favorit"
+  },
+  {
+   "name": "s_cf8b8d02",
+   "value": "Tagesdetails ausblenden"
+  },
+  {
+   "name": "s_f3386881",
+   "value": "Filter schließen"
+  },
+  {
+   "name": "s_e1598b13",
+   "value": "Verwerfen"
+  },
+  {
+   "name": "s_0ac91ecb",
+   "value": "Nicht gespeicherte Änderungen verwerfen?"
+  },
+  {
+   "name": "s_34ea918d",
+   "value": "Entspannt"
+  },
+  {
+   "name": "s_4502142c",
+   "value": "Daten, Backups und App-Einstellungen"
+  },
+  {
+   "name": "s_6344fa26",
+   "value": "Daten & Sicherheit"
+  },
+  {
+   "name": "s_b6537954",
+   "value": "Die Datenbank enthält ungültige Einträge. Die Quarantänekopie konnte nicht geschrieben werden, die Originale bleiben in der Datenbank"
+  },
+  {
+   "name": "s_121fd605",
+   "value": "Die Datenbank enthält ungültige Einträge. Die Originale wurden isoliert und können exportiert werden"
+  },
+  {
+   "name": "s_b464971d",
+   "value": "Daten werden auf diesem Gerät gespeichert"
+  },
+  {
+   "name": "s_b8c8a94f",
+   "value": "Neu"
+  },
+  {
+   "name": "s_b0f36447",
+   "value": "Neue Aufgabe"
+  },
+  {
+   "name": "s_d2c53483",
+   "value": "Neue Idee"
+  },
+  {
+   "name": "s_160eb028",
+   "value": "Neuer Eintrag"
+  },
+  {
+   "name": "s_659aa23f",
+   "value": "Keine"
+  },
+  {
+   "name": "s_40c77de6",
+   "value": "Ungültige Einträge: {0}"
+  },
+  {
+   "name": "s_74421189",
+   "value": "Keine Wichtigkeit"
+  },
+  {
+   "name": "s_609a9a60",
+   "value": "So"
+  },
+  {
+   "name": "s_f9abd512",
+   "value": "Kalender"
+  },
+  {
+   "name": "s_6ba31688",
+   "value": "Alltag"
+  },
+  {
+   "name": "s_caa53f15",
+   "value": "Tagebuch"
+  },
+  {
+   "name": "s_6c39f636",
+   "value": "Alle Tagebucheinträge, Ideen, Stimmungen und Aufgaben werden gelöscht. Das kann nicht rückgängig gemacht werden. Zuerst ein Backup exportieren."
+  },
+  {
+   "name": "s_923b0270",
+   "value": "Tagebuch und Ideen mit einem Tipp"
+  },
+  {
+   "name": "s_92771dae",
+   "value": "Tagebucheintrag gespeichert"
+  },
+  {
+   "name": "s_56409a3c",
+   "value": "Tagebuch-Verlauf"
+  },
+  {
+   "name": "s_50a1db67",
+   "value": "Tagebuch: {0} neu, {1} geändert, {2} nur hier\n"
+  },
+  {
+   "name": "s_449056e4",
+   "value": "Das Datum bestimmt die Einordnung in Kalender und Rückblick. Wichtigkeit dient zum Filtern und für Details."
+  },
+  {
+   "name": "s_432f74fa",
+   "value": "Zeitraum"
+  },
+  {
+   "name": "s_7203eec6",
+   "value": "Das alte Protokoll birgt Sicherheitsrisiken. Nutze unter „Sichern & Wiederherstellen“ den Backup-Export oder „Teilen“, um auf vertrauenswürdigem Weg zu übertragen."
+  },
+  {
+   "name": "s_43a7036a",
+   "value": "Alte Aufgabendaten sind beschädigt"
+  },
+  {
+   "name": "s_f5a97704",
+   "value": "Alte Aufgaben enthalten ungültige Einträge"
+  },
+  {
+   "name": "s_9c3b2801",
+   "value": "Alte Stimmungsdaten sind beschädigt"
+  },
+  {
+   "name": "s_3bddc601",
+   "value": "Alte Stimmungen enthalten ungültige Einträge"
+  },
+  {
+   "name": "s_454e9392",
+   "value": "Alte Tagebuchdaten sind beschädigt"
+  },
+  {
+   "name": "s_a628514c",
+   "value": "Altes Tagebuch enthält ungültige Einträge"
+  },
+  {
+   "name": "s_d7034b36",
+   "value": "Guten Morgen ☀️"
+  },
+  {
+   "name": "s_4b302bcb",
+   "value": "Wie oft glücklich, neutral oder unglücklich im Zeitraum; die Balkenlänge ist proportional"
+  },
+  {
+   "name": "s_50080995",
+   "value": "Keine Stimmungen in diesem Zeitraum"
+  },
+  {
+   "name": "s_b8d35720",
+   "value": "Noch keine Stimmungen in diesem Zeitraum. Die Verteilung entsteht mit der Zeit"
+  },
+  {
+   "name": "s_af564b8c",
+   "value": "NearLink"
+  },
+  {
+   "name": "s_0aaf4aa4",
+   "value": "NearLink, Live-Ansicht, smarte Dienste und mehrere Geräte"
+  },
+  {
+   "name": "s_12263e9a",
+   "value": "Gestern"
+  },
+  {
+   "name": "s_c18f71ef",
+   "value": "Guten Abend 🌙"
+  },
+  {
+   "name": "s_c14d82e9",
+   "value": "Agent-Laufzeit"
+  },
+  {
+   "name": "s_bf13f8b5",
+   "value": "Vorerst aus. Tippen für Alternativen"
+  },
+  {
+   "name": "s_a3b4475f",
+   "value": "Welches Gefühl trifft es am ehesten?"
+  },
+  {
+   "name": "s_87b8867d",
+   "value": "Neueste"
+  },
+  {
+   "name": "s_ceb8f642",
+   "value": "Älteste"
+  },
+  {
+   "name": "s_56b38d0f",
+   "value": "Letzte Momente"
+  },
+  {
+   "name": "s_81364f08",
+   "value": "Mit Wichtigkeit"
+  },
+  {
+   "name": "s_be2c2eb2",
+   "value": "Ungelesen"
+  },
+  {
+   "name": "s_f2dc2311",
+   "value": "Kein Speicherort gewählt"
+  },
+  {
+   "name": "s_9eb7e19a",
+   "value": "Keine Backup-Datei gewählt"
+  },
+  {
+   "name": "s_27c37899",
+   "value": "Diese Woche"
+  },
+  {
+   "name": "s_8b09339a",
+   "value": "Stimmung der Woche"
+  },
+  {
+   "name": "s_b70e17ea",
+   "value": "Diese Woche eher gedrückt"
+  },
+  {
+   "name": "s_24d17368",
+   "value": "Diese Woche ausgeglichen"
+  },
+  {
+   "name": "s_e3f61599",
+   "value": "Diese Woche eher positiv"
+  },
+  {
+   "name": "s_63d2d484",
+   "value": "Diese Woche noch nichts erfasst"
+  },
+  {
+   "name": "s_db0049cb",
+   "value": "Wochenverlauf"
+  },
+  {
+   "name": "s_3750d663",
+   "value": "Lokale Erinnerung"
+  },
+  {
+   "name": "s_5a3b670a",
+   "value": "Lokale Daten konnten nicht geladen werden: {0}"
+  },
+  {
+   "name": "s_36f7c12d",
+   "value": "Lokale Daten werden noch geladen, Backup-Export noch nicht möglich"
+  },
+  {
+   "name": "s_3bc73a70",
+   "value": "Lokale Daten werden noch geladen. Bitte gleich erneut versuchen"
+  },
+  {
+   "name": "s_a30af19c",
+   "value": "Lokale Daten gelöscht"
+  },
+  {
+   "name": "s_5c414af2",
+   "value": "Lokale Daten gelöscht, aber Systemerinnerungen konnten nicht entfernt werden. App neu starten und erneut versuchen"
+  },
+  {
+   "name": "s_caefb3d7",
+   "value": "Lokale Daten überschrieben"
+  },
+  {
+   "name": "s_ed1cc69e",
+   "value": "Die lokale Datenbank ist noch nicht bereit"
+  },
+  {
+   "name": "s_47af33f9",
+   "value": "Diesen Monat"
+  },
+  {
+   "name": "s_37272be9",
+   "value": "Aus einer Idee. Die Idee bleibt erhalten"
+  },
+  {
+   "name": "s_7e5242cd",
+   "value": "Tagesdetails anzeigen"
+  },
+  {
+   "name": "s_495fd6a9",
+   "value": "Idee ansehen"
+  },
+  {
+   "name": "s_c5a41a4d",
+   "value": "Importieren und vergleichen"
+  },
+  {
+   "name": "s_2b1626c8",
+   "value": "Schlagwort"
+  },
+  {
+   "name": "s_6fa75608",
+   "value": "Als Idee markieren"
+  },
+  {
+   "name": "s_da8c43e5",
+   "value": "Als Notiz markieren"
+  },
+  {
+   "name": "s_6642d94e",
+   "value": "Als dringend markieren"
+  },
+  {
+   "name": "s_20532441",
+   "value": "Aufbewahrte ungültige Daten einer alten Version gefunden. In den Einstellungen als Wiederherstellungsdatei exportieren"
+  },
+  {
+   "name": "s_f7d7a0ce",
+   "value": "Willkommen bei Flash"
+  },
+  {
+   "name": "s_b87694cc",
+   "value": "Lokale Daten werden geladen…"
+  },
+  {
+   "name": "s_f489ed09",
+   "value": "Text und Typ"
+  },
+  {
+   "name": "s_6af40858",
+   "value": "Jetzt"
+  },
+  {
+   "name": "s_eb842c00",
+   "value": "Dieses Gerät unterstützt die Zeitzone der Aufgabe nicht. System aktualisieren und erneut versuchen"
+  },
+  {
+   "name": "s_b060afd3",
+   "value": "Dieses Gerät unterstützt eine Aufgaben-Zeitzone im Backup nicht. System aktualisieren und erneut versuchen. Es wurde nichts importiert"
+  },
+  {
+   "name": "s_a46dce44",
+   "value": "Auf diesem Gerät unterstützt"
+  },
+  {
+   "name": "s_4c75c431",
+   "value": "Auf diesem Gerät noch nicht unterstützt"
+  },
+  {
+   "name": "s_f4958768",
+   "value": "Alle 3 Tage"
+  },
+  {
+   "name": "s_41be2fe2",
+   "value": "Wöchentlich"
+  },
+  {
+   "name": "s_02c285b5",
+   "value": "Täglich"
+  },
+  {
+   "name": "s_18fa51bd",
+   "value": "Tagebuch, Ideen und Stimmungen pro Tag · ohne Aufgaben"
+  },
+  {
+   "name": "s_10c2c6ea",
+   "value": "Diagramm der täglichen Einträge, "
+  },
+  {
+   "name": "s_8189ce25",
+   "value": "Sandbox-Export zum Teilen"
+  },
+  {
+   "name": "s_412c1bc9",
+   "value": "Keine Wiederherstellungsdaten zum Exportieren"
+  },
+  {
+   "name": "s_43c975df",
+   "value": "Keine Einträge gefunden"
+  },
+  {
+   "name": "s_f8bc527e",
+   "value": "Keine passenden Tagebucheinträge"
+  },
+  {
+   "name": "s_a1589567",
+   "value": "Aktive Tage: {0} · Durchschnittsstimmung {1}"
+  },
+  {
+   "name": "s_11b5fdf6",
+   "value": "Hell"
+  },
+  {
+   "name": "s_2a8baaea",
+   "value": "Dunkel"
+  },
+  {
+   "name": "s_2d2662ca",
+   "value": "Aufgabe hinzufügen"
+  },
+  {
+   "name": "s_efb3530b",
+   "value": "Löschen entfernt alle Tagebucheinträge, Stimmungen und Aufgaben auf diesem Gerät unwiderruflich. Zuerst ein Backup exportieren."
+  },
+  {
+   "name": "s_7c21f688",
+   "value": "Alle lokalen Daten löschen"
+  },
+  {
+   "name": "s_0f228eb2",
+   "value": "Alle lokalen Daten löschen. Muss bestätigt werden und ist nicht wiederherstellbar"
+  },
+  {
+   "name": "s_ff0218b5",
+   "value": "Alle lokalen Daten löschen?"
+  },
+  {
+   "name": "s_0b9d2bac",
+   "value": "Löschen"
+  },
+  {
+   "name": "s_0fba4654",
+   "value": "Filter löschen"
+  },
+  {
+   "name": "s_82e960a9",
+   "value": "Quarantäne leeren"
+  },
+  {
+   "name": "s_b8b74e9d",
+   "value": "Ideen"
+  },
+  {
+   "name": "s_a25c48e8",
+   "value": "Idee gespeichert"
+  },
+  {
+   "name": "s_4604d6bf",
+   "value": "Ideen-Erinnerungen"
+  },
+  {
+   "name": "s_436e2c82",
+   "value": "Was geht dir durch den Kopf?"
+  },
+  {
+   "name": "s_494f6f35",
+   "value": "Erstellt eine flash-backup-v2-Backup-Datei"
+  },
+  {
+   "name": "s_2ef507d3",
+   "value": "Erstellt ein Backup und sendet es über „Teilen“"
+  },
+  {
+   "name": "s_f60bb44e",
+   "value": "Wütend"
+  },
+  {
+   "name": "s_9efb941a",
+   "value": "Müde"
+  },
+  {
+   "name": "s_5b8de6f4",
+   "value": "Sieh Rhythmus und Stimmung hinter deinen Einträgen"
+  },
+  {
+   "name": "s_2f530b5b",
+   "value": "Löschen bestätigen"
+  },
+  {
+   "name": "s_869f8d0c",
+   "value": "Alles löschen"
+  },
+  {
+   "name": "s_78876d37",
+   "value": "Tippen zum Teilen"
+  },
+  {
+   "name": "s_5716f5ef",
+   "value": "In {0} Minuten"
+  },
+  {
+   "name": "s_7ed1d395",
+   "value": "Geräteinterner Agent A2A"
+  },
+  {
+   "name": "s_d742f801",
+   "value": "Wartet auf Szenario-Freigabe"
+  },
+  {
+   "name": "s_6fbf1709",
+   "value": "Wartet auf manuelle Signatur und App Linking"
+  },
+  {
+   "name": "s_f5e087c9",
+   "value": "Filter"
+  },
+  {
+   "name": "s_26640f43",
+   "value": "Typ"
+  },
+  {
+   "name": "s_5d44879d",
+   "value": "Vom System unterstützt; wartet auf Berechtigung"
+  },
+  {
+   "name": "s_77cc2953",
+   "value": "Das System bietet keine öffentliche API dafür, daher eine App-Einstellung"
+  },
+  {
+   "name": "s_ae26d9e7",
+   "value": "Systemfunktionen"
+  },
+  {
+   "name": "s_b68d1af4",
+   "value": "Systemfunktionen konnten nicht geprüft werden; der Status ist evtl. ungenau"
+  },
+  {
+   "name": "s_235f3e59",
+   "value": "Dringend"
+  },
+  {
+   "name": "s_64db55af",
+   "value": "Warten {0} oder mehr Ideen, wirst du um 20 Uhr erinnert. Geöffnete Ideen zählen nicht mehr."
+  },
+  {
+   "name": "s_77dacc26",
+   "value": "Aufteilung · gesamt"
+  },
+  {
+   "name": "s_476d405b",
+   "value": "Enddatum"
+  },
+  {
+   "name": "s_010e135c",
+   "value": "Weiter bearbeiten"
+  },
+  {
+   "name": "s_e60fd56d",
+   "value": "Schreib weiter, dann wird dein Rückblick klarer"
+  },
+  {
+   "name": "s_607348a8",
+   "value": "Bearbeiten"
+  },
+  {
+   "name": "s_1d5b5e98",
+   "value": "Aufgabe bearbeiten"
+  },
+  {
+   "name": "s_c9ab4c68",
+   "value": "Idee bearbeiten"
+  },
+  {
+   "name": "s_a5db4a27",
+   "value": "Eintrag bearbeiten"
+  },
+  {
+   "name": "s_d157cf32",
+   "value": "Eigener Zustand, z. B. hoffnungsvoll oder ruhig"
+  },
+  {
+   "name": "s_cf266f5e",
+   "value": "Einträge im Zeitraum"
+  },
+  {
+   "name": "s_a6317c7d",
+   "value": "Überschreiben"
+  },
+  {
+   "name": "s_5521c6a5",
+   "value": "Ein Platz für jeden Gedanken · kein Cloud-Konto"
+  },
+  {
+   "name": "s_dad3d89f",
+   "value": "Ersten Gedanken festhalten"
+  },
+  {
+   "name": "s_2c9d9f0e",
+   "value": "Einträge"
+  },
+  {
+   "name": "s_57cc90b8",
+   "value": "Inhalt"
+  },
+  {
+   "name": "s_a7c9e948",
+   "value": "Eintrag gelöscht"
+  },
+  {
+   "name": "s_25548f50",
+   "value": "Eintrag aktualisiert"
+  },
+  {
+   "name": "s_a48657a1",
+   "value": "Stimmung erfassen"
+  },
+  {
+   "name": "s_8c8316a6",
+   "value": "Eintragsdatum JJJJ-MM-TT"
+  },
+  {
+   "name": "s_d1e82646",
+   "value": "Erfassungsaktivität"
+  },
+  {
+   "name": "s_e49ad9fc",
+   "value": "Gerät unterstützt es; wartet auf Szenario"
+  },
+  {
+   "name": "s_0102647f",
+   "value": "Geräteübertragung"
+  },
+  {
+   "name": "s_f3c259dd",
+   "value": "Einstellungen"
+  },
+  {
+   "name": "s_6c53e15d",
+   "value": "Gib einen Aufgabentitel ein"
+  },
+  {
+   "name": "s_b1313650",
+   "value": "Gib ein gültiges Datum ein (JJJJ-MM-TT)"
+  },
+  {
+   "name": "s_796026c5",
+   "value": "Gib ein gültiges Datum und eine gültige Uhrzeit ein"
+  },
+  {
+   "name": "s_8678f5d9",
+   "value": "{0} Zeichen zu viel"
+  },
+  {
+   "name": "s_b45e202f",
+   "value": "Verlauf"
+  },
+  {
+   "name": "s_b494a385",
+   "value": "System"
+  },
+  {
+   "name": "s_ebbcb10b",
+   "value": "In Aufgabe umwandeln"
+  },
+  {
+   "name": "s_13f1b81a",
+   "value": "Stichwort oder Schlagwort eingeben"
+  },
+  {
+   "name": "s_7cd6a835",
+   "value": "Stichwort oder Schlagwortnamen eingeben"
+  },
+  {
+   "name": "s_214cb43c",
+   "value": "die letzten 30 Tage"
+  },
+  {
+   "name": "s_27712c0e",
+   "value": "Balkendiagramm der Tagesstimmung der letzten 7 Tage"
+  },
+  {
+   "name": "s_511bc8b4",
+   "value": "Tagesdurchschnitt, letzte 7 Tage · — bedeutet: nichts erfasst"
+  },
+  {
+   "name": "s_9ea79282",
+   "value": "die letzten 90 Tage"
+  },
+  {
+   "name": "s_4ed18a1a",
+   "value": "Letzte 30 Tage"
+  },
+  {
+   "name": "s_6ae50c28",
+   "value": "Letzte 7 Tage"
+  },
+  {
+   "name": "s_8ab0bb3c",
+   "value": "Letzte 90 Tage"
+  },
+  {
+   "name": "s_863fb33a",
+   "value": "Zuletzt"
+  },
+  {
+   "name": "s_a7f085b7",
+   "value": "Noch {0} Zeichen"
+  },
+  {
+   "name": "s_91cae70c",
+   "value": "Noch keine Stimmungen. Fang damit an, wie du dich fühlst"
+  },
+  {
+   "name": "s_4cabb422",
+   "value": "Noch keine Einträge"
+  },
+  {
+   "name": "s_fa547131",
+   "value": "Keine Pläne oder Einträge an diesem Tag"
+  },
+  {
+   "name": "s_6d67abd6",
+   "value": "diesen Monat"
+  },
+  {
+   "name": "s_09e1a534",
+   "value": "diese Woche"
+  },
+  {
+   "name": "s_d3ce76c1",
+   "value": "Dieser Eintrag existiert nicht mehr"
+  },
+  {
+   "name": "s_5aa52714",
+   "value": "In diesem Zeitraum: Einträge {0} · Stimmungen {1}"
+  },
+  {
+   "name": "s_5fe370b7",
+   "value": "Auswählen"
+  },
+  {
+   "name": "s_b59b6994",
+   "value": "Mitteilungseinstellungen"
+  },
+  {
+   "name": "s_00b88ac0",
+   "value": "Mitteilungseinstellungen-Blatt"
+  },
+  {
+   "name": "s_cf3e4247",
+   "value": "Wichtigkeit"
+  },
+  {
+   "name": "s_b53d490f",
+   "value": "Wichtigkeit und Datum"
+  },
+  {
+   "name": "s_e63fba86",
+   "value": "Wichtigkeit muss zwischen 0 und 4 liegen"
+  },
+  {
+   "name": "s_4e941a37",
+   "value": "Erneut versuchen"
+  },
+  {
+   "name": "s_954316f6",
+   "value": "Schwebender Ball / Fenster"
+  },
+  {
+   "name": "s_aef2df88",
+   "value": "Unterwegs erfassen"
+  },
+  {
+   "name": "s_a87d7d3d",
+   "value": "Quarantäne geleert"
+  },
+  {
+   "name": "s_80390cc2",
+   "value": "Unwohl"
+  },
+  {
+   "name": "s_99546fff",
+   "value": "Sehr aufgebracht"
+  },
+  {
+   "name": "s_22566806",
+   "value": "Begeistert"
+  },
+  {
+   "name": "s_b6819d11",
+   "value": "Die Seite ist noch nicht bereit. Bitte gleich erneut versuchen"
+  },
+  {
+   "name": "s_1f54be7c",
+   "value": "Seitenaktionen sind nicht eingerichtet"
+  },
+  {
+   "name": "s_9a63360d",
+   "value": "Lokale Daten haben sich nach der Vorschau geändert. Unterschiede neu berechnet. Vor dem Überschreiben bestätigen"
+  },
+  {
+   "name": "s_39f2623a",
+   "value": "HarmonyOS-Funktionen"
+  },
+  {
+   "name": "s_a14edc19",
+   "value": "(Ohne Titel)"
+  },
+  {
+   "name": "s_d6d10170",
+   "value": "+ Neu"
+  },
+  {
+   "name": "s_25af9b9f",
+   "value": ", ungelesene Ideen: {0}"
+  },
+  {
+   "name": "s_60b362bc",
+   "value": ", aber Systemerinnerungen konnten nicht wiederhergestellt werden"
+  },
+  {
+   "name": "s_9b38261d",
+   "value": ", Tagesdetails lassen sich einblenden"
+  },
+  {
+   "name": "s_e014a361",
+   "value": ", ausgewählt"
+  },
+  {
+   "name": "s_b5a68109",
+   "value": ", nicht verfügbar"
+  },
+  {
+   "name": "s_67d80aae",
+   "value": ", mit Stimmungseintrag"
+  },
+  {
+   "name": "s_1e2ec103",
+   "value": ", und die Stimmung war etwas gedrückter"
+  },
+  {
+   "name": "s_2122a6c6",
+   "value": ", und die Stimmung war etwas positiver"
+  }
+ ]
+}

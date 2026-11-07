@@ -1,72 +1,1792 @@
 {
-  "string": [
-    {
-      "name": "module_desc",
-      "value": "Flash Aero HarmonyOS 原生版本"
-    },
-    {
-      "name": "EntryAbility_desc",
-      "value": "Flash Aero 主窗口"
-    },
-    {
-      "name": "EntryAbility_label",
-      "value": "Flash Aero"
-    },
-    {
-      "name": "EntryFormAbility_label",
-      "value": "今日概览"
-    },
-    {
-      "name": "EntryFormAbility_desc",
-      "value": "Flash Aero 今日概览服务卡片"
-    },
-    {
-      "name": "form_today_summary_display_name",
-      "value": "今日概览"
-    },
-    {
-      "name": "form_today_summary_desc",
-      "value": "一览今日记录、灵感与待办任务"
-    },
-    {
-      "name": "form_today_title",
-      "value": "今日概览"
-    },
-    {
-      "name": "form_stat_records",
-      "value": "记录"
-    },
-    {
-      "name": "form_stat_ideas",
-      "value": "灵感"
-    },
-    {
-      "name": "form_stat_tasks",
-      "value": "待办"
-    },
-    {
-      "name": "form_today_capture_display_name",
-      "value": "今日与快速记录"
-    },
-    {
-      "name": "form_today_capture_desc",
-      "value": "今日概览，并可一键记录灵感或日志"
-    },
-    {
-      "name": "shortcut_idea",
-      "value": "记灵感"
-    },
-    {
-      "name": "shortcut_log",
-      "value": "记日志"
-    },
-    {
-      "name": "form_action_idea",
-      "value": "灵感"
-    },
-    {
-      "name": "form_action_log",
-      "value": "日志"
-    }
-  ]
+ "string": [
+  {
+   "name": "module_desc",
+   "value": "Flash Aero for HarmonyOS"
+  },
+  {
+   "name": "EntryAbility_desc",
+   "value": "Flash Aero main window"
+  },
+  {
+   "name": "EntryAbility_label",
+   "value": "Flash Aero"
+  },
+  {
+   "name": "EntryFormAbility_label",
+   "value": "Today"
+  },
+  {
+   "name": "EntryFormAbility_desc",
+   "value": "Flash Aero today overview card"
+  },
+  {
+   "name": "form_today_summary_display_name",
+   "value": "Today"
+  },
+  {
+   "name": "form_today_summary_desc",
+   "value": "See today's records, ideas and to-dos"
+  },
+  {
+   "name": "form_today_title",
+   "value": "Today"
+  },
+  {
+   "name": "form_stat_records",
+   "value": "Records"
+  },
+  {
+   "name": "form_stat_ideas",
+   "value": "Ideas"
+  },
+  {
+   "name": "form_stat_tasks",
+   "value": "To-do"
+  },
+  {
+   "name": "form_today_capture_display_name",
+   "value": "Today & Quick Capture"
+  },
+  {
+   "name": "form_today_capture_desc",
+   "value": "Today's overview, with one tap to capture an idea or log"
+  },
+  {
+   "name": "shortcut_idea",
+   "value": "New idea"
+  },
+  {
+   "name": "shortcut_log",
+   "value": "New log"
+  },
+  {
+   "name": "form_action_idea",
+   "value": "Ideas"
+  },
+  {
+   "name": "form_action_log",
+   "value": "Logs"
+  },
+  {
+   "name": "s_349a6396",
+   "value": " · Importance {0}"
+  },
+  {
+   "name": "s_2f0fbd80",
+   "value": "−3 to +3, 0 is neutral; — means nothing recorded that day"
+  },
+  {
+   "name": "s_d78803b1",
+   "value": "/data/emotions: invalid or duplicate entries. Fix them before exporting"
+  },
+  {
+   "name": "s_92fe6094",
+   "value": "/data/logs: invalid or duplicate entries. Fix them before exporting"
+  },
+  {
+   "name": "s_cc6625e3",
+   "value": "/data/tasks: invalid or duplicate entries. Fix them before exporting"
+  },
+  {
+   "name": "s_76da33b4",
+   "value": "/data: invalid or duplicate entries. Use the recovery import"
+  },
+  {
+   "name": "s_bfb6aa12",
+   "value": "/data: array exceeds the limit"
+  },
+  {
+   "name": "s_d40dfcbc",
+   "value": "/updatedAt: invalid task time"
+  },
+  {
+   "name": "s_b9ce0fb9",
+   "value": "/: too many JSON values"
+  },
+  {
+   "name": "s_307d96fc",
+   "value": "/: JSON object has a duplicate key: {0}"
+  },
+  {
+   "name": "s_b414e614",
+   "value": "/: invalid JSON syntax (position {0})"
+  },
+  {
+   "name": "s_d8026ec4",
+   "value": "/: BOM is not allowed"
+  },
+  {
+   "name": "s_4be9c949",
+   "value": "/: invalid backup version or metadata"
+  },
+  {
+   "name": "s_67596dc6",
+   "value": "/: file is larger than 50 MiB"
+  },
+  {
+   "name": "s_355b83a3",
+   "value": "A week worth remembering. ✦"
+  },
+  {
+   "name": "s_2a0b1ddf",
+   "value": "Flash idea"
+  },
+  {
+   "name": "s_de22df1c",
+   "value": "Flash record"
+  },
+  {
+   "name": "s_8d6bfa5c",
+   "value": "Highlights"
+  },
+  {
+   "name": "s_a60503ed",
+   "value": "JSON backup|.json"
+  },
+  {
+   "name": "s_58f879ce",
+   "value": "Memory"
+  },
+  {
+   "name": "s_879db2fb",
+   "value": "Mostly low"
+  },
+  {
+   "name": "s_db9c822c",
+   "value": "Mostly positive"
+  },
+  {
+   "name": "s_f3498d7d",
+   "value": "Mostly steady"
+  },
+  {
+   "name": "s_244cff4e",
+   "value": "This week felt..."
+  },
+  {
+   "name": "s_fe948398",
+   "value": "You recorded"
+  },
+  {
+   "name": "s_70c34463",
+   "value": "moods"
+  },
+  {
+   "name": "s_f22ee8cb",
+   "value": "ideas"
+  },
+  {
+   "name": "s_62852daa",
+   "value": "moments"
+  },
+  {
+   "name": "s_ad2e48cd",
+   "value": "tasks"
+  },
+  {
+   "name": "s_48dce70c",
+   "value": "v0.1.0 · HarmonyOS · com.flash.app.harmonyos"
+  },
+  {
+   "name": "s_6e425eba",
+   "value": "{0}: {1} · {2}: {3}"
+  },
+  {
+   "name": "s_ad1bbef7",
+   "value": "Ideas to review: {0}. Open the oldest"
+  },
+  {
+   "name": "s_409ddff6",
+   "value": "Active days: {0} · Total: {1}"
+  },
+  {
+   "name": "s_ae7c912e",
+   "value": "{1}/{0}"
+  },
+  {
+   "name": "s_79fc376e",
+   "value": "Items: {0}"
+  },
+  {
+   "name": "s_ba02e82e",
+   "value": "{0}×"
+  },
+  {
+   "name": "s_1f0ab446",
+   "value": "{0} details"
+  },
+  {
+   "name": "s_1d2f42b7",
+   "value": "{0} was less active than {1}"
+  },
+  {
+   "name": "s_2712f5b4",
+   "value": "{0} matched {1}"
+  },
+  {
+   "name": "s_2e763a14",
+   "value": "You recorded more often {0} than {1}"
+  },
+  {
+   "name": "s_ae5c9fd5",
+   "value": "{0}/{1}"
+  },
+  {
+   "name": "s_ce181c99",
+   "value": "{0}, items: {1}"
+  },
+  {
+   "name": "s_662e559c",
+   "value": "{0}, but the recovery copy couldn't be written and the original data wasn't kept"
+  },
+  {
+   "name": "s_deca74ba",
+   "value": "{0}. The original data was kept for recovery"
+  },
+  {
+   "name": "s_245af589",
+   "value": "{0}: records {1} · moods {2}"
+  },
+  {
+   "name": "s_509d59f4",
+   "value": "{0}: must be an object"
+  },
+  {
+   "name": "s_0009cc0b",
+   "value": "{0}: missing required fields or has unknown fields"
+  },
+  {
+   "name": "s_c76c65d2",
+   "value": "‹ Back"
+  },
+  {
+   "name": "s_7dad93fd",
+   "value": "★ Favorites"
+  },
+  {
+   "name": "s_745e890f",
+   "value": "✓ Saved to logs"
+  },
+  {
+   "name": "s_a248a677",
+   "value": "✓ Saved to ideas"
+  },
+  {
+   "name": "s_8d102943",
+   "value": "✓ Sorted: {0}"
+  },
+  {
+   "name": "s_05615f1f",
+   "value": "Mon"
+  },
+  {
+   "name": "s_e50a5759",
+   "value": "Fleeting thoughts are worth remembering"
+  },
+  {
+   "name": "s_8bcbbc86",
+   "value": "Seven mood levels to see how you change"
+  },
+  {
+   "name": "s_0c616a24",
+   "value": "Wed"
+  },
+  {
+   "name": "s_508b1e1d",
+   "value": "Previous week"
+  },
+  {
+   "name": "s_b06dcc3d",
+   "value": "Previous month"
+  },
+  {
+   "name": "s_8be194e7",
+   "value": "last month"
+  },
+  {
+   "name": "s_eb0f6aef",
+   "value": "last week"
+  },
+  {
+   "name": "s_0bb3bda2",
+   "value": "Next week"
+  },
+  {
+   "name": "s_6bcf17c2",
+   "value": "Next month"
+  },
+  {
+   "name": "s_10c83c81",
+   "value": "Next"
+  },
+  {
+   "name": "s_82b6cabb",
+   "value": "Good afternoon 🌤"
+  },
+  {
+   "name": "s_1344f491",
+   "value": "Unhappy"
+  },
+  {
+   "name": "s_1f28bc53",
+   "value": "How unhappy moods felt"
+  },
+  {
+   "name": "s_4cc036be",
+   "value": "No reminder"
+  },
+  {
+   "name": "s_44d41ebe",
+   "value": "Focused"
+  },
+  {
+   "name": "s_bfa55e52",
+   "value": "Medium-screen layout"
+  },
+  {
+   "name": "s_b13672cd",
+   "value": "Neutral"
+  },
+  {
+   "name": "s_15a81f9c",
+   "value": "Why aren't some features turned on?"
+  },
+  {
+   "name": "s_74e5c7e6",
+   "value": "Theme"
+  },
+  {
+   "name": "s_5a9c8a19",
+   "value": "Couldn't save the theme: {0}"
+  },
+  {
+   "name": "s_0a416847",
+   "value": "the previous 30 days"
+  },
+  {
+   "name": "s_0c6445c1",
+   "value": "the previous 90 days"
+  },
+  {
+   "name": "s_89609beb",
+   "value": "Tue"
+  },
+  {
+   "name": "s_9160a883",
+   "value": "Fri"
+  },
+  {
+   "name": "s_e835fb8e",
+   "value": "Only shows what was actually detected and connected. System permissions that need review aren't used until approved."
+  },
+  {
+   "name": "s_946c250b",
+   "value": "For manual recovery only. Don't share publicly"
+  },
+  {
+   "name": "s_a848765c",
+   "value": "Today"
+  },
+  {
+   "name": "s_6f3c2b2c",
+   "value": "Note something down today."
+  },
+  {
+   "name": "s_1f2bd289",
+   "value": "Nothing recorded yet today."
+  },
+  {
+   "name": "s_cfccbae7",
+   "value": "Today"
+  },
+  {
+   "name": "s_2d7464e1",
+   "value": "Tasks"
+  },
+  {
+   "name": "s_1915b50d",
+   "value": "Task is due soon"
+  },
+  {
+   "name": "s_9dba36cc",
+   "value": "Task saved"
+  },
+  {
+   "name": "s_9e20fc67",
+   "value": "Task saved, but system reminders aren't turned on"
+  },
+  {
+   "name": "s_991e9b9d",
+   "value": "Task deleted"
+  },
+  {
+   "name": "s_d5f54072",
+   "value": "Task deleted, but system reminders couldn't sync"
+  },
+  {
+   "name": "s_534ff12d",
+   "value": "Couldn't restore task reminders. Your tasks are safe. Restart the app later to retry"
+  },
+  {
+   "name": "s_a961bb3e",
+   "value": "Task title"
+  },
+  {
+   "name": "s_e7cf88d5",
+   "value": "Task updated, but system reminders couldn't sync"
+  },
+  {
+   "name": "s_c185d41b",
+   "value": "Tasks: {0} new, {1} changed, {2} only here\n"
+  },
+  {
+   "name": "s_79955ed0",
+   "value": "Sad"
+  },
+  {
+   "name": "s_d7974514",
+   "value": "Ideas waiting: {0}. Start with the oldest"
+  },
+  {
+   "name": "s_d908f279",
+   "value": "Ideas waiting for review: {0}. Take a look"
+  },
+  {
+   "name": "s_ad5b82b0",
+   "value": "Save"
+  },
+  {
+   "name": "s_9b95e293",
+   "value": "Saving…"
+  },
+  {
+   "name": "s_1d0e5d5a",
+   "value": "All day"
+  },
+  {
+   "name": "s_0c14a696",
+   "value": "All-day task"
+  },
+  {
+   "name": "s_05eb990b",
+   "value": "Search everything"
+  },
+  {
+   "name": "s_5e6558ad",
+   "value": "All"
+  },
+  {
+   "name": "s_e8562c78",
+   "value": "Sat"
+  },
+  {
+   "name": "s_e161dfa6",
+   "value": "Total {0} · Logs {1} · Ideas {2}"
+  },
+  {
+   "name": "s_c5603acc",
+   "value": "The shared folder isn't available. Use “Choose location” instead"
+  },
+  {
+   "name": "s_72a18f8e",
+   "value": "About Flash"
+  },
+  {
+   "name": "s_87dadb5a",
+   "value": "Keyword or tag"
+  },
+  {
+   "name": "s_39b523bd",
+   "value": "Close"
+  },
+  {
+   "name": "s_dc24135d",
+   "value": "Content can't be empty"
+  },
+  {
+   "name": "s_e67132b8",
+   "value": "Content can't be empty. Add something before saving"
+  },
+  {
+   "name": "s_f3b7b450",
+   "value": "Over 100,000 characters. Shorten it before saving"
+  },
+  {
+   "name": "s_87000edc",
+   "value": "Keep recording; future you will see it."
+  },
+  {
+   "name": "s_308e704e",
+   "value": "Reduce motion"
+  },
+  {
+   "name": "s_f6d47411",
+   "value": "Couldn't save Reduce Motion: {0}"
+  },
+  {
+   "name": "s_9aa7d416",
+   "value": "Share"
+  },
+  {
+   "name": "s_081c9fc0",
+   "value": "Couldn't share"
+  },
+  {
+   "name": "s_6ba0562c",
+   "value": "Share export"
+  },
+  {
+   "name": "s_ea8d5381",
+   "value": "Delete"
+  },
+  {
+   "name": "s_04235540",
+   "value": "This can't be undone."
+  },
+  {
+   "name": "s_9b7a515f",
+   "value": "Asks you to confirm again and can't be recovered"
+  },
+  {
+   "name": "s_4ccb1394",
+   "value": "Deletes the kept copy of invalid original data"
+  },
+  {
+   "name": "s_5bfa5877",
+   "value": "Delete this task?"
+  },
+  {
+   "name": "s_e6dedfa0",
+   "value": "Delete this mood?"
+  },
+  {
+   "name": "s_409819b9",
+   "value": "Delete this record?"
+  },
+  {
+   "name": "s_c51f5912",
+   "value": "At due time"
+  },
+  {
+   "name": "s_c6dda34e",
+   "value": "Load more ({0} left)"
+  },
+  {
+   "name": "s_60b4c5ae",
+   "value": "Danger zone"
+  },
+  {
+   "name": "s_949856b3",
+   "value": "Cancel"
+  },
+  {
+   "name": "s_d1d62fb0",
+   "value": "Remove favorite"
+  },
+  {
+   "name": "s_8b70a958",
+   "value": "Move logs, moods and tasks between Android, macOS and HarmonyOS. Backups are plain JSON, so only save or share them somewhere you trust."
+  },
+  {
+   "name": "s_4d55cb75",
+   "value": "Export a backup or send it with system share"
+  },
+  {
+   "name": "s_b902b8d3",
+   "value": "Merge"
+  },
+  {
+   "name": "s_5e53c03a",
+   "value": "Thu"
+  },
+  {
+   "name": "s_40163b46",
+   "value": "Back to today"
+  },
+  {
+   "name": "s_bed63d2f",
+   "value": "This week"
+  },
+  {
+   "name": "s_c2e1aa6d",
+   "value": "Review"
+  },
+  {
+   "name": "s_5a543946",
+   "value": "Visible in the Files app (Downloads/Flash)"
+  },
+  {
+   "name": "s_fbac6f20",
+   "value": "Backup & Restore"
+  },
+  {
+   "name": "s_ad4d7827",
+   "value": "Backup wasn't fully written, so sharing was cancelled"
+  },
+  {
+   "name": "s_c5eb49de",
+   "value": "Backup wasn't fully written, so the export failed"
+  },
+  {
+   "name": "s_a1b093ff",
+   "value": "Backup merged"
+  },
+  {
+   "name": "s_20fe814f",
+   "value": "Backup exported"
+  },
+  {
+   "name": "s_09ecc21d",
+   "value": "Backup exported to Downloads in the Files app"
+  },
+  {
+   "name": "s_55769b97",
+   "value": "Backup structure is incomplete"
+  },
+  {
+   "name": "s_0420eb69",
+   "value": "Backup structure is incomplete or a section version is incompatible"
+  },
+  {
+   "name": "s_c90a7947",
+   "value": "The backup file isn't a valid JSON object"
+  },
+  {
+   "name": "s_364b46a8",
+   "value": "The backup file is empty"
+  },
+  {
+   "name": "s_c4981a8c",
+   "value": "Couldn't read the whole backup file"
+  },
+  {
+   "name": "s_245f47d8",
+   "value": "The backup file is larger than 50 MB"
+  },
+  {
+   "name": "s_fc4f6b0f",
+   "value": "Incompatible backup version"
+  },
+  {
+   "name": "s_584ff11a",
+   "value": "Memo"
+  },
+  {
+   "name": "s_d9dac7dd",
+   "value": "Notes (optional)"
+  },
+  {
+   "name": "s_e4a4815a",
+   "value": "Appearance & use"
+  },
+  {
+   "name": "s_e665350f",
+   "value": "Multi-device layouts"
+  },
+  {
+   "name": "s_d590eab1",
+   "value": "Side navigation on large screens"
+  },
+  {
+   "name": "s_1e13bd21",
+   "value": "Done"
+  },
+  {
+   "name": "s_bb58d8d1",
+   "value": "Live View"
+  },
+  {
+   "name": "s_513bdfd7",
+   "value": "Live View, the floating ball, tap-to-share and Celia intents need scenario, signing, device or platform review. Flash will turn them on once approved, and doesn't request restricted permissions it doesn't need."
+  },
+  {
+   "name": "s_4353e306",
+   "value": "See what will merge or be added before importing"
+  },
+  {
+   "name": "s_7fdaf616",
+   "value": "Export, import and clear"
+  },
+  {
+   "name": "s_7af59148",
+   "value": "Export to Downloads"
+  },
+  {
+   "name": "s_03150537",
+   "value": "Export backup JSON"
+  },
+  {
+   "name": "s_026223aa",
+   "value": "Export old invalid raw data"
+  },
+  {
+   "name": "s_e29f076f",
+   "value": "Try to repair a backup that won't import"
+  },
+  {
+   "name": "s_479481d2",
+   "value": "Local network transfer is turned off for now"
+  },
+  {
+   "name": "s_f959f4af",
+   "value": "Local network transfer is off because the old protocol has security risks. Use Export backup or system share to send the JSON file through a channel you trust."
+  },
+  {
+   "name": "s_cb51ae33",
+   "value": "Open filters"
+  },
+  {
+   "name": "s_b1368837",
+   "value": "Differences"
+  },
+  {
+   "name": "s_5dbcdf6d",
+   "value": "Off"
+  },
+  {
+   "name": "s_bee374d1",
+   "value": "Deleted"
+  },
+  {
+   "name": "s_84f30bbf",
+   "value": "Connected (in Settings)"
+  },
+  {
+   "name": "s_26942e0f",
+   "value": "Connected, limited by folder permissions"
+  },
+  {
+   "name": "s_a8126b62",
+   "value": "Favorited"
+  },
+  {
+   "name": "s_6933b472",
+   "value": "System share opened"
+  },
+  {
+   "name": "s_c8fa62c1",
+   "value": "Selected: {0}"
+  },
+  {
+   "name": "s_23ed437e",
+   "value": "Platform features"
+  },
+  {
+   "name": "s_fea8398c",
+   "value": "Average mood"
+  },
+  {
+   "name": "s_499be303",
+   "value": "Get started"
+  },
+  {
+   "name": "s_5d62764c",
+   "value": "Start date"
+  },
+  {
+   "name": "s_2a665354",
+   "value": "Happy"
+  },
+  {
+   "name": "s_673d4a91",
+   "value": "Intensity"
+  },
+  {
+   "name": "s_6a19ddcf",
+   "value": "Intensity {0}"
+  },
+  {
+   "name": "s_09229c97",
+   "value": "Current state (optional)"
+  },
+  {
+   "name": "s_13cca53d",
+   "value": "Not supported on this device"
+  },
+  {
+   "name": "s_1b4ae1a8",
+   "value": "This device can't export to the shared folder. Use “Choose location” instead"
+  },
+  {
+   "name": "s_91049175",
+   "value": "This device doesn't support in-app notification settings"
+  },
+  {
+   "name": "s_1a0a2c38",
+   "value": "This device doesn't support system share"
+  },
+  {
+   "name": "s_4b8edbfa",
+   "value": "To-do"
+  },
+  {
+   "name": "s_e83d11ae",
+   "value": "To sort"
+  },
+  {
+   "name": "s_243c3959",
+   "value": "To sort: logs tagged Daily."
+  },
+  {
+   "name": "s_2367642b",
+   "value": "Very unhappy"
+  },
+  {
+   "name": "s_fb903262",
+   "value": "Very happy"
+  },
+  {
+   "name": "s_e70923c8",
+   "value": "Quick Capture"
+  },
+  {
+   "name": "s_9f0dc65e",
+   "value": "Quick Capture intents await platform review"
+  },
+  {
+   "name": "s_53d60ffd",
+   "value": "Raw recovery data exported. Keep it safe and contact support"
+  },
+  {
+   "name": "s_abf33a8f",
+   "value": "Restore a damaged or old backup"
+  },
+  {
+   "name": "s_a9612b5e",
+   "value": "Mood"
+  },
+  {
+   "name": "s_f3061bd1",
+   "value": "Mood distribution"
+  },
+  {
+   "name": "s_35dbb46b",
+   "value": "Mood recorded"
+  },
+  {
+   "name": "s_643f1ede",
+   "value": "Mood awareness"
+  },
+  {
+   "name": "s_ff9f8889",
+   "value": "Mood deleted"
+  },
+  {
+   "name": "s_8ac3df35",
+   "value": "Mood trend · daily average"
+  },
+  {
+   "name": "s_fe05f6f8",
+   "value": "Moods: {0} new, {1} changed, {2} only here\n"
+  },
+  {
+   "name": "s_99812275",
+   "value": "Thought"
+  },
+  {
+   "name": "s_d9f8afc2",
+   "value": "Ideas to review"
+  },
+  {
+   "name": "s_6deefec2",
+   "value": "Remind me when ideas are waiting"
+  },
+  {
+   "name": "s_4f5176ed",
+   "value": "Anything to add? (optional)"
+  },
+  {
+   "name": "s_b5d25fe7",
+   "value": "Compact phone layout"
+  },
+  {
+   "name": "s_8523e97b",
+   "value": "Newest first"
+  },
+  {
+   "name": "s_791c2e78",
+   "value": "Oldest first"
+  },
+  {
+   "name": "s_6ef98325",
+   "value": "By tag"
+  },
+  {
+   "name": "s_43bc98a3",
+   "value": "API available; needs device approval"
+  },
+  {
+   "name": "s_392df5d7",
+   "value": "15 minutes before"
+  },
+  {
+   "name": "s_401bd3d4",
+   "value": "1 day before"
+  },
+  {
+   "name": "s_25b72168",
+   "value": "1 hour before"
+  },
+  {
+   "name": "s_669f23ff",
+   "value": "{0} minutes before"
+  },
+  {
+   "name": "s_355f82e3",
+   "value": "{0} days before"
+  },
+  {
+   "name": "s_222759b9",
+   "value": "{0} hours before"
+  },
+  {
+   "name": "s_6d40d527",
+   "value": "Reminder"
+  },
+  {
+   "name": "s_24035981",
+   "value": "Reminders are handled by HarmonyOS in the background. You'll be asked for notification permission the first time."
+  },
+  {
+   "name": "s_0b6efa3b",
+   "value": "Search"
+  },
+  {
+   "name": "s_c8a90aa9",
+   "value": "Search records, ideas, moods and tasks"
+  },
+  {
+   "name": "s_1b9e8bc9",
+   "value": "Undo"
+  },
+  {
+   "name": "s_7be8ae06",
+   "value": "Something went wrong"
+  },
+  {
+   "name": "s_839d4732",
+   "value": "Favorite"
+  },
+  {
+   "name": "s_cf8b8d02",
+   "value": "Hide daily details"
+  },
+  {
+   "name": "s_f3386881",
+   "value": "Close filters"
+  },
+  {
+   "name": "s_e1598b13",
+   "value": "Discard"
+  },
+  {
+   "name": "s_0ac91ecb",
+   "value": "Discard unsaved changes?"
+  },
+  {
+   "name": "s_34ea918d",
+   "value": "Relaxed"
+  },
+  {
+   "name": "s_4502142c",
+   "value": "Data, backups and app settings"
+  },
+  {
+   "name": "s_6344fa26",
+   "value": "Data & security"
+  },
+  {
+   "name": "s_b6537954",
+   "value": "The database has invalid entries. The quarantine copy couldn't be written, so the originals stay in the database"
+  },
+  {
+   "name": "s_121fd605",
+   "value": "The database has invalid entries. The originals were quarantined and can be exported"
+  },
+  {
+   "name": "s_b464971d",
+   "value": "Data is saved on this device"
+  },
+  {
+   "name": "s_b8c8a94f",
+   "value": "New"
+  },
+  {
+   "name": "s_b0f36447",
+   "value": "New task"
+  },
+  {
+   "name": "s_d2c53483",
+   "value": "New idea"
+  },
+  {
+   "name": "s_160eb028",
+   "value": "New record"
+  },
+  {
+   "name": "s_659aa23f",
+   "value": "None"
+  },
+  {
+   "name": "s_40c77de6",
+   "value": "Invalid items: {0}"
+  },
+  {
+   "name": "s_74421189",
+   "value": "No importance"
+  },
+  {
+   "name": "s_609a9a60",
+   "value": "Sun"
+  },
+  {
+   "name": "s_f9abd512",
+   "value": "Calendar"
+  },
+  {
+   "name": "s_6ba31688",
+   "value": "Daily"
+  },
+  {
+   "name": "s_caa53f15",
+   "value": "Logs"
+  },
+  {
+   "name": "s_6c39f636",
+   "value": "All logs, ideas, moods and tasks will be deleted. This can't be undone. Export a backup first."
+  },
+  {
+   "name": "s_923b0270",
+   "value": "Logs and ideas, one tap away"
+  },
+  {
+   "name": "s_92771dae",
+   "value": "Log saved"
+  },
+  {
+   "name": "s_56409a3c",
+   "value": "Log Flow"
+  },
+  {
+   "name": "s_50a1db67",
+   "value": "Logs: {0} new, {1} changed, {2} only here\n"
+  },
+  {
+   "name": "s_449056e4",
+   "value": "The date decides where it appears in the calendar and review. Importance is used for filtering and details."
+  },
+  {
+   "name": "s_432f74fa",
+   "value": "Date range"
+  },
+  {
+   "name": "s_7203eec6",
+   "value": "The old protocol has security risks. Use Export backup or system share in Backup & Restore to send it to another device in a way you trust."
+  },
+  {
+   "name": "s_43a7036a",
+   "value": "Old task data is damaged"
+  },
+  {
+   "name": "s_f5a97704",
+   "value": "Old task data has invalid items"
+  },
+  {
+   "name": "s_9c3b2801",
+   "value": "Old mood data is damaged"
+  },
+  {
+   "name": "s_3bddc601",
+   "value": "Old mood data has invalid items"
+  },
+  {
+   "name": "s_454e9392",
+   "value": "Old log data is damaged"
+  },
+  {
+   "name": "s_a628514c",
+   "value": "Old log data has invalid items"
+  },
+  {
+   "name": "s_d7034b36",
+   "value": "Good morning ☀️"
+  },
+  {
+   "name": "s_4b302bcb",
+   "value": "How often you felt happy, neutral or unhappy in this period; bar length is proportional"
+  },
+  {
+   "name": "s_50080995",
+   "value": "No moods in this period"
+  },
+  {
+   "name": "s_b8d35720",
+   "value": "No moods in this period yet. The distribution will take shape over time"
+  },
+  {
+   "name": "s_af564b8c",
+   "value": "NearLink"
+  },
+  {
+   "name": "s_0aaf4aa4",
+   "value": "NearLink, Live View, smart services and multi-device"
+  },
+  {
+   "name": "s_12263e9a",
+   "value": "Yesterday"
+  },
+  {
+   "name": "s_c18f71ef",
+   "value": "Good evening 🌙"
+  },
+  {
+   "name": "s_c14d82e9",
+   "value": "Agent runtime"
+  },
+  {
+   "name": "s_bf13f8b5",
+   "value": "Off for now. Tap to see alternatives"
+  },
+  {
+   "name": "s_a3b4475f",
+   "value": "Which feeling is closest?"
+  },
+  {
+   "name": "s_87b8867d",
+   "value": "Newest"
+  },
+  {
+   "name": "s_ceb8f642",
+   "value": "Oldest"
+  },
+  {
+   "name": "s_56b38d0f",
+   "value": "Recent moments"
+  },
+  {
+   "name": "s_81364f08",
+   "value": "Has importance"
+  },
+  {
+   "name": "s_be2c2eb2",
+   "value": "Unread"
+  },
+  {
+   "name": "s_f2dc2311",
+   "value": "No save location chosen"
+  },
+  {
+   "name": "s_9eb7e19a",
+   "value": "No backup file chosen"
+  },
+  {
+   "name": "s_27c37899",
+   "value": "This week"
+  },
+  {
+   "name": "s_8b09339a",
+   "value": "This week's mood"
+  },
+  {
+   "name": "s_b70e17ea",
+   "value": "Mood is low this week"
+  },
+  {
+   "name": "s_24d17368",
+   "value": "Mood is steady this week"
+  },
+  {
+   "name": "s_e3f61599",
+   "value": "Mostly positive this week"
+  },
+  {
+   "name": "s_63d2d484",
+   "value": "Nothing recorded this week"
+  },
+  {
+   "name": "s_db0049cb",
+   "value": "This week's trend"
+  },
+  {
+   "name": "s_3750d663",
+   "value": "Local reminder"
+  },
+  {
+   "name": "s_5a3b670a",
+   "value": "Couldn't load local data: {0}"
+  },
+  {
+   "name": "s_36f7c12d",
+   "value": "Local data is still loading, so a backup can't be exported yet"
+  },
+  {
+   "name": "s_3bc73a70",
+   "value": "Local data is still loading. Try again shortly"
+  },
+  {
+   "name": "s_a30af19c",
+   "value": "Local data cleared"
+  },
+  {
+   "name": "s_5c414af2",
+   "value": "Local data cleared, but system reminders couldn't be removed. Restart the app and try again"
+  },
+  {
+   "name": "s_caefb3d7",
+   "value": "Local data overwritten"
+  },
+  {
+   "name": "s_ed1cc69e",
+   "value": "The local database isn't ready yet"
+  },
+  {
+   "name": "s_47af33f9",
+   "value": "This month"
+  },
+  {
+   "name": "s_37272be9",
+   "value": "From an idea. The idea stays"
+  },
+  {
+   "name": "s_7e5242cd",
+   "value": "Show daily details"
+  },
+  {
+   "name": "s_495fd6a9",
+   "value": "View idea"
+  },
+  {
+   "name": "s_c5a41a4d",
+   "value": "Import and compare"
+  },
+  {
+   "name": "s_2b1626c8",
+   "value": "Tag"
+  },
+  {
+   "name": "s_6fa75608",
+   "value": "Mark as idea"
+  },
+  {
+   "name": "s_da8c43e5",
+   "value": "Mark as memo"
+  },
+  {
+   "name": "s_6642d94e",
+   "value": "Mark as urgent"
+  },
+  {
+   "name": "s_20532441",
+   "value": "Kept invalid data from an old version was found. You can export a recovery file in Settings"
+  },
+  {
+   "name": "s_f7d7a0ce",
+   "value": "Welcome to Flash"
+  },
+  {
+   "name": "s_b87694cc",
+   "value": "Loading local data…"
+  },
+  {
+   "name": "s_f489ed09",
+   "value": "Text and type"
+  },
+  {
+   "name": "s_6af40858",
+   "value": "Now"
+  },
+  {
+   "name": "s_eb842c00",
+   "value": "This device doesn't support the task's time zone. Update the system and try again"
+  },
+  {
+   "name": "s_b060afd3",
+   "value": "This device doesn't support a task time zone in the backup. Update the system and try again. Nothing was imported"
+  },
+  {
+   "name": "s_a46dce44",
+   "value": "Supported on this device"
+  },
+  {
+   "name": "s_4c75c431",
+   "value": "Not supported on this device yet"
+  },
+  {
+   "name": "s_f4958768",
+   "value": "Every 3 days"
+  },
+  {
+   "name": "s_41be2fe2",
+   "value": "Weekly"
+  },
+  {
+   "name": "s_02c285b5",
+   "value": "Daily"
+  },
+  {
+   "name": "s_18fa51bd",
+   "value": "Daily logs, ideas and moods · tasks not included"
+  },
+  {
+   "name": "s_10c2c6ea",
+   "value": "Daily record count chart, "
+  },
+  {
+   "name": "s_8189ce25",
+   "value": "Sandbox share export"
+  },
+  {
+   "name": "s_412c1bc9",
+   "value": "No recovery data to export"
+  },
+  {
+   "name": "s_43c975df",
+   "value": "No records found"
+  },
+  {
+   "name": "s_f8bc527e",
+   "value": "No logs match"
+  },
+  {
+   "name": "s_a1589567",
+   "value": "Active days: {0} · Average mood {1}"
+  },
+  {
+   "name": "s_11b5fdf6",
+   "value": "Light"
+  },
+  {
+   "name": "s_2a8baaea",
+   "value": "Dark"
+  },
+  {
+   "name": "s_2d2662ca",
+   "value": "Add task"
+  },
+  {
+   "name": "s_efb3530b",
+   "value": "Clearing deletes all logs, moods and tasks on this device and can't be undone. Export a backup first."
+  },
+  {
+   "name": "s_7c21f688",
+   "value": "Clear all local data"
+  },
+  {
+   "name": "s_0f228eb2",
+   "value": "Clear all local data. Asks you to confirm again and can't be recovered"
+  },
+  {
+   "name": "s_ff0218b5",
+   "value": "Clear all local data?"
+  },
+  {
+   "name": "s_0b9d2bac",
+   "value": "Clear"
+  },
+  {
+   "name": "s_0fba4654",
+   "value": "Clear filters"
+  },
+  {
+   "name": "s_82e960a9",
+   "value": "Clear quarantine"
+  },
+  {
+   "name": "s_b8b74e9d",
+   "value": "Ideas"
+  },
+  {
+   "name": "s_a25c48e8",
+   "value": "Idea saved"
+  },
+  {
+   "name": "s_4604d6bf",
+   "value": "Idea reminders"
+  },
+  {
+   "name": "s_436e2c82",
+   "value": "What's on your mind?"
+  },
+  {
+   "name": "s_494f6f35",
+   "value": "Creates a flash-backup-v2 backup file"
+  },
+  {
+   "name": "s_2ef507d3",
+   "value": "Creates a backup file and sends it with system share"
+  },
+  {
+   "name": "s_f60bb44e",
+   "value": "Angry"
+  },
+  {
+   "name": "s_9efb941a",
+   "value": "Tired"
+  },
+  {
+   "name": "s_5b8de6f4",
+   "value": "See the rhythm and moods behind your records"
+  },
+  {
+   "name": "s_2f530b5b",
+   "value": "Confirm delete"
+  },
+  {
+   "name": "s_869f8d0c",
+   "value": "Clear everything"
+  },
+  {
+   "name": "s_78876d37",
+   "value": "Tap to share"
+  },
+  {
+   "name": "s_5716f5ef",
+   "value": "In {0} minutes"
+  },
+  {
+   "name": "s_7ed1d395",
+   "value": "On-device agent A2A"
+  },
+  {
+   "name": "s_d742f801",
+   "value": "Waiting for scenario approval"
+  },
+  {
+   "name": "s_6fbf1709",
+   "value": "Waiting for manual signing and App Linking setup"
+  },
+  {
+   "name": "s_f5e087c9",
+   "value": "Filter"
+  },
+  {
+   "name": "s_26640f43",
+   "value": "Type"
+  },
+  {
+   "name": "s_5d44879d",
+   "value": "Supported by the system; waiting for permission approval"
+  },
+  {
+   "name": "s_77cc2953",
+   "value": "The system has no public API for this, so it's an in-app setting"
+  },
+  {
+   "name": "s_ae26d9e7",
+   "value": "System capabilities"
+  },
+  {
+   "name": "s_b68d1af4",
+   "value": "Couldn't check system capabilities, so feature status may be inaccurate"
+  },
+  {
+   "name": "s_235f3e59",
+   "value": "Urgent"
+  },
+  {
+   "name": "s_64db55af",
+   "value": "When {0} or more ideas are waiting, you'll get a reminder at 8 PM. Opened ideas no longer count."
+  },
+  {
+   "name": "s_77dacc26",
+   "value": "Breakdown · all time"
+  },
+  {
+   "name": "s_476d405b",
+   "value": "End date"
+  },
+  {
+   "name": "s_010e135c",
+   "value": "Keep editing"
+  },
+  {
+   "name": "s_e60fd56d",
+   "value": "Keep recording and your review will take shape"
+  },
+  {
+   "name": "s_607348a8",
+   "value": "Edit"
+  },
+  {
+   "name": "s_1d5b5e98",
+   "value": "Edit task"
+  },
+  {
+   "name": "s_c9ab4c68",
+   "value": "Edit idea"
+  },
+  {
+   "name": "s_a5db4a27",
+   "value": "Edit record"
+  },
+  {
+   "name": "s_d157cf32",
+   "value": "Custom state, like hopeful or calm"
+  },
+  {
+   "name": "s_cf266f5e",
+   "value": "Records in range"
+  },
+  {
+   "name": "s_a6317c7d",
+   "value": "Overwrite"
+  },
+  {
+   "name": "s_5521c6a5",
+   "value": "A place for every passing thought · no cloud account"
+  },
+  {
+   "name": "s_dad3d89f",
+   "value": "Note your first thought"
+  },
+  {
+   "name": "s_2c9d9f0e",
+   "value": "Records"
+  },
+  {
+   "name": "s_57cc90b8",
+   "value": "Content"
+  },
+  {
+   "name": "s_a7c9e948",
+   "value": "Record deleted"
+  },
+  {
+   "name": "s_25548f50",
+   "value": "Record updated"
+  },
+  {
+   "name": "s_a48657a1",
+   "value": "Record mood"
+  },
+  {
+   "name": "s_8c8316a6",
+   "value": "Record date YYYY-MM-DD"
+  },
+  {
+   "name": "s_d1e82646",
+   "value": "Recording activity"
+  },
+  {
+   "name": "s_e49ad9fc",
+   "value": "Device supports it; waiting for scenario setup"
+  },
+  {
+   "name": "s_0102647f",
+   "value": "Device transfer"
+  },
+  {
+   "name": "s_f3c259dd",
+   "value": "Settings"
+  },
+  {
+   "name": "s_6c53e15d",
+   "value": "Enter a task title"
+  },
+  {
+   "name": "s_b1313650",
+   "value": "Enter a valid date (YYYY-MM-DD)"
+  },
+  {
+   "name": "s_796026c5",
+   "value": "Enter a valid date and time"
+  },
+  {
+   "name": "s_8678f5d9",
+   "value": "Over by {0} characters"
+  },
+  {
+   "name": "s_b45e202f",
+   "value": "Trends"
+  },
+  {
+   "name": "s_b494a385",
+   "value": "System"
+  },
+  {
+   "name": "s_ebbcb10b",
+   "value": "Turn into task"
+  },
+  {
+   "name": "s_13f1b81a",
+   "value": "Enter a keyword or tag"
+  },
+  {
+   "name": "s_7cd6a835",
+   "value": "Enter a keyword or tag name"
+  },
+  {
+   "name": "s_214cb43c",
+   "value": "the last 30 days"
+  },
+  {
+   "name": "s_27712c0e",
+   "value": "Bar chart of daily average mood for the last 7 days"
+  },
+  {
+   "name": "s_511bc8b4",
+   "value": "Daily average, last 7 days · — means nothing recorded"
+  },
+  {
+   "name": "s_9ea79282",
+   "value": "the last 90 days"
+  },
+  {
+   "name": "s_4ed18a1a",
+   "value": "Last 30 days"
+  },
+  {
+   "name": "s_6ae50c28",
+   "value": "Last 7 days"
+  },
+  {
+   "name": "s_8ab0bb3c",
+   "value": "Last 90 days"
+  },
+  {
+   "name": "s_863fb33a",
+   "value": "Recent"
+  },
+  {
+   "name": "s_a7f085b7",
+   "value": "{0} characters left"
+  },
+  {
+   "name": "s_91cae70c",
+   "value": "No moods yet. Start with how you feel now"
+  },
+  {
+   "name": "s_4cabb422",
+   "value": "No entries yet"
+  },
+  {
+   "name": "s_fa547131",
+   "value": "No plans or records on this day"
+  },
+  {
+   "name": "s_6d67abd6",
+   "value": "this month"
+  },
+  {
+   "name": "s_09e1a534",
+   "value": "this week"
+  },
+  {
+   "name": "s_d3ce76c1",
+   "value": "This record no longer exists"
+  },
+  {
+   "name": "s_5aa52714",
+   "value": "This period: records {0} · moods {1}"
+  },
+  {
+   "name": "s_5fe370b7",
+   "value": "Select"
+  },
+  {
+   "name": "s_b59b6994",
+   "value": "Notification settings"
+  },
+  {
+   "name": "s_00b88ac0",
+   "value": "Notification settings sheet"
+  },
+  {
+   "name": "s_cf3e4247",
+   "value": "Importance"
+  },
+  {
+   "name": "s_b53d490f",
+   "value": "Importance and date"
+  },
+  {
+   "name": "s_e63fba86",
+   "value": "Importance must be between 0 and 4"
+  },
+  {
+   "name": "s_4e941a37",
+   "value": "Retry"
+  },
+  {
+   "name": "s_954316f6",
+   "value": "Floating ball / window"
+  },
+  {
+   "name": "s_aef2df88",
+   "value": "Capture on the go"
+  },
+  {
+   "name": "s_a87d7d3d",
+   "value": "Quarantine cleared"
+  },
+  {
+   "name": "s_80390cc2",
+   "value": "Unwell"
+  },
+  {
+   "name": "s_99546fff",
+   "value": "Very upset"
+  },
+  {
+   "name": "s_22566806",
+   "value": "Delighted"
+  },
+  {
+   "name": "s_b6819d11",
+   "value": "The page isn't ready yet. Try again shortly"
+  },
+  {
+   "name": "s_1f54be7c",
+   "value": "Page actions aren't set up"
+  },
+  {
+   "name": "s_9a63360d",
+   "value": "Local data changed after the preview. Differences were recalculated. Confirm before overwriting"
+  },
+  {
+   "name": "s_39f2623a",
+   "value": "HarmonyOS features"
+  },
+  {
+   "name": "s_a14edc19",
+   "value": "(Untitled)"
+  },
+  {
+   "name": "s_d6d10170",
+   "value": "+ New"
+  },
+  {
+   "name": "s_25af9b9f",
+   "value": ", unread ideas: {0}"
+  },
+  {
+   "name": "s_60b362bc",
+   "value": ", but system reminders couldn't be restored"
+  },
+  {
+   "name": "s_9b38261d",
+   "value": ", daily details can be expanded"
+  },
+  {
+   "name": "s_e014a361",
+   "value": ", selected"
+  },
+  {
+   "name": "s_b5a68109",
+   "value": ", unavailable"
+  },
+  {
+   "name": "s_67d80aae",
+   "value": ", has a mood entry"
+  },
+  {
+   "name": "s_1e2ec103",
+   "value": ", and your mood was a bit lower"
+  },
+  {
+   "name": "s_2122a6c6",
+   "value": ", and your mood was a bit more positive"
+  }
+ ]
 }

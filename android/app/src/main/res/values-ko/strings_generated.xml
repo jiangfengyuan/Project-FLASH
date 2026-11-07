@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 由 tools/i18n/generate.py 生成，勿手改 -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="ExtraTranslation,MissingTranslation">
+    <string name="share_target_label">Flash에 저장</string>
+    <string name="widget_label">Flash 지금</string>
+    <string name="widget_description">오늘 기록과 할 일</string>
+    <string name="tile_label">Flash 빠른 기록</string>
+    <string name="shortcut_idea">아이디어 쓰기</string>
+    <string name="shortcut_log">일지 쓰기</string>
+    <string name="s_c9414111" formatted="false">" · 알림 있음"</string>
+    <string name="s_94fc7b8e" formatted="false">/data/tasks/{0}/due: 객체여야 합니다</string>
+    <string name="s_aafdda63" formatted="false">/data/{0}/{1}: 항목은 객체여야 합니다</string>
+    <string name="s_10db0315" formatted="false">/data/{0}: 배열이 한도를 초과했습니다</string>
+    <string name="s_b7cc858a" formatted="false">/data: 잘못되었거나 중복된 항목이 있습니다. 복구 가져오기에서 복구 가능한 내용을 확인하세요</string>
+    <string name="s_90ef682e" formatted="false">/version: 이전 파일은 복구 가져오기를 사용하세요</string>
+    <string name="s_b9ce0fb9" formatted="false">/: JSON 값이 너무 많습니다</string>
+    <string name="s_307d96fc" formatted="false">/: JSON 객체에 중복 키가 있습니다: {0}</string>
+    <string name="s_b414e614" formatted="false">/: JSON 구문 오류 (위치 {0})</string>
+    <string name="s_7038ec28" formatted="false">/: UTF-8 BOM은 허용되지 않습니다</string>
+    <string name="s_4aa2d855" formatted="false">/: 내보내기 메타데이터가 잘못되었습니다</string>
+    <string name="s_5ddd2d8d" formatted="false">30일</string>
+    <string name="s_a96eed0d" formatted="false">7일</string>
+    <string name="s_355b83a3" formatted="false">기억할 만한 한 주예요. ✦</string>
+    <string name="s_a1486dba" formatted="false">Flash Aero 백업</string>
+    <string name="s_eeecd281" formatted="false">Flash 할 일 알림</string>
+    <string name="s_f6ff76b6" formatted="false">Flash 빠른 기록</string>
+    <string name="s_9a2b6832" formatted="false">Flash 지금</string>
+    <string name="s_2a0b1ddf" formatted="false">Flash 아이디어</string>
+    <string name="s_de22df1c" formatted="false">Flash 기록</string>
+    <string name="s_8d6bfa5c" formatted="false">하이라이트</string>
+    <string name="s_58f879ce" formatted="false">메모리</string>
+    <string name="s_879db2fb" formatted="false">대체로 가라앉음</string>
+    <string name="s_db9c822c" formatted="false">대체로 긍정적</string>
+    <string name="s_f3498d7d" formatted="false">대체로 안정적</string>
+    <string name="s_244cff4e" formatted="false">이번 주는...</string>
+    <string name="s_fe948398" formatted="false">이번 주 기록</string>
+    <string name="s_b053c6ce" formatted="false">data는 객체여야 합니다</string>
+    <string name="s_70c34463" formatted="false">기분</string>
+    <string name="s_0dbf59c2" formatted="false">emotions는 배열이어야 합니다</string>
+    <string name="s_f22ee8cb" formatted="false">아이디어</string>
+    <string name="s_be7aa09b" formatted="false">logs는 배열이어야 합니다</string>
+    <string name="s_62852daa" formatted="false">순간</string>
+    <string name="s_22c3caa0" formatted="false">schemas는 객체여야 합니다</string>
+    <string name="s_ad2e48cd" formatted="false">할 일</string>
+    <string name="s_002e97a4" formatted="false">tasks는 배열이어야 합니다</string>
+    <string name="s_6e425eba" formatted="false">{0}: {1} · {2}: {3}</string>
+    <string name="s_39ac061e" formatted="false">{0} — {1} · 기록 없는 날은 평균에서 제외</string>
+    <string name="s_e2a8c96b" formatted="false">할 일 {0}개</string>
+    <string name="s_409ddff6" formatted="false">활동일 {0}일 · 총 {1}회</string>
+    <string name="s_79fc376e" formatted="false">{0}개</string>
+    <string name="s_a06e31ba" formatted="false">건너뛸 잘못된 항목: {0}개.</string>
+    <string name="s_aeb06eb3" formatted="false">기록 {0}개 · 기분 {1}회</string>
+    <string name="s_ba02e82e" formatted="false">{0}회</string>
+    <string name="s_852bf53d" formatted="false">기분 {0}회, 할 일 {1}개</string>
+    <string name="s_1f0ab446" formatted="false">{0} 상세</string>
+    <string name="s_7f7d2285" formatted="false">할 일 {0}개</string>
+    <string name="s_2e763a14" formatted="false">{0}은(는) {1}보다 더 자주 기록했어요</string>
+    <string name="s_10e8d2b4" formatted="false">{0}의 기록은 {1}보다 적어요</string>
+    <string name="s_8d74a879" formatted="false">{0}의 기록은 {1}와(과) 비슷해요</string>
+    <string name="s_1879232a" formatted="false">"{0}, 기록 {1}개, "</string>
+    <string name="s_e168d4f4" formatted="false">{0}, 하지만 시스템 알림을 복구하지 못했습니다. 나중에 다시 시도하세요</string>
+    <string name="s_245af589" formatted="false">{0}: 기록 {1}개 · 기분 {2}회</string>
+    <string name="s_7db427be" formatted="false">{0}: 새로 추가 {1} · 변경 {2} · 동일 {3} · 이 기기에만 {4}</string>
+    <string name="s_0009cc0b" formatted="false">{0}: 필수 필드가 없거나 알 수 없는 필드가 있습니다</string>
+    <string name="s_7dad93fd" formatted="false">★ 즐겨찾기</string>
+    <string name="s_745e890f" formatted="false">✓ 일지에 저장했습니다</string>
+    <string name="s_a248a677" formatted="false">✓ 아이디어에 저장했습니다</string>
+    <string name="s_67fc93c3" formatted="false">✦ Flash</string>
+    <string name="s_05615f1f" formatted="false">월</string>
+    <string name="s_e50a5759" formatted="false">스쳐 가는 생각도 기억할 가치가 있어요</string>
+    <string name="s_8bcbbc86" formatted="false">일곱 단계 기분 기록으로 나의 변화를 봐요</string>
+    <string name="s_0c616a24" formatted="false">수</string>
+    <string name="s_508b1e1d" formatted="false">이전 주</string>
+    <string name="s_b06dcc3d" formatted="false">이전 달</string>
+    <string name="s_8be194e7" formatted="false">지난달</string>
+    <string name="s_eb0f6aef" formatted="false">지난주</string>
+    <string name="s_0bb3bda2" formatted="false">다음 주</string>
+    <string name="s_6bcf17c2" formatted="false">다음 달</string>
+    <string name="s_10c83c81" formatted="false">다음</string>
+    <string name="s_82b6cabb" formatted="false">좋은 오후예요 🌤</string>
+    <string name="s_1344f491" formatted="false">기분 나쁨</string>
+    <string name="s_4cc036be" formatted="false">알림 없음</string>
+    <string name="s_12e8587a" formatted="false">지원하지 않는 {0} 섹션 버전</string>
+    <string name="s_ba358518" formatted="false">전체</string>
+    <string name="s_b13672cd" formatted="false">보통</string>
+    <string name="s_51f6517e" formatted="false">테마</string>
+    <string name="s_0a416847" formatted="false">이전 30일</string>
+    <string name="s_0c6445c1" formatted="false">이전 90일</string>
+    <string name="s_89609beb" formatted="false">화</string>
+    <string name="s_9160a883" formatted="false">금</string>
+    <string name="s_a848765c" formatted="false">오늘</string>
+    <string name="s_6f3c2b2c" formatted="false">오늘도 무언가 기록해 보세요.</string>
+    <string name="s_1f2bd289" formatted="false">오늘은 아직 기록이 없어요.</string>
+    <string name="s_cfccbae7" formatted="false">오늘 기록</string>
+    <string name="s_5bfe853c" formatted="false">오늘 기록과 할 일</string>
+    <string name="s_2d7464e1" formatted="false">할 일</string>
+    <string name="s_3f7946be" formatted="false">할 일을 저장하지 못했습니다</string>
+    <string name="s_bc3ceaab" formatted="false">할 일을 삭제하지 못했습니다</string>
+    <string name="s_cd07ba17" formatted="false">할 일을 저장했습니다. 알림을 허용해야 받을 수 있습니다</string>
+    <string name="s_d3190fa3" formatted="false">할 일 알림</string>
+    <string name="s_d8bb8799" formatted="false">할 일 시간이 잘못되었습니다</string>
+    <string name="s_86da87a3" formatted="false">할 일을 업데이트하지 못했습니다</string>
+    <string name="s_97815f19" formatted="false">Flash Aero 백업 보내기</string>
+    <string name="s_6b17ba8f" formatted="false">다른 기기로 보내기</string>
+    <string name="s_79955ed0" formatted="false">슬픔</string>
+    <string name="s_d7974514" formatted="false">기다리는 아이디어 {0}개. 가장 오래된 것부터 보세요</string>
+    <string name="s_d908f279" formatted="false">정리를 기다리는 아이디어 {0}개. 확인해 보세요</string>
+    <string name="s_ad5b82b0" formatted="false">저장</string>
+    <string name="s_9b95e293" formatted="false">저장 중…</string>
+    <string name="s_64911de5" formatted="false">JSON 파일로 저장</string>
+    <string name="s_46ca88f1" formatted="false">저장하지 못했습니다. 다시 시도하세요</string>
+    <string name="s_1d0e5d5a" formatted="false">종일</string>
+    <string name="s_0c14a696" formatted="false">종일 할 일</string>
+    <string name="s_05eb990b" formatted="false">전체 검색</string>
+    <string name="s_5e6558ad" formatted="false">전체</string>
+    <string name="s_e8562c78" formatted="false">토</string>
+    <string name="s_72a18f8e" formatted="false">Flash 정보</string>
+    <string name="s_87dadb5a" formatted="false">키워드 또는 태그</string>
+    <string name="s_39b523bd" formatted="false">닫기</string>
+    <string name="s_05f5920d" formatted="false">특정 시간</string>
+    <string name="s_801be77b" formatted="false">내용</string>
+    <string name="s_dc24135d" formatted="false">내용을 입력하세요</string>
+    <string name="s_043cda7f" formatted="false">너무 깁니다({0}자, 최대 {1}자). 줄인 뒤 저장하세요</string>
+    <string name="s_87000edc" formatted="false">조금 더 기록해 보세요. 미래의 내가 보게 될 거예요.</string>
+    <string name="s_95a71bc9" formatted="false">준비 중…</string>
+    <string name="s_9aa7d416" formatted="false">공유</string>
+    <string name="s_4ae3c205" formatted="false">기록 공유</string>
+    <string name="s_caf6d5a6" formatted="false">유형</string>
+    <string name="s_a0b5ccaf" formatted="false">정렬 변경</string>
+    <string name="s_ea8d5381" formatted="false">삭제</string>
+    <string name="s_6b93827d" formatted="false">할 일 삭제</string>
+    <string name="s_bb2e6146" formatted="false">할 일을 삭제할까요?</string>
+    <string name="s_309b2b90" formatted="false">삭제하지 못했습니다. 다시 시도하세요</string>
+    <string name="s_e4d23002" formatted="false">모든 일지, 기분, 할 일을 영구 삭제합니다. 먼저 백업을 내보내세요</string>
+    <string name="s_e6dedfa0" formatted="false">이 기분 기록을 삭제할까요?</string>
+    <string name="s_98f7e648" formatted="false">이 일지를 삭제할까요?</string>
+    <string name="s_c51f5912" formatted="false">기한에</string>
+    <string name="s_c628e28d" formatted="false">일지 {0}개, 기분 {1}개, 할 일 {2}개 포함</string>
+    <string name="s_60b4c5ae" formatted="false">위험한 작업</string>
+    <string name="s_949856b3" formatted="false">취소</string>
+    <string name="s_d1d62fb0" formatted="false">즐겨찾기 해제</string>
+    <string name="s_4d55cb75" formatted="false">백업을 내보내거나 시스템 공유로 보내세요</string>
+    <string name="s_5e53c03a" formatted="false">목</string>
+    <string name="s_40163b46" formatted="false">오늘로 이동</string>
+    <string name="s_bed63d2f" formatted="false">이번 주로</string>
+    <string name="s_c2e1aa6d" formatted="false">회고</string>
+    <string name="s_fbac6f20" formatted="false">백업 및 복구</string>
+    <string name="s_bb48fdba" formatted="false">백업은 일지, 기분, 할 일이 담긴 일반 JSON입니다. 신뢰할 수 있는 곳에만 저장하거나 공유하세요</string>
+    <string name="s_20fe814f" formatted="false">백업을 내보냈습니다</string>
+    <string name="s_c90a7947" formatted="false">백업 파일이 올바른 JSON 객체가 아닙니다</string>
+    <string name="s_88f39f13" formatted="false">백업 파일이 올바른 UTF-8 JSON이 아닙니다</string>
+    <string name="s_269e4097" formatted="false">백업 파일이 {0}MB를 넘어 가져올 수 없습니다</string>
+    <string name="s_cc139297" formatted="false">호환되지 않는 버전: {0} 필요, 실제 {1}</string>
+    <string name="s_d3de3f52" formatted="false">호환되지 않는 백업: version 필드 없음</string>
+    <string name="s_584ff11a" formatted="false">메모</string>
+    <string name="s_d82fe22c" formatted="false">메모가 너무 깁니다. 줄인 뒤 저장하세요</string>
+    <string name="s_d9dac7dd" formatted="false">메모(선택)</string>
+    <string name="s_e4a4815a" formatted="false">화면 및 사용</string>
+    <string name="s_1e13bd21" formatted="false">완료</string>
+    <string name="s_dd03e6ad" formatted="false">가져오기 전에 로컬 데이터와의 차이를 미리 봅니다</string>
+    <string name="s_9b60ff74" formatted="false">가져오기 실패: {0}</string>
+    <string name="s_da193966" formatted="false">가져오기를 취소했습니다</string>
+    <string name="s_7fdaf616" formatted="false">내보내기, 가져오기, 지우기</string>
+    <string name="s_f97fded3" formatted="false">백업 내보내기</string>
+    <string name="s_7436fb8d" formatted="false">내보내기 실패: {0}</string>
+    <string name="s_b1632a8b" formatted="false">모든 일지, 기분, 할 일이 영구 삭제됩니다. 먼저 백업을 내보내세요.</string>
+    <string name="s_479481d2" formatted="false">로컬 네트워크 전송은 현재 꺼져 있습니다</string>
+    <string name="s_f8eef707" formatted="false">이전 프로토콜의 보안 위험으로 로컬 네트워크 전송이 꺼져 있습니다. 백업 내보내기나 시스템 공유로 신뢰할 수 있는 경로를 통해 JSON 파일을 보내세요.</string>
+    <string name="s_531320d2" formatted="false">속성</string>
+    <string name="s_b1368837" formatted="false">차이 분석</string>
+    <string name="s_c2d9a3f9" formatted="false">병합은 받은 데이터를 추가하거나 갱신하고 이 기기에만 있는 데이터는 유지합니다. 덮어쓰기는 먼저 이 기기의 데이터를 지웁니다.</string>
+    <string name="s_d0fcf500" formatted="false">저장했습니다</string>
+    <string name="s_5dbcdf6d" formatted="false">꺼짐</string>
+    <string name="s_bee374d1" formatted="false">삭제했습니다</string>
+    <string name="s_8b122251" formatted="false">일지를 삭제했습니다</string>
+    <string name="s_74e8cc38" formatted="false">"일지 {0}개, 기분 {1}개, "</string>
+    <string name="s_a8126b62" formatted="false">즐겨찾기됨</string>
+    <string name="s_2266e2ec" formatted="false">모든 데이터를 지웠습니다</string>
+    <string name="s_c13b3522" formatted="false">모든 데이터를 지웠지만 시스템 알림을 지우지 못했습니다. 앱을 다시 시작해 보세요</string>
+    <string name="s_c8fa62c1" formatted="false">{0}개 선택</string>
+    <string name="s_01133500" formatted="false">평균 기분 {0} · 총 {1}개</string>
+    <string name="s_22696cbc" formatted="false">시작</string>
+    <string name="s_499be303" formatted="false">시작하기</string>
+    <string name="s_5d62764c" formatted="false">시작 날짜</string>
+    <string name="s_2a665354" formatted="false">기쁨</string>
+    <string name="s_673d4a91" formatted="false">강도</string>
+    <string name="s_6a19ddcf" formatted="false">강도 {0}</string>
+    <string name="s_4b8edbfa" formatted="false">할 일</string>
+    <string name="s_dfcdb4b6" formatted="false">할 일</string>
+    <string name="s_e83d11ae" formatted="false">정리 대기</string>
+    <string name="s_5660c655" formatted="false">정리 대기: \'일상\' 태그 일지입니다. 길게 눌러 여러 개를 정리하세요.</string>
+    <string name="s_2367642b" formatted="false">매우 나쁨</string>
+    <string name="s_fb903262" formatted="false">매우 기쁨</string>
+    <string name="s_e70923c8" formatted="false">빠른 기록</string>
+    <string name="s_abf33a8f" formatted="false">손상되었거나 오래된 백업 복구</string>
+    <string name="s_a9612b5e" formatted="false">기분</string>
+    <string name="s_7bd3df69" formatted="false">평균 기분 {0}(-3~+3)</string>
+    <string name="s_643f1ede" formatted="false">기분 알아차리기</string>
+    <string name="s_8de4274f" formatted="false">기분 추이</string>
+    <string name="s_99812275" formatted="false">생각</string>
+    <string name="s_d9f8afc2" formatted="false">정리할 아이디어</string>
+    <string name="s_6deefec2" formatted="false">아이디어가 기다리고 있으면 알림</string>
+    <string name="s_4e89a8ad" formatted="false">하고 싶은 말이 있나요? (선택)</string>
+    <string name="s_eae146ff" formatted="false">선택 항목 유형 변경</string>
+    <string name="s_c9ddd465" formatted="false">선택 항목을 변경하지 못했습니다. 다시 시도하세요</string>
+    <string name="s_803499dd" formatted="false">선택 항목 태그 변경</string>
+    <string name="s_b4b9bfa6" formatted="false">차이 병합</string>
+    <string name="s_8523e97b" formatted="false">최신순</string>
+    <string name="s_791c2e78" formatted="false">오래된 순</string>
+    <string name="s_6ef98325" formatted="false">태그별</string>
+    <string name="s_da39e076" formatted="false">1일 전</string>
+    <string name="s_0c4452fe" formatted="false">1시간 전</string>
+    <string name="s_74d32173" formatted="false">15분 전</string>
+    <string name="s_6d40d527" formatted="false">알림</string>
+    <string name="s_545f8675" formatted="false">알림은 시스템이 예약하며 절전 모드에서는 조금 늦을 수 있습니다.</string>
+    <string name="s_0b6efa3b" formatted="false">검색</string>
+    <string name="s_18fca433" formatted="false">일지 검색...</string>
+    <string name="s_c8a90aa9" formatted="false">기록, 아이디어, 기분, 할 일 검색</string>
+    <string name="s_1b9e8bc9" formatted="false">실행 취소</string>
+    <string name="s_aff00db8" formatted="false">실행 취소하지 못했습니다. 다시 시도하세요</string>
+    <string name="s_87aed705" formatted="false">작업에 실패했습니다. 다시 시도하세요</string>
+    <string name="s_839d4732" formatted="false">즐겨찾기</string>
+    <string name="s_cf8b8d02" formatted="false">일별 내역 접기</string>
+    <string name="s_e1598b13" formatted="false">변경 취소</string>
+    <string name="s_0ac91ecb" formatted="false">저장하지 않은 변경을 버릴까요?</string>
+    <string name="s_6344fa26" formatted="false">데이터 및 보안</string>
+    <string name="s_b464971d" formatted="false">데이터는 이 기기에 저장됩니다</string>
+    <string name="s_95b69a6d" formatted="false">파일이 50MiB를 초과합니다</string>
+    <string name="s_b8c8a94f" formatted="false">새로 만들기</string>
+    <string name="s_b0f36447" formatted="false">새 할 일</string>
+    <string name="s_d2c53483" formatted="false">새 아이디어</string>
+    <string name="s_160eb028" formatted="false">새 기록</string>
+    <string name="s_659aa23f" formatted="false">없음</string>
+    <string name="s_fd8b1ba9" formatted="false">파일을 쓸 수 없습니다</string>
+    <string name="s_e9ebd81b" formatted="false">백업 전송 폴더를 만들 수 없습니다</string>
+    <string name="s_59c97404" formatted="false">시스템 공유를 열 수 없습니다. 파일을 받을 수 있는 앱을 설치하세요</string>
+    <string name="s_6776e896" formatted="false">파일을 읽을 수 없습니다</string>
+    <string name="s_609a9a60" formatted="false">일</string>
+    <string name="s_f9abd512" formatted="false">캘린더</string>
+    <string name="s_afdd356c" formatted="false">캘린더 할 일의 로컬 알림</string>
+    <string name="s_2eeb970b" formatted="false">일 평균 기분 · -3~+3(0은 보통)</string>
+    <string name="s_6ba31688" formatted="false">일상</string>
+    <string name="s_caa53f15" formatted="false">일지</string>
+    <string name="s_923b0270" formatted="false">일지와 아이디어를 한 번에</string>
+    <string name="s_56409a3c" formatted="false">일지 흐름</string>
+    <string name="s_203436ae" formatted="false">일지 관리</string>
+    <string name="s_92fd0eed" formatted="false">날짜</string>
+    <string name="s_432f74fa" formatted="false">날짜 범위</string>
+    <string name="s_7203eec6" formatted="false">이전 프로토콜에는 보안 위험이 있습니다. \'백업 및 복구\'의 백업 내보내기나 시스템 공유로 신뢰할 수 있는 방법을 통해 다른 기기로 보내세요.</string>
+    <string name="s_d7034b36" formatted="false">좋은 아침이에요 ☀️</string>
+    <string name="s_cb28b11e" formatted="false">이 기간에 기록이 없습니다</string>
+    <string name="s_12263e9a" formatted="false">어제</string>
+    <string name="s_c18f71ef" formatted="false">좋은 저녁이에요 🌙</string>
+    <string name="s_bf13f8b5" formatted="false">현재 꺼짐. 눌러서 대안 보기</string>
+    <string name="s_16a3eebb" formatted="false">더 보기</string>
+    <string name="s_89192933" formatted="false">날짜를 바꾸면 캘린더와 회고도 함께 바뀝니다.</string>
+    <string name="s_87b8867d" formatted="false">최신</string>
+    <string name="s_ceb8f642" formatted="false">오래된</string>
+    <string name="s_56b38d0f" formatted="false">최근 순간</string>
+    <string name="s_be2c2eb2" formatted="false">읽지 않음</string>
+    <string name="s_27c37899" formatted="false">이번 주</string>
+    <string name="s_ccb42197" formatted="false">이번 주 기록 {0}개 · 정리 대기 {1}개</string>
+    <string name="s_b70e17ea" formatted="false">이번 주 기분이 가라앉아 있어요</string>
+    <string name="s_24d17368" formatted="false">이번 주 기분이 안정적이에요</string>
+    <string name="s_e3f61599" formatted="false">이번 주는 대체로 긍정적이에요</string>
+    <string name="s_63d2d484" formatted="false">이번 주 기록이 없습니다</string>
+    <string name="s_db0049cb" formatted="false">이번 주 추이</string>
+    <string name="s_3750d663" formatted="false">로컬 알림</string>
+    <string name="s_47af33f9" formatted="false">이번 달</string>
+    <string name="s_37272be9" formatted="false">아이디어에서 만들었으며 아이디어는 유지됩니다</string>
+    <string name="s_7e5242cd" formatted="false">일별 내역 보기</string>
+    <string name="s_495fd6a9" formatted="false">아이디어 보기</string>
+    <string name="s_198c9fe3" formatted="false">가져오기</string>
+    <string name="s_5606df17" formatted="false">가져오기 미리 보기</string>
+    <string name="s_2b1626c8" formatted="false">태그</string>
+    <string name="s_f7d7a0ce" formatted="false">Flash에 오신 것을 환영합니다</string>
+    <string name="s_aef45eb7" formatted="false">더 불러오는 중…</string>
+    <string name="s_6af40858" formatted="false">지금</string>
+    <string name="s_b060afd3" formatted="false">이 기기는 백업의 할 일 시간대를 지원하지 않습니다. 시스템을 업데이트한 뒤 다시 시도하세요. 아무것도 가져오지 않았습니다</string>
+    <string name="s_f4958768" formatted="false">3일마다</string>
+    <string name="s_41be2fe2" formatted="false">매주</string>
+    <string name="s_02c285b5" formatted="false">매일</string>
+    <string name="s_18fa51bd" formatted="false">일별 일지, 아이디어, 기분 횟수 · 할 일 제외</string>
+    <string name="s_6d03477d" formatted="false">일 평균 기분: {0}</string>
+    <string name="s_5816c303" formatted="false">공유할 수 있는 앱이 없습니다</string>
+    <string name="s_43c975df" formatted="false">기록을 찾지 못했습니다</string>
+    <string name="s_f8bc527e" formatted="false">조건에 맞는 일지가 없습니다</string>
+    <string name="s_0fed9772" formatted="false">활동일</string>
+    <string name="s_11b5fdf6" formatted="false">라이트</string>
+    <string name="s_2a8baaea" formatted="false">다크</string>
+    <string name="s_da340c1c" formatted="false">모든 데이터 지우기</string>
+    <string name="s_845a8db9" formatted="false">모든 데이터를 지울까요?</string>
+    <string name="s_115677d8" formatted="false">지우지 못했습니다: {0}</string>
+    <string name="s_0b9d2bac" formatted="false">지우기</string>
+    <string name="s_9c43ebb6" formatted="false">검색 지우기</string>
+    <string name="s_0fba4654" formatted="false">필터 지우기</string>
+    <string name="s_b8b74e9d" formatted="false">아이디어</string>
+    <string name="s_4604d6bf" formatted="false">아이디어 알림</string>
+    <string name="s_436e2c82" formatted="false">지금 무엇을 기록할까요?</string>
+    <string name="s_78fe07cc" formatted="false">전송 파일을 만들지 못했습니다: {0}</string>
+    <string name="s_f60bb44e" formatted="false">화남</string>
+    <string name="s_621a8231" formatted="false">확인</string>
+    <string name="s_869f8d0c" formatted="false">모두 지우기</string>
+    <string name="s_5716f5ef" formatted="false">{0}분 후</string>
+    <string name="s_f5e087c9" formatted="false">필터</string>
+    <string name="s_5db367de" formatted="false">관리</string>
+    <string name="s_26640f43" formatted="false">유형</string>
+    <string name="s_f8ede304" formatted="false">시스템 알림 또는 할 일 알림 채널이 꺼져 있습니다</string>
+    <string name="s_235f3e59" formatted="false">긴급</string>
+    <string name="s_64db55af" formatted="false">아이디어가 {0}개 이상 쌓이면 저녁 8시에 알립니다. 열어 본 아이디어는 세지 않습니다.</string>
+    <string name="s_78a510f0" formatted="false">누적 요약 · 전체 기간</string>
+    <string name="s_1da8a247" formatted="false">종료</string>
+    <string name="s_476d405b" formatted="false">종료 날짜</string>
+    <string name="s_010e135c" formatted="false">계속 편집</string>
+    <string name="s_e60fd56d" formatted="false">계속 기록하면 회고가 점점 또렷해져요</string>
+    <string name="s_607348a8" formatted="false">편집</string>
+    <string name="s_1d5b5e98" formatted="false">할 일 편집</string>
+    <string name="s_c9ab4c68" formatted="false">아이디어 편집</string>
+    <string name="s_a5db4a27" formatted="false">기록 편집</string>
+    <string name="s_72ecf883" formatted="false">{0}부터</string>
+    <string name="s_85b25df8" formatted="false">{0}까지</string>
+    <string name="s_a6317c7d" formatted="false">덮어쓰기</string>
+    <string name="s_5521c6a5" formatted="false">스치는 모든 생각에 자리를 · 클라우드 계정 없음</string>
+    <string name="s_dad3d89f" formatted="false">첫 생각 기록하기</string>
+    <string name="s_6dfa9df7" formatted="false">Flash에 저장</string>
+    <string name="s_2c9d9f0e" formatted="false">기록</string>
+    <string name="s_a48657a1" formatted="false">기분 기록</string>
+    <string name="s_b1bc3a6a" formatted="false">기록 날짜: {0}</string>
+    <string name="s_6de25c07" formatted="false">이 순간을 기록하세요…</string>
+    <string name="s_d1e82646" formatted="false">기록 활동</string>
+    <string name="s_7a550e3e" formatted="false">기록 활동: {0}일 중 {1}일 기록, 총 {2}회. 일별 내역을 펼칠 수 있습니다.</string>
+    <string name="s_e54eaf8b" formatted="false">일지 쓰기</string>
+    <string name="s_e8b414a3" formatted="false">아이디어 쓰기</string>
+    <string name="s_0102647f" formatted="false">기기 간 전송</string>
+    <string name="s_f3c259dd" formatted="false">설정</string>
+    <string name="s_95b0de98" formatted="false">내용을 입력하세요</string>
+    <string name="s_f3462b06" formatted="false">올바른 기록 날짜를 입력하세요</string>
+    <string name="s_b0f4e934" formatted="false">부정적 세부 감정 분포</string>
+    <string name="s_8678f5d9" formatted="false">{0}자 초과</string>
+    <string name="s_b45e202f" formatted="false">추이</string>
+    <string name="s_b494a385" formatted="false">시스템 설정</string>
+    <string name="s_0af75da1" formatted="false">잘못된 데이터와 중복을 건너뛰며 원본 파일은 바꾸지 않습니다</string>
+    <string name="s_ebbcb10b" formatted="false">할 일로 전환</string>
+    <string name="s_13f1b81a" formatted="false">키워드 또는 태그 입력</string>
+    <string name="s_7cd6a835" formatted="false">키워드 또는 태그 이름 입력</string>
+    <string name="s_214cb43c" formatted="false">최근 30일</string>
+    <string name="s_9ea79282" formatted="false">최근 90일</string>
+    <string name="s_4ed18a1a" formatted="false">최근 30일</string>
+    <string name="s_8ab0bb3c" formatted="false">최근 90일</string>
+    <string name="s_863fb33a" formatted="false">최근 기록</string>
+    <string name="s_58cbffa7" formatted="false">뒤로</string>
+    <string name="s_a7f085b7" formatted="false">{0}자 남음</string>
+    <string name="s_4cabb422" formatted="false">아직 기록 없음</string>
+    <string name="s_fa547131" formatted="false">이날 계획이나 기록이 없습니다</string>
+    <string name="s_6d67abd6" formatted="false">이번 달</string>
+    <string name="s_09e1a534" formatted="false">이번 주</string>
+    <string name="s_d3ce76c1" formatted="false">이 기록은 더 이상 없습니다</string>
+    <string name="s_1a959a39" formatted="false">이 기간에 기록이 아직 없습니다. 빈 날짜는 0으로 표시됩니다.</string>
+    <string name="s_5fe370b7" formatted="false">선택</string>
+    <string name="s_cbdfcc99" formatted="false">시스템 공유로 백업 보내기</string>
+    <string name="s_daf5a276" formatted="false">부분 복구 미리 보기</string>
+    <string name="s_cf3e4247" formatted="false">중요도</string>
+    <string name="s_4de22934" formatted="false">중요도</string>
+    <string name="s_490a6afa" formatted="false">스치는 순간을 남겨요. 첫 기록을 써 보세요</string>
+    <string name="s_aef2df88" formatted="false">바로바로 기록</string>
+    <string name="s_80390cc2" formatted="false">불편함</string>
+    <string name="s_99546fff" formatted="false">아주 나쁨</string>
+    <string name="s_22566806" formatted="false">아주 기쁨</string>
+    <string name="s_9a63360d" formatted="false">미리 보기 후 로컬 데이터가 바뀌어 차이를 다시 계산했습니다. 확인 후 덮어쓰세요</string>
+    <string name="s_a14edc19" formatted="false">(제목 없음)</string>
+    <string name="s_12cea83b" formatted="false">(건너뛴 잘못된 항목: {0})</string>
+    <string name="s_be6a75ae" formatted="false">, 오늘</string>
+    <string name="s_a495d14b" formatted="false">, 기분은 조금 가라앉았어요</string>
+    <string name="s_3193d3c7" formatted="false">, 기분은 조금 나아졌어요</string>
+</resources>

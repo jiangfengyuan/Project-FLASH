@@ -1,0 +1,259 @@
+\n\n差异分析	\n\nDifferences	\n\nDifférences	\n\n차이 분석	\n\nUnterschiede	\n\nРазличия	\n\nالفروق	\n\n差分
+\n\n差异合并会新增或更新接收数据，并保留仅本机数据；覆盖会先清空本机数据。	\n\nMerge adds or updates incoming data and keeps data only on this device. Overwrite clears this device first.	\n\nLa fusion ajoute ou met à jour les données reçues et conserve celles présentes uniquement sur cet appareil. Le remplacement efface d'abord cet appareil.	\n\n병합은 받은 데이터를 추가하거나 갱신하고 이 기기에만 있는 데이터는 유지합니다. 덮어쓰기는 먼저 이 기기의 데이터를 지웁니다.	\n\nZusammenführen fügt empfangene Daten hinzu oder aktualisiert sie und behält Daten, die nur auf diesem Gerät sind. Überschreiben löscht zuerst dieses Gerät.	\n\nОбъединение добавляет или обновляет полученные данные и сохраняет данные, которые есть только на этом устройстве. Замена сначала очищает устройство.	\n\nيضيف الدمج البيانات المستلمة أو يحدّثها ويحتفظ بما يوجد على هذا الجهاز فقط. أما الاستبدال فيمسح هذا الجهاز أولًا.	\n\n統合は受信データを追加・更新し、この端末だけのデータを残します。上書きは先にこの端末のデータを消去します。
+\n任务：新增 {0} · 修改 {1}	\nTasks: {0} new · {1} changed	\nTâches : {0} nouvelles · {1} modifiées	\n할 일: 새로 추가 {0} · 변경 {1}	\nAufgaben: {0} neu · {1} geändert	\nЗадачи: новых {0} · изменено {1}	\nالمهام: جديدة {0} · معدّلة {1}	\nタスク: 新規 {0} · 変更 {1}
+\n情绪：新增 {0} · 修改 {1}	\nMoods: {0} new · {1} changed	\nHumeurs : {0} nouvelles · {1} modifiées	\n기분: 새로 추가 {0} · 변경 {1}	\nStimmungen: {0} neu · {1} geändert	\nНастроение: новых {0} · изменено {1}	\nالمزاج: جديدة {0} · معدّلة {1}	\n気分: 新規 {0} · 変更 {1}
+\n日志：新增 {0} · 修改 {1}	\nLogs: {0} new · {1} changed	\nJournal : {0} nouvelles · {1} modifiées	\n일지: 새로 추가 {0} · 변경 {1}	\nTagebuch: {0} neu · {1} geändert	\nЖурнал: новых {0} · изменено {1}	\nاليوميات: جديدة {0} · معدّلة {1}	\nログ: 新規 {0} · 変更 {1}
+\n跳过异常数据 {0} 条	\nSkipped invalid items: {0}	\nÉléments non valides ignorés : {0}	\n건너뛴 잘못된 항목: {0}	\nÜbersprungene ungültige Einträge: {0}	\nПропущено неверных элементов: {0}	\nالعناصر غير الصالحة المتخطاة: {0}	\nスキップした不正データ: {0}
+ · 情绪均值 {0}	 · Average mood {0}	 · Humeur moyenne {0}	 · 평균 기분 {0}	 · Durchschnittsstimmung {0}	 · Среднее настроение {0}	 · متوسط المزاج {0}	 · 平均の気分 {0}
+ · 有提醒	 · Reminder set	 · Rappel activé	 · 알림 있음	 · Erinnerung aktiv	 · Есть напоминание	 · تذكير مفعّل	 · リマインダーあり
+ · 相同 {0} · 仅本机 {1}	 · {0} same · {1} only here	 · {0} identiques · {1} uniquement ici	 · 동일 {0} · 이 기기에만 {1}	 · {0} gleich · {1} nur hier	 · без изменений {0} · только здесь {1}	 · متطابقة {0} · هنا فقط {1}	 · 同一 {0} · この端末のみ {1}
+ · 重要度 {0}	 · Importance {0}	 · Importance {0}	 · 중요도 {0}	 · Wichtigkeit {0}	 · Важность {0}	 · الأهمية {0}	 · 重要度 {0}
+-3 至 +3，0 为中性；— 表示当日未记录	−3 to +3, 0 is neutral; — means nothing recorded that day	−3 à +3, 0 est neutre ; — signifie aucune entrée ce jour-là	-3~+3, 0은 보통; —는 그날 기록 없음	−3 bis +3, 0 ist neutral; — bedeutet: an dem Tag nichts erfasst	от −3 до +3, 0 — нейтрально; — значит, в этот день нет записей	من ‎−3‎ إلى ‎+3‎، و0 محايد؛ — يعني لا تسجيل في ذلك اليوم	−3〜+3、0 は中立。— はその日の記録なし
+-3 至 +3，0 为中性；无记录日期不计入均值	−3 to +3, 0 is neutral; days with no entries aren't averaged	−3 à +3, 0 est neutre ; les jours sans entrée ne comptent pas dans la moyenne	-3~+3, 0은 보통; 기록 없는 날은 평균에서 제외	−3 bis +3, 0 ist neutral; Tage ohne Einträge zählen nicht zum Durchschnitt	от −3 до +3, 0 — нейтрально; дни без записей не входят в среднее	من ‎−3‎ إلى ‎+3‎، و0 محايد؛ الأيام بلا تسجيل لا تدخل في المتوسط	−3〜+3、0 は中立。記録のない日は平均に含みません
+/data/emotions：存在非法或重复记录，请先处理异常数据再导出	/data/emotions: invalid or duplicate entries. Fix them before exporting	/data/emotions : entrées non valides ou en double. Corrigez-les avant d'exporter	/data/emotions: 잘못되었거나 중복된 항목이 있습니다. 내보내기 전에 처리해 주세요	/data/emotions: ungültige oder doppelte Einträge. Vor dem Export beheben	/data/emotions: неверные или повторяющиеся записи. Исправьте их перед экспортом	/data/emotions: سجلات غير صالحة أو مكررة. عالجها قبل التصدير	/data/emotions: 不正または重複したデータがあります。修正してから書き出してください
+/data/logs：存在非法或重复记录，请先处理异常数据再导出	/data/logs: invalid or duplicate entries. Fix them before exporting	/data/logs : entrées non valides ou en double. Corrigez-les avant d'exporter	/data/logs: 잘못되었거나 중복된 항목이 있습니다. 내보내기 전에 처리해 주세요	/data/logs: ungültige oder doppelte Einträge. Vor dem Export beheben	/data/logs: неверные или повторяющиеся записи. Исправьте их перед экспортом	/data/logs: سجلات غير صالحة أو مكررة. عالجها قبل التصدير	/data/logs: 不正または重複したデータがあります。修正してから書き出してください
+/data/tasks/{0}/due：必须是对象	/data/tasks/{0}/due: must be an object	/data/tasks/{0}/due : doit être un objet	/data/tasks/{0}/due: 객체여야 합니다	/data/tasks/{0}/due: muss ein Objekt sein	/data/tasks/{0}/due: должно быть объектом	/data/tasks/{0}/due: يجب أن يكون كائنًا	/data/tasks/{0}/due: オブジェクトである必要があります
+/data/tasks：存在非法或重复记录，请先处理异常数据再导出	/data/tasks: invalid or duplicate entries. Fix them before exporting	/data/tasks : entrées non valides ou en double. Corrigez-les avant d'exporter	/data/tasks: 잘못되었거나 중복된 항목이 있습니다. 내보내기 전에 처리해 주세요	/data/tasks: ungültige oder doppelte Einträge. Vor dem Export beheben	/data/tasks: неверные или повторяющиеся записи. Исправьте их перед экспортом	/data/tasks: سجلات غير صالحة أو مكررة. عالجها قبل التصدير	/data/tasks: 不正または重複したデータがあります。修正してから書き出してください
+/data/{0}/{1}：记录必须是对象	/data/{0}/{1}: entry must be an object	/data/{0}/{1} : l'entrée doit être un objet	/data/{0}/{1}: 항목은 객체여야 합니다	/data/{0}/{1}: Eintrag muss ein Objekt sein	/data/{0}/{1}: запись должна быть объектом	/data/{0}/{1}: يجب أن يكون السجل كائنًا	/data/{0}/{1}: 記録はオブジェクトである必要があります
+/data/{0}：数组超过上限	/data/{0}: array exceeds the limit	/data/{0} : le tableau dépasse la limite	/data/{0}: 배열이 한도를 초과했습니다	/data/{0}: Array überschreitet das Limit	/data/{0}: массив превышает лимит	/data/{0}: تجاوزت المصفوفة الحد	/data/{0}: 配列が上限を超えています
+/data：存在非法或重复记录，请使用损坏文件恢复入口	/data: invalid or duplicate entries. Use the recovery import	/data : entrées non valides ou en double. Utilisez la restauration	/data: 잘못되었거나 중복된 항목이 있습니다. 복구 가져오기를 사용하세요	/data: ungültige oder doppelte Einträge. Bitte Wiederherstellung verwenden	/data: неверные или повторяющиеся записи. Используйте восстановление	/data: سجلات غير صالحة أو مكررة. استخدم الاستعادة	/data: 不正または重複したデータがあります。復元読み込みをお使いください
+/data：存在非法或重复记录，请使用损坏文件恢复入口查看可恢复内容	/data: invalid or duplicate entries. Use the recovery import to see what can be restored	/data : entrées non valides ou en double. Utilisez la restauration pour voir ce qui peut être récupéré	/data: 잘못되었거나 중복된 항목이 있습니다. 복구 가져오기에서 복구 가능한 내용을 확인하세요	/data: ungültige oder doppelte Einträge. Über die Wiederherstellung sehen, was sich retten lässt	/data: неверные или повторяющиеся записи. Посмотрите в восстановлении, что можно вернуть	/data: سجلات غير صالحة أو مكررة. استخدم الاستعادة لمعرفة ما يمكن استرجاعه	/data: 不正または重複したデータがあります。復元読み込みで復元できる内容をご確認ください
+/data：数组超过上限	/data: array exceeds the limit	/data : le tableau dépasse la limite	/data: 배열이 한도를 초과했습니다	/data: Array überschreitet das Limit	/data: массив превышает лимит	/data: تجاوزت المصفوفة الحد	/data: 配列が上限を超えています
+/updatedAt：任务时间不合法	/updatedAt: invalid task time	/updatedAt : heure de tâche non valide	/updatedAt: 할 일 시간이 잘못되었습니다	/updatedAt: ungültige Aufgabenzeit	/updatedAt: неверное время задачи	/updatedAt: وقت المهمة غير صالح	/updatedAt: タスクの時刻が不正です
+/version：旧版文件请使用兼容恢复入口	/version: use the recovery import for older files	/version : utilisez la restauration pour les anciens fichiers	/version: 이전 파일은 복구 가져오기를 사용하세요	/version: Für ältere Dateien die Wiederherstellung verwenden	/version: для старых файлов используйте восстановление	/version: استخدم الاستعادة للملفات القديمة	/version: 古いファイルは復元読み込みをお使いください
+/：JSON 值数量超过资源上限	/: too many JSON values	/ : trop de valeurs JSON	/: JSON 값이 너무 많습니다	/: zu viele JSON-Werte	/: слишком много значений JSON	/: عدد قيم JSON كبير جدًا	/: JSON の値が多すぎます
+/：JSON 对象包含重复键	/: JSON object has duplicate keys	/ : l'objet JSON contient des clés en double	/: JSON 객체에 중복 키가 있습니다	/: JSON-Objekt enthält doppelte Schlüssel	/: в объекте JSON есть повторяющиеся ключи	/: يحتوي كائن JSON على مفاتيح مكررة	/: JSON オブジェクトに重複キーがあります
+/：JSON 对象包含重复键：{0}	/: JSON object has a duplicate key: {0}	/ : clé en double dans l'objet JSON : {0}	/: JSON 객체에 중복 키가 있습니다: {0}	/: doppelter Schlüssel im JSON-Objekt: {0}	/: повторяющийся ключ в объекте JSON: {0}	/: مفتاح مكرر في كائن JSON: {0}	/: JSON オブジェクトに重複キーがあります: {0}
+/：JSON 语法不合法（位置 {0}）	/: invalid JSON syntax (position {0})	/ : syntaxe JSON non valide (position {0})	/: JSON 구문 오류 (위치 {0})	/: ungültige JSON-Syntax (Position {0})	/: неверный синтаксис JSON (позиция {0})	/: صياغة JSON غير صالحة (الموضع {0})	/: JSON の構文エラー (位置 {0})
+/：不允许 BOM	/: BOM is not allowed	/ : BOM non autorisé	/: BOM은 허용되지 않습니다	/: BOM ist nicht erlaubt	/: BOM не допускается	/: لا يُسمح بـ BOM	/: BOM は使用できません
+/：不允许 UTF-8 BOM	/: UTF-8 BOM is not allowed	/ : BOM UTF-8 non autorisé	/: UTF-8 BOM은 허용되지 않습니다	/: UTF-8-BOM ist nicht erlaubt	/: UTF-8 BOM не допускается	/: لا يُسمح بـ UTF-8 BOM	/: UTF-8 BOM は使用できません
+/：备份版本或元信息不合法	/: invalid backup version or metadata	/ : version ou métadonnées de sauvegarde non valides	/: 백업 버전 또는 메타데이터가 잘못되었습니다	/: ungültige Backup-Version oder Metadaten	/: неверная версия или метаданные резервной копии	/: إصدار النسخة الاحتياطية أو بياناتها الوصفية غير صالحة	/: バックアップのバージョンまたはメタ情報が不正です
+/：导出元信息不合法	/: invalid export metadata	/ : métadonnées d'exportation non valides	/: 내보내기 메타데이터가 잘못되었습니다	/: ungültige Export-Metadaten	/: неверные метаданные экспорта	/: بيانات التصدير الوصفية غير صالحة	/: 書き出しのメタ情報が不正です
+/：文件超过 50 MiB	/: file is larger than 50 MiB	/ : le fichier dépasse 50 Mio	/: 파일이 50MiB를 초과합니다	/: Datei ist größer als 50 MiB	/: файл больше 50 МиБ	/: حجم الملف أكبر من 50 ميبيبايت	/: ファイルが 50 MiB を超えています
+30天	30 days	30 jours	30일	30 Tage	30 дней	30 يومًا	30日
+7天	7 days	7 jours	7일	7 Tage	7 дней	7 أيام	7日
+A week worth remembering. ✦	A week worth remembering. ✦	Une semaine à retenir. ✦	기억할 만한 한 주예요. ✦	Eine Woche, die in Erinnerung bleibt. ✦	Неделя, которую стоит запомнить. ✦	أسبوع يستحق أن يُذكر. ✦	心に残る一週間でした。✦
+Flash Aero HarmonyOS 原生版本	Flash Aero for HarmonyOS	Flash Aero pour HarmonyOS	HarmonyOS용 Flash Aero	Flash Aero für HarmonyOS	Flash Aero для HarmonyOS	Flash Aero لنظام HarmonyOS	HarmonyOS 版 Flash Aero
+Flash Aero 主窗口	Flash Aero main window	Fenêtre principale de Flash Aero	Flash Aero 기본 창	Flash Aero-Hauptfenster	Главное окно Flash Aero	نافذة Flash Aero الرئيسية	Flash Aero メインウィンドウ
+Flash Aero 今日概览服务卡片	Flash Aero today overview card	Carte du jour de Flash Aero	Flash Aero 오늘 요약 카드	Flash Aero-Karte „Heute im Überblick“	Карточка Flash Aero «Сегодня»	بطاقة نظرة اليوم في Flash Aero	Flash Aero 今日の概要カード
+Flash Aero 备份	Flash Aero backup	Sauvegarde Flash Aero	Flash Aero 백업	Flash Aero-Backup	Резервная копия Flash Aero	نسخة Flash Aero الاحتياطية	Flash Aero バックアップ
+Flash 任务提醒	Flash task reminder	Rappel de tâche Flash	Flash 할 일 알림	Flash-Aufgabenerinnerung	Напоминание о задаче Flash	تذكير مهمة Flash	Flash タスクのリマインダー
+Flash 备份	Flash backup	Sauvegarde Flash	Flash 백업	Flash-Backup	Резервная копия Flash	نسخة Flash الاحتياطية	Flash バックアップ
+Flash 存储暂不可用，请打开应用后重试	Flash storage isn't available right now. Open the app and try again	Le stockage de Flash n'est pas disponible. Ouvrez l'app et réessayez	Flash 저장소를 지금 사용할 수 없습니다. 앱을 연 뒤 다시 시도하세요	Der Flash-Speicher ist gerade nicht verfügbar. App öffnen und erneut versuchen	Хранилище Flash сейчас недоступно. Откройте приложение и повторите попытку	مساحة تخزين Flash غير متاحة حاليًا. افتح التطبيق وحاول مجددًا	Flash のストレージを利用できません。アプリを開いてもう一度お試しください
+Flash 快速记录	Flash Quick Capture	Capture rapide Flash	Flash 빠른 기록	Flash-Schnellerfassung	Быстрая запись Flash	الالتقاط السريع في Flash	Flash クイック記録
+Flash 此刻	Flash Now	Flash Maintenant	Flash 지금	Flash Jetzt	Flash Сейчас	Flash الآن	Flash いま
+Flash 灵感	Flash idea	Idée Flash	Flash 아이디어	Flash-Idee	Идея Flash	فكرة Flash	Flash アイデア
+Flash 记录	Flash record	Entrée Flash	Flash 기록	Flash-Eintrag	Запись Flash	سجل Flash	Flash 記録
+Flash 锁屏	Flash Lock Screen	Flash écran verrouillé	Flash 잠금 화면	Flash-Sperrbildschirm	Flash на экране блокировки	Flash في شاشة القفل	Flash ロック画面
+Highlights	Highlights	Temps forts	하이라이트	Highlights	Главное	أبرز اللحظات	ハイライト
+JSON 备份|.json	JSON backup|.json	Sauvegarde JSON|.json	JSON 백업|.json	JSON-Backup|.json	Резервная копия JSON|.json	نسخة JSON احتياطية|.json	JSON バックアップ|.json
+Memory	Memory	Mémoire	메모리	Erinnerung	Память	الذاكرة	メモリー
+Mostly Low	Mostly low	Plutôt bas	대체로 가라앉음	Eher gedrückt	В основном подавленно	منخفض غالبًا	やや落ち込み気味
+Mostly Positive	Mostly positive	Plutôt positif	대체로 긍정적	Eher positiv	В основном позитивно	إيجابي غالبًا	おおむね前向き
+Mostly Steady	Mostly steady	Plutôt stable	대체로 안정적	Eher ausgeglichen	В основном ровно	مستقر غالبًا	おおむね安定
+PIN 仅本次有效，60 秒后自动失效。	This PIN works once and expires after 60 seconds.	Ce code PIN n'est valable qu'une fois et expire après 60 secondes.	이 PIN은 이번만 유효하며 60초 후 만료됩니다.	Diese PIN gilt einmal und läuft nach 60 Sekunden ab.	Этот PIN действует один раз и истекает через 60 секунд.	رمز PIN هذا صالح لمرة واحدة وينتهي بعد 60 ثانية.	この PIN は今回のみ有効で、60 秒後に失効します。
+This week felt...	This week felt...	Cette semaine, c'était...	이번 주는...	Diese Woche war...	Эта неделя была...	كان هذا الأسبوع...	今週は...
+Toast 胶囊	Toast	Message	토스트	Hinweis	Уведомление	إشعار	トースト
+You recorded	You recorded	Vous avez noté	이번 주 기록	Das hast du erfasst	Вы записали	ما سجّلته	記録したこと
+data 必须是对象	data must be an object	data doit être un objet	data는 객체여야 합니다	data muss ein Objekt sein	data должно быть объектом	يجب أن يكون data كائنًا	data はオブジェクトである必要があります
+emotions	moods	humeurs	기분	Stimmungen	настроение	مزاج	気分
+emotions 必须是数组	emotions must be an array	emotions doit être un tableau	emotions는 배열이어야 합니다	emotions muss ein Array sein	emotions должно быть массивом	يجب أن يكون emotions مصفوفة	emotions は配列である必要があります
+ideas	ideas	idées	아이디어	Ideen	идеи	أفكار	アイデア
+logs 必须是数组	logs must be an array	logs doit être un tableau	logs는 배열이어야 합니다	logs muss ein Array sein	logs должно быть массивом	يجب أن يكون logs مصفوفة	logs は配列である必要があります
+moments	moments	moments	순간	Momente	моменты	لحظات	ひらめき
+schemas 必须是对象	schemas must be an object	schemas doit être un objet	schemas는 객체여야 합니다	schemas muss ein Objekt sein	schemas должно быть объектом	يجب أن يكون schemas كائنًا	schemas はオブジェクトである必要があります
+tasks	tasks	tâches	할 일	Aufgaben	задачи	مهام	タスク
+tasks 必须是数组	tasks must be an array	tasks doit être un tableau	tasks는 배열이어야 합니다	tasks muss ein Array sein	tasks должно быть массивом	يجب أن يكون tasks مصفوفة	tasks は配列である必要があります
+v0.1.0 · HarmonyOS 原生版 · com.flash.app.harmonyos	v0.1.0 · HarmonyOS · com.flash.app.harmonyos	v0.1.0 · HarmonyOS · com.flash.app.harmonyos	v0.1.0 · HarmonyOS · com.flash.app.harmonyos	v0.1.0 · HarmonyOS · com.flash.app.harmonyos	v0.1.0 · HarmonyOS · com.flash.app.harmonyos	v0.1.0 · HarmonyOS · com.flash.app.harmonyos	v0.1.0 · HarmonyOS · com.flash.app.harmonyos
+{0} {1} 条 · {2} {3} 条	{0}: {1} · {2}: {3}	{0} : {1} · {2} : {3}	{0}: {1} · {2}: {3}	{0}: {1} · {2}: {3}	{0}: {1} · {2}: {3}	{0}: {1} · {2}: {3}	{0}: {1} · {2}: {3}
+{0} — {1} · 无记录日期不计入均值	{0} — {1} · days with no entries aren't averaged	{0} — {1} · les jours sans entrée ne comptent pas	{0} — {1} · 기록 없는 날은 평균에서 제외	{0} — {1} · Tage ohne Einträge zählen nicht	{0} — {1} · дни без записей не учитываются	{0} — {1} · الأيام بلا تسجيل لا تُحسب	{0} — {1} · 記録のない日は平均に含みません
+{0} 个任务	Tasks: {0}	Tâches : {0}	할 일 {0}개	Aufgaben: {0}	Задач: {0}	المهام: {0}	タスク {0} 件
+{0} 个想法待梳理	Ideas to review: {0}	Idées à revoir : {0}	정리할 아이디어 {0}개	Ideen zum Durchgehen: {0}	Идей к разбору: {0}	أفكار للمراجعة: {0}	整理待ちのアイデア {0} 件
+{0} 个想法等待梳理，打开最早的一条	Ideas to review: {0}. Open the oldest	Idées à revoir : {0}. Ouvrir la plus ancienne	정리할 아이디어 {0}개. 가장 오래된 항목 열기	Ideen zum Durchgehen: {0}. Älteste öffnen	Идей к разбору: {0}. Открыть самую раннюю	أفكار للمراجعة: {0}. افتح الأقدم	整理待ちのアイデア {0} 件。最も古いものを開きます
+{0} 个活跃日 · 共 {1} 次	Active days: {0} · Total: {1}	Jours actifs : {0} · Total : {1}	활동일 {0}일 · 총 {1}회	Aktive Tage: {0} · Gesamt: {1}	Активных дней: {0} · Всего: {1}	الأيام النشطة: {0} · الإجمالي: {1}	活動日 {0} 日 · 合計 {1} 回
+{0} 年 {1} 月	{1}/{0}	{1}/{0}	{0}년 {1}월	{1}/{0}	{1}.{0}	{1}/{0}	{0}年{1}月
+{0} 必须是对象	{0} must be an object	{0} doit être un objet	{0}은(는) 객체여야 합니다	{0} muss ein Objekt sein	{0} должно быть объектом	يجب أن يكون {0} كائنًا	{0} はオブジェクトである必要があります
+{0} 必须是数组	{0} must be an array	{0} doit être un tableau	{0}은(는) 배열이어야 합니다	{0} muss ein Array sein	{0} должно быть массивом	يجب أن يكون {0} مصفوفة	{0} は配列である必要があります
+{0} 条	Items: {0}	Éléments : {0}	{0}개	Einträge: {0}	Записей: {0}	العناصر: {0}	{0} 件
+{0} 条数据格式异常，将被跳过。	Invalid items that will be skipped: {0}.	Éléments non valides qui seront ignorés : {0}.	건너뛸 잘못된 항목: {0}개.	Ungültige Einträge, die übersprungen werden: {0}.	Неверных элементов будет пропущено: {0}.	العناصر غير الصالحة التي ستُتخطى: {0}.	スキップされる不正データ: {0} 件。
+{0} 条记录 · {1} 次情绪	Records: {0} · Moods: {1}	Entrées : {0} · Humeurs : {1}	기록 {0}개 · 기분 {1}회	Einträge: {0} · Stimmungen: {1}	Записей: {0} · Настроений: {1}	السجلات: {0} · المزاج: {1}	記録 {0} 件 · 気分 {1} 回
+{0} 条记录，{1} 次情绪	Records: {0}, moods: {1}	Entrées : {0}, humeurs : {1}	기록 {0}개, 기분 {1}회	Einträge: {0}, Stimmungen: {1}	Записей: {0}, настроений: {1}	السجلات: {0}، المزاج: {1}	記録 {0} 件、気分 {1} 回
+{0} 条记录，{1} 次情绪，{2} 项任务	Records: {0}, moods: {1}, tasks: {2}	Entrées : {0}, humeurs : {1}, tâches : {2}	기록 {0}개, 기분 {1}회, 할 일 {2}개	Einträge: {0}, Stimmungen: {1}, Aufgaben: {2}	Записей: {0}, настроений: {1}, задач: {2}	السجلات: {0}، المزاج: {1}، المهام: {2}	記録 {0} 件、気分 {1} 回、タスク {2} 件
+{0} 次	{0}×	{0} fois	{0}회	{0}-mal	{0} раз(а)	{0} مرة	{0} 回
+{0} 次情绪，{1} 项任务	Moods: {0}, tasks: {1}	Humeurs : {0}, tâches : {1}	기분 {0}회, 할 일 {1}개	Stimmungen: {0}, Aufgaben: {1}	Настроений: {0}, задач: {1}	المزاج: {0}، المهام: {1}	気分 {0} 回、タスク {1} 件
+{0} 级及以上	Level {0} and above	Niveau {0} et plus	{0}단계 이상	Stufe {0} und höher	Уровень {0} и выше	المستوى {0} فأعلى	レベル {0} 以上
+{0} 详情	{0} details	Détails du {0}	{0} 상세	Details zu {0}	Подробности: {0}	تفاصيل {0}	{0} の詳細
+{0} 项待办	To-dos: {0}	À faire : {0}	할 일 {0}개	Offen: {0}	К выполнению: {0}	قيد الإنجاز: {0}	未完了 {0} 件
+{0}不如{1}活跃	{0} was less active than {1}	{0} a été moins actif que {1}	{0}은(는) {1}보다 활동이 적었어요	{0} war weniger aktiv als {1}	{0} менее активно, чем {1}	كان {0} أقل نشاطًا من {1}	{0}は{1}より活動が少なめでした
+{0}与{1}持平	{0} matched {1}	{0} est au même niveau que {1}	{0}은(는) {1}와(과) 비슷해요	{0} lag gleichauf mit {1}	{0} на уровне: {1}	{0} مماثل لـ {1}	{0}は{1}と同じくらいでした
+{0}你记录得比{1}更频繁	You recorded more often {0} than {1}	Vous avez noté plus souvent {0} que {1}	{0}은(는) {1}보다 더 자주 기록했어요	{0} hast du öfter erfasst als {1}	{0} вы записывали чаще, чем {1}	سجّلت {0} أكثر من {1}	{0}は{1}より多く記録しました
+{0}月{1}日	{0}/{1}	{1}/{0}	{0}월 {1}일	{1}.{0}.	{1}.{0}	{1}/{0}	{0}月{1}日
+{0}的记录不如{1}活跃	You recorded less {0} than {1}	Vous avez moins noté {0} que {1}	{0}의 기록은 {1}보다 적어요	{0} hast du weniger erfasst als {1}	{0} записей меньше, чем {1}	سجّلت {0} أقل من {1}	{0}の記録は{1}より少なめです
+{0}的记录与{1}持平	You recorded about the same {0} as {1}	Vous avez noté autant {0} que {1}	{0}의 기록은 {1}와(과) 비슷해요	{0} hast du etwa so viel erfasst wie {1}	{0} записей примерно столько же, сколько {1}	سجّلت {0} بقدر {1} تقريبًا	{0}の記録は{1}と同じくらいです
+{0}，{1} 条记录，	{0}, records: {1}, 	{0}, entrées : {1}, 	{0}, 기록 {1}개, 	{0}, Einträge: {1}, 	{0}, записей: {1}, 	{0}، السجلات: {1}، 	{0}、記録 {1} 件、
+{0}，{1} 项	{0}, items: {1}	{0}, éléments : {1}	{0}, {1}개	{0}, Einträge: {1}	{0}, элементов: {1}	{0}، العناصر: {1}	{0}、{1} 件
+{0}，但恢复副本写入失败，原始数据未能保留	{0}, but the recovery copy couldn't be written and the original data wasn't kept	{0}, mais la copie de récupération n'a pas pu être écrite et les données d'origine n'ont pas été conservées	{0}, 하지만 복구 사본을 쓰지 못해 원본 데이터를 보존하지 못했습니다	{0}, aber die Wiederherstellungskopie konnte nicht geschrieben werden; die Originaldaten wurden nicht behalten	{0}, но копию для восстановления записать не удалось, исходные данные не сохранены	{0}، لكن تعذرت كتابة نسخة الاستعادة ولم يُحتفظ بالبيانات الأصلية	{0}、ただし復元用コピーを書き込めず、元データを保持できませんでした
+{0}，但系统提醒恢复失败，请稍后重试	{0}, but system reminders couldn't be restored. Try again later	{0}, mais les rappels n'ont pas pu être restaurés. Réessayez plus tard	{0}, 하지만 시스템 알림을 복구하지 못했습니다. 나중에 다시 시도하세요	{0}, aber Systemerinnerungen konnten nicht wiederhergestellt werden. Später erneut versuchen	{0}, но системные напоминания восстановить не удалось. Повторите позже	{0}، لكن تعذرت استعادة تذكيرات النظام. حاول لاحقًا	{0}、ただしシステムのリマインダーを復元できませんでした。後でもう一度お試しください
+{0}，原始数据已保留用于恢复	{0}. The original data was kept for recovery	{0}. Les données d'origine sont conservées pour la récupération	{0}. 복구를 위해 원본 데이터를 보존했습니다	{0}. Die Originaldaten wurden für die Wiederherstellung behalten	{0}. Исходные данные сохранены для восстановления	{0}. احتُفظ بالبيانات الأصلية للاستعادة	{0}。復元のため元データを保持しました
+{0}：{1} 条记录 · {2} 次情绪	{0}: records {1} · moods {2}	{0} : entrées {1} · humeurs {2}	{0}: 기록 {1}개 · 기분 {2}회	{0}: Einträge {1} · Stimmungen {2}	{0}: записей {1} · настроений {2}	{0}: السجلات {1} · المزاج {2}	{0}: 記録 {1} 件 · 気分 {2} 回
+{0}：不符合备份契约，请检查文件或使用恢复入口	{0}: doesn't match the backup format. Check the file or use the recovery import	{0} : non conforme au format de sauvegarde. Vérifiez le fichier ou utilisez la restauration	{0}: 백업 형식에 맞지 않습니다. 파일을 확인하거나 복구 가져오기를 사용하세요	{0}: entspricht nicht dem Backup-Format. Datei prüfen oder Wiederherstellung verwenden	{0}: не соответствует формату резервной копии. Проверьте файл или используйте восстановление	{0}: لا يطابق تنسيق النسخة الاحتياطية. تحقق من الملف أو استخدم الاستعادة	{0}: バックアップの形式に合いません。ファイルを確認するか復元読み込みをお使いください
+{0}：必须是对象	{0}: must be an object	{0} : doit être un objet	{0}: 객체여야 합니다	{0}: muss ein Objekt sein	{0}: должно быть объектом	{0}: يجب أن يكون كائنًا	{0}: オブジェクトである必要があります
+{0}：新增 {1} · 修改 {2} · 相同 {3} · 仅本机 {4}	{0}: {1} new · {2} changed · {3} same · {4} only here	{0} : {1} nouvelles · {2} modifiées · {3} identiques · {4} uniquement ici	{0}: 새로 추가 {1} · 변경 {2} · 동일 {3} · 이 기기에만 {4}	{0}: {1} neu · {2} geändert · {3} gleich · {4} nur hier	{0}: новых {1} · изменено {2} · без изменений {3} · только здесь {4}	{0}: جديدة {1} · معدّلة {2} · متطابقة {3} · هنا فقط {4}	{0}: 新規 {1} · 変更 {2} · 同一 {3} · この端末のみ {4}
+{0}：缺少必填字段或包含未知字段	{0}: missing required fields or has unknown fields	{0} : champs obligatoires manquants ou champs inconnus	{0}: 필수 필드가 없거나 알 수 없는 필드가 있습니다	{0}: Pflichtfelder fehlen oder unbekannte Felder vorhanden	{0}: нет обязательных полей или есть неизвестные поля	{0}: حقول مطلوبة مفقودة أو حقول غير معروفة	{0}: 必須項目がないか不明な項目があります
+‹ 返回	‹ Back	‹ Retour	‹ 뒤로	‹ Zurück	‹ Назад	‹ رجوع	‹ 戻る
+★ 已收藏	★ Favorites	★ Favoris	★ 즐겨찾기	★ Favoriten	★ Избранное	★ المفضلة	★ お気に入り
+✓ 备份已发送至对方设备，请在对端确认导入	✓ Backup sent. Confirm the import on the other device	✓ Sauvegarde envoyée. Confirmez l'importation sur l'autre appareil	✓ 백업을 보냈습니다. 상대 기기에서 가져오기를 확인하세요	✓ Backup gesendet. Import auf dem anderen Gerät bestätigen	✓ Копия отправлена. Подтвердите импорт на другом устройстве	✓ أُرسلت النسخة. أكّد الاستيراد على الجهاز الآخر	✓ バックアップを送信しました。相手の端末で読み込みを確定してください
+✓ 备份已导出	✓ Backup exported	✓ Sauvegarde exportée	✓ 백업을 내보냈습니다	✓ Backup exportiert	✓ Копия экспортирована	✓ صُدّرت النسخة الاحتياطية	✓ バックアップを書き出しました
+✓ 已保存任务	✓ Task saved	✓ Tâche enregistrée	✓ 할 일을 저장했습니다	✓ Aufgabe gespeichert	✓ Задача сохранена	✓ حُفظت المهمة	✓ タスクを保存しました
+✓ 已保存到日志	✓ Saved to logs	✓ Enregistré dans le journal	✓ 일지에 저장했습니다	✓ Im Tagebuch gespeichert	✓ Сохранено в журнал	✓ حُفظت في اليوميات	✓ ログに保存しました
+✓ 已保存到灵感	✓ Saved to ideas	✓ Enregistré dans les idées	✓ 아이디어에 저장했습니다	✓ Bei den Ideen gespeichert	✓ Сохранено в идеи	✓ حُفظت في الأفكار	✓ アイデアに保存しました
+✓ 已收入 {0} 条分享内容	✓ Shared items added: {0}	✓ Éléments partagés ajoutés : {0}	✓ 공유 항목 {0}개를 추가했습니다	✓ Geteilte Inhalte hinzugefügt: {0}	✓ Добавлено из «Поделиться»: {0}	✓ أُضيفت عناصر مشتركة: {0}	✓ 共有された内容を {0} 件追加しました
+✓ 已整理 {0} 条	✓ Sorted: {0}	✓ Triés : {0}	✓ {0}개를 정리했습니다	✓ Sortiert: {0}	✓ Разобрано: {0}	✓ تم فرز: {0}	✓ {0} 件を整理しました
+✓ 已清空全部数据	✓ All data cleared	✓ Toutes les données ont été effacées	✓ 모든 데이터를 지웠습니다	✓ Alle Daten gelöscht	✓ Все данные удалены	✓ مُسحت كل البيانات	✓ すべてのデータを消去しました
+✦ Flash	✦ Flash	✦ Flash	✦ Flash	✦ Flash	✦ Flash	✦ Flash	✦ Flash
+✦ 今日 {0} 条记录 · {1} 项待办	✦ Today: records {0} · to-dos {1}	✦ Aujourd'hui : entrées {0} · à faire {1}	✦ 오늘 기록 {0}개 · 할 일 {1}개	✦ Heute: Einträge {0} · offen {1}	✦ Сегодня: записей {0} · к выполнению {1}	✦ اليوم: السجلات {0} · قيد الإنجاز {1}	✦ 今日: 記録 {0} 件 · 未完了 {1} 件
+一	Mon	Lun	월	Mo	Пн	ن	月
+一览今日记录、待办与情绪，一键记下新念头。	See today's records, to-dos and mood, and capture a new thought in one tap.	Voyez les entrées, tâches et humeur du jour, et notez une pensée en un geste.	오늘의 기록, 할 일, 기분을 보고 한 번에 새 생각을 기록하세요.	Einträge, offene Aufgaben und Stimmung von heute sehen und neue Gedanken mit einem Tipp erfassen.	Записи, задачи и настроение за сегодня, и новая мысль одним касанием.	اطّلع على سجلات اليوم ومهامه ومزاجه، والتقط فكرة جديدة بلمسة.	今日の記録・未完了・気分を確認し、ワンタップで思いつきを記録できます。
+一览今日记录、灵感与待办任务	See today's records, ideas and to-dos	Voyez les entrées, idées et tâches du jour	오늘의 기록, 아이디어, 할 일 보기	Einträge, Ideen und offene Aufgaben von heute sehen	Записи, идеи и задачи за сегодня	اطّلع على سجلات اليوم وأفكاره ومهامه	今日の記録・アイデア・未完了タスクを確認
+一闪而过的想法，值得被记住	Fleeting thoughts are worth remembering	Les pensées fugaces méritent d'être retenues	스쳐 가는 생각도 기억할 가치가 있어요	Flüchtige Gedanken sind es wert, festgehalten zu werden	Мимолётные мысли стоит запоминать	الأفكار العابرة تستحق أن تُحفظ	ふとした思いつきは、残す価値があります
+七级情绪记录，看见自己的变化	Seven mood levels to see how you change	Sept niveaux d'humeur pour voir votre évolution	일곱 단계 기분 기록으로 나의 변화를 봐요	Sieben Stimmungsstufen zeigen, wie du dich veränderst	Семь уровней настроения, чтобы видеть перемены	سبعة مستويات للمزاج لترى كيف تتغير	7 段階の気分記録で自分の変化が見えます
+三	Wed	Mer	수	Mi	Ср	ر	水
+上一周	Previous week	Semaine précédente	이전 주	Vorige Woche	Предыдущая неделя	الأسبوع السابق	前の週
+上一月	Previous month	Mois précédent	이전 달	Voriger Monat	Предыдущий месяц	الشهر السابق	前の月
+上个月	last month	le mois dernier	지난달	letzten Monat	в прошлом месяце	الشهر الماضي	先月
+上周	last week	la semaine dernière	지난주	letzte Woche	на прошлой неделе	الأسبوع الماضي	先週
+下一周	Next week	Semaine suivante	다음 주	Nächste Woche	Следующая неделя	الأسبوع التالي	次の週
+下一月	Next month	Mois suivant	다음 달	Nächster Monat	Следующий месяц	الشهر التالي	次の月
+下一步	Next	Suivant	다음	Weiter	Далее	التالي	次へ
+下午好 🌤	Good afternoon 🌤	Bon après-midi 🌤	좋은 오후예요 🌤	Guten Tag 🌤	Добрый день 🌤	مساء الخير 🌤	こんにちは 🌤
+下次打开 Flash 时收入。	Added next time you open Flash.	Ajouté à la prochaine ouverture de Flash.	다음에 Flash를 열 때 추가됩니다.	Wird beim nächsten Öffnen von Flash hinzugefügt.	Добавится при следующем открытии Flash.	يُضاف عند فتح Flash في المرة القادمة.	次に Flash を開いたときに追加されます。
+不开心	Unhappy	Pas content	기분 나쁨	Unglücklich	Грустно	غير سعيد	悲しい
+不开心时的具体感受	How unhappy moods felt	Ressenti des moments difficiles	기분이 나쁠 때의 느낌	Wie sich schlechte Stimmung anfühlte	Как ощущалось плохое настроение	الشعور عند عدم السعادة	悲しいときの具体的な感情
+不提醒	No reminder	Pas de rappel	알림 없음	Keine Erinnerung	Без напоминания	بلا تذكير	通知なし
+不支持的 {0} 分区版本	Unsupported {0} section version	Version de la section {0} non prise en charge	지원하지 않는 {0} 섹션 버전	Nicht unterstützte Version des Abschnitts {0}	Неподдерживаемая версия раздела {0}	إصدار قسم {0} غير مدعوم	未対応の {0} セクションのバージョン
+不限	Any	Tous	전체	Alle	Любые	الكل	指定なし
+与分类筛选叠加	Combines with type filters	Se combine avec les filtres de type	유형 필터와 함께 적용	Kombinierbar mit Typ-Filtern	Сочетается с фильтрами типа	يُدمج مع عوامل تصفية النوع	種類の絞り込みと併用できます
+专注	Focused	Concentré	집중	Fokussiert	Сосредоточенно	مركّز	集中
+两台设备连接同一局域网，接收方输入发送方显示的配对 PIN 即可。备份内容未做端到端加密，请仅在可信的家庭或办公网络使用。	Connect both devices to the same network and enter the sender's PIN on the receiver. The backup isn't end-to-end encrypted, so only use trusted home or office networks.	Connectez les deux appareils au même réseau et saisissez le code PIN de l'expéditeur sur le récepteur. La sauvegarde n'est pas chiffrée de bout en bout : utilisez uniquement un réseau domestique ou professionnel de confiance.	두 기기를 같은 네트워크에 연결하고 받는 기기에 보내는 기기의 PIN을 입력하세요. 백업은 종단 간 암호화되지 않으므로 신뢰할 수 있는 가정이나 사무실 네트워크에서만 사용하세요.	Beide Geräte mit demselben Netzwerk verbinden und die PIN des Senders am Empfänger eingeben. Das Backup ist nicht Ende-zu-Ende-verschlüsselt, daher nur vertrauenswürdige Heim- oder Büronetze verwenden.	Подключите оба устройства к одной сети и введите PIN отправителя на получателе. Копия не защищена сквозным шифрованием, используйте только доверенные домашние или рабочие сети.	صِل الجهازين بالشبكة نفسها وأدخل رمز PIN للمرسل على المستقبل. النسخة ليست مشفرة بين الطرفين، فاستخدم شبكات المنزل أو العمل الموثوقة فقط.	両方の端末を同じネットワークに接続し、受信側で送信側の PIN を入力します。バックアップはエンドツーエンド暗号化されていないため、信頼できる家庭や職場のネットワークでのみ使用してください。
+中屏响应式布局	Medium-screen layout	Mise en page écran moyen	중간 화면 레이아웃	Layout für mittlere Bildschirme	Макет для средних экранов	تخطيط الشاشات المتوسطة	中画面レイアウト
+中性	Neutral	Neutre	보통	Neutral	Нейтрально	محايد	ふつう
+临时内存模式	Temporary memory mode	Mode mémoire temporaire	임시 메모리 모드	Temporärer Speichermodus	Временный режим памяти	وضع الذاكرة المؤقتة	一時メモリモード
+为什么部分能力没有直接开启？	Why aren't some features turned on?	Pourquoi certaines fonctions ne sont-elles pas activées ?	일부 기능이 켜져 있지 않은 이유는?	Warum sind manche Funktionen nicht aktiv?	Почему некоторые функции не включены?	لماذا لم تُفعَّل بعض الميزات؟	一部の機能が有効でないのはなぜ?
+主题	Theme	Thème	테마	Design	Тема	المظهر	テーマ
+主题模式	Theme	Thème	테마	Design	Тема	المظهر	テーマ
+主题设置保存失败：{0}	Couldn't save the theme: {0}	Impossible d'enregistrer le thème : {0}	테마를 저장하지 못했습니다: {0}	Design konnte nicht gespeichert werden: {0}	Не удалось сохранить тему: {0}	تعذر حفظ المظهر: {0}	テーマを保存できませんでした: {0}
+主题跟随系统	Theme follows system	Le thème suit le système	시스템 테마 따름	Design folgt dem System	Тема как в системе	المظهر يتبع النظام	テーマはシステムに従います
+之前 30 天	the previous 30 days	les 30 jours précédents	이전 30일	die 30 Tage davor	за предыдущие 30 дней	الثلاثين يومًا السابقة	その前の 30 日
+之前 90 天	the previous 90 days	les 90 jours précédents	이전 90일	die 90 Tage davor	за предыдущие 90 дней	التسعين يومًا السابقة	その前の 90 日
+二	Tue	Mar	화	Di	Вт	ث	火
+五	Fri	Ven	금	Fr	Пт	ج	金
+仅展示真实检测与当前接入状态；需审核的系统权限不会在未获准时调用。	Only shows what was actually detected and connected. System permissions that need review aren't used until approved.	Affiche uniquement ce qui a été réellement détecté et connecté. Les autorisations soumises à examen ne sont utilisées qu'après approbation.	실제로 감지되고 연결된 상태만 표시합니다. 심사가 필요한 시스템 권한은 승인 전에는 사용하지 않습니다.	Zeigt nur, was tatsächlich erkannt und verbunden ist. Prüfpflichtige Systemrechte werden erst nach Genehmigung genutzt.	Показывает только реально обнаруженное и подключённое. Разрешения, требующие проверки, не используются до одобрения.	يعرض فقط ما اكتُشف واتصل فعليًا. لا تُستخدم أذونات النظام الخاضعة للمراجعة قبل الموافقة.	実際に検出・接続された状態のみ表示します。審査が必要なシステム権限は承認前には使用しません。
+仅用于人工恢复，请勿公开分享	For manual recovery only. Don't share publicly	Pour la récupération manuelle uniquement. Ne pas partager publiquement	수동 복구 전용입니다. 공개적으로 공유하지 마세요	Nur für manuelle Wiederherstellung. Nicht öffentlich teilen	Только для ручного восстановления. Не публикуйте	للاستعادة اليدوية فقط. لا تشاركها علنًا	手動復元専用です。公開しないでください
+今天	Today	Aujourd'hui	오늘	Heute	Сегодня	اليوم	今日
+今天也记录一点什么吧。	Note something down today.	Notez quelque chose aujourd'hui.	오늘도 무언가 기록해 보세요.	Halte heute etwas fest.	Запишите что-нибудь сегодня.	دوّن شيئًا اليوم.	今日も何か書き留めましょう。
+今天还没有故事。	No stories yet today.	Pas encore d'histoire aujourd'hui.	오늘은 아직 이야기가 없어요.	Heute noch keine Geschichten.	Сегодня пока без историй.	لا قصص اليوم بعد.	今日はまだお話がありません。
+今天还没有记录。	Nothing recorded yet today.	Rien de noté aujourd'hui.	오늘은 아직 기록이 없어요.	Heute noch nichts erfasst.	Сегодня пока нет записей.	لا تسجيل اليوم بعد.	今日はまだ記録がありません。
+今日 {0} 条 · 待办 {1}	Today: {0} · To-dos: {1}	Aujourd'hui : {0} · À faire : {1}	오늘 {0}개 · 할 일 {1}개	Heute: {0} · Offen: {1}	Сегодня: {0} · К выполнению: {1}	اليوم: {0} · قيد الإنجاز: {1}	今日 {0} 件 · 未完了 {1} 件
+今日 {0} 条记录	Today's records: {0}	Entrées du jour : {0}	오늘 기록 {0}개	Heutige Einträge: {0}	Записей сегодня: {0}	سجلات اليوم: {0}	今日の記録 {0} 件
+今日与快速记录	Today & Quick Capture	Aujourd'hui et capture rapide	오늘 & 빠른 기록	Heute & Schnellerfassung	Сегодня и быстрая запись	اليوم والالتقاط السريع	今日とクイック記録
+今日概览	Today	Aujourd'hui	오늘 요약	Heute	Сегодня	نظرة اليوم	今日の概要
+今日概览，并可一键记录灵感或日志	Today's overview, with one tap to capture an idea or log	Aperçu du jour, et capture d'une idée ou d'une entrée de journal en un geste	오늘 요약과 아이디어·일지 한 번에 기록	Heute im Überblick, Idee oder Tagebucheintrag mit einem Tipp erfassen	Обзор дня и запись идеи или журнала одним касанием	نظرة اليوم مع التقاط فكرة أو يومية بلمسة	今日の概要と、ワンタップのアイデア・ログ記録
+今日记录	Today	Aujourd'hui	오늘 기록	Heute	Сегодня	سجلات اليوم	今日の記録
+今日记录与待办	Today's records and to-dos	Entrées et tâches du jour	오늘 기록과 할 일	Einträge und offene Aufgaben von heute	Записи и задачи на сегодня	سجلات اليوم ومهامه	今日の記録と未完了
+从另一台设备接收…	Receive from another device…	Recevoir d'un autre appareil…	다른 기기에서 받기…	Von anderem Gerät empfangen…	Получить с другого устройства…	استلام من جهاز آخر…	別の端末から受信…
+从备份导入…	Import from backup…	Importer une sauvegarde…	백업에서 가져오기…	Aus Backup importieren…	Импорт из резервной копии…	استيراد من نسخة احتياطية…	バックアップから読み込む…
+从局域网接收	Receive over local network	Recevoir par réseau local	로컬 네트워크로 받기	Über lokales Netzwerk empfangen	Получить по локальной сети	استلام عبر الشبكة المحلية	ローカルネットワークで受信
+任务	Tasks	Tâches	할 일	Aufgaben	Задачи	المهام	タスク
+任务保存失败	Couldn't save the task	Impossible d'enregistrer la tâche	할 일을 저장하지 못했습니다	Aufgabe konnte nicht gespeichert werden	Не удалось сохранить задачу	تعذر حفظ المهمة	タスクを保存できませんでした
+任务保存失败，请重试	Couldn't save the task. Try again	Impossible d'enregistrer la tâche. Réessayez	할 일을 저장하지 못했습니다. 다시 시도하세요	Aufgabe konnte nicht gespeichert werden. Bitte erneut versuchen	Не удалось сохранить задачу. Повторите попытку	تعذر حفظ المهمة. حاول مجددًا	タスクを保存できませんでした。もう一度お試しください
+任务删除失败	Couldn't delete the task	Impossible de supprimer la tâche	할 일을 삭제하지 못했습니다	Aufgabe konnte nicht gelöscht werden	Не удалось удалить задачу	تعذر حذف المهمة	タスクを削除できませんでした
+任务删除失败，请重试	Couldn't delete the task. Try again	Impossible de supprimer la tâche. Réessayez	할 일을 삭제하지 못했습니다. 다시 시도하세요	Aufgabe konnte nicht gelöscht werden. Bitte erneut versuchen	Не удалось удалить задачу. Повторите попытку	تعذر حذف المهمة. حاول مجددًا	タスクを削除できませんでした。もう一度お試しください
+任务即将到期	Task is due soon	Tâche bientôt due	할 일 기한이 곧 다가옵니다	Aufgabe ist bald fällig	Скоро срок задачи	المهمة مستحقة قريبًا	タスクの期限が近づいています
+任务已保存	Task saved	Tâche enregistrée	할 일을 저장했습니다	Aufgabe gespeichert	Задача сохранена	حُفظت المهمة	タスクを保存しました
+任务已保存，但提醒时间已过，将不会提醒	Task saved, but the reminder time has passed so it won't fire	Tâche enregistrée, mais l'heure du rappel est passée : il ne se déclenchera pas	할 일을 저장했지만 알림 시간이 지나 알리지 않습니다	Aufgabe gespeichert, aber die Erinnerungszeit ist vorbei und wird nicht ausgelöst	Задача сохранена, но время напоминания прошло, оно не сработает	حُفظت المهمة، لكن وقت التذكير قد مضى فلن يعمل	タスクを保存しましたが、通知時刻を過ぎているため通知されません
+任务已保存，但系统提醒未启用	Task saved, but system reminders aren't turned on	Tâche enregistrée, mais les rappels système ne sont pas activés	할 일을 저장했지만 시스템 알림이 꺼져 있습니다	Aufgabe gespeichert, aber Systemerinnerungen sind nicht aktiv	Задача сохранена, но системные напоминания выключены	حُفظت المهمة، لكن تذكيرات النظام غير مفعّلة	タスクを保存しましたが、システム通知がオフです
+任务已保存；允许通知后才能收到提醒	Task saved. Allow notifications to get reminders	Tâche enregistrée. Autorisez les notifications pour recevoir les rappels	할 일을 저장했습니다. 알림을 허용해야 받을 수 있습니다	Aufgabe gespeichert. Mitteilungen erlauben, um Erinnerungen zu erhalten	Задача сохранена. Разрешите уведомления, чтобы получать напоминания	حُفظت المهمة. اسمح بالإشعارات لتلقي التذكيرات	タスクを保存しました。通知を許可するとリマインダーが届きます
+任务已删除	Task deleted	Tâche supprimée	할 일을 삭제했습니다	Aufgabe gelöscht	Задача удалена	حُذفت المهمة	タスクを削除しました
+任务已删除，但系统提醒同步失败	Task deleted, but system reminders couldn't sync	Tâche supprimée, mais les rappels système n'ont pas pu être synchronisés	할 일을 삭제했지만 시스템 알림을 동기화하지 못했습니다	Aufgabe gelöscht, aber Systemerinnerungen konnten nicht synchronisiert werden	Задача удалена, но системные напоминания не синхронизировались	حُذفت المهمة، لكن تعذرت مزامنة تذكيرات النظام	タスクを削除しましたが、システム通知を同期できませんでした
+任务提醒	Task reminders	Rappels de tâches	할 일 알림	Aufgabenerinnerungen	Напоминания о задачах	تذكيرات المهام	タスクのリマインダー
+任务提醒恢复失败；任务数据仍然安全，请稍后重启应用重试	Couldn't restore task reminders. Your tasks are safe. Restart the app later to retry	Impossible de restaurer les rappels. Vos tâches sont en sécurité. Redémarrez l'app plus tard	할 일 알림을 복구하지 못했습니다. 데이터는 안전합니다. 나중에 앱을 다시 시작하세요	Aufgabenerinnerungen konnten nicht wiederhergestellt werden. Deine Aufgaben sind sicher. App später neu starten	Не удалось восстановить напоминания. Задачи в сохранности. Перезапустите приложение позже	تعذرت استعادة التذكيرات. مهامك بأمان. أعد تشغيل التطبيق لاحقًا	リマインダーを復元できませんでした。タスクは安全です。後でアプリを再起動してください
+任务时间不合法	Invalid task time	Heure de tâche non valide	할 일 시간이 잘못되었습니다	Ungültige Aufgabenzeit	Неверное время задачи	وقت المهمة غير صالح	タスクの時刻が不正です
+任务更新失败	Couldn't update the task	Impossible de mettre à jour la tâche	할 일을 업데이트하지 못했습니다	Aufgabe konnte nicht aktualisiert werden	Не удалось обновить задачу	تعذر تحديث المهمة	タスクを更新できませんでした
+任务标题	Task title	Titre de la tâche	할 일 제목	Aufgabentitel	Название задачи	عنوان المهمة	タスク名
+任务状态已更新，但系统提醒同步失败	Task updated, but system reminders couldn't sync	Tâche mise à jour, mais les rappels système n'ont pas pu être synchronisés	할 일을 업데이트했지만 시스템 알림을 동기화하지 못했습니다	Aufgabe aktualisiert, aber Systemerinnerungen konnten nicht synchronisiert werden	Задача обновлена, но системные напоминания не синхронизировались	حُدّثت المهمة، لكن تعذرت مزامنة تذكيرات النظام	タスクを更新しましたが、システム通知を同期できませんでした
+任务：新增 {0}、变更 {1}、本机独有 {2}\n	Tasks: {0} new, {1} changed, {2} only here\n	Tâches : {0} nouvelles, {1} modifiées, {2} uniquement ici\n	할 일: 새로 추가 {0}, 변경 {1}, 이 기기에만 {2}\n	Aufgaben: {0} neu, {1} geändert, {2} nur hier\n	Задачи: новых {0}, изменено {1}, только здесь {2}\n	المهام: جديدة {0}، معدّلة {1}، هنا فقط {2}\n	タスク: 新規 {0}、変更 {1}、この端末のみ {2}\n
+传输 Flash Aero 备份	Send Flash Aero backup	Envoyer la sauvegarde Flash Aero	Flash Aero 백업 보내기	Flash Aero-Backup senden	Отправить копию Flash Aero	إرسال نسخة Flash Aero	Flash Aero バックアップを送信
+传输到其他设备	Send to another device	Envoyer vers un autre appareil	다른 기기로 보내기	An anderes Gerät senden	Отправить на другое устройство	إرسال إلى جهاز آخر	別の端末へ送信
+伤心	Sad	Triste	슬픔	Traurig	Грустно	حزين	悲しい
+伤心 / 生气 / 难受的出现次数，次数见条形末端数值	How often you felt sad, angry or unwell; the count is at the end of each bar	Fréquence de la tristesse, de la colère ou du malaise ; le nombre figure au bout de chaque barre	슬픔, 화남, 불편함의 횟수이며 막대 끝에 표시됩니다	Wie oft traurig, wütend oder unwohl; die Zahl steht am Balkenende	Как часто было грустно, злость или плохо; число в конце полоски	عدد مرات الحزن أو الغضب أو الضيق؛ العدد في نهاية كل شريط	悲しい・怒り・つらいの回数。回数は各バーの端に表示されます
+你有一个任务提醒	You have a task reminder	Vous avez un rappel de tâche	할 일 알림이 있습니다	Du hast eine Aufgabenerinnerung	У вас напоминание о задаче	لديك تذكير بمهمة	タスクのリマインダーがあります
+你还有 {0} 个想法，先看看最早的一条	Ideas waiting: {0}. Start with the oldest	Idées en attente : {0}. Commencez par la plus ancienne	기다리는 아이디어 {0}개. 가장 오래된 것부터 보세요	Wartende Ideen: {0}. Fang mit der ältesten an	Ждут идей: {0}. Начните с самой ранней	أفكار بانتظارك: {0}. ابدأ بالأقدم	待っているアイデアが {0} 件あります。古いものから見てみましょう
+你还有{0}个想法等待梳理，去看看吧	Ideas waiting for review: {0}. Take a look	Idées à revoir : {0}. Jetez-y un œil	정리를 기다리는 아이디어 {0}개. 확인해 보세요	Ideen zum Durchgehen: {0}. Schau mal rein	Идей ждут разбора: {0}. Загляните	أفكار بانتظار المراجعة: {0}. ألقِ نظرة	整理を待つアイデアが {0} 件あります。見てみましょう
+保存	Save	Enregistrer	저장	Speichern	Сохранить	حفظ	保存
+保存中…	Saving…	Enregistrement…	저장 중…	Wird gespeichert…	Сохранение…	جارٍ الحفظ…	保存中…
+保存为 JSON 文件	Save as a JSON file	Enregistrer en fichier JSON	JSON 파일로 저장	Als JSON-Datei speichern	Сохранить файлом JSON	حفظ كملف JSON	JSON ファイルとして保存
+保存失败，请重试	Couldn't save. Try again	Échec de l'enregistrement. Réessayez	저장하지 못했습니다. 다시 시도하세요	Speichern fehlgeschlagen. Bitte erneut versuchen	Не удалось сохранить. Повторите попытку	تعذر الحفظ. حاول مجددًا	保存できませんでした。もう一度お試しください
+全天	All day	Toute la journée	종일	Ganztägig	Весь день	طوال اليوم	終日
+全天任务	All-day task	Tâche sur toute la journée	종일 할 일	Ganztägige Aufgabe	Задача на весь день	مهمة طوال اليوم	終日タスク
+全局搜索	Search everything	Recherche globale	전체 검색	Alles durchsuchen	Поиск по всему	بحث شامل	全体を検索
+全部	All	Tout	전체	Alle	Все	الكل	すべて
+六	Sat	Sam	토	Sa	Сб	س	土
+六位配对 PIN	Six-digit pairing PIN	Code PIN à six chiffres	6자리 페어링 PIN	Sechsstellige Kopplungs-PIN	Шестизначный PIN	رمز PIN من ستة أرقام	6 桁のペアリング PIN
+共 {0} 条 · 日志 {1} · 灵感 {2}	Total {0} · Logs {1} · Ideas {2}	Total {0} · Journal {1} · Idées {2}	전체 {0}개 · 일지 {1} · 아이디어 {2}	Gesamt {0} · Tagebuch {1} · Ideen {2}	Всего {0} · Журнал {1} · Идеи {2}	الإجمالي {0} · اليوميات {1} · الأفكار {2}	合計 {0} 件 · ログ {1} · アイデア {2}
+共享目录暂不可用，请改用「选择位置导出」	The shared folder isn't available. Use “Choose location” instead	Le dossier partagé n'est pas disponible. Utilisez « Choisir l'emplacement »	공유 폴더를 사용할 수 없습니다. '위치 선택'을 사용하세요	Der freigegebene Ordner ist nicht verfügbar. Stattdessen „Speicherort wählen“ verwenden	Общая папка недоступна. Используйте «Выбрать место»	المجلد المشترك غير متاح. استخدم «اختيار الموقع»	共有フォルダを利用できません。「場所を選択」をお使いください
+关于 Flash	About Flash	À propos de Flash	Flash 정보	Über Flash	О Flash	حول Flash	Flash について
+关键词或标签	Keyword or tag	Mot-clé ou étiquette	키워드 또는 태그	Stichwort oder Schlagwort	Слово или метка	كلمة أو وسم	キーワードまたはタグ
+关闭	Close	Fermer	닫기	Schließen	Закрыть	إغلاق	閉じる
+具体时间	Specific time	Heure précise	특정 시간	Bestimmte Uhrzeit	Конкретное время	وقت محدد	時刻指定
+内容	Content	Contenu	내용	Inhalt	Содержание	المحتوى	内容
+内容不能为空	Content can't be empty	Le contenu ne peut pas être vide	내용을 입력하세요	Inhalt darf nicht leer sein	Содержание не может быть пустым	لا يمكن أن يكون المحتوى فارغًا	内容を入力してください
+内容不能为空，请输入后再保存	Content can't be empty. Add something before saving	Le contenu ne peut pas être vide. Saisissez du texte avant d'enregistrer	내용을 입력한 뒤 저장하세요	Inhalt darf nicht leer sein. Vor dem Speichern etwas eingeben	Содержание пусто. Введите текст перед сохранением	المحتوى فارغ. أدخل نصًا قبل الحفظ	内容を入力してから保存してください
+内容为空	Nothing to save	Rien à enregistrer	내용이 없습니다	Nichts zu speichern	Нечего сохранять	لا شيء للحفظ	内容がありません
+内容为空，没有记录	Nothing to save, so nothing was recorded	Aucun contenu, rien n'a été noté	내용이 없어 기록하지 않았습니다	Kein Inhalt, daher nichts erfasst	Нет содержания, запись не создана	لا محتوى، فلم يُسجَّل شيء	内容がないため記録しませんでした
+内容优先，玻璃效果只做点缀。	Content first.	Le contenu d'abord.	내용이 먼저입니다.	Inhalt zuerst.	Сначала содержание.	المحتوى أولًا.	内容を最優先に。
+内容超出 {0} 字上限，请删减后再保存	Over the {0}-character limit. Shorten it before saving	Dépasse la limite de {0} caractères. Raccourcissez avant d'enregistrer	{0}자 제한을 넘었습니다. 줄인 뒤 저장하세요	Über dem Limit von {0} Zeichen. Vor dem Speichern kürzen	Превышен лимит в {0} символов. Сократите перед сохранением	تجاوز الحد البالغ {0} حرفًا. اختصره قبل الحفظ	{0} 文字の上限を超えています。短くしてから保存してください
+内容超过 100000 字符，请删减后保存	Over 100,000 characters. Shorten it before saving	Plus de 100 000 caractères. Raccourcissez avant d'enregistrer	100,000자를 넘었습니다. 줄인 뒤 저장하세요	Über 100.000 Zeichen. Vor dem Speichern kürzen	Больше 100 000 символов. Сократите перед сохранением	أكثر من 100000 حرف. اختصره قبل الحفظ	100,000 文字を超えています。短くしてから保存してください
+内容过长（{0} 字），最多 {1} 字，请删减后再保存	Too long ({0} characters, max {1}). Shorten it before saving	Trop long ({0} caractères, max {1}). Raccourcissez avant d'enregistrer	너무 깁니다({0}자, 최대 {1}자). 줄인 뒤 저장하세요	Zu lang ({0} Zeichen, max. {1}). Vor dem Speichern kürzen	Слишком длинно ({0} символов, максимум {1}). Сократите перед сохранением	طويل جدًا ({0} حرفًا، الحد {1}). اختصره قبل الحفظ	長すぎます ({0} 文字、上限 {1} 文字)。短くしてから保存してください
+内部错误：存储未就绪	Internal error: storage isn't ready	Erreur interne : stockage non prêt	내부 오류: 저장소가 준비되지 않았습니다	Interner Fehler: Speicher nicht bereit	Внутренняя ошибка: хранилище не готово	خطأ داخلي: التخزين غير جاهز	内部エラー: ストレージの準備ができていません
+再记录一点，未来的你会看到。	Keep recording; future you will see it.	Continuez à noter, votre futur vous le verra.	조금 더 기록해 보세요. 미래의 내가 보게 될 거예요.	Schreib weiter, dein künftiges Ich wird es sehen.	Записывайте ещё, будущий вы это увидите.	واصل التسجيل، سيراه أنت في المستقبل.	もう少し記録しましょう。未来のあなたが見返します。
+写下刚刚闪过的念头……	Write down that passing thought…	Notez cette pensée fugace…	방금 스친 생각을 적어 보세요…	Halte den flüchtigen Gedanken fest…	Запишите мелькнувшую мысль…	دوّن تلك الفكرة العابرة…	ふと浮かんだことを書き留めましょう…
+准备中…	Preparing…	Préparation…	준비 중…	Wird vorbereitet…	Подготовка…	جارٍ التحضير…	準備中…
+减少动态效果	Reduce motion	Réduire les animations	동작 줄이기	Bewegung reduzieren	Уменьшить движение	تقليل الحركة	視差効果を減らす
+减少动态效果设置保存失败：{0}	Couldn't save Reduce Motion: {0}	Impossible d'enregistrer Réduire les animations : {0}	동작 줄이기를 저장하지 못했습니다: {0}	„Bewegung reduzieren“ konnte nicht gespeichert werden: {0}	Не удалось сохранить настройку: {0}	تعذر حفظ تقليل الحركة: {0}	視差効果の設定を保存できませんでした: {0}
+出了点问题	Something went wrong	Un problème est survenu	문제가 발생했습니다	Etwas ist schiefgelaufen	Что-то пошло не так	حدث خطأ ما	問題が発生しました
+分享	Share	Partager	공유	Teilen	Поделиться	مشاركة	共有
+分享备份…	Share backup…	Partager la sauvegarde…	백업 공유…	Backup teilen…	Поделиться копией…	مشاركة النسخة…	バックアップを共有…
+分享失败	Couldn't share	Échec du partage	공유하지 못했습니다	Teilen fehlgeschlagen	Не удалось поделиться	تعذرت المشاركة	共有できませんでした
+分享导出	Share export	Partager l'exportation	내보내기 공유	Export teilen	Поделиться экспортом	مشاركة التصدير	書き出しを共有
+分享记录	Share record	Partager l'entrée	기록 공유	Eintrag teilen	Поделиться записью	مشاركة السجل	記録を共有
+分类	Type	Type	유형	Typ	Тип	النوع	種類
+切换排序	Change sort order	Changer le tri	정렬 변경	Sortierung ändern	Сменить порядок	تغيير الترتيب	並び順を変更
+删除	Delete	Supprimer	삭제	Löschen	Удалить	حذف	削除
+删除任务	Delete task	Supprimer la tâche	할 일 삭제	Aufgabe löschen	Удалить задачу	حذف المهمة	タスクを削除
+删除任务？	Delete task?	Supprimer la tâche ?	할 일을 삭제할까요?	Aufgabe löschen?	Удалить задачу?	حذف المهمة؟	タスクを削除しますか?
+删除后无法撤销。	This can't be undone.	Cette action est irréversible.	삭제하면 되돌릴 수 없습니다.	Das kann nicht rückgängig gemacht werden.	Это действие необратимо.	لا يمكن التراجع عن هذا.	削除すると元に戻せません。
+删除后需要再次确认，不可恢复	Asks you to confirm again and can't be recovered	Demande une confirmation et est irréversible	다시 확인이 필요하며 복구할 수 없습니다	Muss erneut bestätigt werden und ist nicht wiederherstellbar	Потребует подтверждения, восстановить нельзя	يتطلب تأكيدًا آخر ولا يمكن الاسترجاع	再確認が必要で、復元できません
+删除失败，请重试	Couldn't delete. Try again	Échec de la suppression. Réessayez	삭제하지 못했습니다. 다시 시도하세요	Löschen fehlgeschlagen. Bitte erneut versuchen	Не удалось удалить. Повторите попытку	تعذر الحذف. حاول مجددًا	削除できませんでした。もう一度お試しください
+删除所有日志、情绪记录与任务，且无法恢复；建议先导出备份	Deletes all logs, moods and tasks permanently. Export a backup first	Supprime définitivement le journal, les humeurs et les tâches. Exportez d'abord une sauvegarde	모든 일지, 기분, 할 일을 영구 삭제합니다. 먼저 백업을 내보내세요	Löscht alle Tagebucheinträge, Stimmungen und Aufgaben endgültig. Zuerst ein Backup exportieren	Удаляет все записи журнала, настроения и задачи без возможности восстановления. Сначала экспортируйте копию	يحذف كل اليوميات والمزاج والمهام نهائيًا. صدّر نسخة احتياطية أولًا	すべてのログ・気分・タスクを完全に削除します。先にバックアップを書き出してください
+删除本地保留的异常原始数据副本	Deletes the kept copy of invalid original data	Supprime la copie conservée des données d'origine non valides	보관 중인 잘못된 원본 데이터 사본을 삭제합니다	Löscht die aufbewahrte Kopie ungültiger Originaldaten	Удаляет сохранённую копию неверных исходных данных	يحذف النسخة المحفوظة من البيانات الأصلية غير الصالحة	保持している不正な元データのコピーを削除します
+删除这个任务？	Delete this task?	Supprimer cette tâche ?	이 할 일을 삭제할까요?	Diese Aufgabe löschen?	Удалить эту задачу?	حذف هذه المهمة؟	このタスクを削除しますか?
+删除这条情绪记录？	Delete this mood?	Supprimer cette humeur ?	이 기분 기록을 삭제할까요?	Diese Stimmung löschen?	Удалить эту запись настроения?	حذف هذا المزاج؟	この気分の記録を削除しますか?
+删除这条日志？	Delete this log?	Supprimer cette entrée de journal ?	이 일지를 삭제할까요?	Diesen Tagebucheintrag löschen?	Удалить эту запись журнала?	حذف هذه اليومية؟	このログを削除しますか?
+删除这条灵感？	Delete this idea?	Supprimer cette idée ?	이 아이디어를 삭제할까요?	Diese Idee löschen?	Удалить эту идею?	حذف هذه الفكرة؟	このアイデアを削除しますか?
+删除这条记录？	Delete this record?	Supprimer cette entrée ?	이 기록을 삭제할까요?	Diesen Eintrag löschen?	Удалить эту запись?	حذف هذا السجل؟	この記録を削除しますか?
+到期时	At due time	À l'échéance	기한에	Bei Fälligkeit	В срок	عند الموعد	期限時刻
+加载更多（剩余 {0} 条）	Load more ({0} left)	Charger plus ({0} restants)	더 보기({0}개 남음)	Mehr laden ({0} übrig)	Загрузить ещё (осталось {0})	تحميل المزيد (متبقٍ {0})	さらに読み込む (残り {0} 件)
+包含 {0} 条日志、{1} 条情绪、{2} 个任务	Contains logs: {0}, moods: {1}, tasks: {2}	Contient journal : {0}, humeurs : {1}, tâches : {2}	일지 {0}개, 기분 {1}개, 할 일 {2}개 포함	Enthält Tagebuch: {0}, Stimmungen: {1}, Aufgaben: {2}	Содержит журнал: {0}, настроение: {1}, задачи: {2}	يحتوي اليوميات: {0}، المزاج: {1}، المهام: {2}	ログ {0} 件、気分 {1} 件、タスク {2} 件を含みます
+危险操作	Danger zone	Zone sensible	위험한 작업	Gefahrenbereich	Опасная зона	منطقة الخطر	危険な操作
+发送到另一台设备…	Send to another device…	Envoyer vers un autre appareil…	다른 기기로 보내기…	An anderes Gerät senden…	Отправить на другое устройство…	إرسال إلى جهاز آخر…	別の端末へ送信…
+取消	Cancel	Annuler	취소	Abbrechen	Отмена	إلغاء	キャンセル
+取消发送	Cancel sending	Annuler l'envoi	보내기 취소	Senden abbrechen	Отменить отправку	إلغاء الإرسال	送信をキャンセル
+取消收藏	Remove favorite	Retirer des favoris	즐겨찾기 해제	Aus Favoriten entfernen	Убрать из избранного	إزالة من المفضلة	お気に入りを解除
+可在 Android、macOS 与 HarmonyOS 之间迁移日志、情绪和任务。备份为明文 JSON，请只保存或分享至可信位置。	Move logs, moods and tasks between Android, macOS and HarmonyOS. Backups are plain JSON, so only save or share them somewhere you trust.	Transférez journal, humeurs et tâches entre Android, macOS et HarmonyOS. Les sauvegardes sont en JSON non chiffré : enregistrez-les ou partagez-les uniquement dans un lieu de confiance.	Android, macOS, HarmonyOS 간에 일지, 기분, 할 일을 옮길 수 있습니다. 백업은 일반 JSON이므로 신뢰할 수 있는 곳에만 저장하거나 공유하세요.	Tagebuch, Stimmungen und Aufgaben zwischen Android, macOS und HarmonyOS übertragen. Backups sind unverschlüsseltes JSON, also nur an vertrauenswürdigen Orten speichern oder teilen.	Переносите журнал, настроение и задачи между Android, macOS и HarmonyOS. Резервные копии — открытый JSON, храните и передавайте их только в надёжных местах.	انقل اليوميات والمزاج والمهام بين Android وmacOS وHarmonyOS. النسخ الاحتياطية بصيغة JSON غير مشفرة، فاحفظها أو شاركها في مكان موثوق فقط.	Android・macOS・HarmonyOS 間でログ・気分・タスクを移行できます。バックアップは暗号化されない JSON なので、信頼できる場所にのみ保存・共有してください。
+可导出备份或通过系统分享传输	Export a backup or send it with system share	Exportez une sauvegarde ou envoyez-la via le partage système	백업을 내보내거나 시스템 공유로 보내세요	Backup exportieren oder über „Teilen“ senden	Экспортируйте копию или отправьте через «Поделиться»	صدّر نسخة احتياطية أو أرسلها عبر مشاركة النظام	バックアップを書き出すか、システムの共有で送信できます
+可导出文件备份或通过系统分享保存	Export a file backup or save it with system share	Exportez un fichier de sauvegarde ou enregistrez-le via le partage système	파일 백업을 내보내거나 시스템 공유로 저장하세요	Datei-Backup exportieren oder über „Teilen“ sichern	Экспортируйте файл копии или сохраните через «Поделиться»	صدّر ملف نسخة احتياطية أو احفظه عبر مشاركة النظام	ファイルに書き出すか、システムの共有で保存できます
+合并	Merge	Fusionner	병합	Zusammenführen	Объединить	دمج	統合
+向左右滚动查看完整月历	Scroll sideways to see the full month	Faites défiler pour voir tout le mois	좌우로 스크롤해 전체 달력을 보세요	Seitlich scrollen für den ganzen Monat	Прокрутите в сторону, чтобы увидеть весь месяц	مرّر جانبيًا لرؤية الشهر كاملًا	左右にスクロールして月全体を表示
+周	Week	Semaine	주	Woche	Неделя	أسبوع	週
+四	Thu	Jeu	목	Do	Чт	خ	木
+回到今天	Back to today	Revenir à aujourd'hui	오늘로 이동	Zurück zu heute	Вернуться к сегодня	العودة إلى اليوم	今日に戻る

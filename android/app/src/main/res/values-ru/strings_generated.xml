@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 由 tools/i18n/generate.py 生成，勿手改 -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="ExtraTranslation,MissingTranslation">
+    <string name="share_target_label">Сохранить во Flash</string>
+    <string name="widget_label">Flash Сейчас</string>
+    <string name="widget_description">Записи и задачи на сегодня</string>
+    <string name="tile_label">Быстрая запись Flash</string>
+    <string name="shortcut_idea">Новая идея</string>
+    <string name="shortcut_log">Новая запись журнала</string>
+    <string name="s_c9414111" formatted="false">" · Есть напоминание"</string>
+    <string name="s_94fc7b8e" formatted="false">/data/tasks/{0}/due: должно быть объектом</string>
+    <string name="s_aafdda63" formatted="false">/data/{0}/{1}: запись должна быть объектом</string>
+    <string name="s_10db0315" formatted="false">/data/{0}: массив превышает лимит</string>
+    <string name="s_b7cc858a" formatted="false">/data: неверные или повторяющиеся записи. Посмотрите в восстановлении, что можно вернуть</string>
+    <string name="s_90ef682e" formatted="false">/version: для старых файлов используйте восстановление</string>
+    <string name="s_b9ce0fb9" formatted="false">/: слишком много значений JSON</string>
+    <string name="s_307d96fc" formatted="false">/: повторяющийся ключ в объекте JSON: {0}</string>
+    <string name="s_b414e614" formatted="false">/: неверный синтаксис JSON (позиция {0})</string>
+    <string name="s_7038ec28" formatted="false">/: UTF-8 BOM не допускается</string>
+    <string name="s_4aa2d855" formatted="false">/: неверные метаданные экспорта</string>
+    <string name="s_5ddd2d8d" formatted="false">30 дней</string>
+    <string name="s_a96eed0d" formatted="false">7 дней</string>
+    <string name="s_355b83a3" formatted="false">Неделя, которую стоит запомнить. ✦</string>
+    <string name="s_a1486dba" formatted="false">Резервная копия Flash Aero</string>
+    <string name="s_eeecd281" formatted="false">Напоминание о задаче Flash</string>
+    <string name="s_f6ff76b6" formatted="false">Быстрая запись Flash</string>
+    <string name="s_9a2b6832" formatted="false">Flash Сейчас</string>
+    <string name="s_2a0b1ddf" formatted="false">Идея Flash</string>
+    <string name="s_de22df1c" formatted="false">Запись Flash</string>
+    <string name="s_8d6bfa5c" formatted="false">Главное</string>
+    <string name="s_58f879ce" formatted="false">Память</string>
+    <string name="s_879db2fb" formatted="false">В основном подавленно</string>
+    <string name="s_db9c822c" formatted="false">В основном позитивно</string>
+    <string name="s_f3498d7d" formatted="false">В основном ровно</string>
+    <string name="s_244cff4e" formatted="false">Эта неделя была...</string>
+    <string name="s_fe948398" formatted="false">Вы записали</string>
+    <string name="s_b053c6ce" formatted="false">data должно быть объектом</string>
+    <string name="s_70c34463" formatted="false">настроение</string>
+    <string name="s_0dbf59c2" formatted="false">emotions должно быть массивом</string>
+    <string name="s_f22ee8cb" formatted="false">идеи</string>
+    <string name="s_be7aa09b" formatted="false">logs должно быть массивом</string>
+    <string name="s_62852daa" formatted="false">моменты</string>
+    <string name="s_22c3caa0" formatted="false">schemas должно быть объектом</string>
+    <string name="s_ad2e48cd" formatted="false">задачи</string>
+    <string name="s_002e97a4" formatted="false">tasks должно быть массивом</string>
+    <string name="s_6e425eba" formatted="false">{0}: {1} · {2}: {3}</string>
+    <string name="s_39ac061e" formatted="false">{0} — {1} · дни без записей не учитываются</string>
+    <string name="s_e2a8c96b" formatted="false">Задач: {0}</string>
+    <string name="s_409ddff6" formatted="false">Активных дней: {0} · Всего: {1}</string>
+    <string name="s_79fc376e" formatted="false">Записей: {0}</string>
+    <string name="s_a06e31ba" formatted="false">Неверных элементов будет пропущено: {0}.</string>
+    <string name="s_aeb06eb3" formatted="false">Записей: {0} · Настроений: {1}</string>
+    <string name="s_ba02e82e" formatted="false">{0} раз(а)</string>
+    <string name="s_852bf53d" formatted="false">Настроений: {0}, задач: {1}</string>
+    <string name="s_1f0ab446" formatted="false">Подробности: {0}</string>
+    <string name="s_7f7d2285" formatted="false">К выполнению: {0}</string>
+    <string name="s_2e763a14" formatted="false">{0} вы записывали чаще, чем {1}</string>
+    <string name="s_10e8d2b4" formatted="false">{0} записей меньше, чем {1}</string>
+    <string name="s_8d74a879" formatted="false">{0} записей примерно столько же, сколько {1}</string>
+    <string name="s_1879232a" formatted="false">"{0}, записей: {1}, "</string>
+    <string name="s_e168d4f4" formatted="false">{0}, но системные напоминания восстановить не удалось. Повторите позже</string>
+    <string name="s_245af589" formatted="false">{0}: записей {1} · настроений {2}</string>
+    <string name="s_7db427be" formatted="false">{0}: новых {1} · изменено {2} · без изменений {3} · только здесь {4}</string>
+    <string name="s_0009cc0b" formatted="false">{0}: нет обязательных полей или есть неизвестные поля</string>
+    <string name="s_7dad93fd" formatted="false">★ Избранное</string>
+    <string name="s_745e890f" formatted="false">✓ Сохранено в журнал</string>
+    <string name="s_a248a677" formatted="false">✓ Сохранено в идеи</string>
+    <string name="s_67fc93c3" formatted="false">✦ Flash</string>
+    <string name="s_05615f1f" formatted="false">Пн</string>
+    <string name="s_e50a5759" formatted="false">Мимолётные мысли стоит запоминать</string>
+    <string name="s_8bcbbc86" formatted="false">Семь уровней настроения, чтобы видеть перемены</string>
+    <string name="s_0c616a24" formatted="false">Ср</string>
+    <string name="s_508b1e1d" formatted="false">Предыдущая неделя</string>
+    <string name="s_b06dcc3d" formatted="false">Предыдущий месяц</string>
+    <string name="s_8be194e7" formatted="false">в прошлом месяце</string>
+    <string name="s_eb0f6aef" formatted="false">на прошлой неделе</string>
+    <string name="s_0bb3bda2" formatted="false">Следующая неделя</string>
+    <string name="s_6bcf17c2" formatted="false">Следующий месяц</string>
+    <string name="s_10c83c81" formatted="false">Далее</string>
+    <string name="s_82b6cabb" formatted="false">Добрый день 🌤</string>
+    <string name="s_1344f491" formatted="false">Грустно</string>
+    <string name="s_4cc036be" formatted="false">Без напоминания</string>
+    <string name="s_12e8587a" formatted="false">Неподдерживаемая версия раздела {0}</string>
+    <string name="s_ba358518" formatted="false">Любые</string>
+    <string name="s_b13672cd" formatted="false">Нейтрально</string>
+    <string name="s_51f6517e" formatted="false">Тема</string>
+    <string name="s_0a416847" formatted="false">за предыдущие 30 дней</string>
+    <string name="s_0c6445c1" formatted="false">за предыдущие 90 дней</string>
+    <string name="s_89609beb" formatted="false">Вт</string>
+    <string name="s_9160a883" formatted="false">Пт</string>
+    <string name="s_a848765c" formatted="false">Сегодня</string>
+    <string name="s_6f3c2b2c" formatted="false">Запишите что-нибудь сегодня.</string>
+    <string name="s_1f2bd289" formatted="false">Сегодня пока нет записей.</string>
+    <string name="s_cfccbae7" formatted="false">Сегодня</string>
+    <string name="s_5bfe853c" formatted="false">Записи и задачи на сегодня</string>
+    <string name="s_2d7464e1" formatted="false">Задачи</string>
+    <string name="s_3f7946be" formatted="false">Не удалось сохранить задачу</string>
+    <string name="s_bc3ceaab" formatted="false">Не удалось удалить задачу</string>
+    <string name="s_cd07ba17" formatted="false">Задача сохранена. Разрешите уведомления, чтобы получать напоминания</string>
+    <string name="s_d3190fa3" formatted="false">Напоминания о задачах</string>
+    <string name="s_d8bb8799" formatted="false">Неверное время задачи</string>
+    <string name="s_86da87a3" formatted="false">Не удалось обновить задачу</string>
+    <string name="s_97815f19" formatted="false">Отправить копию Flash Aero</string>
+    <string name="s_6b17ba8f" formatted="false">Отправить на другое устройство</string>
+    <string name="s_79955ed0" formatted="false">Грустно</string>
+    <string name="s_d7974514" formatted="false">Ждут идей: {0}. Начните с самой ранней</string>
+    <string name="s_d908f279" formatted="false">Идей ждут разбора: {0}. Загляните</string>
+    <string name="s_ad5b82b0" formatted="false">Сохранить</string>
+    <string name="s_9b95e293" formatted="false">Сохранение…</string>
+    <string name="s_64911de5" formatted="false">Сохранить файлом JSON</string>
+    <string name="s_46ca88f1" formatted="false">Не удалось сохранить. Повторите попытку</string>
+    <string name="s_1d0e5d5a" formatted="false">Весь день</string>
+    <string name="s_0c14a696" formatted="false">Задача на весь день</string>
+    <string name="s_05eb990b" formatted="false">Поиск по всему</string>
+    <string name="s_5e6558ad" formatted="false">Все</string>
+    <string name="s_e8562c78" formatted="false">Сб</string>
+    <string name="s_72a18f8e" formatted="false">О Flash</string>
+    <string name="s_87dadb5a" formatted="false">Слово или метка</string>
+    <string name="s_39b523bd" formatted="false">Закрыть</string>
+    <string name="s_05f5920d" formatted="false">Конкретное время</string>
+    <string name="s_801be77b" formatted="false">Содержание</string>
+    <string name="s_dc24135d" formatted="false">Содержание не может быть пустым</string>
+    <string name="s_043cda7f" formatted="false">Слишком длинно ({0} символов, максимум {1}). Сократите перед сохранением</string>
+    <string name="s_87000edc" formatted="false">Записывайте ещё, будущий вы это увидите.</string>
+    <string name="s_95a71bc9" formatted="false">Подготовка…</string>
+    <string name="s_9aa7d416" formatted="false">Поделиться</string>
+    <string name="s_4ae3c205" formatted="false">Поделиться записью</string>
+    <string name="s_caf6d5a6" formatted="false">Тип</string>
+    <string name="s_a0b5ccaf" formatted="false">Сменить порядок</string>
+    <string name="s_ea8d5381" formatted="false">Удалить</string>
+    <string name="s_6b93827d" formatted="false">Удалить задачу</string>
+    <string name="s_bb2e6146" formatted="false">Удалить задачу?</string>
+    <string name="s_309b2b90" formatted="false">Не удалось удалить. Повторите попытку</string>
+    <string name="s_e4d23002" formatted="false">Удаляет все записи журнала, настроения и задачи без возможности восстановления. Сначала экспортируйте копию</string>
+    <string name="s_e6dedfa0" formatted="false">Удалить эту запись настроения?</string>
+    <string name="s_98f7e648" formatted="false">Удалить эту запись журнала?</string>
+    <string name="s_c51f5912" formatted="false">В срок</string>
+    <string name="s_c628e28d" formatted="false">Содержит журнал: {0}, настроение: {1}, задачи: {2}</string>
+    <string name="s_60b4c5ae" formatted="false">Опасная зона</string>
+    <string name="s_949856b3" formatted="false">Отмена</string>
+    <string name="s_d1d62fb0" formatted="false">Убрать из избранного</string>
+    <string name="s_4d55cb75" formatted="false">Экспортируйте копию или отправьте через «Поделиться»</string>
+    <string name="s_5e53c03a" formatted="false">Чт</string>
+    <string name="s_40163b46" formatted="false">Вернуться к сегодня</string>
+    <string name="s_bed63d2f" formatted="false">К этой неделе</string>
+    <string name="s_c2e1aa6d" formatted="false">Итоги</string>
+    <string name="s_fbac6f20" formatted="false">Резервное копирование</string>
+    <string name="s_bb48fdba" formatted="false">Копии — открытый JSON с журналом, настроением и задачами. Храните и передавайте только в надёжных местах</string>
+    <string name="s_20fe814f" formatted="false">Копия экспортирована</string>
+    <string name="s_c90a7947" formatted="false">Файл копии не является допустимым объектом JSON</string>
+    <string name="s_88f39f13" formatted="false">Файл копии не является допустимым UTF-8 JSON</string>
+    <string name="s_269e4097" formatted="false">Файл копии больше {0} МБ, импорт невозможен</string>
+    <string name="s_cc139297" formatted="false">Несовместимая версия: ожидается {0}, получено {1}</string>
+    <string name="s_d3de3f52" formatted="false">Несовместимая копия: нет поля version</string>
+    <string name="s_584ff11a" formatted="false">Заметка</string>
+    <string name="s_d82fe22c" formatted="false">Заметка слишком длинная. Сократите перед сохранением</string>
+    <string name="s_d9dac7dd" formatted="false">Заметки (необязательно)</string>
+    <string name="s_e4a4815a" formatted="false">Оформление и использование</string>
+    <string name="s_1e13bd21" formatted="false">Готово</string>
+    <string name="s_dd03e6ad" formatted="false">Предпросмотр отличий от локальных данных перед импортом</string>
+    <string name="s_9b60ff74" formatted="false">Импорт не удался: {0}</string>
+    <string name="s_da193966" formatted="false">Импорт отменён</string>
+    <string name="s_7fdaf616" formatted="false">Экспорт, импорт и очистка</string>
+    <string name="s_f97fded3" formatted="false">Экспорт копии</string>
+    <string name="s_7436fb8d" formatted="false">Экспорт не удался: {0}</string>
+    <string name="s_b1632a8b" formatted="false">Все записи журнала, настроение и задачи будут удалены без возможности восстановления. Сначала экспортируйте копию.</string>
+    <string name="s_479481d2" formatted="false">Передача по локальной сети пока отключена</string>
+    <string name="s_f8eef707" formatted="false">Передача по локальной сети отключена из-за рисков старого протокола. Отправьте файл JSON через экспорт или «Поделиться» по надёжному каналу.</string>
+    <string name="s_531320d2" formatted="false">Свойства</string>
+    <string name="s_b1368837" formatted="false">Различия</string>
+    <string name="s_c2d9a3f9" formatted="false">Объединение добавляет или обновляет полученные данные и сохраняет данные, которые есть только на этом устройстве. Замена сначала очищает устройство.</string>
+    <string name="s_d0fcf500" formatted="false">Сохранено</string>
+    <string name="s_5dbcdf6d" formatted="false">Выключено</string>
+    <string name="s_bee374d1" formatted="false">Удалено</string>
+    <string name="s_8b122251" formatted="false">Запись журнала удалена</string>
+    <string name="s_74e8cc38" formatted="false">"Импортировано журнал: {0}, настроение: {1}, "</string>
+    <string name="s_a8126b62" formatted="false">В избранном</string>
+    <string name="s_2266e2ec" formatted="false">Все данные удалены</string>
+    <string name="s_c13b3522" formatted="false">Все данные удалены, но системные напоминания убрать не удалось. Перезапустите приложение и повторите</string>
+    <string name="s_c8fa62c1" formatted="false">Выбрано: {0}</string>
+    <string name="s_01133500" formatted="false">Среднее настроение {0} · Всего {1}</string>
+    <string name="s_22696cbc" formatted="false">Начало</string>
+    <string name="s_499be303" formatted="false">Начать</string>
+    <string name="s_5d62764c" formatted="false">Дата начала</string>
+    <string name="s_2a665354" formatted="false">Радостно</string>
+    <string name="s_673d4a91" formatted="false">Сила</string>
+    <string name="s_6a19ddcf" formatted="false">Сила {0}</string>
+    <string name="s_4b8edbfa" formatted="false">К выполнению</string>
+    <string name="s_dfcdb4b6" formatted="false">Задача</string>
+    <string name="s_e83d11ae" formatted="false">Разобрать</string>
+    <string name="s_5660c655" formatted="false">Разобрать: записи журнала с меткой «Будни». Удерживайте запись, чтобы выбрать несколько.</string>
+    <string name="s_2367642b" formatted="false">Очень грустно</string>
+    <string name="s_fb903262" formatted="false">Очень радостно</string>
+    <string name="s_e70923c8" formatted="false">Быстрая запись</string>
+    <string name="s_abf33a8f" formatted="false">Восстановить повреждённую или старую копию</string>
+    <string name="s_a9612b5e" formatted="false">Настроение</string>
+    <string name="s_7bd3df69" formatted="false">Среднее настроение {0} (от −3 до +3)</string>
+    <string name="s_643f1ede" formatted="false">Осознание настроения</string>
+    <string name="s_8de4274f" formatted="false">Динамика настроения</string>
+    <string name="s_99812275" formatted="false">Мысль</string>
+    <string name="s_d9f8afc2" formatted="false">Идеи к разбору</string>
+    <string name="s_6deefec2" formatted="false">Напоминать, когда идеи ждут разбора</string>
+    <string name="s_4e89a8ad" formatted="false">Хотите что-то сказать? (необязательно)</string>
+    <string name="s_eae146ff" formatted="false">Изменить тип выбранных</string>
+    <string name="s_c9ddd465" formatted="false">Не удалось изменить выбранные. Повторите попытку</string>
+    <string name="s_803499dd" formatted="false">Изменить метку выбранных</string>
+    <string name="s_b4b9bfa6" formatted="false">Объединить различия</string>
+    <string name="s_8523e97b" formatted="false">Сначала новые</string>
+    <string name="s_791c2e78" formatted="false">Сначала старые</string>
+    <string name="s_6ef98325" formatted="false">По метке</string>
+    <string name="s_da39e076" formatted="false">За 1 день</string>
+    <string name="s_0c4452fe" formatted="false">За 1 час</string>
+    <string name="s_74d32173" formatted="false">За 15 минут</string>
+    <string name="s_6d40d527" formatted="false">Напоминание</string>
+    <string name="s_545f8675" formatted="false">Напоминания планирует система; в режиме экономии они могут немного опаздывать.</string>
+    <string name="s_0b6efa3b" formatted="false">Поиск</string>
+    <string name="s_18fca433" formatted="false">Поиск по журналу...</string>
+    <string name="s_c8a90aa9" formatted="false">Поиск по записям, идеям, настроению и задачам</string>
+    <string name="s_1b9e8bc9" formatted="false">Отменить</string>
+    <string name="s_aff00db8" formatted="false">Не удалось отменить. Повторите попытку</string>
+    <string name="s_87aed705" formatted="false">Операция не удалась. Повторите попытку</string>
+    <string name="s_839d4732" formatted="false">В избранное</string>
+    <string name="s_cf8b8d02" formatted="false">Скрыть по дням</string>
+    <string name="s_e1598b13" formatted="false">Отменить изменения</string>
+    <string name="s_0ac91ecb" formatted="false">Отменить несохранённые изменения?</string>
+    <string name="s_6344fa26" formatted="false">Данные и безопасность</string>
+    <string name="s_b464971d" formatted="false">Данные хранятся на этом устройстве</string>
+    <string name="s_95b69a6d" formatted="false">Файл больше 50 МиБ</string>
+    <string name="s_b8c8a94f" formatted="false">Создать</string>
+    <string name="s_b0f36447" formatted="false">Новая задача</string>
+    <string name="s_d2c53483" formatted="false">Новая идея</string>
+    <string name="s_160eb028" formatted="false">Новая запись</string>
+    <string name="s_659aa23f" formatted="false">Нет</string>
+    <string name="s_fd8b1ba9" formatted="false">Не удалось записать файл</string>
+    <string name="s_e9ebd81b" formatted="false">Не удалось создать папку передачи</string>
+    <string name="s_59c97404" formatted="false">Не удалось открыть «Поделиться». Установите приложение, принимающее файлы</string>
+    <string name="s_6776e896" formatted="false">Не удалось прочитать файл</string>
+    <string name="s_609a9a60" formatted="false">Вс</string>
+    <string name="s_f9abd512" formatted="false">Календарь</string>
+    <string name="s_afdd356c" formatted="false">Локальные напоминания о задачах календаря</string>
+    <string name="s_2eeb970b" formatted="false">Среднее за день · от −3 до +3 (0 — нейтрально)</string>
+    <string name="s_6ba31688" formatted="false">Будни</string>
+    <string name="s_caa53f15" formatted="false">Журнал</string>
+    <string name="s_923b0270" formatted="false">Журнал и идеи — в одно касание</string>
+    <string name="s_56409a3c" formatted="false">Лента журнала</string>
+    <string name="s_203436ae" formatted="false">Управление журналом</string>
+    <string name="s_92fd0eed" formatted="false">Дата</string>
+    <string name="s_432f74fa" formatted="false">Диапазон дат</string>
+    <string name="s_7203eec6" formatted="false">У старого протокола есть риски. Используйте экспорт или «Поделиться» в разделе резервного копирования, чтобы передать данные надёжным способом.</string>
+    <string name="s_d7034b36" formatted="false">Доброе утро ☀️</string>
+    <string name="s_cb28b11e" formatted="false">Нет записей за этот период</string>
+    <string name="s_12263e9a" formatted="false">Вчера</string>
+    <string name="s_c18f71ef" formatted="false">Добрый вечер 🌙</string>
+    <string name="s_bf13f8b5" formatted="false">Пока отключено. Нажмите, чтобы увидеть варианты</string>
+    <string name="s_16a3eebb" formatted="false">Ещё</string>
+    <string name="s_89192933" formatted="false">Смена даты также обновит календарь и итоги.</string>
+    <string name="s_87b8867d" formatted="false">Новые</string>
+    <string name="s_ceb8f642" formatted="false">Старые</string>
+    <string name="s_56b38d0f" formatted="false">Недавние моменты</string>
+    <string name="s_be2c2eb2" formatted="false">Не прочитано</string>
+    <string name="s_27c37899" formatted="false">Эта неделя</string>
+    <string name="s_ccb42197" formatted="false">На этой неделе: записей {0} · разобрать {1}</string>
+    <string name="s_b70e17ea" formatted="false">На этой неделе настроение подавленное</string>
+    <string name="s_24d17368" formatted="false">На этой неделе настроение ровное</string>
+    <string name="s_e3f61599" formatted="false">На этой неделе в основном позитивно</string>
+    <string name="s_63d2d484" formatted="false">На этой неделе нет записей</string>
+    <string name="s_db0049cb" formatted="false">Тренд недели</string>
+    <string name="s_3750d663" formatted="false">Локальное напоминание</string>
+    <string name="s_47af33f9" formatted="false">Этот месяц</string>
+    <string name="s_37272be9" formatted="false">Из идеи. Идея сохраняется</string>
+    <string name="s_7e5242cd" formatted="false">Показать по дням</string>
+    <string name="s_495fd6a9" formatted="false">Открыть идею</string>
+    <string name="s_198c9fe3" formatted="false">Импорт</string>
+    <string name="s_5606df17" formatted="false">Предпросмотр импорта</string>
+    <string name="s_2b1626c8" formatted="false">Метка</string>
+    <string name="s_f7d7a0ce" formatted="false">Добро пожаловать во Flash</string>
+    <string name="s_aef45eb7" formatted="false">Загрузка…</string>
+    <string name="s_6af40858" formatted="false">Сейчас</string>
+    <string name="s_b060afd3" formatted="false">Это устройство не поддерживает часовой пояс задачи из копии. Обновите систему и повторите. Ничего не импортировано</string>
+    <string name="s_f4958768" formatted="false">Каждые 3 дня</string>
+    <string name="s_41be2fe2" formatted="false">Еженедельно</string>
+    <string name="s_02c285b5" formatted="false">Ежедневно</string>
+    <string name="s_18fa51bd" formatted="false">Журнал, идеи и настроение по дням · без задач</string>
+    <string name="s_6d03477d" formatted="false">Среднее за день: {0}</string>
+    <string name="s_5816c303" formatted="false">Нет приложения, чтобы поделиться</string>
+    <string name="s_43c975df" formatted="false">Записи не найдены</string>
+    <string name="s_f8bc527e" formatted="false">Нет подходящих записей журнала</string>
+    <string name="s_0fed9772" formatted="false">Активные дни</string>
+    <string name="s_11b5fdf6" formatted="false">Светлая</string>
+    <string name="s_2a8baaea" formatted="false">Тёмная</string>
+    <string name="s_da340c1c" formatted="false">Очистить все данные</string>
+    <string name="s_845a8db9" formatted="false">Очистить все данные?</string>
+    <string name="s_115677d8" formatted="false">Не удалось очистить: {0}</string>
+    <string name="s_0b9d2bac" formatted="false">Очистить</string>
+    <string name="s_9c43ebb6" formatted="false">Очистить поиск</string>
+    <string name="s_0fba4654" formatted="false">Сбросить фильтры</string>
+    <string name="s_b8b74e9d" formatted="false">Идеи</string>
+    <string name="s_4604d6bf" formatted="false">Напоминания об идеях</string>
+    <string name="s_436e2c82" formatted="false">О чём вы думаете?</string>
+    <string name="s_78fe07cc" formatted="false">Не удалось создать файл передачи: {0}</string>
+    <string name="s_f60bb44e" formatted="false">Злость</string>
+    <string name="s_621a8231" formatted="false">ОК</string>
+    <string name="s_869f8d0c" formatted="false">Очистить всё</string>
+    <string name="s_5716f5ef" formatted="false">Через {0} мин</string>
+    <string name="s_f5e087c9" formatted="false">Фильтр</string>
+    <string name="s_5db367de" formatted="false">Управление</string>
+    <string name="s_26640f43" formatted="false">Тип</string>
+    <string name="s_f8ede304" formatted="false">Системные уведомления или канал напоминаний отключены</string>
+    <string name="s_235f3e59" formatted="false">Срочно</string>
+    <string name="s_64db55af" formatted="false">Когда ждут {0} и более идей, в 20:00 придёт напоминание. Открытые идеи не считаются.</string>
+    <string name="s_78a510f0" formatted="false">Обзор · за всё время</string>
+    <string name="s_1da8a247" formatted="false">Конец</string>
+    <string name="s_476d405b" formatted="false">Дата окончания</string>
+    <string name="s_010e135c" formatted="false">Продолжить</string>
+    <string name="s_e60fd56d" formatted="false">Продолжайте записывать, и итоги станут яснее</string>
+    <string name="s_607348a8" formatted="false">Изменить</string>
+    <string name="s_1d5b5e98" formatted="false">Изменить задачу</string>
+    <string name="s_c9ab4c68" formatted="false">Изменить идею</string>
+    <string name="s_a5db4a27" formatted="false">Изменить запись</string>
+    <string name="s_72ecf883" formatted="false">С {0}</string>
+    <string name="s_85b25df8" formatted="false">По {0}</string>
+    <string name="s_a6317c7d" formatted="false">Заменить</string>
+    <string name="s_5521c6a5" formatted="false">Место для каждой мысли · без облачного аккаунта</string>
+    <string name="s_dad3d89f" formatted="false">Запишите первую мысль</string>
+    <string name="s_6dfa9df7" formatted="false">Сохранить во Flash</string>
+    <string name="s_2c9d9f0e" formatted="false">Записи</string>
+    <string name="s_a48657a1" formatted="false">Записать настроение</string>
+    <string name="s_b1bc3a6a" formatted="false">Дата записи: {0}</string>
+    <string name="s_6de25c07" formatted="false">Запишите этот момент…</string>
+    <string name="s_d1e82646" formatted="false">Активность записей</string>
+    <string name="s_7a550e3e" formatted="false">Активность: записи в {1} из {0} дней, всего {2}. Можно раскрыть по дням.</string>
+    <string name="s_e54eaf8b" formatted="false">Новая запись журнала</string>
+    <string name="s_e8b414a3" formatted="false">Новая идея</string>
+    <string name="s_0102647f" formatted="false">Передача между устройствами</string>
+    <string name="s_f3c259dd" formatted="false">Настройки</string>
+    <string name="s_95b0de98" formatted="false">Введите содержание</string>
+    <string name="s_f3462b06" formatted="false">Введите верную дату записи</string>
+    <string name="s_b0f4e934" formatted="false">Распределение негативных чувств</string>
+    <string name="s_8678f5d9" formatted="false">Лишних символов: {0}</string>
+    <string name="s_b45e202f" formatted="false">Тренды</string>
+    <string name="s_b494a385" formatted="false">Как в системе</string>
+    <string name="s_0af75da1" formatted="false">Пропускает неверные и повторяющиеся данные; файл не меняется</string>
+    <string name="s_ebbcb10b" formatted="false">Сделать задачей</string>
+    <string name="s_13f1b81a" formatted="false">Введите слово или метку</string>
+    <string name="s_7cd6a835" formatted="false">Введите слово или имя метки</string>
+    <string name="s_214cb43c" formatted="false">за последние 30 дней</string>
+    <string name="s_9ea79282" formatted="false">за последние 90 дней</string>
+    <string name="s_4ed18a1a" formatted="false">30 дней</string>
+    <string name="s_8ab0bb3c" formatted="false">90 дней</string>
+    <string name="s_863fb33a" formatted="false">Недавние</string>
+    <string name="s_58cbffa7" formatted="false">Назад</string>
+    <string name="s_a7f085b7" formatted="false">Осталось символов: {0}</string>
+    <string name="s_4cabb422" formatted="false">Записей пока нет</string>
+    <string name="s_fa547131" formatted="false">В этот день нет планов и записей</string>
+    <string name="s_6d67abd6" formatted="false">в этом месяце</string>
+    <string name="s_09e1a534" formatted="false">на этой неделе</string>
+    <string name="s_d3ce76c1" formatted="false">Этой записи больше нет</string>
+    <string name="s_1a959a39" formatted="false">За этот период нет записей. Пустые дни показаны как 0.</string>
+    <string name="s_5fe370b7" formatted="false">Выбрать</string>
+    <string name="s_cbdfcc99" formatted="false">Отправить копию через «Поделиться»</string>
+    <string name="s_daf5a276" formatted="false">Предпросмотр частичного восстановления</string>
+    <string name="s_cf3e4247" formatted="false">Важность</string>
+    <string name="s_4de22934" formatted="false">Важность</string>
+    <string name="s_490a6afa" formatted="false">Поймайте момент. Сделайте первую запись</string>
+    <string name="s_aef2df88" formatted="false">Записывайте на ходу</string>
+    <string name="s_80390cc2" formatted="false">Плохо</string>
+    <string name="s_99546fff" formatted="false">Очень плохо</string>
+    <string name="s_22566806" formatted="false">Очень счастливо</string>
+    <string name="s_9a63360d" formatted="false">Локальные данные изменились после предпросмотра. Различия пересчитаны. Подтвердите перед заменой</string>
+    <string name="s_a14edc19" formatted="false">(Без названия)</string>
+    <string name="s_12cea83b" formatted="false">(пропущено неверных: {0})</string>
+    <string name="s_be6a75ae" formatted="false">, сегодня</string>
+    <string name="s_a495d14b" formatted="false">, и настроение было немного хуже</string>
+    <string name="s_3193d3c7" formatted="false">, и настроение было немного лучше</string>
+</resources>

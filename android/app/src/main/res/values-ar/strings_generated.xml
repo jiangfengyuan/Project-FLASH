@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 由 tools/i18n/generate.py 生成，勿手改 -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="ExtraTranslation,MissingTranslation">
+    <string name="share_target_label">احفظ في Flash</string>
+    <string name="widget_label">Flash الآن</string>
+    <string name="widget_description">سجلات اليوم ومهامه</string>
+    <string name="tile_label">الالتقاط السريع في Flash</string>
+    <string name="shortcut_idea">فكرة جديدة</string>
+    <string name="shortcut_log">يومية جديدة</string>
+    <string name="s_c9414111" formatted="false">" · تذكير مفعّل"</string>
+    <string name="s_94fc7b8e" formatted="false">/data/tasks/{0}/due: يجب أن يكون كائنًا</string>
+    <string name="s_aafdda63" formatted="false">/data/{0}/{1}: يجب أن يكون السجل كائنًا</string>
+    <string name="s_10db0315" formatted="false">/data/{0}: تجاوزت المصفوفة الحد</string>
+    <string name="s_b7cc858a" formatted="false">/data: سجلات غير صالحة أو مكررة. استخدم الاستعادة لمعرفة ما يمكن استرجاعه</string>
+    <string name="s_90ef682e" formatted="false">/version: استخدم الاستعادة للملفات القديمة</string>
+    <string name="s_b9ce0fb9" formatted="false">/: عدد قيم JSON كبير جدًا</string>
+    <string name="s_307d96fc" formatted="false">/: مفتاح مكرر في كائن JSON: {0}</string>
+    <string name="s_b414e614" formatted="false">/: صياغة JSON غير صالحة (الموضع {0})</string>
+    <string name="s_7038ec28" formatted="false">/: لا يُسمح بـ UTF-8 BOM</string>
+    <string name="s_4aa2d855" formatted="false">/: بيانات التصدير الوصفية غير صالحة</string>
+    <string name="s_5ddd2d8d" formatted="false">30 يومًا</string>
+    <string name="s_a96eed0d" formatted="false">7 أيام</string>
+    <string name="s_355b83a3" formatted="false">أسبوع يستحق أن يُذكر. ✦</string>
+    <string name="s_a1486dba" formatted="false">نسخة Flash Aero الاحتياطية</string>
+    <string name="s_eeecd281" formatted="false">تذكير مهمة Flash</string>
+    <string name="s_f6ff76b6" formatted="false">الالتقاط السريع في Flash</string>
+    <string name="s_9a2b6832" formatted="false">Flash الآن</string>
+    <string name="s_2a0b1ddf" formatted="false">فكرة Flash</string>
+    <string name="s_de22df1c" formatted="false">سجل Flash</string>
+    <string name="s_8d6bfa5c" formatted="false">أبرز اللحظات</string>
+    <string name="s_58f879ce" formatted="false">الذاكرة</string>
+    <string name="s_879db2fb" formatted="false">منخفض غالبًا</string>
+    <string name="s_db9c822c" formatted="false">إيجابي غالبًا</string>
+    <string name="s_f3498d7d" formatted="false">مستقر غالبًا</string>
+    <string name="s_244cff4e" formatted="false">كان هذا الأسبوع...</string>
+    <string name="s_fe948398" formatted="false">ما سجّلته</string>
+    <string name="s_b053c6ce" formatted="false">يجب أن يكون data كائنًا</string>
+    <string name="s_70c34463" formatted="false">مزاج</string>
+    <string name="s_0dbf59c2" formatted="false">يجب أن يكون emotions مصفوفة</string>
+    <string name="s_f22ee8cb" formatted="false">أفكار</string>
+    <string name="s_be7aa09b" formatted="false">يجب أن يكون logs مصفوفة</string>
+    <string name="s_62852daa" formatted="false">لحظات</string>
+    <string name="s_22c3caa0" formatted="false">يجب أن يكون schemas كائنًا</string>
+    <string name="s_ad2e48cd" formatted="false">مهام</string>
+    <string name="s_002e97a4" formatted="false">يجب أن يكون tasks مصفوفة</string>
+    <string name="s_6e425eba" formatted="false">{0}: {1} · {2}: {3}</string>
+    <string name="s_39ac061e" formatted="false">{0} — {1} · الأيام بلا تسجيل لا تُحسب</string>
+    <string name="s_e2a8c96b" formatted="false">المهام: {0}</string>
+    <string name="s_409ddff6" formatted="false">الأيام النشطة: {0} · الإجمالي: {1}</string>
+    <string name="s_79fc376e" formatted="false">العناصر: {0}</string>
+    <string name="s_a06e31ba" formatted="false">العناصر غير الصالحة التي ستُتخطى: {0}.</string>
+    <string name="s_aeb06eb3" formatted="false">السجلات: {0} · المزاج: {1}</string>
+    <string name="s_ba02e82e" formatted="false">{0} مرة</string>
+    <string name="s_852bf53d" formatted="false">المزاج: {0}، المهام: {1}</string>
+    <string name="s_1f0ab446" formatted="false">تفاصيل {0}</string>
+    <string name="s_7f7d2285" formatted="false">قيد الإنجاز: {0}</string>
+    <string name="s_2e763a14" formatted="false">سجّلت {0} أكثر من {1}</string>
+    <string name="s_10e8d2b4" formatted="false">سجّلت {0} أقل من {1}</string>
+    <string name="s_8d74a879" formatted="false">سجّلت {0} بقدر {1} تقريبًا</string>
+    <string name="s_1879232a" formatted="false">"{0}، السجلات: {1}، "</string>
+    <string name="s_e168d4f4" formatted="false">{0}، لكن تعذرت استعادة تذكيرات النظام. حاول لاحقًا</string>
+    <string name="s_245af589" formatted="false">{0}: السجلات {1} · المزاج {2}</string>
+    <string name="s_7db427be" formatted="false">{0}: جديدة {1} · معدّلة {2} · متطابقة {3} · هنا فقط {4}</string>
+    <string name="s_0009cc0b" formatted="false">{0}: حقول مطلوبة مفقودة أو حقول غير معروفة</string>
+    <string name="s_7dad93fd" formatted="false">★ المفضلة</string>
+    <string name="s_745e890f" formatted="false">✓ حُفظت في اليوميات</string>
+    <string name="s_a248a677" formatted="false">✓ حُفظت في الأفكار</string>
+    <string name="s_67fc93c3" formatted="false">✦ Flash</string>
+    <string name="s_05615f1f" formatted="false">ن</string>
+    <string name="s_e50a5759" formatted="false">الأفكار العابرة تستحق أن تُحفظ</string>
+    <string name="s_8bcbbc86" formatted="false">سبعة مستويات للمزاج لترى كيف تتغير</string>
+    <string name="s_0c616a24" formatted="false">ر</string>
+    <string name="s_508b1e1d" formatted="false">الأسبوع السابق</string>
+    <string name="s_b06dcc3d" formatted="false">الشهر السابق</string>
+    <string name="s_8be194e7" formatted="false">الشهر الماضي</string>
+    <string name="s_eb0f6aef" formatted="false">الأسبوع الماضي</string>
+    <string name="s_0bb3bda2" formatted="false">الأسبوع التالي</string>
+    <string name="s_6bcf17c2" formatted="false">الشهر التالي</string>
+    <string name="s_10c83c81" formatted="false">التالي</string>
+    <string name="s_82b6cabb" formatted="false">مساء الخير 🌤</string>
+    <string name="s_1344f491" formatted="false">غير سعيد</string>
+    <string name="s_4cc036be" formatted="false">بلا تذكير</string>
+    <string name="s_12e8587a" formatted="false">إصدار قسم {0} غير مدعوم</string>
+    <string name="s_ba358518" formatted="false">الكل</string>
+    <string name="s_b13672cd" formatted="false">محايد</string>
+    <string name="s_51f6517e" formatted="false">المظهر</string>
+    <string name="s_0a416847" formatted="false">الثلاثين يومًا السابقة</string>
+    <string name="s_0c6445c1" formatted="false">التسعين يومًا السابقة</string>
+    <string name="s_89609beb" formatted="false">ث</string>
+    <string name="s_9160a883" formatted="false">ج</string>
+    <string name="s_a848765c" formatted="false">اليوم</string>
+    <string name="s_6f3c2b2c" formatted="false">دوّن شيئًا اليوم.</string>
+    <string name="s_1f2bd289" formatted="false">لا تسجيل اليوم بعد.</string>
+    <string name="s_cfccbae7" formatted="false">سجلات اليوم</string>
+    <string name="s_5bfe853c" formatted="false">سجلات اليوم ومهامه</string>
+    <string name="s_2d7464e1" formatted="false">المهام</string>
+    <string name="s_3f7946be" formatted="false">تعذر حفظ المهمة</string>
+    <string name="s_bc3ceaab" formatted="false">تعذر حذف المهمة</string>
+    <string name="s_cd07ba17" formatted="false">حُفظت المهمة. اسمح بالإشعارات لتلقي التذكيرات</string>
+    <string name="s_d3190fa3" formatted="false">تذكيرات المهام</string>
+    <string name="s_d8bb8799" formatted="false">وقت المهمة غير صالح</string>
+    <string name="s_86da87a3" formatted="false">تعذر تحديث المهمة</string>
+    <string name="s_97815f19" formatted="false">إرسال نسخة Flash Aero</string>
+    <string name="s_6b17ba8f" formatted="false">إرسال إلى جهاز آخر</string>
+    <string name="s_79955ed0" formatted="false">حزين</string>
+    <string name="s_d7974514" formatted="false">أفكار بانتظارك: {0}. ابدأ بالأقدم</string>
+    <string name="s_d908f279" formatted="false">أفكار بانتظار المراجعة: {0}. ألقِ نظرة</string>
+    <string name="s_ad5b82b0" formatted="false">حفظ</string>
+    <string name="s_9b95e293" formatted="false">جارٍ الحفظ…</string>
+    <string name="s_64911de5" formatted="false">حفظ كملف JSON</string>
+    <string name="s_46ca88f1" formatted="false">تعذر الحفظ. حاول مجددًا</string>
+    <string name="s_1d0e5d5a" formatted="false">طوال اليوم</string>
+    <string name="s_0c14a696" formatted="false">مهمة طوال اليوم</string>
+    <string name="s_05eb990b" formatted="false">بحث شامل</string>
+    <string name="s_5e6558ad" formatted="false">الكل</string>
+    <string name="s_e8562c78" formatted="false">س</string>
+    <string name="s_72a18f8e" formatted="false">حول Flash</string>
+    <string name="s_87dadb5a" formatted="false">كلمة أو وسم</string>
+    <string name="s_39b523bd" formatted="false">إغلاق</string>
+    <string name="s_05f5920d" formatted="false">وقت محدد</string>
+    <string name="s_801be77b" formatted="false">المحتوى</string>
+    <string name="s_dc24135d" formatted="false">لا يمكن أن يكون المحتوى فارغًا</string>
+    <string name="s_043cda7f" formatted="false">طويل جدًا ({0} حرفًا، الحد {1}). اختصره قبل الحفظ</string>
+    <string name="s_87000edc" formatted="false">واصل التسجيل، سيراه أنت في المستقبل.</string>
+    <string name="s_95a71bc9" formatted="false">جارٍ التحضير…</string>
+    <string name="s_9aa7d416" formatted="false">مشاركة</string>
+    <string name="s_4ae3c205" formatted="false">مشاركة السجل</string>
+    <string name="s_caf6d5a6" formatted="false">النوع</string>
+    <string name="s_a0b5ccaf" formatted="false">تغيير الترتيب</string>
+    <string name="s_ea8d5381" formatted="false">حذف</string>
+    <string name="s_6b93827d" formatted="false">حذف المهمة</string>
+    <string name="s_bb2e6146" formatted="false">حذف المهمة؟</string>
+    <string name="s_309b2b90" formatted="false">تعذر الحذف. حاول مجددًا</string>
+    <string name="s_e4d23002" formatted="false">يحذف كل اليوميات والمزاج والمهام نهائيًا. صدّر نسخة احتياطية أولًا</string>
+    <string name="s_e6dedfa0" formatted="false">حذف هذا المزاج؟</string>
+    <string name="s_98f7e648" formatted="false">حذف هذه اليومية؟</string>
+    <string name="s_c51f5912" formatted="false">عند الموعد</string>
+    <string name="s_c628e28d" formatted="false">يحتوي اليوميات: {0}، المزاج: {1}، المهام: {2}</string>
+    <string name="s_60b4c5ae" formatted="false">منطقة الخطر</string>
+    <string name="s_949856b3" formatted="false">إلغاء</string>
+    <string name="s_d1d62fb0" formatted="false">إزالة من المفضلة</string>
+    <string name="s_4d55cb75" formatted="false">صدّر نسخة احتياطية أو أرسلها عبر مشاركة النظام</string>
+    <string name="s_5e53c03a" formatted="false">خ</string>
+    <string name="s_40163b46" formatted="false">العودة إلى اليوم</string>
+    <string name="s_bed63d2f" formatted="false">هذا الأسبوع</string>
+    <string name="s_c2e1aa6d" formatted="false">مراجعة</string>
+    <string name="s_fbac6f20" formatted="false">النسخ الاحتياطي والاستعادة</string>
+    <string name="s_bb48fdba" formatted="false">النسخ بصيغة JSON غير مشفرة وتتضمن يومياتك ومزاجك ومهامك. احفظها أو شاركها في مكان موثوق فقط</string>
+    <string name="s_20fe814f" formatted="false">صُدّرت النسخة</string>
+    <string name="s_c90a7947" formatted="false">ملف النسخة ليس كائن JSON صالحًا</string>
+    <string name="s_88f39f13" formatted="false">ملف النسخة ليس JSON بترميز UTF-8 صالحًا</string>
+    <string name="s_269e4097" formatted="false">حجم ملف النسخة أكبر من {0} ميغابايت ولا يمكن استيراده</string>
+    <string name="s_cc139297" formatted="false">إصدار غير متوافق: المتوقع {0}، والفعلي {1}</string>
+    <string name="s_d3de3f52" formatted="false">نسخة غير متوافقة: الحقل version مفقود</string>
+    <string name="s_584ff11a" formatted="false">مذكرة</string>
+    <string name="s_d82fe22c" formatted="false">الملاحظة طويلة جدًا. اختصرها قبل الحفظ</string>
+    <string name="s_d9dac7dd" formatted="false">ملاحظات (اختياري)</string>
+    <string name="s_e4a4815a" formatted="false">المظهر والاستخدام</string>
+    <string name="s_1e13bd21" formatted="false">تم</string>
+    <string name="s_dd03e6ad" formatted="false">معاينة الفروق مع البيانات المحلية قبل الاستيراد</string>
+    <string name="s_9b60ff74" formatted="false">فشل الاستيراد: {0}</string>
+    <string name="s_da193966" formatted="false">أُلغي الاستيراد</string>
+    <string name="s_7fdaf616" formatted="false">التصدير والاستيراد والمسح</string>
+    <string name="s_f97fded3" formatted="false">تصدير نسخة احتياطية</string>
+    <string name="s_7436fb8d" formatted="false">فشل التصدير: {0}</string>
+    <string name="s_b1632a8b" formatted="false">ستُحذف كل اليوميات والمزاج والمهام نهائيًا. صدّر نسخة احتياطية أولًا.</string>
+    <string name="s_479481d2" formatted="false">النقل عبر الشبكة المحلية متوقف حاليًا</string>
+    <string name="s_f8eef707" formatted="false">النقل عبر الشبكة المحلية متوقف لمخاطر البروتوكول القديم. استخدم التصدير أو مشاركة النظام لإرسال ملف JSON عبر قناة موثوقة.</string>
+    <string name="s_531320d2" formatted="false">التفاصيل</string>
+    <string name="s_b1368837" formatted="false">الفروق</string>
+    <string name="s_c2d9a3f9" formatted="false">يضيف الدمج البيانات المستلمة أو يحدّثها ويحتفظ بما يوجد على هذا الجهاز فقط. أما الاستبدال فيمسح هذا الجهاز أولًا.</string>
+    <string name="s_d0fcf500" formatted="false">تم الحفظ</string>
+    <string name="s_5dbcdf6d" formatted="false">متوقف</string>
+    <string name="s_bee374d1" formatted="false">تم الحذف</string>
+    <string name="s_8b122251" formatted="false">حُذفت اليومية</string>
+    <string name="s_74e8cc38" formatted="false">"استُورد اليوميات: {0}، المزاج: {1}، "</string>
+    <string name="s_a8126b62" formatted="false">في المفضلة</string>
+    <string name="s_2266e2ec" formatted="false">مُسحت كل البيانات</string>
+    <string name="s_c13b3522" formatted="false">مُسحت كل البيانات، لكن تعذرت إزالة تذكيرات النظام. أعد تشغيل التطبيق وحاول مجددًا</string>
+    <string name="s_c8fa62c1" formatted="false">المحدد: {0}</string>
+    <string name="s_01133500" formatted="false">متوسط المزاج {0} · الإجمالي {1}</string>
+    <string name="s_22696cbc" formatted="false">البداية</string>
+    <string name="s_499be303" formatted="false">ابدأ</string>
+    <string name="s_5d62764c" formatted="false">تاريخ البدء</string>
+    <string name="s_2a665354" formatted="false">سعيد</string>
+    <string name="s_673d4a91" formatted="false">الشدة</string>
+    <string name="s_6a19ddcf" formatted="false">الشدة {0}</string>
+    <string name="s_4b8edbfa" formatted="false">قيد الإنجاز</string>
+    <string name="s_dfcdb4b6" formatted="false">مهمة قيد الإنجاز</string>
+    <string name="s_e83d11ae" formatted="false">للفرز</string>
+    <string name="s_5660c655" formatted="false">للفرز: يوميات بوسم «يومي». اضغط مطولًا لفرز عدة سجلات.</string>
+    <string name="s_2367642b" formatted="false">غير سعيد جدًا</string>
+    <string name="s_fb903262" formatted="false">سعيد جدًا</string>
+    <string name="s_e70923c8" formatted="false">التقاط سريع</string>
+    <string name="s_abf33a8f" formatted="false">استعادة نسخة تالفة أو قديمة</string>
+    <string name="s_a9612b5e" formatted="false">المزاج</string>
+    <string name="s_7bd3df69" formatted="false">متوسط المزاج {0} (من ‎−3‎ إلى ‎+3‎)</string>
+    <string name="s_643f1ede" formatted="false">الوعي بالمزاج</string>
+    <string name="s_8de4274f" formatted="false">اتجاه المزاج</string>
+    <string name="s_99812275" formatted="false">خاطرة</string>
+    <string name="s_d9f8afc2" formatted="false">أفكار للمراجعة</string>
+    <string name="s_6deefec2" formatted="false">ذكّرني عند وجود أفكار بانتظار المراجعة</string>
+    <string name="s_4e89a8ad" formatted="false">هل تود قول شيء؟ (اختياري)</string>
+    <string name="s_eae146ff" formatted="false">تغيير نوع المحدد</string>
+    <string name="s_c9ddd465" formatted="false">تعذر تعديل المحدد. حاول مجددًا</string>
+    <string name="s_803499dd" formatted="false">تغيير وسم المحدد</string>
+    <string name="s_b4b9bfa6" formatted="false">دمج الفروق</string>
+    <string name="s_8523e97b" formatted="false">الأحدث أولًا</string>
+    <string name="s_791c2e78" formatted="false">الأقدم أولًا</string>
+    <string name="s_6ef98325" formatted="false">حسب الوسم</string>
+    <string name="s_da39e076" formatted="false">قبل يوم واحد</string>
+    <string name="s_0c4452fe" formatted="false">قبل ساعة واحدة</string>
+    <string name="s_74d32173" formatted="false">قبل 15 دقيقة</string>
+    <string name="s_6d40d527" formatted="false">تذكير</string>
+    <string name="s_545f8675" formatted="false">يجدول النظام التذكيرات وقد تتأخر قليلًا في وضع توفير الطاقة.</string>
+    <string name="s_0b6efa3b" formatted="false">بحث</string>
+    <string name="s_18fca433" formatted="false">بحث في اليوميات...</string>
+    <string name="s_c8a90aa9" formatted="false">بحث في السجلات والأفكار والمزاج والمهام</string>
+    <string name="s_1b9e8bc9" formatted="false">تراجع</string>
+    <string name="s_aff00db8" formatted="false">تعذر التراجع. حاول مجددًا</string>
+    <string name="s_87aed705" formatted="false">فشلت العملية. حاول مجددًا</string>
+    <string name="s_839d4732" formatted="false">تفضيل</string>
+    <string name="s_cf8b8d02" formatted="false">إخفاء التفاصيل اليومية</string>
+    <string name="s_e1598b13" formatted="false">تجاهل</string>
+    <string name="s_0ac91ecb" formatted="false">تجاهل التغييرات غير المحفوظة؟</string>
+    <string name="s_6344fa26" formatted="false">البيانات والأمان</string>
+    <string name="s_b464971d" formatted="false">تُحفظ البيانات على هذا الجهاز</string>
+    <string name="s_95b69a6d" formatted="false">حجم الملف أكبر من 50 ميبيبايت</string>
+    <string name="s_b8c8a94f" formatted="false">جديد</string>
+    <string name="s_b0f36447" formatted="false">مهمة جديدة</string>
+    <string name="s_d2c53483" formatted="false">فكرة جديدة</string>
+    <string name="s_160eb028" formatted="false">سجل جديد</string>
+    <string name="s_659aa23f" formatted="false">لا شيء</string>
+    <string name="s_fd8b1ba9" formatted="false">تعذرت كتابة الملف</string>
+    <string name="s_e9ebd81b" formatted="false">تعذر إنشاء مجلد نقل النسخة</string>
+    <string name="s_59c97404" formatted="false">تعذر فتح المشاركة. ثبّت تطبيقًا يستقبل الملفات</string>
+    <string name="s_6776e896" formatted="false">تعذرت قراءة الملف</string>
+    <string name="s_609a9a60" formatted="false">ح</string>
+    <string name="s_f9abd512" formatted="false">التقويم</string>
+    <string name="s_afdd356c" formatted="false">تذكيرات محلية لمهام التقويم</string>
+    <string name="s_2eeb970b" formatted="false">متوسط المزاج اليومي · من ‎−3‎ إلى ‎+3‎ (0 محايد)</string>
+    <string name="s_6ba31688" formatted="false">يومي</string>
+    <string name="s_caa53f15" formatted="false">اليوميات</string>
+    <string name="s_923b0270" formatted="false">اليوميات والأفكار بلمسة واحدة</string>
+    <string name="s_56409a3c" formatted="false">تدفق اليوميات</string>
+    <string name="s_203436ae" formatted="false">إدارة اليوميات</string>
+    <string name="s_92fd0eed" formatted="false">التاريخ</string>
+    <string name="s_432f74fa" formatted="false">نطاق التاريخ</string>
+    <string name="s_7203eec6" formatted="false">للبروتوكول القديم مخاطر أمنية. استخدم التصدير أو مشاركة النظام في «النسخ الاحتياطي والاستعادة» للإرسال بطريقة موثوقة.</string>
+    <string name="s_d7034b36" formatted="false">صباح الخير ☀️</string>
+    <string name="s_cb28b11e" formatted="false">لا سجلات في هذه الفترة</string>
+    <string name="s_12263e9a" formatted="false">أمس</string>
+    <string name="s_c18f71ef" formatted="false">مساء الخير 🌙</string>
+    <string name="s_bf13f8b5" formatted="false">متوقف حاليًا. اضغط لرؤية البدائل</string>
+    <string name="s_16a3eebb" formatted="false">المزيد</string>
+    <string name="s_89192933" formatted="false">يحدّث تغيير التاريخ التقويم والمراجعة أيضًا.</string>
+    <string name="s_87b8867d" formatted="false">الأحدث</string>
+    <string name="s_ceb8f642" formatted="false">الأقدم</string>
+    <string name="s_56b38d0f" formatted="false">اللحظات الأخيرة</string>
+    <string name="s_be2c2eb2" formatted="false">غير مقروء</string>
+    <string name="s_27c37899" formatted="false">هذا الأسبوع</string>
+    <string name="s_ccb42197" formatted="false">هذا الأسبوع: السجلات {0} · للفرز {1}</string>
+    <string name="s_b70e17ea" formatted="false">المزاج منخفض هذا الأسبوع</string>
+    <string name="s_24d17368" formatted="false">المزاج مستقر هذا الأسبوع</string>
+    <string name="s_e3f61599" formatted="false">إيجابي غالبًا هذا الأسبوع</string>
+    <string name="s_63d2d484" formatted="false">لا تسجيل هذا الأسبوع</string>
+    <string name="s_db0049cb" formatted="false">اتجاه هذا الأسبوع</string>
+    <string name="s_3750d663" formatted="false">تذكير محلي</string>
+    <string name="s_47af33f9" formatted="false">هذا الشهر</string>
+    <string name="s_37272be9" formatted="false">من فكرة، وتبقى الفكرة</string>
+    <string name="s_7e5242cd" formatted="false">عرض التفاصيل اليومية</string>
+    <string name="s_495fd6a9" formatted="false">عرض الفكرة</string>
+    <string name="s_198c9fe3" formatted="false">استيراد</string>
+    <string name="s_5606df17" formatted="false">معاينة الاستيراد</string>
+    <string name="s_2b1626c8" formatted="false">الوسم</string>
+    <string name="s_f7d7a0ce" formatted="false">مرحبًا بك في Flash</string>
+    <string name="s_aef45eb7" formatted="false">جارٍ تحميل المزيد…</string>
+    <string name="s_6af40858" formatted="false">الآن</string>
+    <string name="s_b060afd3" formatted="false">لا يدعم هذا الجهاز منطقة زمنية في النسخة. حدّث النظام وحاول مجددًا. لم يُستورد شيء</string>
+    <string name="s_f4958768" formatted="false">كل 3 أيام</string>
+    <string name="s_41be2fe2" formatted="false">أسبوعيًا</string>
+    <string name="s_02c285b5" formatted="false">يوميًا</string>
+    <string name="s_18fa51bd" formatted="false">اليوميات والأفكار والمزاج يوميًا · دون المهام</string>
+    <string name="s_6d03477d" formatted="false">متوسط المزاج اليومي: {0}</string>
+    <string name="s_5816c303" formatted="false">لا تطبيق متاح للمشاركة</string>
+    <string name="s_43c975df" formatted="false">لم يُعثر على سجلات</string>
+    <string name="s_f8bc527e" formatted="false">لا يوميات مطابقة</string>
+    <string name="s_0fed9772" formatted="false">الأيام النشطة</string>
+    <string name="s_11b5fdf6" formatted="false">فاتح</string>
+    <string name="s_2a8baaea" formatted="false">داكن</string>
+    <string name="s_da340c1c" formatted="false">مسح كل البيانات</string>
+    <string name="s_845a8db9" formatted="false">مسح كل البيانات؟</string>
+    <string name="s_115677d8" formatted="false">تعذر المسح: {0}</string>
+    <string name="s_0b9d2bac" formatted="false">مسح</string>
+    <string name="s_9c43ebb6" formatted="false">مسح البحث</string>
+    <string name="s_0fba4654" formatted="false">مسح عوامل التصفية</string>
+    <string name="s_b8b74e9d" formatted="false">الأفكار</string>
+    <string name="s_4604d6bf" formatted="false">تذكيرات الأفكار</string>
+    <string name="s_436e2c82" formatted="false">بماذا تفكر الآن؟</string>
+    <string name="s_78fe07cc" formatted="false">تعذر إنشاء ملف النقل: {0}</string>
+    <string name="s_f60bb44e" formatted="false">غاضب</string>
+    <string name="s_621a8231" formatted="false">حسنًا</string>
+    <string name="s_869f8d0c" formatted="false">مسح الكل</string>
+    <string name="s_5716f5ef" formatted="false">بعد {0} دقيقة</string>
+    <string name="s_f5e087c9" formatted="false">تصفية</string>
+    <string name="s_5db367de" formatted="false">إدارة</string>
+    <string name="s_26640f43" formatted="false">النوع</string>
+    <string name="s_f8ede304" formatted="false">إشعارات النظام أو قناة التذكيرات متوقفة</string>
+    <string name="s_235f3e59" formatted="false">عاجل</string>
+    <string name="s_64db55af" formatted="false">عند وجود {0} أفكار أو أكثر بانتظارك، يصلك تذكير في الثامنة مساءً. الأفكار المفتوحة لا تُحسب.</string>
+    <string name="s_78a510f0" formatted="false">نظرة عامة · كل الوقت</string>
+    <string name="s_1da8a247" formatted="false">النهاية</string>
+    <string name="s_476d405b" formatted="false">تاريخ الانتهاء</string>
+    <string name="s_010e135c" formatted="false">متابعة التحرير</string>
+    <string name="s_e60fd56d" formatted="false">واصل التسجيل وستتضح مراجعتك</string>
+    <string name="s_607348a8" formatted="false">تعديل</string>
+    <string name="s_1d5b5e98" formatted="false">تعديل المهمة</string>
+    <string name="s_c9ab4c68" formatted="false">تعديل الفكرة</string>
+    <string name="s_a5db4a27" formatted="false">تعديل السجل</string>
+    <string name="s_72ecf883" formatted="false">من {0}</string>
+    <string name="s_85b25df8" formatted="false">إلى {0}</string>
+    <string name="s_a6317c7d" formatted="false">استبدال</string>
+    <string name="s_5521c6a5" formatted="false">مكان لكل فكرة عابرة · بلا حساب سحابي</string>
+    <string name="s_dad3d89f" formatted="false">دوّن فكرتك الأولى</string>
+    <string name="s_6dfa9df7" formatted="false">احفظ في Flash</string>
+    <string name="s_2c9d9f0e" formatted="false">السجلات</string>
+    <string name="s_a48657a1" formatted="false">سجّل المزاج</string>
+    <string name="s_b1bc3a6a" formatted="false">تاريخ السجل: {0}</string>
+    <string name="s_6de25c07" formatted="false">سجّل هذه اللحظة…</string>
+    <string name="s_d1e82646" formatted="false">نشاط التسجيل</string>
+    <string name="s_7a550e3e" formatted="false">النشاط: سجلات في {1} من {0} يومًا، والإجمالي {2}. يمكن توسيع التفاصيل اليومية.</string>
+    <string name="s_e54eaf8b" formatted="false">يومية جديدة</string>
+    <string name="s_e8b414a3" formatted="false">فكرة جديدة</string>
+    <string name="s_0102647f" formatted="false">النقل بين الأجهزة</string>
+    <string name="s_f3c259dd" formatted="false">الإعدادات</string>
+    <string name="s_95b0de98" formatted="false">أدخل المحتوى</string>
+    <string name="s_f3462b06" formatted="false">أدخل تاريخ سجل صالحًا</string>
+    <string name="s_b0f4e934" formatted="false">توزيع المشاعر السلبية</string>
+    <string name="s_8678f5d9" formatted="false">تجاوز بمقدار {0} حرف</string>
+    <string name="s_b45e202f" formatted="false">الاتجاهات</string>
+    <string name="s_b494a385" formatted="false">النظام</string>
+    <string name="s_0af75da1" formatted="false">يتخطى البيانات غير الصالحة والمكررة ولا يغير الملف الأصلي</string>
+    <string name="s_ebbcb10b" formatted="false">تحويل إلى مهمة</string>
+    <string name="s_13f1b81a" formatted="false">أدخل كلمة أو وسمًا</string>
+    <string name="s_7cd6a835" formatted="false">أدخل كلمة أو اسم وسم</string>
+    <string name="s_214cb43c" formatted="false">آخر 30 يومًا</string>
+    <string name="s_9ea79282" formatted="false">آخر 90 يومًا</string>
+    <string name="s_4ed18a1a" formatted="false">آخر 30 يومًا</string>
+    <string name="s_8ab0bb3c" formatted="false">آخر 90 يومًا</string>
+    <string name="s_863fb33a" formatted="false">الأخيرة</string>
+    <string name="s_58cbffa7" formatted="false">رجوع</string>
+    <string name="s_a7f085b7" formatted="false">متبقٍ {0} حرف</string>
+    <string name="s_4cabb422" formatted="false">لا تسجيل بعد</string>
+    <string name="s_fa547131" formatted="false">لا خطط أو سجلات في هذا اليوم</string>
+    <string name="s_6d67abd6" formatted="false">هذا الشهر</string>
+    <string name="s_09e1a534" formatted="false">هذا الأسبوع</string>
+    <string name="s_d3ce76c1" formatted="false">لم يعد هذا السجل موجودًا</string>
+    <string name="s_1a959a39" formatted="false">لا تسجيل في هذه الفترة بعد. تظهر الأيام الفارغة بقيمة 0.</string>
+    <string name="s_5fe370b7" formatted="false">تحديد</string>
+    <string name="s_cbdfcc99" formatted="false">إرسال النسخة عبر مشاركة النظام</string>
+    <string name="s_daf5a276" formatted="false">معاينة الاستعادة الجزئية</string>
+    <string name="s_cf3e4247" formatted="false">الأهمية</string>
+    <string name="s_4de22934" formatted="false">الأهمية</string>
+    <string name="s_490a6afa" formatted="false">التقطها وهي تمر. اكتب أولاها</string>
+    <string name="s_aef2df88" formatted="false">سجّل أينما كنت</string>
+    <string name="s_80390cc2" formatted="false">متضايق</string>
+    <string name="s_99546fff" formatted="false">مستاء جدًا</string>
+    <string name="s_22566806" formatted="false">مسرور جدًا</string>
+    <string name="s_9a63360d" formatted="false">تغيرت البيانات المحلية بعد المعاينة. أُعيد حساب الفروق. أكّد قبل الاستبدال</string>
+    <string name="s_a14edc19" formatted="false">(بلا عنوان)</string>
+    <string name="s_12cea83b" formatted="false">(العناصر غير الصالحة المتخطاة: {0})</string>
+    <string name="s_be6a75ae" formatted="false">، اليوم</string>
+    <string name="s_a495d14b" formatted="false">، وكان المزاج أقل قليلًا</string>
+    <string name="s_3193d3c7" formatted="false">، وكان المزاج أفضل قليلًا</string>
+</resources>
