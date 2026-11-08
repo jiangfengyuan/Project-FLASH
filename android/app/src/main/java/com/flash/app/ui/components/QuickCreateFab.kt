@@ -58,6 +58,12 @@ import androidx.compose.ui.unit.dp
 import com.flash.app.data.model.Category
 import com.flash.app.ui.theme.FlashTokens
 import com.flash.app.ui.theme.ModuleColors
+import androidx.compose.animation.core.snap
+import com.flash.app.ui.theme.LocalReduceMotion
+import com.flash.app.ui.theme.reducedEnter
+import com.flash.app.ui.theme.reducedExit
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 
 /**
  * 快速创建 FAB（PRD 09 / UIUX 阶段一）：Dock 右侧独立圆形 “+”（56×56），
@@ -80,14 +86,24 @@ fun QuickCreateFab(
         action()
     }
 
+    // 减少动态效果：菜单只淡入淡出，加号即时旋转到位
+    val reduceMotion = LocalReduceMotion.current
     Column(modifier = modifier, horizontalAlignment = Alignment.End) {
         AnimatedVisibility(
             visible = expanded,
-            enter = fadeIn(tween(FlashTokens.Motion.SelectionMs)) +
-                slideInVertically(tween(FlashTokens.Motion.FabExpandMs)) { it / 6 } +
-                expandVertically(tween(FlashTokens.Motion.FabExpandMs)),
-            exit = fadeOut(tween(150)) +
-                shrinkVertically(tween(FlashTokens.Motion.FabExpandMs)),
+            enter = if (reduceMotion) {
+                reducedEnter()
+            } else {
+                fadeIn(tween(FlashTokens.Motion.SelectionMs)) +
+                    slideInVertically(tween(FlashTokens.Motion.FabExpandMs)) { it / 6 } +
+                    expandVertically(tween(FlashTokens.Motion.FabExpandMs))
+            },
+            exit = if (reduceMotion) {
+                reducedExit()
+            } else {
+                fadeOut(tween(150)) +
+                    shrinkVertically(tween(FlashTokens.Motion.FabExpandMs))
+            },
         ) {
             Column(
                 horizontalAlignment = Alignment.End,
@@ -110,7 +126,7 @@ fun QuickCreateFab(
         }
         val rotation by animateFloatAsState(
             targetValue = if (expanded) 45f else 0f,
-            animationSpec = tween(FlashTokens.Motion.FabExpandMs),
+            animationSpec = if (reduceMotion) snap() else tween(FlashTokens.Motion.FabExpandMs),
             label = "fabRot",
         )
         FloatingActionButton(
@@ -136,9 +152,14 @@ private fun FabOption(
     color: Color,
     onClick: () -> Unit,
 ) {
+    // 整行是一个按钮：读屏只聚焦一次，朗读「新建记录」等（内部小按钮不再重复聚焦）
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable(onClick = onClick),
+        modifier = Modifier.clickable(
+            onClickLabel = "新建$label",
+            role = Role.Button,
+            onClick = onClick,
+        ),
     ) {
         // 标签加 pill 背景，压在页面卡片上也可读
         Text(
@@ -156,8 +177,9 @@ private fun FabOption(
             onClick = onClick,
             containerColor = color,
             contentColor = onColor,
+            modifier = Modifier.clearAndSetSemantics {},
         ) {
-            Icon(icon, contentDescription = label)
+            Icon(icon, contentDescription = null)
         }
     }
 }

@@ -14,7 +14,7 @@ import FlashDesign
 /// 「待整理」支持批量改分类或标签；跨模块定位（全局搜索/日历「查看灵感」）在此打开编辑弹层。
 struct ExploreScreen: View {
     @Environment(\.flashRepository) private var repository
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
     @Environment(FocusRouter.self) private var focusRouter
     @Environment(AppState.self) private var appState
     @Environment(\.flashMarkIdeaViewed) private var markIdeaViewed
@@ -174,7 +174,7 @@ struct ExploreScreen: View {
             .padding(.horizontal, Metrics.pageGutter)
             .padding(.vertical, Spacing.sm)
         }
-        .sensoryFeedback(.selection, trigger: filter)
+        .flashHaptic(.selection, trigger: filter)
     }
 
     // MARK: - 待整理 / 批量

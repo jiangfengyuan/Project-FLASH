@@ -5,6 +5,8 @@
     "versionCode": 1,
     "versionName": "0.1.0",
     "icon": "$media:icon",
-    "label": "$string:app_name"
+    "label": "$string:app_name",
+    // 辅助功能：文字大小跟随系统「字体大小」设置（上限 1.75 倍，固定高度的行不被撑破）
+    "configuration": "$profile:configuration"
   }
 }

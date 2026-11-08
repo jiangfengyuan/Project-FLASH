@@ -12,7 +12,7 @@ import FlashCore
 /// 每敲一键不再触发全量查询。搜索词与面板条件（标签/重要度/日期范围/收藏）在内存中过滤，
 /// 过滤逻辑由 Domain 的 ExploreLogFilter 承担（本视图只做装配与缓存键）。
 public struct ExploreLogListView: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
     @Environment(\.flashRepository) private var repository
     @Query private var logEntities: [LogEntity]
 
@@ -155,6 +155,7 @@ public struct ExploreLogListView: View {
                     Image(systemName: selection.contains(log.id) ? "checkmark.circle.fill" : "circle")
                         .foregroundStyle(selection.contains(log.id)
                                          ? BrandColors.brandPrimary : BrandColors.textSecondary)
+                        .accessibilityHidden(true) // 选中状态由 isSelected 特征朗读
                     LogCardView(log: log)
                 }
             }

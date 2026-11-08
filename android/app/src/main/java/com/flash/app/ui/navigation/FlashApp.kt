@@ -69,11 +69,16 @@ import com.flash.app.ui.theme.glass.LocalHazeState
 import com.flash.app.ui.welcome.WelcomeScreen
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.launch
+import com.flash.app.ui.theme.LocalReduceMotion
+import com.flash.app.ui.theme.reducedEnter
+import com.flash.app.ui.theme.reducedExit
 
 @Composable
 fun FlashApp(darkTheme: Boolean, uiStyle: UiStyle) {
     val app = LocalContext.current.applicationContext as FlashApplication
     val welcomed by app.settings.welcomed.collectAsStateWithLifecycle()
+    // 起始页只在启动时裁决一次：之后 welcomed 变化不改 NavHost 图（改图会清空返回栈）
+    val startDestination = remember { if (welcomed) Routes.HOME else Routes.WELCOME }
     val unviewedIdeas by app.repository.unviewedIdeas.collectAsStateWithLifecycle(emptyList())
     val showIdeaReminder = shouldShowIdeaReminder(unviewedIdeas.size)
 
@@ -83,6 +88,8 @@ fun FlashApp(darkTheme: Boolean, uiStyle: UiStyle) {
     val showBottomBar = currentRoute in TABS.map { it.route }
     val hazeState = remember { HazeState() }
     val isGlass = uiStyle == UiStyle.GLASS
+    // 减少动态效果：页面切换只淡入淡出，不横移
+    val reduceMotion = LocalReduceMotion.current
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -118,33 +125,55 @@ fun FlashApp(darkTheme: Boolean, uiStyle: UiStyle) {
             ) { innerPadding ->
                 NavHost(
                     navController = navController,
-                    startDestination = if (welcomed) Routes.HOME else Routes.WELCOME,
+                    startDestination = startDestination,
                     modifier = Modifier
                         .padding(innerPadding)
                         .consumeWindowInsets(innerPadding),
                     // 轻微横移配合淡入淡出，保留页面连续性并避免纯交叉淡化的闪屏感。
                     enterTransition = {
-                        fadeIn(animationSpec = tween(240)) +
-                            slideInHorizontally(animationSpec = tween(240)) { it / 14 }
+                        if (reduceMotion) {
+                            reducedEnter()
+                        } else {
+                            fadeIn(animationSpec = tween(240)) +
+                                slideInHorizontally(animationSpec = tween(240)) { it / 14 }
+                        }
                     },
                     exitTransition = {
-                        fadeOut(animationSpec = tween(180)) +
-                            slideOutHorizontally(animationSpec = tween(180)) { -it / 20 }
+                        if (reduceMotion) {
+                            reducedExit()
+                        } else {
+                            fadeOut(animationSpec = tween(180)) +
+                                slideOutHorizontally(animationSpec = tween(180)) { -it / 20 }
+                        }
                     },
                     popEnterTransition = {
-                        fadeIn(animationSpec = tween(240)) +
-                            slideInHorizontally(animationSpec = tween(240)) { -it / 14 }
+                        if (reduceMotion) {
+                            reducedEnter()
+                        } else {
+                            fadeIn(animationSpec = tween(240)) +
+                                slideInHorizontally(animationSpec = tween(240)) { -it / 14 }
+                        }
                     },
                     popExitTransition = {
-                        fadeOut(animationSpec = tween(180)) +
-                            slideOutHorizontally(animationSpec = tween(180)) { it / 20 }
+                        if (reduceMotion) {
+                            reducedExit()
+                        } else {
+                            fadeOut(animationSpec = tween(180)) +
+                                slideOutHorizontally(animationSpec = tween(180)) { it / 20 }
+                        }
                     },
                 ) {
                     composable(Routes.WELCOME) {
                         WelcomeScreen(onStart = {
                             app.settings.setWelcomed()
-                            navController.navigate(Routes.HOME) {
-                                popUpTo(Routes.WELCOME) { inclusive = true }
+                            if (navController.previousBackStackEntry != null) {
+                                // 从设置里重新查看：看完回到设置页
+                                navController.popBackStack()
+                            } else {
+                                // 首次安装：进入此刻页，引导不留在返回栈里
+                                navController.navigate(Routes.HOME) {
+                                    popUpTo(Routes.WELCOME) { inclusive = true }
+                                }
                             }
                         })
                     }
@@ -167,7 +196,7 @@ fun FlashApp(darkTheme: Boolean, uiStyle: UiStyle) {
                         )
                     }
                     composable(Routes.PROFILE) {
-                        SettingsScreen()
+                        SettingsScreen(onReplayOnboarding = { navController.navigate(Routes.WELCOME) })
                     }
                     composable(Routes.EMOTION) {
                         EmotionScreen(onBack = { navController.popBackStack() })

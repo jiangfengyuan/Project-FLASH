@@ -13,7 +13,7 @@ import FlashCore
 /// 保存无效时说明原因：正文为空禁用保存；超出契约上限禁用保存并显示计数。
 public struct LogEditSheet: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
 
     public let log: LogItem
     /// 标题（新建场景传「新建记录」/「新建灵感」，默认保持编辑语义）

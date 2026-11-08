@@ -74,4 +74,47 @@ struct SettingsStoreTests {
         suite.set(Data("not json".utf8), forKey: "quickCaptureHotkey")
         #expect(SettingsStore(defaults: suite).quickCaptureHotkey == .defaultQuickCapture)
     }
+
+    // MARK: - 辅助功能 / 新手引导
+
+    @Test func accessibilityPreferencesDefault() {
+        let (name, suite) = makeSuite()
+        defer { suite.removePersistentDomain(forName: name) }
+        let store = SettingsStore(defaults: suite)
+        #expect(!store.reduceMotion)
+        #expect(store.textSize == .system)
+        #expect(store.hapticsEnabled)
+    }
+
+    @Test func accessibilityPreferencesPersist() {
+        let (name, suite) = makeSuite()
+        defer { suite.removePersistentDomain(forName: name) }
+        let store = SettingsStore(defaults: suite)
+        store.setReduceMotion(true)
+        store.setTextSize(.extraLarge)
+        store.setHapticsEnabled(false)
+        let reloaded = SettingsStore(defaults: suite)
+        #expect(reloaded.reduceMotion)
+        #expect(reloaded.textSize == .extraLarge)
+        #expect(!reloaded.hapticsEnabled)
+    }
+
+    @Test func invalidTextSizeFallsBackToSystem() {
+        let (name, suite) = makeSuite()
+        defer { suite.removePersistentDomain(forName: name) }
+        suite.set("huge", forKey: "textSize")
+        #expect(SettingsStore(defaults: suite).textSize == .system)
+    }
+
+    @Test func resetWelcomedOnlyClearsTheOnboardingFlag() {
+        let (name, suite) = makeSuite()
+        defer { suite.removePersistentDomain(forName: name) }
+        let store = SettingsStore(defaults: suite)
+        store.setThemeMode(.dark)
+        store.setWelcomed()
+        store.resetWelcomed()
+        let reloaded = SettingsStore(defaults: suite)
+        #expect(!reloaded.welcomed)
+        #expect(reloaded.themeMode == .dark)
+    }
 }

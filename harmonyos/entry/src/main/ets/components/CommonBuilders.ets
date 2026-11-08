@@ -116,6 +116,7 @@ export function FilterChip(theme: ThemeState, label: string, selected: boolean, 
     .height(TOUCH_MIN)
     .backgroundColor(selected ? CHIP_SELECTED : theme.themeControl)
     .borderRadius(TOUCH_MIN / 2)
+    .accessibilityText(label + (selected ? '，已选中' : ''))
     .stateStyles({
       normal: { .opacity(1) },
       pressed: { .opacity(0.7) }
@@ -140,6 +141,8 @@ export function SegmentedControl(theme: ThemeState, options: string[], selectedI
       .justifyContent(FlexAlign.Center)
       .backgroundColor(index === selectedIndex ? theme.themeSurface : Color.Transparent)
       .borderRadius(18)
+      .accessibilityGroup(true)
+      .accessibilityText(option + (index === selectedIndex ? '，已选中' : ''))
       .stateStyles({
         normal: { .opacity(1) },
         pressed: { .opacity(0.7) }
@@ -240,6 +243,7 @@ export function FabButton(navigation: NavigationState, onToggle: () => void) {
 
 @Builder
 export function FabOption(theme: ThemeState, label: string, icon: Resource, color: string, action: () => void) {
+  // 整行（文字标签 + 圆形图标）是一个按钮：点文字也能触发，读屏只聚焦一次并朗读「新建…」
   Row({ space: 8 }) {
     Text(label).fontSize(TYPE_SECONDARY).fontColor(theme.themeText).padding({ left: 12, right: 12, top: 7, bottom: 7 })
       .backgroundColor(floatingSurface(theme)).borderRadius(18)
@@ -257,8 +261,10 @@ export function FabOption(theme: ThemeState, label: string, icon: Resource, colo
       pressed: { .scale({ x: 0.92, y: 0.92 }) }
     })
     .animation({ duration: motionDuration(MOTION_PRESS), curve: Curve.EaseOut })
-    .onClick(action)
   }
+  .accessibilityGroup(true)
+  .accessibilityText(`新建${label}`)
+  .onClick(action)
 }
 
 @Builder

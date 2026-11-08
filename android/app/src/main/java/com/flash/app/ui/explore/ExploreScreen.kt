@@ -71,6 +71,7 @@ import com.flash.app.ui.components.FlashFormSection
 import com.flash.app.ui.components.RecordCard
 import com.flash.app.ui.theme.FlashTokens
 import java.time.LocalDate
+import com.flash.app.ui.theme.LocalReduceMotion
 
 private val IMPORTANCE_OPTIONS = listOf(0 to "全部", 2 to "!!", 3 to "!!!", 4 to "!!!!")
 
@@ -82,6 +83,8 @@ fun ExploreScreen(
     onOpenRecord: (String) -> Unit,
 ) {
     val app = LocalContext.current.applicationContext as FlashApplication
+    // 减少动态效果：列表增删、筛选切换不做位移动画
+    val reduceMotion = LocalReduceMotion.current
     val viewModel: ExploreViewModel = viewModel(factory = ExploreViewModel.factory(app.repository))
     val logs by viewModel.logs.collectAsStateWithLifecycle()
     val filter by viewModel.filter.collectAsStateWithLifecycle()
@@ -318,8 +321,7 @@ fun ExploreScreen(
                     if (filter == ExploreFilter.UNSORTED) {
                         val selected = log.id in selection
                         Box(
-                            Modifier
-                                .animateItem()
+                            (if (reduceMotion) Modifier.animateItem(placementSpec = null) else Modifier.animateItem())
                                 .border(
                                     width = if (selected) 2.dp else 0.dp,
                                     color = if (selected) {
@@ -330,6 +332,9 @@ fun ExploreScreen(
                                     shape = RoundedCornerShape(FlashTokens.Radius.Card),
                                 )
                                 .combinedClickable(
+                                    // 读屏动作名：单击与长按各自的结果
+                                    onClickLabel = if (selection.isNotEmpty()) "切换选择" else "打开记录",
+                                    onLongClickLabel = "选择以批量整理",
                                     onClick = {
                                         if (selection.isNotEmpty()) {
                                             viewModel.toggleSelect(log.id)
@@ -348,7 +353,11 @@ fun ExploreScreen(
                     } else {
                         RecordCard(
                             log = log,
-                            modifier = Modifier.animateItem(),
+                            modifier = if (reduceMotion) {
+                                Modifier.animateItem(placementSpec = null)
+                            } else {
+                                Modifier.animateItem()
+                            },
                             onClick = { onOpenRecord(log.id) },
                             onEdit = { onOpenRecord(log.id) },
                             showIdeaReminder = log.id in unviewedIdeaIds,

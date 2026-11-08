@@ -11,7 +11,7 @@ import FlashCore
 /// 系统分享 / 局域网收发 / 标准与恢复导入为普通行按钮（均带 hover 反馈）。
 /// 各动作通过闭包抛回 SettingsView（导出/导入状态机、LAN 控制器均由其持有）。
 public struct DataSafetySection: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
 
     /// 导入/导出进行中（期间禁用整组并显示进度行）
     public let isBusy: Bool

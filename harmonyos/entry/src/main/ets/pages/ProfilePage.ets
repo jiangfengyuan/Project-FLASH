@@ -38,6 +38,7 @@ export struct ProfilePage {
           Row({ space: 16 }) {
             Column({ space: 16 }) {
               this.appearanceGroup()
+              this.accessibilityPrefsGroup()
               this.recordsGroup()
               this.platformGroup()
               this.aboutGroup()
@@ -50,6 +51,7 @@ export struct ProfilePage {
           }.alignItems(VerticalAlign.Top).width('100%')
         } else {
           this.appearanceGroup()
+          this.accessibilityPrefsGroup()
           this.recordsGroup()
           this.platformGroup()
           this.backupGroup()
@@ -72,17 +74,6 @@ export struct ProfilePage {
       }.width('100%').height(32)
       SegmentedControl(this.theme, ['浅色', '深色', '跟随系统'], this.themeModeIndex(),
         (index: number) => requireActions(this.actions).setThemeMode(['light', 'dark', 'system'][index]))
-      Row({ space: 12 }) {
-        SymbolGlyph($r('sys.symbol.bolt')).fontSize(20).fontColor([iconSemantic(this.theme, 'appearance')]).width(ICON_COLUMN)
-        Column({ space: 2 }) {
-          Text('减少动态效果').fontSize(TYPE_BODY).fontColor(this.theme.themeText).width('100%')
-          Text('系统无公开查询接口，此为应用内设置').fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%')
-        }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-        Toggle({ type: ToggleType.Switch, isOn: this.settings.reduceMotion })
-          .onChange((value: boolean) => {
-            requireActions(this.actions).controller.setReduceMotion(value);
-          })
-      }.width('100%')
       if (this.settings.notificationSettingsSupported) {
         Row({ space: 12 }) {
           SymbolGlyph($r('sys.symbol.bell')).fontSize(20).fontColor([iconSemantic(this.theme, 'appearance')]).width(ICON_COLUMN)
@@ -99,6 +90,37 @@ export struct ProfilePage {
           .animation({ duration: motionDuration(MOTION_PRESS), curve: Curve.EaseOut })
           .onClick(() => requireActions(this.actions).controller.openNotificationSettings())
       }
+    }
+  }
+
+  // 辅助功能：减少动态效果（应用内设置，系统无公开查询接口）、文字大小说明、重新查看新手引导
+  @Builder
+  private accessibilityPrefsGroup() {
+    this.groupLabel('辅助功能')
+    FlashCard({ theme: this.theme, space: 2 }) {
+      Row({ space: 12 }) {
+        SymbolGlyph($r('sys.symbol.bolt')).fontSize(20).fontColor([iconSemantic(this.theme, 'appearance')]).width(ICON_COLUMN)
+        Column({ space: 2 }) {
+          Text('减少动态效果').fontSize(TYPE_BODY).fontColor(this.theme.themeText).width('100%')
+          Text('关闭页面切换、弹出与按压缩放动画').fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%')
+        }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+        Toggle({ type: ToggleType.Switch, isOn: this.settings.reduceMotion })
+          .accessibilityText('减少动态效果')
+          .onChange((value: boolean) => {
+            requireActions(this.actions).controller.setReduceMotion(value);
+          })
+      }.width('100%').constraintSize({ minHeight: 64 })
+      Row({ space: 12 }) {
+        SymbolGlyph($r('sys.symbol.doc_text')).fontSize(20).fontColor([iconSemantic(this.theme, 'appearance')]).width(ICON_COLUMN)
+        Column({ space: 2 }) {
+          Text('文字大小').fontSize(TYPE_BODY).fontColor(this.theme.themeText).width('100%')
+          Text('跟随系统的字体大小设置').fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%')
+        }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+      }.width('100%').constraintSize({ minHeight: 64 })
+        .accessibilityGroup(true)
+        .accessibilityText('文字大小，跟随系统的字体大小设置')
+      this.navRow($r('sys.symbol.lightbulb'), brandText(this.theme), '重新查看新手引导', '介绍与偏好设置，不影响已有记录',
+        () => requireActions(this.actions).controller.replayWelcome())
     }
   }
 

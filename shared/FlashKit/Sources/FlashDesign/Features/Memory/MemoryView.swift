@@ -23,7 +23,7 @@ public struct MemoryView: View {
     @State private var baseDate = Date()
     /// 映射/聚合缓存：仅在数据写代际、周偏移或基准日变化时重算
     @State private var aggregateCache = ViewComputeCache<MemoryKey, WeeklyMemory.Report>()
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
     @Environment(\.flashUsesSystemNavigationTitle) private var usesSystemNavigationTitle
 
     public init() {}

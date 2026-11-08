@@ -13,7 +13,7 @@ import FlashCore
 /// 区块结构：情绪选择卡片 → 本周趋势 → 近期记录，入场按 50ms 级联错开。
 public struct EmotionView: View {
     @Environment(\.flashRepository) private var repository
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
 
     @State private var sliderValue: Double = 5 // 1...7 → veryUnhappy...slightlyHappy 默认
     @State private var selectedSubEmotion: SubEmotion? = nil
@@ -205,6 +205,7 @@ public struct EmotionView: View {
                 }
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(isOn ? [.isSelected] : [])
     }
 
     // MARK: - 入场 / 保存
@@ -257,7 +258,7 @@ public struct EmotionView: View {
 /// 本周情绪区块（PRD §20.3 THIS WEEK / Mood Trend）：近 7 天 emoji 条 +
 /// 趋势折线 + 一句话总结。逐日单元格以 50ms 级联入场（Motion.staggerDelay）。
 private struct EmotionWeekView: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
     @Query(sort: \EmotionEntity.createdAt, order: .reverse) private var emotionEntities: [EmotionEntity]
 
     /// 卡片内容级联入场标记（onAppear 后置 true）
@@ -361,7 +362,7 @@ private struct EmotionWeekView: View {
 /// 近期情绪记录：自带 @Query（按创建时间倒序、限 20 条），与父视图滑杆/输入状态隔离
 private struct EmotionHistoryView: View {
     @Environment(\.flashRepository) private var repository
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
     @Query private var emotionEntities: [EmotionEntity]
 
     @State private var deletingRecord: EmotionRecord? = nil

@@ -18,7 +18,7 @@ import FlashDesign
 struct ExploreView: View {
     @Environment(\.flashRepository) private var repository
     @Environment(AppState.self) private var appState
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
 
     @State private var filter: ExploreFilter = .all
     @State private var searchText = ""

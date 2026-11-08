@@ -21,7 +21,7 @@ public struct LogFlowView: View {
     @State private var editingLog: LogItem? = nil
     @State private var deletingLog: LogItem? = nil
     @State private var errorMessage: String? = nil
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
 
     /// 缓存键：数据写代际 + 过滤条件（含搜索词/标签/日期/排序）
     private struct FilteredKey: Equatable {

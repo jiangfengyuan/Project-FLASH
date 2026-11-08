@@ -21,7 +21,7 @@ public struct CalendarView: View {
     @State private var message: String?
     /// 月份切换方向：+1 前进 / -1 后退 / 0 无方向（回到本月），驱动方向性过渡
     @State private var monthDirection = 0
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
     @Environment(\.flashRepository) private var repository
     @Environment(FocusRouter.self) private var focusRouter
 

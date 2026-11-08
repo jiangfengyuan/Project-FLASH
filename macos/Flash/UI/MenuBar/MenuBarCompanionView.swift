@@ -17,7 +17,7 @@ struct MenuBarCompanionView: View {
     @Environment(\.flashRepository) private var repository
     @Environment(AppState.self) private var appState
     @Environment(\.openWindow) private var openWindow
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
 
     @State private var draft = ""
     /// 成功/失败反馈文案；非 nil 时在标题行右侧显示
@@ -213,7 +213,7 @@ struct MenuBarCompanionView: View {
 /// 今日概览（只读）：今日记录数 + 最新一条情绪。
 /// 自带 @Query，与输入框的 draft 状态隔离，每敲一键不触发全量查询重建。
 private struct TodaySummary: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
     @Query private var todayLogs: [LogEntity]
     @Query private var todayEmotions: [EmotionEntity]
 

@@ -14,7 +14,7 @@ import FlashDesign
 /// Motion.quick；选中图标极轻 bounce。所有动效尊重 Reduce Motion。
 struct Sidebar: View {
     @Environment(AppState.self) private var appState
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
     @Namespace private var selectionNamespace
 
     var body: some View {

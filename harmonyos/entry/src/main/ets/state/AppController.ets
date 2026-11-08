@@ -3,6 +3,7 @@ import { preferences } from '@kit.ArkData';
 import { dayString } from '../data/DateUtils';
 import { TaskItem } from '../models/Models';
 import { AppSession, DeleteKind, normalizeThemeMode, setReduceMotionEnabled } from '../state/FeatureStates';
+import { closeOnboarding, openOnboarding } from '../state/Onboarding';
 import { BackupService } from '../data/BackupService';
 import { FlashStore } from '../data/FlashStore';
 import { TaskReminderScheduler } from '../data/TaskReminderScheduler';
@@ -65,7 +66,7 @@ export class AppController {
       this.session.theme.themeMode = themeMode;
       themeLoaded(themeMode);
       await this.loadReduceMotion(context);
-      this.session.settings.showWelcome = !store.welcomed;
+      if (!store.welcomed) openOnboarding(this.session.settings, false);
       this.session.backup.recoveryAvailable = store.hasRecoveryData;
       this.unsubscribe = store.changes.subscribe((partition: StorePartition) => {
         this.projection.update(partition, { logs: store.logs, emotions: store.emotions, tasks: store.tasks });
@@ -207,13 +208,20 @@ export class AppController {
     }
   }
 
+  // 引导结束（跳过或开始使用）：首次安装写入完成标记；从设置重新查看时标记早已写入，只关闭界面。
   async finishWelcome(): Promise<void> {
+    const replay = this.session.settings.welcomeReplay;
     try {
-      await FlashStore.instance.setWelcomed();
-      this.session.settings.showWelcome = false;
+      if (!replay) await FlashStore.instance.setWelcomed();
+      closeOnboarding(this.session.settings);
     } catch (error) {
       this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
     }
+  }
+
+  // 设置 › 辅助功能「重新查看新手引导」：不改动任何记录数据或偏好。
+  replayWelcome(): void {
+    openOnboarding(this.session.settings, true);
   }
 
   cancelDestructiveAction(): void {

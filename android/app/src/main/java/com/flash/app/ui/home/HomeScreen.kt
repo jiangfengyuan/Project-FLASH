@@ -76,6 +76,7 @@ import com.flash.app.ui.theme.ModuleColors
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import com.flash.app.ui.theme.LocalReduceMotion
 
 private val DATE_SUBTITLE_FORMAT: DateTimeFormatter =
     DateTimeFormatter.ofPattern("EEEE，M 月 d 日", Locale.CHINESE)
@@ -87,6 +88,8 @@ fun HomeScreen(
     onOpenRecord: (String) -> Unit,
 ) {
     val app = LocalContext.current.applicationContext as FlashApplication
+    // 减少动态效果：最近闪念列表增删不做位移动画
+    val reduceMotion = LocalReduceMotion.current
     val viewModel: HomeViewModel = viewModel(factory = HomeViewModel.factory(app.repository))
     val ui by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
@@ -275,7 +278,11 @@ fun HomeScreen(
             items(items = ui.recentLogs, key = { it.id }) { log ->
                 RecordCard(
                     log = log,
-                    modifier = Modifier.animateItem(),
+                    modifier = if (reduceMotion) {
+                        Modifier.animateItem(placementSpec = null)
+                    } else {
+                        Modifier.animateItem()
+                    },
                     onClick = { onOpenRecord(log.id) },
                     onEdit = { onOpenRecord(log.id) },
                     onDelete = { deletingId = log.id },

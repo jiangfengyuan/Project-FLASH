@@ -9,7 +9,7 @@ import FlashCore
 
 /// 「关于 Flash」分组：版本号 + 无云端账号说明
 public struct AboutSection: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
 
     /// 形如 "Flash Aero v1.0 (1)" 的版本串，由 SettingsView 从 Bundle 读取
     public let version: String

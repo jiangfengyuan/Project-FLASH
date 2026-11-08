@@ -161,6 +161,7 @@ export struct CalendarPage {
           pressed: { .scale({ x: 0.9, y: 0.9 }) }
         })
         .animation({ duration: motionDuration(MOTION_PRESS), curve: Curve.EaseOut })
+        .accessibilityText(item.completedAt ? `${item.title}，已完成，点按标记为未完成` : `${item.title}，未完成，点按标记为完成`)
         .onClick(() => requireActions(this.actions).calendarController.toggleTask(item))
       Column({ space: 3 }) {
         Text(item.title).fontSize(TYPE_BODY).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)

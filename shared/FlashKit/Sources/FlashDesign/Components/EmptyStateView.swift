@@ -11,7 +11,7 @@ import FlashCore
 /// 入场用 Motion.appear（淡入 + 微上移），尊重系统「减少动态效果」。
 /// 文案约定（品牌标准 §06）：说「今天还没有记录」，不说「数据为空」。
 public struct EmptyStateView: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
 
     public let systemImage: String
     public let title: String

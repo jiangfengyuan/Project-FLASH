@@ -19,7 +19,7 @@ public struct HomeTodayOverviewCard: View {
     /// 情绪状态文字（如「平静」；无记录时传「还没有记录」）
     public let emotionTitle: String
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
 
     public init(recordCount: Int, openTaskCount: Int, emotionEmoji: String, emotionTitle: String) {
         self.recordCount = recordCount

@@ -19,6 +19,7 @@ import { RecordDetailDialog } from '../components/RecordDetailDialog';
 import { TaskEditorDialog } from '../components/TaskEditorDialog';
 import { DestructiveConfirmDialog } from '../components/DestructiveConfirmDialog';
 import { WelcomeOverlay } from '../components/WelcomeOverlay';
+import { onboardingBack } from '../state/Onboarding';
 import {
   FabButton, FabOption, FlashDockBar, DetailHeader, LoadingState, ErrorState, FAB_SIZE, BRAND, brandText,
   scrimColor, toastSurface, toastLevelColor, fabOptionColor, motionDuration,
@@ -105,6 +106,10 @@ struct Index {
   // stack, so the system back gesture must be routed manually: back closes
   // the detail page first, and only exits the app from the home page.
   onBackPress(): boolean {
+    // 新手引导覆盖全屏：返回键先在引导内回退（见 state/Onboarding.onboardingBack）
+    if (this.settings.showWelcome) {
+      return onboardingBack(this.settings);
+    }
     if (this.logs.editingLogId !== '') {
       this.actions?.logsController.requestCloseEdit();
       return true;
@@ -494,7 +499,7 @@ struct Index {
       }
 
       if (this.settings.showWelcome) {
-        WelcomeOverlay({ theme: this.theme, actions: this.actions })
+        WelcomeOverlay({ theme: this.theme, settings: this.settings, navigation: this.navigation, actions: this.actions })
           .transition(overlayTransition())
       }
     }

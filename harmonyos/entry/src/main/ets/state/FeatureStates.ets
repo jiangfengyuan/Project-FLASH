@@ -183,6 +183,10 @@ export class BackupState {
 @Observed
 export class SettingsState {
   showWelcome: boolean = false;
+  // 新手引导当前步（0 起）；放在共享状态里，系统返回键可回到上一步。
+  welcomeStep: number = 0;
+  // 从「设置 › 辅助功能」重新查看：第一步按返回直接关闭引导（首次安装时则交给系统）。
+  welcomeReplay: boolean = false;
   nearLinkSupported: boolean = false;
   floatingBallSupported: boolean = false;
   liveViewEnabled: boolean = false;

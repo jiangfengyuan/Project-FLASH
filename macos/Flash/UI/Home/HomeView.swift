@@ -16,7 +16,7 @@ import FlashDesign
 /// ⌘N 聚焦快速记录输入框（⌘K 全局搜索为 RootView 层浮层）；情绪/任务经「+ 新建」直达。
 struct HomeView: View {
     @Environment(\.flashRepository) private var repository
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
     @Environment(AppState.self) private var appState
     @Query(sort: \LogEntity.createdAt, order: .reverse) private var logEntities: [LogEntity]
     @Query(sort: \EmotionEntity.createdAt, order: .reverse) private var emotionEntities: [EmotionEntity]

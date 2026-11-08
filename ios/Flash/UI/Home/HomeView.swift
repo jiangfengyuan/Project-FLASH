@@ -14,7 +14,7 @@ import FlashDesign
 /// 写路径统一经 FlashRepository（保存规则走共享 QuickCaptureCommit）。
 struct HomeView: View {
     @Environment(\.flashRepository) private var repository
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
     @Environment(AppState.self) private var appState
     @Environment(IdeaReminderCenter.self) private var ideaReminders
     @Environment(FocusRouter.self) private var focusRouter

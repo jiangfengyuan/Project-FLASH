@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.flash.app.data.ThemeMode
 import com.flash.app.ui.navigation.FlashApp
+import com.flash.app.ui.theme.FlashAccessibility
 import com.flash.app.ui.theme.FlashTheme
 
 class MainActivity : ComponentActivity() {
@@ -36,6 +37,8 @@ private fun FlashRoot() {
     val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as FlashApplication
     val themeMode by app.settings.themeMode.collectAsStateWithLifecycle()
     val uiStyle by app.settings.uiStyle.collectAsStateWithLifecycle()
+    val reduceMotion by app.settings.reduceMotion.collectAsStateWithLifecycle()
+    val textScale by app.settings.textScale.collectAsStateWithLifecycle()
 
     val systemDark = isSystemInDarkTheme()
     val darkTheme = when (themeMode) {
@@ -67,7 +70,10 @@ private fun FlashRoot() {
         )
     }
 
-    FlashTheme(darkTheme = darkTheme, uiStyle = uiStyle) {
-        FlashApp(darkTheme = darkTheme, uiStyle = uiStyle)
+    // 辅助功能偏好（减少动态效果 / 文字大小）包在最外层：主题过渡与所有页面都遵守
+    FlashAccessibility(appReduceMotion = reduceMotion, textScale = textScale) {
+        FlashTheme(darkTheme = darkTheme, uiStyle = uiStyle) {
+            FlashApp(darkTheme = darkTheme, uiStyle = uiStyle)
+        }
     }
 }

@@ -76,7 +76,10 @@ struct RootView: View {
                 .flashZoomTransition(sourceID: "quickCapture", in: captureNamespace)
         }
         .fullScreenCover(isPresented: welcomePresented) {
-            WelcomeScreen { settings.setWelcomed() }
+            // 首次安装 / 设置里重新查看：四步新手引导（共享 FlashDesign.OnboardingView）
+            OnboardingView { settings.setWelcomed() }
+                // 引导内有偏好步骤：不允许下滑误关（跳过 / 开始使用都会写入完成标记）
+                .interactiveDismissDisabled()
         }
         .alert("数据存储异常", isPresented: databaseFallbackAlertPresented) {
             Button("我知道了") { appState.databaseFallbackMessage = nil }

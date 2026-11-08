@@ -17,7 +17,7 @@ import FlashDesign
 struct GlobalSearchOverlay: View {
     @Environment(\.flashRepository) private var repository
     @Environment(AppState.self) private var appState
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
 
     let close: () -> Void
 

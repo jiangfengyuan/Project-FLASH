@@ -86,6 +86,7 @@ export struct EmotionPage {
             .width('100%')
             .blockSize({ width: SLIDER_THUMB, height: SLIDER_THUMB })
             .blockColor(brandText(this.theme)).selectedColor(brandText(this.theme)).trackColor(this.theme.themeControl)
+            .accessibilityText(`情绪等级：${emotionName(this.emotion.emotionLevel)}`)
             .onChange((value: number) => this.emotion.emotionLevel = Math.round(value))
           // 刻度：两端图标各放进滑块直径宽的格子并居中，图标中心 = 最左 / 最右档位滑块中心；
           // 中间图标居中 = 0 档位
@@ -249,6 +250,7 @@ export struct EmotionPage {
       .fontColor(this.emotion.selectedSubEmotion === value ? Color.White : this.theme.themeText)
       .textAlign(TextAlign.Center).layoutWeight(1).height(44)
       .backgroundColor(this.emotion.selectedSubEmotion === value ? BRAND : this.theme.themeControl).borderRadius(22)
+      .accessibilityText(subEmotionName(value) + (this.emotion.selectedSubEmotion === value ? '，已选中' : ''))
       .stateStyles({
         normal: { .opacity(1) },
         pressed: { .opacity(0.7) }

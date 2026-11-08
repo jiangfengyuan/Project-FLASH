@@ -35,6 +35,21 @@ enum class UiStyle(val storageKey: String, val displayName: String) {
     }
 }
 
+/**
+ * 应用内文字大小（辅助功能）：在系统字体缩放之上再乘一个系数。
+ * 「跟随系统」不干预；系统已设大字时两者相乘，仍以更大的为准。
+ */
+enum class TextScale(val storageKey: String, val displayName: String, val factor: Float) {
+    SYSTEM("system", "跟随系统", 1f),
+    LARGE("large", "较大", 1.15f),
+    EXTRA_LARGE("extraLarge", "特大", 1.3f);
+
+    companion object {
+        fun fromStorage(key: String?): TextScale =
+            entries.firstOrNull { it.storageKey == key } ?: SYSTEM
+    }
+}
+
 /** 应用设置，SharedPreferences 持久化。对应 Web 版 themeStore。 */
 class SettingsStore(context: Context) {
 
@@ -54,6 +69,16 @@ class SettingsStore(context: Context) {
     private val _welcomed = MutableStateFlow(prefs.getBoolean(KEY_WELCOMED, false))
     val welcomed: StateFlow<Boolean> = _welcomed.asStateFlow()
 
+    /** 辅助功能：应用内「减少动态效果」，与系统「移除动画」取或 */
+    private val _reduceMotion = MutableStateFlow(prefs.getBoolean(KEY_REDUCE_MOTION, false))
+    val reduceMotion: StateFlow<Boolean> = _reduceMotion.asStateFlow()
+
+    /** 辅助功能：应用内文字大小 */
+    private val _textScale = MutableStateFlow(
+        TextScale.fromStorage(prefs.getString(KEY_TEXT_SCALE, null))
+    )
+    val textScale: StateFlow<TextScale> = _textScale.asStateFlow()
+
     fun setThemeMode(mode: ThemeMode) {
         _themeMode.value = mode
         prefs.edit { putString(KEY_THEME_MODE, mode.storageKey) }
@@ -64,15 +89,27 @@ class SettingsStore(context: Context) {
         prefs.edit { putString(KEY_UI_STYLE, style.storageKey) }
     }
 
-    /** Welcome 页完成后调用 */
+    /** 新手引导完成（或跳过）后调用 */
     fun setWelcomed() {
         _welcomed.value = true
         prefs.edit { putBoolean(KEY_WELCOMED, true) }
+    }
+
+    fun setReduceMotion(enabled: Boolean) {
+        _reduceMotion.value = enabled
+        prefs.edit { putBoolean(KEY_REDUCE_MOTION, enabled) }
+    }
+
+    fun setTextScale(scale: TextScale) {
+        _textScale.value = scale
+        prefs.edit { putString(KEY_TEXT_SCALE, scale.storageKey) }
     }
 
     private companion object {
         const val KEY_THEME_MODE = "themeMode"
         const val KEY_UI_STYLE = "uiStyle"
         const val KEY_WELCOMED = "welcomed"
+        const val KEY_REDUCE_MOTION = "reduceMotion"
+        const val KEY_TEXT_SCALE = "textScale"
     }
 }

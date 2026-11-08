@@ -83,12 +83,20 @@ import com.flash.app.ui.components.FlashSegmentedControl
 import com.flash.app.ui.theme.FlashTokens
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import androidx.compose.material.icons.outlined.Animation
+import androidx.compose.material.icons.outlined.FormatSize
+import androidx.compose.material.icons.outlined.School
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material3.Switch
+import com.flash.app.data.TextScale
 
 /** 设置/我的 页：本地存储提示 + 外观 / 数据与安全 / 危险操作 / 关于。作为「我的」Tab 时 onBack 传 null */
 @Composable
-fun SettingsScreen(onBack: (() -> Unit)? = null) {
+fun SettingsScreen(onBack: (() -> Unit)? = null, onReplayOnboarding: () -> Unit = {}) {
     val context = LocalContext.current
     val app = context.applicationContext as FlashApplication
+    val reduceMotion by app.settings.reduceMotion.collectAsStateWithLifecycle()
+    val textScale by app.settings.textScale.collectAsStateWithLifecycle()
     val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.factory(app))
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
     val uiStyle by viewModel.uiStyle.collectAsStateWithLifecycle()
@@ -246,6 +254,41 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = FlashTokens.Spacing.XS),
+                )
+            }
+
+            SettingsGroup(
+                title = "辅助功能",
+                footnote = "也会遵循系统的「移除动画」与字体大小设置",
+            ) {
+                SettingsSwitchRow(
+                    icon = Icons.Outlined.Animation,
+                    iconTint = MaterialTheme.colorScheme.primary,
+                    title = "减少动态效果",
+                    subtitle = "关闭页面滑动、缩放与展开动画",
+                    checked = reduceMotion,
+                    onCheckedChange = app.settings::setReduceMotion,
+                )
+                RowDivider()
+                SettingsRow(
+                    icon = Icons.Outlined.FormatSize,
+                    iconTint = MaterialTheme.colorScheme.primary,
+                    title = "文字大小",
+                    value = textScale.displayName,
+                    showChevron = false,
+                )
+                FlashSegmentedControl(
+                    options = TextScale.entries.map { it to it.displayName },
+                    selected = textScale,
+                    onSelect = app.settings::setTextScale,
+                )
+                RowDivider()
+                SettingsRow(
+                    icon = Icons.Outlined.School,
+                    iconTint = MaterialTheme.colorScheme.primary,
+                    title = "重新查看新手引导",
+                    subtitle = "介绍与偏好设置，不影响已有记录",
+                    onClick = onReplayOnboarding,
                 )
             }
 
@@ -587,6 +630,41 @@ private fun SettingsRow(
                 modifier = Modifier.size(18.dp),
             )
         }
+    }
+}
+
+/** 开关行：整行可切换（Role.Switch），读屏朗读标题、说明与开关状态；布局与 [SettingsRow] 同列 */
+@Composable
+private fun SettingsSwitchRow(
+    icon: ImageVector,
+    iconTint: Color,
+    title: String,
+    subtitle: String?,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = FlashTokens.Touch.IconButtonMin)
+            .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange)
+            .padding(vertical = FlashTokens.Spacing.XS),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(22.dp))
+        Spacer(Modifier.width(FlashTokens.Spacing.SM))
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge)
+            if (subtitle != null) {
+                Text(
+                    subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        Spacer(Modifier.width(FlashTokens.Spacing.SM))
+        Switch(checked = checked, onCheckedChange = null)
     }
 }
 

@@ -16,8 +16,10 @@ import FlashDesign
 /// 故不设「记录与提醒」组、不加动态效果/字体设置项，仅暴露已有功能入口。
 struct SettingsView: View {
     @Environment(\.flashRepository) private var repository
+    /// 辅助功能分组的「重新查看新手引导」
+    @EnvironmentObject private var settings: SettingsStore
     @Environment(AppState.self) private var appState
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
 
     @State private var recoveryImport = false
     @State private var importPreview: ImportPreview? = nil
@@ -59,6 +61,9 @@ struct SettingsView: View {
                 AppearanceSection(appeared: appearanceAppeared)
 
                 QuickCaptureSection(appeared: appearanceAppeared)
+
+                // 辅助功能：重新查看引导只清除引导标记，主窗口随之切回引导页
+                AccessibilitySection(appeared: appearanceAppeared) { settings.resetWelcomed() }
 
                 DataSafetySection(isBusy: isBusy, appeared: dataAppeared,
                                   onShare: transferBackup,

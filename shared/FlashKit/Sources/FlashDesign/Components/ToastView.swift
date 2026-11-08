@@ -17,7 +17,7 @@ import FlashCore
 public struct ToastView: View {
     public let message: String
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
 
     public init(message: String) {
         self.message = message
