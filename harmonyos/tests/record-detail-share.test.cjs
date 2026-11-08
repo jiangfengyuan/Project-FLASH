@@ -141,7 +141,7 @@ test('backup file share writes the JSON atomically and shares a file record', as
   try {
     const json = BackupService.exportJSON([log()], [], []);
     await shareBackupFile({ cacheDir }, json, 'flash-aero-backup-2026-10-05.json');
-    const target = path.join(cacheDir, 'flash-aero-backup-2026-10-05.json');
+    const target = path.join(cacheDir, 'shared-backups', 'flash-aero-backup-2026-10-05.json');
     assert.equal(fs.readFileSync(target, 'utf8'), json, 'shared file holds the exact export');
     assert.ok(!fs.existsSync(`${target}.tmp`), 'temp file is renamed away');
     assert.equal(spy.calls.records[0].utd, 'general.file');
@@ -169,9 +169,10 @@ test('BackupController.shareBackupExport end-to-end via the faked ShareKit', asy
     await controller.shareBackupExport();
     assert.ok(r.messages.includes('已调起系统分享'));
     assert.equal(spy.calls.shows.length, 1);
-    const files = fs.readdirSync(cacheDir).filter(name => name.endsWith('.json'));
+    const shareDir = path.join(cacheDir, 'shared-backups');
+    const files = fs.readdirSync(shareDir).filter(name => name.endsWith('.json'));
     assert.equal(files.length, 1);
-    assert.equal(JSON.parse(fs.readFileSync(path.join(cacheDir, files[0]), 'utf8')).version, 'flash-backup-v2');
+    assert.equal(JSON.parse(fs.readFileSync(path.join(shareDir, files[0]), 'utf8')).version, 'flash-backup-v2');
   } finally {
     delete globalThis.canIUse;
   }
@@ -187,4 +188,41 @@ test('BackupController.shareBackupExport refuses before the store is ready', asy
   await controller.shareBackupExport();
   assert.ok(r.messages.some(m => m.includes('尚未加载完成')));
   assert.equal(spy.calls.shows.length, 0);
+});
+
+test('backup share copies live in shared-backups and expire after 24 hours', async () => {
+  const spy = shareKitSpy();
+  const load = createLoader({ '@kit.ShareKit': spy.fake });
+  const { shareBackupFile, cleanupExpiredShareCopies, SHARE_DIRECTORY, SHARE_MAX_AGE_MILLIS } = load('data/ShareService');
+  const cacheDir = fs.mkdtempSync(path.join(os.tmpdir(), 'flash-share-'));
+  const shareDir = path.join(cacheDir, SHARE_DIRECTORY);
+  const old = (Date.now() - SHARE_MAX_AGE_MILLIS - 60_000) / 1000;
+  // Legacy copy written at the cacheDir root by older builds, a stale temp file, and an unrelated cache file.
+  const legacy = path.join(cacheDir, 'flash-aero-backup-2026-01-01.json');
+  const unrelated = path.join(cacheDir, 'other.json');
+  fs.writeFileSync(legacy, '{}');
+  fs.writeFileSync(unrelated, '{}');
+  fs.utimesSync(legacy, old, old);
+  fs.utimesSync(unrelated, old, old);
+  fs.mkdirSync(shareDir);
+  const staleTemp = path.join(shareDir, 'flash-aero-backup-2026-01-02.json.tmp');
+  const fresh = path.join(shareDir, 'flash-aero-backup-2026-01-03.json');
+  fs.writeFileSync(staleTemp, '{}');
+  fs.utimesSync(staleTemp, old, old);
+  fs.writeFileSync(fresh, '{}');
+  globalThis.canIUse = () => true;
+  try {
+    await shareBackupFile({ cacheDir }, '{"x":1}', 'flash-aero-backup-2026-10-05.json');
+    assert.ok(fs.existsSync(path.join(shareDir, 'flash-aero-backup-2026-10-05.json')), 'new copy goes into shared-backups/');
+    assert.ok(!fs.existsSync(legacy), 'expired legacy root copy is removed');
+    assert.ok(!fs.existsSync(staleTemp), 'expired temp copy is removed');
+    assert.ok(fs.existsSync(fresh), 'copies younger than 24 hours are kept');
+    assert.ok(fs.existsSync(unrelated), 'unrelated cache files are untouched');
+
+    await cleanupExpiredShareCopies(cacheDir, Date.now() + SHARE_MAX_AGE_MILLIS + 60_000);
+    assert.deepEqual(fs.readdirSync(shareDir), [], 'launch cleanup expires every aged copy');
+    await cleanupExpiredShareCopies(path.join(cacheDir, 'missing'));
+  } finally {
+    delete globalThis.canIUse;
+  }
 });

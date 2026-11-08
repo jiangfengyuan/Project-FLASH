@@ -30,6 +30,8 @@ enum CaptureCategory: String, AppEnum {
 struct CaptureFlashIntent: AppIntent {
     static let title: LocalizedStringResource = "记一闪"
     static let description = IntentDescription("把刚闪过的念头直接记到 Flash，无需打开应用。")
+    /// 锁屏状态下须先解锁：拿到手机的人不能经 Siri / 操作按钮往日志里写内容
+    static let authenticationPolicy: IntentAuthenticationPolicy = .requiresAuthentication
 
     @Parameter(title: "内容", requestValueDialog: "现在想记录什么？")
     var text: String

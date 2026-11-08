@@ -15,6 +15,11 @@ import { Category, colorTagName, LogItem } from '../models/Models';
 const SYSTEM_SHARE_SYSCAP = 'SystemCapability.Collaboration.SystemShare';
 const TEXT_UTD = 'general.plain-text';
 const FILE_UTD = 'general.file';
+/** 分享用的明文备份副本放在 cacheDir 下的独立子目录（对齐 Android `shared-backups/`）。 */
+export const SHARE_DIRECTORY = 'shared-backups';
+const SHARE_FILE_PREFIX = 'flash-aero-backup-';
+/** 一次性分享副本 24 小时后删除（对齐 Android / Apple 的 BackupTransfer）。 */
+export const SHARE_MAX_AGE_MILLIS = 24 * 60 * 60 * 1000;
 
 export function systemShareSupported(): boolean {
   try {
@@ -51,7 +56,10 @@ export async function shareLog(context: common.UIAbilityContext, item: LogItem):
  * macOS 系统分享的导出路径）。临时文件 + rename 保证不分享写了一半的文件。 */
 export async function shareBackupFile(context: common.UIAbilityContext, json: string, fileName: string): Promise<void> {
   if (!systemShareSupported()) throw new Error(tr('当前设备不支持系统分享'));
-  const path = `${context.cacheDir}/${fileName}`;
+  const directory = `${context.cacheDir}/${SHARE_DIRECTORY}`;
+  if (!(await fileIo.access(directory))) await fileIo.mkdir(directory);
+  await cleanupExpiredShareCopies(context.cacheDir);
+  const path = `${directory}/${fileName}`;
   const temp = `${path}.tmp`;
   try { await fileIo.unlink(temp); } catch (_) {}
   const file = await fileIo.open(temp, fileIo.OpenMode.READ_WRITE | fileIo.OpenMode.CREATE | fileIo.OpenMode.TRUNC);
@@ -78,4 +86,41 @@ export async function shareBackupFile(context: common.UIAbilityContext, json: st
     selectionMode: systemShare.SelectionMode.SINGLE,
     previewMode: systemShare.SharePreviewMode.DEFAULT
   });
+}
+
+/**
+ * 删除过期的明文分享副本：`shared-backups/` 内及旧版本直接写在 cacheDir 根下的
+ * `flash-aero-backup-*.json(.tmp)`。分享时与应用启动时各调用一次，尽力而为：
+ * 清理失败不影响分享或启动。
+ */
+export async function cleanupExpiredShareCopies(cacheDir: string, now: number = Date.now()): Promise<void> {
+  if (!cacheDir) return;
+  for (const directory of [`${cacheDir}/${SHARE_DIRECTORY}`, cacheDir]) {
+    let names: string[] = [];
+    try {
+      if (!(await fileIo.access(directory))) continue;
+      names = await fileIo.listFile(directory);
+    } catch (_) {
+      continue;
+    }
+    for (const name of names) {
+      if (!name.startsWith(SHARE_FILE_PREFIX) || !(name.endsWith('.json') || name.endsWith('.json.tmp'))) continue;
+      const path = `${directory}/${name}`;
+      try {
+        const file = await fileIo.open(path, fileIo.OpenMode.READ_ONLY);
+        let expired = false;
+        try {
+          // Stat.mtime 文档为秒，部分 API 级别返回毫秒：按量级归一（同 FlashStore 隔离区清理）
+          const mtime = (await fileIo.stat(file.fd)).mtime;
+          const mtimeMillis = mtime > 1e12 ? mtime : mtime * 1000;
+          expired = Number.isFinite(mtimeMillis) && (now - mtimeMillis) > SHARE_MAX_AGE_MILLIS;
+        } finally {
+          await fileIo.close(file);
+        }
+        if (expired) await fileIo.unlink(path);
+      } catch (_) {
+        console.error('Flash share copy cleanup failed');
+      }
+    }
+  }
 }

@@ -164,3 +164,18 @@ test('rebuild still works when the platform lacks channel APIs entirely', async 
   assert.equal(published[0].slotType, undefined, 'no channel field is sent on legacy platforms');
   assert.equal(published[0].notificationId, 1);
 });
+
+test('task reminders never carry the task notes into the notification', async () => {
+  const { published, kits } = reminderKits(notificationKit().kit['@kit.NotificationKit']);
+  const load = createLoader({ 'data/TaskReminderScheduler': null, ...kits });
+  const { TaskReminderScheduler } = load('data/TaskReminderScheduler');
+  const task = { id: 't-3', title: '体检', notes: '私密备注：复查结果', colorTag: 'daily', importance: 1,
+    createdAt: '2026-09-05T00:00:00.000Z', updatedAt: '2026-09-05T00:00:00.000Z',
+    reminderAt: '2027-01-01T00:00:00.000Z' };
+
+  await TaskReminderScheduler.rebuild({}, [task], false);
+  assert.equal(published.length, 1);
+  assert.equal(published[0].title, '体检');
+  assert.equal(published[0].content, '任务即将到期');
+  assert.ok(!JSON.stringify(published[0]).includes('私密备注'), 'notes stay inside the encrypted store');
+});

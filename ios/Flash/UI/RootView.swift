@@ -86,8 +86,14 @@ struct RootView: View {
         .onChange(of: settings.ideaReminderEnabled) { refreshIdeaReminders() }
         .onChange(of: settings.ideaReminderFrequency) { refreshIdeaReminders() }
         // 分享扩展只投递到 App Group 收件箱（不碰主库）：启动与每次回到前台时收入
-        .onChange(of: scenePhase, initial: true) { _, phase in
+        .onChange(of: scenePhase, initial: true) { previous, phase in
             if phase == .active { drainCaptureInbox() }
+            // 多任务快照不留正文；只在离开前台时遮挡，启动时的 inactive 不闪一下遮罩
+            if phase == .active {
+                PrivacyShield.shared.update(isActive: true)
+            } else if previous == .active || phase == .background {
+                PrivacyShield.shared.update(isActive: false)
+            }
         }
         .flashToast($inboxToast)
         .sheet(isPresented: $appState.isSearchPresented) {

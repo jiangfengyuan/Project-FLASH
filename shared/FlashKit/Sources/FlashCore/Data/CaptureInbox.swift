@@ -40,7 +40,7 @@ public enum CaptureInboxError: Error, Equatable {
 
 /// 分享收件箱：App Group 容器下 `capture-inbox/`，一条内容一个 `<id>.json`。
 ///
-/// SwiftData 主库不在 App Group 内（迁移属独立项目），扩展不能打开它，只往这里投递；
+/// SwiftData 主库固定在 App 私有目录（见 `FlashStoreLocation`），扩展不能打开它，只往这里投递；
 /// 主 App 启动与回到前台时经 `CaptureInboxImporter` 收入并删除文件。
 /// - 一条一个文件：扩展与 App 永不追加写同一文件，无需跨进程锁；
 /// - iOS 以 `.completeFileProtection` 写入（锁定即不可读），目录与文件标记不纳入备份，

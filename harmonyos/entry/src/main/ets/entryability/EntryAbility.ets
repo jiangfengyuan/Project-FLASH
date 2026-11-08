@@ -5,6 +5,7 @@ import { FlashStore } from '../data/FlashStore';
 import { systemEnvironment } from '../state/FeatureStates';
 import { i18n } from '@kit.LocalizationKit';
 import { AppEntry, namedEntry, parseDeepLink, sharedEntry } from '../data/AppEntry';
+import { cleanupExpiredShareCopies } from '../data/ShareService';
 import { resourceManager } from '@kit.LocalizationKit';
 import { installI18n, StringSource } from '../data/I18n';
 import { setFontScale } from '../components/DesignTokens';
@@ -43,6 +44,8 @@ export default class EntryAbility extends UIAbility {
     FlashStore.instance.initialize(this.context).catch((error: Error) => {
       hilog.error(DOMAIN, 'FlashAero', 'Failed to initialize store: %{public}s', error.message);
     });
+    // 被放弃的明文分享副本到期删除（与 Android / Apple 启动时清理同口径）
+    cleanupExpiredShareCopies(this.context.cacheDir).catch(() => {});
   }
 
   onNewWant(want: Want): void {

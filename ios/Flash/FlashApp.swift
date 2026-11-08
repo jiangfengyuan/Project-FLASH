@@ -74,8 +74,9 @@ struct FlashApp: App {
                     #if DEBUG
                     DebugSeeder.seedIfRequested(repository: assembly.repository)
                     #endif
-                    // 启动对账：按当前日志表重建系统索引（关闭或内存降级时不动）
-                    spotlight.rebuild()
+                    // 启动对账：开启时按当前日志表重建；关闭时清空（含旧版本默认开启时写入的条目）；
+                    // 内存降级时不动
+                    spotlight.settingChanged(enabled: settings.spotlightIndexingEnabled)
                     do {
                         // 小组件快照 + 按任务表重建提醒；内存降级时整体跳过（F-07）
                         try await LaunchMaintenance.run(repository: assembly.repository)

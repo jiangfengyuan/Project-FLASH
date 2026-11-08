@@ -7,6 +7,7 @@
 package com.flash.app
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -27,6 +28,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // 最近任务里不显示界面快照（日志、情绪、任务正文）；不同于 FLAG_SECURE，不拦截用户截屏。
+        // Android 13 以下没有不禁截屏的等价开关，保持系统默认。
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) setRecentsScreenshotEnabled(false)
         // 配置变更重建时不重复消费同一个 Intent
         if (savedInstanceState == null) deliver(intent)
         setContent {

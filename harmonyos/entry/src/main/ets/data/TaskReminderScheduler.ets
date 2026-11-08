@@ -83,7 +83,8 @@ export class TaskReminderScheduler {
           hour: reminderDate.getHours(), minute: reminderDate.getMinutes(), second: reminderDate.getSeconds()
         },
         title: task.title.slice(0, 200),
-        content: task.notes?.slice(0, 500) || tr('任务即将到期'),
+        // 备注不进通知：提醒由系统服务保存在加密库之外，且可能出现在锁屏（对齐 Android / Apple 只显示标题）
+        content: tr('任务即将到期'),
         expiredContent: task.title.slice(0, 200),
         notificationId: storedId(task.id) ?? allocate(task.id),
         groupId: TASK_GROUP,

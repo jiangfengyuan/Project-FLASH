@@ -75,9 +75,11 @@ struct SettingsStoreTests {
         #expect(SettingsStore(defaults: suite).quickCaptureHotkey == .defaultQuickCapture)
     }
 
-    @Test func spotlightIndexingDefaultsOnAndPersists() {
+    @Test func spotlightIndexingDefaultsOffAndPersists() {
         let (name, suite) = makeSuite()
         defer { suite.removePersistentDomain(forName: name) }
+        #expect(!SettingsStore(defaults: suite).spotlightIndexingEnabled, "private text stays out of system search until opted in")
+        SettingsStore(defaults: suite).setSpotlightIndexingEnabled(true)
         #expect(SettingsStore(defaults: suite).spotlightIndexingEnabled)
         SettingsStore(defaults: suite).setSpotlightIndexingEnabled(false)
         #expect(!SettingsStore(defaults: suite).spotlightIndexingEnabled)

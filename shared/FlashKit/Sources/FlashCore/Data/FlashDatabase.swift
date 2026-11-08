@@ -26,11 +26,20 @@ public enum FlashDatabase: Sendable {
         makeContainerWithFallback(inMemory: inMemory).container
     }
 
-    /// - Parameter storeURL: 仅供测试指向临时文件以模拟库打不开；生产调用不传，沿用默认存储位置
+    /// - Parameter storeURL: 仅供测试指向临时文件以模拟库打不开；生产调用不传，使用 `FlashStoreLocation.resolve()`
     public static func makeContainerWithFallback(inMemory: Bool = false, storeURL: URL? = nil) -> ContainerResult {
         let schema = Schema(versionedSchema: FlashSchemaV2.self)
-        let config = storeURL.map { ModelConfiguration(schema: schema, url: $0) }
-            ?? ModelConfiguration(schema: schema, isStoredInMemoryOnly: inMemory)
+        // 显式路径 + 关闭 CloudKit：SwiftData 默认 `groupContainer: .automatic` 会在声明 App Group 时
+        // 把主库放进组容器（分享扩展、小组件可读），`cloudKitDatabase: .automatic` 会在日后加入 iCloud
+        // 权限时自动同步。两者都不应由权限声明隐式决定。
+        let config: ModelConfiguration
+        if inMemory && storeURL == nil {
+            config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true,
+                                        groupContainer: .none, cloudKitDatabase: .none)
+        } else {
+            config = ModelConfiguration(schema: schema, url: storeURL ?? FlashStoreLocation.resolve(),
+                                        cloudKitDatabase: .none)
+        }
         do {
             return ContainerResult(container: try ModelContainer(for: schema,
                                                                  migrationPlan: FlashMigrationPlan.self,

@@ -44,7 +44,8 @@ function nodeFileIo() {
       fs.readSync(fd, Buffer.from(buffer), 0, options?.length ?? buffer.byteLength, 0),
     stat: async fd => statShape(fs.fstatSync(fd)),
     close: async file => fs.closeSync(typeof file === 'object' ? file.fd : file),
-    rename: async (from, to) => fs.renameSync(from, to)
+    rename: async (from, to) => fs.renameSync(from, to),
+    listFile: async p => fs.readdirSync(p)
   };
 }
 

@@ -39,7 +39,8 @@ public final class SettingsStore: ObservableObject {
         self.ideaReminderEnabled = defaults.object(forKey: Keys.ideaReminderEnabled) as? Bool ?? true
         self.ideaReminderFrequency = defaults.string(forKey: Keys.ideaReminderFrequency)
             .flatMap(IdeaReminder.Frequency.init(rawValue:)) ?? .daily
-        self.spotlightIndexingEnabled = defaults.object(forKey: Keys.spotlightIndexingEnabled) as? Bool ?? true
+        // 系统搜索索引：默认关闭（私人日志正文默认不进系统索引，由用户在设置中开启）
+        self.spotlightIndexingEnabled = defaults.object(forKey: Keys.spotlightIndexingEnabled) as? Bool ?? false
         let stored = defaults.string(forKey: Keys.themeMode)
         self.themeMode = stored.flatMap(ThemeMode.init(rawValue:)) ?? .system
         self.welcomed = defaults.bool(forKey: Keys.welcomed)
