@@ -60,6 +60,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.foundation.layout.offset
 import com.flash.app.FlashApplication
 import com.flash.app.data.model.Category
 import com.flash.app.data.model.ColorTag
@@ -261,14 +262,20 @@ fun ExploreScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.weight(1f),
                     )
-                    IconButton(onClick = viewModel::toggleSort) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.Sort,
-                            contentDescription = "切换排序",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                    // 末尾按钮组外移 TextButton 内建留白：「管理」右缘落在页边距线上（与搜索框、卡片右缘对齐）
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.offset(x = FlashTokens.Touch.TextButtonInset),
+                    ) {
+                        IconButton(onClick = viewModel::toggleSort) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.Sort,
+                                contentDescription = "切换排序",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        TextButton(onClick = onOpenLogFlow) { Text("管理") }
                     }
-                    TextButton(onClick = onOpenLogFlow) { Text("管理") }
                 }
             }
 
@@ -283,9 +290,12 @@ fun ExploreScreen(
                             style = MaterialTheme.typography.labelLarge,
                             modifier = Modifier.weight(1f),
                         )
-                        TextButton(onClick = { batchDialog = BatchDialog.CATEGORY }) { Text("分类") }
-                        TextButton(onClick = { batchDialog = BatchDialog.TAG }) { Text("标签") }
-                        TextButton(onClick = viewModel::clearSelection) { Text("完成") }
+                        // 同排序行：末尾按钮组外移内建留白，「完成」右缘落在页边距线上
+                        Row(modifier = Modifier.offset(x = FlashTokens.Touch.TextButtonInset)) {
+                            TextButton(onClick = { batchDialog = BatchDialog.CATEGORY }) { Text("分类") }
+                            TextButton(onClick = { batchDialog = BatchDialog.TAG }) { Text("标签") }
+                            TextButton(onClick = viewModel::clearSelection) { Text("完成") }
+                        }
                     }
                 }
             }
@@ -358,8 +368,9 @@ fun ExploreScreen(
             ),
         ) {
             Column(
+                // 与下方列表同一页边距：面板滑出时筛选 Chip 左缘 = 记录卡左缘
                 modifier = Modifier.padding(
-                    horizontal = FlashTokens.Spacing.LG,
+                    horizontal = FlashTokens.Spacing.PageHorizontal,
                     vertical = FlashTokens.Spacing.MD,
                 ),
                 verticalArrangement = Arrangement.spacedBy(FlashTokens.Spacing.MD),

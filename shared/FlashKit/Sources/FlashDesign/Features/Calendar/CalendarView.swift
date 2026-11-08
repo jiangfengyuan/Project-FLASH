@@ -51,31 +51,10 @@ public struct CalendarView: View {
             }
         }
         VStack(spacing: 0) {
-            // 头部
-            HStack {
-                Button { shiftMonth(-1) } label: { Image(systemName: "chevron.left") }
-                    .accessibilityLabel("上一月")
-                    .help("上一月")
-                Text(monthTitle)
-                    .font(Typography.cardTitle)
-                    .frame(minWidth: 140) // 月份标题最小宽度，切换月份不抖动（几何值）
-                Button { shiftMonth(1) } label: { Image(systemName: "chevron.right") }
-                    .accessibilityLabel("下一月")
-                    .help("下一月")
-                Spacer()
-                Button {
-                    editingTask = nil
-                    showingTaskEditor = true
-                } label: {
-                    Label("新建任务", systemImage: "plus")
-                }
-                Button("回到今天") {
-                    let today = Date()
-                    let order = Self.gregorian.compare(today, to: displayedMonth, toGranularity: .month)
-                    monthDirection = order == .orderedAscending ? -1 : (order == .orderedDescending ? 1 : 0)
-                    displayedMonth = today
-                    selectedDate = today
-                }
+            // 头部：一行放不下（iPhone 竖屏 / 大字号）时「新建任务」退为仅图标，月份标题与按钮不被挤压截断
+            ViewThatFits(in: .horizontal) {
+                header(compactNewTask: false)
+                header(compactNewTask: true)
             }
             .padding(.horizontal, Metrics.pageGutter)
             .padding(.vertical, 10) // 头部纵向内距：紧凑特调值（无对应令牌）
@@ -149,6 +128,51 @@ public struct CalendarView: View {
             Button("好") { message = nil }
         } message: {
             Text(message ?? "")
+        }
+    }
+
+    private func header(compactNewTask: Bool) -> some View {
+        HStack {
+            Button { shiftMonth(-1) } label: { Image(systemName: "chevron.left") }
+                .accessibilityLabel("上一月")
+                .help("上一月")
+            Text(monthTitle)
+                .font(Typography.cardTitle)
+                .frame(minWidth: 140) // 月份标题最小宽度，切换月份不抖动（几何值）
+            Button { shiftMonth(1) } label: { Image(systemName: "chevron.right") }
+                .accessibilityLabel("下一月")
+                .help("下一月")
+            Spacer(minLength: Spacing.xs)
+            Button {
+                editingTask = nil
+                showingTaskEditor = true
+            } label: {
+                Label("新建任务", systemImage: "plus")
+                    .labelStyle(NewTaskLabelStyle(iconOnly: compactNewTask))
+            }
+            .help("新建任务")
+            Button("回到今天") {
+                let today = Date()
+                let order = Self.gregorian.compare(today, to: displayedMonth, toGranularity: .month)
+                monthDirection = order == .orderedAscending ? -1 : (order == .orderedDescending ? 1 : 0)
+                displayedMonth = today
+                selectedDate = today
+            }
+        }
+        .fixedSize(horizontal: false, vertical: true)
+    }
+
+    /// 「新建任务」标签：宽时图文、窄时仅图标（读屏仍读标题）
+    private struct NewTaskLabelStyle: LabelStyle {
+        let iconOnly: Bool
+
+        func makeBody(configuration: Configuration) -> some View {
+            if iconOnly {
+                configuration.icon
+                    .accessibilityLabel(Text("新建任务"))
+            } else {
+                Label(configuration)
+            }
         }
     }
 

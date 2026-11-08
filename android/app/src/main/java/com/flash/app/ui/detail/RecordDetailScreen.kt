@@ -309,8 +309,12 @@ private fun CircularIconButton(
 private fun RecordViewer(record: LogItem) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = FlashTokens.Spacing.PageHorizontal, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        // 与编辑态（RecordEditor）同一内容边距与行距：查看 ↔ 编辑切换时内容不上下跳动
+        contentPadding = PaddingValues(
+            horizontal = FlashTokens.Spacing.PageHorizontal,
+            vertical = FlashTokens.Spacing.SM,
+        ),
+        verticalArrangement = Arrangement.spacedBy(FlashTokens.Spacing.MD),
     ) {
         item {
             Row(
@@ -382,7 +386,7 @@ private fun RecordEditor(
         verticalArrangement = Arrangement.spacedBy(FlashTokens.Spacing.MD),
     ) {
         item {
-            FlashFormSection(title = "内容") {
+            FlashFormSection(title = "内容", titleInset = FlashTokens.Spacing.CardInset) {
                 StyleCard(modifier = Modifier.fillMaxWidth()) {
                     OutlinedTextField(
                         value = content,
@@ -419,7 +423,7 @@ private fun RecordEditor(
             }
         }
         item {
-            FlashFormSection(title = "属性") {
+            FlashFormSection(title = "属性", titleInset = FlashTokens.Spacing.CardInset) {
                 StyleCard(modifier = Modifier.fillMaxWidth()) {
                     Text("标签", style = MaterialTheme.typography.labelLarge)
                     FlashFilterChipRow(

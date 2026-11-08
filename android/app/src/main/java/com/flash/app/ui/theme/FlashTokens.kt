@@ -65,6 +65,13 @@ object FlashTokens {
     object Touch {
         val IconButtonMin = 44.dp
         val FabMain = 56.dp
+
+        /**
+         * Material TextButton / IconButton 的内建横向留白（文字内距 12、48 命中框里 24 图标两侧各 12）。
+         * 贴页边距的首个 / 末个按钮向外偏移这么多，文字或图标框即落在页边距线上，命中区不变。
+         */
+        val TextButtonInset = 12.dp
+        val IconButtonInset = 12.dp
     }
 
     /** 图形尺寸 */

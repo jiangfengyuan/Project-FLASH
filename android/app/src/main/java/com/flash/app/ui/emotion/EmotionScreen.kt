@@ -26,11 +26,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
@@ -63,6 +65,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -284,6 +287,12 @@ private fun SubEmotionSelector(
     }
 }
 
+/** emoji 选择器每档的固定宽度：容纳最长档名「非常不开心」；各档等宽，选中切换时邻居不再左右挪动 */
+private val EmojiSlotWidth = 72.dp
+
+/** 选中档 emoji 放大倍数（34sp / 28sp）：用绘制缩放而非改字号，行高不随选中跳动 */
+private const val EmojiSelectedScale = 34f / 28f
+
 /** 七档 emoji 选择器（😍😊🙂😐😔😣😡，对应 level 3→-3） */
 @Composable
 private fun EmojiSelector(selected: EmotionLevel, onSelect: (EmotionLevel) -> Unit) {
@@ -298,7 +307,8 @@ private fun EmojiSelector(selected: EmotionLevel, onSelect: (EmotionLevel) -> Un
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .clip(CircleShape)
+                    .widthIn(min = EmojiSlotWidth)
+                    .clip(RoundedCornerShape(FlashTokens.Radius.Card))
                     .background(
                         if (isSelected) {
                             MaterialTheme.colorScheme.primaryContainer
@@ -309,7 +319,15 @@ private fun EmojiSelector(selected: EmotionLevel, onSelect: (EmotionLevel) -> Un
                     .clickable { onSelect(level) }
                     .padding(horizontal = 8.dp, vertical = 6.dp),
             ) {
-                Text(level.emoji, fontSize = if (isSelected) 34.sp else 28.sp)
+                Text(
+                    level.emoji,
+                    fontSize = 28.sp,
+                    modifier = Modifier.graphicsLayer {
+                        val scale = if (isSelected) EmojiSelectedScale else 1f
+                        scaleX = scale
+                        scaleY = scale
+                    },
+                )
                 Text(
                     level.displayName,
                     style = MaterialTheme.typography.labelSmall,

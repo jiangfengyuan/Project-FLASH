@@ -195,7 +195,8 @@ export struct StatsPage {
     Column({ space: 12 }) {
       Column({ space: 12 }) {
         PageHeader(this.theme, '回顾', '看见记录背后的节奏与情绪')
-        Row({ space: 12 }) {
+        // 胶囊间距与下方时间范围胶囊行一致（8），两行胶囊起点对齐
+        Row({ space: 8 }) {
           FilterChip(this.theme, '趋势', !this.showCalendar, () => this.showCalendar = false)
           FilterChip(this.theme, '日历', this.showCalendar, () => this.showCalendar = true)
         }.width('100%')

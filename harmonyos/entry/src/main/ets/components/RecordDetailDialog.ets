@@ -11,7 +11,7 @@ import { PageActions, requireActions } from '../state/PageActions';
 import {
   BRAND, FormGroup, FormRow, RADIUS_CARD, brandText, cardShadowColor, colorTagLabelColor, dangerText,
   floatingSurface, hairlineColor, importanceText, scrimColor, supportsBlurMaterial,
-  DIALOG_WIDTH_FORM, DIALOG_WIDTH_PERCENT, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION, TYPE_GROUP
+  DIALOG_WIDTH_FORM, DIALOG_WIDTH_PERCENT, DIALOG_INSET, CARD_INSET, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION, TYPE_GROUP
 } from './CommonBuilders';
 
 /** 记录详情弹层：完整内容、元数据与操作（编辑/删除/分享）。
@@ -64,7 +64,7 @@ export struct RecordDetailDialog {
           }
         }
         .width('100%')
-        .padding(22)
+        .padding(DIALOG_INSET)
       }
       .width(this.navigation.isMediumWindow ? DIALOG_WIDTH_FORM : DIALOG_WIDTH_PERCENT)
       .constraintSize({ maxHeight: '90%' })
@@ -78,23 +78,27 @@ export struct RecordDetailDialog {
 
   @Builder
   private headerRow() {
-    Row() {
-      Button('关闭', { type: ButtonType.Normal })
-        .fontSize(TYPE_BODY).fontColor(this.theme.themeMuted).backgroundColor(Color.Transparent).height(44)
-        .onClick(() => this.close())
-      Blank()
+    // 标题居中：叠放在按钮行之上，左右按钮宽度不同或「分享」缺席时都不偏移；标题不接收触摸
+    Stack() {
+      Row() {
+        // 透明按钮去掉外侧内距：「关闭」「分享」文字与下方内容左右缘对齐
+        Button('关闭', { type: ButtonType.Normal })
+          .fontSize(TYPE_BODY).fontColor(this.theme.themeMuted).backgroundColor(Color.Transparent).height(44)
+          .padding({ left: 0, right: 12 })
+          .onClick(() => this.close())
+        Blank()
+        // 受限能力：设备不支持系统分享时不渲染入口（不留虚假按钮）。
+        if (this.settings.systemShareSupported && this.item()) {
+          Button('分享', { type: ButtonType.Normal })
+            .fontSize(TYPE_BODY).fontColor(brandText(this.theme)).backgroundColor(Color.Transparent).height(44)
+            .padding({ left: 12, right: 0 })
+            .accessibilityText('分享这条记录')
+            .onClick(() => this.share(this.item()!))
+        }
+      }.width('100%')
       Text(this.item()?.category === Category.IDEA ? '灵感详情' : '记录详情')
         .fontSize(TYPE_GROUP).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)
-      Blank()
-      // 受限能力：设备不支持系统分享时不渲染入口（不留虚假按钮，占位保持标题居中）。
-      if (this.settings.systemShareSupported && this.item()) {
-        Button('分享', { type: ButtonType.Normal })
-          .fontSize(TYPE_BODY).fontColor(brandText(this.theme)).backgroundColor(Color.Transparent).height(44)
-          .accessibilityText('分享这条记录')
-          .onClick(() => this.share(this.item()!))
-      } else {
-        Text(' ').width(56)
-      }
+        .maxLines(1).hitTestBehavior(HitTestMode.None)
     }.width('100%')
   }
 
@@ -115,7 +119,7 @@ export struct RecordDetailDialog {
         .copyOption(CopyOptions.LocalDevice)
     }
     .width('100%')
-    .padding(16)
+    .padding(CARD_INSET)
     .backgroundColor(this.theme.themeControl)
     .borderRadius(16)
 

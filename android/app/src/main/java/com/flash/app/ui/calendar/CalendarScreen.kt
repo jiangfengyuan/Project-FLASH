@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -126,7 +127,10 @@ fun CalendarScreen(
         contentWindowInsets = if (embedded) WindowInsets(0, 0, 0, 0) else ScaffoldDefaults.contentWindowInsets,
         topBar = {
             if (!embedded) TopAppBar(
-                title = { Text("日历") },
+                // 无返回图标时 TopAppBar 标题起点为 16dp：补齐到页边距，标题左缘 = 内容左缘
+                title = {
+                    Text("日历", modifier = Modifier.padding(start = FlashTokens.Spacing.PageHorizontal - 16.dp))
+                },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 actions = {
                     IconButton(onClick = {
@@ -152,17 +156,21 @@ fun CalendarScreen(
                 bottom = 8.dp + com.flash.app.ui.navigation.LocalPageBottomPadding.current),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            if (embedded) {
-                item(key = "new-task") {
-                    TextButton(onClick = { editingTask = null; editorOpen = true }) { Text("新建任务") }
-                }
+            item(key = "month-actions") {
+                MonthActions(
+                    onToday = viewModel::backToToday,
+                    onNewTask = if (embedded) {
+                        { editingTask = null; editorOpen = true }
+                    } else {
+                        null
+                    },
+                )
             }
             item(key = "month-header") {
                 MonthHeader(
                     month = uiState.month,
                     onPrev = viewModel::prevMonth,
                     onNext = viewModel::nextMonth,
-                    onToday = viewModel::backToToday,
                 )
             }
             item(key = "weekdays") {
@@ -244,15 +252,33 @@ fun CalendarScreen(
     }
 }
 
+/** 月份操作行：「今天」贴左页边距，「新建任务」（嵌入回顾页时）贴右页边距 */
+@Composable
+private fun MonthActions(onToday: () -> Unit, onNewTask: (() -> Unit)?) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        TextButton(onClick = onToday, modifier = Modifier.offset(x = -FlashTokens.Touch.TextButtonInset)) { Text("今天") }
+        Spacer(Modifier.weight(1f))
+        if (onNewTask != null) {
+            TextButton(onClick = onNewTask, modifier = Modifier.offset(x = FlashTokens.Touch.TextButtonInset)) { Text("新建任务") }
+        }
+    }
+}
+
+/**
+ * 月份标题行：‹ 标题 › 左右对称，标题正好居中在月网格上方；
+ * 两侧箭头按钮外移内建留白，箭头图标框与网格左右缘对齐。
+ */
 @Composable
 private fun MonthHeader(
     month: YearMonth,
     onPrev: () -> Unit,
     onNext: () -> Unit,
-    onToday: () -> Unit,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClick = onPrev) {
+        IconButton(onClick = onPrev, modifier = Modifier.offset(x = -FlashTokens.Touch.IconButtonInset)) {
             Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "上一月", tint = MaterialTheme.colorScheme.onSurface)
         }
         Text(
@@ -263,8 +289,7 @@ private fun MonthHeader(
             modifier = Modifier.weight(1f),
             textAlign = TextAlign.Center,
         )
-        TextButton(onClick = onToday) { Text("今天") }
-        IconButton(onClick = onNext) {
+        IconButton(onClick = onNext, modifier = Modifier.offset(x = FlashTokens.Touch.IconButtonInset)) {
             Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "下一月", tint = MaterialTheme.colorScheme.onSurface)
         }
     }

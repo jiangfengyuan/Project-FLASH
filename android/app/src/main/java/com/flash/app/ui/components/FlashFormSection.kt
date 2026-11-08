@@ -13,17 +13,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.flash.app.ui.theme.FlashTokens
 
 /**
  * 表单分区：小节标题 + 内容组，组内间距 12、标题与内容间距 8。
  * 用于设置项、编辑表单等成组排布的表单内容。
- * 内容组无卡片底、直接贴左缘排布，标题不缩进，与内容左缘对齐。
+ * 标题缩进 [titleInset]：内容直接贴左缘排布（筛选 Chip 等）时取 0，标题与内容左缘对齐；
+ * 内容包在卡片里时传 FlashTokens.Spacing.CardInset，标题与卡内文字左缘对齐（与设置页分组一致）。
  */
 @Composable
 fun FlashFormSection(
     title: String,
     modifier: Modifier = Modifier,
+    titleInset: Dp = 0.dp,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Column(
@@ -34,6 +39,7 @@ fun FlashFormSection(
             title,
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = titleInset),
         )
         Column(
             verticalArrangement = Arrangement.spacedBy(FlashTokens.Spacing.SM),

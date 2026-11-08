@@ -2,7 +2,7 @@ import { NavigationState, ThemeState, CalendarState } from '../state/FeatureStat
 import { PageActions, requireActions } from '../state/PageActions';
 import {
   BRAND, cardShadowColor, floatingSurface, hairlineColor, supportsBlurMaterial, scrimColor,
-  DIALOG_WIDTH_FORM, DIALOG_WIDTH_PERCENT, TYPE_SECTION, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION
+  DIALOG_WIDTH_FORM, DIALOG_WIDTH_PERCENT, DIALOG_INSET, RADIUS_CARD, TYPE_SECTION, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION
 } from './CommonBuilders';
 
 @Component
@@ -70,13 +70,13 @@ export struct TaskEditorDialog {
             Button('保存').layoutWeight(1).height(44).backgroundColor(BRAND)
               .enabled(this.calendar.taskTitle.trim().length > 0).onClick(() => requireActions(this.actions).calendarController.saveTaskEditor())
           }.width('100%')
-        }.width('100%').padding(22)
+        }.width('100%').padding(DIALOG_INSET)
       }
       .width(this.navigation.isMediumWindow ? DIALOG_WIDTH_FORM : DIALOG_WIDTH_PERCENT)
       .constraintSize({ maxHeight: '86%' })
       .backgroundColor(floatingSurface(this.theme))
       .backgroundBlurStyle(supportsBlurMaterial() ? BlurStyle.COMPONENT_ULTRA_THICK : BlurStyle.NONE)
-      .borderRadius(24)
+      .borderRadius(RADIUS_CARD)
       .border({ width: 0.5, color: hairlineColor(this.theme) })
       .shadow({ radius: 24, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 10 })
     }.width('100%').height('100%')

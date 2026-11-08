@@ -56,6 +56,8 @@ export const TYPE_HERO = 56;
 export const DIALOG_WIDTH = 460;
 export const DIALOG_WIDTH_FORM = 540;
 export const DIALOG_WIDTH_PERCENT = '88%';
+/** 浮层（对话框 / 欢迎卡）内容内距：所有浮层同一值，标题、表单分组与按钮行左右缘对齐 */
+export const DIALOG_INSET = 22;
 export const CONTENT_MAX_WIDE = 980;
 export const CONTENT_MAX_MEDIUM = 760;
 export const CONTENT_MAX_CENTERED = 560;

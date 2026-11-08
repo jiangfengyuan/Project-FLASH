@@ -72,6 +72,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.core.content.ContextCompat
+import androidx.compose.foundation.layout.offset
 import com.flash.app.BuildConfig
 import com.flash.app.FlashApplication
 import com.flash.app.data.ThemeMode
@@ -175,7 +176,10 @@ fun SettingsScreen(onBack: (() -> Unit)? = null) {
             verticalArrangement = Arrangement.spacedBy(FlashTokens.Spacing.LG),
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                // 有返回按钮时整行外移 IconButton 内建留白：返回箭头落在页边距线上（与下方卡片左缘对齐）
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .then(if (onBack != null) Modifier.offset(x = -FlashTokens.Touch.IconButtonInset) else Modifier),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 if (onBack != null) {

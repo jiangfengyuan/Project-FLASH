@@ -86,6 +86,11 @@ struct ExploreScreen: View {
                 .navigationTitle("筛选")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
+                    // 面板在 iOS 不再自带标题行：「清除」放进导航栏，与「完成」左右对称
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("清除") { clearFilters() }
+                            .disabled(!criteria.isActive)
+                    }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("完成") { showFilterSheet = false }
                     }
