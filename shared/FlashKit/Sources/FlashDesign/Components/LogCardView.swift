@@ -93,7 +93,8 @@ public struct LogCardView: View {
                 .foregroundStyle(.primary)
                 .textSelection(.enabled)
         }
-        .padding(14) // 卡片内边距：sm 与 md 之间的特调值
+        // 卡片内边距：与其它卡片同一令牌，卡内文字与上方分组标题、相邻卡片左缘对齐
+        .padding(Metrics.cardInset)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(BrandColors.cardSurface)
         .clipShape(RoundedRectangle(cornerRadius: Radius.row))

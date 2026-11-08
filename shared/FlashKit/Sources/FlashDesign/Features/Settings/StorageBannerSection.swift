@@ -23,6 +23,7 @@ public struct StorageBannerSection: View {
             } icon: {
                 Image(systemName: "internaldrive")
                     .foregroundStyle(BrandColors.brandPrimary)
+                    .flashIconColumn() // 与其它设置行同一图标列，标题左缘对齐
             }
         }
     }

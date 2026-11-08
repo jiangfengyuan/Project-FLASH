@@ -82,7 +82,9 @@ public struct LogFlowView: View {
                 }
                 .font(Typography.caption)
             }
-            .padding(Spacing.sm)
+            // 与下方列表同一页边距：筛选胶囊左缘 = 日志卡左缘
+            .padding(.horizontal, Metrics.pageGutter)
+            .padding(.vertical, Spacing.sm)
 
             Divider()
 
@@ -120,7 +122,8 @@ public struct LogFlowView: View {
                                 }
                         }
                     }
-                    .padding(Spacing.md)
+                    .padding(.horizontal, Metrics.pageGutter)
+                    .padding(.vertical, Spacing.md)
                     // 列表插入/删除/筛选切换统一 Motion.soft；行重排走默认 move
                     .animation(Motion.soft(reduceMotion), value: filtered)
                 }

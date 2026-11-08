@@ -56,7 +56,7 @@ struct ExploreView: View {
                     .font(Typography.caption)
                     .foregroundStyle(BrandColors.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, Spacing.md)
+                    .padding(.horizontal, Metrics.pageGutter)
                 batchBar
             }
             ExploreLogListView(filter: filter, query: appliedQuery, criteria: criteria,
@@ -142,7 +142,7 @@ struct ExploreView: View {
             .menuIndicator(.hidden)
             .help("新建记录 ⌘N")
         }
-        .padding(.horizontal, Spacing.md)
+        .padding(.horizontal, Metrics.pageGutter)
         .padding(.top, Spacing.md)
     }
 
@@ -185,7 +185,7 @@ struct ExploreView: View {
                 lineWidth: searchFocused ? 1.5 : 1
             )
         )
-        .padding(.horizontal, Spacing.md)
+        .padding(.horizontal, Metrics.pageGutter)
         .padding(.top, Spacing.sm)
         .animation(Motion.quick(reduceMotion), value: searchText.isEmpty)
     }
@@ -230,7 +230,7 @@ struct ExploreView: View {
                 .font(Typography.caption)
                 .foregroundStyle(BrandColors.textSecondary)
         }
-        .padding(.horizontal, Spacing.md)
+        .padding(.horizontal, Metrics.pageGutter)
         .padding(.vertical, Spacing.sm)
     }
 
@@ -263,7 +263,7 @@ struct ExploreView: View {
                 Spacer()
             }
         }
-        .padding(.horizontal, Spacing.md)
+        .padding(.horizontal, Metrics.pageGutter)
         .padding(.bottom, Spacing.xs)
     }
 

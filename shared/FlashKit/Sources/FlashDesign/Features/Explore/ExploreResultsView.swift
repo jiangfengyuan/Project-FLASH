@@ -77,8 +77,8 @@ public struct ExploreLogListView: View {
                 List {
                     ForEach(displayedLogs) { log in
                         row(log)
-                            .listRowInsets(EdgeInsets(top: Spacing.xxs, leading: Spacing.md,
-                                                      bottom: Spacing.xxs, trailing: Spacing.md))
+                            .listRowInsets(EdgeInsets(top: Spacing.xxs, leading: Metrics.pageGutter,
+                                                      bottom: Spacing.xxs, trailing: Metrics.pageGutter))
                             .listRowSeparator(.hidden)
                             .listRowBackground(Color.clear)
                     }
@@ -92,7 +92,7 @@ public struct ExploreLogListView: View {
                             row(log)
                         }
                     }
-                    .padding(.horizontal, Spacing.md)
+                    .padding(.horizontal, Metrics.pageGutter)
                     .padding(.vertical, Spacing.sm)
                 }
                 #endif

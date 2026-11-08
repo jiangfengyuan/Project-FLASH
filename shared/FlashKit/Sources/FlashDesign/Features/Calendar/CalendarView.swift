@@ -30,6 +30,9 @@ public struct CalendarView: View {
     /// 不能用 @Query 实体数组做键：PersistentModel 相等走身份，漏掉勾选完成等就地更新。
     @State private var aggregateCache = ViewComputeCache<Int, [String: DayAggregate]>()
 
+    /// 月网格行列间距（星期表头共用，保证表头与日期列中线对齐）
+    private static let gridSpacing: CGFloat = Spacing.xxs
+
     /// 共享公历实例，避免每次渲染格子都新建 Calendar
     private static let gregorian = Calendar(identifier: .gregorian)
 
@@ -74,11 +77,11 @@ public struct CalendarView: View {
                     selectedDate = today
                 }
             }
-            .padding(.horizontal, Spacing.md)
+            .padding(.horizontal, Metrics.pageGutter)
             .padding(.vertical, 10) // 头部纵向内距：紧凑特调值（无对应令牌）
 
-            // 星期表头
-            HStack {
+            // 星期表头：列间距与月网格 GridItem 间距一致，每个表头正好居中在对应日期列上方
+            HStack(spacing: Self.gridSpacing) {
                 ForEach(["一", "二", "三", "四", "五", "六", "日"], id: \.self) { day in
                     Text(day)
                         .font(Typography.caption)
@@ -86,17 +89,17 @@ public struct CalendarView: View {
                         .frame(maxWidth: .infinity)
                 }
             }
-            .padding(.horizontal, Spacing.md)
+            .padding(.horizontal, Metrics.pageGutter)
             .padding(.bottom, 6) // 表头与网格的紧凑间距
 
             // 月网格
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Spacing.xxs), count: 7),
-                      spacing: Spacing.xxs) {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Self.gridSpacing), count: 7),
+                      spacing: Self.gridSpacing) {
                 ForEach(weeks.flatMap { $0 }, id: \.self) { date in
                     dayCell(date, aggregates: aggregates)
                 }
             }
-            .padding(.horizontal, Spacing.md)
+            .padding(.horizontal, Metrics.pageGutter)
             .id(displayedMonth)
             .transition(monthTransition)
             .animation(reduceMotion ? Motion.reducedFade(true) : Motion.emphasize(false),
@@ -128,7 +131,8 @@ public struct CalendarView: View {
                         Text("这一天没有记录").foregroundStyle(.secondary)
                     }
                 }
-                .padding(Spacing.md)
+                .padding(.horizontal, Metrics.pageGutter)
+                .padding(.vertical, Spacing.md)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
@@ -247,7 +251,9 @@ public struct CalendarView: View {
                 .accessibilityLabel("删除任务")
                 .help("删除任务")
         }
-        .padding(10) // 行内边距：紧凑特调值（无对应令牌）
+        // 横向与日志卡同一内边距：同一详情列表里任务行与日志卡的文字左缘对齐
+        .padding(.horizontal, Metrics.cardInset)
+        .padding(.vertical, 10) // 行纵向内距：紧凑特调值（无对应令牌）
         .background(BrandColors.weakSurface, in: RoundedRectangle(cornerRadius: Radius.row))
         .overlay {
             RoundedRectangle(cornerRadius: Radius.row)

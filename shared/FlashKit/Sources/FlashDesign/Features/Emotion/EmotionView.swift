@@ -35,6 +35,10 @@ public struct EmotionView: View {
 
     public init() {}
 
+    /// 主卡片控件列宽：标题、滑杆、强度行、子情绪胶囊与输入行共用这一列（宽卡片里居中），
+    /// 各行左右边缘落在同一条线上
+    private let controlColumnWidth: CGFloat = 420 // 几何值
+
     /// 强度圆点：触屏命中框 44pt（Metrics.minTouchTarget），macOS 保持原 14pt 圆点 + 12pt 间距
     #if os(iOS)
     private let intensityHitSize: CGFloat = Metrics.minTouchTarget
@@ -60,7 +64,8 @@ public struct EmotionView: View {
                         .transition(.appear(reduceMotion: reduceMotion))
                 }
             }
-            .padding(Spacing.lg)
+            .padding(.horizontal, Metrics.pageGutter)
+            .padding(.vertical, Spacing.lg)
             .frame(maxWidth: Metrics.readingMaxWidth)
             .frame(maxWidth: .infinity)
         }
@@ -80,7 +85,7 @@ public struct EmotionView: View {
             VStack(spacing: 20) { // 20：hero 卡内部件的宽松节奏（md 与 lg 之间）
                 Text("现在感觉怎么样？")
                     .font(Typography.cardTitle)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(maxWidth: controlColumnWidth, alignment: .leading)
 
                 // 主视觉：emoji 随等级切换 .pop 过渡，名称色彩沿七级调色板连续插值
                 VStack(spacing: Spacing.sm) {
@@ -105,7 +110,7 @@ public struct EmotionView: View {
                 } maximumValueLabel: {
                     Text("😍")
                 }
-                .frame(maxWidth: 420) // 滑杆最大宽度（几何值）
+                .frame(maxWidth: controlColumnWidth)
                 // 每档切换一次轻触感（触屏）
                 .flashHaptic(.selection, trigger: sliderValue)
                 .flashHaptic(.success, trigger: savedCount)
@@ -144,7 +149,7 @@ public struct EmotionView: View {
                     }
                     .animation(Motion.quick(reduceMotion), value: intensity)
                 }
-                .frame(maxWidth: 420, alignment: .leading) // 与滑杆同宽（几何值）
+                .frame(maxWidth: controlColumnWidth, alignment: .leading)
 
                 // 子情绪（仅负面）
                 if selectedLevel.isNegative {
@@ -153,6 +158,7 @@ public struct EmotionView: View {
                             subEmotionChip(sub)
                         }
                     }
+                    .frame(maxWidth: controlColumnWidth, alignment: .leading)
                     .animation(Motion.quick(reduceMotion), value: selectedSubEmotion)
                     .transition(.pop(reduceMotion: reduceMotion))
                 }
@@ -164,7 +170,7 @@ public struct EmotionView: View {
                         .buttonStyle(.borderedProminent)
                         .controlSize(.large)
                 }
-                .frame(maxWidth: 420) // 输入行最大宽度（几何值）
+                .frame(maxWidth: controlColumnWidth)
             }
             .padding(Spacing.lg)
             .frame(maxWidth: .infinity)
@@ -286,7 +292,7 @@ private struct EmotionWeekView: View {
                                 value: contentAppeared
                             )
                     }
-                    .padding(Spacing.md)
+                    .padding(Metrics.cardInset)
                 }
             } else {
                 Text("本周还没有情绪记录，从上方开始吧")
@@ -440,7 +446,9 @@ private struct EmotionHistoryView: View {
             .accessibilityLabel(record.isFavorite == true ? "取消收藏" : "收藏")
             Text(record.recordDate).font(Typography.caption).foregroundStyle(.secondary)
         }
-        .padding(10) // 行内边距：紧凑特调值（无对应令牌）
+        // 横向与上方本周趋势卡同一内边距，emoji 列与卡内内容左缘对齐
+        .padding(.horizontal, Metrics.cardInset)
+        .padding(.vertical, 10) // 行纵向内距：紧凑特调值（无对应令牌）
         .background(BrandColors.cardSurface)
         .clipShape(RoundedRectangle(cornerRadius: Radius.field))
         .contextMenu {

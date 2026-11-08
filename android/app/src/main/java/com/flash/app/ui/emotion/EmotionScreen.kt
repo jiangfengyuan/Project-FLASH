@@ -75,6 +75,7 @@ import com.flash.app.data.model.SubEmotion
 import com.flash.app.data.model.emoji
 import com.flash.app.ui.components.StyleCard
 import com.flash.app.ui.components.hexToColor
+import com.flash.app.ui.theme.FlashTokens
 import com.flash.app.ui.theme.ModuleColors
 
 /** 情绪页（PRD 7.4 / 效果图）：emoji 选择器 + 简短文字 + 周趋势 + 历史 */
@@ -116,7 +117,7 @@ fun EmotionScreen(onBack: () -> Unit) {
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = FlashTokens.Spacing.PageHorizontal),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(Modifier.height(8.dp))

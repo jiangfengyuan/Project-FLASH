@@ -9,17 +9,16 @@ package com.flash.app.ui.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.flash.app.ui.theme.FlashTokens
 
 /**
  * 表单分区：小节标题 + 内容组，组内间距 12、标题与内容间距 8。
  * 用于设置项、编辑表单等成组排布的表单内容。
+ * 内容组无卡片底、直接贴左缘排布，标题不缩进，与内容左缘对齐。
  */
 @Composable
 fun FlashFormSection(
@@ -35,7 +34,6 @@ fun FlashFormSection(
             title,
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 4.dp),
         )
         Column(
             verticalArrangement = Arrangement.spacedBy(FlashTokens.Spacing.SM),

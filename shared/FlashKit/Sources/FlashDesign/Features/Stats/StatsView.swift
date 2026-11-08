@@ -45,7 +45,8 @@ public struct StatsView: View {
                 // 系统导航栏承载标题时分段占满一行；否则固有宽度 180（几何值）
                 .frame(maxWidth: usesSystemNavigationTitle ? .infinity : 180)
             }
-            .padding(.horizontal, usesSystemNavigationTitle ? Spacing.md : Spacing.lg)
+            // 与下方内容同一页边距：分段控件左缘 = 卡片左缘（iOS 亦与导航栏大标题对齐）
+            .padding(.horizontal, Metrics.pageGutter)
             .padding(.vertical, usesSystemNavigationTitle ? Spacing.sm : Spacing.lg)
             ZStack {
                 trendsContent
@@ -89,7 +90,7 @@ public struct StatsView: View {
                                          emotions: stats.periodEmotionCount))
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(20) // 洞察卡内边距：md 与 lg 之间的特调值
+                .padding(Metrics.cardInset)
                 .background(BrandColors.cardSurface)
                 .clipShape(RoundedRectangle(cornerRadius: Radius.card))
 
@@ -182,7 +183,8 @@ public struct StatsView: View {
                     .frame(minHeight: 180) // 嵌入 ScrollView 内容流，给空态最小高度
                 }
             }
-            .padding(Spacing.lg)
+            .padding(.horizontal, Metrics.pageGutter)
+            .padding(.vertical, Spacing.lg)
         }
         .background(BrandColors.pageBackground)
         .onAppear {
@@ -306,7 +308,7 @@ public struct StatsView: View {
                 }
             }
         }
-        .padding(20) // 图表卡内边距：md 与 lg 之间的特调值
+        .padding(Metrics.cardInset)
         .background(BrandColors.cardSurface)
         .clipShape(RoundedRectangle(cornerRadius: Radius.card))
     }

@@ -65,7 +65,7 @@ public struct QuickCaptureCard: View {
                         .animation(Motion.quick(reduceMotion), value: hasDraft)
                 }
             }
-            .padding(Spacing.md)
+            .padding(Metrics.cardInset)
         }
         .cardFloat(reduceMotion: reduceMotion)
     }

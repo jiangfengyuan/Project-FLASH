@@ -166,7 +166,7 @@ struct ExploreScreen: View {
                     favoritesOnly.toggle()
                 }
             }
-            .padding(.horizontal, Spacing.md)
+            .padding(.horizontal, Metrics.pageGutter)
             .padding(.vertical, Spacing.sm)
         }
         .sensoryFeedback(.selection, trigger: filter)
@@ -198,7 +198,7 @@ struct ExploreScreen: View {
                 }
             }
         }
-        .padding(.horizontal, Spacing.md)
+        .padding(.horizontal, Metrics.pageGutter)
         .padding(.bottom, Spacing.xs)
         .animation(Motion.quick(reduceMotion), value: batchMode)
     }

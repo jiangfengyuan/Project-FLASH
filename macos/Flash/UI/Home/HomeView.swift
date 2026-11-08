@@ -84,7 +84,8 @@ struct HomeView: View {
 
                 recentSection
             }
-            .padding(Spacing.lg)
+            .padding(.horizontal, Metrics.pageGutter)
+            .padding(.vertical, Spacing.lg)
             .frame(maxWidth: Metrics.toolMaxWidth)
             .frame(maxWidth: .infinity)
             .opacity(bodyAppeared ? 1 : 0)
@@ -180,7 +181,8 @@ struct HomeView: View {
                 Text("最近闪念")
                     .font(Typography.secondary)
                     .foregroundStyle(BrandColors.textSecondary)
-                    .padding(.horizontal, Spacing.sm)
+                    // 与卡内文字同一缩进：分组标题左缘 = 日志卡正文左缘
+                    .padding(.horizontal, Metrics.cardInset)
                 ViewThatFits(in: .horizontal) {
                     HStack(alignment: .top, spacing: Spacing.md) {
                         logColumn(logs: Array(viewModel.recentLogs.prefix(3)))

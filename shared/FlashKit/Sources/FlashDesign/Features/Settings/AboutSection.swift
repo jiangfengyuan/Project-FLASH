@@ -28,9 +28,14 @@ public struct AboutSection: View {
             } label: {
                 SettingsRowLabel(title: "版本", systemImage: "info.circle", color: .secondary)
             }
-            Label("无云端账号，备份与传输由你主动发起。", systemImage: "lock.shield")
-                .font(Typography.caption)
-                .foregroundStyle(.secondary)
+            // 图标进同一图标列：说明文字与上方「版本」行标题左缘对齐
+            Label {
+                Text("无云端账号，备份与传输由你主动发起。")
+            } icon: {
+                Image(systemName: "lock.shield").flashIconColumn()
+            }
+            .font(Typography.caption)
+            .foregroundStyle(.secondary)
         }
         .opacity(appeared ? 1 : 0)
         .offset(y: !appeared && !reduceMotion ? 6 : 0)

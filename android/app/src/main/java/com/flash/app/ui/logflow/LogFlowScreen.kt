@@ -10,6 +10,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.rememberCoroutineScope
 import com.flash.app.ui.components.RecordDateField
 import com.flash.app.data.model.Category
+import com.flash.app.ui.theme.FlashTokens
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CancellationException
 import androidx.compose.foundation.horizontalScroll
@@ -138,14 +139,14 @@ fun LogFlowScreen(onBack: () -> Unit, onOpenRecord: (String) -> Unit) {
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = FlashTokens.Spacing.PageHorizontal),
             )
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .horizontalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = FlashTokens.Spacing.PageHorizontal, vertical = 8.dp),
             ) {
                 ColorTag.entries.forEach { tag ->
                     FilterChip(
@@ -161,7 +162,7 @@ fun LogFlowScreen(onBack: () -> Unit, onOpenRecord: (String) -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = FlashTokens.Spacing.PageHorizontal),
             ) {
                 OutlinedButton(onClick = { showStartPicker = true }) {
                     Text(filter.startDate?.let { "自 $it" } ?: "开始日期")
@@ -178,7 +179,7 @@ fun LogFlowScreen(onBack: () -> Unit, onOpenRecord: (String) -> Unit) {
             SingleChoiceSegmentedButtonRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = FlashTokens.Spacing.PageHorizontal),
             ) {
                 LogSort.entries.forEachIndexed { index, sort ->
                     SegmentedButton(
@@ -197,7 +198,7 @@ fun LogFlowScreen(onBack: () -> Unit, onOpenRecord: (String) -> Unit) {
                 "$totalCount 条",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = FlashTokens.Spacing.PageHorizontal, vertical = 8.dp),
             )
             val listState = rememberLazyListState()
             val hasMore = logs.size < totalCount
@@ -215,7 +216,7 @@ fun LogFlowScreen(onBack: () -> Unit, onOpenRecord: (String) -> Unit) {
             LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+                contentPadding = PaddingValues(horizontal = FlashTokens.Spacing.PageHorizontal, vertical = 4.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) { 
                 if (logs.isEmpty()) {

@@ -45,14 +45,13 @@ struct SettingsView: View {
     @State private var aboutAppeared = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Text("设置")
-                    .flashPageTitle()
-                Spacer()
-            }
-            .padding(.horizontal, Spacing.lg)
-            .padding(.top, Spacing.lg)
+        // 标题与表单同处一列（同一最大宽度、同一页边距）：宽窗口下标题不再贴最左而表单居中，
+        // 「设置」左缘与分组卡片左缘落在同一条线上
+        VStack(alignment: .leading, spacing: 0) {
+            Text("设置")
+                .flashPageTitle()
+                .padding(.horizontal, Metrics.pageGutter)
+                .padding(.top, Spacing.lg)
 
             Form {
                 StorageBannerSection()
@@ -77,9 +76,11 @@ struct SettingsView: View {
             }
             .formStyle(.grouped)
             .scrollContentBackground(.hidden)
-            .padding()
-            .frame(maxWidth: Metrics.readingMaxWidth)
+            // 分组卡片左右外缘 = 页边距（替代系统默认分组内距 + 额外 .padding() 的叠加）
+            .contentMargins(.horizontal, Metrics.pageGutter, for: .scrollContent)
+            .padding(.vertical, Spacing.md)
         }
+        .frame(maxWidth: Metrics.readingMaxWidth)
         .frame(maxWidth: .infinity)
         .background(BrandColors.pageBackground)
         .onAppear {

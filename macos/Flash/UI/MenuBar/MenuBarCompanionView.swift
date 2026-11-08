@@ -61,9 +61,11 @@ struct MenuBarCompanionView: View {
     // MARK: - 区块
 
     private var header: some View {
-        HStack(spacing: 6) { // 6：图标与标题的紧凑节奏（无对应令牌）
+        // 图标列与间距与「今日概览」「打开 Flash」两行一致：三行图标居中对齐、文字左缘对齐
+        HStack(spacing: Spacing.xs) {
             Image(systemName: "sparkles")
                 .foregroundStyle(BrandColors.accent)
+                .flashIconColumn()
             Text("Flash")
                 .font(Typography.cardTitle)
             Spacer()
@@ -120,8 +122,12 @@ struct MenuBarCompanionView: View {
     private var footer: some View {
         HStack {
             Button { openMainWindow() } label: {
-                Label("打开 Flash", systemImage: "macwindow")
-                    .font(Typography.secondary)
+                HStack(spacing: Spacing.xs) {
+                    Image(systemName: "macwindow")
+                        .flashIconColumn()
+                    Text("打开 Flash")
+                }
+                .font(Typography.secondary)
             }
             .buttonStyle(.borderless)
             Spacer()
@@ -222,8 +228,9 @@ private struct TodaySummary: View {
     }
 
     var body: some View {
-        HStack(spacing: Spacing.xxs) {
+        HStack(spacing: Spacing.xs) {
             Image(systemName: "note.text")
+                .flashIconColumn()
             Text("今日 \(todayLogs.count) 条记录")
                 .monospacedDigit()
                 // 数字变化滚动过渡（macOS 14+）；Reduce Motion 时瞬变

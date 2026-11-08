@@ -57,6 +57,14 @@ public struct LogEditSheet: View {
     /// 契约上限（UTF-16 单元）：超限禁用保存并显示计数，不静默截断
     private var contentExceedsLimit: Bool { !TextLimits.fits(content) }
 
+    /// TextEditor 内文字相对其边框的系统内距（行片段左右留白 5；iOS 另有文本容器上内距 8），
+    /// 占位文字按此偏移才能与输入后的首行文字重合
+    #if os(iOS)
+    private static let editorTextInset = EdgeInsets(top: 8, leading: 5, bottom: 8, trailing: 5)
+    #else
+    private static let editorTextInset = EdgeInsets(top: 0, leading: 5, bottom: 0, trailing: 5)
+    #endif
+
     private var dirty: Bool {
         content != log.content || category != log.category || colorTag != log.colorTag ||
         importance != log.importance || isFavorite != (log.isFavorite ?? false) ||
@@ -103,11 +111,12 @@ public struct LogEditSheet: View {
                                 }
                                 .focused($contentFocused)
                             if content.isEmpty {
+                                // 占位文字与 TextEditor 首行文字同一起点：外层内距 + 系统文本内距
                                 Text("记录内容…")
                                     .font(Typography.body)
                                     .foregroundStyle(BrandColors.textSecondary)
-                                    .padding(.horizontal, Spacing.xs)
-                                    .padding(.vertical, Spacing.xs)
+                                    .padding(.leading, Spacing.xxs + Self.editorTextInset.leading)
+                                    .padding(.top, Spacing.xxs + Self.editorTextInset.top)
                                     .allowsHitTesting(false)
                             }
                         }
@@ -118,7 +127,7 @@ public struct LogEditSheet: View {
                                 .foregroundStyle(BrandColors.destructive)
                         }
                     }
-                    .padding(Spacing.md)
+                    .padding(Metrics.cardInset)
                 }
                 .staggeredIn(index: 1, appeared: appeared, reduceMotion: reduceMotion)
 
@@ -146,7 +155,7 @@ public struct LogEditSheet: View {
                         Toggle("收藏", isOn: $isFavorite)
                             .flashCheckboxToggleStyle()
                     }
-                    .padding(Spacing.md)
+                    .padding(Metrics.cardInset)
                 }
                 .staggeredIn(index: 2, appeared: appeared, reduceMotion: reduceMotion)
 

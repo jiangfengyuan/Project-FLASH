@@ -81,7 +81,9 @@ public struct MemoryView: View {
                 weekRange(report)
             }
         }
-        .padding(usesSystemNavigationTitle ? Spacing.md : Spacing.lg)
+        // 与下方内容同一页边距：周导航 / 标题左缘 = 卡片左缘
+        .padding(.horizontal, Metrics.pageGutter)
+        .padding(.vertical, usesSystemNavigationTitle ? Spacing.md : Spacing.lg)
     }
 
     @ViewBuilder
@@ -152,7 +154,7 @@ public struct MemoryView: View {
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(20) // 情绪卡内边距：md 与 lg 之间的特调值
+                    .padding(Metrics.cardInset)
                     .background(BrandColors.cardSurface)
                     .clipShape(RoundedRectangle(cornerRadius: Radius.card))
                     .flashCardShadow()
@@ -169,7 +171,7 @@ public struct MemoryView: View {
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(20) // 亮点卡内边距：md 与 lg 之间的特调值
+                    .padding(Metrics.cardInset)
                     .background(BrandColors.cardSurface)
                     .clipShape(RoundedRectangle(cornerRadius: Radius.card))
                     .flashCardShadow()
@@ -180,7 +182,8 @@ public struct MemoryView: View {
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
             }
-            .padding(Spacing.lg)
+            .padding(.horizontal, Metrics.pageGutter)
+            .padding(.vertical, Spacing.lg)
         }
         .background(BrandColors.pageBackground)
     }

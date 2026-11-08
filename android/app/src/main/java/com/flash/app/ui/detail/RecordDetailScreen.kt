@@ -309,7 +309,7 @@ private fun CircularIconButton(
 private fun RecordViewer(record: LogItem) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+        contentPadding = PaddingValues(horizontal = FlashTokens.Spacing.PageHorizontal, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         item {

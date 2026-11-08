@@ -491,14 +491,15 @@ private fun SettingsGroup(
             title,
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 4.dp),
+            // 与 FlashCard 内容内距（MD）同一缩进：分组标题 / 说明 / 脚注左缘 = 卡内文字左缘
+            modifier = Modifier.padding(horizontal = FlashTokens.Spacing.MD),
         )
         if (note != null) {
             Text(
                 note,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 4.dp),
+                modifier = Modifier.padding(horizontal = FlashTokens.Spacing.MD),
             )
         }
         FlashCard(modifier = Modifier.fillMaxWidth(), content = content)
@@ -507,7 +508,7 @@ private fun SettingsGroup(
                 footnote,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 4.dp),
+                modifier = Modifier.padding(horizontal = FlashTokens.Spacing.MD),
             )
         }
     }

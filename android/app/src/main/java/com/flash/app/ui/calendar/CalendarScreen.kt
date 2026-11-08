@@ -78,6 +78,7 @@ import com.flash.app.data.model.TaskItem
 import com.flash.app.ui.components.LogCard
 import com.flash.app.ui.components.StyleCard
 import com.flash.app.ui.components.hexToColor
+import com.flash.app.ui.theme.FlashTokens
 import java.time.LocalDate
 import java.time.YearMonth
 import kotlinx.coroutines.launch
@@ -147,7 +148,7 @@ fun CalendarScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp,
+            contentPadding = PaddingValues(start = FlashTokens.Spacing.PageHorizontal, end = FlashTokens.Spacing.PageHorizontal, top = 8.dp,
                 bottom = 8.dp + com.flash.app.ui.navigation.LocalPageBottomPadding.current),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
