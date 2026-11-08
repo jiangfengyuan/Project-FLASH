@@ -2,6 +2,7 @@ import { NavigationState, ThemeState, SettingsState } from '../state/FeatureStat
 import { PageActions, requireActions } from '../state/PageActions';
 import {
   FlashCard, brandText, hairlineColor, cardShadowColor, statusText, RADIUS_CARD,
+  PAGE_GUTTER, CARD_INSET, ICON_COLUMN,
   TYPE_SECTION, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION
 } from '../components/CommonBuilders';
 
@@ -20,7 +21,7 @@ export struct HarmonyFeaturesPage {
           Text('系统能力').fontSize(TYPE_GROUP).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).width('100%')
           Text('仅展示真实检测与当前接入状态；需审核的系统权限不会在未获准时调用。')
             .fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).lineHeight(19).width('100%')
-        }.width('100%').padding(20).backgroundColor(this.theme.themeTint).borderRadius(RADIUS_CARD)
+        }.width('100%').padding(CARD_INSET).backgroundColor(this.theme.themeTint).borderRadius(RADIUS_CARD)
           .border({ width: 0.5, color: hairlineColor(this.theme) })
           .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
 
@@ -49,16 +50,17 @@ export struct HarmonyFeaturesPage {
           Text('为什么部分能力没有直接开启？').fontSize(TYPE_GROUP).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).width('100%')
           Text('实况窗、闪控球、碰一碰和小艺意图均涉及场景、签名、真机或平台审核。Flash 会在取得正式资格后启用，不申请与产品场景不符的受限权限。')
             .fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).lineHeight(20).width('100%')
-        }.width('100%').padding(20).backgroundColor(this.theme.themeControl).borderRadius(RADIUS_CARD)
+        }.width('100%').padding(CARD_INSET).backgroundColor(this.theme.themeControl).borderRadius(RADIUS_CARD)
           .border({ width: 0.5, color: hairlineColor(this.theme) })
-      }.width('100%').padding({ left: 20, right: 20, bottom: 30 })
+      }.width('100%').padding({ left: PAGE_GUTTER, right: PAGE_GUTTER, bottom: 30 })
     }.width('100%').layoutWeight(1)
   }
 
   @Builder
   private capabilityRow(icon: string, title: string, status: string, statusColor: string) {
     Row({ space: 12 }) {
-      Text(icon).fontSize(TYPE_SECTION).fontColor(brandText(this.theme)).width(34).textAlign(TextAlign.Center)
+      // 与设置页图标列同宽：两页切换时图标列与标题起点一致
+      Text(icon).fontSize(TYPE_SECTION).fontColor(brandText(this.theme)).width(ICON_COLUMN).textAlign(TextAlign.Center)
       Text(title).fontSize(TYPE_BODY).fontColor(this.theme.themeText).layoutWeight(1)
       Text(status).fontSize(TYPE_CAPTION).fontColor(statusColor).textAlign(TextAlign.End).maxLines(2).width(150).lineHeight(16)
     }.width('100%').height(64)

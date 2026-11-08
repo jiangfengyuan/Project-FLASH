@@ -152,7 +152,12 @@ struct FlashTodayView: View {
     private func captureLink(_ title: String, systemImage: String, category: FlashCore.Category,
                              tint: Color) -> some View {
         Link(destination: URL(string: "flash://capture?category=\(category.rawValue)")!) {
-            Label(title, systemImage: systemImage)
+            // 图标进等宽图标列：两个按钮的图标与文字上下对齐（lightbulb 与 square.and.pencil 固有宽度不同）
+            Label {
+                Text(title)
+            } icon: {
+                Image(systemName: systemImage).flashIconColumn()
+            }
                 .font(.subheadline.weight(.semibold))
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(tint.opacity(0.18), in: RoundedRectangle(cornerRadius: Radius.panel))

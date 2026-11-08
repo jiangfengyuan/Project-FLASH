@@ -80,7 +80,7 @@ struct ExploreScreen: View {
             NavigationStack {
                 ScrollView {
                     ExploreFilterPanel(criteria: $criteria, onClear: clearFilters)
-                        .padding(Spacing.md)
+                        .padding(Metrics.pageGutter)
                 }
                 .background(BrandColors.pageBackground)
                 .navigationTitle("筛选")

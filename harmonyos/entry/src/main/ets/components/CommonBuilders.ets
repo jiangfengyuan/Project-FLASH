@@ -3,7 +3,7 @@ import { Category, colorTagColor, colorTagName, LogItem } from '../models/Models
 import { NavigationState, ThemeState, FeedbackState, DeleteKind } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
 import {
-  BRAND, RADIUS_CARD, RADIUS_FOCUS, TOUCH_MIN, FAB_SIZE, DOCK_HEIGHT,
+  BRAND, RADIUS_CARD, RADIUS_FOCUS, TOUCH_MIN, FAB_SIZE, DOCK_HEIGHT, PAGE_GUTTER, CARD_INSET,
   MOTION_PRESS, MOTION_FADE, CHIP_SELECTED,
   TYPE_DISPLAY, TYPE_TITLE, TYPE_SECTION, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION,
   motionDuration, supportsBlurMaterial, floatingSurface, hairlineColor, cardShadowColor, dockShadowColor, FAB_SHADOW,
@@ -17,6 +17,7 @@ export {
   WEAK_SURFACE_LIGHT, CONTROL_SURFACE_DARK, TINT_SURFACE_LIGHT, TINT_SURFACE_DARK,
   DANGER_SURFACE_LIGHT, DANGER_SURFACE_DARK,
   CHIP_SELECTED, RADIUS_CARD, RADIUS_FOCUS, TOUCH_MIN, FAB_SIZE, DOCK_HEIGHT, DOCK_CLEARANCE,
+  PAGE_GUTTER, CARD_INSET, ICON_COLUMN,
   MOTION_PRESS, MOTION_FADE, MOTION_PAGE,
   TYPE_DISPLAY, TYPE_TITLE, TYPE_SECTION, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION, TYPE_HERO,
   DIALOG_WIDTH, DIALOG_WIDTH_FORM, DIALOG_WIDTH_PERCENT,
@@ -30,25 +31,30 @@ export {
 } from './DesignTokens';
 export { setReduceMotionEnabled, isReduceMotionEnabled } from '../state/FeatureStates';
 
+// 页标题本身不带横向边距：放在已有页边距的容器里时传 0（默认），
+// 独立放置时传 PAGE_GUTTER。之前固定内缩 20，放进已有 20 边距的列表 / 列里会缩进成 40，
+// 标题与下方卡片左缘错开。
 @Builder
-export function PageHeader(theme: ThemeState, title: string, subtitle: string) {
+export function PageHeader(theme: ThemeState, title: string, subtitle: string, horizontalInset: number = 0) {
     Column({ space: 4 }) {
       Text(title).fontSize(TYPE_TITLE).fontWeight(FontWeight.Bold).fontColor(theme.themeText).width('100%')
       Text(subtitle).fontSize(TYPE_SECONDARY).fontColor(theme.themeMuted).lineHeight(19).width('100%')
     }
     .width('100%')
     .alignItems(HorizontalAlign.Start)
-    .padding({ left: 20, right: 20, top: 18, bottom: 12 })
+    .padding({ left: horizontalInset, right: horizontalInset, top: 18, bottom: 12 })
   }
 
 // 详情页页头：自绘返回栏的统一实现（Index 详情路由使用）。
 @Builder
 export function DetailHeader(theme: ThemeState, title: string, onBack: () => void) {
     Row({ space: 10 }) {
+      // 按钮去掉左内距：「‹」与下方页面内容同在页边距线上
       Button('‹ 返回', { type: ButtonType.Normal }).height(TOUCH_MIN).fontColor(brandText(theme)).backgroundColor(Color.Transparent)
+        .padding({ left: 0, right: 12 })
         .onClick(onBack)
       Text(title).fontSize(TYPE_SECTION).fontWeight(FontWeight.Bold).fontColor(theme.themeText)
-    }.width('100%').height(60).padding({ left: 8, right: 16 })
+    }.width('100%').height(60).padding({ left: PAGE_GUTTER, right: PAGE_GUTTER })
   }
 
 // 三态套件：空态/加载/错误共用同一卡片容器语言。actionLabel 为空时不渲染操作按钮。
@@ -332,7 +338,7 @@ export struct RecordCard {
         ])
     }
     .width('100%')
-    .padding(16)
+    .padding(CARD_INSET)
     .backgroundColor(this.theme.themeSurface)
     .borderRadius(RADIUS_CARD)
     .border({ width: 0.5, color: hairlineColor(this.theme) })
@@ -352,7 +358,8 @@ export struct RecordCard {
 export struct FlashCard {
   @ObjectLink theme: ThemeState;
   radius: number = RADIUS_CARD;
-  contentPadding: number = 16;
+  /** 统一卡片内距；页面不再按卡片单独覆盖，保证上下相邻卡片的内容左缘对齐 */
+  contentPadding: number = CARD_INSET;
   space: number = 0;
   @BuilderParam content: () => void = this.emptyContent;
 

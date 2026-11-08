@@ -39,7 +39,10 @@ public struct EmotionView: View {
     /// 各行左右边缘落在同一条线上
     private let controlColumnWidth: CGFloat = 420 // 几何值
 
-    /// 强度圆点：触屏命中框 44pt（Metrics.minTouchTarget），macOS 保持原 14pt 圆点 + 12pt 间距
+    /// 强度圆点直径（几何值）
+    private let intensityDotSize: CGFloat = 14
+
+    /// 强度圆点命中框：触屏 44pt（Metrics.minTouchTarget），macOS 保持原 14pt 圆点 + 12pt 间距
     #if os(iOS)
     private let intensityHitSize: CGFloat = Metrics.minTouchTarget
     private let intensityDotSpacing: CGFloat = 0
@@ -133,7 +136,7 @@ public struct EmotionView: View {
                                     .fill((intensity ?? 0) >= value
                                           ? BrandColors.emotionPink
                                           : Color.primary.opacity(0.15))
-                                    .frame(width: 14, height: 14) // 强度圆点尺寸（几何值）
+                                    .frame(width: intensityDotSize, height: intensityDotSize)
                                     .frame(width: intensityHitSize, height: intensityHitSize)
                                     .contentShape(Rectangle())
                             }
@@ -148,6 +151,9 @@ public struct EmotionView: View {
                         }
                     }
                     .animation(Motion.quick(reduceMotion), value: intensity)
+                    // 触屏命中框（44）比圆点（14）宽：整行左移半个差值，第一个圆点的可见左缘
+                    // 与上方「强度（可选）」文字左缘对齐，多出的命中区落在卡片内边距里
+                    .padding(.leading, -(intensityHitSize - intensityDotSize) / 2)
                 }
                 .frame(maxWidth: controlColumnWidth, alignment: .leading)
 
@@ -172,7 +178,9 @@ public struct EmotionView: View {
                 }
                 .frame(maxWidth: controlColumnWidth)
             }
-            .padding(Spacing.lg)
+            // 横向与下方本周趋势卡、近期记录行同一内边距：窄屏下滑杆 / 输入行左右缘与其它卡片内容对齐
+            .padding(.horizontal, Metrics.cardInset)
+            .padding(.vertical, Spacing.lg)
             .frame(maxWidth: .infinity)
         }
         .animation(Motion.soft(reduceMotion), value: selectedLevel)

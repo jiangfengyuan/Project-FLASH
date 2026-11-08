@@ -10,9 +10,12 @@ import { ThemeState, EmotionState, FeedbackState, DeleteKind } from '../state/Fe
 import { PageActions, requireActions } from '../state/PageActions';
 import {
   BRAND, FlashCard, EmptyState, FilterChip, brandText, dangerText, hairlineColor, emotionColor,
-  motionDuration, MOTION_PRESS,
+  motionDuration, MOTION_PRESS, PAGE_GUTTER,
   TYPE_SECTION, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION
 } from '../components/CommonBuilders';
+
+/** 情绪滑杆滑块直径：OutSet 滑轨两端各内缩半个滑块，刻度图标按此居中在最左 / 最右档位正下方 */
+const SLIDER_THUMB = 20;
 
 // 「当前状态」快捷输入：chip 一键填入，自由文本可覆盖（≤50 字，随情绪记录保存）。
 const QUICK_STATUSES: string[] = ['疲惫', '专注', '放松'];
@@ -73,24 +76,29 @@ export struct EmotionPage {
   private emotionPage() {
     Scroll() {
       Column({ space: 16 }) {
-        FlashCard({ theme: this.theme, contentPadding: 20, space: 14 }) {
+        // 与下方卡片同一内距：滑杆、刻度与子情绪胶囊、状态输入的左右边缘对齐
+        FlashCard({ theme: this.theme, space: 14 }) {
           SymbolGlyph(this.emotionSymbol(this.emotion.emotionLevel))
             .fontSize(64)
             .fontColor([emotionColor(this.theme, this.emotion.emotionLevel)])
           Text(emotionName(this.emotion.emotionLevel)).fontSize(TYPE_SECTION).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)
           Slider({ value: this.emotion.emotionLevel, min: -3, max: 3, step: 1, style: SliderStyle.OutSet })
+            .width('100%')
+            .blockSize({ width: SLIDER_THUMB, height: SLIDER_THUMB })
             .blockColor(brandText(this.theme)).selectedColor(brandText(this.theme)).trackColor(this.theme.themeControl)
             .onChange((value: number) => this.emotion.emotionLevel = Math.round(value))
+          // 刻度：两端图标各放进滑块直径宽的格子并居中，图标中心 = 最左 / 最右档位滑块中心；
+          // 中间图标居中 = 0 档位
           Row() {
             Row() {
               SymbolGlyph($r('sys.symbol.face_sading')).fontSize(18).fontColor([emotionColor(this.theme, -1)])
-            }.layoutWeight(1).justifyContent(FlexAlign.Start)
-            Row() {
-              SymbolGlyph($r('sys.symbol.face_smiling')).fontSize(18).fontColor([emotionColor(this.theme, 0)])
-            }.layoutWeight(1).justifyContent(FlexAlign.Center)
+            }.width(SLIDER_THUMB).justifyContent(FlexAlign.Center)
+            Blank()
+            SymbolGlyph($r('sys.symbol.face_smiling')).fontSize(18).fontColor([emotionColor(this.theme, 0)])
+            Blank()
             Row() {
               SymbolGlyph($r('sys.symbol.face_laughing')).fontSize(18).fontColor([emotionColor(this.theme, 1)])
-            }.layoutWeight(1).justifyContent(FlexAlign.End)
+            }.width(SLIDER_THUMB).justifyContent(FlexAlign.Center)
           }.width('100%')
         }
 
@@ -150,7 +158,7 @@ export struct EmotionPage {
         } else {
           EmptyState(this.theme, '🌱', '还没有情绪记录，从当下的感受开始')
         }
-      }.width('100%').padding({ left: 16, right: 16, bottom: 30 })
+      }.width('100%').padding({ left: PAGE_GUTTER, right: PAGE_GUTTER, bottom: 30 })
     }.width('100%').height('100%')
   }
 

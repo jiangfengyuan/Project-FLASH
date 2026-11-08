@@ -16,7 +16,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.flash.app.data.UiStyle
 import com.flash.app.ui.theme.LocalUiStyle
 import com.flash.app.ui.theme.glass.GlassCard
@@ -40,7 +39,7 @@ fun StyleCard(
             shape = RoundedCornerShape(FlashTokens.Radius.Card),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         ) {
-            Column(Modifier.padding(12.dp), content = content)
+            Column(Modifier.padding(FlashTokens.Spacing.CardInset), content = content)
         }
     } else {
         Card(
@@ -49,7 +48,7 @@ fun StyleCard(
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
             onClick = onClick,
         ) {
-            Column(Modifier.padding(12.dp), content = content)
+            Column(Modifier.padding(FlashTokens.Spacing.CardInset), content = content)
         }
     }
 }

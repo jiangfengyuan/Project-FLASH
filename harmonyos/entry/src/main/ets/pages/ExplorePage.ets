@@ -4,7 +4,7 @@ import { PageActions, requireActions } from '../state/PageActions';
 import {
   PageHeader, FilterChip, RecordCard, FlashCard, EmptyState, DOCK_CLEARANCE, RADIUS_FOCUS, brandText,
   floatingSurface, hairlineColor, supportsBlurMaterial, scrimColor, cardShadowColor, motionDuration, MOTION_FADE,
-  TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY
+  PAGE_GUTTER, CARD_INSET, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY
 } from '../components/CommonBuilders';
 
 /** Lazy row source for the records list; reloaded only when the displayed
@@ -101,7 +101,8 @@ export struct ExplorePage {
             }
             .width('100%')
             .height(52)
-            .padding({ left: 16, right: 12 })
+            // 左内距与卡片同一内距：放大镜左缘 = 记录卡内容左缘
+            .padding({ left: CARD_INSET, right: 12 })
             .backgroundColor(floatingSurface(this.theme))
             .backgroundBlurStyle(supportsBlurMaterial() ? BlurStyle.COMPONENT_THIN : BlurStyle.NONE)
             .borderRadius(26)
@@ -134,7 +135,7 @@ export struct ExplorePage {
             Row({ space: 12 }) {
               Text(this.logs.sortAscending ? '按最早记录' : '按最新记录')
                 .fontSize(TYPE_SECONDARY).fontColor(brandText(this.theme))
-                .height(44).padding({ left: 4, right: 4 })
+                .height(44).padding({ right: 12 }) // 只向内扩命中区：文字左缘留在页边距线上
                 .stateStyles({
                   normal: { .opacity(1) },
                   pressed: { .opacity(0.6) }
@@ -149,7 +150,7 @@ export struct ExplorePage {
                   .fontColor(this.filterPanelOpen ? brandText(this.theme) : this.theme.themeMuted)
               }
               .height(44)
-              .padding({ left: 12, right: 12 })
+              .padding({ left: 12 }) // 只向内扩命中区：「筛选」右缘与搜索框外缘对齐
               .accessibilityGroup(true)
               .accessibilityText(this.filterPanelOpen ? '收起筛选面板' : '展开筛选面板')
               .stateStyles({
@@ -162,7 +163,7 @@ export struct ExplorePage {
 
             if (this.logs.filterCategory === 'inbox' &&
               requireActions(this.actions).logsController.inboxLogs().length > 0) {
-              FlashCard({ theme: this.theme, contentPadding: 12, radius: 16, space: 8 }) {
+              FlashCard({ theme: this.theme, radius: 16, space: 8 }) {
                 Text('批量整理（影响全部待整理记录）').fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width('100%')
                 Row({ space: 8 }) {
                   Button('转为灵感', { type: ButtonType.Normal })
@@ -203,7 +204,7 @@ export struct ExplorePage {
       .width('100%')
       .height('100%')
       .cachedCount(5)
-      .padding({ left: 20, right: 20, bottom: DOCK_CLEARANCE })
+      .padding({ left: PAGE_GUTTER, right: PAGE_GUTTER, bottom: DOCK_CLEARANCE })
 
       if (this.filterPanelOpen) {
         Column().width('100%').height('100%').backgroundColor(scrimColor(this.theme))
@@ -281,7 +282,7 @@ export struct ExplorePage {
       }.width('100%')
     }
     .width('100%')
-    .padding(20)
+    .padding(PAGE_GUTTER)
     .backgroundColor(floatingSurface(this.theme))
     .backgroundBlurStyle(supportsBlurMaterial() ? BlurStyle.COMPONENT_ULTRA_THICK : BlurStyle.NONE)
     .borderRadius({ topLeft: RADIUS_FOCUS, topRight: RADIUS_FOCUS })

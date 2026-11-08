@@ -192,7 +192,9 @@ public struct LogEditSheet: View {
                 }
                 .staggeredIn(index: 3, appeared: appeared, reduceMotion: reduceMotion)
             }
-            .padding(Spacing.lg)
+            // 横向取页边距：iOS 下与导航栏「取消 / 保存」同在系统边距线上（16），macOS 弹层保持 24
+            .padding(.horizontal, Metrics.pageGutter)
+            .padding(.vertical, Spacing.lg)
         }
         .disabled(isSaving || saved)
         .interactiveDismissDisabled(dirty || isSaving || saved)

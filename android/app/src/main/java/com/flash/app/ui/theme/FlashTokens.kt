@@ -46,6 +46,12 @@ object FlashTokens {
         val XL = 32.dp
         val XXL = 48.dp
         val PageHorizontal = 20.dp
+
+        /**
+         * 卡片内容内距：FlashCard / StyleCard / GlassCard 统一取值，
+         * 同一页面上下相邻的卡片内容左缘对齐；卡片上方的分组标题也缩进同样距离。
+         */
+        val CardInset = MD
     }
 
     object Radius {

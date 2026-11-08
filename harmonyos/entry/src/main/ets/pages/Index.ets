@@ -27,7 +27,7 @@ import {
   PAGE_BACKGROUND_LIGHT, PAGE_BACKGROUND_DARK, CARD_SURFACE_LIGHT, CARD_SURFACE_DARK,
   TEXT_PRIMARY_LIGHT, TEXT_PRIMARY_DARK, TEXT_MUTED_LIGHT, TEXT_MUTED_DARK,
   WEAK_SURFACE_LIGHT, CONTROL_SURFACE_DARK, TINT_SURFACE_LIGHT, TINT_SURFACE_DARK,
-  DANGER_SURFACE_LIGHT, DANGER_SURFACE_DARK, hairlineColor
+  DANGER_SURFACE_LIGHT, DANGER_SURFACE_DARK, hairlineColor, PAGE_GUTTER
 } from '../components/CommonBuilders';
 // 调色板以 CommonBuilders 令牌为准，此处仅组合主题所需的常量。
 const LIGHT_BACKGROUND = PAGE_BACKGROUND_LIGHT;
@@ -296,7 +296,7 @@ struct Index {
       FabButton(this.navigation, () => this.toggleFab())
     }
     .width('100%')
-    .padding({ left: 20, right: 20, bottom: 16 + this.navigation.navigationBarHeight })
+    .padding({ left: PAGE_GUTTER, right: PAGE_GUTTER, bottom: 16 + this.navigation.navigationBarHeight })
   }
 
   @Builder
