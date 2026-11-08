@@ -128,7 +128,7 @@ struct GlobalSearchOverlay: View {
                 Divider().opacity(0.5)
                 ScrollView {
                     LazyVStack(spacing: 0) {
-                        ForEach(Array(matches.enumerated()), id: \.element.id) { index, match in
+                        ForEach(Array(matches.enumerated()), id: \.element.rowIdentity) { index, match in
                             resultRow(match, isSelected: index == selectedIndex) {
                                 open(match)
                             }
@@ -204,7 +204,7 @@ struct GlobalSearchOverlay: View {
     }
 
     private func openSelected() {
-        guard matches.indices.contains(selectedIndex) else { return }
+        guard query == appliedQuery, matches.indices.contains(selectedIndex) else { return }
         open(matches[selectedIndex])
     }
 
@@ -221,4 +221,8 @@ struct GlobalSearchOverlay: View {
             appState.requestFocus(.task(on: taskLookup[match.id]?.calendarDate))
         }
     }
+}
+
+private extension SearchMatch {
+    var rowIdentity: String { "\(kind.rawValue):\(id)" }
 }

@@ -39,8 +39,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -99,14 +99,17 @@ fun SearchScreen(
             applied = query
         }
     }
-    val matches by produceState(emptyList(), applied, logs, emotions, tasks) {
-        value = withContext(Dispatchers.Default) {
-            GlobalSearch.search(logs, emotions, tasks, applied)
+    val result by produceState<Pair<String, List<SearchMatch>>?>(null, applied, logs, emotions, tasks) {
+        val searchQuery = applied
+        val matches = withContext(Dispatchers.Default) {
+            GlobalSearch.search(logs, emotions, tasks, searchQuery)
         }
+        value = searchQuery to matches
     }
+    val matches = result?.takeIf { it.first == applied }?.second
     val groups = remember(matches) {
         listOf(SearchMatchKind.LOG, SearchMatchKind.EMOTION, SearchMatchKind.TASK).mapNotNull { kind ->
-            matches.filter { it.kind == kind }.takeIf { it.isNotEmpty() }?.let { kind to it }
+            matches.orEmpty().filter { it.kind == kind }.takeIf { it.isNotEmpty() }?.let { kind to it }
         }
     }
 
@@ -156,6 +159,7 @@ fun SearchScreen(
                     ringSeed = "search",
                     description = tr("输入关键词或标签名"),
                 )
+                query != applied || matches == null -> Unit
                 matches.isEmpty() -> FlashEmptyState(
                     title = tr("没有找到相关记录"),
                     icon = Icons.Filled.Search,

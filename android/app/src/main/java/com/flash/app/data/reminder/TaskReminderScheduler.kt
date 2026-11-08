@@ -14,6 +14,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -154,6 +155,8 @@ private suspend fun Operation.awaitCompletion(): Unit = suspendCancellableCorout
     }, Runnable::run)
 }
 
+private const val TASK_NOTIFICATION_ID = 0
+
 class TaskReminderWorker(
     appContext: Context,
     params: WorkerParameters,
@@ -175,15 +178,16 @@ class TaskReminderWorker(
         }
         val pendingIntent = PendingIntent.getActivity(
             applicationContext,
-            taskId.hashCode(),
+            0,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
-        fun action(action: String, requestOffset: Int): PendingIntent = PendingIntent.getBroadcast(
+        fun action(action: String): PendingIntent = PendingIntent.getBroadcast(
             applicationContext,
-            taskId.hashCode() + requestOffset,
+            0,
             Intent(applicationContext, TaskReminderActionReceiver::class.java)
                 .setAction(action)
+                .setData(Uri.fromParts("flash-reminder", taskId, null))
                 .putExtra(KEY_TASK_ID, taskId),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
@@ -196,10 +200,10 @@ class TaskReminderWorker(
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             // 锁屏只显示通用标题，任务名在解锁后才可见
             .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
-            .addAction(0, tr("完成"), action(TaskReminderActionReceiver.ACTION_COMPLETE, 1))
-            .addAction(0, tr("稍后 {0} 分钟", TaskReminderActionReceiver.SNOOZE_MINUTES), action(TaskReminderActionReceiver.ACTION_SNOOZE, 2))
+            .addAction(0, tr("完成"), action(TaskReminderActionReceiver.ACTION_COMPLETE))
+            .addAction(0, tr("稍后 {0} 分钟", TaskReminderActionReceiver.SNOOZE_MINUTES), action(TaskReminderActionReceiver.ACTION_SNOOZE))
             .build()
-        manager.notify(taskId.hashCode(), notification)
+        manager.notify(taskId, TASK_NOTIFICATION_ID, notification)
         return Result.success()
     }
 
@@ -230,7 +234,13 @@ class TaskReminderActionReceiver : android.content.BroadcastReceiver() {
         val pending = goAsync()
         kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
             try {
-                NotificationManagerCompat.from(context).cancel(taskId.hashCode())
+                val manager = NotificationManagerCompat.from(context)
+                if (intent.data == null) {
+                    // Notifications posted before this update used the untagged hash ID.
+                    manager.cancel(taskId.hashCode())
+                } else {
+                    manager.cancel(taskId, TASK_NOTIFICATION_ID)
+                }
                 val task = app.repository.tasks.first().firstOrNull { it.id == taskId } ?: return@launch
                 when (intent.action) {
                     ACTION_COMPLETE -> {

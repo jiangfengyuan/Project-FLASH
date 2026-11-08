@@ -24,28 +24,53 @@ protocol SpotlightIndexing: AnyObject {
 final class CoreSpotlightIndex: SpotlightIndexing {
     private let index = CSSearchableIndex(name: "flash-records", protectionClass: .complete)
 
+    private var pending: Task<Void, Never>?
+
+    // Wait for each operation to be journaled before submitting the next one.
+    // In particular, a rebuild's clear and write must stay together.
+    private func enqueue(_ operation: @escaping @MainActor (CSSearchableIndex) async -> Void) {
+        let previous = pending
+        pending = Task { [index] in
+            await previous?.value
+            await operation(index)
+        }
+    }
+
     func index(_ records: [SpotlightRecord]) {
         guard !records.isEmpty else { return }
-        index.indexSearchableItems(records.map(Self.item)) { error in
-            if let error { FlashLog.failure("spotlight_index_failed", error) }
+        enqueue { index in
+            await Self.write(records, to: index)
         }
     }
 
     func remove(ids: [String]) {
         guard !ids.isEmpty else { return }
-        index.deleteSearchableItems(withIdentifiers: ids) { error in
-            if let error { FlashLog.failure("spotlight_delete_failed", error) }
+        enqueue { index in
+            do {
+                try await index.deleteSearchableItems(withIdentifiers: ids)
+            } catch {
+                FlashLog.failure("spotlight_delete_failed", error)
+            }
         }
     }
 
     func replaceAll(with records: [SpotlightRecord]) {
-        // 先清后写：在删除回调里写入，保证新条目不会被同一轮清空吞掉
-        index.deleteAllSearchableItems { [weak self] error in
-            if let error {
+        enqueue { index in
+            do {
+                try await index.deleteAllSearchableItems()
+                await Self.write(records, to: index)
+            } catch {
                 FlashLog.failure("spotlight_clear_failed", error)
-                return
             }
-            Task { @MainActor in self?.index(records) }
+        }
+    }
+
+    private static func write(_ records: [SpotlightRecord], to index: CSSearchableIndex) async {
+        guard !records.isEmpty else { return }
+        do {
+            try await index.indexSearchableItems(records.map(Self.item))
+        } catch {
+            FlashLog.failure("spotlight_index_failed", error)
         }
     }
 

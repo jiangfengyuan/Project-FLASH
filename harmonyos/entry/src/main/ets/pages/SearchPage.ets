@@ -4,7 +4,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-import { EmotionRecord, LogItem, TaskItem } from '../models/Models';
+import { TaskItem } from '../models/Models';
 import { dayString } from '../data/DateUtils';
 import { tr } from '../data/I18n';
 import { highlightParts, globalSearch, HighlightPart, SearchMatch, SearchMatchKind, searchKindName } from '../data/GlobalSearch';
@@ -36,12 +36,8 @@ export struct SearchPage {
     clearTimeout(this.timer);
   }
 
-  private matches(): SearchMatch[] {
-    return globalSearch(this.logs.logs, this.emotion.emotions, this.calendar.tasks, this.applied);
-  }
-
   private groups(): SearchGroup[] {
-    const all = this.matches();
+    const all = globalSearch(this.logs.logs, this.emotion.emotions, this.calendar.tasks, this.applied);
     const out: SearchGroup[] = [];
     [SearchMatchKind.LOG, SearchMatchKind.EMOTION, SearchMatchKind.TASK].forEach((kind: SearchMatchKind) => {
       const items = all.filter((item: SearchMatch) => item.kind === kind);
@@ -108,6 +104,29 @@ export struct SearchPage {
     .onClick(() => this.open(match))
   }
 
+  @Builder
+  private results(groups: SearchGroup[]) {
+    if (groups.length === 0) {
+      EmptyState(this.theme, '🔍', tr('没有找到相关记录'))
+    } else {
+      List({ space: 8 }) {
+        ForEach(groups, (group: SearchGroup) => {
+          ListItem() {
+            Text(`${searchKindName(group.kind)} · ${group.items.length}`)
+              .fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).padding({ top: 8 })
+          }
+          ForEach(group.items, (match: SearchMatch) => {
+            ListItem() {
+              this.row(match)
+            }
+          }, (match: SearchMatch) => `${match.kind}-${match.id}`)
+        }, (group: SearchGroup) => group.kind)
+      }
+      .width('100%')
+      .layoutWeight(1)
+    }
+  }
+
   build() {
     Column({ space: 12 }) {
       TextInput({ placeholder: tr('关键词或标签'), text: this.query })
@@ -126,24 +145,8 @@ export struct SearchPage {
       if (this.applied.trim() === '') {
         EmptyState(this.theme, '🔍', tr('搜索记录、灵感、情绪与任务'))
         Text(tr('输入关键词或标签名')).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
-      } else if (this.matches().length === 0) {
-        EmptyState(this.theme, '🔍', tr('没有找到相关记录'))
       } else {
-        List({ space: 8 }) {
-          ForEach(this.groups(), (group: SearchGroup) => {
-            ListItem() {
-              Text(`${searchKindName(group.kind)} · ${group.items.length}`)
-                .fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).padding({ top: 8 })
-            }
-            ForEach(group.items, (match: SearchMatch) => {
-              ListItem() {
-                this.row(match)
-              }
-            }, (match: SearchMatch) => `${match.kind}-${match.id}`)
-          }, (group: SearchGroup) => group.kind)
-        }
-        .width('100%')
-        .layoutWeight(1)
+        this.results(this.groups())
       }
     }
     .width('100%')

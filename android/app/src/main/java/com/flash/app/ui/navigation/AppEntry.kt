@@ -18,17 +18,13 @@ sealed interface AppEntry {
     data object Today : AppEntry
     data object Ideas : AppEntry
     data class Shared(val text: String) : AppEntry
-    data class OpenRecord(val id: String) : AppEntry
 
     companion object {
-        const val EXTRA_OPEN_RECORD = "com.flash.app.extra.OPEN_RECORD"
-
         /** 分享内容的读取上限：足以覆盖正文上限，超长由面板提示，不静默截断到上限以内 */
         private const val MAX_SHARED_CHARS = 200_000
 
         fun from(intent: Intent?): AppEntry? {
             intent ?: return null
-            intent.getStringExtra(EXTRA_OPEN_RECORD)?.let { return OpenRecord(it) }
             return when (intent.action) {
                 Intent.ACTION_SEND -> sharedText(intent)?.let(::Shared)
                 Intent.ACTION_VIEW -> parse(intent.dataString)

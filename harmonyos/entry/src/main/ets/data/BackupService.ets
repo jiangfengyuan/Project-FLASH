@@ -78,65 +78,39 @@ class StrictJSONScanner {
     }
   }
 
-  /** Validate a string literal without building its value. Value contents are
-   * never inspected, so accumulating them char-by-char would only cost
-   * quadratic re-copying on large payloads. */
-  private scanString(): void {
-    this.stringStart();
+  /** Validate a string literal and report whether the key needs decoding. */
+  private scanString(): boolean {
+    if (this.index >= this.text.length || this.text[this.index++] !== '"') this.fail();
+    let escaped = false;
     while (this.index < this.text.length) {
       const character = this.text[this.index++];
-      if (character === '"') return;
+      if (character === '"') return escaped;
       if (character.charCodeAt(0) < 0x20) this.fail();
       if (character !== '\\') continue;
-      this.escape();
+      escaped = true;
+      this.scanEscape();
     }
     this.fail();
   }
 
-  /** Scan a string literal and decode it for duplicate-key detection. */
   private key(): string {
-    this.stringStart();
-    const parts: string[] = [];
-    while (this.index < this.text.length) {
-      const character = this.text[this.index++];
-      if (character === '"') return parts.join('');
-      if (character.charCodeAt(0) < 0x20) this.fail();
-      if (character !== '\\') {
-        parts.push(character);
-        continue;
-      }
-      parts.push(this.escape());
-    }
-    this.fail();
+    const start = this.index;
+    const escaped = this.scanString();
+    // Decode escaped keys for duplicate detection without a per-character array.
+    return escaped
+      ? JSON.parse(this.text.slice(start, this.index)) as string
+      : this.text.slice(start + 1, this.index - 1);
   }
 
-  private stringStart(): void {
-    if (this.index >= this.text.length || this.text[this.index++] !== '"') this.fail();
-  }
-
-  /** Consume one escape sequence (the backslash is already read). Keys need
-   * the decoded char; value strings pass the result to an ignored slot. */
-  private escape(): string {
+  private scanEscape(): void {
     if (this.index >= this.text.length) this.fail();
     const escape = this.text[this.index++];
-    switch (escape) {
-      case '"': case '\\': case '/': return escape;
-      case 'b': return '\b';
-      case 'f': return '\f';
-      case 'n': return '\n';
-      case 'r': return '\r';
-      case 't': return '\t';
-      case 'u': {
-        let codeUnit = 0;
-        for (let count = 0; count < 4; count++) {
-          if (this.index >= this.text.length) this.fail();
-          const digit = StrictJSONScanner.hex(this.text[this.index++]);
-          if (digit < 0) this.fail();
-          codeUnit = codeUnit * 16 + digit;
-        }
-        return String.fromCharCode(codeUnit);
+    if (escape === 'u') {
+      for (let count = 0; count < 4; count++) {
+        if (this.index >= this.text.length || StrictJSONScanner.hex(this.text[this.index++]) < 0) this.fail();
       }
-      default: this.fail();
+    } else if (!'"\\/bfnrt'.includes(escape)) {
+      this.fail();
     }
   }
 
@@ -272,12 +246,23 @@ export class BackupService {
     if (new util.TextEncoder().encodeInto(json).length > BackupService.MAX_BYTES) {
       throw new Error(tr('备份文件超过 50 MB'));
     }
+    return BackupService.parseDocument(BackupService.decodeDocument(json));
+  }
+
+  private static decodeDocument(json: string): BackupDocument {
     let document: BackupDocument;
     try {
       document = JSON.parse(json) as BackupDocument;
     } catch (_) {
       throw new Error(tr('备份文件不是有效的 JSON 对象'));
     }
+    if (!document || typeof document !== 'object' || Array.isArray(document)) {
+      throw new Error(tr('备份文件不是有效的 JSON 对象'));
+    }
+    return document;
+  }
+
+  private static parseDocument(document: BackupDocument): BackupImport {
     if (document.version !== BackupService.VERSION && document.version !== BackupService.LEGACY_VERSION) {
       throw new Error(tr('备份版本不兼容'));
     }
@@ -356,8 +341,8 @@ export class BackupService {
     if (json.startsWith('\uFEFF')) throw new Error(tr('/：不允许 BOM'));
     if (new util.TextEncoder().encodeInto(json).length > BackupService.MAX_BYTES) throw new Error(tr('/：文件超过 50 MiB'));
     StrictJSONScanner.validate(json);
-    const result = BackupService.parse(json);
-    const document = JSON.parse(json) as BackupDocument;
+    const document = BackupService.decodeDocument(json);
+    const result = BackupService.parseDocument(document);
     BackupService.checkFields(document, ['version', 'exportedAt', 'appVersion', 'notes', 'schemas', 'data'], [], '/');
     if (result.sourceVersion !== BackupService.VERSION || !BackupService.validISO(document.exportedAt) ||
       typeof document.appVersion !== 'string' || typeof document.notes !== 'string' ||
@@ -386,8 +371,8 @@ export class BackupService {
     if (new util.TextEncoder().encodeInto(json).length > BackupService.MAX_BYTES) throw new Error(tr('/：文件超过 50 MiB'));
     // Recover individual records only after bounded, unambiguous JSON syntax.
     StrictJSONScanner.validate(json);
-    const result = BackupService.parse(json);
-    const document = JSON.parse(json) as BackupDocument;
+    const document = BackupService.decodeDocument(json);
+    const result = BackupService.parseDocument(document);
     const legacy = result.sourceVersion === BackupService.LEGACY_VERSION;
     BackupService.checkFields(document, [], legacy ? ['version', 'exportedAt', 'appVersion', 'notes', 'logs', 'emotions'] : ['version', 'exportedAt', 'appVersion', 'notes', 'schemas', 'data'], '/');
     if (!legacy) {

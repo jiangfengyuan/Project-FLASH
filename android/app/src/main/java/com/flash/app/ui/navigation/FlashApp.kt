@@ -155,7 +155,6 @@ fun FlashApp() {
                 explorePresetIdeas = true
                 navController.openTab(Routes.EXPLORE)
             }
-            is AppEntry.OpenRecord -> navController.navigate(Routes.recordDetail(entry.id))
         }
     }
 
