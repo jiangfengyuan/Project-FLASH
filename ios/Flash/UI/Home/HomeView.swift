@@ -14,7 +14,7 @@ import FlashDesign
 /// 写路径统一经 FlashRepository（保存规则走共享 QuickCaptureCommit）。
 struct HomeView: View {
     @Environment(\.flashRepository) private var repository
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
     @Environment(AppState.self) private var appState
     @Environment(IdeaReminderCenter.self) private var ideaReminders
     @Environment(FocusRouter.self) private var focusRouter
@@ -85,7 +85,7 @@ struct HomeView: View {
                     recentSection
                 }
             }
-            .padding(.horizontal, Spacing.md)
+            .padding(.horizontal, Metrics.pageGutter)
             .padding(.vertical, Spacing.lg)
             // 与 macOS 此刻页同一上限：超宽窗口不把卡片拉成细长条
             .frame(maxWidth: Metrics.toolMaxWidth)
@@ -184,7 +184,7 @@ struct HomeView: View {
                     .font(Typography.caption)
                     .foregroundStyle(.tertiary)
             }
-            .padding(Spacing.md)
+            .padding(Metrics.cardInset)
             .background(BrandColors.cardSurface, in: RoundedRectangle(cornerRadius: Radius.cardSmall))
             .overlay {
                 RoundedRectangle(cornerRadius: Radius.cardSmall)
@@ -236,7 +236,8 @@ struct HomeView: View {
                 Text("最近闪念")
                     .font(Typography.secondary)
                     .foregroundStyle(BrandColors.textSecondary)
-                    .padding(.horizontal, Spacing.sm)
+                    // 与卡内文字同一缩进：分组标题左缘 = 日志卡正文左缘
+                    .padding(.horizontal, Metrics.cardInset)
                 // 无悬停：卡片内操作按钮不出现；点按编辑，收藏 / 删除走长按菜单
                 VStack(spacing: Spacing.sm) {
                     ForEach(viewModel.recentLogs) { log in

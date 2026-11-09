@@ -14,7 +14,9 @@ import FlashDesign
 /// 局域网收发走共享 LanTransferSheet。导入预览、合并/覆盖与提醒重建全部经 BackupImportCoordinator。
 struct SettingsScreen: View {
     @Environment(\.flashRepository) private var repository
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// 辅助功能分组的「重新查看新手引导」
+    @EnvironmentObject private var settings: SettingsStore
+    @FlashReduceMotion private var reduceMotion
 
     @State private var lanTransfer = LocalBackupTransferController.shared
     @State private var isBusy = false
@@ -41,6 +43,8 @@ struct SettingsScreen: View {
         Form {
             StorageBannerSection()
             AppearanceSection(appeared: true)
+            // 辅助功能：重新查看引导只清除引导标记，RootView 的全屏引导随之出现
+            AccessibilitySection { settings.resetWelcomed() }
             IdeaReminderSection()
             DataSafetySection(isBusy: isBusy, appeared: true,
                               onShare: prepareShare,

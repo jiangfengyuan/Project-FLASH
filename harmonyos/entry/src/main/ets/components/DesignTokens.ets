@@ -22,6 +22,14 @@ export const DANGER_SURFACE_LIGHT = '#FFF1F0';
 export const DANGER_SURFACE_DARK = '#4A292D';
 export const CHIP_SELECTED = '#2D3436';
 export const RADIUS_CARD = 24;
+
+// 对齐栅格：所有页面共用，保证跨页、跨区块的左右边缘落在同一条线上（与 Android PageHorizontal 一致）。
+/** 页面左右边距：页标题、工具行、卡片外缘、底部 Dock 都从这条线开始 */
+export const PAGE_GUTTER = 20;
+/** 卡片内容内距：所有卡片统一；卡片上方的分组标题也缩进同样距离，与卡内内容左缘对齐 */
+export const CARD_INSET = 16;
+/** 图标列宽：设置行 / 能力行的图标放进等宽列，其后文字逐行左对齐 */
+export const ICON_COLUMN = 28;
 export const RADIUS_FOCUS = 32;
 export const TOUCH_MIN = 44;
 export const FAB_SIZE = 56;
@@ -48,6 +56,8 @@ export const TYPE_HERO = 56;
 export const DIALOG_WIDTH = 460;
 export const DIALOG_WIDTH_FORM = 540;
 export const DIALOG_WIDTH_PERCENT = '88%';
+/** 浮层（对话框 / 欢迎卡）内容内距：所有浮层同一值，标题、表单分组与按钮行左右缘对齐 */
+export const DIALOG_INSET = 22;
 export const CONTENT_MAX_WIDE = 980;
 export const CONTENT_MAX_MEDIUM = 760;
 export const CONTENT_MAX_CENTERED = 560;

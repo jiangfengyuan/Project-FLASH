@@ -10,7 +10,7 @@ import FlashCore
 /// 「外观与使用」分组：主题模式分段选择
 public struct AppearanceSection: View {
     @EnvironmentObject private var settings: SettingsStore
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
 
     /// 分组入场标记（stagger 淡入上移），由 SettingsView 驱动
     public let appeared: Bool

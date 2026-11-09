@@ -62,13 +62,23 @@ public extension View {
         #endif
     }
 
-    /// 触感反馈（PRD v3 §3.5.3：保存成功 Success、删除 Light）：只在触屏平台生效，macOS 不触发触控板反馈
-    @ViewBuilder
+    /// 触感反馈（PRD v3 §3.5.3：保存成功 Success、删除 Light）：只在触屏平台生效，macOS 不触发触控板反馈；
+    /// 设置 › 辅助功能关闭「触感反馈」后不再触发
     func flashHaptic<T: Equatable>(_ feedback: SensoryFeedback, trigger: T) -> some View {
+        modifier(FlashHapticModifier(feedback: feedback, trigger: trigger))
+    }
+}
+
+private struct FlashHapticModifier<T: Equatable>: ViewModifier {
+    @Environment(\.flashHapticsEnabled) private var enabled
+    let feedback: SensoryFeedback
+    let trigger: T
+
+    func body(content: Content) -> some View {
         #if os(iOS)
-        sensoryFeedback(feedback, trigger: trigger)
+        content.sensoryFeedback(feedback, trigger: trigger) { _, _ in enabled }
         #else
-        self
+        content
         #endif
     }
 }

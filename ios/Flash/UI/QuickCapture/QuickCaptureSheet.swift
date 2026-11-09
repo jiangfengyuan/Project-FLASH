@@ -19,7 +19,7 @@ struct QuickCaptureSheet: View {
 
     @Environment(\.flashRepository) private var repository
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
 
     @State private var text = ""
     @State private var category: Category = .idea
@@ -86,8 +86,8 @@ struct QuickCaptureSheet: View {
         .padding(Spacing.lg)
         .presentationDetents([.height(260), .medium])
         .presentationDragIndicator(.visible)
-        .sensoryFeedback(.success, trigger: saveCount)
-        .sensoryFeedback(.selection, trigger: category)
+        .flashHaptic(.success, trigger: saveCount)
+        .flashHaptic(.selection, trigger: category)
         .animation(Motion.soft(reduceMotion), value: errorMessage)
         .onAppear(perform: restoreDraft)
         .onDisappear(perform: keepDraftIfNeeded)

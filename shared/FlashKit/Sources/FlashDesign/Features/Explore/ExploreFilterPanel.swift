@@ -7,8 +7,11 @@
 import SwiftUI
 import FlashCore
 
-/// 记录页筛选面板（popover 承载，关闭后状态保留在 ExploreView 的 @State 中）。
+/// 记录页筛选面板（关闭后状态保留在宿主页的 @State 中）。
 /// 控件用实色卡片分组（FormSection 语义），可选日期用 Toggle + DatePicker 组合。
+/// macOS：popover 承载，面板自带标题行、「清除筛选」、内距与玻璃底。
+/// iOS：放在带导航栏的 sheet 里，标题 / 完成 / 清除由导航栏承载，面板只输出卡片，
+/// 由宿主给页边距——卡片外缘与其它页面同在页边距线上，不再出现重复标题与双层底。
 public struct ExploreFilterPanel: View {
     @Binding public var criteria: ExploreCriteria
     public let onClear: () -> Void
@@ -20,6 +23,7 @@ public struct ExploreFilterPanel: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
+            #if os(macOS)
             HStack {
                 Text("筛选")
                     .font(Typography.cardTitle)
@@ -31,6 +35,7 @@ public struct ExploreFilterPanel: View {
                     .disabled(!criteria.isActive)
                     .opacity(criteria.isActive ? 1 : 0.4)
             }
+            #endif
 
             SolidCard {
                 VStack(alignment: .leading, spacing: Spacing.sm) {
@@ -62,13 +67,15 @@ public struct ExploreFilterPanel: View {
                     OptionalDateRow(title: "开始日期", date: $criteria.startDate)
                     OptionalDateRow(title: "结束日期", date: $criteria.endDate)
                 }
-                .padding(Spacing.md)
+                .padding(Metrics.cardInset)
             }
         }
+        #if os(macOS)
         .padding(Spacing.md)
         .flashPanelWidth(280) // 浮层固有宽度（几何值，仅 macOS）
         // popover 浮层：玻璃背景（macOS 26+ Liquid Glass / 15 回退 regularMaterial + 细边框）
         .flashGlassBackground(in: RoundedRectangle(cornerRadius: Radius.panel, style: .continuous))
+        #endif
     }
 }
 

@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.flash.app.ui.theme.FlashTokens
 import com.flash.app.ui.theme.LocalIsDarkTheme
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
@@ -111,7 +112,8 @@ fun GlassCard(
     strong: Boolean = false,
     blur: Boolean = true,
     shape: Shape = GlassShape,
-    contentPadding: Dp = 12.dp,
+    // 与 FlashCard / StyleCard(MD3) 同一内距：玻璃风格下卡片内容左缘不再比实体卡片内缩 4dp
+    contentPadding: Dp = FlashTokens.Spacing.CardInset,
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {

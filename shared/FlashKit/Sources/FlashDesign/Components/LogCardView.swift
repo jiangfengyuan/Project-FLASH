@@ -30,7 +30,7 @@ public struct LogCardView: View {
     /// 灵感提醒：未查看过的灵感在徽章旁标「未读」（默认关，macOS 不变）
     public var isUnread: Bool = false
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
     @State private var hovering = false
     /// 删除确认前的极轻缩放反馈
     @State private var deletePulse = false
@@ -93,7 +93,8 @@ public struct LogCardView: View {
                 .foregroundStyle(.primary)
                 .textSelection(.enabled)
         }
-        .padding(14) // 卡片内边距：sm 与 md 之间的特调值
+        // 卡片内边距：与其它卡片同一令牌，卡内文字与上方分组标题、相邻卡片左缘对齐
+        .padding(Metrics.cardInset)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(BrandColors.cardSurface)
         .clipShape(RoundedRectangle(cornerRadius: Radius.row))

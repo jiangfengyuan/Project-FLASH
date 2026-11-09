@@ -5,8 +5,11 @@ import { ThemeState, CalendarState, FeedbackState, DeleteKind } from '../state/F
 import { PageActions, requireActions } from '../state/PageActions';
 import {
   RecordRow, FlashCard, BRAND, DOCK_CLEARANCE, brandText, dangerText, emotionColor, hairlineColor, successFill,
-  motionDuration, MOTION_PRESS, TYPE_SECTION, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION
+  motionDuration, MOTION_PRESS, PAGE_GUTTER, TYPE_SECTION, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION
 } from '../components/CommonBuilders';
+
+/** 月网格列间距：星期表头与日期行共用，每个表头正好居中在对应日期列上方 */
+const GRID_GAP = 2;
 
 @Component
 export struct CalendarPage {
@@ -34,14 +37,14 @@ export struct CalendarPage {
           Button('新建任务').height(44).fontColor(Color.White).backgroundColor(BRAND)
             .onClick(() => requireActions(this.actions).calendarController.openTaskEditor(undefined, this.calendar.selectedDay))
         }.width('100%')
-        Row() {
+        Row({ space: GRID_GAP }) {
           ForEach(['一', '二', '三', '四', '五', '六', '日'], (day: string) => {
             Text(day).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).layoutWeight(1).textAlign(TextAlign.Center)
           }, (day: string) => day)
         }.width('100%')
         Column({ space: 4 }) {
           ForEach(requireActions(this.actions).calendarController.monthWeeks(), (week: string[]) => {
-            Row({ space: 2 }) {
+            Row({ space: GRID_GAP }) {
               ForEach(week, (day: string) => { this.dayCell(day) }, (day: string) => day)
             }.width('100%')
           }, (week: string[]) => week[0])
@@ -60,7 +63,7 @@ export struct CalendarPage {
           Text('数字＝条目总数').fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted)
         }.width('100%')
         ForEach([this.calendar.selectedDay], (day: string) => {
-          FlashCard({ theme: this.theme, contentPadding: 14, space: 8 }) {
+          FlashCard({ theme: this.theme, space: 8 }) {
             Row() {
               Text(day + ' 详情').fontSize(TYPE_BODY).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).layoutWeight(1)
               Button('添加任务', { type: ButtonType.Normal }).height(44).fontSize(TYPE_CAPTION)
@@ -83,7 +86,7 @@ export struct CalendarPage {
           }
         }, (day: string) => day)
 
-      }.width('100%').padding({ left: 16, right: 16, bottom: this.embedded ? DOCK_CLEARANCE : 30 })
+      }.width('100%').padding({ left: PAGE_GUTTER, right: PAGE_GUTTER, bottom: this.embedded ? DOCK_CLEARANCE : 30 })
     }.width('100%').layoutWeight(1)
   }
 
@@ -158,6 +161,7 @@ export struct CalendarPage {
           pressed: { .scale({ x: 0.9, y: 0.9 }) }
         })
         .animation({ duration: motionDuration(MOTION_PRESS), curve: Curve.EaseOut })
+        .accessibilityText(item.completedAt ? `${item.title}，已完成，点按标记为未完成` : `${item.title}，未完成，点按标记为完成`)
         .onClick(() => requireActions(this.actions).calendarController.toggleTask(item))
       Column({ space: 3 }) {
         Text(item.title).fontSize(TYPE_BODY).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)

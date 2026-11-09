@@ -19,7 +19,7 @@ public struct HomeTodayOverviewCard: View {
     /// 情绪状态文字（如「平静」；无记录时传「还没有记录」）
     public let emotionTitle: String
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
 
     public init(recordCount: Int, openTaskCount: Int, emotionEmoji: String, emotionTitle: String) {
         self.recordCount = recordCount
@@ -54,7 +54,7 @@ public struct HomeTodayOverviewCard: View {
                     }
                 }
             }
-            .padding(Spacing.md)
+            .padding(Metrics.cardInset)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
@@ -80,7 +80,6 @@ public struct HomeTodayOverviewCard: View {
     private func wideItem(_ entry: Entry) -> some View {
         HStack(spacing: Spacing.sm) {
             icon(entry)
-                .frame(width: 24) // 图标列宽（几何值，对齐三段）
             VStack(alignment: .leading, spacing: 2) { // 2：数值与标签的紧凑节奏
                 value(entry)
                 label(entry)
@@ -119,10 +118,12 @@ public struct HomeTodayOverviewCard: View {
         .accessibilityElement(children: .combine)
     }
 
+    /// 三档布局共用同一图标列：纵向档逐行堆叠时数值 / 标签左缘对齐，横向档三段节奏一致
     private func icon(_ entry: Entry) -> some View {
         Image(systemName: entry.icon)
             .scaledSystemFont(size: 15, weight: .medium, relativeTo: .body)
             .foregroundStyle(entry.tint)
+            .flashIconColumn()
     }
 
     private func value(_ entry: Entry) -> some View {

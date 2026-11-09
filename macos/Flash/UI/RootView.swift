@@ -10,7 +10,7 @@ import FlashDesign
 
 struct RootView: View {
     @Environment(AppState.self) private var appState
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
 
     var body: some View {
         NavigationSplitView {

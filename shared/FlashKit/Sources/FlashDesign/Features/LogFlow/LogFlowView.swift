@@ -21,7 +21,7 @@ public struct LogFlowView: View {
     @State private var editingLog: LogItem? = nil
     @State private var deletingLog: LogItem? = nil
     @State private var errorMessage: String? = nil
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
 
     /// 缓存键：数据写代际 + 过滤条件（含搜索词/标签/日期/排序）
     private struct FilteredKey: Equatable {
@@ -40,26 +40,33 @@ public struct LogFlowView: View {
         VStack(spacing: 0) {
             // 工具区
             VStack(spacing: 10) { // 10：工具区行距特调（xs 偏紧、sm 偏松）
+                // 胶囊行可横向滚动（iPhone 一行放不下 6 个胶囊 + 排序菜单）：滚动区贴屏幕左缘，
+                // 首个胶囊从页边距开始，与下方日期行、日志卡左缘对齐；排序菜单固定在右侧页边距内
                 HStack(spacing: Spacing.xs) {
-                    // 「已收藏」胶囊：FilterChipView 标准样式（星标金点缀，与记录页一致）
-                    FilterChipView(title: "已收藏", isSelected: filter.favoritesOnly,
-                                   accent: BrandColors.ideaYellow,
-                                   accentText: BrandColors.ideaYellowText) {
-                        filter.favoritesOnly.toggle()
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: Spacing.xs) {
+                            // 「已收藏」胶囊：星标金点缀，与记录页一致
+                            FilterChipView(title: "已收藏", isSelected: filter.favoritesOnly,
+                                           accent: BrandColors.ideaYellow,
+                                           accentText: BrandColors.ideaYellowText) {
+                                filter.favoritesOnly.toggle()
+                            }
+                            // 「想法」标签只挂在 category == .idea 的灵感上，而 LogFilter 只保留
+                            // category == .log（LogFilter.apply），选中它永远无结果，故不出现在筛选 chips
+                            ForEach(ColorTag.allCases.filter { $0 != .idea }, id: \.self) { tag in
+                                tagChip(tag)
+                            }
+                        }
+                        .padding(.leading, Metrics.pageGutter)
                     }
-                    // 「想法」标签只挂在 category == .idea 的灵感上，而 LogFilter 只保留
-                    // category == .log（LogFilter.apply），选中它永远无结果，故不出现在筛选 chips
-                    ForEach(ColorTag.allCases.filter { $0 != .idea }, id: \.self) { tag in
-                        tagChip(tag)
-                    }
-                    Spacer()
                     Picker("排序", selection: $filter.sort) {
                         ForEach(LogSort.allCases, id: \.self) {
                             Text($0.displayName).tag($0)
                         }
                     }
                     .pickerStyle(.menu)
-                    .frame(width: 110)
+                    .fixedSize()
+                    .padding(.trailing, Metrics.pageGutter)
                 }
                 HStack(spacing: Spacing.xs) {
                     DatePicker("开始", selection: startBinding, displayedComponents: .date)
@@ -81,8 +88,10 @@ public struct LogFlowView: View {
                     Spacer()
                 }
                 .font(Typography.caption)
+                // 与下方列表同一页边距：日期选择左缘 = 日志卡左缘
+                .padding(.horizontal, Metrics.pageGutter)
             }
-            .padding(Spacing.sm)
+            .padding(.vertical, Spacing.sm)
 
             Divider()
 
@@ -120,7 +129,8 @@ public struct LogFlowView: View {
                                 }
                         }
                     }
-                    .padding(Spacing.md)
+                    .padding(.horizontal, Metrics.pageGutter)
+                    .padding(.vertical, Spacing.md)
                     // 列表插入/删除/筛选切换统一 Motion.soft；行重排走默认 move
                     .animation(Motion.soft(reduceMotion), value: filtered)
                 }
@@ -195,26 +205,12 @@ public struct LogFlowView: View {
         }
     }
 
+    /// 标签胶囊：与「已收藏」同一 FilterChipView（同字号、内距、高度），选中态用标签色点缀
     private func tagChip(_ tag: ColorTag) -> some View {
         let isOn = filter.tags.contains(tag)
-        return Button {
+        return FilterChipView(title: tag.displayName, isSelected: isOn,
+                              accent: tag.color, accentText: tag.textColor) {
             if isOn { filter.tags.remove(tag) } else { filter.tags.insert(tag) }
-        } label: {
-            Text(tag.displayName)
-                .font(Typography.caption)
-                .padding(.horizontal, 10) // 紧凑胶囊横向内距（无对应令牌）
-                .padding(.vertical, Spacing.xxs)
-                .background(isOn ? tag.color.opacity(0.25)
-                                 : BrandColors.cardSurface)
-                .foregroundStyle(.primary)
-                .clipShape(Capsule())
-                .overlay {
-                    Capsule().stroke(isOn ? tag.color
-                                          : BrandColors.weakBorder,
-                                     lineWidth: 1)
-                }
-                .animation(Motion.quick(reduceMotion), value: isOn)
         }
-        .buttonStyle(.plain)
     }
 }

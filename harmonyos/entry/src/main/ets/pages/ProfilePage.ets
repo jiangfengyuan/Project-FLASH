@@ -4,6 +4,7 @@ import { PageActions, requireActions } from '../state/PageActions';
 import {
   PageHeader, DOCK_CLEARANCE, RADIUS_CARD, BRAND, SegmentedControl, FlashCard, brandText, cardShadowColor,
   dangerText, hairlineColor, iconSemantic, motionDuration, MOTION_PRESS,
+  PAGE_GUTTER, CARD_INSET, ICON_COLUMN,
   TYPE_DISPLAY, TYPE_SECTION, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION
 } from '../components/CommonBuilders';
 
@@ -27,7 +28,7 @@ export struct ProfilePage {
       Column({ space: 16 }) {
         PageHeader(this.theme, '设置', '数据、备份与应用设置')
 
-        FlashCard({ theme: this.theme, contentPadding: 20, space: 8 }) {
+        FlashCard({ theme: this.theme, space: 8 }) {
           SymbolGlyph($r('sys.symbol.doc_text')).fontSize(24).fontColor([brandText(this.theme)])
           Text('数据默认保存在此设备').fontSize(TYPE_GROUP).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)
           Text('可导出备份或在可信局域网内传输').fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
@@ -37,6 +38,7 @@ export struct ProfilePage {
           Row({ space: 16 }) {
             Column({ space: 16 }) {
               this.appearanceGroup()
+              this.accessibilityPrefsGroup()
               this.recordsGroup()
               this.platformGroup()
               this.aboutGroup()
@@ -49,6 +51,7 @@ export struct ProfilePage {
           }.alignItems(VerticalAlign.Top).width('100%')
         } else {
           this.appearanceGroup()
+          this.accessibilityPrefsGroup()
           this.recordsGroup()
           this.platformGroup()
           this.backupGroup()
@@ -56,7 +59,7 @@ export struct ProfilePage {
           this.dangerGroup()
           this.aboutGroup()
         }
-      }.width('100%').padding({ left: 20, right: 20, bottom: DOCK_CLEARANCE })
+      }.width('100%').padding({ left: PAGE_GUTTER, right: PAGE_GUTTER, bottom: DOCK_CLEARANCE })
     }.width('100%').height('100%').backgroundColor(this.theme.themeBackground)
   }
 
@@ -65,26 +68,15 @@ export struct ProfilePage {
     this.groupLabel('外观与使用')
     FlashCard({ theme: this.theme, space: 12 }) {
       Row({ space: 12 }) {
-        SymbolGlyph($r('sys.symbol.slider_vertical_3')).fontSize(20).fontColor([iconSemantic(this.theme, 'appearance')]).width(28)
+        SymbolGlyph($r('sys.symbol.slider_vertical_3')).fontSize(20).fontColor([iconSemantic(this.theme, 'appearance')]).width(ICON_COLUMN)
         Text('主题').fontSize(TYPE_BODY).fontColor(this.theme.themeText).layoutWeight(1)
         Text(this.themeModeLabel()).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
       }.width('100%').height(32)
       SegmentedControl(this.theme, ['浅色', '深色', '跟随系统'], this.themeModeIndex(),
         (index: number) => requireActions(this.actions).setThemeMode(['light', 'dark', 'system'][index]))
-      Row({ space: 12 }) {
-        SymbolGlyph($r('sys.symbol.bolt')).fontSize(20).fontColor([iconSemantic(this.theme, 'appearance')]).width(28)
-        Column({ space: 2 }) {
-          Text('减少动态效果').fontSize(TYPE_BODY).fontColor(this.theme.themeText).width('100%')
-          Text('系统无公开查询接口，此为应用内设置').fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%')
-        }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-        Toggle({ type: ToggleType.Switch, isOn: this.settings.reduceMotion })
-          .onChange((value: boolean) => {
-            requireActions(this.actions).controller.setReduceMotion(value);
-          })
-      }.width('100%')
       if (this.settings.notificationSettingsSupported) {
         Row({ space: 12 }) {
-          SymbolGlyph($r('sys.symbol.bell')).fontSize(20).fontColor([iconSemantic(this.theme, 'appearance')]).width(28)
+          SymbolGlyph($r('sys.symbol.bell')).fontSize(20).fontColor([iconSemantic(this.theme, 'appearance')]).width(ICON_COLUMN)
           Text('通知设置').fontSize(TYPE_BODY).fontColor(this.theme.themeText).layoutWeight(1)
           Text('›').fontSize(TYPE_SECTION).fontColor(this.theme.themeMuted)
         }.width('100%').height(44)
@@ -101,10 +93,41 @@ export struct ProfilePage {
     }
   }
 
+  // 辅助功能：减少动态效果（应用内设置，系统无公开查询接口）、文字大小说明、重新查看新手引导
+  @Builder
+  private accessibilityPrefsGroup() {
+    this.groupLabel('辅助功能')
+    FlashCard({ theme: this.theme, space: 2 }) {
+      Row({ space: 12 }) {
+        SymbolGlyph($r('sys.symbol.bolt')).fontSize(20).fontColor([iconSemantic(this.theme, 'appearance')]).width(ICON_COLUMN)
+        Column({ space: 2 }) {
+          Text('减少动态效果').fontSize(TYPE_BODY).fontColor(this.theme.themeText).width('100%')
+          Text('关闭页面切换、弹出与按压缩放动画').fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%')
+        }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+        Toggle({ type: ToggleType.Switch, isOn: this.settings.reduceMotion })
+          .accessibilityText('减少动态效果')
+          .onChange((value: boolean) => {
+            requireActions(this.actions).controller.setReduceMotion(value);
+          })
+      }.width('100%').constraintSize({ minHeight: 64 })
+      Row({ space: 12 }) {
+        SymbolGlyph($r('sys.symbol.doc_text')).fontSize(20).fontColor([iconSemantic(this.theme, 'appearance')]).width(ICON_COLUMN)
+        Column({ space: 2 }) {
+          Text('文字大小').fontSize(TYPE_BODY).fontColor(this.theme.themeText).width('100%')
+          Text('跟随系统的字体大小设置').fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%')
+        }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+      }.width('100%').constraintSize({ minHeight: 64 })
+        .accessibilityGroup(true)
+        .accessibilityText('文字大小，跟随系统的字体大小设置')
+      this.navRow($r('sys.symbol.lightbulb'), brandText(this.theme), '重新查看新手引导', '介绍与偏好设置，不影响已有记录',
+        () => requireActions(this.actions).controller.replayWelcome())
+    }
+  }
+
   @Builder
   private recordsGroup() {
     this.groupLabel('记录与回顾')
-    FlashCard({ theme: this.theme, contentPadding: 14, space: 2 }) {
+    FlashCard({ theme: this.theme, space: 2 }) {
       this.navRow($r('sys.symbol.calendar'), iconSemantic(this.theme, 'calendar'), '日历', '按日期回看日志与情绪',
         () => requireActions(this.actions).openDetail('calendar'))
       this.navRow($r('sys.symbol.face_smiling'), iconSemantic(this.theme, 'emotion'), '情绪记录', '七级情绪与子情绪',
@@ -118,7 +141,7 @@ export struct ProfilePage {
   @Builder
   private platformGroup() {
     this.groupLabel('平台能力')
-    FlashCard({ theme: this.theme, contentPadding: 14, space: 2 }) {
+    FlashCard({ theme: this.theme, space: 2 }) {
       this.navRow($r('sys.symbol.bolt'), brandText(this.theme), '鸿蒙体验', '星闪、实况窗、智慧服务与多设备',
         () => requireActions(this.actions).openDetail('harmony'))
     }
@@ -223,7 +246,7 @@ export struct ProfilePage {
       Text('清空会删除本机全部日志、情绪和任务，且无法撤销，建议先导出备份。')
         .fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).lineHeight(19).width('100%').padding({ top: 12, bottom: 6 })
       Row({ space: 12 }) {
-        SymbolGlyph($r('sys.symbol.doc_text')).fontSize(20).fontColor([dangerText(this.theme)]).width(28)
+        SymbolGlyph($r('sys.symbol.doc_text')).fontSize(20).fontColor([dangerText(this.theme)]).width(ICON_COLUMN)
         Column({ space: 2 }) {
           Text('清空全部本地数据').fontSize(TYPE_BODY).fontColor(dangerText(this.theme)).width('100%')
           Text('删除后需要再次确认，不可恢复').fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%')
@@ -255,9 +278,11 @@ export struct ProfilePage {
       .shadow({ radius: 16, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 6 })
   }
 
+  // 分组标题与卡内内容同一缩进（卡片内距），标题左缘 = 卡内图标列左缘
   @Builder
   private groupLabel(title: string) {
-    Text(title).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width('100%').padding({ left: 4 })
+    Text(title).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width('100%')
+      .padding({ left: CARD_INSET, right: CARD_INSET })
   }
 
   private themeModeIndex(): number {
@@ -275,7 +300,7 @@ export struct ProfilePage {
   @Builder
   private navRow(icon: Resource, color: string, title: string, subtitle: string, onTap: () => void) {
     Row({ space: 12 }) {
-      SymbolGlyph(icon).fontSize(20).fontColor([color]).width(28)
+      SymbolGlyph(icon).fontSize(20).fontColor([color]).width(ICON_COLUMN)
       Column({ space: 2 }) {
         Text(title).fontSize(TYPE_BODY).fontColor(this.theme.themeText).width('100%')
         Text(subtitle).fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%')
@@ -298,7 +323,7 @@ export struct ProfilePage {
   @Builder
   private actionRow(icon: Resource, color: string, title: string, subtitle: string, enabled: boolean, onTap: () => void) {
     Row({ space: 12 }) {
-      SymbolGlyph(icon).fontSize(20).fontColor([enabled ? color : this.theme.themeMuted]).width(28)
+      SymbolGlyph(icon).fontSize(20).fontColor([enabled ? color : this.theme.themeMuted]).width(ICON_COLUMN)
       Column({ space: 2 }) {
         Text(title).fontSize(TYPE_BODY).fontColor(enabled ? this.theme.themeText : this.theme.themeMuted).width('100%')
         Text(subtitle).fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%')

@@ -10,6 +10,7 @@ import FlashCore
 /// 表单分组容器：组标题 + 实色卡片内容。
 /// 用于设置类表单页的分区（对应 Android 组件族的 FormSection）；
 /// 标题用次文字令牌，内容承载在 `SolidCard` 中（圆角 24）。
+/// 组标题缩进 `Metrics.cardInset`，与卡内内容（调用方以同一令牌内缩）左缘对齐。
 public struct FormSection<Content: View>: View {
     public let title: String
     private let content: Content
@@ -24,7 +25,7 @@ public struct FormSection<Content: View>: View {
             Text(title)
                 .font(Typography.secondary)
                 .foregroundStyle(BrandColors.textSecondary)
-                .padding(.horizontal, Spacing.sm)
+                .padding(.horizontal, Metrics.cardInset)
             SolidCard {
                 content
             }
@@ -40,7 +41,7 @@ public struct FormSection<Content: View>: View {
                 .font(Typography.secondary)
                 .foregroundStyle(BrandColors.textSecondary)
         }
-        .padding(Spacing.md)
+        .padding(Metrics.cardInset)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
     .padding(Spacing.lg)

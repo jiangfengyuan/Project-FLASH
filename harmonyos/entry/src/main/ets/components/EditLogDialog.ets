@@ -4,7 +4,7 @@ import { PageActions, requireActions } from '../state/PageActions';
 import {
   BRAND, FilterChip, FormGroup, RADIUS_CARD, SegmentedControl, cardShadowColor, dangerText,
   floatingSurface, hairlineColor, supportsBlurMaterial, scrimColor,
-  DIALOG_WIDTH_FORM, DIALOG_WIDTH_PERCENT, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION
+  DIALOG_WIDTH_FORM, DIALOG_WIDTH_PERCENT, DIALOG_INSET, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION
 } from './CommonBuilders';
 
 interface ImportanceOption {
@@ -38,17 +38,22 @@ export struct EditLogDialog {
         .onClick(() => this.close())
       Scroll() {
         Column({ space: 14 }) {
-          Row() {
-            Button('关闭', { type: ButtonType.Normal })
-              .fontSize(TYPE_BODY).fontColor(this.theme.themeMuted).backgroundColor(Color.Transparent).height(44)
-              .onClick(() => this.close())
-            Blank()
+          // 标题居中：叠放在按钮行之上，不随左右按钮宽度不同（如「保存中…」）而偏移；标题不接收触摸
+          Stack() {
+            Row() {
+              // 透明按钮去掉左内距：「关闭」文字与下方表单分组左缘对齐
+              Button('关闭', { type: ButtonType.Normal })
+                .fontSize(TYPE_BODY).fontColor(this.theme.themeMuted).backgroundColor(Color.Transparent).height(44)
+                .padding({ left: 0, right: 12 })
+                .onClick(() => this.close())
+              Blank()
+              Button(this.logs.busy ? '保存中…' : '保存', { type: ButtonType.Normal })
+                .fontSize(TYPE_BODY).fontColor(Color.White).backgroundColor(BRAND).height(44)
+                .enabled(!this.logs.busy && requireActions(this.actions).logsController.editValidation() === '')
+                .onClick(() => requireActions(this.actions).logsController.saveEditedLog())
+            }.width('100%')
             Text('编辑记录').fontSize(TYPE_GROUP).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)
-            Blank()
-            Button(this.logs.busy ? '保存中…' : '保存', { type: ButtonType.Normal })
-              .fontSize(TYPE_BODY).fontColor(Color.White).backgroundColor(BRAND).height(44)
-              .enabled(!this.logs.busy && requireActions(this.actions).logsController.editValidation() === '')
-              .onClick(() => requireActions(this.actions).logsController.saveEditedLog())
+              .maxLines(1).hitTestBehavior(HitTestMode.None)
           }.width('100%')
 
           if (this.logs.editDiscard) {
@@ -103,7 +108,7 @@ export struct EditLogDialog {
         }
         .width('100%')
         .enabled(!this.logs.busy)
-        .padding(22)
+        .padding(DIALOG_INSET)
       }.width(this.navigation.isMediumWindow ? DIALOG_WIDTH_FORM : DIALOG_WIDTH_PERCENT).constraintSize({ maxHeight: '90%' })
         .backgroundColor(floatingSurface(this.theme))
         .backgroundBlurStyle(supportsBlurMaterial() ? BlurStyle.COMPONENT_ULTRA_THICK : BlurStyle.NONE)

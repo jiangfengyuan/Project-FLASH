@@ -49,7 +49,7 @@ struct QuickCaptureEntryModifier: ViewModifier {
                     }
                     .flashZoomSource(id: "quickCapture", in: zoomNamespace)
                     .accessibilityLabel("快速记录")
-                    .padding(.trailing, Spacing.md)
+                    .padding(.trailing, Metrics.pageGutter) // 与页面内容右缘对齐
                     .padding(.bottom, 64) // 让出标签栏高度（几何值）
                 }
         }

@@ -6,7 +6,7 @@ import { PageActions, requireActions } from '../state/PageActions';
 import {
   PageHeader, RecordCard, SegmentedControl, FlashCard, EmptyState, DOCK_CLEARANCE, BRAND, brandText,
   floatingSurface, hairlineColor, supportsBlurMaterial, iconSemantic, fabOptionColor, motionDuration,
-  MOTION_PRESS, MOTION_FADE,
+  MOTION_PRESS, MOTION_FADE, PAGE_GUTTER, CARD_INSET,
   TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION,
   HOME_HALO_TOP, HOME_HALO_MID, HOME_HALO_OUTER
 } from '../components/CommonBuilders';
@@ -39,7 +39,8 @@ export struct HomePage {
               colors: [[HOME_HALO_TOP, 0.0], [HOME_HALO_MID, 0.45], [HOME_HALO_OUTER, 1.0]]
             })
           Column() {
-            PageHeader(this.theme, '此刻', this.dateSubtitle())
+            // 此页标题在光晕 Stack 里、不在带页边距的内容列中，自行传入页边距
+            PageHeader(this.theme, '此刻', this.dateSubtitle(), PAGE_GUTTER)
             Row({ space: 12 }) {
               SymbolGlyph($r('sys.symbol.magnifyingglass')).fontSize(20).fontColor([brandText(this.theme)])
               Text('搜索或筛选记录').fontSize(TYPE_BODY).fontColor(this.theme.themeMuted).layoutWeight(1)
@@ -47,7 +48,8 @@ export struct HomePage {
             }
             .width('100%')
             .height(52)
-            .padding({ left: 16, right: 16 })
+            // 与卡片同一内距：放大镜左缘 = 下方卡片内容左缘
+            .padding({ left: CARD_INSET, right: CARD_INSET })
             .backgroundColor(floatingSurface(this.theme))
             .backgroundBlurStyle(supportsBlurMaterial() ? BlurStyle.COMPONENT_THIN : BlurStyle.NONE)
             .borderRadius(26)
@@ -61,7 +63,7 @@ export struct HomePage {
             .accessibilityText('搜索或筛选记录')
             .onClick(() => requireActions(this.actions).switchTab(1))
             .animation({ duration: motionDuration(MOTION_FADE), curve: Curve.EaseOut })
-            .margin({ left: 20, right: 20 })
+            .margin({ left: PAGE_GUTTER, right: PAGE_GUTTER })
           }.width('100%')
         }
 
@@ -76,14 +78,14 @@ export struct HomePage {
             }.layoutWeight(1).alignItems(HorizontalAlign.Start)
           }
           .alignItems(VerticalAlign.Top)
-          .padding({ left: 20, right: 20, top: 12, bottom: DOCK_CLEARANCE })
+          .padding({ left: PAGE_GUTTER, right: PAGE_GUTTER, top: 12, bottom: DOCK_CLEARANCE })
           .width('100%')
         } else {
           Column({ space: 12 }) {
             this.todayCard()
             this.captureCard()
             this.recentSection()
-          }.padding({ left: 20, right: 20, top: 12, bottom: DOCK_CLEARANCE }).width('100%')
+          }.padding({ left: PAGE_GUTTER, right: PAGE_GUTTER, top: 12, bottom: DOCK_CLEARANCE }).width('100%')
         }
       }.width('100%')
     }.width('100%').height('100%').backgroundColor(this.theme.themeBackground)

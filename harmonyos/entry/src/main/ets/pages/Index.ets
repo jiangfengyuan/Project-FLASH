@@ -19,6 +19,7 @@ import { RecordDetailDialog } from '../components/RecordDetailDialog';
 import { TaskEditorDialog } from '../components/TaskEditorDialog';
 import { DestructiveConfirmDialog } from '../components/DestructiveConfirmDialog';
 import { WelcomeOverlay } from '../components/WelcomeOverlay';
+import { onboardingBack } from '../state/Onboarding';
 import {
   FabButton, FabOption, FlashDockBar, DetailHeader, LoadingState, ErrorState, FAB_SIZE, BRAND, brandText,
   scrimColor, toastSurface, toastLevelColor, fabOptionColor, motionDuration,
@@ -27,7 +28,7 @@ import {
   PAGE_BACKGROUND_LIGHT, PAGE_BACKGROUND_DARK, CARD_SURFACE_LIGHT, CARD_SURFACE_DARK,
   TEXT_PRIMARY_LIGHT, TEXT_PRIMARY_DARK, TEXT_MUTED_LIGHT, TEXT_MUTED_DARK,
   WEAK_SURFACE_LIGHT, CONTROL_SURFACE_DARK, TINT_SURFACE_LIGHT, TINT_SURFACE_DARK,
-  DANGER_SURFACE_LIGHT, DANGER_SURFACE_DARK, hairlineColor
+  DANGER_SURFACE_LIGHT, DANGER_SURFACE_DARK, hairlineColor, PAGE_GUTTER
 } from '../components/CommonBuilders';
 // 调色板以 CommonBuilders 令牌为准，此处仅组合主题所需的常量。
 const LIGHT_BACKGROUND = PAGE_BACKGROUND_LIGHT;
@@ -105,6 +106,10 @@ struct Index {
   // stack, so the system back gesture must be routed manually: back closes
   // the detail page first, and only exits the app from the home page.
   onBackPress(): boolean {
+    // 新手引导覆盖全屏：返回键先在引导内回退（见 state/Onboarding.onboardingBack）
+    if (this.settings.showWelcome) {
+      return onboardingBack(this.settings);
+    }
     if (this.logs.editingLogId !== '') {
       this.actions?.logsController.requestCloseEdit();
       return true;
@@ -296,7 +301,7 @@ struct Index {
       FabButton(this.navigation, () => this.toggleFab())
     }
     .width('100%')
-    .padding({ left: 20, right: 20, bottom: 16 + this.navigation.navigationBarHeight })
+    .padding({ left: PAGE_GUTTER, right: PAGE_GUTTER, bottom: 16 + this.navigation.navigationBarHeight })
   }
 
   @Builder
@@ -494,7 +499,7 @@ struct Index {
       }
 
       if (this.settings.showWelcome) {
-        WelcomeOverlay({ theme: this.theme, actions: this.actions })
+        WelcomeOverlay({ theme: this.theme, settings: this.settings, navigation: this.navigation, actions: this.actions })
           .transition(overlayTransition())
       }
     }

@@ -48,6 +48,8 @@ struct FlashApp: App {
                 .environment(\.flashRepository, assembly.repository)
                 .environmentObject(settings)
                 .preferredColorScheme(settings.themeMode.colorScheme)
+                // 辅助功能偏好（减少动态效果 / 文字大小 / 触感反馈）：sheet 与全屏覆盖继承
+                .flashAccessibilityPreferences(settings)
                 .tint(BrandColors.brandPrimary)
                 // 深链：flash://capture、flash://today、flash://ideas（小组件 / 通知 / 控制中心）
                 .onOpenURL { appState.handle(url: $0) }

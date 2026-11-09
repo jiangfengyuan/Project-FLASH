@@ -14,7 +14,6 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,11 +25,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
@@ -63,6 +64,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -75,13 +77,23 @@ import com.flash.app.data.model.SubEmotion
 import com.flash.app.data.model.emoji
 import com.flash.app.ui.components.StyleCard
 import com.flash.app.ui.components.hexToColor
+import com.flash.app.ui.theme.FlashTokens
 import com.flash.app.ui.theme.ModuleColors
+import com.flash.app.ui.theme.LocalReduceMotion
+import com.flash.app.ui.theme.reducedEnter
+import com.flash.app.ui.theme.reducedExit
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 
 /** 情绪页（PRD 7.4 / 效果图）：emoji 选择器 + 简短文字 + 周趋势 + 历史 */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EmotionScreen(onBack: () -> Unit) {
     val app = LocalContext.current.applicationContext as FlashApplication
+    // 减少动态效果：emoji 切换只淡入淡出，历史行删除 / 插入不做位移动画
+    val reduceMotion = LocalReduceMotion.current
     val viewModel: EmotionViewModel = viewModel(factory = EmotionViewModel.factory(app.repository))
     val emotions by viewModel.emotions.collectAsStateWithLifecycle()
     val statsEmotions by viewModel.statsEmotions.collectAsStateWithLifecycle()
@@ -116,7 +128,7 @@ fun EmotionScreen(onBack: () -> Unit) {
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = FlashTokens.Spacing.PageHorizontal),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(Modifier.height(8.dp))
@@ -129,8 +141,12 @@ fun EmotionScreen(onBack: () -> Unit) {
                     AnimatedContent(
                         targetState = viewModel.selectedLevel,
                         transitionSpec = {
-                            (scaleIn(tween(220)) + fadeIn(tween(220)))
-                                .togetherWith(scaleOut(tween(180)) + fadeOut(tween(180)))
+                            if (reduceMotion) {
+                                reducedEnter().togetherWith(reducedExit())
+                            } else {
+                                (scaleIn(tween(220)) + fadeIn(tween(220)))
+                                    .togetherWith(scaleOut(tween(180)) + fadeOut(tween(180)))
+                            }
                         },
                         label = "emojiSwap",
                     ) { level ->
@@ -212,7 +228,13 @@ fun EmotionScreen(onBack: () -> Unit) {
                     EmotionStatsSection(emotions = statsEmotions, weekAligned = true)
                 }
                 items(items = emotions, key = { it.id }) { record ->
-                    Column(modifier = Modifier.animateItem()) {
+                    Column(
+                        modifier = if (reduceMotion) {
+                            Modifier.animateItem(placementSpec = null)
+                        } else {
+                            Modifier.animateItem()
+                        },
+                    ) {
                         EmotionRow(record, onDelete = { deletingRecord = record })
                         HorizontalDivider(thickness = 0.5.dp)
                     }
@@ -283,6 +305,12 @@ private fun SubEmotionSelector(
     }
 }
 
+/** emoji 选择器每档的固定宽度：容纳最长档名「非常不开心」；各档等宽，选中切换时邻居不再左右挪动 */
+private val EmojiSlotWidth = 72.dp
+
+/** 选中档 emoji 放大倍数（34sp / 28sp）：用绘制缩放而非改字号，行高不随选中跳动 */
+private const val EmojiSelectedScale = 34f / 28f
+
 /** 七档 emoji 选择器（😍😊🙂😐😔😣😡，对应 level 3→-3） */
 @Composable
 private fun EmojiSelector(selected: EmotionLevel, onSelect: (EmotionLevel) -> Unit) {
@@ -290,6 +318,7 @@ private fun EmojiSelector(selected: EmotionLevel, onSelect: (EmotionLevel) -> Un
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .selectableGroup()
             .horizontalScroll(rememberScrollState()),
     ) {
         EmotionLevel.entries.sortedByDescending { it.value }.forEach { level ->
@@ -297,7 +326,8 @@ private fun EmojiSelector(selected: EmotionLevel, onSelect: (EmotionLevel) -> Un
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .clip(CircleShape)
+                    .widthIn(min = EmojiSlotWidth)
+                    .clip(RoundedCornerShape(FlashTokens.Radius.Card))
                     .background(
                         if (isSelected) {
                             MaterialTheme.colorScheme.primaryContainer
@@ -305,10 +335,19 @@ private fun EmojiSelector(selected: EmotionLevel, onSelect: (EmotionLevel) -> Un
                             Color.Transparent
                         },
                     )
-                    .clickable { onSelect(level) }
+                    // 单选语义：读屏朗读档名与「已选中」，不再读 emoji 字符名
+                    .selectable(selected = isSelected, role = Role.RadioButton, onClick = { onSelect(level) })
                     .padding(horizontal = 8.dp, vertical = 6.dp),
             ) {
-                Text(level.emoji, fontSize = if (isSelected) 34.sp else 28.sp)
+                Text(
+                    level.emoji,
+                    fontSize = 28.sp,
+                    modifier = Modifier.clearAndSetSemantics {}.graphicsLayer {
+                        val scale = if (isSelected) EmojiSelectedScale else 1f
+                        scaleX = scale
+                        scaleY = scale
+                    },
+                )
                 Text(
                     level.displayName,
                     style = MaterialTheme.typography.labelSmall,

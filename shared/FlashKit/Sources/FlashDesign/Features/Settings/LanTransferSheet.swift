@@ -43,10 +43,15 @@ public struct LanTransferSheet: View {
                         } label: {
                             HStack {
                                 Image(systemName: controller.selectedDevice == device ? "checkmark.circle.fill" : "circle")
+                                    .accessibilityHidden(true) // 选中状态由 isSelected 特征朗读
                                 Text(device.name)
                             }
+                            .frame(minHeight: Metrics.minTouchTarget)
+                            .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
+                        .accessibilityAddTraits(controller.selectedDevice == device ? [.isSelected] : [])
+                        .accessibilityHint("选择这台设备作为发送方")
                     }
                 }
                 TextField("六位配对 PIN", text: $controller.enteredPIN)

@@ -52,6 +52,41 @@ public enum Metrics {
     public static let readingMaxWidth: CGFloat = 720
     /// 桌面端工具页内容最大宽度
     public static let toolMaxWidth: CGFloat = 1200
+
+    // MARK: 对齐栅格（所有页面共用，保证跨页、跨区块的左右边缘落在同一条线上）
+
+    /// 页面左右边距：页标题、页内工具行、卡片外缘、列表都从这条线开始。
+    /// iOS 取 16，与系统导航栏大标题 / 返回按钮的布局边距一致（标题与内容左缘对齐）；
+    /// macOS 取 24（主窗口内容区）。
+    #if os(macOS)
+    public static let pageGutter: CGFloat = Spacing.lg
+    #else
+    public static let pageGutter: CGFloat = Spacing.md
+    #endif
+
+    /// 卡片内容内边距：日志卡、实色卡、图表卡、提示行统一取 16，
+    /// 卡片上方的分组标题也缩进同样距离，与卡内文字左缘对齐。
+    public static let cardInset: CGFloat = Spacing.md
+
+    /// 图标列基准宽度（随系统字体档位缩放，见 `View.flashIconColumn()`）：
+    /// 不同 SF Symbol 固有宽度不同，放进等宽列后其后的文字才能逐行左对齐。
+    public static let iconColumn: CGFloat = 20
+}
+
+extension View {
+    /// 把图标放进固定宽度的图标列（基准 `Metrics.iconColumn`，随系统字体档位缩放），
+    /// 使同一组行里图标居中对齐、其后的文字左缘对齐。
+    public func flashIconColumn() -> some View {
+        modifier(IconColumnModifier())
+    }
+}
+
+private struct IconColumnModifier: ViewModifier {
+    @ScaledMetric(relativeTo: .body) private var width: CGFloat = Metrics.iconColumn
+
+    func body(content: Content) -> some View {
+        content.frame(width: width, alignment: .center)
+    }
 }
 
 // MARK: - 字体（品牌标准 §30 Typography）

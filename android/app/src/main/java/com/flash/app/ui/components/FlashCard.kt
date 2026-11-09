@@ -28,7 +28,7 @@ import com.flash.app.ui.theme.LocalIsDarkTheme
 fun FlashCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
-    contentPadding: Dp = FlashTokens.Spacing.MD,
+    contentPadding: Dp = FlashTokens.Spacing.CardInset,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val shape = RoundedCornerShape(FlashTokens.Radius.Card)

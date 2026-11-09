@@ -21,7 +21,7 @@ public struct CalendarView: View {
     @State private var message: String?
     /// 月份切换方向：+1 前进 / -1 后退 / 0 无方向（回到本月），驱动方向性过渡
     @State private var monthDirection = 0
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
     @Environment(\.flashRepository) private var repository
     @Environment(FocusRouter.self) private var focusRouter
 
@@ -29,6 +29,9 @@ public struct CalendarView: View {
     /// 键不含 displayedMonth：aggregateDay 对全部日期产出字典，与展示月份无关。
     /// 不能用 @Query 实体数组做键：PersistentModel 相等走身份，漏掉勾选完成等就地更新。
     @State private var aggregateCache = ViewComputeCache<Int, [String: DayAggregate]>()
+
+    /// 月网格行列间距（星期表头共用，保证表头与日期列中线对齐）
+    private static let gridSpacing: CGFloat = Spacing.xxs
 
     /// 共享公历实例，避免每次渲染格子都新建 Calendar
     private static let gregorian = Calendar(identifier: .gregorian)
@@ -48,37 +51,16 @@ public struct CalendarView: View {
             }
         }
         VStack(spacing: 0) {
-            // 头部
-            HStack {
-                Button { shiftMonth(-1) } label: { Image(systemName: "chevron.left") }
-                    .accessibilityLabel("上一月")
-                    .help("上一月")
-                Text(monthTitle)
-                    .font(Typography.cardTitle)
-                    .frame(minWidth: 140) // 月份标题最小宽度，切换月份不抖动（几何值）
-                Button { shiftMonth(1) } label: { Image(systemName: "chevron.right") }
-                    .accessibilityLabel("下一月")
-                    .help("下一月")
-                Spacer()
-                Button {
-                    editingTask = nil
-                    showingTaskEditor = true
-                } label: {
-                    Label("新建任务", systemImage: "plus")
-                }
-                Button("回到今天") {
-                    let today = Date()
-                    let order = Self.gregorian.compare(today, to: displayedMonth, toGranularity: .month)
-                    monthDirection = order == .orderedAscending ? -1 : (order == .orderedDescending ? 1 : 0)
-                    displayedMonth = today
-                    selectedDate = today
-                }
+            // 头部：一行放不下（iPhone 竖屏 / 大字号）时「新建任务」退为仅图标，月份标题与按钮不被挤压截断
+            ViewThatFits(in: .horizontal) {
+                header(compactNewTask: false)
+                header(compactNewTask: true)
             }
-            .padding(.horizontal, Spacing.md)
+            .padding(.horizontal, Metrics.pageGutter)
             .padding(.vertical, 10) // 头部纵向内距：紧凑特调值（无对应令牌）
 
-            // 星期表头
-            HStack {
+            // 星期表头：列间距与月网格 GridItem 间距一致，每个表头正好居中在对应日期列上方
+            HStack(spacing: Self.gridSpacing) {
                 ForEach(["一", "二", "三", "四", "五", "六", "日"], id: \.self) { day in
                     Text(day)
                         .font(Typography.caption)
@@ -86,17 +68,17 @@ public struct CalendarView: View {
                         .frame(maxWidth: .infinity)
                 }
             }
-            .padding(.horizontal, Spacing.md)
+            .padding(.horizontal, Metrics.pageGutter)
             .padding(.bottom, 6) // 表头与网格的紧凑间距
 
             // 月网格
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Spacing.xxs), count: 7),
-                      spacing: Spacing.xxs) {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Self.gridSpacing), count: 7),
+                      spacing: Self.gridSpacing) {
                 ForEach(weeks.flatMap { $0 }, id: \.self) { date in
                     dayCell(date, aggregates: aggregates)
                 }
             }
-            .padding(.horizontal, Spacing.md)
+            .padding(.horizontal, Metrics.pageGutter)
             .id(displayedMonth)
             .transition(monthTransition)
             .animation(reduceMotion ? Motion.reducedFade(true) : Motion.emphasize(false),
@@ -128,7 +110,8 @@ public struct CalendarView: View {
                         Text("这一天没有记录").foregroundStyle(.secondary)
                     }
                 }
-                .padding(Spacing.md)
+                .padding(.horizontal, Metrics.pageGutter)
+                .padding(.vertical, Spacing.md)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
@@ -145,6 +128,51 @@ public struct CalendarView: View {
             Button("好") { message = nil }
         } message: {
             Text(message ?? "")
+        }
+    }
+
+    private func header(compactNewTask: Bool) -> some View {
+        HStack {
+            Button { shiftMonth(-1) } label: { Image(systemName: "chevron.left") }
+                .accessibilityLabel("上一月")
+                .help("上一月")
+            Text(monthTitle)
+                .font(Typography.cardTitle)
+                .frame(minWidth: 140) // 月份标题最小宽度，切换月份不抖动（几何值）
+            Button { shiftMonth(1) } label: { Image(systemName: "chevron.right") }
+                .accessibilityLabel("下一月")
+                .help("下一月")
+            Spacer(minLength: Spacing.xs)
+            Button {
+                editingTask = nil
+                showingTaskEditor = true
+            } label: {
+                Label("新建任务", systemImage: "plus")
+                    .labelStyle(NewTaskLabelStyle(iconOnly: compactNewTask))
+            }
+            .help("新建任务")
+            Button("回到今天") {
+                let today = Date()
+                let order = Self.gregorian.compare(today, to: displayedMonth, toGranularity: .month)
+                monthDirection = order == .orderedAscending ? -1 : (order == .orderedDescending ? 1 : 0)
+                displayedMonth = today
+                selectedDate = today
+            }
+        }
+        .fixedSize(horizontal: false, vertical: true)
+    }
+
+    /// 「新建任务」标签：宽时图文、窄时仅图标（读屏仍读标题）
+    private struct NewTaskLabelStyle: LabelStyle {
+        let iconOnly: Bool
+
+        func makeBody(configuration: Configuration) -> some View {
+            if iconOnly {
+                configuration.icon
+                    .accessibilityLabel(Text("新建任务"))
+            } else {
+                Label(configuration)
+            }
         }
     }
 
@@ -247,7 +275,9 @@ public struct CalendarView: View {
                 .accessibilityLabel("删除任务")
                 .help("删除任务")
         }
-        .padding(10) // 行内边距：紧凑特调值（无对应令牌）
+        // 横向与日志卡同一内边距：同一详情列表里任务行与日志卡的文字左缘对齐
+        .padding(.horizontal, Metrics.cardInset)
+        .padding(.vertical, 10) // 行纵向内距：紧凑特调值（无对应令牌）
         .background(BrandColors.weakSurface, in: RoundedRectangle(cornerRadius: Radius.row))
         .overlay {
             RoundedRectangle(cornerRadius: Radius.row)

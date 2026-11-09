@@ -7,9 +7,14 @@ import { NavigationState, ThemeState, LogsState, EmotionState, CalendarState, Fe
 import { PageActions, requireActions } from '../state/PageActions';
 import { StatsController } from '../state/StatsController';
 import {
-  PageHeader, DOCK_CLEARANCE, FilterChip, FlashCard, brandText, hairlineColor, statLineColor,
+  PageHeader, DOCK_CLEARANCE, FilterChip, FlashCard, brandText, hairlineColor, statLineColor, PAGE_GUTTER,
   TYPE_TITLE, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY
 } from '../components/CommonBuilders';
+
+// 条形行三列：标签列 / 条形 / 数值列。趋势卡与分布卡共用同宽列且数值右对齐，
+// 上下两张卡的条形起点、终点和数值右缘都落在同一条线上。
+const BAR_LABEL_WIDTH = 58;
+const BAR_VALUE_WIDTH = 48;
 
 @Component
 export struct StatsPage {
@@ -76,7 +81,7 @@ export struct StatsPage {
           this.distributionCard()
           this.compositionCard()
         }
-      }.width('100%').padding({ left: 20, right: 20, bottom: DOCK_CLEARANCE })
+      }.width('100%').padding({ left: PAGE_GUTTER, right: PAGE_GUTTER, bottom: DOCK_CLEARANCE })
     }.width('100%').layoutWeight(1).backgroundColor(this.theme.themeBackground)
   }
 
@@ -110,12 +115,13 @@ export struct StatsPage {
       }
       ForEach(this.days(), (day: string) => {
         Row({ space: 10 }) {
-          Text(shortDay(day)).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width(58)
+          Text(shortDay(day)).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width(BAR_LABEL_WIDTH)
           Stack({ alignContent: Alignment.Start }) {
             Row().height(10).width('100%').backgroundColor(this.theme.themeControl).borderRadius(5)
             Row().height(10).width(`${requireActions(this.actions).emotionController.dayBar(day)}%`).backgroundColor(brandText(this.theme)).borderRadius(5)
           }.layoutWeight(1).height(12)
-          Text(requireActions(this.actions).emotionController.dayEmotionLabel(day)).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeText).width(34)
+          Text(requireActions(this.actions).emotionController.dayEmotionLabel(day)).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeText)
+            .width(BAR_VALUE_WIDTH).textAlign(TextAlign.End)
         }.width('100%')
       }, (day: string) => day)
     }
@@ -174,14 +180,14 @@ export struct StatsPage {
   @Builder
   private distributionRow(label: string, count: number, total: number) {
     Row({ space: 10 }) {
-      Text(label).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width(58)
+      Text(label).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width(BAR_LABEL_WIDTH)
       Stack({ alignContent: Alignment.Start }) {
         Row().height(10).width('100%').backgroundColor(this.theme.themeControl).borderRadius(5)
         if (count > 0 && total > 0) {
           Row().height(10).width(`${Math.max(4, Math.round(100 * count / total))}%`).backgroundColor(brandText(this.theme)).borderRadius(5)
         }
       }.layoutWeight(1).height(12)
-      Text(`${count} 次`).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeText).width(48).textAlign(TextAlign.End)
+      Text(`${count} 次`).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeText).width(BAR_VALUE_WIDTH).textAlign(TextAlign.End)
     }.width('100%')
   }
 
@@ -189,11 +195,12 @@ export struct StatsPage {
     Column({ space: 12 }) {
       Column({ space: 12 }) {
         PageHeader(this.theme, '回顾', '看见记录背后的节奏与情绪')
-        Row({ space: 12 }) {
+        // 胶囊间距与下方时间范围胶囊行一致（8），两行胶囊起点对齐
+        Row({ space: 8 }) {
           FilterChip(this.theme, '趋势', !this.showCalendar, () => this.showCalendar = false)
           FilterChip(this.theme, '日历', this.showCalendar, () => this.showCalendar = true)
         }.width('100%')
-      }.width('100%').padding({ left: 20, right: 20 })
+      }.width('100%').padding({ left: PAGE_GUTTER, right: PAGE_GUTTER })
       if (this.showCalendar) {
         CalendarPage({ theme: this.theme, calendar: this.calendar, feedback: this.feedback, actions: this.actions, embedded: true })
       } else {

@@ -14,7 +14,7 @@ import FlashDesign
 /// Motion.quick；选中图标极轻 bounce。所有动效尊重 Reduce Motion。
 struct Sidebar: View {
     @Environment(AppState.self) private var appState
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
     @Namespace private var selectionNamespace
 
     var body: some View {
@@ -82,15 +82,13 @@ private struct SidebarRow: View {
     let onSelect: () -> Void
 
     @State private var hovering = false
-    /// 图标列宽：固定基准 20，随字体档位缩放（图标框场景）
-    @ScaledMetric(relativeTo: .body) private var iconColumnWidth = 20
 
     var body: some View {
         Button(action: onSelect) {
             HStack(spacing: Spacing.xs) {
                 Image(systemName: module.systemImage)
                     .scaledSystemFont(size: 14, relativeTo: .body)
-                    .frame(width: iconColumnWidth, alignment: .center)
+                    .flashIconColumn() // 共享图标列：各行标题左缘对齐
                     // 选中图标极轻 bounce（减弱动态时关闭）
                     .scaleEffect(isSelected && !reduceMotion ? 1.06 : 1)
                     .animation(Motion.bounce(reduceMotion), value: isSelected)

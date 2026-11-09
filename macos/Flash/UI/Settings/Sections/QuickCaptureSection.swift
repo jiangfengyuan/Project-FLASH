@@ -15,7 +15,7 @@ import FlashDesign
 /// 注册结果（含被占用失败）经 GlobalHotKeyService.state 回本组提示。
 struct QuickCaptureSection: View {
     @EnvironmentObject private var settings: SettingsStore
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
     /// 热键服务单例（@Observable）：只读 state，用于冲突提示
     @State private var hotKeys = GlobalHotKeyService.shared
 

@@ -17,7 +17,7 @@ public struct QuickCaptureCard: View {
     public let focus: FocusState<Bool>.Binding?
     public let onSave: () -> Void
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
 
     public init(draft: Binding<String>,
          category: Binding<FlashCore.Category>,
@@ -65,7 +65,7 @@ public struct QuickCaptureCard: View {
                         .animation(Motion.quick(reduceMotion), value: hasDraft)
                 }
             }
-            .padding(Spacing.md)
+            .padding(Metrics.cardInset)
         }
         .cardFloat(reduceMotion: reduceMotion)
     }

@@ -17,7 +17,7 @@ public struct GreetingHeaderView: View {
     public let onNewTask: () -> Void
 
     @State private var isNewHovered = false
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
 
     public init(onNewLog: @escaping () -> Void, onNewIdea: @escaping () -> Void,
                 onNewEmotion: @escaping () -> Void, onNewTask: @escaping () -> Void) {

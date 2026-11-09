@@ -2,7 +2,7 @@ import { NavigationState, ThemeState, FeedbackState, DeleteKind } from '../state
 import { PageActions, requireActions } from '../state/PageActions';
 import {
   cardShadowColor, floatingSurface, hairlineColor, supportsBlurMaterial, scrimColor, dangerButtonColor,
-  DIALOG_WIDTH, DIALOG_WIDTH_PERCENT, TYPE_SECTION, TYPE_SECONDARY
+  DIALOG_WIDTH, DIALOG_WIDTH_PERCENT, DIALOG_INSET, RADIUS_CARD, TYPE_SECTION, TYPE_SECONDARY
 } from './CommonBuilders';
 
 @Component
@@ -27,7 +27,7 @@ export struct DestructiveConfirmDialog {
           Button(this.feedback.destructive?.kind === DeleteKind.ALL ? '确认清空' : '确认删除').layoutWeight(1).height(44)
             .fontColor(Color.White).backgroundColor(dangerButtonColor()).onClick(() => requireActions(this.actions).controller.confirmDestructiveAction())
         }.width('100%')
-      }.width(this.navigation.isMediumWindow ? DIALOG_WIDTH : DIALOG_WIDTH_PERCENT).padding(22).backgroundColor(floatingSurface(this.theme)).borderRadius(24)
+      }.width(this.navigation.isMediumWindow ? DIALOG_WIDTH : DIALOG_WIDTH_PERCENT).padding(DIALOG_INSET).backgroundColor(floatingSurface(this.theme)).borderRadius(RADIUS_CARD)
         .backgroundBlurStyle(supportsBlurMaterial() ? BlurStyle.COMPONENT_ULTRA_THICK : BlurStyle.NONE)
         .border({ width: 0.5, color: hairlineColor(this.theme) })
         .shadow({ radius: 24, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 10 })

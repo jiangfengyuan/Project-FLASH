@@ -3,7 +3,7 @@ import { NavigationState, ThemeState, LogsState } from '../state/FeatureStates';
 import { PageActions, requireActions } from '../state/PageActions';
 import {
   BRAND, cardShadowColor, floatingSurface, hairlineColor, supportsBlurMaterial, scrimColor,
-  DIALOG_WIDTH, DIALOG_WIDTH_PERCENT, TYPE_SECTION, TYPE_CAPTION
+  DIALOG_WIDTH, DIALOG_WIDTH_PERCENT, DIALOG_INSET, RADIUS_CARD, TYPE_SECTION, TYPE_CAPTION
 } from './CommonBuilders';
 
 @Component
@@ -42,7 +42,7 @@ export struct QuickInputDialog {
           Button('保存').layoutWeight(1).height(44).backgroundColor(BRAND)
             .enabled(this.logs.quickText.trim().length > 0).onClick(() => requireActions(this.actions).logsController.saveQuickCategory())
         }.width('100%')
-      }.width(this.navigation.isMediumWindow ? DIALOG_WIDTH : DIALOG_WIDTH_PERCENT).padding(22).backgroundColor(floatingSurface(this.theme)).borderRadius(24)
+      }.width(this.navigation.isMediumWindow ? DIALOG_WIDTH : DIALOG_WIDTH_PERCENT).padding(DIALOG_INSET).backgroundColor(floatingSurface(this.theme)).borderRadius(RADIUS_CARD)
         .backgroundBlurStyle(supportsBlurMaterial() ? BlurStyle.COMPONENT_ULTRA_THICK : BlurStyle.NONE)
         .border({ width: 0.5, color: hairlineColor(this.theme) })
         .shadow({ radius: 24, color: cardShadowColor(this.theme), offsetX: 0, offsetY: 10 })
