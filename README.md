@@ -12,6 +12,12 @@
 
 ![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-brightgreen.svg)
 
+## 官方 App 图标
+
+<img src="assets/brand/flash-standard-icon.png" alt="Flash 一闪标准 App 图标，纸张和铅笔" width="184" />
+
+2026 年 11 月 9 日起，**Flash 一闪**以这款暖色纸张与铅笔 3D 图标为跨平台标准图标。透明 PNG 主资源、设计边界及各平台接入位置见 [官方图标规范](docs/brand/APP_ICON.md)。
+
 ## 平台
 
 | 平台 | 技术栈 | 状态 |
