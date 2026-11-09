@@ -1,0 +1,6 @@
+{
+  "layered-image": {
+    "background": "$media:flash_icon_background",
+    "foreground": "$media:flash_icon_foreground"
+  }
+}

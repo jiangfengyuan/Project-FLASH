@@ -17,7 +17,7 @@
         "name": "EntryAbility",
         "srcEntry": "./ets/entryability/EntryAbility.ets",
         "description": "$string:EntryAbility_desc",
-        "icon": "$media:flash_standard_icon",
+        "icon": "$media:layered_image",
         "label": "$string:EntryAbility_label",
         "startWindowIcon": "$media:flash_standard_icon",
         "startWindowBackground": "$color:start_window_background",
@@ -25,7 +25,9 @@
         "skills": [
           {
             "entities": ["entity.system.home"],
-            "actions": ["action.system.home"]
+            // 入口 UIAbility 判定（桌面图标取此 Ability 的 icon）：官方要求 entity.system.home +
+            // ohos.want.action.home；保留旧写法 action.system.home 以兼容旧版本 SDK
+            "actions": ["action.system.home", "ohos.want.action.home"]
           }
         ]
       }
