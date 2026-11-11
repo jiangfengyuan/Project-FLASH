@@ -36,6 +36,8 @@ Consequences, each verified:
 - Some fixes exist on only one line. `fix/pr3-review-followups` has the HarmonyOS obfuscation fix (F-05), the fragmented-receive fix (F-23) and the keep-rejected-rows merge fix (F-08); `feat/paper-writing` has none of those three as dedicated commits and its `obfuscation-rules.txt` is unchanged from `main`.
 - PR #5 is based on `main`, so it still carries Room v4 and the 420-entry time-zone list.
 
+> **Correction (2026-11-11, later the same day):** the anchored Swift ID and date patterns (F-09, commit `2187100`) are also only on `fix/pr3-review-followups`; `feat/paper-writing` still uses `^…$`. Wherever this report lists the fixes unique to that branch as F-05, F-08 and F-23, read F-05, F-08, F-09 and F-23. See `docs/standards/ADOPTION-ROADMAP.md` P0-02.
+
 Until these lines are reconciled, every other item below is being fixed against a moving target.
 
 ---
