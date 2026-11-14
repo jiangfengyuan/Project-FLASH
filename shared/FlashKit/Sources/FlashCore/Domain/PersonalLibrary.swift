@@ -40,11 +40,17 @@ public struct LibraryFilter: Codable, Equatable, Identifiable, Sendable {
     public var oldestFirst = false
     public init() {}
     public func apply(_ records: [LibraryRecord], library: PersonalLibrary) -> [LibraryRecord] {
-        records.filter { r in
+        guard !records.isEmpty else { return [] }
+        // Match the catalog once per query; do not scan all tags for every record.
+        let matchingTagIDs = query.isEmpty ? Set<String>() : Set(library.tags.filter {
+            $0.name.localizedCaseInsensitiveContains(query)
+        }.map(\.id))
+        let requiredTagIDs = Set(tagIDs)
+        return records.filter { r in
             let linked = Set(library.links[r.key] ?? [])
             return (kinds.isEmpty || kinds.contains(r.kind)) &&
-            (query.isEmpty || r.title.localizedCaseInsensitiveContains(query) || library.tags.contains { linked.contains($0.id) && $0.name.localizedCaseInsensitiveContains(query) }) &&
-            (tagIDs.isEmpty || (matchAll ? Set(tagIDs).isSubset(of: linked) : !Set(tagIDs).isDisjoint(with: linked))) &&
+            (query.isEmpty || r.title.localizedCaseInsensitiveContains(query) || !matchingTagIDs.isDisjoint(with: linked)) &&
+            (tagIDs.isEmpty || (matchAll ? requiredTagIDs.isSubset(of: linked) : !requiredTagIDs.isDisjoint(with: linked))) &&
             (colors.isEmpty || colors.contains(r.color)) && (!favoritesOnly || r.favorite) &&
             (startDay.isEmpty || r.day >= startDay) && (endDay.isEmpty || r.day <= endDay) &&
             (r.kind != .task || taskStatus == "all" || (taskStatus == "completed") == r.completed)
