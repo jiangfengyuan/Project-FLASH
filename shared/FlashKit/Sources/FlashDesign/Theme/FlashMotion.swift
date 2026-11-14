@@ -15,7 +15,7 @@ import FlashCore
 ///
 /// 使用约定：所有动效必须尊重 Reduce Motion。
 /// ```swift
-/// @Environment(\.accessibilityReduceMotion) private var reduceMotion
+/// @FlashReduceMotion private var reduceMotion
 ///
 /// .animation(Motion.soft(reduceMotion), value: someState)
 /// .transition(.appear(reduceMotion: reduceMotion))

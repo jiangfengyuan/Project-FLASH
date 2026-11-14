@@ -8,7 +8,7 @@ import { PageActions, requireActions } from '../state/PageActions';
 import {
   FilterChip, FormGroup, RADIUS_CARD, SegmentedControl, cardShadowColor, dangerText, brandFill, onBrandFill, brandText, BODY_LINE_HEIGHT,
   floatingSurface, hairlineColor, supportsBlurMaterial, scrimColor,
-  DIALOG_WIDTH_FORM, DIALOG_WIDTH_PERCENT, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION
+  DIALOG_WIDTH_FORM, DIALOG_WIDTH_PERCENT, DIALOG_INSET, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION
 } from './CommonBuilders';
 
 interface ImportanceOption {
@@ -164,7 +164,7 @@ export struct EditLogDialog {
         }
         .width('100%')
         .enabled(!this.logs.busy)
-        .padding(22)
+        .padding(DIALOG_INSET)
       }.width(this.navigation.isMediumWindow ? DIALOG_WIDTH_FORM : DIALOG_WIDTH_PERCENT).constraintSize({ maxHeight: '90%' })
         .backgroundColor(floatingSurface(this.theme))
         .backgroundBlurStyle(supportsBlurMaterial() ? BlurStyle.COMPONENT_ULTRA_THICK : BlurStyle.NONE)

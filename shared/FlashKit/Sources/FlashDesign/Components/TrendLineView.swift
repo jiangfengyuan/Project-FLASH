@@ -16,7 +16,7 @@ public struct TrendLineView: View {
     public let points: [Double?]
     public let color: Color
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
     /// 曲线描绘进度（0→1）
     @State private var drawProgress: CGFloat = 0
     /// 圆点可见性开关（配合逐项 delay 做 stagger 淡入）

@@ -85,6 +85,8 @@ final class QuickCaptureController: NSObject {
             })
         // 应用主题覆盖与主窗口/菜单栏伴侣同源
             .preferredColorScheme(settings?.themeMode.colorScheme)
+            // 辅助功能偏好（减少动态效果）：面板每次唤起重建，取当时的设置值即可
+            .environment(\.flashPrefersReducedMotion, settings?.reduceMotion ?? false)
 
         let hostingView = NSHostingView(rootView: view)
         let panel = self.panel ?? makePanel()

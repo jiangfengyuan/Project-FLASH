@@ -18,6 +18,21 @@ public enum ThemeMode: String, CaseIterable, Sendable {
     }
 }
 
+/// 应用内文字大小偏好（辅助功能）：在系统字体档位之上再设一个下限。
+/// 「跟随系统」不干预；「较大」「特大」只抬高下限，系统档位更大时仍以系统为准。
+/// macOS 无动态字体，仅 iOS 生效。
+public enum TextSizePreference: String, CaseIterable, Sendable {
+    case system, large, extraLarge
+
+    public var displayName: String {
+        switch self {
+        case .system: "跟随系统"
+        case .large: "较大"
+        case .extraLarge: "特大"
+        }
+    }
+}
+
 /// 对应 Android SettingsStore（Mac 版仅保留 themeMode/welcomed，UI 风格固定 HIG）。
 public final class SettingsStore: ObservableObject {
     @Published public private(set) var themeMode: ThemeMode
@@ -33,6 +48,10 @@ public final class SettingsStore: ObservableObject {
     /// 应用锁：默认关闭；开启后冷启动与离开超过宽限期需验证（见 AppLockController）
     @Published public private(set) var appLockEnabled: Bool
 
+    @Published public private(set) var reduceMotion: Bool
+    @Published public private(set) var textSize: TextSizePreference
+    @Published public private(set) var hapticsEnabled: Bool
+
     private let defaults: UserDefaults
 
     public init(defaults: UserDefaults = .standard) {
@@ -47,6 +66,10 @@ public final class SettingsStore: ObservableObject {
         let stored = defaults.string(forKey: Keys.themeMode)
         self.themeMode = stored.flatMap(ThemeMode.init(rawValue:)) ?? .system
         self.welcomed = defaults.bool(forKey: Keys.welcomed)
+        self.reduceMotion = defaults.bool(forKey: Keys.reduceMotion)
+        self.textSize = defaults.string(forKey: Keys.textSize)
+            .flatMap(TextSizePreference.init(rawValue:)) ?? .system
+        self.hapticsEnabled = defaults.object(forKey: Keys.hapticsEnabled) as? Bool ?? true
         // Codable JSON 存储；缺失或损坏均回退默认 ⌘⇧Space
         if let data = defaults.data(forKey: Keys.quickCaptureHotkey),
            let chord = try? JSONDecoder().decode(KeyChord.self, from: data) {
@@ -86,6 +109,27 @@ public final class SettingsStore: ObservableObject {
         defaults.set(true, forKey: Keys.welcomed)
     }
 
+    /// 设置页「重新查看新手引导」：只清除引导标记，不触碰任何记录数据或其它偏好
+    public func resetWelcomed() {
+        welcomed = false
+        defaults.set(false, forKey: Keys.welcomed)
+    }
+
+    public func setReduceMotion(_ enabled: Bool) {
+        reduceMotion = enabled
+        defaults.set(enabled, forKey: Keys.reduceMotion)
+    }
+
+    public func setTextSize(_ size: TextSizePreference) {
+        textSize = size
+        defaults.set(size.rawValue, forKey: Keys.textSize)
+    }
+
+    public func setHapticsEnabled(_ enabled: Bool) {
+        hapticsEnabled = enabled
+        defaults.set(enabled, forKey: Keys.hapticsEnabled)
+    }
+
     public func setQuickCaptureHotkey(_ chord: KeyChord) {
         quickCaptureHotkey = chord
         if let data = try? JSONEncoder().encode(chord) {
@@ -101,5 +145,8 @@ public final class SettingsStore: ObservableObject {
         static let themeMode = "themeMode"
         static let welcomed = "welcomed"
         static let quickCaptureHotkey = "quickCaptureHotkey"
+        static let reduceMotion = "reduceMotion"
+        static let textSize = "textSize"
+        static let hapticsEnabled = "hapticsEnabled"
     }
 }

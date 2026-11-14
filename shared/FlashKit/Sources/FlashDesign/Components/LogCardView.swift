@@ -30,7 +30,7 @@ public struct LogCardView: View {
     /// 灵感提醒：未查看过的灵感在徽章旁标「未读」（默认关，macOS 不变）
     public var isUnread: Bool = false
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
     @State private var hovering = false
     /// 删除确认前的极轻缩放反馈
     @State private var deletePulse = false

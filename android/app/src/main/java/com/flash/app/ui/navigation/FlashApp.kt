@@ -104,6 +104,8 @@ fun FlashApp() {
     val context = LocalContext.current
     val app = context.applicationContext as FlashApplication
     val welcomed by app.settings.welcomed.collectAsStateWithLifecycle()
+    // 起始页只在启动时裁决一次：之后 welcomed 变化不改 NavHost 图（改图会清空返回栈）
+    val startDestination = remember { if (welcomed) Routes.HOME else Routes.WELCOME }
     val unviewedIdeas by app.repository.unviewedIdeas.collectAsStateWithLifecycle(emptyList())
     val showIdeaReminder = shouldShowIdeaReminder(unviewedIdeas.size)
     val pendingEntry by app.pendingEntry.collectAsStateWithLifecycle()
@@ -194,7 +196,7 @@ fun FlashApp() {
             ) { innerPadding ->
                 NavHost(
                     navController = navController,
-                    startDestination = if (welcomed) Routes.HOME else Routes.WELCOME,
+                    startDestination = startDestination,
                     modifier = Modifier.padding(innerPadding).consumeWindowInsets(innerPadding),
                     enterTransition = {
                         fadeIn(animationSpec = tween(240)) + slideInHorizontally(animationSpec = tween(240)) { it / 14 }
@@ -211,8 +213,11 @@ fun FlashApp() {
                 ) {
                     composable(Routes.WELCOME) {
                         WelcomeScreen(onStart = {
-                            app.settings.setWelcomed()
-                            navController.navigate(Routes.HOME) { popUpTo(Routes.WELCOME) { inclusive = true } }
+                            if (welcomed) navController.popBackStack()
+                            else {
+                                app.settings.setWelcomed()
+                                navController.navigate(Routes.HOME) { popUpTo(Routes.WELCOME) { inclusive = true } }
+                            }
                         })
                     }
                     composable(Routes.HOME) { HomeScreen() }
@@ -233,6 +238,7 @@ fun FlashApp() {
                     }
                     composable(Routes.PROFILE) {
                         SettingsScreen(
+                            onReplayOnboarding = { navController.navigate(Routes.WELCOME) { launchSingleTop = true } },
                             onOpenIdeaReminder = { navController.navigate(Routes.SETTINGS_IDEA_REMINDER) },
                             onOpenBackup = { navController.navigate(Routes.SETTINGS_BACKUP) },
                             onOpenTransfer = { navController.navigate(Routes.SETTINGS_TRANSFER) },

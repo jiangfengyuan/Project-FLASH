@@ -17,6 +17,9 @@ import {
   TYPE_SECTION, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION
 } from '../components/CommonBuilders';
 
+/** 情绪滑杆滑块直径：OutSet 滑轨两端各内缩半个滑块，刻度图标按此居中在最左 / 最右档位正下方 */
+const SLIDER_THUMB = 20;
+
 // 「当前状态」快捷输入：chip 一键填入，自由文本可覆盖（≤50 字，随情绪记录保存）。
 const QUICK_STATUSES: string[] = ['疲惫', '专注', '放松'];
 const WEEKDAY_LABELS: string[] = ['一', '二', '三', '四', '五', '六', '日'];

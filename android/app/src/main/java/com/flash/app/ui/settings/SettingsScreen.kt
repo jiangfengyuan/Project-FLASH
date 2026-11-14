@@ -70,6 +70,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.flash.app.BuildConfig
 import com.flash.app.FlashApplication
+import com.flash.app.data.TextScale
 import com.flash.app.data.AppLockToggleOutcome
 import com.flash.app.data.AppLockToggleStart
 import com.flash.app.data.IdeaReminderFrequency
@@ -89,12 +90,15 @@ import java.util.Locale
 /** 设置页（对齐 iOS）：外观 / 灵感提醒 / 数据 / 关于，细节在子页。 */
 @Composable
 fun SettingsScreen(
+    onReplayOnboarding: () -> Unit,
     onOpenIdeaReminder: () -> Unit,
     onOpenBackup: () -> Unit,
     onOpenTransfer: () -> Unit,
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as FlashApplication
+    val reduceMotion by app.settings.reduceMotion.collectAsStateWithLifecycle()
+    val textScale by app.settings.textScale.collectAsStateWithLifecycle()
     val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.factory(app))
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
     val ideaEnabled by app.settings.ideaReminderEnabled.collectAsStateWithLifecycle()
@@ -154,6 +158,16 @@ fun SettingsScreen(
             )
         }
 
+        SettingsGroup(title = tr("辅助功能")) {
+            SettingsSwitchRow(Icons.Outlined.Settings, MaterialTheme.colorScheme.primary,
+                tr("减少动态效果"), null, reduceMotion, app.settings::setReduceMotion)
+            FlashSegmentedControl(
+                options = TextScale.entries.map { it to tr(it.displayName) },
+                selected = textScale, onSelect = app.settings::setTextScale,
+            )
+            SettingsRow(icon = Icons.Outlined.Settings, iconTint = MaterialTheme.colorScheme.primary,
+                title = tr("重新查看新手引导"), onClick = onReplayOnboarding)
+        }
         AppLockSettingsGroup(app)
 
         SettingsGroup(title = tr("数据与安全")) {
@@ -543,14 +557,15 @@ internal fun SettingsGroup(
             title,
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 4.dp),
+            // 与 FlashCard 内容内距（MD）同一缩进：分组标题 / 说明 / 脚注左缘 = 卡内文字左缘
+            modifier = Modifier.padding(horizontal = FlashTokens.Spacing.CardInset),
         )
         if (note != null) {
             Text(
                 note,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 4.dp),
+                modifier = Modifier.padding(horizontal = FlashTokens.Spacing.CardInset),
             )
         }
         FlashCard(modifier = Modifier.fillMaxWidth(), content = content)
@@ -559,7 +574,7 @@ internal fun SettingsGroup(
                 footnote,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 4.dp),
+                modifier = Modifier.padding(horizontal = FlashTokens.Spacing.CardInset),
             )
         }
     }
@@ -634,6 +649,41 @@ internal fun SettingsRow(
                 modifier = Modifier.size(18.dp),
             )
         }
+    }
+}
+
+/** 开关行：整行可切换（Role.Switch），读屏朗读标题、说明与开关状态；布局与 [SettingsRow] 同列 */
+@Composable
+private fun SettingsSwitchRow(
+    icon: ImageVector,
+    iconTint: Color,
+    title: String,
+    subtitle: String?,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = FlashTokens.Touch.IconButtonMin)
+            .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange)
+            .padding(vertical = FlashTokens.Spacing.XS),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(22.dp))
+        Spacer(Modifier.width(FlashTokens.Spacing.SM))
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge)
+            if (subtitle != null) {
+                Text(
+                    subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        Spacer(Modifier.width(FlashTokens.Spacing.SM))
+        Switch(checked = checked, onCheckedChange = null)
     }
 }
 

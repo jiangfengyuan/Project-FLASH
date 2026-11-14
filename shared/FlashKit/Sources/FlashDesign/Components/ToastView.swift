@@ -20,7 +20,7 @@ public struct ToastView: View {
     public let actionTitle: String?
     public let action: (@MainActor () -> Void)?
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
 
     public init(message: String, actionTitle: String? = nil, action: (@MainActor () -> Void)? = nil) {
         self.message = message

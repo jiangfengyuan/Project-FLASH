@@ -63,6 +63,7 @@ struct SettingsScreen: View {
                     }
 
                     AppearanceSection(appeared: true)
+                    AccessibilitySection { settings.resetWelcomed() }
                     Section {
                         NavigationLink(L("本地智能标签")) { TaggingSettingsScreen() }
                         NavigationLink(L("回收站")) { TrashScreen() }

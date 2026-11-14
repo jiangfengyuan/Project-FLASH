@@ -13,7 +13,7 @@ import FlashCore
 /// `.cardFloat(reduceMotion:)`，同样由调用方决定）；开启后仅边框微亮 + 阴影略深，不位移。
 public struct GlassCard<Content: View>: View {
     @Environment(\.colorScheme) private var colorScheme
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
 
     public let cornerRadius: CGFloat
     public let hoverFeedback: Bool

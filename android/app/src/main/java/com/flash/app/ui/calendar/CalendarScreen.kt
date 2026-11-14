@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -269,6 +270,25 @@ fun CalendarScreen(
     }
 }
 
+/** 月份操作行：「今天」贴左页边距，「新建任务」（嵌入回顾页时）贴右页边距 */
+@Composable
+private fun MonthActions(onToday: () -> Unit, onNewTask: (() -> Unit)?) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        TextButton(onClick = onToday, modifier = Modifier.offset(x = -FlashTokens.Touch.TextButtonInset)) { Text("今天") }
+        Spacer(Modifier.weight(1f))
+        if (onNewTask != null) {
+            TextButton(onClick = onNewTask, modifier = Modifier.offset(x = FlashTokens.Touch.TextButtonInset)) { Text("新建任务") }
+        }
+    }
+}
+
+/**
+ * 月份标题行：‹ 标题 › 左右对称，标题正好居中在月网格上方；
+ * 两侧箭头按钮外移内建留白，箭头图标框与网格左右缘对齐。
+ */
 @Composable
 private fun MonthHeader(
     month: YearMonth,

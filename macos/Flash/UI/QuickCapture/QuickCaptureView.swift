@@ -26,7 +26,7 @@ struct QuickCaptureView: View {
     @State private var errorMessage: String? = nil
     @FocusState private var inputFocused: Bool
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
 
     init(draft: QuickCaptureDraft,
          onCommit: @escaping (String, Category) -> String?,

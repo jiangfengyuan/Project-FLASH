@@ -67,6 +67,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.foundation.layout.offset
 import com.flash.app.FlashApplication
 import com.flash.app.data.model.Category
 import com.flash.app.data.model.ColorTag
@@ -77,6 +78,7 @@ import com.flash.app.ui.components.FlashFormSection
 import com.flash.app.ui.components.RecordCard
 import com.flash.app.ui.theme.FlashTokens
 import java.time.LocalDate
+import com.flash.app.ui.theme.LocalReduceMotion
 
 private val IMPORTANCE_OPTIONS get() = listOf(0 to com.flash.app.i18n.tr("全部"), 2 to "!!", 3 to "!!!", 4 to "!!!!")
 
@@ -90,6 +92,8 @@ fun ExploreScreen(
     onPresetConsumed: () -> Unit = {},
 ) {
     val app = LocalContext.current.applicationContext as FlashApplication
+    // 减少动态效果：列表增删、筛选切换不做位移动画
+    val reduceMotion = LocalReduceMotion.current
     val viewModel: ExploreViewModel = viewModel(factory = ExploreViewModel.factory(app.repository))
     val logs by viewModel.logs.collectAsStateWithLifecycle()
     val filter by viewModel.filter.collectAsStateWithLifecycle()
@@ -379,8 +383,9 @@ fun ExploreScreen(
             ),
         ) {
             Column(
+                // 与下方列表同一页边距：面板滑出时筛选 Chip 左缘 = 记录卡左缘
                 modifier = Modifier.padding(
-                    horizontal = FlashTokens.Spacing.LG,
+                    horizontal = FlashTokens.Spacing.PageHorizontal,
                     vertical = FlashTokens.Spacing.MD,
                 ),
                 verticalArrangement = Arrangement.spacedBy(FlashTokens.Spacing.MD),

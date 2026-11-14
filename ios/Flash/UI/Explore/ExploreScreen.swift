@@ -14,7 +14,7 @@ import FlashDesign
 /// 「待整理」支持「选择」模式（底部工具栏批量改分类或标签）；跨模块定位（全局搜索/日历「查看灵感」）在此打开编辑弹层。
 struct ExploreScreen: View {
     @Environment(\.flashRepository) private var repository
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
     @Environment(FocusRouter.self) private var focusRouter
     @Environment(AppState.self) private var appState
     @Environment(\.flashMarkIdeaViewed) private var markIdeaViewed
@@ -110,6 +110,11 @@ struct ExploreScreen: View {
                 .navigationTitle("筛选")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
+                    // 面板在 iOS 不再自带标题行：「清除」放进导航栏，与「完成」左右对称
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("清除") { clearFilters() }
+                            .disabled(!criteria.isActive)
+                    }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("完成") { showFilterSheet = false }
                     }
@@ -214,7 +219,7 @@ struct ExploreScreen: View {
             .flashPageGutter()
             .padding(.vertical, Spacing.sm)
         }
-        .sensoryFeedback(.selection, trigger: filter)
+        .flashHaptic(.selection, trigger: filter)
     }
 
     // MARK: - 待整理 / 批量

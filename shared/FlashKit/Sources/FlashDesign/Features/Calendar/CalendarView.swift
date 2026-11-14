@@ -32,6 +32,9 @@ public struct CalendarView: View {
     /// 不能用 @Query 实体数组做键：PersistentModel 相等走身份，漏掉勾选完成等就地更新。
     @State private var aggregateCache = ViewComputeCache<Int, [String: DayAggregate]>()
 
+    /// 月网格行列间距（星期表头共用，保证表头与日期列中线对齐）
+    private static let gridSpacing: CGFloat = Spacing.xxs
+
     /// 共享公历实例，避免每次渲染格子都新建 Calendar
     private static let gregorian = Calendar(identifier: .gregorian)
 
@@ -326,7 +329,9 @@ public struct CalendarView: View {
                 .accessibilityLabel("删除任务")
                 .help("删除任务")
         }
-        .padding(10) // 行内边距：紧凑特调值（无对应令牌）
+        // 横向与日志卡同一内边距：同一详情列表里任务行与日志卡的文字左缘对齐
+        .padding(.horizontal, Metrics.cardInset)
+        .padding(.vertical, 10) // 行纵向内距：紧凑特调值（无对应令牌）
         .background(BrandColors.weakSurface, in: RoundedRectangle(cornerRadius: Radius.row))
         .overlay {
             RoundedRectangle(cornerRadius: Radius.row)

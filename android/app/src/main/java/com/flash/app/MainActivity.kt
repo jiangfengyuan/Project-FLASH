@@ -34,6 +34,7 @@ import com.flash.app.ui.lock.AppLockAuth
 import com.flash.app.ui.lock.requestUnlock
 import com.flash.app.ui.navigation.AppEntry
 import com.flash.app.ui.navigation.FlashApp
+import com.flash.app.ui.theme.FlashAccessibility
 import com.flash.app.ui.theme.FlashTheme
 
 class MainActivity : ComponentActivity() {
@@ -97,6 +98,8 @@ private fun FlashRoot() {
     val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as FlashApplication
     val themeMode by app.settings.themeMode.collectAsStateWithLifecycle()
 
+    val reduceMotion by app.settings.reduceMotion.collectAsStateWithLifecycle()
+    val textScale by app.settings.textScale.collectAsStateWithLifecycle()
     val systemDark = isSystemInDarkTheme()
     val darkTheme = when (themeMode) {
         ThemeMode.SYSTEM -> systemDark
@@ -117,6 +120,7 @@ private fun FlashRoot() {
     }
 
     val lockAuth = LocalAppLockAuth.current
+    FlashAccessibility(appReduceMotion = reduceMotion, textScale = textScale) {
     FlashTheme(darkTheme = darkTheme) {
         Box(Modifier.fillMaxSize()) {
             FlashApp()
@@ -129,4 +133,5 @@ private fun FlashRoot() {
             }
         }
     }
+}
 }

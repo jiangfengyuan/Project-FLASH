@@ -5,7 +5,7 @@ import { PageActions, requireActions } from '../state/PageActions';
 import {
   FilterChip, RecordCard, FlashCard, EmptyState, DOCK_CLEARANCE, RADIUS_FOCUS, RADIUS_FIELD, TOUCH_MIN, TYPE_TITLE, pageGutter, displayFontFamily, dangerText, brandText,
   floatingSurface, hairlineColor, supportsBlurMaterial, scrimColor, cardShadowColor, motionDuration, MOTION_FADE,
-  TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY
+  PAGE_GUTTER, CARD_INSET, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY
 } from '../components/CommonBuilders';
 
 /** Lazy row source for the records list; reloaded only when the displayed
@@ -154,7 +154,7 @@ export struct ExplorePage {
             Row({ space: 12 }) {
               Text(this.logs.sortAscending ? tr('按最早记录') : tr('按最新记录'))
                 .fontSize(TYPE_SECONDARY).fontColor(brandText(this.theme))
-                .height(44).padding({ left: 4, right: 4 })
+                .height(44).padding({ right: 12 }) // 只向内扩命中区：文字左缘留在页边距线上
                 .stateStyles({
                   normal: { .opacity(1) },
                   pressed: { .opacity(0.6) }
@@ -311,7 +311,7 @@ export struct ExplorePage {
       }.width('100%')
     }
     .width('100%')
-    .padding(20)
+    .padding(PAGE_GUTTER)
     .backgroundColor(floatingSurface(this.theme))
     .backgroundBlurStyle(supportsBlurMaterial() ? BlurStyle.COMPONENT_ULTRA_THICK : BlurStyle.NONE)
     .borderRadius({ topLeft: RADIUS_FOCUS, topRight: RADIUS_FOCUS })

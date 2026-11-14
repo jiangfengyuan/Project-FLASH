@@ -1,3 +1,4 @@
+import { onboardingBack } from '../state/Onboarding';
 import { common } from '@kit.AbilityKit';
 import { mediaquery } from '@kit.ArkUI';
 import { Category } from '../models/Models';
@@ -32,7 +33,7 @@ import {
   PAGE_BACKGROUND_LIGHT, PAGE_BACKGROUND_DARK, CARD_SURFACE_LIGHT, CARD_SURFACE_DARK,
   TEXT_PRIMARY_LIGHT, TEXT_PRIMARY_DARK, TEXT_MUTED_LIGHT, TEXT_MUTED_DARK,
   WEAK_SURFACE_LIGHT, CONTROL_SURFACE_DARK, TINT_SURFACE_LIGHT, TINT_SURFACE_DARK,
-  DANGER_SURFACE_LIGHT, DANGER_SURFACE_DARK, hairlineColor
+  DANGER_SURFACE_LIGHT, DANGER_SURFACE_DARK, hairlineColor, PAGE_GUTTER
 } from '../components/CommonBuilders';
 // 调色板以 CommonBuilders 令牌为准，此处仅组合主题所需的常量。
 const LIGHT_BACKGROUND = PAGE_BACKGROUND_LIGHT;
@@ -150,6 +151,7 @@ struct Index {
   }
 
   onBackPress(): boolean {
+    if (onboardingBack(this.settings)) return true;
     // 锁定时返回不能关掉下面的页面：先关快速记录，否则交给系统（退到后台）
     if (this.appLocked) {
       if (this.logs.quickCategory !== '') {
@@ -538,7 +540,7 @@ struct Index {
       }
 
       if (this.settings.showWelcome) {
-        WelcomeOverlay({ theme: this.theme, actions: this.actions })
+        WelcomeOverlay({ theme: this.theme, settings: this.settings, navigation: this.navigation, actions: this.actions })
           .transition(overlayTransition())
       }
 

@@ -12,6 +12,11 @@ import {
   TYPE_TITLE, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY
 } from '../components/CommonBuilders';
 
+// 条形行三列：标签列 / 条形 / 数值列。趋势卡与分布卡共用同宽列且数值右对齐，
+// 上下两张卡的条形起点、终点和数值右缘都落在同一条线上。
+const BAR_LABEL_WIDTH = 58;
+const BAR_VALUE_WIDTH = 48;
+
 @Component
 export struct StatsPage {
   @ObjectLink navigation: NavigationState;
@@ -111,12 +116,13 @@ export struct StatsPage {
       }
       ForEach(this.days(), (day: string) => {
         Row({ space: 10 }) {
-          Text(shortDay(day)).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width(58)
+          Text(shortDay(day)).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width(BAR_LABEL_WIDTH)
           Stack({ alignContent: Alignment.Start }) {
             Row().height(10).width('100%').backgroundColor(this.theme.themeControl).borderRadius(5)
             Row().height(10).width(`${requireActions(this.actions).emotionController.dayBar(day)}%`).backgroundColor(brandText(this.theme)).borderRadius(5)
           }.layoutWeight(1).height(12)
-          Text(requireActions(this.actions).emotionController.dayEmotionLabel(day)).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeText).width(34)
+          Text(requireActions(this.actions).emotionController.dayEmotionLabel(day)).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeText)
+            .width(BAR_VALUE_WIDTH).textAlign(TextAlign.End)
         }.width('100%')
       }, (day: string) => day)
     }
@@ -175,7 +181,7 @@ export struct StatsPage {
   @Builder
   private distributionRow(label: string, count: number, total: number) {
     Row({ space: 10 }) {
-      Text(label).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width(58)
+      Text(label).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width(BAR_LABEL_WIDTH)
       Stack({ alignContent: Alignment.Start }) {
         Row().height(10).width('100%').backgroundColor(this.theme.themeControl).borderRadius(5)
         if (count > 0 && total > 0) {

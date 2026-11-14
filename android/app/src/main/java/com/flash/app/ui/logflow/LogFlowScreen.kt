@@ -10,6 +10,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.rememberCoroutineScope
 import com.flash.app.ui.components.RecordDateField
 import com.flash.app.data.model.Category
+import com.flash.app.ui.theme.FlashTokens
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CancellationException
 import androidx.compose.foundation.horizontalScroll

@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.flash.app.data.model.EmotionRecord
 import com.flash.app.domain.EmotionStats
@@ -125,7 +126,13 @@ fun EmotionStatsSection(
                     )
                     }
                     Spacer(Modifier.width(8.dp))
-                    Text("$count", style = MaterialTheme.typography.bodySmall)
+                    // 数值列定宽右对齐：各行条形轨道终点与数字右缘落在同一条线上（位数不同也不参差）
+                    Text(
+                        "$count",
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.width(32.dp),
+                    )
                 }
             }
         }

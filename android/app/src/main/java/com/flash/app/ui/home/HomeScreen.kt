@@ -96,6 +96,8 @@ internal fun greetingSource(hour: Int): String = when (hour) {
 @Composable
 fun HomeScreen() {
     val app = LocalContext.current.applicationContext as FlashApplication
+    // 减少动态效果：最近闪念列表增删不做位移动画
+    val reduceMotion = LocalReduceMotion.current
     val viewModel: HomeViewModel = viewModel(factory = HomeViewModel.factory(app.repository))
     val ui by viewModel.uiState.collectAsStateWithLifecycle()
     val actions = LocalAppActions.current

@@ -22,7 +22,7 @@ export {
   CHIP_SELECTED, RADIUS_CARD, RADIUS_FOCUS, TOUCH_MIN, FAB_SIZE, DOCK_HEIGHT, DOCK_CLEARANCE,
   MOTION_PRESS, MOTION_FADE, MOTION_PAGE, DISPLAY_FONT_NAME,
   TYPE_DISPLAY, TYPE_TITLE, TYPE_SECTION, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION, TYPE_HERO,
-  DIALOG_WIDTH, DIALOG_WIDTH_FORM, DIALOG_WIDTH_PERCENT,
+  DIALOG_WIDTH, DIALOG_WIDTH_FORM, DIALOG_WIDTH_PERCENT, DIALOG_INSET,
   CONTENT_MAX_WIDE, CONTENT_MAX_MEDIUM, CONTENT_MAX_CENTERED,
   motionDuration,
   supportsBlurMaterial, floatingSurface, hairlineColor, cardShadowColor, dockShadowColor, FAB_SHADOW,
@@ -36,15 +36,18 @@ export {
 export { setReduceMotionEnabled, isReduceMotionEnabled } from '../state/FeatureStates';
 export { TornDivider, TornSectionBreak, HandUnderline, HandRing, TornCardEdge, FoldMarks, StickyUnderSheet, paperShadow } from './Paper';
 
+// 页标题本身不带横向边距：放在已有页边距的容器里时传 0（默认），
+// 独立放置时传 PAGE_GUTTER。之前固定内缩 20，放进已有 20 边距的列表 / 列里会缩进成 40，
+// 标题与下方卡片左缘错开。
 @Builder
-export function PageHeader(theme: ThemeState, title: string, subtitle: string) {
+export function PageHeader(theme: ThemeState, title: string, subtitle: string, horizontalInset: number = 0) {
     Column({ space: 4 }) {
       Text(title).fontSize(TYPE_TITLE).fontFamily(displayFontFamily()).fontWeight(FontWeight.Medium).fontColor(theme.themeText).width('100%')
       Text(subtitle).fontSize(TYPE_SECONDARY).fontColor(theme.themeMuted).lineHeight(19).width('100%')
     }
     .width('100%')
     .alignItems(HorizontalAlign.Start)
-    .padding({ left: 20, right: 20, top: 18, bottom: 12 })
+    .padding({ left: horizontalInset, right: horizontalInset, top: 18, bottom: 12 })
   }
 
 // 详情页页头：自绘返回栏的统一实现（Index 详情路由使用）。
@@ -148,6 +151,8 @@ export function SegmentedControl(theme: ThemeState, options: string[], selectedI
       .justifyContent(FlexAlign.Center)
       .backgroundColor(index === selectedIndex ? chipSelected(theme) : Color.Transparent)
       .borderRadius(18)
+      .accessibilityGroup(true)
+      .accessibilityText(option + (index === selectedIndex ? '，已选中' : ''))
       .stateStyles({
         normal: { .opacity(1) },
         pressed: { .opacity(0.7) }

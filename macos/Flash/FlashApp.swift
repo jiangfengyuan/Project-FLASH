@@ -49,7 +49,8 @@ struct FlashApp: App {
                 if settings.welcomed {
                     RootView()
                 } else {
-                    WelcomeView {
+                    // 首次安装 / 设置里重新查看：四步新手引导（共享 FlashDesign.OnboardingView）
+                    OnboardingView {
                         settings.setWelcomed()
                     }
                 }
@@ -71,6 +72,8 @@ struct FlashApp: App {
             .environment(\.flashRepository, assembly.repository)
             .environmentObject(settings)
             .animatedPreferredColorScheme(settings.themeMode)
+            // 辅助功能偏好放在最外层：外观切换过渡本身也遵守「减少动态效果」
+            .flashAccessibilityPreferences(settings)
             .onOpenURL { url in
                 // 桌面小组件 deep link：flash://today → 切到此刻页
                 guard url.scheme == "flash", url.host == "today" else { return }
@@ -157,6 +160,7 @@ struct FlashApp: App {
                 .environment(\.flashRepository, assembly.repository)
                 .environmentObject(settings)
                 .animatedPreferredColorScheme(settings.themeMode)
+                .flashAccessibilityPreferences(settings)
         }
         .menuBarExtraStyle(.window)
         .modelContainer(assembly.container)
@@ -176,7 +180,7 @@ private extension View {
 private struct AppearanceTransitionModifier: ViewModifier {
     let targetMode: ThemeMode
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
     @State private var appliedMode: ThemeMode
     @State private var contentOpacity = 1.0
     @State private var contentScale = 1.0

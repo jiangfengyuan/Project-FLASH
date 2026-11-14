@@ -142,6 +142,8 @@ export struct ProfilePage {
             requireActions(this.actions).controller.setReduceMotion(value);
           })
       }.width('100%')
+      this.navRow($r('sys.symbol.arrow_clockwise'), iconSemantic(this.theme, 'appearance'), '重新查看新手引导', '',
+        () => requireActions(this.actions).controller.replayWelcome())
       if (this.settings.notificationSettingsSupported) {
         Row({ space: 12 }) {
           SymbolGlyph($r('sys.symbol.bell')).fontSize(20).fontColor([iconSemantic(this.theme, 'appearance')]).width(28)
@@ -359,7 +361,7 @@ export struct ProfilePage {
       Text(tr('清空会删除本机全部日志、情绪和任务，且无法撤销，建议先导出备份。'))
         .fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).lineHeight(19).width('100%').padding({ top: 12, bottom: 6 })
       Row({ space: 12 }) {
-        SymbolGlyph($r('sys.symbol.doc_text')).fontSize(20).fontColor([dangerText(this.theme)]).width(28)
+        SymbolGlyph($r('sys.symbol.doc_text')).fontSize(20).fontColor([dangerText(this.theme)]).width(ICON_COLUMN)
         Column({ space: 2 }) {
           Text(tr('清空全部本地数据')).fontSize(TYPE_BODY).fontColor(dangerText(this.theme)).width('100%')
           Text(tr('删除后需要再次确认，不可恢复')).fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%')
@@ -391,9 +393,11 @@ export struct ProfilePage {
       .shadow(paperShadow(this.theme))
   }
 
+  // 分组标题与卡内内容同一缩进（卡片内距），标题左缘 = 卡内图标列左缘
   @Builder
   private groupLabel(title: string) {
-    Text(title).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width('100%').padding({ left: 4 })
+    Text(title).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted).width('100%')
+      .padding({ left: CARD_INSET, right: CARD_INSET })
   }
 
   private frequencyLabel(): string {
@@ -417,7 +421,7 @@ export struct ProfilePage {
   @Builder
   private navRow(icon: Resource, color: string, title: string, subtitle: string, onTap: () => void) {
     Row({ space: 12 }) {
-      SymbolGlyph(icon).fontSize(20).fontColor([color]).width(28)
+      SymbolGlyph(icon).fontSize(20).fontColor([color]).width(ICON_COLUMN)
       Column({ space: 2 }) {
         Text(title).fontSize(TYPE_BODY).fontColor(this.theme.themeText).width('100%')
         Text(subtitle).fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%')
@@ -440,7 +444,7 @@ export struct ProfilePage {
   @Builder
   private actionRow(icon: Resource, color: string, title: string, subtitle: string, enabled: boolean, onTap: () => void) {
     Row({ space: 12 }) {
-      SymbolGlyph(icon).fontSize(20).fontColor([enabled ? color : this.theme.themeMuted]).width(28)
+      SymbolGlyph(icon).fontSize(20).fontColor([enabled ? color : this.theme.themeMuted]).width(ICON_COLUMN)
       Column({ space: 2 }) {
         Text(title).fontSize(TYPE_BODY).fontColor(enabled ? this.theme.themeText : this.theme.themeMuted).width('100%')
         Text(subtitle).fontSize(TYPE_CAPTION).fontColor(this.theme.themeMuted).width('100%')

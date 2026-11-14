@@ -48,6 +48,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.flash.app.FlashApplication
 import com.flash.app.ui.components.FlashCard
 import com.flash.app.ui.emotion.EmotionStatsSection
+import com.flash.app.ui.theme.FlashTokens
 
 /** 统计 Tab：数据概览 + 情绪走势（对应 PRD Insights） */
 @OptIn(ExperimentalMaterial3Api::class)

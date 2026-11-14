@@ -66,6 +66,7 @@ struct FlashApp: App {
                 .environment(ideaReminders)
                 .environment(\.flashRepository, assembly.repository)
                 .environmentObject(settings)
+                .flashAccessibilityPreferences(settings)
                 .environment(appLock)
                 .modifier(ThemeTransitionModifier(mode:settings.themeMode))
                 .tint(BrandColors.brandPrimary)

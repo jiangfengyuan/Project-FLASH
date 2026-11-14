@@ -34,6 +34,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarOutline
@@ -95,6 +96,8 @@ import kotlin.math.roundToInt
 @Composable
 fun EmotionScreen() {
     val app = LocalContext.current.applicationContext as FlashApplication
+    // 减少动态效果：emoji 切换只淡入淡出，历史行删除 / 插入不做位移动画
+    val reduceMotion = LocalReduceMotion.current
     val viewModel: EmotionViewModel = viewModel(factory = EmotionViewModel.factory(app.repository))
     val emotions by viewModel.emotions.collectAsStateWithLifecycle()
     val statsEmotions by viewModel.statsEmotions.collectAsStateWithLifecycle()

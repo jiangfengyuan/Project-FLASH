@@ -9,6 +9,9 @@ import {
   motionDuration, MOTION_PRESS, TYPE_SECTION, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION
 } from '../components/CommonBuilders';
 
+/** 月网格列间距：星期表头与日期行共用，每个表头正好居中在对应日期列上方 */
+const GRID_GAP = 2;
+
 @Component
 export struct CalendarPage {
   @ObjectLink theme: ThemeState;
@@ -42,13 +45,13 @@ export struct CalendarPage {
         }.width('100%')
         Column({ space: 4 }) {
           ForEach(requireActions(this.actions).calendarController.monthWeeks(), (week: string[]) => {
-            Row({ space: 2 }) {
+            Row({ space: GRID_GAP }) {
               ForEach(week, (day: string) => { this.dayCell(day) }, (day: string) => day)
             }.width('100%')
           }, (week: string[]) => week[0])
         }.width('100%')
         ForEach([this.calendar.selectedDay], (day: string) => {
-          FlashCard({ theme: this.theme, contentPadding: 14, space: 8 }) {
+          FlashCard({ theme: this.theme, space: 8 }) {
             Row() {
               Text(tr('{0} 详情', day)).fontSize(TYPE_BODY).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText).layoutWeight(1)
               Button(tr('添加任务'), { type: ButtonType.Normal }).height(44).fontSize(TYPE_CAPTION)
@@ -152,6 +155,7 @@ export struct CalendarPage {
           pressed: { .scale({ x: 0.9, y: 0.9 }) }
         })
         .animation({ duration: motionDuration(MOTION_PRESS), curve: Curve.EaseOut })
+        .accessibilityText(item.completedAt ? `${item.title}，已完成，点按标记为未完成` : `${item.title}，未完成，点按标记为完成`)
         .onClick(() => requireActions(this.actions).calendarController.toggleTask(item))
       Column({ space: 3 }) {
         Text(item.title).fontSize(TYPE_BODY).fontWeight(FontWeight.Medium).fontColor(this.theme.themeText)

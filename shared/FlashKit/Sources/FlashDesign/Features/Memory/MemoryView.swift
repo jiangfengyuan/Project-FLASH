@@ -23,7 +23,7 @@ public struct MemoryView: View {
     @State private var baseDate = Date()
     /// 映射/聚合缓存：仅在数据写代际、周偏移或基准日变化时重算
     @State private var aggregateCache = ViewComputeCache<MemoryKey, WeeklyMemory.Report>()
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
     @Environment(\.flashUsesSystemNavigationTitle) private var usesSystemNavigationTitle
 
     public init() {}
@@ -81,7 +81,9 @@ public struct MemoryView: View {
                 weekRange(report)
             }
         }
-        .padding(usesSystemNavigationTitle ? Spacing.md : Spacing.lg)
+        // 与下方内容同一页边距：周导航 / 标题左缘 = 卡片左缘
+        .padding(.horizontal, Metrics.pageGutter)
+        .padding(.vertical, usesSystemNavigationTitle ? Spacing.md : Spacing.lg)
     }
 
     @ViewBuilder
@@ -178,7 +180,8 @@ public struct MemoryView: View {
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
             }
-            .padding(Spacing.lg)
+            .padding(.horizontal, Metrics.pageGutter)
+            .padding(.vertical, Spacing.lg)
         }
         .flashPageBackground()
     }

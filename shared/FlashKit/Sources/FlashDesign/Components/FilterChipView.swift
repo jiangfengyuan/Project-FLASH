@@ -14,7 +14,7 @@ import FlashCore
 /// 未选中时 hover 描边微亮（Motion.quick）；选中切换走 Motion.soft
 ///（220ms，处于选中态 160–240ms 令牌区间内），尊重减少动态。
 public struct FilterChipView: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
 
     public let title: String
     public let isSelected: Bool

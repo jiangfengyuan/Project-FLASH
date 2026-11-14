@@ -16,7 +16,7 @@ import FlashDesign
 /// ⌘N 聚焦快速记录输入框（⌘K 全局搜索为 RootView 层浮层）；情绪/任务经「+ 新建」直达。
 struct HomeView: View {
     @Environment(\.flashRepository) private var repository
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FlashReduceMotion private var reduceMotion
     @Environment(AppState.self) private var appState
     @Query(sort: \LogEntity.createdAt, order: .reverse) private var logEntities: [LogEntity]
     @Query(sort: \EmotionEntity.createdAt, order: .reverse) private var emotionEntities: [EmotionEntity]
@@ -84,7 +84,8 @@ struct HomeView: View {
 
                 recentSection
             }
-            .padding(Spacing.lg)
+            .padding(.horizontal, Metrics.pageGutter)
+            .padding(.vertical, Spacing.lg)
             .frame(maxWidth: Metrics.toolMaxWidth)
             .frame(maxWidth: .infinity)
             .opacity(bodyAppeared ? 1 : 0)
@@ -180,7 +181,8 @@ struct HomeView: View {
                 Text("最近闪念")
                     .font(Typography.secondary)
                     .foregroundStyle(BrandColors.textSecondary)
-                    .padding(.horizontal, Spacing.sm)
+                    // 与卡内文字同一缩进：分组标题左缘 = 日志卡正文左缘
+                    .padding(.horizontal, Metrics.cardInset)
                 ViewThatFits(in: .horizontal) {
                     HStack(alignment: .top, spacing: Spacing.md) {
                         logColumn(logs: Array(viewModel.recentLogs.prefix(3)))
