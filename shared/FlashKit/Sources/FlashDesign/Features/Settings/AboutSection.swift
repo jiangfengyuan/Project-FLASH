@@ -11,7 +11,7 @@ import FlashCore
 public struct AboutSection: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    /// 形如 "Flash Aero v1.0 (1)" 的版本串，由 SettingsView 从 Bundle 读取
+    /// 形如 "Flash Paper v1.0 (1)" 的版本串，由 SettingsView 从 Bundle 读取
     public let version: String
     /// 分组入场标记（stagger 淡入上移），由 SettingsView 驱动
     public let appeared: Bool

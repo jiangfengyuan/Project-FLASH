@@ -296,6 +296,15 @@
   "ko": "/: 파일이 50MiB를 초과합니다",
   "ru": "/: файл больше 50 МиБ"
  },
+ "1.0 Alpha 1 · HarmonyOS 原生版 · com.flash.app.harmonyos": {
+  "ar": "1.0 Alpha 1 · HarmonyOS · com.flash.app.harmonyos",
+  "de": "1.0 Alpha 1 · HarmonyOS · com.flash.app.harmonyos",
+  "en": "1.0 Alpha 1 · HarmonyOS · com.flash.app.harmonyos",
+  "fr": "1.0 Alpha 1 · HarmonyOS · com.flash.app.harmonyos",
+  "ja": "1.0 Alpha 1 · HarmonyOS · com.flash.app.harmonyos",
+  "ko": "1.0 Alpha 1 · HarmonyOS · com.flash.app.harmonyos",
+  "ru": "1.0 Alpha 1 · HarmonyOS · com.flash.app.harmonyos"
+ },
  "30天": {
   "ar": "30 يومًا",
   "de": "30 Tage",
@@ -332,41 +341,41 @@
   "ko": "기억할 만한 한 주예요. ✦",
   "ru": "Неделя, которую стоит запомнить. ✦"
  },
- "Flash Aero HarmonyOS 原生版本": {
-  "ar": "Flash Aero لنظام HarmonyOS",
-  "de": "Flash Aero für HarmonyOS",
-  "en": "Flash Aero for HarmonyOS",
-  "fr": "Flash Aero pour HarmonyOS",
-  "ja": "HarmonyOS 版 Flash Aero",
-  "ko": "HarmonyOS용 Flash Aero",
-  "ru": "Flash Aero для HarmonyOS"
+ "Flash Paper HarmonyOS 原生版本": {
+  "ar": "Flash Paper لنظام HarmonyOS",
+  "de": "Flash Paper für HarmonyOS",
+  "en": "Flash Paper for HarmonyOS",
+  "fr": "Flash Paper pour HarmonyOS",
+  "ja": "HarmonyOS 版 Flash Paper",
+  "ko": "HarmonyOS용 Flash Paper",
+  "ru": "Flash Paper для HarmonyOS"
  },
- "Flash Aero 主窗口": {
-  "ar": "نافذة Flash Aero الرئيسية",
-  "de": "Flash Aero-Hauptfenster",
-  "en": "Flash Aero main window",
-  "fr": "Fenêtre principale de Flash Aero",
-  "ja": "Flash Aero メインウィンドウ",
-  "ko": "Flash Aero 기본 창",
-  "ru": "Главное окно Flash Aero"
+ "Flash Paper 主窗口": {
+  "ar": "نافذة Flash Paper الرئيسية",
+  "de": "Flash Paper-Hauptfenster",
+  "en": "Flash Paper main window",
+  "fr": "Fenêtre principale de Flash Paper",
+  "ja": "Flash Paper メインウィンドウ",
+  "ko": "Flash Paper 기본 창",
+  "ru": "Главное окно Flash Paper"
  },
- "Flash Aero 今日概览服务卡片": {
-  "ar": "بطاقة نظرة اليوم في Flash Aero",
-  "de": "Flash Aero-Karte „Heute im Überblick“",
-  "en": "Flash Aero today overview card",
-  "fr": "Carte du jour de Flash Aero",
-  "ja": "Flash Aero 今日の概要カード",
-  "ko": "Flash Aero 오늘 요약 카드",
-  "ru": "Карточка Flash Aero «Сегодня»"
+ "Flash Paper 今日概览服务卡片": {
+  "ar": "بطاقة نظرة اليوم في Flash Paper",
+  "de": "Flash Paper-Karte „Heute im Überblick“",
+  "en": "Flash Paper today overview card",
+  "fr": "Carte du jour de Flash Paper",
+  "ja": "Flash Paper 今日の概要カード",
+  "ko": "Flash Paper 오늘 요약 카드",
+  "ru": "Карточка Flash Paper «Сегодня»"
  },
- "Flash Aero 备份": {
-  "ar": "نسخة Flash Aero الاحتياطية",
-  "de": "Flash Aero-Backup",
-  "en": "Flash Aero backup",
-  "fr": "Sauvegarde Flash Aero",
-  "ja": "Flash Aero バックアップ",
-  "ko": "Flash Aero 백업",
-  "ru": "Резервная копия Flash Aero"
+ "Flash Paper 备份": {
+  "ar": "نسخة Flash Paper الاحتياطية",
+  "de": "Flash Paper-Backup",
+  "en": "Flash Paper backup",
+  "fr": "Sauvegarde Flash Paper",
+  "ja": "Flash Paper バックアップ",
+  "ko": "Flash Paper 백업",
+  "ru": "Резервная копия Flash Paper"
  },
  "Flash 任务提醒": {
   "ar": "تذكير مهمة Flash",
@@ -619,15 +628,6 @@
   "ja": "tasks は配列である必要があります",
   "ko": "tasks는 배열이어야 합니다",
   "ru": "tasks должно быть массивом"
- },
- "v0.1.0 · HarmonyOS 原生版 · com.flash.app.harmonyos": {
-  "ar": "v0.1.0 · HarmonyOS · com.flash.app.harmonyos",
-  "de": "v0.1.0 · HarmonyOS · com.flash.app.harmonyos",
-  "en": "v0.1.0 · HarmonyOS · com.flash.app.harmonyos",
-  "fr": "v0.1.0 · HarmonyOS · com.flash.app.harmonyos",
-  "ja": "v0.1.0 · HarmonyOS · com.flash.app.harmonyos",
-  "ko": "v0.1.0 · HarmonyOS · com.flash.app.harmonyos",
-  "ru": "v0.1.0 · HarmonyOS · com.flash.app.harmonyos"
  },
  "{0} {1} 条 · {2} {3} 条": {
   "ar": "{0}: {1} · {2}: {3}",
@@ -889,6 +889,15 @@
   "ja": "{0}、ただしシステムのリマインダーを復元できませんでした。後でもう一度お試しください",
   "ko": "{0}, 하지만 시스템 알림을 복구하지 못했습니다. 나중에 다시 시도하세요",
   "ru": "{0}, но системные напоминания восстановить не удалось. Повторите позже"
+ },
+ "{0}，但隔离副本写入失败，原始数据仍保留在旧版存储中": {
+  "ar": "{0}؛ تعذر حفظ نسخة الاسترداد، والأصول باقية في التخزين السابق",
+  "de": "{0}; Wiederherstellungskopie fehlgeschlagen, Originale bleiben im alten Speicher",
+  "en": "{0}; the quarantine copy failed, but originals remain in legacy storage",
+  "fr": "{0} ; la copie de récupération a échoué, mais les originaux sont conservés",
+  "ja": "{0}。復旧用コピーの保存に失敗しましたが、元データは旧ストレージに保持されています",
+  "ko": "{0}. 복구 사본을 쓰지 못했지만 원본은 이전 저장소에 유지됩니다",
+  "ru": "{0}; копия не сохранена, оригиналы остались в прежнем хранилище"
  },
  "{0}，原始数据已保留用于恢复": {
   "ar": "{0}. احتُفظ بالبيانات الأصلية للاستعادة",
@@ -1637,6 +1646,15 @@
   "ko": "할 일을 저장했지만 알림 시간이 지나 알리지 않습니다",
   "ru": "Задача сохранена, но время напоминания прошло, оно не сработает"
  },
+ "任务已保存，但系统提醒恢复失败": {
+  "ar": "تم حفظ المهمة، لكن تعذرت استعادة تذكيرات النظام",
+  "de": "Aufgabe gespeichert, Systemerinnerungen konnten jedoch nicht wiederhergestellt werden",
+  "en": "Task saved, but system reminders could not be restored",
+  "fr": "Tâche enregistrée, mais les rappels système n’ont pas pu être rétablis",
+  "ja": "タスクを保存しましたが、システムのリマインダーを復元できませんでした",
+  "ko": "작업은 저장되었지만 시스템 알림을 복원하지 못했습니다",
+  "ru": "Задача сохранена, но системные напоминания восстановить не удалось"
+ },
  "任务已保存，但系统提醒未启用": {
   "ar": "حُفظت المهمة، لكن تذكيرات النظام غير مفعّلة",
   "de": "Aufgabe gespeichert, aber Systemerinnerungen sind nicht aktiv",
@@ -1681,6 +1699,15 @@
   "ja": "タスクを削除しましたが、システム通知を同期できませんでした",
   "ko": "할 일을 삭제했지만 시스템 알림을 동기화하지 못했습니다",
   "ru": "Задача удалена, но системные напоминания не синхронизировались"
+ },
+ "任务已删除，但系统提醒清理失败": {
+  "ar": "تم حذف المهمة، لكن تعذر مسح تذكيرات النظام",
+  "de": "Aufgabe gelöscht, Systemerinnerungen konnten jedoch nicht entfernt werden",
+  "en": "Task deleted, but system reminders could not be cleared",
+  "fr": "Tâche supprimée, mais les rappels système n’ont pas pu être effacés",
+  "ja": "タスクを削除しましたが、システムのリマインダーを削除できませんでした",
+  "ko": "작업은 삭제되었지만 시스템 알림을 정리하지 못했습니다",
+  "ru": "Задача удалена, но системные напоминания очистить не удалось"
  },
  "任务提醒": {
   "ar": "تذكيرات المهام",
@@ -1754,14 +1781,14 @@
   "ko": "할 일: 새로 추가 {0}, 변경 {1}, 이 기기에만 {2}\n",
   "ru": "Задачи: новых {0}, изменено {1}, только здесь {2}\n"
  },
- "传输 Flash Aero 备份": {
-  "ar": "إرسال نسخة Flash Aero",
-  "de": "Flash Aero-Backup senden",
-  "en": "Send Flash Aero backup",
-  "fr": "Envoyer la sauvegarde Flash Aero",
-  "ja": "Flash Aero バックアップを送信",
-  "ko": "Flash Aero 백업 보내기",
-  "ru": "Отправить копию Flash Aero"
+ "传输 Flash Paper 备份": {
+  "ar": "إرسال نسخة Flash Paper",
+  "de": "Flash Paper-Backup senden",
+  "en": "Send Flash Paper backup",
+  "fr": "Envoyer la sauvegarde Flash Paper",
+  "ja": "Flash Paper バックアップを送信",
+  "ko": "Flash Paper 백업 보내기",
+  "ru": "Отправить копию Flash Paper"
  },
  "传输到其他设备": {
   "ar": "إرسال إلى جهاز آخر",
@@ -4814,6 +4841,15 @@
   "ko": "데이터를 지웠지만 시스템 알림을 지우지 못했습니다. 앱을 다시 시작해 보세요",
   "ru": "Данные удалены, но напоминания убрать не удалось. Перезапустите приложение и повторите"
  },
+ "数据库中有异常原始记录尚未安全保全，已暂停合并以保留原始数据；请释放存储空间后重启应用重试": {
+  "ar": "تعذر حفظ بعض السجلات الأصلية بأمان. أُوقف الدمج لحمايتها؛ وفر مساحة وأعد تشغيل التطبيق قبل المحاولة.",
+  "de": "Einige Originaldatensätze konnten nicht sicher bewahrt werden. Die Zusammenführung ist angehalten; Speicher freigeben und die App vor einem neuen Versuch neu starten.",
+  "en": "Some original database records could not be preserved safely. Merge is paused to keep them intact; free storage and restart the app before retrying.",
+  "fr": "Certains enregistrements d’origine n’ont pas pu être préservés. La fusion est suspendue ; libérez de l’espace et redémarrez avant de réessayer.",
+  "ja": "元のデータを安全に保全できないため、保持したまま統合を停止しました。空き容量を確保してアプリを再起動し、再試行してください。",
+  "ko": "원본 데이터 일부를 안전하게 보존하지 못해 병합을 중지했습니다. 저장 공간을 확보하고 앱을 다시 시작한 후 시도하세요.",
+  "ru": "Часть исходных записей не удалось безопасно сохранить. Объединение приостановлено; освободите место и перезапустите приложение перед повтором."
+ },
  "数据库中有异常记录，但隔离副本写入失败，原始内容仍保留在数据库中": {
   "ar": "في قاعدة البيانات سجلات غير صالحة. تعذرت كتابة نسخة العزل، فبقيت الأصول في القاعدة",
   "de": "Die Datenbank enthält ungültige Einträge. Die Quarantänekopie konnte nicht geschrieben werden, die Originale bleiben in der Datenbank",
@@ -6056,14 +6092,14 @@
   "ko": "알맞은 태그를 찾는 중…",
   "ru": "Подбираем теги…"
  },
- "正在查找附近的 Flash Aero…": {
-  "ar": "جارٍ البحث عن Flash Aero قريبًا…",
-  "de": "Suche Flash Aero in der Nähe…",
-  "en": "Looking for Flash Aero nearby…",
-  "fr": "Recherche de Flash Aero à proximité…",
-  "ja": "近くの Flash Aero を検索中…",
-  "ko": "근처의 Flash Aero를 찾는 중…",
-  "ru": "Поиск Flash Aero поблизости…"
+ "正在查找附近的 Flash Paper…": {
+  "ar": "جارٍ البحث عن Flash Paper قريبًا…",
+  "de": "Suche Flash Paper in der Nähe…",
+  "en": "Looking for Flash Paper nearby…",
+  "fr": "Recherche de Flash Paper à proximité…",
+  "ja": "近くの Flash Paper を検索中…",
+  "ko": "근처의 Flash Paper를 찾는 중…",
+  "ru": "Поиск Flash Paper поблизости…"
  },
  "正在载入本地数据…": {
   "ar": "جارٍ تحميل البيانات المحلية…",
@@ -7927,6 +7963,15 @@
   "ja": "暗号化されたバックアップです。書き出し時に設定したパスフレーズを入力してください。",
   "ko": "암호화된 백업입니다. 내보낼 때 설정한 암호 문구를 입력하세요.",
   "ru": "Это зашифрованная копия. Введите парольную фразу, заданную при экспорте."
+ },
+ "这条任务已不存在": {
+  "ar": "هذه المهمة لم تعد موجودة",
+  "de": "Diese Aufgabe existiert nicht mehr",
+  "en": "This task no longer exists",
+  "fr": "Cette tâche n’existe plus",
+  "ja": "このタスクは存在しません",
+  "ko": "이 작업은 더 이상 존재하지 않습니다",
+  "ru": "Этой задачи больше нет"
  },
  "这条记录已不存在": {
   "ar": "لم يعد هذا السجل موجودًا",

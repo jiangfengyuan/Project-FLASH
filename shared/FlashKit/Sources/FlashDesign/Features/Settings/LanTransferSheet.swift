@@ -34,7 +34,7 @@ public struct LanTransferSheet: View {
             case .receiving:
                 Text("从局域网接收").font(Typography.sectionTitle)
                 if controller.devices.isEmpty {
-                    HStack { ProgressView(); Text("正在查找附近的 Flash Aero…") }
+                    HStack { ProgressView(); Text("正在查找附近的 Flash Paper…") }
                 } else {
                     Text("选择发送设备：")
                     ForEach(controller.devices) { device in

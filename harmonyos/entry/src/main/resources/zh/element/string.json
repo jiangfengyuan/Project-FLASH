@@ -2,15 +2,15 @@
  "string": [
   {
    "name": "module_desc",
-   "value": "Flash Aero HarmonyOS 原生版本"
+   "value": "Flash Paper HarmonyOS 原生版本"
   },
   {
    "name": "EntryAbility_desc",
-   "value": "Flash Aero 主窗口"
+   "value": "Flash Paper 主窗口"
   },
   {
    "name": "EntryAbility_label",
-   "value": "Flash Aero"
+   "value": "Flash Paper"
   },
   {
    "name": "EntryFormAbility_label",
@@ -18,7 +18,7 @@
   },
   {
    "name": "EntryFormAbility_desc",
-   "value": "Flash Aero 今日概览服务卡片"
+   "value": "Flash Paper 今日概览服务卡片"
   },
   {
    "name": "form_today_summary_display_name",
@@ -129,6 +129,10 @@
    "value": "/：文件超过 50 MiB"
   },
   {
+   "name": "s_924a9629",
+   "value": "1.0 Alpha 1 · HarmonyOS 原生版 · com.flash.app.harmonyos"
+  },
+  {
    "name": "s_355b83a3",
    "value": "值得记住的一周。✦"
   },
@@ -193,10 +197,6 @@
    "value": "任务"
   },
   {
-   "name": "s_48dce70c",
-   "value": "v0.1.0 · HarmonyOS 原生版 · com.flash.app.harmonyos"
-  },
-  {
    "name": "s_6e425eba",
    "value": "{0} {1} 条 · {2} {3} 条"
   },
@@ -247,6 +247,10 @@
   {
    "name": "s_662e559c",
    "value": "{0}，但恢复副本写入失败，原始数据未能保留"
+  },
+  {
+   "name": "s_c172b622",
+   "value": "{0}，但隔离副本写入失败，原始数据仍保留在旧版存储中"
   },
   {
    "name": "s_deca74ba",
@@ -1063,6 +1067,10 @@
   {
    "name": "s_6344fa26",
    "value": "数据与安全"
+  },
+  {
+   "name": "s_d8d92218",
+   "value": "数据库中有异常原始记录尚未安全保全，已暂停合并以保留原始数据；请释放存储空间后重启应用重试"
   },
   {
    "name": "s_b6537954",

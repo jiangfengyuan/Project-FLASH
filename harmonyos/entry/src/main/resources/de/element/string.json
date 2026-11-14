@@ -2,15 +2,15 @@
  "string": [
   {
    "name": "module_desc",
-   "value": "Flash Aero für HarmonyOS"
+   "value": "Flash Paper für HarmonyOS"
   },
   {
    "name": "EntryAbility_desc",
-   "value": "Flash Aero-Hauptfenster"
+   "value": "Flash Paper-Hauptfenster"
   },
   {
    "name": "EntryAbility_label",
-   "value": "Flash Aero"
+   "value": "Flash Paper"
   },
   {
    "name": "EntryFormAbility_label",
@@ -18,7 +18,7 @@
   },
   {
    "name": "EntryFormAbility_desc",
-   "value": "Flash Aero-Karte „Heute im Überblick“"
+   "value": "Flash Paper-Karte „Heute im Überblick“"
   },
   {
    "name": "form_today_summary_display_name",
@@ -129,6 +129,10 @@
    "value": "/: Datei ist größer als 50 MiB"
   },
   {
+   "name": "s_924a9629",
+   "value": "1.0 Alpha 1 · HarmonyOS · com.flash.app.harmonyos"
+  },
+  {
    "name": "s_355b83a3",
    "value": "Eine Woche, die in Erinnerung bleibt. ✦"
   },
@@ -193,10 +197,6 @@
    "value": "Aufgaben"
   },
   {
-   "name": "s_48dce70c",
-   "value": "v0.1.0 · HarmonyOS · com.flash.app.harmonyos"
-  },
-  {
    "name": "s_6e425eba",
    "value": "{0}: {1} · {2}: {3}"
   },
@@ -247,6 +247,10 @@
   {
    "name": "s_662e559c",
    "value": "{0}, aber die Wiederherstellungskopie konnte nicht geschrieben werden; die Originaldaten wurden nicht behalten"
+  },
+  {
+   "name": "s_c172b622",
+   "value": "{0}; Wiederherstellungskopie fehlgeschlagen, Originale bleiben im alten Speicher"
   },
   {
    "name": "s_deca74ba",
@@ -1063,6 +1067,10 @@
   {
    "name": "s_6344fa26",
    "value": "Daten & Sicherheit"
+  },
+  {
+   "name": "s_d8d92218",
+   "value": "Einige Originaldatensätze konnten nicht sicher bewahrt werden. Die Zusammenführung ist angehalten; Speicher freigeben und die App vor einem neuen Versuch neu starten."
   },
   {
    "name": "s_b6537954",

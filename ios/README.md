@@ -1,4 +1,6 @@
-# Flash Aero · iOS
+# Flash Paper · iOS
+
+当前候选为 **Flash Paper 1.0 Alpha 1**（数字版本 1.0，build 1），验收状态以 [本轮报告](../docs/acceptance/paper-alpha1-20261114.md) 为准。正式版命名为 Flash Paper 1.0.0；审查前源码冻结为 Flash Aero 最后一个 Beta，保留原编号。
 
 > 2026-10-31 整合候选：已合入最新 iOS 导航、分享扩展与 Spotlight，并保留加固修复。旧 LAN 仍停用，已清理仅供其使用的网络声明；Android 的 WorkManager 依赖仍合并 ACCESS_NETWORK_STATE，未为清理 LAN 强删调度框架能力。当前仅支持文件导出/系统分享；升级本端不会修复仍运行旧版本的另一端。详见 [整合与验收](../docs/hardening/integration-20261031.md)。
 
@@ -116,7 +118,7 @@ iPhone 原生实现（Alpha）。SwiftUI + SwiftData，零第三方依赖；数�
   - 留存：删除记录即从索引撤下；清空全部、覆盖导入会清空索引后按现有数据重建；启动时全量对账一次；
     点开一条已不存在的结果会顺手撤掉它；
   - 数据库内存降级期间不写、不删、不重建索引；
-  - 如何关闭：「设置 › 隐私 › 在系统搜索中显示」，关闭即清空 Flash 的整个索引；或在 iOS「设置 › Apps › Flash Aero ›
+  - 如何关闭：「设置 › 隐私 › 在系统搜索中显示」，关闭即清空 Flash 的整个索引；或在 iOS「设置 › Apps › Flash Paper ›
     Siri 与搜索」中关闭「在搜索中显示 App 内容」。默认开启。
 - **数据库落盘**：SwiftData 存储沿用系统默认保护级别（首次解锁后可读）。不提升到「锁定即不可读」：
   锁屏上点通知的「完成 / 稍后」需要在锁定状态写库。存储随系统设备备份一同备份：这是用户希望换机后恢复的数据。

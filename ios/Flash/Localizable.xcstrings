@@ -21217,54 +21217,54 @@
         }
       }
     },
-    "正在查找附近的 Flash Aero…": {
+    "正在查找附近的 Flash Paper…": {
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "جارٍ البحث عن Flash Aero قريبًا…"
+            "value": "جارٍ البحث عن Flash Paper قريبًا…"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Suche Flash Aero in der Nähe…"
+            "value": "Suche Flash Paper in der Nähe…"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Looking for Flash Aero nearby…"
+            "value": "Looking for Flash Paper nearby…"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Recherche de Flash Aero à proximité…"
+            "value": "Recherche de Flash Paper à proximité…"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "近くの Flash Aero を検索中…"
+            "value": "近くの Flash Paper を検索中…"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "근처의 Flash Aero를 찾는 중…"
+            "value": "근처의 Flash Paper를 찾는 중…"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Поиск Flash Aero поблизости…"
+            "value": "Поиск Flash Paper поблизости…"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "正在查找附近的 Flash Aero…"
+            "value": "正在查找附近的 Flash Paper…"
           }
         }
       }

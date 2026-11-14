@@ -212,6 +212,6 @@ public enum BackupImportCoordinator {
     public static var appVersion: String {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
         let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?"
-        return "Flash Aero v\(version) (\(build))"
+        return "Flash Paper \(version) Alpha \(build)"
     }
 }

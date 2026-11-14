@@ -383,8 +383,8 @@ export struct ProfilePage {
   private aboutGroup() {
     this.groupLabel(tr('关于 Flash'))
     Column({ space: 6 }) {
-      Text('Flash Aero').fontSize(TYPE_SECTION).fontWeight(FontWeight.Bold).fontColor(this.theme.themeText)
-      Text(tr('v0.1.0 · HarmonyOS 原生版 · com.flash.app.harmonyos')).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
+      Text('Flash Paper 1.0 Alpha 1').fontSize(TYPE_SECTION).fontWeight(FontWeight.Bold).fontColor(this.theme.themeText)
+      Text(tr('1.0 Alpha 1 · HarmonyOS 原生版 · com.flash.app.harmonyos')).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
       Text(tr('让每一次闪念都有落点 · 无云端账号')).fontSize(TYPE_SECONDARY).fontColor(this.theme.themeMuted)
     }.width('100%').height(130).justifyContent(FlexAlign.Center).backgroundColor(this.theme.themeSurface).borderRadius(RADIUS_CARD)
       .border({ width: 0.75, color: hairlineColor(this.theme) })

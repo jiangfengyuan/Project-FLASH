@@ -2,15 +2,15 @@
  "string": [
   {
    "name": "module_desc",
-   "value": "Flash Aero لنظام HarmonyOS"
+   "value": "Flash Paper لنظام HarmonyOS"
   },
   {
    "name": "EntryAbility_desc",
-   "value": "نافذة Flash Aero الرئيسية"
+   "value": "نافذة Flash Paper الرئيسية"
   },
   {
    "name": "EntryAbility_label",
-   "value": "Flash Aero"
+   "value": "Flash Paper"
   },
   {
    "name": "EntryFormAbility_label",
@@ -18,7 +18,7 @@
   },
   {
    "name": "EntryFormAbility_desc",
-   "value": "بطاقة نظرة اليوم في Flash Aero"
+   "value": "بطاقة نظرة اليوم في Flash Paper"
   },
   {
    "name": "form_today_summary_display_name",
@@ -129,6 +129,10 @@
    "value": "/: حجم الملف أكبر من 50 ميبيبايت"
   },
   {
+   "name": "s_924a9629",
+   "value": "1.0 Alpha 1 · HarmonyOS · com.flash.app.harmonyos"
+  },
+  {
    "name": "s_355b83a3",
    "value": "أسبوع يستحق أن يُذكر. ✦"
   },
@@ -193,10 +197,6 @@
    "value": "مهام"
   },
   {
-   "name": "s_48dce70c",
-   "value": "v0.1.0 · HarmonyOS · com.flash.app.harmonyos"
-  },
-  {
    "name": "s_6e425eba",
    "value": "{0}: {1} · {2}: {3}"
   },
@@ -247,6 +247,10 @@
   {
    "name": "s_662e559c",
    "value": "{0}، لكن تعذرت كتابة نسخة الاستعادة ولم يُحتفظ بالبيانات الأصلية"
+  },
+  {
+   "name": "s_c172b622",
+   "value": "{0}؛ تعذر حفظ نسخة الاسترداد، والأصول باقية في التخزين السابق"
   },
   {
    "name": "s_deca74ba",
@@ -1063,6 +1067,10 @@
   {
    "name": "s_6344fa26",
    "value": "البيانات والأمان"
+  },
+  {
+   "name": "s_d8d92218",
+   "value": "تعذر حفظ بعض السجلات الأصلية بأمان. أُوقف الدمج لحمايتها؛ وفر مساحة وأعد تشغيل التطبيق قبل المحاولة."
   },
   {
    "name": "s_b6537954",

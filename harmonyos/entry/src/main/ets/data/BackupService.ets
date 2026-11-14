@@ -172,7 +172,7 @@ export class BackupService {
   static readonly MAX_BYTES: number = 50 * 1024 * 1024;
   /** Stamped into exported documents. AppController overwrites this from the
    * bundle info at startup; the literal only survives as a fallback. */
-  static appVersion: string = '0.1.0';
+  static appVersion: string = '1.0';
   private static readonly MAX_FIELD_LENGTH: number = 100000;
   // Keep imports bounded even when a small, adversarial JSON file contains huge arrays.
   private static readonly MAX_ENTRY_COUNT: number = 100000;

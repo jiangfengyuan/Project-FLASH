@@ -1,4 +1,6 @@
-# Flash Aero · Android
+# Flash Paper · Android
+
+当前候选为 **Flash Paper 1.0 Alpha 1**（数字版本 1.0，build 1），验收状态以 [本轮报告](../docs/acceptance/paper-alpha1-20261114.md) 为准。正式版命名为 Flash Paper 1.0.0；审查前源码冻结为 Flash Aero 最后一个 Beta，保留原编号。
 
 > 2026-10-31 整合候选：已合入最新 iOS 导航、分享扩展与 Spotlight，并保留加固修复。旧 LAN 仍停用，已清理仅供其使用的网络声明；Android 的 WorkManager 依赖仍合并 ACCESS_NETWORK_STATE，未为清理 LAN 强删调度框架能力。当前仅支持文件导出/系统分享；升级本端不会修复仍运行旧版本的另一端。详见 [整合与验收](../docs/hardening/integration-20261031.md)。
 
@@ -6,8 +8,7 @@
 
 Android 端原生实现。Kotlin + Jetpack Compose，严格遵循 Material Design 3。
 
-当前发布身份为 **Flash Aero v0.1.0**；`Aero` 为 v0 Alpha 阶段的版本代号。
-首个正式版将统一命名为 **Flash Pulse v1.0.0**。
+
 
 - applicationId：Release 为 `com.flash.app`；Debug 使用 `.native` 后缀（`com.flash.app.native`）
 - minSdk 26 / targetSdk 36

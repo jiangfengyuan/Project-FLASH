@@ -1,6 +1,6 @@
 # Flash 一闪 · 四端原生路线图
 
-更新：2026-11-14（香港）。当前仍为 Flash Aero v0.1.0 Alpha；Flash Pulse v1.0.0 保留为正式版名称，不承诺发布日期。
+更新：2026-11-14（香港）。当前候选为 Flash Paper 1.0 Alpha 1；正式版命名为 Flash Paper 1.0.0，不承诺发布日期。Alpha 验收结论见 docs/acceptance/paper-alpha1-20261114.md。
 
 ## 下一步：Android 与 macOS 测试候选
 

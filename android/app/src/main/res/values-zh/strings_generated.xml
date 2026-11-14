@@ -22,7 +22,7 @@
     <string name="s_5ddd2d8d" formatted="false">30天</string>
     <string name="s_a96eed0d" formatted="false">7天</string>
     <string name="s_355b83a3" formatted="false">值得记住的一周。✦</string>
-    <string name="s_a1486dba" formatted="false">Flash Aero 备份</string>
+    <string name="s_fb28eba1" formatted="false">Flash Paper 备份</string>
     <string name="s_eeecd281" formatted="false">Flash 任务提醒</string>
     <string name="s_2534b43c" formatted="false">Flash 已锁定</string>
     <string name="s_f6ff76b6" formatted="false">Flash 快速记录</string>
@@ -100,11 +100,13 @@
     <string name="s_2d7464e1" formatted="false">任务</string>
     <string name="s_3f7946be" formatted="false">任务保存失败</string>
     <string name="s_bc3ceaab" formatted="false">任务删除失败</string>
+    <string name="s_69206a95" formatted="false">任务已保存，但系统提醒恢复失败</string>
     <string name="s_cd07ba17" formatted="false">任务已保存；允许通知后才能收到提醒</string>
+    <string name="s_01b1fb7e" formatted="false">任务已删除，但系统提醒清理失败</string>
     <string name="s_d3190fa3" formatted="false">任务提醒</string>
     <string name="s_d8bb8799" formatted="false">任务时间不合法</string>
     <string name="s_86da87a3" formatted="false">任务更新失败</string>
-    <string name="s_97815f19" formatted="false">传输 Flash Aero 备份</string>
+    <string name="s_4335bf0c" formatted="false">传输 Flash Paper 备份</string>
     <string name="s_6b17ba8f" formatted="false">传输到其他设备</string>
     <string name="s_79955ed0" formatted="false">伤心</string>
     <string name="s_d7974514" formatted="false">你还有 {0} 个想法，先看看最早的一条</string>
@@ -382,6 +384,7 @@
     <string name="s_6d67abd6" formatted="false">这个月</string>
     <string name="s_09e1a534" formatted="false">这周</string>
     <string name="s_f8f100e1" formatted="false">这是加密备份，请输入导出时设置的口令</string>
+    <string name="s_b677cb36" formatted="false">这条任务已不存在</string>
     <string name="s_d3ce76c1" formatted="false">这条记录已不存在</string>
     <string name="s_1a959a39" formatted="false">这段时间还没有记录，空白日期按 0 次显示。</string>
     <string name="s_5fe370b7" formatted="false">选择</string>

@@ -1,13 +1,14 @@
-# Flash Aero · 一闪
+# Flash Paper · 一闪
 
 > 2026-10-31 整合候选：已合入最新 iOS 导航、分享扩展与 Spotlight，并保留加固修复。旧 LAN 仍停用，已清理仅供其使用的网络声明；Android 的 WorkManager 依赖仍合并 ACCESS_NETWORK_STATE，未为清理 LAN 强删调度框架能力。当前仅支持文件导出/系统分享；升级本端不会修复仍运行旧版本的另一端。详见 [整合与验收](docs/hardening/integration-20261031.md)。
 
 闪过即留，一目了然。本地优先的日志 / 灵感 / 情绪记录应用。
 
-当前版本：**Flash Aero v0.1.0**。`Aero` 是 v0 Alpha 阶段的版本代号；
-首个正式版将统一命名为 **Flash Pulse v1.0.0**。
+当前候选：**Flash Paper 1.0 Alpha 1**（数字版本1.0，build 1）。正式版采用三段版本号1.0.0；本轮验收结论为**不通过**，修复与可执行测试已完成，仍有备份互读／旧库升级及签名设备验证阻断，不能视为可发布。
 
-没有账号、没有后端——数据默认只存在你自己的设备上；换设备可通过 JSON 文件。
+[版本规则](docs/release/versioning.md)、Flash Aero最后Beta的冻结快照及验收阻断项见[Paper Alpha 1验收记录](docs/acceptance/paper-alpha1-20261114.md)。
+
+没有账号、没有后端；数据默认保存在本机。换设备可通过 JSON 文件，但当前 Apple 默认 v4 备份不能由 Android／Harmony v1/v2 导入，详见验收报告。
 旧版局域网直传因安全风险暂时停用，请使用文件备份或系统分享。
 
 [爱发电主页](https://ifdian.net/a/HEY10086D)
@@ -24,10 +25,10 @@
 
 | 平台 | 技术栈 | 状态 |
 | --- | --- | --- |
-| Android | Kotlin + Jetpack Compose + Material 3 + Room | Flash Aero v0.1.0 |
-| macOS | SwiftUI + SwiftData，universal2（arm64 + x86_64） | Flash Aero v0.1.0 |
-| HarmonyOS | ArkTS + ArkUI + 加密 RDB + Preferences 设置存储，纯原生 HAP | Flash Aero v0.1.0 |
-| iOS | SwiftUI + SwiftData，iPhone，iOS 18+（与 macOS 共用 FlashKit） | 开发中（Alpha，未发布） |
+| Android | Kotlin + Jetpack Compose + Material 3 + Room | Flash Paper 1.0 Alpha 1候选 |
+| macOS | SwiftUI + SwiftData，universal2（arm64 + x86_64） | Flash Paper 1.0 Alpha 1候选 |
+| HarmonyOS | ArkTS + ArkUI + 加密 RDB + Preferences 设置存储，纯原生 HAP | Flash Paper 1.0 Alpha 1候选 |
+| iOS | SwiftUI + SwiftData，iPhone，iOS 18+（与 macOS 共用 FlashKit） | Flash Paper 1.0 Alpha 1候选，未发布 |
 
 历史上有过 React + Capacitor 的 Web/混合版，已退役（git 历史可查），
 本仓库现在包含 Android、macOS、HarmonyOS 三个纯原生工程，以及开发中的 iOS 工程（与 macOS 共用 `shared/FlashKit`）。

@@ -22,7 +22,7 @@
     <string name="s_5ddd2d8d" formatted="false">30일</string>
     <string name="s_a96eed0d" formatted="false">7일</string>
     <string name="s_355b83a3" formatted="false">기억할 만한 한 주예요. ✦</string>
-    <string name="s_a1486dba" formatted="false">Flash Aero 백업</string>
+    <string name="s_fb28eba1" formatted="false">Flash Paper 백업</string>
     <string name="s_eeecd281" formatted="false">Flash 할 일 알림</string>
     <string name="s_2534b43c" formatted="false">Flash가 잠겨 있습니다</string>
     <string name="s_f6ff76b6" formatted="false">Flash 빠른 기록</string>
@@ -100,11 +100,13 @@
     <string name="s_2d7464e1" formatted="false">할 일</string>
     <string name="s_3f7946be" formatted="false">할 일을 저장하지 못했습니다</string>
     <string name="s_bc3ceaab" formatted="false">할 일을 삭제하지 못했습니다</string>
+    <string name="s_69206a95" formatted="false">작업은 저장되었지만 시스템 알림을 복원하지 못했습니다</string>
     <string name="s_cd07ba17" formatted="false">할 일을 저장했습니다. 알림을 허용해야 받을 수 있습니다</string>
+    <string name="s_01b1fb7e" formatted="false">작업은 삭제되었지만 시스템 알림을 정리하지 못했습니다</string>
     <string name="s_d3190fa3" formatted="false">할 일 알림</string>
     <string name="s_d8bb8799" formatted="false">할 일 시간이 잘못되었습니다</string>
     <string name="s_86da87a3" formatted="false">할 일을 업데이트하지 못했습니다</string>
-    <string name="s_97815f19" formatted="false">Flash Aero 백업 보내기</string>
+    <string name="s_4335bf0c" formatted="false">Flash Paper 백업 보내기</string>
     <string name="s_6b17ba8f" formatted="false">다른 기기로 보내기</string>
     <string name="s_79955ed0" formatted="false">슬픔</string>
     <string name="s_d7974514" formatted="false">기다리는 아이디어 {0}개. 가장 오래된 것부터 보세요</string>
@@ -382,6 +384,7 @@
     <string name="s_6d67abd6" formatted="false">이번 달</string>
     <string name="s_09e1a534" formatted="false">이번 주</string>
     <string name="s_f8f100e1" formatted="false">암호화된 백업입니다. 내보낼 때 설정한 암호 문구를 입력하세요.</string>
+    <string name="s_b677cb36" formatted="false">이 작업은 더 이상 존재하지 않습니다</string>
     <string name="s_d3ce76c1" formatted="false">이 기록은 더 이상 없습니다</string>
     <string name="s_1a959a39" formatted="false">이 기간에 기록이 아직 없습니다. 빈 날짜는 0으로 표시됩니다.</string>
     <string name="s_5fe370b7" formatted="false">선택</string>

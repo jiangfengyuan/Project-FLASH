@@ -33,10 +33,10 @@
 30天	30 days	30 jours	30일	30 Tage	30 дней	30 يومًا	30日
 7天	7 days	7 jours	7일	7 Tage	7 дней	7 أيام	7日
 A week worth remembering. ✦	A week worth remembering. ✦	Une semaine à retenir. ✦	기억할 만한 한 주예요. ✦	Eine Woche, die in Erinnerung bleibt. ✦	Неделя, которую стоит запомнить. ✦	أسبوع يستحق أن يُذكر. ✦	心に残る一週間でした。✦
-Flash Aero HarmonyOS 原生版本	Flash Aero for HarmonyOS	Flash Aero pour HarmonyOS	HarmonyOS용 Flash Aero	Flash Aero für HarmonyOS	Flash Aero для HarmonyOS	Flash Aero لنظام HarmonyOS	HarmonyOS 版 Flash Aero
-Flash Aero 主窗口	Flash Aero main window	Fenêtre principale de Flash Aero	Flash Aero 기본 창	Flash Aero-Hauptfenster	Главное окно Flash Aero	نافذة Flash Aero الرئيسية	Flash Aero メインウィンドウ
-Flash Aero 今日概览服务卡片	Flash Aero today overview card	Carte du jour de Flash Aero	Flash Aero 오늘 요약 카드	Flash Aero-Karte „Heute im Überblick“	Карточка Flash Aero «Сегодня»	بطاقة نظرة اليوم في Flash Aero	Flash Aero 今日の概要カード
-Flash Aero 备份	Flash Aero backup	Sauvegarde Flash Aero	Flash Aero 백업	Flash Aero-Backup	Резервная копия Flash Aero	نسخة Flash Aero الاحتياطية	Flash Aero バックアップ
+Flash Paper HarmonyOS 原生版本	Flash Paper for HarmonyOS	Flash Paper pour HarmonyOS	HarmonyOS용 Flash Paper	Flash Paper für HarmonyOS	Flash Paper для HarmonyOS	Flash Paper لنظام HarmonyOS	HarmonyOS 版 Flash Paper
+Flash Paper 主窗口	Flash Paper main window	Fenêtre principale de Flash Paper	Flash Paper 기본 창	Flash Paper-Hauptfenster	Главное окно Flash Paper	نافذة Flash Paper الرئيسية	Flash Paper メインウィンドウ
+Flash Paper 今日概览服务卡片	Flash Paper today overview card	Carte du jour de Flash Paper	Flash Paper 오늘 요약 카드	Flash Paper-Karte „Heute im Überblick“	Карточка Flash Paper «Сегодня»	بطاقة نظرة اليوم في Flash Paper	Flash Paper 今日の概要カード
+Flash Paper 备份	Flash Paper backup	Sauvegarde Flash Paper	Flash Paper 백업	Flash Paper-Backup	Резервная копия Flash Paper	نسخة Flash Paper الاحتياطية	Flash Paper バックアップ
 Flash 任务提醒	Flash task reminder	Rappel de tâche Flash	Flash 할 일 알림	Flash-Aufgabenerinnerung	Напоминание о задаче Flash	تذكير مهمة Flash	Flash タスクのリマインダー
 Flash 备份	Flash backup	Sauvegarde Flash	Flash 백업	Flash-Backup	Резервная копия Flash	نسخة Flash الاحتياطية	Flash バックアップ
 Flash 存储暂不可用，请打开应用后重试	Flash storage isn't available right now. Open the app and try again	Le stockage de Flash n'est pas disponible. Ouvrez l'app et réessayez	Flash 저장소를 지금 사용할 수 없습니다. 앱을 연 뒤 다시 시도하세요	Der Flash-Speicher ist gerade nicht verfügbar. App öffnen und erneut versuchen	Хранилище Flash сейчас недоступно. Откройте приложение и повторите попытку	مساحة تخزين Flash غير متاحة حاليًا. افتح التطبيق وحاول مجددًا	Flash のストレージを利用できません。アプリを開いてもう一度お試しください
@@ -64,7 +64,7 @@ moments	moments	moments	순간	Momente	моменты	لحظات	ひらめき
 schemas 必须是对象	schemas must be an object	schemas doit être un objet	schemas는 객체여야 합니다	schemas muss ein Objekt sein	schemas должно быть объектом	يجب أن يكون schemas كائنًا	schemas はオブジェクトである必要があります
 tasks	tasks	tâches	할 일	Aufgaben	задачи	مهام	タスク
 tasks 必须是数组	tasks must be an array	tasks doit être un tableau	tasks는 배열이어야 합니다	tasks muss ein Array sein	tasks должно быть массивом	يجب أن يكون tasks مصفوفة	tasks は配列である必要があります
-v0.1.0 · HarmonyOS 原生版 · com.flash.app.harmonyos	v0.1.0 · HarmonyOS · com.flash.app.harmonyos	v0.1.0 · HarmonyOS · com.flash.app.harmonyos	v0.1.0 · HarmonyOS · com.flash.app.harmonyos	v0.1.0 · HarmonyOS · com.flash.app.harmonyos	v0.1.0 · HarmonyOS · com.flash.app.harmonyos	v0.1.0 · HarmonyOS · com.flash.app.harmonyos	v0.1.0 · HarmonyOS · com.flash.app.harmonyos
+1.0 Alpha 1 · HarmonyOS 原生版 · com.flash.app.harmonyos	1.0 Alpha 1 · HarmonyOS · com.flash.app.harmonyos	1.0 Alpha 1 · HarmonyOS · com.flash.app.harmonyos	1.0 Alpha 1 · HarmonyOS · com.flash.app.harmonyos	1.0 Alpha 1 · HarmonyOS · com.flash.app.harmonyos	1.0 Alpha 1 · HarmonyOS · com.flash.app.harmonyos	1.0 Alpha 1 · HarmonyOS · com.flash.app.harmonyos	1.0 Alpha 1 · HarmonyOS · com.flash.app.harmonyos
 {0} {1} 条 · {2} {3} 条	{0}: {1} · {2}: {3}	{0} : {1} · {2} : {3}	{0}: {1} · {2}: {3}	{0}: {1} · {2}: {3}	{0}: {1} · {2}: {3}	{0}: {1} · {2}: {3}	{0}: {1} · {2}: {3}
 {0} — {1} · 无记录日期不计入均值	{0} — {1} · days with no entries aren't averaged	{0} — {1} · les jours sans entrée ne comptent pas	{0} — {1} · 기록 없는 날은 평균에서 제외	{0} — {1} · Tage ohne Einträge zählen nicht	{0} — {1} · дни без записей не учитываются	{0} — {1} · الأيام بلا تسجيل لا تُحسب	{0} — {1} · 記録のない日は平均に含みません
 {0} 个任务	Tasks: {0}	Tâches : {0}	할 일 {0}개	Aufgaben: {0}	Задач: {0}	المهام: {0}	タスク {0} 件
@@ -182,7 +182,7 @@ v0.1.0 · HarmonyOS 原生版 · com.flash.app.harmonyos	v0.1.0 · HarmonyOS · 
 任务标题	Task title	Titre de la tâche	할 일 제목	Aufgabentitel	Название задачи	عنوان المهمة	タスク名
 任务状态已更新，但系统提醒同步失败	Task updated, but system reminders couldn't sync	Tâche mise à jour, mais les rappels système n'ont pas pu être synchronisés	할 일을 업데이트했지만 시스템 알림을 동기화하지 못했습니다	Aufgabe aktualisiert, aber Systemerinnerungen konnten nicht synchronisiert werden	Задача обновлена, но системные напоминания не синхронизировались	حُدّثت المهمة، لكن تعذرت مزامنة تذكيرات النظام	タスクを更新しましたが、システム通知を同期できませんでした
 任务：新增 {0}、变更 {1}、本机独有 {2}\n	Tasks: {0} new, {1} changed, {2} only here\n	Tâches : {0} nouvelles, {1} modifiées, {2} uniquement ici\n	할 일: 새로 추가 {0}, 변경 {1}, 이 기기에만 {2}\n	Aufgaben: {0} neu, {1} geändert, {2} nur hier\n	Задачи: новых {0}, изменено {1}, только здесь {2}\n	المهام: جديدة {0}، معدّلة {1}، هنا فقط {2}\n	タスク: 新規 {0}、変更 {1}、この端末のみ {2}\n
-传输 Flash Aero 备份	Send Flash Aero backup	Envoyer la sauvegarde Flash Aero	Flash Aero 백업 보내기	Flash Aero-Backup senden	Отправить копию Flash Aero	إرسال نسخة Flash Aero	Flash Aero バックアップを送信
+传输 Flash Paper 备份	Send Flash Paper backup	Envoyer la sauvegarde Flash Paper	Flash Paper 백업 보내기	Flash Paper-Backup senden	Отправить копию Flash Paper	إرسال نسخة Flash Paper	Flash Paper バックアップを送信
 传输到其他设备	Send to another device	Envoyer vers un autre appareil	다른 기기로 보내기	An anderes Gerät senden	Отправить на другое устройство	إرسال إلى جهاز آخر	別の端末へ送信
 伤心	Sad	Triste	슬픔	Traurig	Грустно	حزين	悲しい
 伤心 / 生气 / 难受的出现次数，次数见条形末端数值	How often you felt sad, angry or unwell; the count is at the end of each bar	Fréquence de la tristesse, de la colère ou du malaise ; le nombre figure au bout de chaque barre	슬픔, 화남, 불편함의 횟수이며 막대 끝에 표시됩니다	Wie oft traurig, wütend oder unwohl; die Zahl steht am Balkenende	Как часто было грустно, злость или плохо; число в конце полоски	عدد مرات الحزن أو الغضب أو الضيق؛ العدد في نهاية كل شريط	悲しい・怒り・つらいの回数。回数は各バーの端に表示されます

@@ -2,15 +2,15 @@
  "string": [
   {
    "name": "module_desc",
-   "value": "Flash Aero pour HarmonyOS"
+   "value": "Flash Paper pour HarmonyOS"
   },
   {
    "name": "EntryAbility_desc",
-   "value": "Fenêtre principale de Flash Aero"
+   "value": "Fenêtre principale de Flash Paper"
   },
   {
    "name": "EntryAbility_label",
-   "value": "Flash Aero"
+   "value": "Flash Paper"
   },
   {
    "name": "EntryFormAbility_label",
@@ -18,7 +18,7 @@
   },
   {
    "name": "EntryFormAbility_desc",
-   "value": "Carte du jour de Flash Aero"
+   "value": "Carte du jour de Flash Paper"
   },
   {
    "name": "form_today_summary_display_name",
@@ -129,6 +129,10 @@
    "value": "/ : le fichier dépasse 50 Mio"
   },
   {
+   "name": "s_924a9629",
+   "value": "1.0 Alpha 1 · HarmonyOS · com.flash.app.harmonyos"
+  },
+  {
    "name": "s_355b83a3",
    "value": "Une semaine à retenir. ✦"
   },
@@ -193,10 +197,6 @@
    "value": "tâches"
   },
   {
-   "name": "s_48dce70c",
-   "value": "v0.1.0 · HarmonyOS · com.flash.app.harmonyos"
-  },
-  {
    "name": "s_6e425eba",
    "value": "{0} : {1} · {2} : {3}"
   },
@@ -247,6 +247,10 @@
   {
    "name": "s_662e559c",
    "value": "{0}, mais la copie de récupération n'a pas pu être écrite et les données d'origine n'ont pas été conservées"
+  },
+  {
+   "name": "s_c172b622",
+   "value": "{0} ; la copie de récupération a échoué, mais les originaux sont conservés"
   },
   {
    "name": "s_deca74ba",
@@ -1063,6 +1067,10 @@
   {
    "name": "s_6344fa26",
    "value": "Données et sécurité"
+  },
+  {
+   "name": "s_d8d92218",
+   "value": "Certains enregistrements d’origine n’ont pas pu être préservés. La fusion est suspendue ; libérez de l’espace et redémarrez avant de réessayer."
   },
   {
    "name": "s_b6537954",

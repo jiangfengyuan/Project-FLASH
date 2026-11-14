@@ -22,7 +22,7 @@
     <string name="s_5ddd2d8d" formatted="false">30 jours</string>
     <string name="s_a96eed0d" formatted="false">7 jours</string>
     <string name="s_355b83a3" formatted="false">Une semaine à retenir. ✦</string>
-    <string name="s_a1486dba" formatted="false">Sauvegarde Flash Aero</string>
+    <string name="s_fb28eba1" formatted="false">Sauvegarde Flash Paper</string>
     <string name="s_eeecd281" formatted="false">Rappel de tâche Flash</string>
     <string name="s_2534b43c" formatted="false">Flash est verrouillé</string>
     <string name="s_f6ff76b6" formatted="false">Capture rapide Flash</string>
@@ -100,11 +100,13 @@
     <string name="s_2d7464e1" formatted="false">Tâches</string>
     <string name="s_3f7946be" formatted="false">Impossible d\'enregistrer la tâche</string>
     <string name="s_bc3ceaab" formatted="false">Impossible de supprimer la tâche</string>
+    <string name="s_69206a95" formatted="false">Tâche enregistrée, mais les rappels système n’ont pas pu être rétablis</string>
     <string name="s_cd07ba17" formatted="false">Tâche enregistrée. Autorisez les notifications pour recevoir les rappels</string>
+    <string name="s_01b1fb7e" formatted="false">Tâche supprimée, mais les rappels système n’ont pas pu être effacés</string>
     <string name="s_d3190fa3" formatted="false">Rappels de tâches</string>
     <string name="s_d8bb8799" formatted="false">Heure de tâche non valide</string>
     <string name="s_86da87a3" formatted="false">Impossible de mettre à jour la tâche</string>
-    <string name="s_97815f19" formatted="false">Envoyer la sauvegarde Flash Aero</string>
+    <string name="s_4335bf0c" formatted="false">Envoyer la sauvegarde Flash Paper</string>
     <string name="s_6b17ba8f" formatted="false">Envoyer vers un autre appareil</string>
     <string name="s_79955ed0" formatted="false">Triste</string>
     <string name="s_d7974514" formatted="false">Idées en attente : {0}. Commencez par la plus ancienne</string>
@@ -382,6 +384,7 @@
     <string name="s_6d67abd6" formatted="false">ce mois-ci</string>
     <string name="s_09e1a534" formatted="false">cette semaine</string>
     <string name="s_f8f100e1" formatted="false">Cette sauvegarde est chiffrée. Saisissez la phrase secrète définie lors de l\'export.</string>
+    <string name="s_b677cb36" formatted="false">Cette tâche n’existe plus</string>
     <string name="s_d3ce76c1" formatted="false">Cette entrée n\'existe plus</string>
     <string name="s_1a959a39" formatted="false">Rien de noté sur cette période. Les jours vides affichent 0.</string>
     <string name="s_5fe370b7" formatted="false">Sélectionner</string>

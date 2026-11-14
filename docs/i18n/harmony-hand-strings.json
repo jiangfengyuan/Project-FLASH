@@ -1,15 +1,15 @@
 [
  {
   "name": "module_desc",
-  "value": "Flash Aero HarmonyOS 原生版本"
+  "value": "Flash Paper HarmonyOS 原生版本"
  },
  {
   "name": "EntryAbility_desc",
-  "value": "Flash Aero 主窗口"
+  "value": "Flash Paper 主窗口"
  },
  {
   "name": "EntryAbility_label",
-  "value": "Flash Aero"
+  "value": "Flash Paper"
  },
  {
   "name": "EntryFormAbility_label",
@@ -17,7 +17,7 @@
  },
  {
   "name": "EntryFormAbility_desc",
-  "value": "Flash Aero 今日概览服务卡片"
+  "value": "Flash Paper 今日概览服务卡片"
  },
  {
   "name": "form_today_summary_display_name",

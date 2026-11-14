@@ -4,7 +4,7 @@ package com.flash.app.i18n
 import com.flash.app.R
 
 internal object I18nKeys {
-    val strings: Map<String, Int> = HashMap<String, Int>(794).apply {
+    val strings: Map<String, Int> = HashMap<String, Int>(800).apply {
         chunk0(this)
         chunk1(this)
     }
@@ -27,7 +27,7 @@ internal object I18nKeys {
         map["30天"] = R.string.s_5ddd2d8d
         map["7天"] = R.string.s_a96eed0d
         map["A week worth remembering. ✦"] = R.string.s_355b83a3
-        map["Flash Aero 备份"] = R.string.s_a1486dba
+        map["Flash Paper 备份"] = R.string.s_fb28eba1
         map["Flash 任务提醒"] = R.string.s_eeecd281
         map["Flash 已锁定"] = R.string.s_2534b43c
         map["Flash 快速记录"] = R.string.s_f6ff76b6
@@ -105,11 +105,13 @@ internal object I18nKeys {
         map["任务"] = R.string.s_2d7464e1
         map["任务保存失败"] = R.string.s_3f7946be
         map["任务删除失败"] = R.string.s_bc3ceaab
+        map["任务已保存，但系统提醒恢复失败"] = R.string.s_69206a95
         map["任务已保存；允许通知后才能收到提醒"] = R.string.s_cd07ba17
+        map["任务已删除，但系统提醒清理失败"] = R.string.s_01b1fb7e
         map["任务提醒"] = R.string.s_d3190fa3
         map["任务时间不合法"] = R.string.s_d8bb8799
         map["任务更新失败"] = R.string.s_86da87a3
-        map["传输 Flash Aero 备份"] = R.string.s_97815f19
+        map["传输 Flash Paper 备份"] = R.string.s_4335bf0c
         map["传输到其他设备"] = R.string.s_6b17ba8f
         map["伤心"] = R.string.s_79955ed0
         map["你还有 {0} 个想法，先看看最早的一条"] = R.string.s_d7974514
@@ -310,11 +312,11 @@ internal object I18nKeys {
         map["没有口令的人无法读取或改动备份内容。Flash 不保存口令，忘记后无法恢复。"] = R.string.s_3aa61c82
         map["没有可用的分享应用"] = R.string.s_5816c303
         map["没有找到相关记录"] = R.string.s_43c975df
-        map["没有符合条件的日志"] = R.string.s_f8bc527e
-        map["活跃天数"] = R.string.s_0fed9772
     }
 
     private fun chunk1(map: MutableMap<String, Int>) {
+        map["没有符合条件的日志"] = R.string.s_f8bc527e
+        map["活跃天数"] = R.string.s_0fed9772
         map["浅色"] = R.string.s_11b5fdf6
         map["深色"] = R.string.s_2a8baaea
         map["清空全部数据"] = R.string.s_da340c1c
@@ -390,6 +392,7 @@ internal object I18nKeys {
         map["这个月"] = R.string.s_6d67abd6
         map["这周"] = R.string.s_09e1a534
         map["这是加密备份，请输入导出时设置的口令"] = R.string.s_f8f100e1
+        map["这条任务已不存在"] = R.string.s_b677cb36
         map["这条记录已不存在"] = R.string.s_d3ce76c1
         map["这段时间还没有记录，空白日期按 0 次显示。"] = R.string.s_1a959a39
         map["选择"] = R.string.s_5fe370b7

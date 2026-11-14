@@ -2,15 +2,15 @@
  "string": [
   {
    "name": "module_desc",
-   "value": "Flash Aero для HarmonyOS"
+   "value": "Flash Paper для HarmonyOS"
   },
   {
    "name": "EntryAbility_desc",
-   "value": "Главное окно Flash Aero"
+   "value": "Главное окно Flash Paper"
   },
   {
    "name": "EntryAbility_label",
-   "value": "Flash Aero"
+   "value": "Flash Paper"
   },
   {
    "name": "EntryFormAbility_label",
@@ -18,7 +18,7 @@
   },
   {
    "name": "EntryFormAbility_desc",
-   "value": "Карточка Flash Aero «Сегодня»"
+   "value": "Карточка Flash Paper «Сегодня»"
   },
   {
    "name": "form_today_summary_display_name",
@@ -129,6 +129,10 @@
    "value": "/: файл больше 50 МиБ"
   },
   {
+   "name": "s_924a9629",
+   "value": "1.0 Alpha 1 · HarmonyOS · com.flash.app.harmonyos"
+  },
+  {
    "name": "s_355b83a3",
    "value": "Неделя, которую стоит запомнить. ✦"
   },
@@ -193,10 +197,6 @@
    "value": "задачи"
   },
   {
-   "name": "s_48dce70c",
-   "value": "v0.1.0 · HarmonyOS · com.flash.app.harmonyos"
-  },
-  {
    "name": "s_6e425eba",
    "value": "{0}: {1} · {2}: {3}"
   },
@@ -247,6 +247,10 @@
   {
    "name": "s_662e559c",
    "value": "{0}, но копию для восстановления записать не удалось, исходные данные не сохранены"
+  },
+  {
+   "name": "s_c172b622",
+   "value": "{0}; копия не сохранена, оригиналы остались в прежнем хранилище"
   },
   {
    "name": "s_deca74ba",
@@ -1063,6 +1067,10 @@
   {
    "name": "s_6344fa26",
    "value": "Данные и безопасность"
+  },
+  {
+   "name": "s_d8d92218",
+   "value": "Часть исходных записей не удалось безопасно сохранить. Объединение приостановлено; освободите место и перезапустите приложение перед повтором."
   },
   {
    "name": "s_b6537954",

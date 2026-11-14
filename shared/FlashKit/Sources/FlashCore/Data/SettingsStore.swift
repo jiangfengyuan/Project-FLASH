@@ -25,10 +25,10 @@ public final class SettingsStore: ObservableObject {
     /// Quick Capture 全局快捷键（PRD §13.2），缺省 ⌘⇧Space；
     /// setter 发布 @Published，QuickCaptureController 订阅后通知 GlobalHotKeyService 重注册
     @Published public private(set) var quickCaptureHotkey: KeyChord
-    /// 灵感提醒推送开关与频率（iOS 设置页；默认开启、每天）
+    /// 灵感提醒推送开关与频率（iOS 设置页；默认关闭（用户明确开启后才索引）、每天）
     @Published public private(set) var ideaReminderEnabled: Bool
     @Published public private(set) var ideaReminderFrequency: IdeaReminder.Frequency
-    /// iOS 系统搜索（Spotlight）收录日志与灵感；默认开启，关闭即清空系统索引
+    /// iOS 系统搜索（Spotlight）收录日志与灵感；默认关闭（用户明确开启后才索引），关闭即清空系统索引
     @Published public private(set) var spotlightIndexingEnabled: Bool
     /// 应用锁：默认关闭；开启后冷启动与离开超过宽限期需验证（见 AppLockController）
     @Published public private(set) var appLockEnabled: Bool
@@ -37,7 +37,7 @@ public final class SettingsStore: ObservableObject {
 
     public init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        // 灵感提醒推送：默认开启、每天（PRD v3 §6.3）
+        // 灵感提醒推送：默认关闭（用户明确开启后才索引）、每天（PRD v3 §6.3）
         self.ideaReminderEnabled = defaults.object(forKey: Keys.ideaReminderEnabled) as? Bool ?? true
         self.ideaReminderFrequency = defaults.string(forKey: Keys.ideaReminderFrequency)
             .flatMap(IdeaReminder.Frequency.init(rawValue:)) ?? .daily

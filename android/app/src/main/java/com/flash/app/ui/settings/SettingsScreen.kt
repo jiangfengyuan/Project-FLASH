@@ -178,9 +178,9 @@ fun SettingsScreen(
             SettingsRow(
                 icon = Icons.Outlined.Info,
                 iconTint = MaterialTheme.colorScheme.primary,
-                title = "Flash Aero",
+                title = "Flash Paper",
                 subtitle = tr("让每一次闪念都有落点 · 无云端账号"),
-                value = "v${BuildConfig.VERSION_NAME}",
+                value = "${BuildConfig.VERSION_NAME} Alpha ${BuildConfig.VERSION_CODE}",
                 showChevron = false,
             )
         }
@@ -390,10 +390,10 @@ fun BackupSettingsScreen(onBack: () -> Unit) {
             val sendIntent = Intent(Intent.ACTION_SEND).apply {
                 type = "application/json"
                 putExtra(Intent.EXTRA_STREAM, uri)
-                clipData = ClipData.newRawUri(tr("Flash Aero 备份"), uri)
+                clipData = ClipData.newRawUri(tr("Flash Paper 备份"), uri)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
-            context.startActivity(Intent.createChooser(sendIntent, tr("传输 Flash Aero 备份")))
+            context.startActivity(Intent.createChooser(sendIntent, tr("传输 Flash Paper 备份")))
         }.onFailure {
             viewModel.reportShareFailure()
         }

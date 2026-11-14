@@ -2,15 +2,15 @@
  "string": [
   {
    "name": "module_desc",
-   "value": "Flash Aero for HarmonyOS"
+   "value": "Flash Paper for HarmonyOS"
   },
   {
    "name": "EntryAbility_desc",
-   "value": "Flash Aero main window"
+   "value": "Flash Paper main window"
   },
   {
    "name": "EntryAbility_label",
-   "value": "Flash Aero"
+   "value": "Flash Paper"
   },
   {
    "name": "EntryFormAbility_label",
@@ -18,7 +18,7 @@
   },
   {
    "name": "EntryFormAbility_desc",
-   "value": "Flash Aero today overview card"
+   "value": "Flash Paper today overview card"
   },
   {
    "name": "form_today_summary_display_name",
@@ -129,6 +129,10 @@
    "value": "/: file is larger than 50 MiB"
   },
   {
+   "name": "s_924a9629",
+   "value": "1.0 Alpha 1 · HarmonyOS · com.flash.app.harmonyos"
+  },
+  {
    "name": "s_355b83a3",
    "value": "A week worth remembering. ✦"
   },
@@ -193,10 +197,6 @@
    "value": "tasks"
   },
   {
-   "name": "s_48dce70c",
-   "value": "v0.1.0 · HarmonyOS · com.flash.app.harmonyos"
-  },
-  {
    "name": "s_6e425eba",
    "value": "{0}: {1} · {2}: {3}"
   },
@@ -247,6 +247,10 @@
   {
    "name": "s_662e559c",
    "value": "{0}, but the recovery copy couldn't be written and the original data wasn't kept"
+  },
+  {
+   "name": "s_c172b622",
+   "value": "{0}; the quarantine copy failed, but originals remain in legacy storage"
   },
   {
    "name": "s_deca74ba",
@@ -1063,6 +1067,10 @@
   {
    "name": "s_6344fa26",
    "value": "Data & security"
+  },
+  {
+   "name": "s_d8d92218",
+   "value": "Some original database records could not be preserved safely. Merge is paused to keep them intact; free storage and restart the app before retrying."
   },
   {
    "name": "s_b6537954",

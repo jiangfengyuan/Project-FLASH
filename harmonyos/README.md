@@ -1,10 +1,13 @@
-# Flash Aero for HarmonyOS
+# Flash Paper · HarmonyOS
+
+当前候选为 **Flash Paper 1.0 Alpha 1**（数字版本 1.0，build 1），验收状态以 [本轮报告](../docs/acceptance/paper-alpha1-20261114.md) 为准。正式版命名为 Flash Paper 1.0.0；审查前源码冻结为 Flash Aero 最后一个 Beta，保留原编号。
+
 
 > 2026-10-31 整合候选：已合入最新 iOS 导航、分享扩展与 Spotlight，并保留加固修复。旧 LAN 仍停用，已清理仅供其使用的网络声明；Android 的 WorkManager 依赖仍合并 ACCESS_NETWORK_STATE，未为清理 LAN 强删调度框架能力。当前仅支持文件导出/系统分享；升级本端不会修复仍运行旧版本的另一端。详见 [整合与验收](../docs/hardening/integration-20261031.md)。
 
 > 2026-10-25 加固候选：旧版 LAN 因未认证下载/明文风险经批准暂时停用，请使用文件导出/系统分享；没有不安全回退。四端候选支持既有分区 schema1/2，原生 IANA 别名策略已统一；完整 app/真机矩阵仍未验收。见 [审查交接与限制](../docs/hardening/review-handoff.md)。签名团队未变；本轮移除旧LAN专用声明，历史构建记录仍保留。
 
-Flash Aero v0.1.0 的 HarmonyOS 原生版本，使用 ArkTS、ArkUI、加密 RDB 与 Preferences 设置存储构建，
+Flash Paper 的 HarmonyOS 原生版本，使用 ArkTS、ArkUI、加密 RDB 与 Preferences 设置存储构建，
 不依赖 Android 兼容层。
 
 ## 已对齐功能
@@ -15,7 +18,7 @@ Flash Aero v0.1.0 的 HarmonyOS 原生版本，使用 ArkTS、ArkUI、加密 RDB
 - `flash-backup-v2` 分区 JSON 导入/导出（兼容 v1），持久化 Calendar 任务并在导入前
   分析日志、情绪和任务差异，可选择合并或覆盖；
 - 旧LAN暂时停用，入口说明文件/系统分享替代方式；历史mDNS/TCP实现只在测试fixture；
-- 本地优先存储、欢迎页和 Flash Aero v0.1.0 品牌信息。
+- 本地优先存储、欢迎页和 Flash Paper 1.0 Alpha 1 品牌信息。
 - 与 Android 对齐的四模块首页、明确命名的“搜索”导航、今日概览、快速创建浮动按钮、
   页面淡入/位移转场；
 - 响应式窗口断点：手机使用底部导航，展开折叠屏/平板使用宽屏布局，`840vp` 起切换侧边导航；

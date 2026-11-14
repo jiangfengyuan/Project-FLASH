@@ -159,7 +159,7 @@ def android(table, keys):
     used = [k for k in keys if k in table]
     # 删除旧的手写中文，统一进生成文件；app_name 保留在 strings.xml
     with open(os.path.join(res, "values/strings.xml"), "w", encoding="utf-8") as fh:
-        fh.write('<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <string name="app_name">Flash Aero</string>\n</resources>\n')
+        fh.write('<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <string name="app_name" translatable="false">Flash Paper</string>\n</resources>\n')
     for lang, folder in ANDROID_DIRS.items():
         os.makedirs(os.path.join(res, folder), exist_ok=True)
         lines = ['<?xml version="1.0" encoding="utf-8"?>', "<!-- 由 tools/i18n/generate.py 生成，勿手改 -->",

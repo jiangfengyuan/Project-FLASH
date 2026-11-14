@@ -2,15 +2,15 @@
  "string": [
   {
    "name": "module_desc",
-   "value": "HarmonyOS용 Flash Aero"
+   "value": "HarmonyOS용 Flash Paper"
   },
   {
    "name": "EntryAbility_desc",
-   "value": "Flash Aero 기본 창"
+   "value": "Flash Paper 기본 창"
   },
   {
    "name": "EntryAbility_label",
-   "value": "Flash Aero"
+   "value": "Flash Paper"
   },
   {
    "name": "EntryFormAbility_label",
@@ -18,7 +18,7 @@
   },
   {
    "name": "EntryFormAbility_desc",
-   "value": "Flash Aero 오늘 요약 카드"
+   "value": "Flash Paper 오늘 요약 카드"
   },
   {
    "name": "form_today_summary_display_name",
@@ -129,6 +129,10 @@
    "value": "/: 파일이 50MiB를 초과합니다"
   },
   {
+   "name": "s_924a9629",
+   "value": "1.0 Alpha 1 · HarmonyOS · com.flash.app.harmonyos"
+  },
+  {
    "name": "s_355b83a3",
    "value": "기억할 만한 한 주예요. ✦"
   },
@@ -193,10 +197,6 @@
    "value": "할 일"
   },
   {
-   "name": "s_48dce70c",
-   "value": "v0.1.0 · HarmonyOS · com.flash.app.harmonyos"
-  },
-  {
    "name": "s_6e425eba",
    "value": "{0}: {1} · {2}: {3}"
   },
@@ -247,6 +247,10 @@
   {
    "name": "s_662e559c",
    "value": "{0}, 하지만 복구 사본을 쓰지 못해 원본 데이터를 보존하지 못했습니다"
+  },
+  {
+   "name": "s_c172b622",
+   "value": "{0}. 복구 사본을 쓰지 못했지만 원본은 이전 저장소에 유지됩니다"
   },
   {
    "name": "s_deca74ba",
@@ -1063,6 +1067,10 @@
   {
    "name": "s_6344fa26",
    "value": "데이터 및 보안"
+  },
+  {
+   "name": "s_d8d92218",
+   "value": "원본 데이터 일부를 안전하게 보존하지 못해 병합을 중지했습니다. 저장 공간을 확보하고 앱을 다시 시작한 후 시도하세요."
   },
   {
    "name": "s_b6537954",
