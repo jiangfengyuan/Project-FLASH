@@ -17,6 +17,7 @@ jobs:
           cache: npm
           cache-dependency-path: scripts/backup-contract/package-lock.json
       - run: npm ci --prefix scripts/backup-contract --ignore-scripts
+      - run: python3 scripts/check-lan-quarantine.py
       - run: node scripts/backup-contract/generate-cases.cjs --check
       - run: node scripts/backup-contract/generate-encrypted.cjs --check
       - run: node --test scripts/backup-contract/contract.test.cjs harmonyos/tests/*.test.cjs
@@ -61,3 +62,6 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - run: xcodebuild test -scheme Flash -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
         working-directory: macos
+      - run: swift test --package-path shared/FlashKit
+      - name: iOS simulator compilation (no signing)
+        run: xcodebuild -project ios/Flash.xcodeproj -scheme Flash -destination 'generic/platform=iOS Simulator' build-for-testing CODE_SIGNING_ALLOWED=NO
