@@ -87,6 +87,35 @@ struct FlashStoreLocationTests {
         #expect(try read(legacy) == "main")
     }
 
+    #if os(macOS)
+    @Test func failedMainMoveLeavesLegacyCompanionsAvailableForFallback() throws {
+        let (root, legacy, destination) = try makeDirs()
+        let manager = FileManager.default
+        defer {
+            try? manager.setAttributes([.immutable: false], ofItemAtPath: legacy.path)
+            try? manager.removeItem(at: root)
+        }
+        try write("main", to: legacy)
+        let wal = URL(filePath: legacy.path + "-wal")
+        let shm = URL(filePath: legacy.path + "-shm")
+        try write("committed WAL", to: wal)
+        try write("shared memory", to: shm)
+        // Sidecars can move/copy; the main-file rename fails after those steps.
+        try manager.setAttributes([.immutable: true], ofItemAtPath: legacy.path)
+
+        #expect(FlashStoreLocation.resolve(legacy: legacy, destination: destination) == legacy)
+        #expect(try read(wal) == "committed WAL")
+        #expect(try read(shm) == "shared memory")
+        #expect(!manager.fileExists(atPath: destination.path))
+
+        try manager.setAttributes([.immutable: false], ofItemAtPath: legacy.path)
+        #expect(FlashStoreLocation.resolve(legacy: legacy, destination: destination) == destination)
+        #expect(try read(URL(filePath: destination.path + "-wal")) == "committed WAL")
+        #expect(try read(URL(filePath: destination.path + "-shm")) == "shared memory")
+        #expect(try manager.contentsOfDirectory(atPath: legacy.deletingLastPathComponent().path).isEmpty)
+    }
+    #endif
+
     @Test func productionStoreIsAppPrivate() {
         #expect(FlashStoreLocation.privateStoreURL.lastPathComponent == "default.store")
         #expect(!FlashStoreLocation.privateStoreURL.path.contains("Group Containers"))

@@ -67,9 +67,16 @@ public enum FlashStoreLocation {
             guard fileManager.fileExists(atPath: item.0.path) else { continue }
             // 上次中断留下的半截副本：以组容器里的为准
             if fileManager.fileExists(atPath: item.1.path) { try fileManager.removeItem(at: item.1) }
-            try fileManager.moveItem(at: item.0, to: item.1)
+            // Keep the legacy store and its WAL coherent until the main file
+            // commits the migration. A failure must leave fallback readable.
+            try fileManager.copyItem(at: item.0, to: item.1)
         }
         try fileManager.moveItem(at: legacy, to: destination)
+        // The private main file is now authoritative. Cleanup cannot undo the
+        // successful migration; leftovers may be removed best-effort.
+        for item in companionItems(of: legacy) where fileManager.fileExists(atPath: item.path) {
+            try? fileManager.removeItem(at: item)
+        }
         return true
     }
 
