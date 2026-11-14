@@ -1,4 +1,5 @@
--enable-property-obfuscation
+# Property obfuscation must stay off: backups and database rows are JSON.stringify
+# of ArkTS objects, so renaming properties rewrites the on-disk and wire format.
 -enable-toplevel-obfuscation
 -enable-filename-obfuscation
 -enable-export-obfuscation

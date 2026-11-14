@@ -13,3 +13,15 @@ Import/export preserves the original accepted identifier and absolute instant. C
 Native OS tzdb rules remain authoritative; the pinned naming facts do not replace rule data or guarantee identical historical/future offsets on different OS releases. Verify OS versions separately. Candidate tests cover modern/legacy parse-export spelling, simulated older-OS rename fallback, no GMT/neighbor-city substitution and invalid casing/offset/unknown IDs. Existing DST, timestamp, strict and recovery gates remain required. Physical devices/oldest supported OS coverage remains pending.
 
 Updating facts requires a reviewed upstream snapshot/hash, regeneration, preservation of legacy acceptance, alias-family review (including backzone), all contract/native gates and export/import matrix tests. Do not remove a previously accepted identifier or rewrite stored task zones as a side effect.
+
+## Device-reported identifiers at export
+
+Strict import accepts only the wire set above, but a device may report an identifier outside it: Foundation lists `GMT`, `Asia/Chongqing`, `America/Montreal`; Java also lists `US/Eastern`, `Etc/GMT-8` and custom `GMT+08:00`. Such a value must never block a backup, so every exporter maps it before strict validation. Import is deliberately not widened, so files stay readable by existing peers.
+
+| Device-reported ID | Written to the backup | Backup `notes` |
+| --- | --- | --- |
+| Already a wire ID | Unchanged | Unchanged |
+| IANA Link or legacy POSIX name (`scripts/backup-contract/timezone-export-aliases.json`) | Wire ID of the same zone family; the UTC family maps to `UTC` | Unchanged |
+| No zone family (`Etc/GMT±N`, `GMT+08:00`, `SystemV/*`, anything unrecognised) | `UTC`; the task's instant is unchanged | Gains a line naming the original IDs (at most eight) |
+
+The stored task is not rewritten on Apple or Android, so local display keeps the device's zone. HarmonyOS stores wire IDs at creation and maps legacy rows when loading them, instead of hiding them. Fallback changes how a timed task displays on the receiving device, never when it is due. `timezones/device-reported-samples.json` is a host enumeration used as a regression list, not a device matrix.

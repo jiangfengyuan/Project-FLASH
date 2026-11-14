@@ -44,7 +44,7 @@ test('valid merge and merge after successful quarantine remain available', async
     await store.addLog('retained valid record');
     await store.mergeAll([], [], []);
     assert.equal(store.logs.length, 1);
-    assert.equal(JSON.parse(tables.logs[0].payload).content, 'retained valid record');
+    assert.equal(JSON.parse(tables.logs.find(row => row.id === store.logs[0].id).payload).content, 'retained valid record');
     if (raw) assert.equal(JSON.parse(JSON.parse(await store.recoveryArchive()).databaseRaw)[0].raw, raw);
   }
 });

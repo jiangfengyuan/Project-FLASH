@@ -89,13 +89,18 @@ object Backup {
             )
         }
         val tasksArray = JSONArray()
+        val replacedTimeZones = mutableSetOf<String>()
         tasks.forEach { task ->
             val due = JSONObject().put("kind", task.dueKind.storageKey)
             when (task.dueKind) {
                 TaskDueKind.ALL_DAY -> due.put("date", task.dueDate)
                 TaskDueKind.DATE_TIME -> due
                     .put("at", task.dueAt?.let(::normalizedForExport))
-                    .put("timeZone", task.timeZone)
+                    .put("timeZone", task.timeZone?.let { zone ->
+                        val (wire, exact) = CanonicalTimeZones.wireIdentifier(zone)
+                        if (!exact) replacedTimeZones += zone
+                        wire
+                    })
             }
             tasksArray.put(
                 JSONObject()
@@ -125,7 +130,7 @@ object Backup {
             .put("version", BACKUP_VERSION)
             .put("exportedAt", NORMALIZED_ISO.format(Instant.now()))
             .put("appVersion", BuildConfig.VERSION_NAME)
-            .put("notes", notes)
+            .put("notes", CanonicalTimeZones.exportNotes(notes, replacedTimeZones))
             .put("schemas", schemas)
             .put("data", data)
             .toString(2).also { parseStrict(it) }

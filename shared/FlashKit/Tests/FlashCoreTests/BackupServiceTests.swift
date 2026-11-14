@@ -10,6 +10,76 @@ import Foundation
 
 @Suite("BackupService")
 struct BackupServiceTests {
+    @Test func aLocalTaskKeepsTheNativeRulesOfItsDeviceZone() {
+        for device in ["GMT", "US/Eastern"] {
+            #expect(CanonicalTimeZones.timeZone(for: device) == TimeZone(identifier: device), "\(device)")
+        }
+        #expect(CanonicalTimeZones.timeZone(for: "Mars/Olympus") == nil)
+    }
+
+
+    @Test func fixedOffsetDeviceZoneDegradesToUTCWithANote() throws {
+        var task = sampleTask()
+        task.timeZone = "GMT+0800"
+        let json = try BackupService.exportStrictJSON(logs: [], emotions: [], tasks: [task], notes: "kept", appVersion: "0.1.0")
+        let preview = try BackupService.parseStrict(json)
+        #expect(preview.tasks.first?.timeZone == "UTC")
+        #expect(preview.tasks.first?.dueAt == task.dueAt)
+        let root = try #require(JSONSerialization.jsonObject(with: Data(json.utf8)) as? [String: Any])
+        let notes = try #require(root["notes"] as? String)
+        #expect(notes.hasPrefix("kept\n") && notes.contains("GMT+0800") && notes.contains("UTC"))
+        let exact = try BackupService.exportStrictJSON(logs: [], emotions: [], tasks: [sampleTask()], notes: "kept", appVersion: "0.1.0")
+        let exactRoot = try #require(JSONSerialization.jsonObject(with: Data(exact.utf8)) as? [String: Any])
+        #expect(exactRoot["notes"] as? String == "kept")
+    }
+
+
+    @Test func everyFoundationKnownZoneExports() throws {
+        for device in TimeZone.knownTimeZoneIdentifiers {
+            var task = sampleTask()
+            task.timeZone = device
+            let preview = try BackupService.parseStrict(
+                BackupService.exportStrictJSON(logs: [], emotions: [], tasks: [task], appVersion: "0.1.0"))
+            #expect(preview.tasks.count == 1, "\(device)")
+        }
+    }
+
+
+    @Test func deviceReportedZonesOutsideTheWireSetNeverFailExport() throws {
+        let cases = [("GMT", "UTC"), ("Etc/GMT", "UTC"), ("Zulu", "UTC"), ("Asia/Chongqing", "Asia/Shanghai"),
+                     ("US/Eastern", "America/New_York"), ("Asia/Ho_Chi_Minh", "Asia/Ho_Chi_Minh"),
+                     ("UTC", "UTC"), ("Etc/UTC", "Etc/UTC")]
+        for (device, wire) in cases {
+            var task = sampleTask()
+            task.timeZone = device
+            let json = try BackupService.exportStrictJSON(logs: [], emotions: [], tasks: [task], appVersion: "0.1.0")
+            let preview = try BackupService.parseStrict(json)
+            #expect(preview.tasks.first?.timeZone == wire, "\(device)")
+            #expect(preview.tasks.first?.dueAt == task.dueAt, "\(device)")
+        }
+    }
+
+
+    @Test func idsAndDaysWithTrailingLineTerminatorsAreRejected() throws {
+        // Android, HarmonyOS and the reference validator reject these (PR #3 F-09).
+        let json = try BackupService.exportStrictJSON(logs: [sampleLog()], emotions: [], appVersion: "0.1.0")
+        for suffix in ["\n", "\r\n", "\u{2028}"] {
+            for field in ["id", "recordDate"] {
+                var root = try #require(JSONSerialization.jsonObject(with: Data(json.utf8)) as? [String: Any])
+                var data = try #require(root["data"] as? [String: Any])
+                var logs = try #require(data["logs"] as? [[String: Any]])
+                logs[0][field] = try #require(logs[0][field] as? String) + suffix
+                data["logs"] = logs
+                root["data"] = data
+                let mutated = String(decoding: try JSONSerialization.data(withJSONObject: root), as: UTF8.self)
+                #expect(throws: (any Error).self, "\(field) \(suffix.debugDescription)") {
+                    _ = try BackupService.parseStrict(mutated)
+                }
+            }
+        }
+    }
+
+
     private func sampleLog(id: String = "11111111-1111-1111-1111-111111111111") -> LogItem {
         LogItem(id: id, content: "测试!!", colorTag: .urgent, category: .log,
                 importance: 2, createdAt: "2026-08-13T08:00:00.000Z",

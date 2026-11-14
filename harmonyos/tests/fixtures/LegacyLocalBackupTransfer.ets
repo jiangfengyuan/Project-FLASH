@@ -379,6 +379,10 @@ export class LocalBackupReceiver {
       let discardComplete = true;
       let backoffTimer = 0;
       let rechallengePending = false;
+      // True while an async proof/MAC check runs. Bytes keep arriving meanwhile
+      // and must wait in `incoming`: parsing them now would read the next line
+      // against the wrong phase.
+      let verifying = false;
       this.armTimer();
       this.capTimer = setTimeout(() => this.fail('传输超时'), transferMillis);
       const sendChallenge = (): void => {
@@ -426,7 +430,7 @@ export class LocalBackupReceiver {
         armBackoff();
       };
       const process = (): void => {
-        while (cursor < incoming.length && !this.finished) {
+        while (!verifying && cursor < incoming.length && !this.finished) {
           if (phase === 'proof' || phase === 'ok' || (phase === 'discard' && discardHeader)) {
             const lineLimit = phase === 'proof' ? MAX_HEADER_BYTES : MAX_OK_HEADER_BYTES;
             while (cursor < incoming.length && incoming[cursor] !== 10) {
@@ -453,7 +457,9 @@ export class LocalBackupReceiver {
               if (!proof) { this.fail('发送方返回了无效响应'); return; }
               const nonceLine = this.lastChallengeNonce;
               const proofValue = proof[1];
+              verifying = true;
               handshakeProof(pinSource(), nonceLine).then((expected) => {
+                verifying = false;
                 if (this.finished || phase !== 'proof') return;
                 if (constantTimeEqual(expected, proofValue)) {
                   authenticatedPin = pinSource();
@@ -505,8 +511,14 @@ export class LocalBackupReceiver {
           cursor = incoming.length;
           if (payloadOffset !== payload.length) return;
           const received = payload;
+          verifying = true;
           payloadMac(authenticatedPin, received).then((mac) => {
+            verifying = false;
             if (this.finished) return;
+            if (cursor < incoming.length) {
+              this.fail('发送方返回了额外数据');
+              return;
+            }
             if (!constantTimeEqual(mac, expectedMac)) {
               // Whole-transfer integrity: a tampered payload is discarded in
               // full and never reaches parsing or preview.
@@ -533,6 +545,12 @@ export class LocalBackupReceiver {
       };
       const absorb = (chunk: Uint8Array): void => {
         if (cursor > 0) incoming = incoming.slice(cursor);
+        cursor = 0;
+        // Only a pending check lets bytes accumulate; bound it to one legal answer.
+        if (incoming.length + chunk.length > BackupService.MAX_BYTES + MAX_HEADER_BYTES + MAX_OK_HEADER_BYTES) {
+          this.fail('发送方返回的数据过长');
+          return;
+        }
         const merged = new Uint8Array(incoming.length + chunk.length);
         merged.set(incoming, 0);
         merged.set(chunk, incoming.length);
@@ -545,6 +563,8 @@ export class LocalBackupReceiver {
         this.armTimer();
         absorb(new Uint8Array(info.message));
       });
+      // EOF is never success here: a result requires a verified complete payload.
+      this.client.on('close', () => this.fail('连接已断开'));
       this.client.connect({ address: { address: device.host, port: device.port }, timeout: SOCKET_TIMEOUT })
         .then(() => {
           sendChallenge();

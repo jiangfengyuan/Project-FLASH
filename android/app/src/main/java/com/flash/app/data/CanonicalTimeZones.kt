@@ -525,6 +525,26 @@ object CanonicalTimeZones {
         for (family in families) for (name in family) if (name in ALL) put(name, family)
     }
 
+    /** Device-reported IDs outside the wire set, mapped to the same IANA zone family. */
+    private val exportAliases: Map<String, String> = EXPORT_ALIAS_ROWS.associate { it[0] to it[1] }
+
+    /** Used when a device ID has no IANA family (fixed offsets such as `GMT+08:00`). */
+    const val EXPORT_FALLBACK = "UTC"
+
+    /** Strict wire ID for a stored or device-reported identifier; never fails export. */
+    fun wireIdentifier(identifier: String): Pair<String, Boolean> = when {
+        identifier in ALL -> identifier to true
+        identifier in exportAliases -> exportAliases.getValue(identifier) to true
+        else -> EXPORT_FALLBACK to false
+    }
+
+    /** Backup notes describing every fallback, so the degradation is never silent. */
+    fun exportNotes(notes: String, replaced: Set<String>): String {
+        if (replaced.isEmpty()) return notes
+        val line = "时区已规范为 UTC，时刻不变：" + replaced.sorted().take(8).joinToString(", ")
+        return if (notes.isEmpty()) line else notes + "\n" + line
+    }
+
     internal fun runtimeIdentifier(identifier: String, supports: (String) -> Boolean): String? {
         if (identifier !in ALL) return null
         if (supports(identifier)) return identifier
@@ -532,7 +552,144 @@ object CanonicalTimeZones {
     }
 
     fun zoneId(identifier: String): ZoneId? {
-        val resolved = runtimeIdentifier(identifier) { runCatching { ZoneId.of(it) }.isSuccess } ?: return null
+        val resolved = runtimeIdentifier(identifier) { runCatching { ZoneId.of(it) }.isSuccess }
+            // Not a wire ID: a locally created task keeps the zone its device reported.
+            ?: return if (identifier in ALL) null else runCatching { ZoneId.of(identifier) }.getOrNull()
         return runCatching { ZoneId.of(resolved) }.getOrNull()
     }
 }
+
+private val EXPORT_ALIAS_ROWS: List<List<String>> = listOf(
+    listOf("Africa/Timbuktu", "Africa/Abidjan"),
+    listOf("America/Argentina/ComodRivadavia", "America/Argentina/Catamarca"),
+    listOf("America/Atka", "America/Adak"),
+    listOf("America/Ensenada", "America/Tijuana"),
+    listOf("America/Fort_Wayne", "America/Indiana/Indianapolis"),
+    listOf("America/Knox_IN", "America/Indiana/Knox"),
+    listOf("America/Montreal", "America/Toronto"),
+    listOf("America/Nipigon", "America/Toronto"),
+    listOf("America/Pangnirtung", "America/Iqaluit"),
+    listOf("America/Porto_Acre", "America/Rio_Branco"),
+    listOf("America/Rainy_River", "America/Winnipeg"),
+    listOf("America/Rosario", "America/Argentina/Cordoba"),
+    listOf("America/Santa_Isabel", "America/Tijuana"),
+    listOf("America/Shiprock", "America/Denver"),
+    listOf("America/Thunder_Bay", "America/Toronto"),
+    listOf("America/Virgin", "America/Puerto_Rico"),
+    listOf("America/Yellowknife", "America/Edmonton"),
+    listOf("Antarctica/South_Pole", "Pacific/Auckland"),
+    listOf("Asia/Ashkhabad", "Asia/Ashgabat"),
+    listOf("Asia/Choibalsan", "Asia/Ulaanbaatar"),
+    listOf("Asia/Chongqing", "Asia/Shanghai"),
+    listOf("Asia/Chungking", "Asia/Shanghai"),
+    listOf("Asia/Dacca", "Asia/Dhaka"),
+    listOf("Asia/Harbin", "Asia/Shanghai"),
+    listOf("Asia/Istanbul", "Europe/Istanbul"),
+    listOf("Asia/Kashgar", "Asia/Urumqi"),
+    listOf("Asia/Macao", "Asia/Macau"),
+    listOf("Asia/Tel_Aviv", "Asia/Jerusalem"),
+    listOf("Asia/Thimbu", "Asia/Thimphu"),
+    listOf("Asia/Ujung_Pandang", "Asia/Makassar"),
+    listOf("Asia/Ulan_Bator", "Asia/Ulaanbaatar"),
+    listOf("Atlantic/Jan_Mayen", "Europe/Berlin"),
+    listOf("Australia/ACT", "Australia/Sydney"),
+    listOf("Australia/Canberra", "Australia/Sydney"),
+    listOf("Australia/Currie", "Australia/Hobart"),
+    listOf("Australia/LHI", "Australia/Lord_Howe"),
+    listOf("Australia/NSW", "Australia/Sydney"),
+    listOf("Australia/North", "Australia/Darwin"),
+    listOf("Australia/Queensland", "Australia/Brisbane"),
+    listOf("Australia/South", "Australia/Adelaide"),
+    listOf("Australia/Tasmania", "Australia/Hobart"),
+    listOf("Australia/Victoria", "Australia/Melbourne"),
+    listOf("Australia/West", "Australia/Perth"),
+    listOf("Australia/Yancowinna", "Australia/Broken_Hill"),
+    listOf("Brazil/Acre", "America/Rio_Branco"),
+    listOf("Brazil/DeNoronha", "America/Noronha"),
+    listOf("Brazil/East", "America/Sao_Paulo"),
+    listOf("Brazil/West", "America/Manaus"),
+    listOf("CET", "Europe/Brussels"),
+    listOf("CST6CDT", "America/Chicago"),
+    listOf("Canada/Atlantic", "America/Halifax"),
+    listOf("Canada/Central", "America/Winnipeg"),
+    listOf("Canada/Eastern", "America/Toronto"),
+    listOf("Canada/Mountain", "America/Edmonton"),
+    listOf("Canada/Newfoundland", "America/St_Johns"),
+    listOf("Canada/Pacific", "America/Vancouver"),
+    listOf("Canada/Saskatchewan", "America/Regina"),
+    listOf("Canada/Yukon", "America/Whitehorse"),
+    listOf("Chile/Continental", "America/Santiago"),
+    listOf("Chile/EasterIsland", "Pacific/Easter"),
+    listOf("Cuba", "America/Havana"),
+    listOf("EET", "Europe/Athens"),
+    listOf("EST", "America/Panama"),
+    listOf("EST5EDT", "America/New_York"),
+    listOf("Egypt", "Africa/Cairo"),
+    listOf("Eire", "Europe/Dublin"),
+    listOf("Etc/GMT", "UTC"),
+    listOf("Etc/GMT+0", "UTC"),
+    listOf("Etc/GMT-0", "UTC"),
+    listOf("Etc/GMT0", "UTC"),
+    listOf("Etc/Greenwich", "UTC"),
+    listOf("Etc/UCT", "UTC"),
+    listOf("Etc/Universal", "UTC"),
+    listOf("Etc/Zulu", "UTC"),
+    listOf("Europe/Belfast", "Europe/London"),
+    listOf("Europe/Nicosia", "Asia/Nicosia"),
+    listOf("Europe/Tiraspol", "Europe/Chisinau"),
+    listOf("Europe/Uzhgorod", "Europe/Kyiv"),
+    listOf("Europe/Zaporozhye", "Europe/Kyiv"),
+    listOf("GB", "Europe/London"),
+    listOf("GB-Eire", "Europe/London"),
+    listOf("GMT", "UTC"),
+    listOf("GMT+0", "UTC"),
+    listOf("GMT-0", "UTC"),
+    listOf("GMT0", "UTC"),
+    listOf("Greenwich", "UTC"),
+    listOf("HST", "Pacific/Honolulu"),
+    listOf("Hongkong", "Asia/Hong_Kong"),
+    listOf("Iceland", "Africa/Abidjan"),
+    listOf("Iran", "Asia/Tehran"),
+    listOf("Israel", "Asia/Jerusalem"),
+    listOf("Jamaica", "America/Jamaica"),
+    listOf("Japan", "Asia/Tokyo"),
+    listOf("Kwajalein", "Pacific/Kwajalein"),
+    listOf("Libya", "Africa/Tripoli"),
+    listOf("MET", "Europe/Brussels"),
+    listOf("MST", "America/Phoenix"),
+    listOf("MST7MDT", "America/Denver"),
+    listOf("Mexico/BajaNorte", "America/Tijuana"),
+    listOf("Mexico/BajaSur", "America/Mazatlan"),
+    listOf("Mexico/General", "America/Mexico_City"),
+    listOf("NZ", "Pacific/Auckland"),
+    listOf("NZ-CHAT", "Pacific/Chatham"),
+    listOf("Navajo", "America/Denver"),
+    listOf("PRC", "Asia/Shanghai"),
+    listOf("PST8PDT", "America/Los_Angeles"),
+    listOf("Pacific/Johnston", "Pacific/Honolulu"),
+    listOf("Pacific/Samoa", "Pacific/Pago_Pago"),
+    listOf("Pacific/Yap", "Pacific/Port_Moresby"),
+    listOf("Poland", "Europe/Warsaw"),
+    listOf("Portugal", "Europe/Lisbon"),
+    listOf("ROC", "Asia/Taipei"),
+    listOf("ROK", "Asia/Seoul"),
+    listOf("Singapore", "Asia/Singapore"),
+    listOf("Turkey", "Europe/Istanbul"),
+    listOf("UCT", "UTC"),
+    listOf("US/Alaska", "America/Anchorage"),
+    listOf("US/Aleutian", "America/Adak"),
+    listOf("US/Arizona", "America/Phoenix"),
+    listOf("US/Central", "America/Chicago"),
+    listOf("US/East-Indiana", "America/Indiana/Indianapolis"),
+    listOf("US/Eastern", "America/New_York"),
+    listOf("US/Hawaii", "Pacific/Honolulu"),
+    listOf("US/Indiana-Starke", "America/Indiana/Knox"),
+    listOf("US/Michigan", "America/Detroit"),
+    listOf("US/Mountain", "America/Denver"),
+    listOf("US/Pacific", "America/Los_Angeles"),
+    listOf("US/Samoa", "Pacific/Pago_Pago"),
+    listOf("Universal", "UTC"),
+    listOf("W-SU", "Europe/Moscow"),
+    listOf("WET", "Europe/Lisbon"),
+    listOf("Zulu", "UTC"),
+)

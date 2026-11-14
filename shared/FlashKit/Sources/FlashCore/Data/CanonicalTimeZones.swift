@@ -527,6 +527,162 @@ public enum CanonicalTimeZones: Sendable {
         return result
     }()
 
+    /// Device-reported IDs outside the wire set, mapped to the same IANA zone family.
+    public static let exportAliases: [String: String] = [
+        "Africa/Timbuktu": "Africa/Abidjan",
+        "America/Argentina/ComodRivadavia": "America/Argentina/Catamarca",
+        "America/Atka": "America/Adak",
+        "America/Ensenada": "America/Tijuana",
+        "America/Fort_Wayne": "America/Indiana/Indianapolis",
+        "America/Knox_IN": "America/Indiana/Knox",
+        "America/Montreal": "America/Toronto",
+        "America/Nipigon": "America/Toronto",
+        "America/Pangnirtung": "America/Iqaluit",
+        "America/Porto_Acre": "America/Rio_Branco",
+        "America/Rainy_River": "America/Winnipeg",
+        "America/Rosario": "America/Argentina/Cordoba",
+        "America/Santa_Isabel": "America/Tijuana",
+        "America/Shiprock": "America/Denver",
+        "America/Thunder_Bay": "America/Toronto",
+        "America/Virgin": "America/Puerto_Rico",
+        "America/Yellowknife": "America/Edmonton",
+        "Antarctica/South_Pole": "Pacific/Auckland",
+        "Asia/Ashkhabad": "Asia/Ashgabat",
+        "Asia/Choibalsan": "Asia/Ulaanbaatar",
+        "Asia/Chongqing": "Asia/Shanghai",
+        "Asia/Chungking": "Asia/Shanghai",
+        "Asia/Dacca": "Asia/Dhaka",
+        "Asia/Harbin": "Asia/Shanghai",
+        "Asia/Istanbul": "Europe/Istanbul",
+        "Asia/Kashgar": "Asia/Urumqi",
+        "Asia/Macao": "Asia/Macau",
+        "Asia/Tel_Aviv": "Asia/Jerusalem",
+        "Asia/Thimbu": "Asia/Thimphu",
+        "Asia/Ujung_Pandang": "Asia/Makassar",
+        "Asia/Ulan_Bator": "Asia/Ulaanbaatar",
+        "Atlantic/Jan_Mayen": "Europe/Berlin",
+        "Australia/ACT": "Australia/Sydney",
+        "Australia/Canberra": "Australia/Sydney",
+        "Australia/Currie": "Australia/Hobart",
+        "Australia/LHI": "Australia/Lord_Howe",
+        "Australia/NSW": "Australia/Sydney",
+        "Australia/North": "Australia/Darwin",
+        "Australia/Queensland": "Australia/Brisbane",
+        "Australia/South": "Australia/Adelaide",
+        "Australia/Tasmania": "Australia/Hobart",
+        "Australia/Victoria": "Australia/Melbourne",
+        "Australia/West": "Australia/Perth",
+        "Australia/Yancowinna": "Australia/Broken_Hill",
+        "Brazil/Acre": "America/Rio_Branco",
+        "Brazil/DeNoronha": "America/Noronha",
+        "Brazil/East": "America/Sao_Paulo",
+        "Brazil/West": "America/Manaus",
+        "CET": "Europe/Brussels",
+        "CST6CDT": "America/Chicago",
+        "Canada/Atlantic": "America/Halifax",
+        "Canada/Central": "America/Winnipeg",
+        "Canada/Eastern": "America/Toronto",
+        "Canada/Mountain": "America/Edmonton",
+        "Canada/Newfoundland": "America/St_Johns",
+        "Canada/Pacific": "America/Vancouver",
+        "Canada/Saskatchewan": "America/Regina",
+        "Canada/Yukon": "America/Whitehorse",
+        "Chile/Continental": "America/Santiago",
+        "Chile/EasterIsland": "Pacific/Easter",
+        "Cuba": "America/Havana",
+        "EET": "Europe/Athens",
+        "EST": "America/Panama",
+        "EST5EDT": "America/New_York",
+        "Egypt": "Africa/Cairo",
+        "Eire": "Europe/Dublin",
+        "Etc/GMT": "UTC",
+        "Etc/GMT+0": "UTC",
+        "Etc/GMT-0": "UTC",
+        "Etc/GMT0": "UTC",
+        "Etc/Greenwich": "UTC",
+        "Etc/UCT": "UTC",
+        "Etc/Universal": "UTC",
+        "Etc/Zulu": "UTC",
+        "Europe/Belfast": "Europe/London",
+        "Europe/Nicosia": "Asia/Nicosia",
+        "Europe/Tiraspol": "Europe/Chisinau",
+        "Europe/Uzhgorod": "Europe/Kyiv",
+        "Europe/Zaporozhye": "Europe/Kyiv",
+        "GB": "Europe/London",
+        "GB-Eire": "Europe/London",
+        "GMT": "UTC",
+        "GMT+0": "UTC",
+        "GMT-0": "UTC",
+        "GMT0": "UTC",
+        "Greenwich": "UTC",
+        "HST": "Pacific/Honolulu",
+        "Hongkong": "Asia/Hong_Kong",
+        "Iceland": "Africa/Abidjan",
+        "Iran": "Asia/Tehran",
+        "Israel": "Asia/Jerusalem",
+        "Jamaica": "America/Jamaica",
+        "Japan": "Asia/Tokyo",
+        "Kwajalein": "Pacific/Kwajalein",
+        "Libya": "Africa/Tripoli",
+        "MET": "Europe/Brussels",
+        "MST": "America/Phoenix",
+        "MST7MDT": "America/Denver",
+        "Mexico/BajaNorte": "America/Tijuana",
+        "Mexico/BajaSur": "America/Mazatlan",
+        "Mexico/General": "America/Mexico_City",
+        "NZ": "Pacific/Auckland",
+        "NZ-CHAT": "Pacific/Chatham",
+        "Navajo": "America/Denver",
+        "PRC": "Asia/Shanghai",
+        "PST8PDT": "America/Los_Angeles",
+        "Pacific/Johnston": "Pacific/Honolulu",
+        "Pacific/Samoa": "Pacific/Pago_Pago",
+        "Pacific/Yap": "Pacific/Port_Moresby",
+        "Poland": "Europe/Warsaw",
+        "Portugal": "Europe/Lisbon",
+        "ROC": "Asia/Taipei",
+        "ROK": "Asia/Seoul",
+        "Singapore": "Asia/Singapore",
+        "Turkey": "Europe/Istanbul",
+        "UCT": "UTC",
+        "US/Alaska": "America/Anchorage",
+        "US/Aleutian": "America/Adak",
+        "US/Arizona": "America/Phoenix",
+        "US/Central": "America/Chicago",
+        "US/East-Indiana": "America/Indiana/Indianapolis",
+        "US/Eastern": "America/New_York",
+        "US/Hawaii": "Pacific/Honolulu",
+        "US/Indiana-Starke": "America/Indiana/Knox",
+        "US/Michigan": "America/Detroit",
+        "US/Mountain": "America/Denver",
+        "US/Pacific": "America/Los_Angeles",
+        "US/Samoa": "Pacific/Pago_Pago",
+        "Universal": "UTC",
+        "W-SU": "Europe/Moscow",
+        "WET": "Europe/Lisbon",
+        "Zulu": "UTC",
+    ]
+    /// Used when a device ID has no IANA family (fixed offsets such as `GMT+08:00`).
+    /// The task's instant is unchanged; only its display zone degrades, and
+    /// exporters record that in the backup notes.
+    public static let exportFallback = "UTC"
+
+    /// The strict wire ID for a stored or device-reported identifier. `exact` is
+    /// false only for the fallback, so export can never fail on a device's zone.
+    public static func wireIdentifier(_ identifier: String) -> (identifier: String, exact: Bool) {
+        if all.contains(identifier) { return (identifier, true) }
+        if let alias = exportAliases[identifier] { return (alias, true) }
+        return (exportFallback, false)
+    }
+
+    /// Backup notes describing every fallback, so the degradation is never silent.
+    public static func exportNotes(_ notes: String, replacing identifiers: Set<String>) -> String {
+        guard !identifiers.isEmpty else { return notes }
+        let list = identifiers.sorted().prefix(8).joined(separator: ", ")
+        let line = "时区已规范为 UTC，时刻不变：" + list
+        return notes.isEmpty ? line : notes + "\n" + line
+    }
+
     static func runtimeIdentifier(_ identifier: String, supports: (String) -> Bool) -> String? {
         guard all.contains(identifier) else { return nil }
         if supports(identifier) { return identifier }
@@ -534,7 +690,10 @@ public enum CanonicalTimeZones: Sendable {
     }
 
     public static func timeZone(for identifier: String) -> TimeZone? {
-        guard let resolved = runtimeIdentifier(identifier, supports: { TimeZone(identifier: $0) != nil }) else { return nil }
+        guard let resolved = runtimeIdentifier(identifier, supports: { TimeZone(identifier: $0) != nil }) else {
+            // Not a wire ID: a locally created task keeps the zone its device reported.
+            return all.contains(identifier) ? nil : TimeZone(identifier: identifier)
+        }
         return TimeZone(identifier: resolved)
     }
 }

@@ -239,8 +239,8 @@ public enum BackupService: Sendable {
     public static let maxJSONTokenCount = 10_000_000
 
     private static let uuidRegex = try! NSRegularExpression(
-        pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
-    private static let dayRegex = try! NSRegularExpression(pattern: "^\\d{4}-\\d{2}-\\d{2}$")
+        pattern: "\\A[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\z")
+    private static let dayRegex = try! NSRegularExpression(pattern: "\\A\\d{4}-\\d{2}-\\d{2}\\z")
     private static let instantRegex = try! NSRegularExpression(
         pattern: #"^([0-9]{4}-[0-9]{2}-[0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})(?:\.([0-9]{1,9}))?(Z|[+-][0-9]{2}:[0-9]{2})$"#)
 
@@ -282,6 +282,7 @@ public enum BackupService: Sendable {
             if let isFavorite = e.isFavorite { dict["isFavorite"] = isFavorite }
             return dict
         }
+        var replacedTimeZones = Set<String>()
         let taskDicts: [[String: Any]] = tasks.map { task in
             let due: [String: Any]
             switch task.dueKind {
@@ -290,7 +291,11 @@ public enum BackupService: Sendable {
             case .dateTime:
                 due = ["kind": task.dueKind.rawValue,
                        "at": normalizedForExport(task.dueAt),
-                       "timeZone": task.timeZone ?? NSNull()]
+                       "timeZone": task.timeZone.map { zone -> String in
+                           let wire = CanonicalTimeZones.wireIdentifier(zone)
+                           if !wire.exact { replacedTimeZones.insert(zone) }
+                           return wire.identifier
+                       } ?? NSNull()]
             }
             var dict: [String: Any] = [
                 "id": task.id, "title": task.title, "notes": task.notes ?? NSNull(),
@@ -309,7 +314,7 @@ public enum BackupService: Sendable {
             "version": backupVersion,
             "exportedAt": DateFormatting.isoNow(),
             "appVersion": appVersion,
-            "notes": notes,
+            "notes": CanonicalTimeZones.exportNotes(notes, replacing: replacedTimeZones),
             "schemas": ["logs": sectionSchemaVersion,
                         "emotions": sectionSchemaVersion,
                         "tasks": sectionSchemaVersion],

@@ -11,7 +11,7 @@ import {
   TaskDueKind,
   TaskItem
 } from '../models/Models';
-import { CANONICAL_TIME_ZONES, runtimeTimeZone } from './CanonicalTimeZones';
+import { CANONICAL_TIME_ZONES, runtimeTimeZone, exportNotes, isExactWireTimeZone, wireTimeZone } from './CanonicalTimeZones';
 import { util } from '@kit.ArkTS';
 import { isoNow } from './DateUtils';
 import { ENVELOPE_VERSION_PREFIX, EnvelopeError, EnvelopeErrorKind } from './BackupEnvelope';
@@ -191,11 +191,16 @@ export class BackupService {
     // Locally produced records no longer round-trip through
     // stringify→parseStrict→stringify: the same field validators run directly
     // and the document is stringified once. Output stays identical.
+    const replacedTimeZones = new Set<string>();
+    tasks.forEach((item: TaskItem) => {
+      const zone = item?.due?.timeZone;
+      if (typeof zone === 'string' && !isExactWireTimeZone(zone)) replacedTimeZones.add(zone);
+    });
     const document: BackupDocument = {
       version: BackupService.VERSION,
       exportedAt: isoNow(),
       appVersion: BackupService.appVersion,
-      notes: notes,
+      notes: exportNotes(notes, replacedTimeZones),
       schemas: { logs: 2, emotions: 2, tasks: 2 },
       data: {
         logs: BackupService.exportLogs(logs),
@@ -234,7 +239,8 @@ export class BackupService {
 
   private static exportTasks(tasks: TaskItem[]): TaskItem[] {
     const ids = new Set<string>();
-    return tasks.map((item: TaskItem) => {
+    return tasks.map((stored: TaskItem) => {
+      const item = BackupService.withWireTimeZone(stored);
       if (!BackupService.validTask(item) || ids.has(item.id)) {
         throw new Error(tr('/data/tasks：存在非法或重复记录，请先处理异常数据再导出'));
       }
@@ -451,6 +457,13 @@ export class BackupService {
       BackupService.validDate(item.createdAt, item.recordDate);
   }
 
+  private static withWireTimeZone(item: TaskItem): TaskItem {
+    if (!item?.due || typeof item.due.timeZone !== 'string') return item;
+    const copy = JSON.parse(JSON.stringify(item)) as TaskItem;
+    copy.due.timeZone = wireTimeZone(item.due.timeZone);
+    return copy;
+  }
+
   private static validTask(item: TaskItem): boolean {
     if (!item || typeof item.id !== 'string' || !BackupService.UUID_PATTERN.test(item.id) ||
       !BackupService.validOptionalBoolean(item.isFavorite) ||
@@ -569,7 +582,8 @@ export class BackupService {
     return BackupService.validEmotion(item) ? BackupService.normalizedEmotion(item) : undefined;
   }
 
-  static validatedTask(item: TaskItem): TaskItem | undefined {
+  static validatedTask(stored: TaskItem): TaskItem | undefined {
+    const item = BackupService.withWireTimeZone(stored);
     return BackupService.validTask(item) ? BackupService.normalizedTask(item) : undefined;
   }
 
