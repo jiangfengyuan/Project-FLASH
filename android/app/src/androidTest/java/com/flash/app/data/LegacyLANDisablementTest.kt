@@ -27,7 +27,6 @@ class LegacyLANDisablementTest {
         assertEquals(LanTransferMode.IDLE, model.lanTransfer.value.mode)
         assertTrue(model.lanTransfer.value.pin.isEmpty())
         assertTrue(model.lanTransfer.value.devices.isEmpty())
-        assertTrue(model.message.value.orEmpty().contains("局域网传输暂时停用"))
-        assertTrue(model.message.value.orEmpty().contains("导出备份"))
+        assertEquals(LocalBackupTransfer.UNAVAILABLE_MESSAGE, model.message.value)
     }
 }

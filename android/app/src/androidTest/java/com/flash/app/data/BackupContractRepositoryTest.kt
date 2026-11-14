@@ -65,7 +65,7 @@ class BackupContractRepositoryTest {
             reminderAt = Instant.now().plusSeconds(3600).toString(), completedAt = null,
         )
         val failure = runCatching { scheduler.rebuild(listOf(task)) }.exceptionOrNull()
-        assertEquals("系统通知或任务提醒频道已关闭", failure?.message)
+        assertEquals(com.flash.app.i18n.tr("系统通知或任务提醒频道已关闭"), failure?.message)
     }
 
     @Test fun sharedMergeOverwriteAndRollback() = runBlocking {

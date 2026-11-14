@@ -24,7 +24,8 @@ class QuickCaptureTileService : TileService() {
                 PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE),
             )
         } else {
-            @Suppress("DEPRECATION")
+            // API 34+ uses the PendingIntent branch above; this call is only reachable on older OS versions.
+            @Suppress("DEPRECATION", "StartActivityAndCollapseDeprecated")
             startActivityAndCollapse(intent)
         }
     }

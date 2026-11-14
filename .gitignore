@@ -19,3 +19,6 @@ android/release-signing.env
 
 # Superpowers 临时工作区
 .superpowers/
+
+# Generated Python bytecode
+__pycache__/

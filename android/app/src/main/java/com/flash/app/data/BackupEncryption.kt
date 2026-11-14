@@ -96,7 +96,7 @@ object BackupEncryption {
     /** 按契约顺序校验：先版本，再字段集合；KDF / 算法名先于其余字段判断「不支持」。 */
     internal fun parseEnvelope(json: String): Envelope {
         if (json.length > MAX_ENVELOPE_BYTES) throw Backup.BackupFormatException(tr("备份文件超过 {0} MB，无法导入", MAX_ENVELOPE_BYTES / 1024 / 1024))
-        if (json.startsWith("﻿")) throw Backup.BackupFormatException(tr("/：不允许 UTF-8 BOM"))
+        if (json.startsWith("\uFEFF")) throw Backup.BackupFormatException(tr("/：不允许 UTF-8 BOM"))
         StrictJson(json).validate()
         val root = try { JSONObject(json) } catch (_: Exception) {
             throw Backup.BackupFormatException(tr("备份文件不是有效的 JSON 对象"))

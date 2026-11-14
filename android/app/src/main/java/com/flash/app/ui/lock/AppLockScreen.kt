@@ -6,7 +6,7 @@
 
 package com.flash.app.ui.lock
 
-import android.app.Activity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -70,7 +70,7 @@ fun AppLockController.requestUnlock(auth: AppLockAuth) {
 fun AppLockGate(lock: AppLockController, auth: AppLockAuth, onQuickCapture: () -> Unit) {
     val locked by lock.locked.collectAsStateWithLifecycle()
     if (!locked) return
-    val activity = LocalContext.current as? Activity
+    val activity = LocalActivity.current
     Box(Modifier.fillMaxSize().paperBackground())
     Dialog(
         onDismissRequest = { activity?.moveTaskToBack(true) },
