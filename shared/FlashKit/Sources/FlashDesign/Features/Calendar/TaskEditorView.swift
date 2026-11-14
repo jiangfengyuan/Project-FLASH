@@ -11,6 +11,8 @@ public struct TaskEditorView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.dismiss) private var dismiss
     @Environment(\.flashRepository) private var repository
+    @State private var draftID: String
+    @State private var draftCreatedAt: String
     @State private var tagDraft = TagDraft()
     @State private var errorMessage: String?
     @State private var saving = false
@@ -27,6 +29,8 @@ public struct TaskEditorView: View {
 
     public init(selectedDate: Date, task: TaskItem?, ideaDraft: IdeaTaskDraft? = nil,
          onSave: @escaping (TaskItem) -> Void) {
+        _draftID = State(initialValue:task?.id ?? UUID().uuidString)
+        _draftCreatedAt = State(initialValue:task?.createdAt ?? DateFormatting.isoNow())
         self.selectedDate = selectedDate
         self.task = task
         self.sourceLogId = task?.sourceLogId ?? ideaDraft?.sourceLogId
@@ -145,7 +149,7 @@ public struct TaskEditorView: View {
                    displayedComponents: allDay ? [.date] : [.date, .hourAndMinute])
     }
 
-    private func makeTask() -> TaskItem {
+    func makeTask() -> TaskItem {
         let now = Self.isoFractionString(from: Date())
         let anchor: Date
         if allDay {
@@ -156,7 +160,7 @@ public struct TaskEditorView: View {
             anchor = dueDate
         }
         return TaskItem(
-            id: task?.id ?? UUID().uuidString,
+            id: draftID,
             // 保存按钮已在标题超限时禁用，此处不再截断（契约按 UTF-16 单元计）
             title: title.trimmingCharacters(in: .whitespacesAndNewlines),
             notes: notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : notes,
@@ -170,7 +174,7 @@ public struct TaskEditorView: View {
             completedAt: task?.completedAt,
             sourceLogId: sourceLogId,
             isFavorite: isFavorite,
-            createdAt: task?.createdAt ?? now,
+            createdAt: draftCreatedAt,
             updatedAt: now
         )
     }
