@@ -53,8 +53,12 @@ final class ShareCaptureModel {
         var sharedURL: URL?
         for provider in providers {
             if sharedURL == nil, provider.hasItemConformingToTypeIdentifier(UTType.url.identifier) {
-                sharedURL = await Self.loadObject(URL.self, from: provider)
-            } else if sharedText == nil, provider.hasItemConformingToTypeIdentifier(UTType.plainText.identifier) {
+                let candidate = await Self.loadObject(URL.self, from: provider)
+                if let scheme = candidate?.scheme?.lowercased(), scheme == "http" || scheme == "https" {
+                    sharedURL = candidate
+                }
+            }
+            if sharedText == nil, provider.hasItemConformingToTypeIdentifier(UTType.plainText.identifier) {
                 sharedText = await Self.loadObject(String.self, from: provider)
             }
         }
