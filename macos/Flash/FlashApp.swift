@@ -54,6 +54,8 @@ struct FlashApp: App {
                     }
                 }
             }
+            .disabled(appLock.isLocked)
+            .accessibilityHidden(appLock.isLocked)
             // 应用锁：盖住整个主窗口内容（含工具栏下方区域），不显示任何记录
             .overlay {
                 if appLock.isLocked {
@@ -62,6 +64,7 @@ struct FlashApp: App {
                         .transition(.opacity)
                 }
             }
+            .background(AppLockSheetShield(lock: appLock, isLocked: appLock.isLocked))
             .environment(appLock)
             .environment(appState)
             .environment(appState.focusRouter)
