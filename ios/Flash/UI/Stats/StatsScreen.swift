@@ -6,6 +6,7 @@
 
 import SwiftUI
 import FlashDesign
+import FlashCore
 
 /// 回顾页（iOS 外壳）：共享 StatsView（趋势 / 日历分段），标题交给系统导航栏；
 /// Memory 周报不再单占 Tab，由工具栏入口推入
@@ -16,6 +17,7 @@ struct StatsScreen: View {
         StatsView()
             .navigationTitle("回顾")
             .toolbar {
+                ToolbarItem(placement: .topBarTrailing) { Button(L("历史回忆")) { appState.statsPath.append(.history) } }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         appState.statsPath.append(.memory)

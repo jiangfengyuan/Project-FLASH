@@ -18,6 +18,18 @@ public enum BackupError: Error, Equatable, Sendable {
     case unsupportedTimeZone
     /// 当前为内存降级的临时存储：导出只会包含本次启动后的内容，导入也会在退出后丢失（F-07）
     case temporaryStore
+    /// 文件是加密备份（flash-backup-enc-v1）：需要口令解密后再走正常导入
+    case encrypted
+    /// 加密信封不符合 flash-backup-enc-v1（字段、取值或 Base64 编码）
+    case encryptedInvalid
+    /// 未知的加密信封版本、KDF 或算法：需要更新应用
+    case encryptedUnsupported
+    /// GCM 认证失败：口令错误或文件被改动，二者无法区分
+    case encryptedAuthenticationFailed
+    /// 导出口令少于 8 个字符（NFC 后按 Unicode 字符计）
+    case passphraseTooShort
+    /// 导出口令超过 1,024 个字符
+    case passphraseTooLong
 
     public var userMessage: String {
         switch self {
@@ -30,6 +42,12 @@ public enum BackupError: Error, Equatable, Sendable {
         case .fileTooLarge: L("文件过大，不是有效的备份")
         case .unsupportedTimeZone: L("此设备不支持备份中的任务时区，请更新系统后重试；未导入任何数据")
         case .temporaryStore: L("本地数据库暂时无法打开，当前只有本次启动后的临时内容，不能导出或导入。原有数据未被改动，请完全退出 Flash 后重新打开再试")
+        case .encrypted: L("这是加密备份，请输入导出时设置的口令")
+        case .encryptedInvalid: L("加密备份文件已损坏或格式不正确")
+        case .encryptedUnsupported: L("需要更新 Flash 才能打开此加密备份")
+        case .encryptedAuthenticationFailed: L("口令错误，或文件已损坏")
+        case .passphraseTooShort: L("口令至少需要 8 个字符")
+        case .passphraseTooLong: L("口令不能超过 1024 个字符")
         }
     }
 }
@@ -44,7 +62,11 @@ public struct ImportPreview: Sendable {
     public let logs: [LogItem]
     public let emotions: [EmotionRecord]
     public let tasks: [TaskItem]
-    public let sourceVersion: String
+    public var trash: [TrashItem] = []
+    public var preferences: LibraryPreferences? = nil
+    public var automaticTags: [String:[String]] = [:]
+    public var library: PersonalLibrary? = nil
+    public var sourceVersion: String
     public var difference: BackupDifference? = nil
 
     public init(logCount: Int, emotionCount: Int, skippedLogs: Int, skippedEmotions: Int, taskCount: Int, skippedTasks: Int, logs: [LogItem], emotions: [EmotionRecord], tasks: [TaskItem], sourceVersion: String, difference: BackupDifference? = nil) {
@@ -324,7 +346,9 @@ public enum BackupService: Sendable {
 
     public static func parse(_ json: String) throws -> ImportPreview {
         if json.utf8.count > maxFileBytes { throw BackupError.fileTooLarge }
-        return try parse(root: serializedRoot(json))
+        let root = try serializedRoot(json)
+        if LibraryBackup.supportedVersions.contains(root["version"] as? String ?? "") { return try parseStrict(json) }
+        return try parse(root: root)
     }
 
     /// 单次 JSONSerialization：parse/parseStrict/parseRecovery 复用同一 root，
@@ -340,6 +364,8 @@ public enum BackupService: Sendable {
             throw BackupError.missingVersion
         }
         guard let version = versionValue as? String else { throw BackupError.missingVersion }
+        // 加密信封（任何 flash-backup-enc-* 版本）不是 v2 文档：交给 BackupEncryption 识别
+        if version.hasPrefix(BackupEncryption.versionPrefix) { throw BackupError.encrypted }
         guard version == backupVersion || version == legacyBackupVersion else {
             throw BackupError.incompatibleVersion(version)
         }
@@ -427,6 +453,7 @@ public enum BackupService: Sendable {
         try scanner.validate()
         // 单次序列化：解析与字段检查共用同一 root（原实现在此全量解析两次）
         let root = try serializedRoot(json)
+        if LibraryBackup.supportedVersions.contains(root["version"] as? String ?? "") { return try LibraryBackup.parse(root) }
         let result = try parse(root: root)
         guard result.sourceVersion == backupVersion else { throw BackupError.contract("/version") }
         try checkFields(root, required: ["version", "exportedAt", "appVersion", "notes", "schemas", "data"], path: "/")
@@ -478,6 +505,7 @@ public enum BackupService: Sendable {
         var scanner = StrictJSONScanner(json)
         try scanner.validate()
         let root = try serializedRoot(json)
+        if LibraryBackup.supportedVersions.contains(root["version"] as? String ?? "") { return try LibraryBackup.parse(root) }
         let result = try parse(root: root)
         let legacy = result.sourceVersion == legacyBackupVersion
         try checkFields(root, required: [], optional: legacy ? ["version", "exportedAt", "appVersion", "notes", "logs", "emotions"] : ["version", "exportedAt", "appVersion", "notes", "schemas", "data"], path: "/")
@@ -679,6 +707,15 @@ public enum BackupService: Sendable {
     }
 
     private static let contractWhitespace = CharacterSet(charactersIn: "\u{9}\u{A}\u{B}\u{C}\u{D} \u{A0}\u{1680}\u{2000}\u{2001}\u{2002}\u{2003}\u{2004}\u{2005}\u{2006}\u{2007}\u{2008}\u{2009}\u{200A}\u{2028}\u{2029}\u{202F}\u{205F}\u{3000}\u{FEFF}")
+
+    /// 供加密信封复用：与备份同一套重复键 / 深度 / token 预算扫描
+    static func strictScan(_ json: String) throws {
+        var scanner = StrictJSONScanner(json)
+        try scanner.validate()
+    }
+
+    /// 供加密信封复用：整数值（允许 1.0，拒绝布尔）
+    static func integerValue(_ value: Any?) -> Int? { integer(value) }
 
     private static func integer(_ value: Any?) -> Int? {
         guard let number = value as? NSNumber, CFGetTypeID(number) != CFBooleanGetTypeID() else { return nil }

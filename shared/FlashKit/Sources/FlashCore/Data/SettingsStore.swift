@@ -30,6 +30,8 @@ public final class SettingsStore: ObservableObject {
     @Published public private(set) var ideaReminderFrequency: IdeaReminder.Frequency
     /// iOS 系统搜索（Spotlight）收录日志与灵感；默认开启，关闭即清空系统索引
     @Published public private(set) var spotlightIndexingEnabled: Bool
+    /// 应用锁：默认关闭；开启后冷启动与离开超过宽限期需验证（见 AppLockController）
+    @Published public private(set) var appLockEnabled: Bool
 
     private let defaults: UserDefaults
 
@@ -41,6 +43,7 @@ public final class SettingsStore: ObservableObject {
             .flatMap(IdeaReminder.Frequency.init(rawValue:)) ?? .daily
         // 系统搜索索引：默认关闭（私人日志正文默认不进系统索引，由用户在设置中开启）
         self.spotlightIndexingEnabled = defaults.object(forKey: Keys.spotlightIndexingEnabled) as? Bool ?? false
+        self.appLockEnabled = defaults.bool(forKey: Keys.appLockEnabled)
         let stored = defaults.string(forKey: Keys.themeMode)
         self.themeMode = stored.flatMap(ThemeMode.init(rawValue:)) ?? .system
         self.welcomed = defaults.bool(forKey: Keys.welcomed)
@@ -68,6 +71,11 @@ public final class SettingsStore: ObservableObject {
         defaults.set(enabled, forKey: Keys.spotlightIndexingEnabled)
     }
 
+    public func setAppLockEnabled(_ enabled: Bool) {
+        appLockEnabled = enabled
+        defaults.set(enabled, forKey: Keys.appLockEnabled)
+    }
+
     public func setThemeMode(_ mode: ThemeMode) {
         themeMode = mode
         defaults.set(mode.rawValue, forKey: Keys.themeMode)
@@ -89,6 +97,7 @@ public final class SettingsStore: ObservableObject {
         static let ideaReminderEnabled = "ideaReminderEnabled"
         static let ideaReminderFrequency = "ideaReminderFrequency"
         static let spotlightIndexingEnabled = "spotlightIndexingEnabled"
+        static let appLockEnabled = "appLockEnabled"
         static let themeMode = "themeMode"
         static let welcomed = "welcomed"
         static let quickCaptureHotkey = "quickCaptureHotkey"

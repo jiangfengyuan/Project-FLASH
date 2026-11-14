@@ -1,0 +1,58 @@
+历史回忆	Memories	Souvenirs	지난 기록	Erinnerungen	Воспоминания	ذكريات	過去の思い出
+去年的今天	On this day last year	Ce jour l’an dernier	작년 오늘	Heute vor einem Jahr	В этот день год назад	في مثل هذا اليوم العام الماضي	去年の今日
+一个月前	A month ago	Il y a un mois	한 달 전	Vor einem Monat	Месяц назад	قبل شهر	1か月前
+展示情绪记录	Include mood entries	Inclure les humeurs	감정 기록 포함	Stimmungseinträge anzeigen	Показывать записи настроения	إظهار سجلات المزاج	気分の記録を表示
+抽取收藏	Pick a favorite	Choisir un favori	즐겨찾기 뽑기	Favorit auswählen	Выбрать избранное	اختيار من المفضلة	お気に入りを選ぶ
+抽取一条收藏	Pick a favorite entry	Tirer une entrée favorite	즐겨찾기 하나 뽑기	Einen Favoriten ziehen	Выбрать одну запись	اختيار سجل من المفضلة	お気に入りを1件選ぶ
+暂时没有可展示的收藏	No favorites to show yet	Aucun favori à afficher	표시할 즐겨찾기가 없어요	Noch keine Favoriten verfügbar	Пока нет избранного	لا توجد مفضلة لعرضها بعد	表示できるお気に入りはありません
+这一天还没有记录	No entries for this day	Aucune entrée ce jour-là	이 날짜의 기록이 없어요	Keine Einträge an diesem Tag	В этот день записей нет	لا توجد سجلات لهذا اليوم	この日の記録はありません
+自由标签	Custom tags	Étiquettes personnelles	사용자 태그	Eigene Tags	Свои теги	وسوم مخصصة	カスタムタグ
+新标签	New tag	Nouvelle étiquette	새 태그	Neuer Tag	Новый тег	وسم جديد	新しいタグ
+添加	Add	Ajouter	추가	Hinzufügen	Добавить	إضافة	追加
+保存标签	Save tags	Enregistrer les étiquettes	태그 저장	Tags speichern	Сохранить теги	حفظ الوسوم	タグを保存
+删除自由标签	Delete custom tag	Supprimer l’étiquette	사용자 태그 삭제	Eigenen Tag löschen	Удалить тег	حذف الوسم المخصص	カスタムタグを削除
+将移除所有记录关联，并删除引用此标签的保存筛选；记录正文保留。	Links and saved filters using this tag will be removed. Entries are kept.	Les liens et filtres utilisant cette étiquette seront supprimés. Les entrées sont conservées.	이 태그의 연결과 저장된 필터가 삭제됩니다. 기록 내용은 유지됩니다.	Verknüpfungen und gespeicherte Filter mit diesem Tag werden entfernt. Einträge bleiben erhalten.	Связи и фильтры с этим тегом будут удалены. Сами записи сохранятся.	ستُحذف الروابط والفلاتر المحفوظة التي تستخدم هذا الوسم. ستبقى السجلات.	このタグの関連付けと保存済みフィルターを削除します。記録本文は残ります。
+重命名	Rename	Renommer	이름 변경	Umbenennen	Переименовать	إعادة التسمية	名前を変更
+名称	Name	Nom	이름	Name	Название	الاسم	名前
+已保存筛选	Saved filters	Filtres enregistrés	저장된 필터	Gespeicherte Filter	Сохранённые фильтры	الفلاتر المحفوظة	保存済みフィルター
+筛选名称	Filter name	Nom du filtre	필터 이름	Filtername	Название фильтра	اسم الفلتر	フィルター名
+关键词	Keyword	Mot-clé	검색어	Suchwort	Ключевое слово	كلمة مفتاحية	キーワード
+匹配全部标签	Match all tags	Toutes les étiquettes	모든 태그 일치	Alle Tags abgleichen	Совпадение всех тегов	مطابقة جميع الوسوم	すべてのタグに一致
+仅收藏	Favorites only	Favoris uniquement	즐겨찾기만	Nur Favoriten	Только избранное	المفضلة فقط	お気に入りのみ
+起始日期 yyyy-MM-dd	Start date yyyy-MM-dd	Date de début yyyy-MM-dd	시작일 yyyy-MM-dd	Startdatum yyyy-MM-dd	Начальная дата yyyy-MM-dd	تاريخ البدء yyyy-MM-dd	開始日 yyyy-MM-dd
+结束日期 yyyy-MM-dd	End date yyyy-MM-dd	Date de fin yyyy-MM-dd	종료일 yyyy-MM-dd	Enddatum yyyy-MM-dd	Конечная дата yyyy-MM-dd	تاريخ الانتهاء yyyy-MM-dd	終了日 yyyy-MM-dd
+任务状态	Task status	État des tâches	작업 상태	Aufgabenstatus	Статус задачи	حالة المهمة	タスクの状態
+未完成	Open	À faire	미완료	Offen	Не выполнено	غير مكتملة	未完了
+已完成	Completed	Terminées	완료	Erledigt	Выполнено	مكتملة	完了
+最早在前	Oldest first	Plus anciennes d’abord	오래된 순	Älteste zuerst	Сначала старые	الأقدم أولاً	古い順
+保存筛选	Save filter	Enregistrer le filtre	필터 저장	Filter speichern	Сохранить фильтр	حفظ الفلتر	フィルターを保存
+新建筛选	New filter	Nouveau filtre	새 필터	Neuer Filter	Новый фильтр	فلتر جديد	新しいフィルター
+筛选条件	Filter conditions	Critères du filtre	필터 조건	Filterbedingungen	Условия фильтра	شروط الفلتر	絞り込み条件
+筛选结果	Results	Résultats	결과	Ergebnisse	Результаты	النتائج	検索結果
+记录详情	Entry details	Détails de l’entrée	기록 상세	Eintragsdetails	Подробности записи	تفاصيل السجل	記録の詳細
+打开原记录	Open original entry	Ouvrir l’entrée	원본 기록 열기	Originaleintrag öffnen	Открыть исходную запись	فتح السجل الأصلي	元の記録を開く
+灵感周期提醒	Recurring idea reminders	Rappels d’idées récurrents	아이디어 주기 알림	Wiederkehrende Ideen-Erinnerungen	Повторные напоминания об идеях	تذكيرات الأفكار الدورية	アイデアの定期リマインダー
+周期提醒	Recurring reminder	Rappel récurrent	주기 알림	Wiederkehrende Erinnerung	Повторное напоминание	تذكير دوري	定期リマインダー
+单条灵感提醒	Individual idea reminders	Rappels par idée	개별 아이디어 알림	Einzelne Ideen erinnern	Напоминания об отдельных идеях	تذكيرات لأفكار محددة	個別アイデアのリマインダー
+灵感汇总提醒	Idea roundup reminder	Rappel de bilan des idées	아이디어 모아보기 알림	Ideenübersicht erinnern	Общее напоминание об идеях	تذكير بمراجعة الأفكار	アイデアまとめのリマインダー
+汇总提醒时间	Roundup reminder time	Heure du rappel de bilan	모아보기 알림 시간	Zeit für die Ideenübersicht	Время общего напоминания	وقت تذكير المراجعة	まとめの通知時刻
+小时	Hour	Heure	시	Stunde	Час	الساعة	時
+分钟	Minute	Minute	분	Minute	Минута	الدقيقة	分
+每3天	Every 3 days	Tous les 3 jours	3일마다	Alle 3 Tage	Каждые 3 дня	كل 3 أيام	3日ごと
+每周期最多两次，间隔30分钟；22:00至09:00不提醒。	Up to two alerts per cycle, 30 minutes apart. Quiet hours: 22:00–09:00.	Deux alertes par cycle au maximum, espacées de 30 minutes. Silence de 22 h à 9 h.	주기마다 최대 2회, 30분 간격으로 알립니다. 22:00~09:00에는 알리지 않습니다.	Höchstens zwei Hinweise pro Zyklus im Abstand von 30 Minuten. Ruhezeit: 22–9 Uhr.	До двух уведомлений за цикл с интервалом 30 минут. Тихие часы: 22:00–09:00.	تنبيهان كحد أقصى لكل دورة بفاصل 30 دقيقة. وقت الهدوء: 22:00–09:00.	各周期に最大2回、30分間隔で通知します。22:00〜09:00は通知しません。
+本次已梳理	Reviewed this time	Revu pour cette fois	이번 검토 완료	Diesmal durchgesehen	В этот раз разобрано	تمت المراجعة لهذه المرة	今回は確認済み
+稍后30分钟	In 30 minutes	Dans 30 minutes	30분 후	In 30 Minuten	Через 30 минут	بعد 30 دقيقة	30分後
+暂停提醒	Pause reminders	Suspendre les rappels	알림 일시 중지	Erinnerungen pausieren	Приостановить напоминания	إيقاف التذكيرات مؤقتاً	リマインダーを一時停止
+启用导入的提醒配置	Enable imported reminders	Activer les rappels importés	가져온 알림 활성화	Importierte Erinnerungen aktivieren	Включить импортированные напоминания	تفعيل التذكيرات المستوردة	読み込んだリマインダーを有効化
+导入的提醒等待确认启用	Imported reminders await confirmation	Les rappels importés attendent votre confirmation	가져온 알림은 확인 후 활성화됩니다	Importierte Erinnerungen warten auf Bestätigung	Импортированные напоминания ожидают подтверждения	التذكيرات المستوردة تنتظر تأكيد التفعيل	読み込んだリマインダーは有効化の確認待ちです
+导入的灵感提醒需要确认后启用	Confirm before enabling imported idea reminders	Confirmez l’activation des rappels d’idées importés	가져온 아이디어 알림은 확인 후 활성화됩니다	Importierte Ideen-Erinnerungen erst bestätigen	Подтвердите включение импортированных напоминаний	أكد تفعيل تذكيرات الأفكار المستوردة	読み込んだアイデア通知は確認後に有効になります
+已安排至	Scheduled through	Planifié jusqu’au	예약된 마지막 날짜	Geplant bis	Запланировано до	مجدول حتى	次の日時まで設定済み
+暂无待提醒的灵感	No ideas awaiting reminders	Aucune idée à rappeler	알릴 아이디어가 없어요	Keine Ideen für Erinnerungen vorhanden	Нет идей для напоминания	لا توجد أفكار بانتظار التذكير	通知待ちのアイデアはありません
+提醒排期失败，请重试	Could not schedule reminders. Try again.	Impossible de planifier les rappels. Réessayez.	알림을 예약하지 못했습니다. 다시 시도하세요.	Erinnerungen konnten nicht geplant werden. Erneut versuchen.	Не удалось запланировать напоминания. Повторите попытку.	تعذرت جدولة التذكيرات. حاول مجدداً.	通知を設定できませんでした。もう一度お試しください。
+提醒操作未保存，请重试	Reminder action was not saved. Try again.	L’action du rappel n’a pas été enregistrée. Réessayez.	알림 작업이 저장되지 않았습니다. 다시 시도하세요.	Erinnerungsaktion nicht gespeichert. Erneut versuchen.	Действие не сохранено. Повторите попытку.	لم يُحفظ إجراء التذكير. حاول مجدداً.	通知の操作を保存できませんでした。もう一度お試しください。
+系统通知排期已满，请先处理任务提醒	Notification capacity is full. Review task reminders first.	La limite de notifications est atteinte. Vérifiez les rappels de tâches.	알림 예약이 가득 찼습니다. 작업 알림을 먼저 확인하세요.	Benachrichtigungskapazität erreicht. Aufgaben-Erinnerungen prüfen.	Достигнут лимит уведомлений. Проверьте напоминания о задачах.	امتلأت سعة الإشعارات. راجع تذكيرات المهام أولاً.	通知の設定上限に達しました。タスク通知を先に確認してください。
+通知权限未开启，请在系统设置中允许通知	Allow notifications in system settings.	Autorisez les notifications dans les réglages système.	시스템 설정에서 알림을 허용하세요.	Benachrichtigungen in den Systemeinstellungen erlauben.	Разрешите уведомления в настройках системы.	اسمح بالإشعارات في إعدادات النظام.	システム設定で通知を許可してください。
+有些想法等你回来看看	Some ideas are waiting for you	Quelques idées vous attendent	다시 살펴볼 아이디어가 있어요	Ein paar Ideen warten auf dich	Некоторые идеи ждут вас	بعض الأفكار تنتظر عودتك	見返してみたいアイデアがあります
+有些想法等你回来看看，方便时梳理一下吧。	Some ideas are waiting. Take a look when you have a moment.	Quelques idées vous attendent. Revenez quand vous avez un moment.	기다리는 아이디어가 있어요. 편할 때 살펴보세요.	Ein paar Ideen warten. Schau vorbei, wenn du einen Moment hast.	Есть идеи, которые ждут вас. Загляните, когда будет минутка.	بعض الأفكار بانتظارك. راجعها حين تجد وقتاً مناسباً.	アイデアが待っています。時間のあるときに見返してみませんか。
+再轻轻提醒一下：那条想法还在，今天有空时再看看。	A gentle reminder: your idea is still here. Come back when it suits you.	Petit rappel : votre idée est toujours là. Revenez quand cela vous convient.	살짝 다시 알려드려요. 아이디어는 여기 있으니 편할 때 돌아오세요.	Eine kleine Erinnerung: Deine Idee ist noch da. Komm vorbei, wenn es passt.	Мягко напоминаем: ваша идея всё ещё здесь. Вернитесь, когда удобно.	تذكير لطيف: فكرتك ما زالت هنا. عد إليها حين يناسبك الوقت.	そっとリマインド。そのアイデアはここにあります。都合のよいときにどうぞ。
+覆盖旧版备份将清除本机自由标签、保存筛选与灵感提醒配置	Replacing with an older backup clears local custom tags, saved filters and idea reminder settings.	Remplacer par une ancienne sauvegarde efface les étiquettes, filtres et rappels d’idées locaux.	이전 버전 백업으로 덮어쓰면 사용자 태그, 저장된 필터와 아이디어 알림 설정이 지워집니다.	Beim Ersetzen durch eine ältere Sicherung werden eigene Tags, gespeicherte Filter und Ideen-Erinnerungen gelöscht.	Замена старой копией удалит локальные теги, фильтры и настройки напоминаний об идеях.	الاستبدال بنسخة أقدم يمسح الوسوم والفلاتر وإعدادات تذكير الأفكار المحلية.	旧版のバックアップで上書きすると、カスタムタグ、保存済みフィルター、アイデア通知設定が消去されます。

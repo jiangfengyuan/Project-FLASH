@@ -197,6 +197,15 @@
   "ko": "/updatedAt: 할 일 시간이 잘못되었습니다",
   "ru": "/updatedAt: неверное время задачи"
  },
+ "/version：加密备份里不能再嵌套加密备份": {
+  "ar": "/version: لا يمكن أن تحتوي نسخة احتياطية مشفّرة على نسخة مشفّرة أخرى",
+  "de": "/version: Ein verschlüsseltes Backup darf kein weiteres verschlüsseltes Backup enthalten",
+  "en": "/version: an encrypted backup cannot contain another encrypted backup",
+  "fr": "/version : une sauvegarde chiffrée ne peut pas en contenir une autre",
+  "ja": "/version: 暗号化バックアップの中に別の暗号化バックアップは入れられません",
+  "ko": "/version: 암호화된 백업 안에 다른 암호화된 백업을 넣을 수 없습니다",
+  "ru": "/version: зашифрованная копия не может содержать другую зашифрованную копию"
+ },
  "/version：旧版文件请使用兼容恢复入口": {
   "ar": "/version: استخدم الاستعادة للملفات القديمة",
   "de": "/version: Für ältere Dateien die Wiederherstellung verwenden",
@@ -305,6 +314,15 @@
   "ko": "7일",
   "ru": "7 дней"
  },
+ "90天": {
+  "ar": "90 يومًا",
+  "de": "90 Tage",
+  "en": "90 days",
+  "fr": "90 jours",
+  "ja": "90日",
+  "ko": "90일",
+  "ru": "90 дней"
+ },
  "A week worth remembering. ✦": {
   "ar": "أسبوع يستحق أن يُذكر. ✦",
   "de": "Eine Woche, die in Erinnerung bleibt. ✦",
@@ -376,6 +394,15 @@
   "ja": "Flash のストレージを利用できません。アプリを開いてもう一度お試しください",
   "ko": "Flash 저장소를 지금 사용할 수 없습니다. 앱을 연 뒤 다시 시도하세요",
   "ru": "Хранилище Flash сейчас недоступно. Откройте приложение и повторите попытку"
+ },
+ "Flash 已锁定": {
+  "ar": "Flash مقفل",
+  "de": "Flash ist gesperrt",
+  "en": "Flash is locked",
+  "fr": "Flash est verrouillé",
+  "ja": "Flash はロックされています",
+  "ko": "Flash가 잠겨 있습니다",
+  "ru": "Flash заблокирован"
  },
  "Flash 快速记录": {
   "ar": "الالتقاط السريع في Flash",
@@ -1034,6 +1061,15 @@
   "ko": "월",
   "ru": "Пн"
  },
+ "一个月前": {
+  "ar": "قبل شهر",
+  "de": "Vor einem Monat",
+  "en": "A month ago",
+  "fr": "Il y a un mois",
+  "ja": "1か月前",
+  "ko": "한 달 전",
+  "ru": "Месяц назад"
+ },
  "一览今日记录、待办与情绪，一键记下新念头。": {
   "ar": "اطّلع على سجلات اليوم ومهامه ومزاجه، والتقط فكرة جديدة بلمسة.",
   "de": "Einträge, offene Aufgaben und Stimmung von heute sehen und neue Gedanken mit einem Tipp erfassen.",
@@ -1160,6 +1196,15 @@
   "ko": "다음에 Flash를 열 때 추가됩니다.",
   "ru": "Добавится при следующем открытии Flash."
  },
+ "不加密的备份是明文 JSON，任何拿到文件的人都能读取全部日志、情绪和任务。仅保存或分享给可信设备或联系人。": {
+  "ar": "النسخة الاحتياطية غير المشفّرة هي JSON نصّي واضح: يستطيع أي شخص لديه الملف قراءة كل سجلاتك ومشاعرك ومهامك. احفظها أو شاركها مع أجهزة أو جهات اتصال موثوقة فقط.",
+  "de": "Ein unverschlüsseltes Backup ist Klartext-JSON: Jeder mit der Datei kann alle Einträge, Emotionen und Aufgaben lesen. Speichere oder teile es nur mit vertrauenswürdigen Geräten oder Kontakten.",
+  "en": "An unencrypted backup is plain JSON: anyone with the file can read all your logs, emotions and tasks. Only save or share it with trusted devices or contacts.",
+  "fr": "Une sauvegarde non chiffrée est du JSON en clair : quiconque possède le fichier peut lire tous vos journaux, émotions et tâches. Ne l'enregistrez ou ne la partagez qu'avec des appareils ou contacts de confiance.",
+  "ja": "暗号化しないバックアップは平文の JSON で、ファイルを持つ人は誰でもすべての記録・感情・タスクを読めます。信頼できる端末や連絡先にのみ保存・共有してください。",
+  "ko": "암호화하지 않은 백업은 일반 JSON이라 파일을 가진 누구나 모든 기록, 감정, 할 일을 읽을 수 있습니다. 신뢰할 수 있는 기기나 연락처에만 저장하거나 공유하세요.",
+  "ru": "Незашифрованная копия — это открытый JSON: любой, у кого есть файл, прочитает все записи, эмоции и задачи. Сохраняйте и отправляйте её только на доверенные устройства или контактам."
+ },
  "不开心": {
   "ar": "غير سعيد",
   "de": "Unglücklich",
@@ -1231,6 +1276,15 @@
   "ja": "両方の端末を同じネットワークに接続し、受信側で送信側の PIN を入力します。バックアップはエンドツーエンド暗号化されていないため、信頼できる家庭や職場のネットワークでのみ使用してください。",
   "ko": "두 기기를 같은 네트워크에 연결하고 받는 기기에 보내는 기기의 PIN을 입력하세요. 백업은 종단 간 암호화되지 않으므로 신뢰할 수 있는 가정이나 사무실 네트워크에서만 사용하세요.",
   "ru": "Подключите оба устройства к одной сети и введите PIN отправителя на получателе. Копия не защищена сквозным шифрованием, используйте только доверенные домашние или рабочие сети."
+ },
+ "两次输入的口令不一致": {
+  "ar": "عبارتا المرور غير متطابقتين.",
+  "de": "Die Passphrasen stimmen nicht überein.",
+  "en": "The passphrases don't match.",
+  "fr": "Les phrases secrètes ne correspondent pas.",
+  "ja": "パスフレーズが一致しません。",
+  "ko": "두 암호 문구가 일치하지 않습니다.",
+  "ru": "Парольные фразы не совпадают."
  },
  "中屏响应式布局": {
   "ar": "تخطيط الشاشات المتوسطة",
@@ -1322,6 +1376,15 @@
   "ko": "이전 90일",
   "ru": "за предыдущие 90 дней"
  },
+ "书名与作者：\n\n摘录：\n\n我的理解：\n": {
+  "ar": "الكتاب والمؤلف:\n\nاقتباس:\n\nأفكاري:\n",
+  "de": "Buch und Autor:\n\nAuszug:\n\nMeine Gedanken:\n",
+  "en": "Book and author:\n\nExcerpt:\n\nMy thoughts:\n",
+  "fr": "Livre et auteur :\n\nExtrait :\n\nMon interprétation :\n",
+  "ja": "本と著者：\n\n引用：\n\n自分の考え：\n",
+  "ko": "책과 저자:\n\n발췌:\n\n나의 생각:\n",
+  "ru": "Книга и автор:\n\nЦитата:\n\nМои мысли:\n"
+ },
  "二": {
   "ar": "ث",
   "de": "Di",
@@ -1349,6 +1412,15 @@
   "ko": "실제로 감지되고 연결된 상태만 표시합니다. 심사가 필요한 시스템 권한은 승인 전에는 사용하지 않습니다.",
   "ru": "Показывает только реально обнаруженное и подключённое. Разрешения, требующие проверки, не используются до одобрения."
  },
+ "仅收藏": {
+  "ar": "المفضلة فقط",
+  "de": "Nur Favoriten",
+  "en": "Favorites only",
+  "fr": "Favoris uniquement",
+  "ja": "お気に入りのみ",
+  "ko": "즐겨찾기만",
+  "ru": "Только избранное"
+ },
  "仅用于人工恢复，请勿公开分享": {
   "ar": "للاستعادة اليدوية فقط. لا تشاركها علنًا",
   "de": "Nur für manuelle Wiederherstellung. Nicht öffentlich teilen",
@@ -1375,6 +1447,15 @@
   "ja": "今日も何か書き留めましょう。",
   "ko": "오늘도 무언가 기록해 보세요.",
   "ru": "Запишите что-нибудь сегодня."
+ },
+ "今天发生了什么：\n\n有什么感受：\n\n明天想做什么：\n": {
+  "ar": "ما حدث اليوم:\n\nما شعرت به:\n\nما أريد فعله غدًا:\n",
+  "de": "Was heute passiert ist:\n\nWie ich mich gefühlt habe:\n\nWas ich morgen tun möchte:\n",
+  "en": "What happened today:\n\nHow I felt:\n\nWhat I want to do tomorrow:\n",
+  "fr": "Ce qui s’est passé aujourd’hui :\n\nCe que j’ai ressenti :\n\nCe que je veux faire demain :\n",
+  "ja": "今日あったこと：\n\n感じたこと：\n\n明日したいこと：\n",
+  "ko": "오늘 있었던 일:\n\n느낀 점:\n\n내일 하고 싶은 일:\n",
+  "ru": "Что произошло сегодня:\n\nЧто я чувствовал:\n\nЧто хочу сделать завтра:\n"
  },
  "今天还没有故事。": {
   "ar": "لا قصص اليوم بعد.",
@@ -1565,6 +1646,15 @@
   "ko": "할 일을 저장했지만 시스템 알림이 꺼져 있습니다",
   "ru": "Задача сохранена, но системные напоминания выключены"
  },
+ "任务已保存，提醒未能启用": {
+  "ar": "تم حفظ المهمة، وتعذر تفعيل التذكير.",
+  "de": "Aufgabe gespeichert; Erinnerung konnte nicht aktiviert werden.",
+  "en": "Task saved; the reminder could not be enabled.",
+  "fr": "Tâche enregistrée ; rappel non activé.",
+  "ja": "タスクを保存しましたが、リマインダーを有効にできませんでした。",
+  "ko": "작업은 저장되었지만 알림을 켜지 못했습니다.",
+  "ru": "Задача сохранена, напоминание включить не удалось."
+ },
  "任务已保存；允许通知后才能收到提醒": {
   "ar": "حُفظت المهمة. اسمح بالإشعارات لتلقي التذكيرات",
   "de": "Aufgabe gespeichert. Mitteilungen erlauben, um Erinnerungen zu erhalten",
@@ -1636,6 +1726,15 @@
   "ja": "タスク名",
   "ko": "할 일 제목",
   "ru": "Название задачи"
+ },
+ "任务状态": {
+  "ar": "حالة المهمة",
+  "de": "Aufgabenstatus",
+  "en": "Task status",
+  "fr": "État des tâches",
+  "ja": "タスクの状態",
+  "ko": "작업 상태",
+  "ru": "Статус задачи"
  },
  "任务状态已更新，但系统提醒同步失败": {
   "ar": "حُدّثت المهمة، لكن تعذرت مزامنة تذكيرات النظام",
@@ -1745,6 +1844,15 @@
   "ko": "JSON 파일로 저장",
   "ru": "Сохранить файлом JSON"
  },
+ "保存后自动整理": {
+  "ar": "تنظيم بعد الحفظ",
+  "de": "Nach dem Speichern ordnen",
+  "en": "Organize after saving",
+  "fr": "Organiser après l’enregistrement",
+  "ja": "保存後に自動整理",
+  "ko": "저장 후 자동 정리",
+  "ru": "Упорядочивать после сохранения"
+ },
  "保存失败，请重试": {
   "ar": "تعذر الحفظ. حاول مجددًا",
   "de": "Speichern fehlgeschlagen. Bitte erneut versuchen",
@@ -1753,6 +1861,33 @@
   "ja": "保存できませんでした。もう一度お試しください",
   "ko": "저장하지 못했습니다. 다시 시도하세요",
   "ru": "Не удалось сохранить. Повторите попытку"
+ },
+ "保存标签": {
+  "ar": "حفظ الوسوم",
+  "de": "Tags speichern",
+  "en": "Save tags",
+  "fr": "Enregistrer les étiquettes",
+  "ja": "タグを保存",
+  "ko": "태그 저장",
+  "ru": "Сохранить теги"
+ },
+ "保存筛选": {
+  "ar": "حفظ الفلتر",
+  "de": "Filter speichern",
+  "en": "Save filter",
+  "fr": "Enregistrer le filtre",
+  "ja": "フィルターを保存",
+  "ko": "필터 저장",
+  "ru": "Сохранить фильтр"
+ },
+ "保留天数": {
+  "ar": "أيام الاحتفاظ",
+  "de": "Aufbewahrungsdauer",
+  "en": "Days to keep",
+  "fr": "Jours de conservation",
+  "ja": "保存日数",
+  "ko": "보관 일수",
+  "ru": "Дней хранения"
  },
  "先在「情绪」页记录几天吧": {
   "ar": "سجّل مزاجك بضعة أيام أولًا",
@@ -1789,6 +1924,15 @@
   "ja": "全体を検索",
   "ko": "전체 검색",
   "ru": "Поиск по всему"
+ },
+ "全选": {
+  "ar": "تحديد الكل",
+  "de": "Alle auswählen",
+  "en": "Select all",
+  "fr": "Tout sélectionner",
+  "ja": "すべて選択",
+  "ko": "전체 선택",
+  "ru": "Выбрать всё"
  },
  "全部": {
   "ar": "الكل",
@@ -1843,6 +1987,15 @@
   "ja": "Flash について",
   "ko": "Flash 정보",
   "ru": "О Flash"
+ },
+ "关键词": {
+  "ar": "كلمة مفتاحية",
+  "de": "Suchwort",
+  "en": "Keyword",
+  "fr": "Mot-clé",
+  "ja": "キーワード",
+  "ko": "검색어",
+  "ru": "Ключевое слово"
  },
  "关键词或标签": {
   "ar": "كلمة أو وسم",
@@ -1925,6 +2078,15 @@
   "ko": "내용이 먼저입니다.",
   "ru": "Сначала содержание."
  },
+ "内容已恢复，提醒未能启用": {
+  "ar": "تمت استعادة المحتوى، وتعذر تفعيل التذكيرات.",
+  "de": "Inhalt wiederhergestellt; Erinnerungen konnten nicht aktiviert werden.",
+  "en": "Content restored; reminders could not be enabled.",
+  "fr": "Contenu restauré ; rappels non activés.",
+  "ja": "内容を復元しましたが、リマインダーを有効にできませんでした。",
+  "ko": "내용은 복원되었지만 알림을 켜지 못했습니다.",
+  "ru": "Запись восстановлена, напоминания включить не удалось."
+ },
  "内容超出 {0} 字上限，请删减后再保存": {
   "ar": "تجاوز الحد البالغ {0} حرفًا. اختصره قبل الحفظ",
   "de": "Über dem Limit von {0} Zeichen. Vor dem Speichern kürzen",
@@ -1961,6 +2123,15 @@
   "ko": "내부 오류: 저장소가 준비되지 않았습니다",
   "ru": "Внутренняя ошибка: хранилище не готово"
  },
+ "再次输入口令": {
+  "ar": "أعد إدخال عبارة المرور",
+  "de": "Passphrase wiederholen",
+  "en": "Enter the passphrase again",
+  "fr": "Saisissez à nouveau la phrase secrète",
+  "ja": "パスフレーズをもう一度入力",
+  "ko": "암호 문구 다시 입력",
+  "ru": "Повторите парольную фразу"
+ },
  "再记录一点，未来的你会看到。": {
   "ar": "واصل التسجيل، سيراه أنت في المستقبل.",
   "de": "Schreib weiter, dein künftiges Ich wird es sehen.",
@@ -1969,6 +2140,15 @@
   "ja": "もう少し記録しましょう。未来のあなたが見返します。",
   "ko": "조금 더 기록해 보세요. 미래의 내가 보게 될 거예요.",
   "ru": "Записывайте ещё, будущий вы это увидите."
+ },
+ "再轻轻提醒一下：那条想法还在，今天有空时再看看。": {
+  "ar": "تذكير لطيف: فكرتك ما زالت هنا. عد إليها حين يناسبك الوقت.",
+  "de": "Eine kleine Erinnerung: Deine Idee ist noch da. Komm vorbei, wenn es passt.",
+  "en": "A gentle reminder: your idea is still here. Come back when it suits you.",
+  "fr": "Petit rappel : votre idée est toujours là. Revenez quand cela vous convient.",
+  "ja": "そっとリマインド。そのアイデアはここにあります。都合のよいときにどうぞ。",
+  "ko": "살짝 다시 알려드려요. 아이디어는 여기 있으니 편할 때 돌아오세요.",
+  "ru": "Мягко напоминаем: ваша идея всё ещё здесь. Вернитесь, когда удобно."
  },
  "写下刚刚闪过的念头……": {
   "ar": "دوّن تلك الفكرة العابرة…",
@@ -2069,6 +2249,15 @@
   "ko": "유형",
   "ru": "Тип"
  },
+ "分钟": {
+  "ar": "الدقيقة",
+  "de": "Minute",
+  "en": "Minute",
+  "fr": "Minute",
+  "ja": "分",
+  "ko": "분",
+  "ru": "Минута"
+ },
  "切换排序": {
   "ar": "تغيير الترتيب",
   "de": "Sortierung ändern",
@@ -2150,6 +2339,15 @@
   "ko": "보관 중인 잘못된 원본 데이터 사본을 삭제합니다",
   "ru": "Удаляет сохранённую копию неверных исходных данных"
  },
+ "删除自由标签": {
+  "ar": "حذف الوسم المخصص",
+  "de": "Eigenen Tag löschen",
+  "en": "Delete custom tag",
+  "fr": "Supprimer l’étiquette",
+  "ja": "カスタムタグを削除",
+  "ko": "사용자 태그 삭제",
+  "ru": "Удалить тег"
+ },
  "删除这个任务？": {
   "ar": "حذف هذه المهمة؟",
   "de": "Diese Aufgabe löschen?",
@@ -2204,6 +2402,24 @@
   "ko": "기한에",
   "ru": "В срок"
  },
+ "加密备份": {
+  "ar": "نسخة احتياطية مشفّرة",
+  "de": "Verschlüsseltes Backup",
+  "en": "Encrypted backup",
+  "fr": "Sauvegarde chiffrée",
+  "ja": "暗号化バックアップ",
+  "ko": "암호화된 백업",
+  "ru": "Зашифрованная копия"
+ },
+ "加密备份文件已损坏或格式不正确": {
+  "ar": "ملف النسخة الاحتياطية المشفّرة تالف أو بتنسيق غير صحيح.",
+  "de": "Die verschlüsselte Backup-Datei ist beschädigt oder fehlerhaft.",
+  "en": "The encrypted backup file is damaged or malformed.",
+  "fr": "Le fichier de sauvegarde chiffré est endommagé ou mal formé.",
+  "ja": "暗号化バックアップファイルが壊れているか、形式が正しくありません。",
+  "ko": "암호화된 백업 파일이 손상되었거나 형식이 올바르지 않습니다.",
+  "ru": "Файл зашифрованной копии повреждён или имеет неверный формат."
+ },
  "加载更多（剩余 {0} 条）": {
   "ar": "تحميل المزيد (متبقٍ {0})",
   "de": "Mehr laden ({0} übrig)",
@@ -2222,6 +2438,24 @@
   "ko": "일지 {0}개, 기분 {1}개, 할 일 {2}개 포함",
   "ru": "Содержит журнал: {0}, настроение: {1}, задачи: {2}"
  },
+ "匹配全部标签": {
+  "ar": "مطابقة جميع الوسوم",
+  "de": "Alle Tags abgleichen",
+  "en": "Match all tags",
+  "fr": "Toutes les étiquettes",
+  "ja": "すべてのタグに一致",
+  "ko": "모든 태그 일치",
+  "ru": "Совпадение всех тегов"
+ },
+ "单条灵感提醒": {
+  "ar": "تذكيرات لأفكار محددة",
+  "de": "Einzelne Ideen erinnern",
+  "en": "Individual idea reminders",
+  "fr": "Rappels par idée",
+  "ja": "個別アイデアのリマインダー",
+  "ko": "개별 아이디어 알림",
+  "ru": "Напоминания об отдельных идеях"
+ },
  "危险操作": {
   "ar": "منطقة الخطر",
   "de": "Gefahrenbereich",
@@ -2230,6 +2464,42 @@
   "ja": "危険な操作",
   "ko": "위험한 작업",
   "ru": "Опасная зона"
+ },
+ "历史回忆": {
+  "ar": "ذكريات",
+  "de": "Erinnerungen",
+  "en": "Memories",
+  "fr": "Souvenirs",
+  "ja": "過去の思い出",
+  "ko": "지난 기록",
+  "ru": "Воспоминания"
+ },
+ "原记录仍存在，请恢复为副本": {
+  "ar": "الأصل موجود. استعد نسخة.",
+  "de": "Das Original existiert. Als Kopie wiederherstellen.",
+  "en": "The original exists. Restore a copy instead.",
+  "fr": "L’original existe. Restaurez une copie.",
+  "ja": "元の項目が存在します。コピーとして復元してください。",
+  "ko": "원본이 있습니다. 사본으로 복원하세요.",
+  "ru": "Оригинал существует. Восстановите копию."
+ },
+ "去年的今天": {
+  "ar": "في مثل هذا اليوم العام الماضي",
+  "de": "Heute vor einem Jahr",
+  "en": "On this day last year",
+  "fr": "Ce jour l’an dernier",
+  "ja": "去年の今日",
+  "ko": "작년 오늘",
+  "ru": "В этот день год назад"
+ },
+ "发生了什么：\n\n我怎么理解：\n\n现在需要什么：\n": {
+  "ar": "ما حدث:\n\nكيف أفهمه:\n\nما أحتاجه الآن:\n",
+  "de": "Was passiert ist:\n\nWie ich es verstehe:\n\nWas ich jetzt brauche:\n",
+  "en": "What happened:\n\nHow I understand it:\n\nWhat I need now:\n",
+  "fr": "Ce qui s’est passé :\n\nComment je le comprends :\n\nCe dont j’ai besoin :\n",
+  "ja": "起きたこと：\n\nどう受け止めたか：\n\n今必要なこと：\n",
+  "ko": "무슨 일이 있었는지:\n\n어떻게 이해하는지:\n\n지금 필요한 것:\n",
+  "ru": "Что произошло:\n\nКак я это понимаю:\n\nЧто мне нужно сейчас:\n"
  },
  "发送到另一台设备…": {
   "ar": "إرسال إلى جهاز آخر…",
@@ -2267,6 +2537,51 @@
   "ko": "즐겨찾기 해제",
   "ru": "Убрать из избранного"
  },
+ "口令": {
+  "ar": "عبارة المرور",
+  "de": "Passphrase",
+  "en": "Passphrase",
+  "fr": "Phrase secrète",
+  "ja": "パスフレーズ",
+  "ko": "암호 문구",
+  "ru": "Парольная фраза"
+ },
+ "口令不能超过 1024 个字符": {
+  "ar": "لا يمكن أن تتجاوز عبارة المرور 1024 حرفًا.",
+  "de": "Die Passphrase darf höchstens 1024 Zeichen lang sein.",
+  "en": "The passphrase can't be longer than 1024 characters.",
+  "fr": "La phrase secrète ne peut pas dépasser 1024 caractères.",
+  "ja": "パスフレーズは 1024 文字以内にしてください。",
+  "ko": "암호 문구는 1024자를 넘을 수 없습니다.",
+  "ru": "Парольная фраза не может быть длиннее 1024 символов."
+ },
+ "口令至少需要 8 个字符": {
+  "ar": "يجب أن تتكون عبارة المرور من 8 أحرف على الأقل.",
+  "de": "Die Passphrase muss mindestens 8 Zeichen lang sein.",
+  "en": "The passphrase needs at least 8 characters.",
+  "fr": "La phrase secrète doit comporter au moins 8 caractères.",
+  "ja": "パスフレーズは 8 文字以上にしてください。",
+  "ko": "암호 문구는 8자 이상이어야 합니다.",
+  "ru": "Парольная фраза должна содержать не менее 8 символов."
+ },
+ "口令错误，或文件已损坏": {
+  "ar": "عبارة المرور خاطئة، أو أن الملف تالف.",
+  "de": "Falsche Passphrase oder beschädigte Datei.",
+  "en": "Wrong passphrase, or the file is damaged.",
+  "fr": "Phrase secrète incorrecte, ou fichier endommagé.",
+  "ja": "パスフレーズが違うか、ファイルが壊れています。",
+  "ko": "암호 문구가 틀렸거나 파일이 손상되었습니다.",
+  "ru": "Неверная парольная фраза или файл повреждён."
+ },
+ "口令（至少 8 个字符）": {
+  "ar": "عبارة المرور (8 أحرف على الأقل)",
+  "de": "Passphrase (mindestens 8 Zeichen)",
+  "en": "Passphrase (at least 8 characters)",
+  "fr": "Phrase secrète (8 caractères minimum)",
+  "ja": "パスフレーズ(8 文字以上)",
+  "ko": "암호 문구(8자 이상)",
+  "ru": "Парольная фраза (не менее 8 символов)"
+ },
  "可在 Android、macOS 与 HarmonyOS 之间迁移日志、情绪和任务。备份为明文 JSON，请只保存或分享至可信位置。": {
   "ar": "انقل اليوميات والمزاج والمهام بين Android وmacOS وHarmonyOS. النسخ الاحتياطية بصيغة JSON غير مشفرة، فاحفظها أو شاركها في مكان موثوق فقط.",
   "de": "Tagebuch, Stimmungen und Aufgaben zwischen Android, macOS und HarmonyOS übertragen. Backups sind unverschlüsseltes JSON, also nur an vertrauenswürdigen Orten speichern oder teilen.",
@@ -2275,6 +2590,15 @@
   "ja": "Android・macOS・HarmonyOS 間でログ・気分・タスクを移行できます。バックアップは暗号化されない JSON なので、信頼できる場所にのみ保存・共有してください。",
   "ko": "Android, macOS, HarmonyOS 간에 일지, 기분, 할 일을 옮길 수 있습니다. 백업은 일반 JSON이므로 신뢰할 수 있는 곳에만 저장하거나 공유하세요.",
   "ru": "Переносите журнал, настроение и задачи между Android, macOS и HarmonyOS. Резервные копии — открытый JSON, храните и передавайте их только в надёжных местах."
+ },
+ "可在 Android、macOS 与 HarmonyOS 之间迁移日志、情绪和任务。导出时可用口令加密（推荐）；不加密的备份是明文 JSON，请只保存或分享至可信位置。": {
+  "ar": "انقل السجلات والمشاعر والمهام بين Android وmacOS وHarmonyOS. يمكنك تشفير التصدير بعبارة مرور (موصى به)؛ النسخ غير المشفّرة هي JSON نصّي واضح، فاحفظها أو شاركها في أماكن موثوقة فقط.",
+  "de": "Übertrage Einträge, Emotionen und Aufgaben zwischen Android, macOS und HarmonyOS. Beim Export kannst du mit einer Passphrase verschlüsseln (empfohlen); unverschlüsselte Backups sind Klartext-JSON, also nur an vertrauenswürdigen Orten speichern oder teilen.",
+  "en": "Move logs, emotions and tasks between Android, macOS and HarmonyOS. You can encrypt exports with a passphrase (recommended); unencrypted backups are plain JSON, so only save or share them somewhere you trust.",
+  "fr": "Transférez journaux, émotions et tâches entre Android, macOS et HarmonyOS. Vous pouvez chiffrer l'export avec une phrase secrète (recommandé) ; une sauvegarde non chiffrée est du JSON en clair, à n'enregistrer ou partager qu'en lieu sûr.",
+  "ja": "Android・macOS・HarmonyOS 間で記録・感情・タスクを移行できます。書き出し時にパスフレーズで暗号化できます(推奨)。暗号化しないバックアップは平文の JSON なので、信頼できる場所にのみ保存・共有してください。",
+  "ko": "Android, macOS, HarmonyOS 사이에서 기록, 감정, 할 일을 옮길 수 있습니다. 내보낼 때 암호 문구로 암호화할 수 있으며(권장), 암호화하지 않은 백업은 일반 JSON이므로 신뢰할 수 있는 곳에만 저장하거나 공유하세요.",
+  "ru": "Переносите записи, эмоции и задачи между Android, macOS и HarmonyOS. При экспорте копию можно зашифровать парольной фразой (рекомендуется); незашифрованная копия — открытый JSON, храните и отправляйте её только в надёжные места."
  },
  "可导出备份或通过系统分享传输": {
   "ar": "صدّر نسخة احتياطية أو أرسلها عبر مشاركة النظام",
@@ -2303,6 +2627,15 @@
   "ko": "병합",
   "ru": "Объединить"
  },
+ "名称": {
+  "ar": "الاسم",
+  "de": "Name",
+  "en": "Name",
+  "fr": "Nom",
+  "ja": "名前",
+  "ko": "이름",
+  "ru": "Название"
+ },
  "向左右滚动查看完整月历": {
   "ar": "مرّر جانبيًا لرؤية الشهر كاملًا",
   "de": "Seitlich scrollen für den ganzen Monat",
@@ -2312,6 +2645,15 @@
   "ko": "좌우로 스크롤해 전체 달력을 보세요",
   "ru": "Прокрутите в сторону, чтобы увидеть весь месяц"
  },
+ "启用导入的提醒配置": {
+  "ar": "تفعيل التذكيرات المستوردة",
+  "de": "Importierte Erinnerungen aktivieren",
+  "en": "Enable imported reminders",
+  "fr": "Activer les rappels importés",
+  "ja": "読み込んだリマインダーを有効化",
+  "ko": "가져온 알림 활성화",
+  "ru": "Включить импортированные напоминания"
+ },
  "周": {
   "ar": "أسبوع",
   "de": "Woche",
@@ -2320,6 +2662,15 @@
   "ja": "週",
   "ko": "주",
   "ru": "Неделя"
+ },
+ "周期提醒": {
+  "ar": "تذكير دوري",
+  "de": "Wiederkehrende Erinnerung",
+  "en": "Recurring reminder",
+  "fr": "Rappel récurrent",
+  "ja": "定期リマインダー",
+  "ko": "주기 알림",
+  "ru": "Повторное напоминание"
  },
  "四": {
   "ar": "خ",
@@ -2347,6 +2698,15 @@
   "ja": "今週に戻る",
   "ko": "이번 주로",
   "ru": "К этой неделе"
+ },
+ "回收站": {
+  "ar": "المحذوفات",
+  "de": "Papierkorb",
+  "en": "Recently deleted",
+  "fr": "Corbeille",
+  "ja": "ゴミ箱",
+  "ko": "휴지통",
+  "ru": "Корзина"
  },
  "回顾": {
   "ar": "مراجعة",
@@ -2428,6 +2788,15 @@
   "ja": "平均",
   "ko": "평균",
   "ru": "Среднее"
+ },
+ "处理方式": {
+  "ar": "طريقة العمل",
+  "de": "Verhalten",
+  "en": "Behavior",
+  "fr": "Fonctionnement",
+  "ja": "動作",
+  "ko": "처리 방식",
+  "ru": "Режим"
  },
  "备份与恢复": {
   "ar": "النسخ الاحتياطي والاستعادة",
@@ -2581,6 +2950,15 @@
   "ja": "バックアップファイルが 50 MB を超えています",
   "ko": "백업 파일이 50MB를 넘습니다",
   "ru": "Файл копии больше 50 МБ"
+ },
+ "备份文件超过 72 MB": {
+  "ar": "ملف النسخة الاحتياطية أكبر من 72 ميغابايت",
+  "de": "Die Backup-Datei ist größer als 72 MB",
+  "en": "The backup file is larger than 72 MB",
+  "fr": "Le fichier de sauvegarde dépasse 72 Mo",
+  "ja": "バックアップファイルが 72 MB を超えています",
+  "ko": "백업 파일이 72MB를 넘습니다",
+  "ru": "Файл копии больше 72 МБ"
  },
  "备份文件超过 {0} MB，无法导入": {
   "ar": "حجم ملف النسخة أكبر من {0} ميغابايت ولا يمكن استيراده",
@@ -2816,6 +3194,24 @@
   "ko": "가져오기를 취소했습니다",
   "ru": "Импорт отменён"
  },
+ "导入的提醒等待确认启用": {
+  "ar": "التذكيرات المستوردة تنتظر تأكيد التفعيل",
+  "de": "Importierte Erinnerungen warten auf Bestätigung",
+  "en": "Imported reminders await confirmation",
+  "fr": "Les rappels importés attendent votre confirmation",
+  "ja": "読み込んだリマインダーは有効化の確認待ちです",
+  "ko": "가져온 알림은 확인 후 활성화됩니다",
+  "ru": "Импортированные напоминания ожидают подтверждения"
+ },
+ "导入的灵感提醒需要确认后启用": {
+  "ar": "أكد تفعيل تذكيرات الأفكار المستوردة",
+  "de": "Importierte Ideen-Erinnerungen erst bestätigen",
+  "en": "Confirm before enabling imported idea reminders",
+  "fr": "Confirmez l’activation des rappels d’idées importés",
+  "ja": "読み込んだアイデア通知は確認後に有効になります",
+  "ko": "가져온 아이디어 알림은 확인 후 활성화됩니다",
+  "ru": "Подтвердите включение импортированных напоминаний"
+ },
  "导出": {
   "ar": "تصدير",
   "de": "Exportieren",
@@ -2906,6 +3302,15 @@
   "ko": "내보내기 실패: {0}",
   "ru": "Экспорт не удался: {0}"
  },
+ "导出已中断，请重新导出": {
+  "ar": "توقف التصدير. يُرجى التصدير مرة أخرى.",
+  "de": "Der Export wurde unterbrochen. Bitte erneut exportieren.",
+  "en": "Export was interrupted. Please export again.",
+  "fr": "L'export a été interrompu. Veuillez recommencer.",
+  "ja": "書き出しが中断されました。もう一度書き出してください。",
+  "ko": "내보내기가 중단되었습니다. 다시 내보내세요.",
+  "ru": "Экспорт прерван. Повторите экспорт."
+ },
  "导出旧版异常原始数据": {
   "ar": "تصدير البيانات الخام القديمة غير الصالحة",
   "de": "Alte ungültige Rohdaten exportieren",
@@ -2914,6 +3319,33 @@
   "ja": "旧版の不正な元データを書き出す",
   "ko": "이전 잘못된 원본 데이터 내보내기",
   "ru": "Экспорт старых неверных данных"
+ },
+ "导出时可用口令加密（推荐）；不加密的 JSON 文件请仅保存或分享给可信设备或联系人。旧版局域网传输暂时停用。": {
+  "ar": "يمكنك تشفير التصدير بعبارة مرور (موصى به). احفظ ملفات JSON غير المشفّرة أو شاركها مع أجهزة أو جهات اتصال موثوقة فقط. النقل القديم عبر الشبكة المحلية متوقف مؤقتًا.",
+  "de": "Beim Export kannst du mit einer Passphrase verschlüsseln (empfohlen). Unverschlüsselte JSON-Dateien nur mit vertrauenswürdigen Geräten oder Kontakten speichern oder teilen. Die alte Übertragung im lokalen Netzwerk ist vorübergehend deaktiviert.",
+  "en": "You can encrypt exports with a passphrase (recommended). Only save or share unencrypted JSON files with trusted devices or contacts. Legacy local network transfer is temporarily disabled.",
+  "fr": "Vous pouvez chiffrer l'export avec une phrase secrète (recommandé). N'enregistrez ou ne partagez les fichiers JSON non chiffrés qu'avec des appareils ou contacts de confiance. L'ancien transfert sur le réseau local est temporairement désactivé.",
+  "ja": "書き出し時にパスフレーズで暗号化できます(推奨)。暗号化しない JSON ファイルは信頼できる端末や連絡先にのみ保存・共有してください。旧ローカルネットワーク転送は一時停止中です。",
+  "ko": "내보낼 때 암호 문구로 암호화할 수 있습니다(권장). 암호화하지 않은 JSON 파일은 신뢰할 수 있는 기기나 연락처에만 저장하거나 공유하세요. 이전 로컬 네트워크 전송은 일시적으로 중단되었습니다.",
+  "ru": "При экспорте можно зашифровать копию парольной фразой (рекомендуется). Незашифрованные JSON-файлы сохраняйте и отправляйте только на доверенные устройства или контактам. Старая передача по локальной сети временно отключена."
+ },
+ "导出时可用口令加密（推荐）；不加密的备份是明文 JSON。可存到「文件」或用隔空投送发给自己的其他设备。": {
+  "ar": "يمكنك تشفير التصدير بعبارة مرور (موصى به)؛ النسخ غير المشفّرة هي JSON نصّي واضح. احفظها في «الملفات» أو أرسلها عبر AirDrop إلى أجهزتك الأخرى.",
+  "de": "Beim Export kannst du mit einer Passphrase verschlüsseln (empfohlen); unverschlüsselte Backups sind Klartext-JSON. In „Dateien“ sichern oder per AirDrop an deine anderen Geräte senden.",
+  "en": "You can encrypt exports with a passphrase (recommended); unencrypted backups are plain JSON. Save to Files or AirDrop to your other devices.",
+  "fr": "Vous pouvez chiffrer l'export avec une phrase secrète (recommandé) ; sinon la sauvegarde est du JSON en clair. Enregistrez-la dans Fichiers ou envoyez-la par AirDrop à vos autres appareils.",
+  "ja": "書き出し時にパスフレーズで暗号化できます(推奨)。暗号化しないバックアップは平文の JSON です。「ファイル」に保存するか、AirDrop で自分の他の端末に送れます。",
+  "ko": "내보낼 때 암호 문구로 암호화할 수 있습니다(권장). 암호화하지 않은 백업은 일반 JSON입니다. 파일 앱에 저장하거나 AirDrop으로 내 다른 기기에 보낼 수 있습니다.",
+  "ru": "При экспорте копию можно зашифровать парольной фразой (рекомендуется); без шифрования это открытый JSON. Сохраните её в «Файлы» или отправьте по AirDrop на другие свои устройства."
+ },
+ "导出时可用口令加密（推荐）；不加密的备份是明文 JSON，包含日志、情绪和任务内容，请只保存或分享至可信位置": {
+  "ar": "يمكنك تشفير التصدير بعبارة مرور (موصى به). النسخ غير المشفّرة هي JSON نصّي واضح يحتوي على السجلات والمشاعر والمهام؛ احفظها أو شاركها في أماكن موثوقة فقط",
+  "de": "Beim Export kannst du mit einer Passphrase verschlüsseln (empfohlen). Unverschlüsselte Backups sind Klartext-JSON mit Einträgen, Emotionen und Aufgaben; nur an vertrauenswürdigen Orten speichern oder teilen",
+  "en": "You can encrypt exports with a passphrase (recommended). Unencrypted backups are plain JSON containing your logs, emotions and tasks; only save or share them somewhere you trust",
+  "fr": "Vous pouvez chiffrer l'export avec une phrase secrète (recommandé). Une sauvegarde non chiffrée est du JSON en clair contenant journaux, émotions et tâches ; ne l'enregistrez ou ne la partagez qu'en lieu sûr",
+  "ja": "書き出し時にパスフレーズで暗号化できます(推奨)。暗号化しないバックアップは記録・感情・タスクを含む平文の JSON なので、信頼できる場所にのみ保存・共有してください",
+  "ko": "내보낼 때 암호 문구로 암호화할 수 있습니다(권장). 암호화하지 않은 백업은 기록, 감정, 할 일이 담긴 일반 JSON이므로 신뢰할 수 있는 곳에만 저장하거나 공유하세요",
+  "ru": "При экспорте можно зашифровать копию парольной фразой (рекомендуется). Незашифрованная копия — открытый JSON с записями, эмоциями и задачами; храните и отправляйте её только в надёжные места"
  },
  "导出的 JSON 文件未加密，仅保存或分享给可信设备或联系人。旧版局域网传输暂时停用。": {
   "ar": "ملف JSON المُصدَّر غير مشفر. شاركه مع أجهزة أو أشخاص موثوقين فقط. النقل القديم عبر الشبكة المحلية متوقف حاليًا.",
@@ -2950,6 +3382,33 @@
   "ja": "この端末のログ・アイデア・気分・タスクをすべて削除し、元に戻せません。先にバックアップを書き出してください。",
   "ko": "이 기기의 모든 일지, 아이디어, 기분, 할 일을 삭제하며 되돌릴 수 없습니다. 먼저 백업을 내보내세요.",
   "ru": "Все записи, идеи, настроение и задачи на этом устройстве будут удалены без возврата. Сначала экспортируйте копию."
+ },
+ "将永久删除到期内容": {
+  "ar": "العناصر المنتهية للحذف النهائي",
+  "de": "Endgültig zu löschende abgelaufene Einträge",
+  "en": "Expired items to delete permanently",
+  "fr": "Éléments expirés à supprimer",
+  "ja": "期限切れで完全に削除する項目",
+  "ko": "영구 삭제할 만료 항목",
+  "ru": "Просроченные записи для удаления"
+ },
+ "将移除所有记录关联，并删除引用此标签的保存筛选；记录正文保留。": {
+  "ar": "ستُحذف الروابط والفلاتر المحفوظة التي تستخدم هذا الوسم. ستبقى السجلات.",
+  "de": "Verknüpfungen und gespeicherte Filter mit diesem Tag werden entfernt. Einträge bleiben erhalten.",
+  "en": "Links and saved filters using this tag will be removed. Entries are kept.",
+  "fr": "Les liens et filtres utilisant cette étiquette seront supprimés. Les entrées sont conservées.",
+  "ja": "このタグの関連付けと保存済みフィルターを削除します。記録本文は残ります。",
+  "ko": "이 태그의 연결과 저장된 필터가 삭제됩니다. 기록 내용은 유지됩니다.",
+  "ru": "Связи и фильтры с этим тегом будут удалены. Сами записи сохранятся."
+ },
+ "小时": {
+  "ar": "الساعة",
+  "de": "Stunde",
+  "en": "Hour",
+  "fr": "Heure",
+  "ja": "時",
+  "ko": "시",
+  "ru": "Час"
  },
  "尝试修复无法直接导入的备份": {
   "ar": "محاولة إصلاح نسخة يتعذر استيرادها",
@@ -3023,6 +3482,15 @@
   "ko": "필터 열기",
   "ru": "Открыть фильтры"
  },
+ "展示情绪记录": {
+  "ar": "إظهار سجلات المزاج",
+  "de": "Stimmungseinträge anzeigen",
+  "en": "Include mood entries",
+  "fr": "Inclure les humeurs",
+  "ja": "気分の記録を表示",
+  "ko": "감정 기록 포함",
+  "ru": "Показывать записи настроения"
+ },
  "属性": {
   "ar": "التفاصيل",
   "de": "Details",
@@ -3059,6 +3527,15 @@
   "ko": "저장했습니다",
   "ru": "Сохранено"
  },
+ "已保存筛选": {
+  "ar": "الفلاتر المحفوظة",
+  "de": "Gespeicherte Filter",
+  "en": "Saved filters",
+  "fr": "Filtres enregistrés",
+  "ja": "保存済みフィルター",
+  "ko": "저장된 필터",
+  "ru": "Сохранённые фильтры"
+ },
  "已关闭": {
   "ar": "متوقف",
   "de": "Aus",
@@ -3076,6 +3553,15 @@
   "ja": "削除しました",
   "ko": "삭제했습니다",
   "ru": "Удалено"
+ },
+ "已删除内容": {
+  "ar": "محتوى محذوف",
+  "de": "Gelöschter Inhalt",
+  "en": "Deleted content",
+  "fr": "Contenu supprimé",
+  "ja": "削除した内容",
+  "ko": "삭제된 내용",
+  "ru": "Удалённая запись"
  },
  "已删除日志": {
   "ar": "حُذفت اليومية",
@@ -3103,6 +3589,33 @@
   "ja": "記録を削除しました",
   "ko": "기록을 삭제했습니다",
   "ru": "Запись удалена"
+ },
+ "已在本机整理标签": {
+  "ar": "تم تنظيم الوسوم على الجهاز",
+  "de": "Tags auf diesem Gerät geordnet",
+  "en": "Tags organized on this device",
+  "fr": "Tags organisés sur cet appareil",
+  "ja": "デバイス内でタグを整理しました",
+  "ko": "기기에서 태그 정리 완료",
+  "ru": "Теги упорядочены на устройстве"
+ },
+ "已安排至": {
+  "ar": "مجدول حتى",
+  "de": "Geplant bis",
+  "en": "Scheduled through",
+  "fr": "Planifié jusqu’au",
+  "ja": "次の日時まで設定済み",
+  "ko": "예약된 마지막 날짜",
+  "ru": "Запланировано до"
+ },
+ "已完成": {
+  "ar": "مكتملة",
+  "de": "Erledigt",
+  "en": "Completed",
+  "fr": "Terminées",
+  "ja": "完了",
+  "ko": "완료",
+  "ru": "Выполнено"
  },
  "已导入 {0} 条日志、{1} 条情绪、": {
   "ar": "استُورد اليوميات: {0}، المزاج: {1}، ",
@@ -3167,6 +3680,15 @@
   "ko": "모든 데이터를 지웠지만 시스템 알림을 지우지 못했습니다. 앱을 다시 시작해 보세요",
   "ru": "Все данные удалены, но системные напоминания убрать не удалось. Перезапустите приложение и повторите"
  },
+ "已用口令加密。接收方需要同一口令才能导入。": {
+  "ar": "مشفّرة بعبارة مرور. يحتاج المستلم إلى عبارة المرور نفسها لاستيرادها.",
+  "de": "Mit einer Passphrase verschlüsselt. Zum Importieren braucht der Empfänger dieselbe Passphrase.",
+  "en": "Encrypted with a passphrase. The recipient needs the same passphrase to import it.",
+  "fr": "Chiffrée avec une phrase secrète. Le destinataire aura besoin de la même phrase secrète pour l'importer.",
+  "ja": "パスフレーズで暗号化済みです。読み込むには受け取る人にも同じパスフレーズが必要です。",
+  "ko": "암호 문구로 암호화되었습니다. 받는 사람이 가져오려면 같은 암호 문구가 필요합니다.",
+  "ru": "Зашифровано парольной фразой. Чтобы импортировать копию, получателю нужна та же фраза."
+ },
  "已调起系统分享": {
   "ar": "فُتحت مشاركة النظام",
   "de": "Teilen geöffnet",
@@ -3230,6 +3752,24 @@
   "ko": "평균 기분 {0} · 총 {1}개",
   "ru": "Среднее настроение {0} · Всего {1}"
  },
+ "应用保留期限": {
+  "ar": "تطبيق مدة الاحتفاظ",
+  "de": "Aufbewahrungsdauer anwenden",
+  "en": "Apply retention period",
+  "fr": "Appliquer la durée",
+  "ja": "保存期間を適用",
+  "ko": "보관 기간 적용",
+  "ru": "Применить срок хранения"
+ },
+ "应用锁": {
+  "ar": "قفل التطبيق",
+  "de": "App-Sperre",
+  "en": "App Lock",
+  "fr": "Verrouillage de l'app",
+  "ja": "アプリロック",
+  "ko": "앱 잠금",
+  "ru": "Блокировка приложения"
+ },
  "开启后，日志与灵感的首行和摘录会写入本机的系统搜索索引（不含情绪与任务，不离开此设备）。关闭即从系统搜索中移除。": {
   "ar": "عند التفعيل، يُضاف السطر الأول ومقتطف من اليوميات والأفكار إلى فهرس بحث النظام على هذا الجهاز (دون المزاج والمهام، ولا يغادر شيء الجهاز). وعند الإيقاف تُزال.",
   "de": "Wenn aktiv, landen erste Zeile und Auszug von Tagebuch und Ideen im Systemsuchindex dieses Geräts (keine Stimmungen oder Aufgaben, nichts verlässt das Gerät). Beim Ausschalten werden sie entfernt.",
@@ -3238,6 +3778,24 @@
   "ja": "オンにすると、ログとアイデアの最初の行と抜粋をこの端末のシステム検索に登録します (気分とタスクは含まず、端末外には出ません)。オフにすると削除します。",
   "ko": "켜면 일지와 아이디어의 첫 줄과 발췌가 이 기기의 시스템 검색 색인에 저장됩니다(기분과 할 일 제외, 기기 밖으로 나가지 않음). 끄면 제거됩니다.",
   "ru": "Если включено, первая строка и отрывок журнала и идей попадают в системный поиск устройства (без настроения и задач, ничего не покидает устройство). При выключении они удаляются."
+ },
+ "开启应用锁后，Flash 用面容 ID 解锁你的记录": {
+  "ar": "يستخدم Flash بصمة الوجه (Face ID) لفتح سجلاتك عند تفعيل قفل التطبيق.",
+  "de": "Flash verwendet Face ID, um deine Einträge zu entsperren, wenn die App-Sperre aktiv ist.",
+  "en": "Flash uses Face ID to unlock your records when App Lock is on.",
+  "fr": "Flash utilise Face ID pour déverrouiller vos entrées lorsque le verrouillage de l'app est activé.",
+  "ja": "アプリロックがオンのとき、Flash は Face ID で記録のロックを解除します。",
+  "ko": "앱 잠금을 켜면 Flash가 Face ID로 기록의 잠금을 해제합니다.",
+  "ru": "Flash использует Face ID, чтобы разблокировать ваши записи, когда включена блокировка приложения."
+ },
+ "开启应用锁后，冷启动或离开超过 1 分钟再回来时，需要用生物识别或设备密码解锁。小组件、快速记录和通知操作不受影响。": {
+  "ar": "عند تفعيل قفل التطبيق، يلزم فتح Flash بالقياسات الحيوية أو رمز الجهاز عند تشغيله أو بعد الابتعاد عنه أكثر من دقيقة واحدة. تبقى الأدوات المصغّرة والالتقاط السريع وإجراءات الإشعارات متاحة.",
+  "de": "Mit App-Sperre entsperrst du Flash beim Start oder nach mehr als 1 Minute Abwesenheit per Biometrie oder Gerätecode. Widgets, Schnellerfassung und Mitteilungsaktionen funktionieren weiter.",
+  "en": "With App Lock on, you unlock Flash with biometrics or your device passcode when it starts or after you've been away for more than 1 minute. Widgets, Quick Capture and notification actions keep working.",
+  "fr": "Avec le verrouillage activé, Flash se déverrouille par biométrie ou avec le code de l'appareil au démarrage ou après plus d'une minute d'absence. Les widgets, la capture rapide et les actions de notification restent disponibles.",
+  "ja": "アプリロックをオンにすると、Flash の起動時や 1 分以上離れて戻ったときに、生体認証または端末のパスコードでロックを解除します。ウィジェット、クイック記録、通知の操作はそのまま使えます。",
+  "ko": "앱 잠금을 켜면 Flash를 새로 열거나 1분 넘게 떠나 있다가 돌아올 때 생체 인증이나 기기 암호로 잠금을 해제해야 합니다. 위젯, 빠른 기록, 알림 작업은 그대로 사용할 수 있습니다.",
+  "ru": "Когда блокировка включена, при запуске Flash или возвращении после отсутствия дольше 1 минуты его нужно разблокировать биометрией или паролем устройства. Виджеты, быстрая запись и действия в уведомлениях работают как прежде."
  },
  "开始": {
   "ar": "البداية",
@@ -3446,6 +4004,15 @@
   "ko": "매우 기쁨",
   "ru": "Очень радостно"
  },
+ "快捷设置": {
+  "ar": "إعدادات سريعة",
+  "de": "Vorgaben",
+  "en": "Presets",
+  "fr": "Préréglages",
+  "ja": "プリセット",
+  "ko": "빠른 설정",
+  "ru": "Готовые настройки"
+ },
  "快速记录": {
   "ar": "التقاط سريع",
   "de": "Schnellerfassung",
@@ -3464,6 +4031,24 @@
   "ko": "빠른 기록 인텐트는 플랫폼 심사 대기 중입니다",
   "ru": "Намерения быстрой записи ждут проверки"
  },
+ "恢复": {
+  "ar": "استعادة",
+  "de": "Wiederherstellen",
+  "en": "Restore",
+  "fr": "Restaurer",
+  "ja": "復元",
+  "ko": "복원",
+  "ru": "Восстановить"
+ },
+ "恢复为副本": {
+  "ar": "استعادة نسخة",
+  "de": "Als Kopie wiederherstellen",
+  "en": "Restore a copy",
+  "fr": "Restaurer une copie",
+  "ja": "コピーとして復元",
+  "ko": "사본으로 복원",
+  "ru": "Восстановить копию"
+ },
  "恢复原始数据已导出，请妥善保管并联系支持人员处理": {
   "ar": "صُدّرت بيانات الاستعادة الخام. احفظها وتواصل مع الدعم",
   "de": "Rohdaten zur Wiederherstellung exportiert. Sicher aufbewahren und Support kontaktieren",
@@ -3472,6 +4057,15 @@
   "ja": "復元用の元データを書き出しました。大切に保管しサポートにご連絡ください",
   "ko": "복구 원본 데이터를 내보냈습니다. 안전하게 보관하고 지원팀에 문의하세요",
   "ru": "Исходные данные экспортированы. Сохраните их и обратитесь в поддержку"
+ },
+ "恢复所选": {
+  "ar": "استعادة المحدد",
+  "de": "Auswahl wiederherstellen",
+  "en": "Restore selected",
+  "fr": "Restaurer la sélection",
+  "ja": "選択した項目を復元",
+  "ko": "선택 항목 복원",
+  "ru": "Восстановить выбранное"
  },
  "恢复损坏或旧版备份": {
   "ar": "استعادة نسخة تالفة أو قديمة",
@@ -3517,6 +4111,15 @@
   "ja": "平均の気分 {0} (−3〜+3)",
   "ko": "평균 기분 {0}(-3~+3)",
   "ru": "Среднее настроение {0} (от −3 до +3)"
+ },
+ "情绪复盘": {
+  "ar": "مراجعة المشاعر",
+  "de": "Gefühle reflektieren",
+  "en": "Mood reflection",
+  "fr": "Bilan émotionnel",
+  "ja": "気持ちの振り返り",
+  "ko": "감정 돌아보기",
+  "ru": "Разбор эмоций"
  },
  "情绪已记录": {
   "ar": "سُجّل المزاج",
@@ -3589,6 +4192,15 @@
   "ja": "気分: 新規 {0}、変更 {1}、この端末のみ {2}\n",
   "ko": "기분: 새로 추가 {0}, 변경 {1}, 이 기기에만 {2}\n",
   "ru": "Настроение: новых {0}, изменено {1}, только здесь {2}\n"
+ },
+ "想到什么：\n\n为什么有用：\n\n下一步可以做什么：\n": {
+  "ar": "الفكرة:\n\nلماذا هي مفيدة:\n\nالخطوة التالية:\n",
+  "de": "Meine Idee:\n\nWarum sie nützlich ist:\n\nMein nächster Schritt:\n",
+  "en": "The idea:\n\nWhy it matters:\n\nWhat I can do next:\n",
+  "fr": "Mon idée :\n\nPourquoi elle est utile :\n\nLa prochaine étape :\n",
+  "ja": "思いついたこと：\n\n役立つ理由：\n\n次にできること：\n",
+  "ko": "떠오른 생각:\n\n유용한 이유:\n\n다음에 할 일:\n",
+  "ru": "Идея:\n\nПочему она полезна:\n\nСледующий шаг:\n"
  },
  "想法": {
   "ar": "خاطرة",
@@ -3707,6 +4319,15 @@
   "ko": "아이디어로 채운 할 일 편집기를 엽니다. 아이디어는 유지됩니다",
   "ru": "Открывает редактор задачи с текстом идеи; идея сохраняется"
  },
+ "打开原记录": {
+  "ar": "فتح السجل الأصلي",
+  "de": "Originaleintrag öffnen",
+  "en": "Open original entry",
+  "fr": "Ouvrir l’entrée",
+  "ja": "元の記録を開く",
+  "ko": "원본 기록 열기",
+  "ru": "Открыть исходную запись"
+ },
  "打开快速记录": {
   "ar": "فتح الالتقاط السريع",
   "de": "Schnellerfassung öffnen",
@@ -3751,6 +4372,24 @@
   "ja": "アプリを開かずに思いつきを Flash に保存できます。",
   "ko": "앱을 열지 않고 스친 생각을 Flash에 저장하세요.",
   "ru": "Сохраните мысль во Flash, не открывая приложение."
+ },
+ "抽取一条收藏": {
+  "ar": "اختيار سجل من المفضلة",
+  "de": "Einen Favoriten ziehen",
+  "en": "Pick a favorite entry",
+  "fr": "Tirer une entrée favorite",
+  "ja": "お気に入りを1件選ぶ",
+  "ko": "즐겨찾기 하나 뽑기",
+  "ru": "Выбрать одну запись"
+ },
+ "抽取收藏": {
+  "ar": "اختيار من المفضلة",
+  "de": "Favorit auswählen",
+  "en": "Pick a favorite",
+  "fr": "Choisir un favori",
+  "ja": "お気に入りを選ぶ",
+  "ko": "즐겨찾기 뽑기",
+  "ru": "Выбрать избранное"
  },
  "按差异合并": {
   "ar": "دمج الفروق",
@@ -3823,6 +4462,15 @@
   "ja": "受信した内容は有効な Flash バックアップではありません",
   "ko": "받은 내용이 올바른 Flash 백업이 아닙니다",
   "ru": "Полученное не является допустимой копией Flash"
+ },
+ "推荐后点选采用": {
+  "ar": "اختيار الاقتراحات بالنقر",
+  "de": "Vorschläge antippen",
+  "en": "Tap to accept suggestions",
+  "fr": "Choisir les suggestions",
+  "ja": "候補をタップして採用",
+  "ko": "추천을 눌러 적용",
+  "ru": "Выбирать рекомендации"
  },
  "提前 1 天": {
   "ar": "قبل يوم واحد",
@@ -3922,6 +4570,24 @@
   "ja": "リマインダー",
   "ko": "알림",
   "ru": "Напоминание"
+ },
+ "提醒排期失败，请重试": {
+  "ar": "تعذرت جدولة التذكيرات. حاول مجدداً.",
+  "de": "Erinnerungen konnten nicht geplant werden. Erneut versuchen.",
+  "en": "Could not schedule reminders. Try again.",
+  "fr": "Impossible de planifier les rappels. Réessayez.",
+  "ja": "通知を設定できませんでした。もう一度お試しください。",
+  "ko": "알림을 예약하지 못했습니다. 다시 시도하세요.",
+  "ru": "Не удалось запланировать напоминания. Повторите попытку."
+ },
+ "提醒操作未保存，请重试": {
+  "ar": "لم يُحفظ إجراء التذكير. حاول مجدداً.",
+  "de": "Erinnerungsaktion nicht gespeichert. Erneut versuchen.",
+  "en": "Reminder action was not saved. Try again.",
+  "fr": "L’action du rappel n’a pas été enregistrée. Réessayez.",
+  "ja": "通知の操作を保存できませんでした。もう一度お試しください。",
+  "ko": "알림 작업이 저장되지 않았습니다. 다시 시도하세요.",
+  "ru": "Действие не сохранено. Повторите попытку."
  },
  "提醒由 HarmonyOS 系统后台托管；首次启用会请求通知权限。": {
   "ar": "يدير HarmonyOS التذكيرات في الخلفية. سيُطلب إذن الإشعارات في المرة الأولى.",
@@ -4211,6 +4877,15 @@
   "ko": "파일이 너무 커서 올바른 백업이 아닙니다",
   "ru": "Файл слишком велик для допустимой копии"
  },
+ "文字只在本机分析。推荐不会阻塞保存，你可以随时调整标签。": {
+  "ar": "يُحلّل النص على هذا الجهاز. لا تؤخر الاقتراحات الحفظ ويمكن تعديل الوسوم دائمًا.",
+  "de": "Text wird auf diesem Gerät analysiert. Vorschläge verzögern das Speichern nicht; Tags bleiben bearbeitbar.",
+  "en": "Text is analyzed on this device. Suggestions never delay saving, and tags remain editable.",
+  "fr": "Le texte est analysé sur cet appareil. Les suggestions ne retardent pas l’enregistrement et les tags restent modifiables.",
+  "ja": "テキストはこのデバイスで解析します。候補の生成は保存を妨げず、タグはいつでも編集できます。",
+  "ko": "텍스트는 이 기기에서 분석됩니다. 추천은 저장을 지연시키지 않으며 태그는 언제든 수정할 수 있습니다.",
+  "ru": "Текст анализируется на устройстве. Рекомендации не задерживают сохранение, теги можно изменить."
+ },
  "新建": {
   "ar": "جديد",
   "de": "Neu",
@@ -4247,6 +4922,15 @@
   "ko": "새 아이디어",
   "ru": "Новая идея"
  },
+ "新建筛选": {
+  "ar": "فلتر جديد",
+  "de": "Neuer Filter",
+  "en": "New filter",
+  "fr": "Nouveau filtre",
+  "ja": "新しいフィルター",
+  "ko": "새 필터",
+  "ru": "Новый фильтр"
+ },
  "新建记录": {
   "ar": "سجل جديد",
   "de": "Neuer Eintrag",
@@ -4264,6 +4948,15 @@
   "ja": "新規記録 ⌘N",
   "ko": "새 기록 ⌘N",
   "ru": "Новая запись ⌘N"
+ },
+ "新标签": {
+  "ar": "وسم جديد",
+  "de": "Neuer Tag",
+  "en": "New tag",
+  "fr": "Nouvelle étiquette",
+  "ja": "新しいタグ",
+  "ko": "새 태그",
+  "ru": "Новый тег"
  },
  "无": {
   "ar": "لا شيء",
@@ -4670,6 +5363,24 @@
   "ko": "에이전트 런타임",
   "ru": "Среда агентов"
  },
+ "暂停提醒": {
+  "ar": "إيقاف التذكيرات مؤقتاً",
+  "de": "Erinnerungen pausieren",
+  "en": "Pause reminders",
+  "fr": "Suspendre les rappels",
+  "ja": "リマインダーを一時停止",
+  "ko": "알림 일시 중지",
+  "ru": "Приостановить напоминания"
+ },
+ "暂无待提醒的灵感": {
+  "ar": "لا توجد أفكار بانتظار التذكير",
+  "de": "Keine Ideen für Erinnerungen vorhanden",
+  "en": "No ideas awaiting reminders",
+  "fr": "Aucune idée à rappeler",
+  "ja": "通知待ちのアイデアはありません",
+  "ko": "알릴 아이디어가 없어요",
+  "ru": "Нет идей для напоминания"
+ },
  "暂时停用，点击查看替代方式": {
   "ar": "متوقف حاليًا. اضغط لرؤية البدائل",
   "de": "Vorerst aus. Tippen für Alternativen",
@@ -4687,6 +5398,15 @@
   "ja": "現在 Flash に保存できません: 共有ストレージを利用できません",
   "ko": "지금은 Flash에 저장할 수 없습니다: 공유 저장소를 사용할 수 없습니다",
   "ru": "Сейчас нельзя сохранить во Flash: общее хранилище недоступно"
+ },
+ "暂时没有可展示的收藏": {
+  "ar": "لا توجد مفضلة لعرضها بعد",
+  "de": "Noch keine Favoriten verfügbar",
+  "en": "No favorites to show yet",
+  "fr": "Aucun favori à afficher",
+  "ja": "表示できるお気に入りはありません",
+  "ko": "표시할 즐겨찾기가 없어요",
+  "ru": "Пока нет избранного"
  },
  "更多": {
   "ar": "المزيد",
@@ -4733,6 +5453,15 @@
   "ko": "오래된",
   "ru": "Старые"
  },
+ "最早在前": {
+  "ar": "الأقدم أولاً",
+  "de": "Älteste zuerst",
+  "en": "Oldest first",
+  "fr": "Plus anciennes d’abord",
+  "ja": "古い順",
+  "ko": "오래된 순",
+  "ru": "Сначала старые"
+ },
  "最近闪念": {
   "ar": "اللحظات الأخيرة",
   "de": "Letzte Momente",
@@ -4742,6 +5471,24 @@
   "ko": "최근 순간",
   "ru": "Недавние моменты"
  },
+ "有些想法等你回来看看": {
+  "ar": "بعض الأفكار تنتظر عودتك",
+  "de": "Ein paar Ideen warten auf dich",
+  "en": "Some ideas are waiting for you",
+  "fr": "Quelques idées vous attendent",
+  "ja": "見返してみたいアイデアがあります",
+  "ko": "다시 살펴볼 아이디어가 있어요",
+  "ru": "Некоторые идеи ждут вас"
+ },
+ "有些想法等你回来看看，方便时梳理一下吧。": {
+  "ar": "بعض الأفكار بانتظارك. راجعها حين تجد وقتاً مناسباً.",
+  "de": "Ein paar Ideen warten. Schau vorbei, wenn du einen Moment hast.",
+  "en": "Some ideas are waiting. Take a look when you have a moment.",
+  "fr": "Quelques idées vous attendent. Revenez quand vous avez un moment.",
+  "ja": "アイデアが待っています。時間のあるときに見返してみませんか。",
+  "ko": "기다리는 아이디어가 있어요. 편할 때 살펴보세요.",
+  "ru": "Есть идеи, которые ждут вас. Загляните, когда будет минутка."
+ },
  "有重要度": {
   "ar": "ذات أهمية",
   "de": "Mit Wichtigkeit",
@@ -4750,6 +5497,33 @@
   "ja": "重要度あり",
   "ko": "중요도 있음",
   "ru": "С важностью"
+ },
+ "未完成": {
+  "ar": "غير مكتملة",
+  "de": "Offen",
+  "en": "Open",
+  "fr": "À faire",
+  "ja": "未完了",
+  "ko": "미완료",
+  "ru": "Не выполнено"
+ },
+ "未能验证身份，设置未更改": {
+  "ar": "تعذّر التحقق من هويتك. لم يتغير الإعداد.",
+  "de": "Identität nicht bestätigt. Die Einstellung bleibt unverändert.",
+  "en": "Couldn't verify it's you. The setting wasn't changed.",
+  "fr": "Identité non confirmée. Le réglage n'a pas été modifié.",
+  "ja": "本人確認できなかったため、設定は変更されていません。",
+  "ko": "본인 인증에 실패하여 설정을 변경하지 않았습니다.",
+  "ru": "Не удалось подтвердить личность. Настройка не изменена."
+ },
+ "未能验证身份，请重试": {
+  "ar": "تعذّر التحقق من هويتك. حاول مرة أخرى.",
+  "de": "Identität nicht bestätigt. Versuch es erneut.",
+  "en": "Couldn't verify it's you. Try again.",
+  "fr": "Identité non confirmée. Réessayez.",
+  "ja": "本人確認できませんでした。もう一度お試しください。",
+  "ko": "본인 인증에 실패했습니다. 다시 시도하세요.",
+  "ru": "Не удалось подтвердить личность. Повторите попытку."
  },
  "未读": {
   "ar": "غير مقروء",
@@ -5021,6 +5795,15 @@
   "ko": "로컬 데이터베이스를 열 수 없습니다: 내보내기, 가져오기, 전송, 지우기가 일시 중지되었습니다. 기존 데이터는 그대로입니다.",
   "ru": "Локальную базу не открыть: экспорт, импорт, передача и очистка приостановлены. Данные не изменены."
  },
+ "本地智能标签": {
+  "ar": "وسوم على الجهاز",
+  "de": "Lokale intelligente Tags",
+  "en": "On-device tags",
+  "fr": "Tags sur l’appareil",
+  "ja": "デバイス内タグ",
+  "ko": "기기 내 태그",
+  "ru": "Теги на устройстве"
+ },
  "本月": {
   "ar": "هذا الشهر",
   "de": "Diesen Monat",
@@ -5039,6 +5822,15 @@
   "ko": "이번 실행은 임시 저장소를 사용합니다: 새 내용은 종료 후 유지되지 않습니다. 불완전한 데이터로 덮어쓰지 않도록 내보내기와 가져오기를 일시 중지했으며, ",
   "ru": "Этот запуск использует временное хранилище: новое не сохранится после выхода. Чтобы неполные данные ничего не заменили, экспорт и импорт приостановлены, "
  },
+ "本次已梳理": {
+  "ar": "تمت المراجعة لهذه المرة",
+  "de": "Diesmal durchgesehen",
+  "en": "Reviewed this time",
+  "fr": "Revu pour cette fois",
+  "ja": "今回は確認済み",
+  "ko": "이번 검토 완료",
+  "ru": "В этот раз разобрано"
+ },
  "来源：灵感": {
   "ar": "المصدر: فكرة",
   "de": "Quelle: Idee",
@@ -5056,6 +5848,15 @@
   "ja": "アイデアから作成。アイデアは残ります",
   "ko": "아이디어에서 만들었으며 아이디어는 유지됩니다",
   "ru": "Из идеи. Идея сохраняется"
+ },
+ "查看": {
+  "ar": "عرض",
+  "de": "Ansehen",
+  "en": "View",
+  "fr": "Voir",
+  "ja": "表示",
+  "ko": "보기",
+  "ru": "Просмотр"
  },
  "查看每日明细": {
   "ar": "عرض التفاصيل اليومية",
@@ -5129,6 +5930,15 @@
   "ko": "태그, 중요도, 날짜",
   "ru": "Метка, важность, дата"
  },
+ "标签推荐": {
+  "ar": "اقتراحات الوسوم",
+  "de": "Tag-Vorschläge",
+  "en": "Tag suggestions",
+  "fr": "Suggestions de tags",
+  "ja": "タグの候補",
+  "ko": "태그 추천",
+  "ru": "Рекомендации тегов"
+ },
  "标记为完成": {
   "ar": "وضع علامة منجز",
   "de": "Als erledigt markieren",
@@ -5192,6 +6002,15 @@
   "ko": "보관된 이전 버전의 잘못된 데이터가 있습니다. 설정에서 복구 파일을 내보낼 수 있습니다",
   "ru": "Найдены сохранённые неверные данные старой версии. Экспортируйте файл восстановления в настройках"
  },
+ "模型暂不可用，使用本机关键词推荐": {
+  "ar": "النموذج غير متاح؛ تُستخدم اقتراحات الكلمات المحلية",
+  "de": "Modell nicht verfügbar; lokale Stichwortvorschläge werden verwendet",
+  "en": "Model unavailable; using on-device keyword suggestions",
+  "fr": "Modèle indisponible ; suggestions locales par mots-clés",
+  "ja": "モデルを利用できないため、デバイス内のキーワードで提案します",
+  "ko": "모델을 사용할 수 없어 기기 내 키워드로 추천합니다",
+  "ru": "Модель недоступна, используются ключевые слова на устройстве"
+ },
  "次数": {
   "ar": "العدد",
   "de": "Anzahl",
@@ -5227,6 +6046,15 @@
   "ja": "処理中…",
   "ko": "처리 중…",
   "ru": "Обработка…"
+ },
+ "正在找几个合适的标签…": {
+  "ar": "جارٍ البحث عن وسوم مناسبة…",
+  "de": "Passende Tags werden gesucht…",
+  "en": "Finding a few useful tags…",
+  "fr": "Recherche de tags adaptés…",
+  "ja": "合うタグを探しています…",
+  "ko": "알맞은 태그를 찾는 중…",
+  "ru": "Подбираем теги…"
  },
  "正在查找附近的 Flash Aero…": {
   "ar": "جارٍ البحث عن Flash Aero قريبًا…",
@@ -5273,6 +6101,15 @@
   "ko": "본문 및 유형",
   "ru": "Текст и тип"
  },
+ "正文为空，无法保存": {
+  "ar": "أضف نصًا قبل الحفظ.",
+  "de": "Vor dem Speichern Text hinzufügen.",
+  "en": "Add some text before saving.",
+  "fr": "Ajoutez du texte avant d’enregistrer.",
+  "ja": "保存する内容を入力してください。",
+  "ko": "저장할 내용을 입력하세요.",
+  "ru": "Добавьте текст перед сохранением."
+ },
  "此任务由灵感转化而来": {
   "ar": "نشأت هذه المهمة من فكرة",
   "de": "Diese Aufgabe stammt aus einer Idee",
@@ -5290,6 +6127,15 @@
   "ja": "いま",
   "ko": "지금",
   "ru": "Сейчас"
+ },
+ "此操作无法撤销。": {
+  "ar": "لا يمكن التراجع عن هذا الإجراء.",
+  "de": "Dies kann nicht rückgängig gemacht werden.",
+  "en": "This cannot be undone.",
+  "fr": "Cette action est irréversible.",
+  "ja": "この操作は取り消せません。",
+  "ko": "이 작업은 취소할 수 없습니다.",
+  "ru": "Это действие нельзя отменить."
  },
  "此设备不支持任务时区，请更新系统后重试": {
   "ar": "لا يدعم هذا الجهاز المنطقة الزمنية للمهمة. حدّث النظام وحاول مجددًا",
@@ -5327,12 +6173,30 @@
   "ko": "이 기기에서 아직 지원되지 않음",
   "ru": "Пока не поддерживается на этом устройстве"
  },
+ "此设备未设置锁屏密码，无法开启应用锁": {
+  "ar": "عيّن رمز قفل الشاشة على هذا الجهاز لاستخدام قفل التطبيق",
+  "de": "Lege auf diesem Gerät eine Displaysperre fest, um die App-Sperre zu nutzen",
+  "en": "Set a screen lock passcode on this device to use App Lock",
+  "fr": "Définissez un code de verrouillage sur cet appareil pour utiliser le verrouillage de l'app",
+  "ja": "アプリロックを使うには、この端末に画面ロックのパスコードを設定してください",
+  "ko": "앱 잠금을 사용하려면 이 기기에 화면 잠금 암호를 설정하세요",
+  "ru": "Задайте пароль блокировки экрана, чтобы включить блокировку приложения"
+ },
  "每 3 天": {
   "ar": "كل 3 أيام",
   "de": "Alle 3 Tage",
   "en": "Every 3 days",
   "fr": "Tous les 3 jours",
   "ja": "3 日ごと",
+  "ko": "3일마다",
+  "ru": "Каждые 3 дня"
+ },
+ "每3天": {
+  "ar": "كل 3 أيام",
+  "de": "Alle 3 Tage",
+  "en": "Every 3 days",
+  "fr": "Tous les 3 jours",
+  "ja": "3日ごと",
   "ko": "3일마다",
   "ru": "Каждые 3 дня"
  },
@@ -5344,6 +6208,15 @@
   "ja": "毎週",
   "ko": "매주",
   "ru": "Еженедельно"
+ },
+ "每周期最多两次，间隔30分钟；22:00至09:00不提醒。": {
+  "ar": "تنبيهان كحد أقصى لكل دورة بفاصل 30 دقيقة. وقت الهدوء: 22:00–09:00.",
+  "de": "Höchstens zwei Hinweise pro Zyklus im Abstand von 30 Minuten. Ruhezeit: 22–9 Uhr.",
+  "en": "Up to two alerts per cycle, 30 minutes apart. Quiet hours: 22:00–09:00.",
+  "fr": "Deux alertes par cycle au maximum, espacées de 30 minutes. Silence de 22 h à 9 h.",
+  "ja": "各周期に最大2回、30分間隔で通知します。22:00〜09:00は通知しません。",
+  "ko": "주기마다 최대 2회, 30분 간격으로 알립니다. 22:00~09:00에는 알리지 않습니다.",
+  "ru": "До двух уведомлений за цикл с интервалом 30 минут. Тихие часы: 22:00–09:00."
  },
  "每天": {
   "ar": "يوميًا",
@@ -5362,6 +6235,15 @@
   "ja": "日別のログ・アイデア・気分の回数 · タスクは含みません",
   "ko": "일별 일지, 아이디어, 기분 횟수 · 할 일 제외",
   "ru": "Журнал, идеи и настроение по дням · без задач"
+ },
+ "每日三句话": {
+  "ar": "ثلاث جمل يوميًا",
+  "de": "Drei Sätze am Tag",
+  "en": "Three sentences a day",
+  "fr": "Trois phrases par jour",
+  "ja": "毎日3つの文",
+  "ko": "하루 세 문장",
+  "ru": "Три фразы в день"
  },
  "每日情绪均值：{0}": {
   "ar": "متوسط المزاج اليومي: {0}",
@@ -5390,6 +6272,42 @@
   "ko": "일별 기록 횟수 차트, ",
   "ru": "График записей по дням, "
  },
+ "永不清理（不推荐）": {
+  "ar": "عدم الحذف أبدًا (غير موصى به)",
+  "de": "Nie löschen (nicht empfohlen)",
+  "en": "Never delete (not recommended)",
+  "fr": "Ne jamais supprimer (déconseillé)",
+  "ja": "削除しない（非推奨）",
+  "ko": "삭제 안 함(권장하지 않음)",
+  "ru": "Не удалять (не рекомендуется)"
+ },
+ "永久删除": {
+  "ar": "حذف نهائي",
+  "de": "Endgültig löschen",
+  "en": "Delete permanently",
+  "fr": "Supprimer définitivement",
+  "ja": "完全に削除",
+  "ko": "영구 삭제",
+  "ru": "Удалить навсегда"
+ },
+ "永久删除所选": {
+  "ar": "حذف المحدد نهائيًا",
+  "de": "Auswahl endgültig löschen",
+  "en": "Delete selected permanently",
+  "fr": "Supprimer la sélection définitivement",
+  "ja": "選択した項目を完全に削除",
+  "ko": "선택 항목 영구 삭제",
+  "ru": "Удалить выбранное навсегда"
+ },
+ "汇总提醒时间": {
+  "ar": "وقت تذكير المراجعة",
+  "de": "Zeit für die Ideenübersicht",
+  "en": "Roundup reminder time",
+  "fr": "Heure du rappel de bilan",
+  "ja": "まとめの通知時刻",
+  "ko": "모아보기 알림 시간",
+  "ru": "Время общего напоминания"
+ },
  "沙箱共享导出": {
   "ar": "تصدير مشترك من البيئة المعزولة",
   "de": "Sandbox-Export zum Teilen",
@@ -5407,6 +6325,15 @@
   "ja": "一致する記録はありません",
   "ko": "일치하는 기록이 없습니다",
   "ru": "Нет подходящих записей"
+ },
+ "没有口令的人无法读取或改动备份内容。Flash 不保存口令，忘记后无法恢复。": {
+  "ar": "لا يمكن لأحد قراءة النسخة الاحتياطية أو تغييرها دون عبارة المرور. لا يحفظ Flash عبارة المرور، وإذا نسيتها فلا يمكن استعادة النسخة.",
+  "de": "Ohne die Passphrase kann niemand das Backup lesen oder ändern. Flash speichert die Passphrase nicht; wenn du sie vergisst, ist das Backup nicht wiederherstellbar.",
+  "en": "Without the passphrase, no one can read or change the backup. Flash doesn't store the passphrase; if you forget it, the backup can't be recovered.",
+  "fr": "Sans la phrase secrète, personne ne peut lire ni modifier la sauvegarde. Flash ne conserve pas la phrase secrète : si vous l'oubliez, la sauvegarde est irrécupérable.",
+  "ja": "パスフレーズがなければ、誰もバックアップを読んだり変更したりできません。Flash はパスフレーズを保存しないため、忘れると復元できません。",
+  "ko": "암호 문구가 없으면 누구도 백업 내용을 읽거나 바꿀 수 없습니다. Flash는 암호 문구를 저장하지 않으므로 잊어버리면 복구할 수 없습니다.",
+  "ru": "Без парольной фразы никто не сможет прочитать или изменить копию. Flash не хранит парольную фразу: если вы её забудете, восстановить копию будет невозможно."
  },
  "没有可导出的恢复数据": {
   "ar": "لا بيانات استعادة للتصدير",
@@ -5498,6 +6425,15 @@
   "ko": "다크",
   "ru": "Тёмная"
  },
+ "添加": {
+  "ar": "إضافة",
+  "de": "Hinzufügen",
+  "en": "Add",
+  "fr": "Ajouter",
+  "ja": "追加",
+  "ko": "추가",
+  "ru": "Добавить"
+ },
  "添加任务": {
   "ar": "إضافة مهمة",
   "de": "Aufgabe hinzufügen",
@@ -5588,6 +6524,15 @@
   "ko": "모든 로컬 데이터를 지울까요?",
   "ru": "Очистить все локальные данные?"
  },
+ "清空回收站": {
+  "ar": "إفراغ المحذوفات",
+  "de": "Papierkorb leeren",
+  "en": "Empty trash",
+  "fr": "Vider la corbeille",
+  "ja": "ゴミ箱を空にする",
+  "ko": "휴지통 비우기",
+  "ru": "Очистить корзину"
+ },
  "清空失败，请重试": {
   "ar": "تعذر المسح. حاول مجددًا",
   "de": "Löschen fehlgeschlagen. Bitte erneut versuchen",
@@ -5660,6 +6605,15 @@
   "ko": "아이디어",
   "ru": "Идеи"
  },
+ "灵感周期提醒": {
+  "ar": "تذكيرات الأفكار الدورية",
+  "de": "Wiederkehrende Ideen-Erinnerungen",
+  "en": "Recurring idea reminders",
+  "fr": "Rappels d’idées récurrents",
+  "ja": "アイデアの定期リマインダー",
+  "ko": "아이디어 주기 알림",
+  "ru": "Повторные напоминания об идеях"
+ },
  "灵感已保存": {
   "ar": "حُفظت الفكرة",
   "de": "Idee gespeichert",
@@ -5677,6 +6631,24 @@
   "ja": "アイデアのリマインダー",
   "ko": "아이디어 알림",
   "ru": "Напоминания об идеях"
+ },
+ "灵感整理": {
+  "ar": "تنظيم فكرة",
+  "de": "Idee ordnen",
+  "en": "Shape an idea",
+  "fr": "Structurer une idée",
+  "ja": "ひらめきの整理",
+  "ko": "아이디어 정리",
+  "ru": "Разобрать идею"
+ },
+ "灵感汇总提醒": {
+  "ar": "تذكير بمراجعة الأفكار",
+  "de": "Ideenübersicht erinnern",
+  "en": "Idea roundup reminder",
+  "fr": "Rappel de bilan des idées",
+  "ja": "アイデアまとめのリマインダー",
+  "ko": "아이디어 모아보기 알림",
+  "ru": "Общее напоминание об идеях"
  },
  "灵感还没出现，先给它留个位置。": {
   "ar": "لا أفكار بعد. احتفظ لها بمكان.",
@@ -5777,6 +6749,24 @@
   "ko": "화남",
   "ru": "Злость"
  },
+ "用口令加密备份（推荐）": {
+  "ar": "التشفير بعبارة مرور (موصى به)",
+  "de": "Mit Passphrase verschlüsseln (empfohlen)",
+  "en": "Encrypt with a passphrase (recommended)",
+  "fr": "Chiffrer avec une phrase secrète (recommandé)",
+  "ja": "パスフレーズで暗号化(推奨)",
+  "ko": "암호 문구로 백업 암호화(권장)",
+  "ru": "Зашифровать парольной фразой (рекомендуется)"
+ },
+ "由Apple Intelligence在本机推荐标签": {
+  "ar": "يقترح Apple Intelligence الوسوم على الجهاز",
+  "de": "Tags werden lokal von Apple Intelligence vorgeschlagen",
+  "en": "Tags suggested on this device by Apple Intelligence",
+  "fr": "Tags proposés sur cet appareil par Apple Intelligence",
+  "ja": "Apple Intelligenceがデバイス内でタグを提案します",
+  "ko": "Apple Intelligence가 기기에서 태그를 추천합니다",
+  "ru": "Apple Intelligence рекомендует теги на устройстве"
+ },
  "疲惫": {
   "ar": "متعب",
   "de": "Müde",
@@ -5849,6 +6839,15 @@
   "ko": "{0}분 후",
   "ru": "Через {0} мин"
  },
+ "稍后30分钟": {
+  "ar": "بعد 30 دقيقة",
+  "de": "In 30 Minuten",
+  "en": "In 30 minutes",
+  "fr": "Dans 30 minutes",
+  "ja": "30分後",
+  "ko": "30분 후",
+  "ru": "Через 30 минут"
+ },
  "端侧智能体 A2A": {
   "ar": "وكيل على الجهاز A2A",
   "de": "Geräteinterner Agent A2A",
@@ -5893,6 +6892,33 @@
   "ja": "絞り込み",
   "ko": "필터",
   "ru": "Фильтр"
+ },
+ "筛选名称": {
+  "ar": "اسم الفلتر",
+  "de": "Filtername",
+  "en": "Filter name",
+  "fr": "Nom du filtre",
+  "ja": "フィルター名",
+  "ko": "필터 이름",
+  "ru": "Название фильтра"
+ },
+ "筛选条件": {
+  "ar": "شروط الفلتر",
+  "de": "Filterbedingungen",
+  "en": "Filter conditions",
+  "fr": "Critères du filtre",
+  "ja": "絞り込み条件",
+  "ko": "필터 조건",
+  "ru": "Условия фильтра"
+ },
+ "筛选结果": {
+  "ar": "النتائج",
+  "de": "Ergebnisse",
+  "en": "Results",
+  "fr": "Résultats",
+  "ja": "検索結果",
+  "ko": "결과",
+  "ru": "Результаты"
  },
  "筛选（已启用条件）": {
   "ar": "تصفية (مفعّلة)",
@@ -5975,6 +7001,15 @@
   "ko": "시스템 알림 또는 할 일 알림 채널이 꺼져 있습니다",
   "ru": "Системные уведомления или канал напоминаний отключены"
  },
+ "系统通知排期已满，请先处理任务提醒": {
+  "ar": "امتلأت سعة الإشعارات. راجع تذكيرات المهام أولاً.",
+  "de": "Benachrichtigungskapazität erreicht. Aufgaben-Erinnerungen prüfen.",
+  "en": "Notification capacity is full. Review task reminders first.",
+  "fr": "La limite de notifications est atteinte. Vérifiez les rappels de tâches.",
+  "ja": "通知の設定上限に達しました。タスク通知を先に確認してください。",
+  "ko": "알림 예약이 가득 찼습니다. 작업 알림을 먼저 확인하세요.",
+  "ru": "Достигнут лимит уведомлений. Проверьте напоминания о задачах."
+ },
  "紧急": {
   "ar": "عاجل",
   "de": "Dringend",
@@ -6056,6 +7091,33 @@
   "ko": "종료 날짜",
   "ru": "Дата окончания"
  },
+ "结束日期 yyyy-MM-dd": {
+  "ar": "تاريخ الانتهاء yyyy-MM-dd",
+  "de": "Enddatum yyyy-MM-dd",
+  "en": "End date yyyy-MM-dd",
+  "fr": "Date de fin yyyy-MM-dd",
+  "ja": "終了日 yyyy-MM-dd",
+  "ko": "종료일 yyyy-MM-dd",
+  "ru": "Конечная дата yyyy-MM-dd"
+ },
+ "统计加载失败，请重试": {
+  "ar": "تعذر تحميل الإحصاءات. حاول مجددًا.",
+  "de": "Statistiken konnten nicht geladen werden. Erneut versuchen.",
+  "en": "Could not load statistics. Please retry.",
+  "fr": "Impossible de charger les statistiques. Réessayez.",
+  "ja": "統計を読み込めませんでした。再試行してください。",
+  "ko": "통계를 불러오지 못했습니다. 다시 시도하세요.",
+  "ru": "Не удалось загрузить статистику. Повторите попытку."
+ },
+ "继续": {
+  "ar": "متابعة",
+  "de": "Weiter",
+  "en": "Continue",
+  "fr": "Continuer",
+  "ja": "続ける",
+  "ko": "계속",
+  "ru": "Продолжить"
+ },
  "继续编辑": {
   "ar": "متابعة التحرير",
   "de": "Weiter bearbeiten",
@@ -6128,6 +7190,33 @@
   "ko": "{0}부터",
   "ru": "С {0}"
  },
+ "自动应用已有标签": {
+  "ar": "تطبيق الوسوم الموجودة تلقائيًا",
+  "de": "Vorhandene Tags automatisch anwenden",
+  "en": "Apply existing tags automatically",
+  "fr": "Appliquer les tags existants",
+  "ja": "既存タグを自動適用",
+  "ko": "기존 태그 자동 적용",
+  "ru": "Применять имеющиеся теги"
+ },
+ "自动清理": {
+  "ar": "التنظيف التلقائي",
+  "de": "Automatisch leeren",
+  "en": "Automatic cleanup",
+  "fr": "Nettoyage automatique",
+  "ja": "自動削除",
+  "ko": "자동 정리",
+  "ru": "Автоочистка"
+ },
+ "自定义": {
+  "ar": "مخصص",
+  "de": "Benutzerdefiniert",
+  "en": "Custom",
+  "fr": "Personnalisé",
+  "ja": "カスタム",
+  "ko": "사용자 지정",
+  "ru": "Другое значение"
+ },
  "自定义状态，如：期待、平静": {
   "ar": "حالة مخصصة، مثل متفائل أو هادئ",
   "de": "Eigener Zustand, z. B. hoffnungsvoll oder ruhig",
@@ -6136,6 +7225,15 @@
   "ja": "自由入力 (例: 期待、穏やか)",
   "ko": "직접 입력 (예: 기대, 평온)",
   "ru": "Своё состояние, например надежда или спокойствие"
+ },
+ "自由标签": {
+  "ar": "وسوم مخصصة",
+  "de": "Eigene Tags",
+  "en": "Custom tags",
+  "fr": "Étiquettes personnelles",
+  "ja": "カスタムタグ",
+  "ko": "사용자 태그",
+  "ru": "Свои теги"
  },
  "至": {
   "ar": "إلى",
@@ -6199,6 +7297,60 @@
   "ja": "上書きすると既存データがすべて消去されます。続けますか?",
   "ko": "덮어쓰면 기존 데이터가 모두 지워집니다. 계속할까요?",
   "ru": "Замена удалит все текущие данные. Продолжить?"
+ },
+ "覆盖旧版备份将清除本机回收站与本地智能设置": {
+  "ar": "يؤدي الاستبدال بنسخة قديمة إلى مسح المحذوفات وإعدادات الوسوم المحلية.",
+  "de": "Ersetzen mit einer älteren Sicherung leert den lokalen Papierkorb und setzt lokale Tag-Einstellungen zurück.",
+  "en": "Replacing with an older backup clears local trash and on-device tagging settings.",
+  "fr": "Remplacer par une ancienne sauvegarde efface la corbeille locale et les réglages des tags sur l’appareil.",
+  "ja": "古いバックアップで上書きすると、デバイス内のゴミ箱とタグ設定が消去されます。",
+  "ko": "이전 백업으로 덮어쓰면 기기의 휴지통과 태그 설정이 지워집니다.",
+  "ru": "Замена старой резервной копией очистит корзину и настройки тегов на устройстве."
+ },
+ "覆盖旧版备份将清除本机自由标签、保存筛选与灵感提醒配置": {
+  "ar": "الاستبدال بنسخة أقدم يمسح الوسوم والفلاتر وإعدادات تذكير الأفكار المحلية.",
+  "de": "Beim Ersetzen durch eine ältere Sicherung werden eigene Tags, gespeicherte Filter und Ideen-Erinnerungen gelöscht.",
+  "en": "Replacing with an older backup clears local custom tags, saved filters and idea reminder settings.",
+  "fr": "Remplacer par une ancienne sauvegarde efface les étiquettes, filtres et rappels d’idées locaux.",
+  "ja": "旧版のバックアップで上書きすると、カスタムタグ、保存済みフィルター、アイデア通知設定が消去されます。",
+  "ko": "이전 버전 백업으로 덮어쓰면 사용자 태그, 저장된 필터와 아이디어 알림 설정이 지워집니다.",
+  "ru": "Замена старой копией удалит локальные теги, фильтры и настройки напоминаний об идеях."
+ },
+ "解密": {
+  "ar": "فك التشفير",
+  "de": "Entschlüsseln",
+  "en": "Decrypt",
+  "fr": "Déchiffrer",
+  "ja": "復号",
+  "ko": "복호화",
+  "ru": "Расшифровать"
+ },
+ "解锁": {
+  "ar": "فتح القفل",
+  "de": "Entsperren",
+  "en": "Unlock",
+  "fr": "Déverrouiller",
+  "ja": "ロック解除",
+  "ko": "잠금 해제",
+  "ru": "Разблокировать"
+ },
+ "解锁 Flash": {
+  "ar": "فتح قفل Flash",
+  "de": "Flash entsperren",
+  "en": "Unlock Flash",
+  "fr": "Déverrouiller Flash",
+  "ja": "Flash のロックを解除",
+  "ko": "Flash 잠금 해제",
+  "ru": "Разблокировать Flash"
+ },
+ "解锁 Flash 以查看你的记录": {
+  "ar": "افتح قفل Flash لعرض سجلاتك",
+  "de": "Entsperre Flash, um deine Einträge zu sehen",
+  "en": "Unlock Flash to see your records",
+  "fr": "Déverrouillez Flash pour voir vos entrées",
+  "ja": "記録を見るには Flash のロックを解除してください",
+  "ko": "기록을 보려면 Flash 잠금을 해제하세요",
+  "ru": "Разблокируйте Flash, чтобы увидеть записи"
  },
  "让每一次闪念都有落点 · 无云端账号": {
   "ar": "مكان لكل فكرة عابرة · بلا حساب سحابي",
@@ -6281,6 +7433,15 @@
   "ko": "기록을 업데이트했습니다",
   "ru": "Запись обновлена"
  },
+ "记录已过期，无法恢复": {
+  "ar": "انتهت مدة هذه الملاحظة ولا يمكن استعادتها.",
+  "de": "Dieser Eintrag ist abgelaufen und kann nicht wiederhergestellt werden.",
+  "en": "This entry has expired and cannot be restored.",
+  "fr": "Cette entrée a expiré et ne peut plus être restaurée.",
+  "ja": "保存期限が切れたため復元できません。",
+  "ko": "보관 기간이 만료되어 복원할 수 없습니다.",
+  "ru": "Срок хранения истёк, восстановление невозможно."
+ },
  "记录情绪": {
   "ar": "سجّل المزاج",
   "de": "Stimmung erfassen",
@@ -6362,6 +7523,15 @@
   "ko": "기록 유형",
   "ru": "Тип записи"
  },
+ "记录详情": {
+  "ar": "تفاصيل السجل",
+  "de": "Eintragsdetails",
+  "en": "Entry details",
+  "fr": "Détails de l’entrée",
+  "ja": "記録の詳細",
+  "ko": "기록 상세",
+  "ru": "Подробности записи"
+ },
  "记日志": {
   "ar": "يومية جديدة",
   "de": "Tagebuch schreiben",
@@ -6406,6 +7576,15 @@
   "ja": "設定",
   "ko": "설정",
   "ru": "Настройки"
+ },
+ "请确认操作": {
+  "ar": "تأكيد الإجراء",
+  "de": "Aktion bestätigen",
+  "en": "Confirm action",
+  "fr": "Confirmer l’action",
+  "ja": "操作を確認",
+  "ko": "작업 확인",
+  "ru": "Подтвердите действие"
  },
  "请输入任务标题": {
   "ar": "أدخل عنوان المهمة",
@@ -6452,6 +7631,15 @@
   "ko": "올바른 기록 날짜를 입력하세요",
   "ru": "Введите верную дату записи"
  },
+ "读书摘记": {
+  "ar": "ملاحظات القراءة",
+  "de": "Lesenotizen",
+  "en": "Reading notes",
+  "fr": "Notes de lecture",
+  "ja": "読書メモ",
+  "ko": "독서 노트",
+  "ru": "Заметки о чтении"
+ },
  "负面子情绪分布": {
   "ar": "توزيع المشاعر السلبية",
   "de": "Verteilung negativer Gefühle",
@@ -6469,6 +7657,15 @@
   "ja": "ネガティブな気分の内訳",
   "ko": "부정적 기분 구성",
   "ru": "Состав плохого настроения"
+ },
+ "起始日期 yyyy-MM-dd": {
+  "ar": "تاريخ البدء yyyy-MM-dd",
+  "de": "Startdatum yyyy-MM-dd",
+  "en": "Start date yyyy-MM-dd",
+  "fr": "Date de début yyyy-MM-dd",
+  "ja": "開始日 yyyy-MM-dd",
+  "ko": "시작일 yyyy-MM-dd",
+  "ru": "Начальная дата yyyy-MM-dd"
  },
  "超出": {
   "ar": "تجاوز",
@@ -6695,6 +7892,15 @@
   "ko": "이날 계획이나 기록이 없습니다",
   "ru": "В этот день нет планов и записей"
  },
+ "这一天还没有记录": {
+  "ar": "لا توجد سجلات لهذا اليوم",
+  "de": "Keine Einträge an diesem Tag",
+  "en": "No entries for this day",
+  "fr": "Aucune entrée ce jour-là",
+  "ja": "この日の記録はありません",
+  "ko": "이 날짜의 기록이 없어요",
+  "ru": "В этот день записей нет"
+ },
  "这个月": {
   "ar": "هذا الشهر",
   "de": "diesen Monat",
@@ -6712,6 +7918,15 @@
   "ja": "今週",
   "ko": "이번 주",
   "ru": "на этой неделе"
+ },
+ "这是加密备份，请输入导出时设置的口令": {
+  "ar": "هذه نسخة احتياطية مشفّرة. أدخل عبارة المرور التي عيّنتها عند التصدير.",
+  "de": "Dieses Backup ist verschlüsselt. Gib die beim Export festgelegte Passphrase ein.",
+  "en": "This is an encrypted backup. Enter the passphrase set when it was exported.",
+  "fr": "Cette sauvegarde est chiffrée. Saisissez la phrase secrète définie lors de l'export.",
+  "ja": "暗号化されたバックアップです。書き出し時に設定したパスフレーズを入力してください。",
+  "ko": "암호화된 백업입니다. 내보낼 때 설정한 암호 문구를 입력하세요.",
+  "ru": "Это зашифрованная копия. Введите парольную фразу, заданную при экспорте."
  },
  "这条记录已不存在": {
   "ar": "لم يعد هذا السجل موجودًا",
@@ -6740,6 +7955,15 @@
   "ko": "이 기간에 기록이 아직 없습니다. 빈 날짜는 0으로 표시됩니다.",
   "ru": "За этот период нет записей. Пустые дни показаны как 0."
  },
+ "这里暂时没有已删除的内容": {
+  "ar": "لا توجد عناصر محذوفة",
+  "de": "Keine gelöschten Einträge",
+  "en": "No recently deleted items",
+  "fr": "Aucun élément supprimé",
+  "ja": "削除した項目はありません",
+  "ko": "삭제된 항목이 없습니다",
+  "ru": "Нет удалённых записей"
+ },
  "选择": {
   "ar": "تحديد",
   "de": "Auswählen",
@@ -6766,6 +7990,15 @@
   "ja": "通知",
   "ko": "알림",
   "ru": "Уведомления"
+ },
+ "通知权限未开启，请在系统设置中允许通知": {
+  "ar": "اسمح بالإشعارات في إعدادات النظام.",
+  "de": "Benachrichtigungen in den Systemeinstellungen erlauben.",
+  "en": "Allow notifications in system settings.",
+  "fr": "Autorisez les notifications dans les réglages système.",
+  "ja": "システム設定で通知を許可してください。",
+  "ko": "시스템 설정에서 알림을 허용하세요.",
+  "ru": "Разрешите уведомления в настройках системы."
  },
  "通知设置": {
   "ar": "إعدادات الإشعارات",
@@ -6829,6 +8062,15 @@
   "ja": "ペアリングして受信",
   "ko": "페어링 후 받기",
   "ru": "Сопрячь и получить"
+ },
+ "重命名": {
+  "ar": "إعادة التسمية",
+  "de": "Umbenennen",
+  "en": "Rename",
+  "fr": "Renommer",
+  "ja": "名前を変更",
+  "ko": "이름 변경",
+  "ru": "Переименовать"
  },
  "重要度": {
   "ar": "الأهمية",
@@ -6938,6 +8180,15 @@
   "ko": "불편함",
   "ru": "Плохо"
  },
+ "需要更新 Flash 才能打开此加密备份": {
+  "ar": "حدّث Flash لفتح هذه النسخة الاحتياطية المشفّرة.",
+  "de": "Aktualisiere Flash, um dieses verschlüsselte Backup zu öffnen.",
+  "en": "Update Flash to open this encrypted backup.",
+  "fr": "Mettez Flash à jour pour ouvrir cette sauvegarde chiffrée.",
+  "ja": "この暗号化バックアップを開くには Flash をアップデートしてください。",
+  "ko": "이 암호화된 백업을 열려면 Flash를 업데이트하세요.",
+  "ru": "Обновите Flash, чтобы открыть эту зашифрованную копию."
+ },
  "非常不开心": {
   "ar": "مستاء جدًا",
   "de": "Sehr aufgebracht",
@@ -6983,6 +8234,24 @@
   "ko": "미리 보기 후 로컬 데이터가 바뀌어 차이를 다시 계산했습니다. 확인 후 덮어쓰세요",
   "ru": "Локальные данные изменились после предпросмотра. Различия пересчитаны. Подтвердите перед заменой"
  },
+ "验证身份以关闭应用锁": {
+  "ar": "تحقق من هويتك لإيقاف قفل التطبيق",
+  "de": "Bestätige deine Identität, um die App-Sperre auszuschalten",
+  "en": "Verify it's you to turn off App Lock",
+  "fr": "Confirmez votre identité pour désactiver le verrouillage de l'app",
+  "ja": "アプリロックをオフにするには本人確認をしてください",
+  "ko": "앱 잠금을 끄려면 본인 인증을 하세요",
+  "ru": "Подтвердите личность, чтобы выключить блокировку приложения"
+ },
+ "验证身份以开启应用锁": {
+  "ar": "تحقق من هويتك لتفعيل قفل التطبيق",
+  "de": "Bestätige deine Identität, um die App-Sperre einzuschalten",
+  "en": "Verify it's you to turn on App Lock",
+  "fr": "Confirmez votre identité pour activer le verrouillage de l'app",
+  "ja": "アプリロックをオンにするには本人確認をしてください",
+  "ko": "앱 잠금을 켜려면 본인 인증을 하세요",
+  "ru": "Подтвердите личность, чтобы включить блокировку приложения"
+ },
  "鸿蒙体验": {
   "ar": "ميزات HarmonyOS",
   "de": "HarmonyOS-Funktionen",
@@ -6991,6 +8260,15 @@
   "ja": "HarmonyOS の機能",
   "ko": "HarmonyOS 기능",
   "ru": "Возможности HarmonyOS"
+ },
+ "默认保留30天，过期后将永久删除。恢复会保留正文、日期、收藏和标签。": {
+  "ar": "تُحفظ 30 يومًا افتراضيًا ثم تُحذف نهائيًا. تحتفظ الاستعادة بالنص والتواريخ والمفضلة والوسوم.",
+  "de": "Standardmäßig 30 Tage aufbewahrt, danach endgültig gelöscht. Wiederherstellen bewahrt Text, Datum, Favoriten und Tags.",
+  "en": "Kept for 30 days by default, then permanently deleted. Restoring preserves text, dates, favorites and tags.",
+  "fr": "Conservé 30 jours par défaut, puis supprimé définitivement. La restauration conserve texte, dates, favoris et tags.",
+  "ja": "初期設定では30日間保存後、完全に削除します。復元すると本文、日付、お気に入り、タグを保持します。",
+  "ko": "기본 30일 보관 후 영구 삭제됩니다. 복원 시 본문, 날짜, 즐겨찾기와 태그가 유지됩니다.",
+  "ru": "По умолчанию хранится 30 дней, затем удаляется навсегда. При восстановлении сохраняются текст, даты, избранное и теги."
  },
  "（无标题）": {
   "ar": "(بلا عنوان)",

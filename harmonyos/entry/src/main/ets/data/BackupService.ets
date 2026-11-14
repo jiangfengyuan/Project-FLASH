@@ -14,6 +14,7 @@ import {
 import { CANONICAL_TIME_ZONES, runtimeTimeZone } from './CanonicalTimeZones';
 import { util } from '@kit.ArkTS';
 import { isoNow } from './DateUtils';
+import { ENVELOPE_VERSION_PREFIX, EnvelopeError, EnvelopeErrorKind } from './BackupEnvelope';
 
 export class BackupImport {
   logs: LogItem[] = [];
@@ -262,7 +263,16 @@ export class BackupService {
     return document;
   }
 
+  /** 供加密信封复用：与备份同一套重复键 / 深度 / 值数量扫描 */
+  static scanStrictJSON(json: string): void {
+    StrictJSONScanner.validate(json);
+  }
+
   private static parseDocument(document: BackupDocument): BackupImport {
+    // 加密信封（任何 flash-backup-enc-* 版本）不是 v2 文档：交给 BackupEncryption 识别
+    if (typeof document.version === 'string' && document.version.startsWith(ENVELOPE_VERSION_PREFIX)) {
+      throw new EnvelopeError(EnvelopeErrorKind.PASSPHRASE_REQUIRED, tr('这是加密备份，请输入导出时设置的口令'));
+    }
     if (document.version !== BackupService.VERSION && document.version !== BackupService.LEGACY_VERSION) {
       throw new Error(tr('备份版本不兼容'));
     }

@@ -22,6 +22,8 @@ import { EditLogDialog } from '../components/EditLogDialog';
 import { TaskEditorDialog } from '../components/TaskEditorDialog';
 import { DestructiveConfirmDialog } from '../components/DestructiveConfirmDialog';
 import { WelcomeOverlay } from '../components/WelcomeOverlay';
+import { dangerText, TOUCH_MIN, TYPE_BODY } from '../components/DesignTokens';
+import { appLockRuntime } from '../state/AppLockRuntime';
 import {
   DISPLAY_FONT_NAME, FabButton, FlashDockBar, QuickCaptureBar, DetailHeader, LoadingState, ErrorState, brandText, brandFill, onBrandFill, parchmentColor, dockShadowColor,
   toastSurface, toastLevelColor, motionDuration, ELEVATED_SHADOW_RADIUS, ELEVATED_SHADOW_Y,
@@ -70,6 +72,10 @@ struct Index {
   @State private feedback: FeedbackState = this.controller.session.feedback;
   @State @Watch('onSystemEnvironmentChange') private systemEnv: SystemEnvironment = systemEnvironment;
   @StorageLink('flashPendingEntry') @Watch('onPendingEntry') private pendingEntry: AppEntry | undefined = undefined;
+  // 应用锁（AppLockRuntime 镜像到 AppStorage）：锁定时盖住页面与编辑类浮层，快速记录仍在最上层可写
+  @StorageLink('flashAppLocked') private appLocked: boolean = false;
+  @StorageLink('flashAppLockFailed') private appLockFailed: boolean = false;
+  @StorageLink('flashAppLockBusy') private appLockBusy: boolean = false;
   private actions: PageActions = new PageActions(this.controller,
     (index: number) => this.switchTab(index), (destination: string) => this.openDetail(destination),
     (mode: string) => this.setThemeMode(mode));
@@ -138,7 +144,21 @@ struct Index {
   // Detail pages live inside this component instead of the system navigation
   // stack, so the system back gesture must be routed manually: back closes
   // the detail page first, and only exits the app from the home page.
+  // 回到前台 / 冷启动页面可见：每次上锁自动弹一次系统认证（取消后只能手动点「解锁」）
+  onPageShow(): void {
+    appLockRuntime.autoPromptIfNeeded();
+  }
+
   onBackPress(): boolean {
+    // 锁定时返回不能关掉下面的页面：先关快速记录，否则交给系统（退到后台）
+    if (this.appLocked) {
+      if (this.logs.quickCategory !== '') {
+        this.logs.quickShared = false;
+        this.logs.quickCategory = '';
+        return true;
+      }
+      return false;
+    }
     if (this.logs.editingLogId !== '') {
       this.actions?.logsController.requestCloseEdit();
       return true;
@@ -328,7 +348,7 @@ struct Index {
   @Builder
   private navigationRail() {
     Column({ space: 10 }) {
-      Image($r('app.media.icon')).width(40).height(40).borderRadius(10).margin({ top: 24, bottom: 18 })
+      Image($r('app.media.flash_standard_icon')).width(40).height(40).borderRadius(10).margin({ top: 24, bottom: 18 })
       this.railButton(0, $r('sys.symbol.house'), $r('sys.symbol.house_fill'), tr('此刻'))
       this.railButton(1, $r('sys.symbol.doc_text'), $r('sys.symbol.doc_text_fill'), tr('记录'), this.ideaBadge())
       this.railButton(2, $r('sys.symbol.face_smiling'), $r('sys.symbol.face_smiling'), tr('情绪'))
@@ -385,6 +405,43 @@ struct Index {
     if (level === 'success') return $r('sys.symbol.checkmark_circle');
     if (level === 'error') return $r('sys.symbol.exclamationmark_circle');
     return $r('sys.symbol.info_circle');
+  }
+
+  // 应用锁遮挡页：只有品牌与解锁入口，不显示任何记录内容
+  @Builder
+  private appLockOverlay() {
+    Column({ space: 8 }) {
+      SymbolGlyph($r('sys.symbol.lock')).fontSize(36).fontColor([this.theme.themeMuted]).accessibilityLevel('no')
+      Text('✦ Flash').fontSize(28).fontWeight(FontWeight.Medium).fontFamily(DISPLAY_FONT_NAME).fontColor(this.theme.themeText)
+        .margin({ top: 8 })
+      Text(tr('Flash 已锁定')).fontSize(TYPE_BODY).fontColor(this.theme.themeMuted).textAlign(TextAlign.Center)
+      if (this.appLockFailed) {
+        Text(tr('未能验证身份，请重试')).fontSize(TYPE_CAPTION).fontColor(dangerText(this.theme)).textAlign(TextAlign.Center)
+      }
+      Button(tr('解锁'))
+        .height(TOUCH_MIN)
+        .constraintSize({ minWidth: 160 })
+        .fontColor(onBrandFill(this.theme))
+        .backgroundColor(brandFill(this.theme))
+        .enabled(!this.appLockBusy)
+        .margin({ top: 16 })
+        .onClick(() => appLockRuntime.requestUnlock())
+      // 锁定时也能只写不读：快速记录面板开在锁定层之上
+      Button(tr('快速记录'))
+        .height(TOUCH_MIN)
+        .fontSize(TYPE_SECONDARY)
+        .fontColor(brandText(this.theme))
+        .backgroundColor(Color.Transparent)
+        .onClick(() => this.logs.quickCategory = Category.IDEA)
+    }
+    .width('100%')
+    .height('100%')
+    .padding(24)
+    .justifyContent(FlexAlign.Center)
+    .backgroundColor(this.theme.themeBackground)
+    .backgroundImage(this.theme.isDark() ? $r('app.media.paper_grain_dark') : $r('app.media.paper_grain_light'), ImageRepeat.XY)
+    .backgroundImageSize({ width: 128, height: 128 })
+    .hitTestBehavior(HitTestMode.Block)
   }
 
   build() {
@@ -463,7 +520,7 @@ struct Index {
         .alignItems(HorizontalAlign.End)
         .padding({ right: 24, bottom: 22 + this.navigation.navigationBarHeight })
       }
-      if (this.logs.quickCategory !== '') {
+      if (!this.appLocked && this.logs.quickCategory !== '') {
         QuickInputDialog({ navigation: this.navigation, theme: this.theme, logs: this.logs, actions: this.actions })
           .transition(overlayTransition())
       }
@@ -483,6 +540,14 @@ struct Index {
       if (this.settings.showWelcome) {
         WelcomeOverlay({ theme: this.theme, actions: this.actions })
           .transition(overlayTransition())
+      }
+
+      if (this.appLocked) {
+        this.appLockOverlay()
+        if (this.logs.quickCategory !== '') {
+          QuickInputDialog({ navigation: this.navigation, theme: this.theme, logs: this.logs, actions: this.actions })
+            .transition(overlayTransition())
+        }
       }
     }
     .width('100%')

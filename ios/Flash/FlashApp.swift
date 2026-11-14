@@ -20,7 +20,10 @@ struct FlashApp: App {
     /// 灵感提醒：未读灵感、角标与本地通知
     @State private var ideaReminders = IdeaReminderCenter()
     /// 日志 / 灵感 → 系统搜索；跟随仓储变更与「系统搜索」设置
+    @State private var tagAutomation: TagAutomationCoordinator
     private let spotlight: SpotlightIndexer
+    /// 应用锁（默认关闭）：冷启动与离开超过宽限期后由 RootView 弹出锁定窗口
+    @State private var appLock: AppLockController
 
     init() {
         // 过期分享副本清理是纯沙箱文件 IO，移出启动同步路径后台执行（同 macOS）
@@ -32,8 +35,13 @@ struct FlashApp: App {
         let appState = AppState()
         appState.checkDatabaseFallback(didFallbackToMemory: assembly.didFallbackToMemory)
         _appState = State(initialValue: appState)
+        let automation = TagAutomationCoordinator(repository: assembly.repository)
+        _tagAutomation = State(initialValue: automation)
+        assembly.repository.onTextChange = { key,text in automation.enqueue(key,text:text) }
         let settings = SettingsStore()
         _settings = StateObject(wrappedValue: settings)
+        _appLock = State(initialValue: AppLockController(isEnabled: { settings.appLockEnabled },
+                                                         policy: .mobile))
         let spotlight = SpotlightIndexer(index: CoreSpotlightIndex(), repository: assembly.repository,
                                          isEnabled: { settings.spotlightIndexingEnabled })
         self.spotlight = spotlight
@@ -45,7 +53,7 @@ struct FlashApp: App {
         // 通知点按（灵感提醒等）走深链；前台也展示横幅
         UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
         // 任务提醒通知上的「完成 / 稍后 10 分钟」
-        TaskReminderScheduler.registerCategories()
+        PeriodicIdeaNotifications.register()
         // 纸上书写：导航栏标题字体与颜色
         CraftedAppearance.apply()
     }
@@ -54,10 +62,12 @@ struct FlashApp: App {
         WindowGroup {
             RootView()
                 .environment(appState)
+                .environment(tagAutomation)
                 .environment(ideaReminders)
                 .environment(\.flashRepository, assembly.repository)
                 .environmentObject(settings)
-                .preferredColorScheme(settings.themeMode.colorScheme)
+                .environment(appLock)
+                .modifier(ThemeTransitionModifier(mode:settings.themeMode))
                 .tint(BrandColors.brandPrimary)
                 // 深链：flash://capture、flash://today、flash://ideas（小组件 / 通知 / 控制中心）
                 .onOpenURL { appState.handle(url: $0) }

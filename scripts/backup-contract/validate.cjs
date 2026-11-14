@@ -94,6 +94,8 @@ ajv.addFormat('date-time', validInstant);
 const validateStructure = ajv.compile(schema);
 
 function validateDocument(document) {
+  if (document?.version === "flash-backup-v4") return require("./library-v4.cjs")(document, ajv, validateDocument);
+  if (document?.version === "flash-backup-v3") return require("./library-v3.cjs")(document, ajv, validateDocument);
   if (!validateStructure(document)) return { valid: false, errors: validateStructure.errors.map(e => ({
     path: e.instancePath || '/', code: 'SCHEMA', message: e.message
   })) };
@@ -159,4 +161,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { validateDocument, validateBytes, validDay, validInstant, MAX_BYTES };
+module.exports = { validateDocument, validateBytes, validDay, validInstant, MAX_BYTES, rejectDuplicateKeys };

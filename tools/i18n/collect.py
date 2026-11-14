@@ -83,16 +83,25 @@ def scan(root, ext, lit):
 
 
 def resource_keys():
-    keys = set()
+    # generate.py 会把 strings.xml / base string.json 改写成英文，所以手写资源的中文原文
+    # 从它们的源头取：Android 是 generate.HAND_ANDROID，HarmonyOS 是 harmony-hand-strings.json
+    from generate import HAND_ANDROID
+
+    keys = {value for value in HAND_ANDROID.values() if CJK.search(value)}
     for path in (
         "android/app/src/main/res/values/strings.xml",
     ):
         for m in re.finditer(r"<string name=\"[^\"]+\">([^<]*)</string>", open(os.path.join(ROOT, path), encoding="utf-8").read()):
             if CJK.search(m.group(1)):
                 keys.add(m.group(1))
-    path = os.path.join(ROOT, "harmonyos/entry/src/main/resources/base/element/string.json")
-    for entry in json.load(open(path, encoding="utf-8"))["string"]:
-        if not entry["name"].startswith("s_") and CJK.search(entry["value"]):
+    hand = os.path.join(ROOT, "docs/i18n/harmony-hand-strings.json")
+    if os.path.exists(hand):
+        entries = json.load(open(hand, encoding="utf-8"))
+    else:
+        path = os.path.join(ROOT, "harmonyos/entry/src/main/resources/base/element/string.json")
+        entries = [e for e in json.load(open(path, encoding="utf-8"))["string"] if not e["name"].startswith("s_")]
+    for entry in entries:
+        if CJK.search(entry["value"]):
             keys.add(entry["value"])
     return keys
 

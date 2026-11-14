@@ -12,6 +12,7 @@
     <string name="s_aafdda63" formatted="false">/data/{0}/{1}: запись должна быть объектом</string>
     <string name="s_10db0315" formatted="false">/data/{0}: массив превышает лимит</string>
     <string name="s_b7cc858a" formatted="false">/data: неверные или повторяющиеся записи. Посмотрите в восстановлении, что можно вернуть</string>
+    <string name="s_8cc3cbe4" formatted="false">/version: зашифрованная копия не может содержать другую зашифрованную копию</string>
     <string name="s_90ef682e" formatted="false">/version: для старых файлов используйте восстановление</string>
     <string name="s_b9ce0fb9" formatted="false">/: слишком много значений JSON</string>
     <string name="s_307d96fc" formatted="false">/: повторяющийся ключ в объекте JSON: {0}</string>
@@ -23,6 +24,7 @@
     <string name="s_355b83a3" formatted="false">Неделя, которую стоит запомнить. ✦</string>
     <string name="s_a1486dba" formatted="false">Резервная копия Flash Aero</string>
     <string name="s_eeecd281" formatted="false">Напоминание о задаче Flash</string>
+    <string name="s_2534b43c" formatted="false">Flash заблокирован</string>
     <string name="s_f6ff76b6" formatted="false">Быстрая запись Flash</string>
     <string name="s_9a2b6832" formatted="false">Flash Сейчас</string>
     <string name="s_2a0b1ddf" formatted="false">Идея Flash</string>
@@ -78,10 +80,12 @@
     <string name="s_6bcf17c2" formatted="false">Следующий месяц</string>
     <string name="s_10c83c81" formatted="false">Далее</string>
     <string name="s_82b6cabb" formatted="false">Добрый день 🌤</string>
+    <string name="s_e08c4ba9" formatted="false">Незашифрованная копия — это открытый JSON: любой, у кого есть файл, прочитает все записи, эмоции и задачи. Сохраняйте и отправляйте её только на доверенные устройства или контактам.</string>
     <string name="s_1344f491" formatted="false">Грустно</string>
     <string name="s_4cc036be" formatted="false">Без напоминания</string>
     <string name="s_12e8587a" formatted="false">Неподдерживаемая версия раздела {0}</string>
     <string name="s_ba358518" formatted="false">Любые</string>
+    <string name="s_9ae60760" formatted="false">Парольные фразы не совпадают.</string>
     <string name="s_b13672cd" formatted="false">Нейтрально</string>
     <string name="s_51f6517e" formatted="false">Тема</string>
     <string name="s_0a416847" formatted="false">за предыдущие 30 дней</string>
@@ -121,6 +125,7 @@
     <string name="s_801be77b" formatted="false">Содержание</string>
     <string name="s_dc24135d" formatted="false">Содержание не может быть пустым</string>
     <string name="s_043cda7f" formatted="false">Слишком длинно ({0} символов, максимум {1}). Сократите перед сохранением</string>
+    <string name="s_d15889f8" formatted="false">Повторите парольную фразу</string>
     <string name="s_87000edc" formatted="false">Записывайте ещё, будущий вы это увидите.</string>
     <string name="s_95a71bc9" formatted="false">Подготовка…</string>
     <string name="s_9aa7d416" formatted="false">Поделиться</string>
@@ -135,10 +140,17 @@
     <string name="s_e6dedfa0" formatted="false">Удалить эту запись настроения?</string>
     <string name="s_98f7e648" formatted="false">Удалить эту запись журнала?</string>
     <string name="s_c51f5912" formatted="false">В срок</string>
+    <string name="s_d26ab92b" formatted="false">Зашифрованная копия</string>
+    <string name="s_e78a9d95" formatted="false">Файл зашифрованной копии повреждён или имеет неверный формат.</string>
     <string name="s_c628e28d" formatted="false">Содержит журнал: {0}, настроение: {1}, задачи: {2}</string>
     <string name="s_60b4c5ae" formatted="false">Опасная зона</string>
     <string name="s_949856b3" formatted="false">Отмена</string>
     <string name="s_d1d62fb0" formatted="false">Убрать из избранного</string>
+    <string name="s_53c7e602" formatted="false">Парольная фраза</string>
+    <string name="s_f7e8d7e8" formatted="false">Парольная фраза не может быть длиннее 1024 символов.</string>
+    <string name="s_ad879bae" formatted="false">Парольная фраза должна содержать не менее 8 символов.</string>
+    <string name="s_4db1b243" formatted="false">Неверная парольная фраза или файл повреждён.</string>
+    <string name="s_ef638194" formatted="false">Парольная фраза (не менее 8 символов)</string>
     <string name="s_4d55cb75" formatted="false">Экспортируйте копию или отправьте через «Поделиться»</string>
     <string name="s_5e53c03a" formatted="false">Чт</string>
     <string name="s_40163b46" formatted="false">Вернуться к сегодня</string>
@@ -156,6 +168,7 @@
     <string name="s_d82fe22c" formatted="false">Заметка слишком длинная. Сократите перед сохранением</string>
     <string name="s_d9dac7dd" formatted="false">Заметки (необязательно)</string>
     <string name="s_e4a4815a" formatted="false">Оформление и использование</string>
+    <string name="s_f849ada8" formatted="false">ОК</string>
     <string name="s_1e13bd21" formatted="false">Готово</string>
     <string name="s_dd03e6ad" formatted="false">Предпросмотр отличий от локальных данных перед импортом</string>
     <string name="s_9b60ff74" formatted="false">Импорт не удался: {0}</string>
@@ -163,6 +176,8 @@
     <string name="s_7fdaf616" formatted="false">Экспорт, импорт и очистка</string>
     <string name="s_f97fded3" formatted="false">Экспорт копии</string>
     <string name="s_7436fb8d" formatted="false">Экспорт не удался: {0}</string>
+    <string name="s_0bd03067" formatted="false">Экспорт прерван. Повторите экспорт.</string>
+    <string name="s_1a26bd57" formatted="false">При экспорте можно зашифровать копию парольной фразой (рекомендуется). Незашифрованная копия — открытый JSON с записями, эмоциями и задачами; храните и отправляйте её только в надёжные места</string>
     <string name="s_b1632a8b" formatted="false">Все записи журнала, настроение и задачи будут удалены без возможности восстановления. Сначала экспортируйте копию.</string>
     <string name="s_479481d2" formatted="false">Передача по локальной сети пока отключена</string>
     <string name="s_f8eef707" formatted="false">Передача по локальной сети отключена из-за рисков старого протокола. Отправьте файл JSON через экспорт или «Поделиться» по надёжному каналу.</string>
@@ -179,6 +194,8 @@
     <string name="s_c13b3522" formatted="false">Все данные удалены, но системные напоминания убрать не удалось. Перезапустите приложение и повторите</string>
     <string name="s_c8fa62c1" formatted="false">Выбрано: {0}</string>
     <string name="s_01133500" formatted="false">Среднее настроение {0} · Всего {1}</string>
+    <string name="s_ee490e90" formatted="false">Блокировка приложения</string>
+    <string name="s_fb13a35f" formatted="false">Когда блокировка включена, при запуске Flash или возвращении после отсутствия дольше 1 минуты его нужно разблокировать биометрией или паролем устройства. Виджеты, быстрая запись и действия в уведомлениях работают как прежде.</string>
     <string name="s_22696cbc" formatted="false">Начало</string>
     <string name="s_499be303" formatted="false">Начать</string>
     <string name="s_5d62764c" formatted="false">Дата начала</string>
@@ -257,6 +274,8 @@
     <string name="s_87b8867d" formatted="false">Новые</string>
     <string name="s_ceb8f642" formatted="false">Старые</string>
     <string name="s_56b38d0f" formatted="false">Недавние моменты</string>
+    <string name="s_4f2beab6" formatted="false">Не удалось подтвердить личность. Настройка не изменена.</string>
+    <string name="s_5665b744" formatted="false">Не удалось подтвердить личность. Повторите попытку.</string>
     <string name="s_be2c2eb2" formatted="false">Не прочитано</string>
     <string name="s_27c37899" formatted="false">Эта неделя</string>
     <string name="s_ccb42197" formatted="false">На этой неделе: записей {0} · разобрать {1}</string>
@@ -277,11 +296,13 @@
     <string name="s_aef45eb7" formatted="false">Загрузка…</string>
     <string name="s_6af40858" formatted="false">Сейчас</string>
     <string name="s_b060afd3" formatted="false">Это устройство не поддерживает часовой пояс задачи из копии. Обновите систему и повторите. Ничего не импортировано</string>
+    <string name="s_2f15ac82" formatted="false">Задайте пароль блокировки экрана, чтобы включить блокировку приложения</string>
     <string name="s_f4958768" formatted="false">Каждые 3 дня</string>
     <string name="s_41be2fe2" formatted="false">Еженедельно</string>
     <string name="s_02c285b5" formatted="false">Ежедневно</string>
     <string name="s_18fa51bd" formatted="false">Журнал, идеи и настроение по дням · без задач</string>
     <string name="s_6d03477d" formatted="false">Среднее за день: {0}</string>
+    <string name="s_3aa61c82" formatted="false">Без парольной фразы никто не сможет прочитать или изменить копию. Flash не хранит парольную фразу: если вы её забудете, восстановить копию будет невозможно.</string>
     <string name="s_5816c303" formatted="false">Нет приложения, чтобы поделиться</string>
     <string name="s_43c975df" formatted="false">Записи не найдены</string>
     <string name="s_f8bc527e" formatted="false">Нет подходящих записей журнала</string>
@@ -299,6 +320,7 @@
     <string name="s_436e2c82" formatted="false">О чём вы думаете?</string>
     <string name="s_78fe07cc" formatted="false">Не удалось создать файл передачи: {0}</string>
     <string name="s_f60bb44e" formatted="false">Злость</string>
+    <string name="s_8ce87829" formatted="false">Зашифровать парольной фразой (рекомендуется)</string>
     <string name="s_621a8231" formatted="false">ОК</string>
     <string name="s_869f8d0c" formatted="false">Очистить всё</string>
     <string name="s_5716f5ef" formatted="false">Через {0} мин</string>
@@ -311,6 +333,7 @@
     <string name="s_78a510f0" formatted="false">Обзор · за всё время</string>
     <string name="s_1da8a247" formatted="false">Конец</string>
     <string name="s_476d405b" formatted="false">Дата окончания</string>
+    <string name="s_70f57871" formatted="false">Продолжить</string>
     <string name="s_010e135c" formatted="false">Продолжить</string>
     <string name="s_e60fd56d" formatted="false">Продолжайте записывать, и итоги станут яснее</string>
     <string name="s_607348a8" formatted="false">Изменить</string>
@@ -320,6 +343,10 @@
     <string name="s_72ecf883" formatted="false">С {0}</string>
     <string name="s_85b25df8" formatted="false">По {0}</string>
     <string name="s_a6317c7d" formatted="false">Заменить</string>
+    <string name="s_64bca37c" formatted="false">Расшифровать</string>
+    <string name="s_227fd229" formatted="false">Разблокировать</string>
+    <string name="s_8b2f5c73" formatted="false">Разблокировать Flash</string>
+    <string name="s_f86c7b1b" formatted="false">Разблокируйте Flash, чтобы увидеть записи</string>
     <string name="s_5521c6a5" formatted="false">Место для каждой мысли · без облачного аккаунта</string>
     <string name="s_dad3d89f" formatted="false">Запишите первую мысль</string>
     <string name="s_6dfa9df7" formatted="false">Сохранить во Flash</string>
@@ -354,6 +381,7 @@
     <string name="s_fa547131" formatted="false">В этот день нет планов и записей</string>
     <string name="s_6d67abd6" formatted="false">в этом месяце</string>
     <string name="s_09e1a534" formatted="false">на этой неделе</string>
+    <string name="s_f8f100e1" formatted="false">Это зашифрованная копия. Введите парольную фразу, заданную при экспорте.</string>
     <string name="s_d3ce76c1" formatted="false">Этой записи больше нет</string>
     <string name="s_1a959a39" formatted="false">За этот период нет записей. Пустые дни показаны как 0.</string>
     <string name="s_5fe370b7" formatted="false">Выбрать</string>
@@ -363,10 +391,14 @@
     <string name="s_4de22934" formatted="false">Важность</string>
     <string name="s_490a6afa" formatted="false">Поймайте момент. Сделайте первую запись</string>
     <string name="s_aef2df88" formatted="false">Записывайте на ходу</string>
+    <string name="s_4552930a" formatted="false">Конфиденциальность</string>
     <string name="s_80390cc2" formatted="false">Плохо</string>
+    <string name="s_1f381169" formatted="false">Обновите Flash, чтобы открыть эту зашифрованную копию.</string>
     <string name="s_99546fff" formatted="false">Очень плохо</string>
     <string name="s_22566806" formatted="false">Очень счастливо</string>
     <string name="s_9a63360d" formatted="false">Локальные данные изменились после предпросмотра. Различия пересчитаны. Подтвердите перед заменой</string>
+    <string name="s_1203f0e4" formatted="false">Подтвердите личность, чтобы выключить блокировку приложения</string>
+    <string name="s_d02b1cf3" formatted="false">Подтвердите личность, чтобы включить блокировку приложения</string>
     <string name="s_a14edc19" formatted="false">(Без названия)</string>
     <string name="s_12cea83b" formatted="false">(пропущено неверных: {0})</string>
     <string name="s_be6a75ae" formatted="false">, сегодня</string>

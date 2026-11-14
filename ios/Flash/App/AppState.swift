@@ -41,12 +41,17 @@ enum AppRoute: Hashable {
     case logFlow
     case calendar
     case memory
+    case history, savedFilters, tags, periodicReminders
 
     var title: String {
         switch self {
         case .logFlow: L("日志流")
         case .calendar: L("日历")
         case .memory: L("Memory")
+        case .history: L("历史回忆")
+        case .savedFilters: L("已保存筛选")
+        case .tags: L("自由标签")
+        case .periodicReminders: L("灵感周期提醒")
         }
     }
 }
@@ -69,6 +74,7 @@ final class AppState {
     var statsPath: [AppRoute] = []
 
     /// 全局搜索弹层（各 Tab 根页工具栏的放大镜唤起）
+    var pendingIdeaAction: PendingIdeaAction?
     var isSearchPresented = false
     /// 快速记录弹层（常驻入口 / flash://capture / 快捷指令 / 控制中心）
     var quickCapture: QuickCaptureRequest? = nil

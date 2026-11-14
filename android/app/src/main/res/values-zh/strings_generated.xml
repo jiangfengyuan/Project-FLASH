@@ -12,6 +12,7 @@
     <string name="s_aafdda63" formatted="false">/data/{0}/{1}：记录必须是对象</string>
     <string name="s_10db0315" formatted="false">/data/{0}：数组超过上限</string>
     <string name="s_b7cc858a" formatted="false">/data：存在非法或重复记录，请使用损坏文件恢复入口查看可恢复内容</string>
+    <string name="s_8cc3cbe4" formatted="false">/version：加密备份里不能再嵌套加密备份</string>
     <string name="s_90ef682e" formatted="false">/version：旧版文件请使用兼容恢复入口</string>
     <string name="s_b9ce0fb9" formatted="false">/：JSON 值数量超过资源上限</string>
     <string name="s_307d96fc" formatted="false">/：JSON 对象包含重复键：{0}</string>
@@ -23,6 +24,7 @@
     <string name="s_355b83a3" formatted="false">值得记住的一周。✦</string>
     <string name="s_a1486dba" formatted="false">Flash Aero 备份</string>
     <string name="s_eeecd281" formatted="false">Flash 任务提醒</string>
+    <string name="s_2534b43c" formatted="false">Flash 已锁定</string>
     <string name="s_f6ff76b6" formatted="false">Flash 快速记录</string>
     <string name="s_9a2b6832" formatted="false">Flash 此刻</string>
     <string name="s_2a0b1ddf" formatted="false">Flash 灵感</string>
@@ -78,10 +80,12 @@
     <string name="s_6bcf17c2" formatted="false">下一月</string>
     <string name="s_10c83c81" formatted="false">下一步</string>
     <string name="s_82b6cabb" formatted="false">下午好 🌤</string>
+    <string name="s_e08c4ba9" formatted="false">不加密的备份是明文 JSON，任何拿到文件的人都能读取全部日志、情绪和任务。仅保存或分享给可信设备或联系人。</string>
     <string name="s_1344f491" formatted="false">不开心</string>
     <string name="s_4cc036be" formatted="false">不提醒</string>
     <string name="s_12e8587a" formatted="false">不支持的 {0} 分区版本</string>
     <string name="s_ba358518" formatted="false">不限</string>
+    <string name="s_9ae60760" formatted="false">两次输入的口令不一致</string>
     <string name="s_b13672cd" formatted="false">中性</string>
     <string name="s_51f6517e" formatted="false">主题模式</string>
     <string name="s_0a416847" formatted="false">之前 30 天</string>
@@ -121,6 +125,7 @@
     <string name="s_801be77b" formatted="false">内容</string>
     <string name="s_dc24135d" formatted="false">内容不能为空</string>
     <string name="s_043cda7f" formatted="false">内容过长（{0} 字），最多 {1} 字，请删减后再保存</string>
+    <string name="s_d15889f8" formatted="false">再次输入口令</string>
     <string name="s_87000edc" formatted="false">再记录一点，未来的你会看到。</string>
     <string name="s_95a71bc9" formatted="false">准备中…</string>
     <string name="s_9aa7d416" formatted="false">分享</string>
@@ -135,10 +140,17 @@
     <string name="s_e6dedfa0" formatted="false">删除这条情绪记录？</string>
     <string name="s_98f7e648" formatted="false">删除这条日志？</string>
     <string name="s_c51f5912" formatted="false">到期时</string>
+    <string name="s_d26ab92b" formatted="false">加密备份</string>
+    <string name="s_e78a9d95" formatted="false">加密备份文件已损坏或格式不正确</string>
     <string name="s_c628e28d" formatted="false">包含 {0} 条日志、{1} 条情绪、{2} 个任务</string>
     <string name="s_60b4c5ae" formatted="false">危险操作</string>
     <string name="s_949856b3" formatted="false">取消</string>
     <string name="s_d1d62fb0" formatted="false">取消收藏</string>
+    <string name="s_53c7e602" formatted="false">口令</string>
+    <string name="s_f7e8d7e8" formatted="false">口令不能超过 1024 个字符</string>
+    <string name="s_ad879bae" formatted="false">口令至少需要 8 个字符</string>
+    <string name="s_4db1b243" formatted="false">口令错误，或文件已损坏</string>
+    <string name="s_ef638194" formatted="false">口令（至少 8 个字符）</string>
     <string name="s_4d55cb75" formatted="false">可导出备份或通过系统分享传输</string>
     <string name="s_5e53c03a" formatted="false">四</string>
     <string name="s_40163b46" formatted="false">回到今天</string>
@@ -156,6 +168,7 @@
     <string name="s_d82fe22c" formatted="false">备注过长，请删减后再保存</string>
     <string name="s_d9dac7dd" formatted="false">备注（可选）</string>
     <string name="s_e4a4815a" formatted="false">外观与使用</string>
+    <string name="s_f849ada8" formatted="false">好</string>
     <string name="s_1e13bd21" formatted="false">完成</string>
     <string name="s_dd03e6ad" formatted="false">导入前预览与本地数据的差异</string>
     <string name="s_9b60ff74" formatted="false">导入失败：{0}</string>
@@ -163,6 +176,8 @@
     <string name="s_7fdaf616" formatted="false">导出、导入与清空</string>
     <string name="s_f97fded3" formatted="false">导出备份</string>
     <string name="s_7436fb8d" formatted="false">导出失败：{0}</string>
+    <string name="s_0bd03067" formatted="false">导出已中断，请重新导出</string>
+    <string name="s_1a26bd57" formatted="false">导出时可用口令加密（推荐）；不加密的备份是明文 JSON，包含日志、情绪和任务内容，请只保存或分享至可信位置</string>
     <string name="s_b1632a8b" formatted="false">将删除所有日志、情绪记录与任务，且无法恢复。建议先导出备份。</string>
     <string name="s_479481d2" formatted="false">局域网传输暂时停用</string>
     <string name="s_f8eef707" formatted="false">局域网传输暂时停用：旧协议存在安全风险。请使用‘导出备份’或‘系统分享’，通过可信渠道传输 JSON 文件。</string>
@@ -179,6 +194,8 @@
     <string name="s_c13b3522" formatted="false">已清空全部数据，但系统提醒清理失败，请重启应用后重试</string>
     <string name="s_c8fa62c1" formatted="false">已选 {0} 项</string>
     <string name="s_01133500" formatted="false">平均情绪 {0} · 共 {1} 条</string>
+    <string name="s_ee490e90" formatted="false">应用锁</string>
+    <string name="s_fb13a35f" formatted="false">开启应用锁后，冷启动或离开超过 1 分钟再回来时，需要用生物识别或设备密码解锁。小组件、快速记录和通知操作不受影响。</string>
     <string name="s_22696cbc" formatted="false">开始</string>
     <string name="s_499be303" formatted="false">开始使用</string>
     <string name="s_5d62764c" formatted="false">开始日期</string>
@@ -257,6 +274,8 @@
     <string name="s_87b8867d" formatted="false">最新</string>
     <string name="s_ceb8f642" formatted="false">最早</string>
     <string name="s_56b38d0f" formatted="false">最近闪念</string>
+    <string name="s_4f2beab6" formatted="false">未能验证身份，设置未更改</string>
+    <string name="s_5665b744" formatted="false">未能验证身份，请重试</string>
     <string name="s_be2c2eb2" formatted="false">未读</string>
     <string name="s_27c37899" formatted="false">本周</string>
     <string name="s_ccb42197" formatted="false">本周 {0} 条记录 · {1} 条待整理</string>
@@ -277,11 +296,13 @@
     <string name="s_aef45eb7" formatted="false">正在加载更多…</string>
     <string name="s_6af40858" formatted="false">此刻</string>
     <string name="s_b060afd3" formatted="false">此设备不支持备份中的任务时区，请更新系统后重试；未导入任何数据</string>
+    <string name="s_2f15ac82" formatted="false">此设备未设置锁屏密码，无法开启应用锁</string>
     <string name="s_f4958768" formatted="false">每 3 天</string>
     <string name="s_41be2fe2" formatted="false">每周</string>
     <string name="s_02c285b5" formatted="false">每天</string>
     <string name="s_18fa51bd" formatted="false">每天的日志、灵感与情绪次数 · 不含任务</string>
     <string name="s_6d03477d" formatted="false">每日情绪均值：{0}</string>
+    <string name="s_3aa61c82" formatted="false">没有口令的人无法读取或改动备份内容。Flash 不保存口令，忘记后无法恢复。</string>
     <string name="s_5816c303" formatted="false">没有可用的分享应用</string>
     <string name="s_43c975df" formatted="false">没有找到相关记录</string>
     <string name="s_f8bc527e" formatted="false">没有符合条件的日志</string>
@@ -299,6 +320,7 @@
     <string name="s_436e2c82" formatted="false">现在想记录什么？</string>
     <string name="s_78fe07cc" formatted="false">生成传输文件失败：{0}</string>
     <string name="s_f60bb44e" formatted="false">生气</string>
+    <string name="s_8ce87829" formatted="false">用口令加密备份（推荐）</string>
     <string name="s_621a8231" formatted="false">确定</string>
     <string name="s_869f8d0c" formatted="false">确认清空</string>
     <string name="s_5716f5ef" formatted="false">稍后 {0} 分钟</string>
@@ -311,6 +333,7 @@
     <string name="s_78a510f0" formatted="false">累计概览 · 全部时间</string>
     <string name="s_1da8a247" formatted="false">结束</string>
     <string name="s_476d405b" formatted="false">结束日期</string>
+    <string name="s_70f57871" formatted="false">继续</string>
     <string name="s_010e135c" formatted="false">继续编辑</string>
     <string name="s_e60fd56d" formatted="false">继续记录，回顾会慢慢清晰</string>
     <string name="s_607348a8" formatted="false">编辑</string>
@@ -320,6 +343,10 @@
     <string name="s_72ecf883" formatted="false">自 {0}</string>
     <string name="s_85b25df8" formatted="false">至 {0}</string>
     <string name="s_a6317c7d" formatted="false">覆盖</string>
+    <string name="s_64bca37c" formatted="false">解密</string>
+    <string name="s_227fd229" formatted="false">解锁</string>
+    <string name="s_8b2f5c73" formatted="false">解锁 Flash</string>
+    <string name="s_f86c7b1b" formatted="false">解锁 Flash 以查看你的记录</string>
     <string name="s_5521c6a5" formatted="false">让每一次闪念都有落点 · 无云端账号</string>
     <string name="s_dad3d89f" formatted="false">记下第一个念头</string>
     <string name="s_6dfa9df7" formatted="false">记到 Flash</string>
@@ -354,6 +381,7 @@
     <string name="s_fa547131" formatted="false">这一天还没有计划或记录</string>
     <string name="s_6d67abd6" formatted="false">这个月</string>
     <string name="s_09e1a534" formatted="false">这周</string>
+    <string name="s_f8f100e1" formatted="false">这是加密备份，请输入导出时设置的口令</string>
     <string name="s_d3ce76c1" formatted="false">这条记录已不存在</string>
     <string name="s_1a959a39" formatted="false">这段时间还没有记录，空白日期按 0 次显示。</string>
     <string name="s_5fe370b7" formatted="false">选择</string>
@@ -363,10 +391,14 @@
     <string name="s_4de22934" formatted="false">重要性</string>
     <string name="s_490a6afa" formatted="false">闪过即留，写下第一条吧</string>
     <string name="s_aef2df88" formatted="false">随手记录</string>
+    <string name="s_4552930a" formatted="false">隐私</string>
     <string name="s_80390cc2" formatted="false">难受</string>
+    <string name="s_1f381169" formatted="false">需要更新 Flash 才能打开此加密备份</string>
     <string name="s_99546fff" formatted="false">非常不开心</string>
     <string name="s_22566806" formatted="false">非常开心</string>
     <string name="s_9a63360d" formatted="false">预览后本地数据有变化，差异已重新计算，请确认后再覆盖</string>
+    <string name="s_1203f0e4" formatted="false">验证身份以关闭应用锁</string>
+    <string name="s_d02b1cf3" formatted="false">验证身份以开启应用锁</string>
     <string name="s_a14edc19" formatted="false">（无标题）</string>
     <string name="s_12cea83b" formatted="false">（跳过异常数据 {0} 条）</string>
     <string name="s_be6a75ae" formatted="false">，今天</string>

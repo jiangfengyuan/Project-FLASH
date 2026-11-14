@@ -4,7 +4,7 @@
     "vendor": "Fengyuan Jiang",
     "versionCode": 1,
     "versionName": "0.1.0",
-    "icon": "$media:icon",
+    "icon": "$media:flash_standard_icon",
     "label": "$string:app_name"
   }
 }

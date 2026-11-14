@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flash.app/contracts/flash-backup-enc-v1.schema.json",
+  "title": "Flash encrypted backup envelope v1",
+  "description": "Structure of flash-backup-enc-v1 only. Which error an importer reports (unsupported vs invalid) follows the staged order in flash-backup-enc-v1.md; the decrypted plaintext is validated separately as flash-backup-v2.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "kdf", "cipher", "ciphertext"],
+  "properties": {
+    "version": { "const": "flash-backup-enc-v1" },
+    "kdf": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "iterations", "salt"],
+      "properties": {
+        "name": { "const": "PBKDF2-HMAC-SHA256" },
+        "iterations": { "type": "integer", "minimum": 100000, "maximum": 10000000 },
+        "salt": {
+          "description": "Canonical standard base64 of exactly 16 bytes",
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{21}[AQgw]==$"
+        }
+      }
+    },
+    "cipher": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "nonce"],
+      "properties": {
+        "name": { "const": "AES-256-GCM" },
+        "nonce": {
+          "description": "Canonical standard base64 of exactly 12 bytes",
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{16}$"
+        }
+      }
+    },
+    "ciphertext": {
+      "description": "Canonical standard base64 of AES-GCM ciphertext followed by its 16-byte tag; at most 50 MiB + 16 bytes decoded",
+      "type": "string",
+      "minLength": 24,
+      "maxLength": 69905088,
+      "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/][AQgw]==|[A-Za-z0-9+/]{2}[AEIMQUYcgkosw048]=)?$"
+    }
+  }
+}

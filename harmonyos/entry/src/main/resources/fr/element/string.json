@@ -101,6 +101,10 @@
    "value": "/updatedAt : heure de tâche non valide"
   },
   {
+   "name": "s_8cc3cbe4",
+   "value": "/version : une sauvegarde chiffrée ne peut pas en contenir une autre"
+  },
+  {
    "name": "s_b9ce0fb9",
    "value": "/ : trop de valeurs JSON"
   },
@@ -127,6 +131,10 @@
   {
    "name": "s_355b83a3",
    "value": "Une semaine à retenir. ✦"
+  },
+  {
+   "name": "s_2534b43c",
+   "value": "Flash est verrouillé"
   },
   {
    "name": "s_2a0b1ddf",
@@ -277,6 +285,10 @@
    "value": "✓ Triés : {0}"
   },
   {
+   "name": "s_67fc93c3",
+   "value": "✦ Flash"
+  },
+  {
    "name": "s_05615f1f",
    "value": "Lun"
   },
@@ -325,6 +337,10 @@
    "value": "Bon après-midi 🌤"
   },
   {
+   "name": "s_e08c4ba9",
+   "value": "Une sauvegarde non chiffrée est du JSON en clair : quiconque possède le fichier peut lire tous vos journaux, émotions et tâches. Ne l'enregistrez ou ne la partagez qu'avec des appareils ou contacts de confiance."
+  },
+  {
    "name": "s_1344f491",
    "value": "Pas content"
   },
@@ -339,6 +355,10 @@
   {
    "name": "s_44d41ebe",
    "value": "Concentré"
+  },
+  {
+   "name": "s_9ae60760",
+   "value": "Les phrases secrètes ne correspondent pas."
   },
   {
    "name": "s_bfa55e52",
@@ -513,6 +533,10 @@
    "value": "Plus de 100 000 caractères. Raccourcissez avant d'enregistrer"
   },
   {
+   "name": "s_d15889f8",
+   "value": "Saisissez à nouveau la phrase secrète"
+  },
+  {
    "name": "s_87000edc",
    "value": "Continuez à noter, votre futur vous le verra."
   },
@@ -569,6 +593,14 @@
    "value": "À l'échéance"
   },
   {
+   "name": "s_d26ab92b",
+   "value": "Sauvegarde chiffrée"
+  },
+  {
+   "name": "s_e78a9d95",
+   "value": "Le fichier de sauvegarde chiffré est endommagé ou mal formé."
+  },
+  {
    "name": "s_c6dda34e",
    "value": "Charger plus ({0} restants)"
   },
@@ -585,8 +617,28 @@
    "value": "Retirer des favoris"
   },
   {
-   "name": "s_8b70a958",
-   "value": "Transférez journal, humeurs et tâches entre Android, macOS et HarmonyOS. Les sauvegardes sont en JSON non chiffré : enregistrez-les ou partagez-les uniquement dans un lieu de confiance."
+   "name": "s_53c7e602",
+   "value": "Phrase secrète"
+  },
+  {
+   "name": "s_f7e8d7e8",
+   "value": "La phrase secrète ne peut pas dépasser 1024 caractères."
+  },
+  {
+   "name": "s_ad879bae",
+   "value": "La phrase secrète doit comporter au moins 8 caractères."
+  },
+  {
+   "name": "s_4db1b243",
+   "value": "Phrase secrète incorrecte, ou fichier endommagé."
+  },
+  {
+   "name": "s_ef638194",
+   "value": "Phrase secrète (8 caractères minimum)"
+  },
+  {
+   "name": "s_301dabf8",
+   "value": "Transférez journaux, émotions et tâches entre Android, macOS et HarmonyOS. Vous pouvez chiffrer l'export avec une phrase secrète (recommandé) ; une sauvegarde non chiffrée est du JSON en clair, à n'enregistrer ou partager qu'en lieu sûr."
   },
   {
    "name": "s_4d55cb75",
@@ -653,6 +705,10 @@
    "value": "Le fichier de sauvegarde n'est pas un objet JSON valide"
   },
   {
+   "name": "s_88f39f13",
+   "value": "Le fichier de sauvegarde n'est pas du JSON UTF-8 valide"
+  },
+  {
    "name": "s_364b46a8",
    "value": "Le fichier de sauvegarde est vide"
   },
@@ -663,6 +719,10 @@
   {
    "name": "s_245f47d8",
    "value": "Le fichier de sauvegarde dépasse 50 Mo"
+  },
+  {
+   "name": "s_b2509850",
+   "value": "Le fichier de sauvegarde dépasse 72 Mo"
   },
   {
    "name": "s_fc4f6b0f",
@@ -775,6 +835,14 @@
   {
    "name": "s_fea8398c",
    "value": "Humeur moyenne"
+  },
+  {
+   "name": "s_ee490e90",
+   "value": "Verrouillage de l'app"
+  },
+  {
+   "name": "s_fb13a35f",
+   "value": "Avec le verrouillage activé, Flash se déverrouille par biométrie ou avec le code de l'appareil au démarrage ou après plus d'une minute d'absence. Les widgets, la capture rapide et les actions de notification restent disponibles."
   },
   {
    "name": "s_499be303",
@@ -1169,6 +1237,14 @@
    "value": "Avec importance"
   },
   {
+   "name": "s_4f2beab6",
+   "value": "Identité non confirmée. Le réglage n'a pas été modifié."
+  },
+  {
+   "name": "s_5665b744",
+   "value": "Identité non confirmée. Réessayez."
+  },
+  {
    "name": "s_be2c2eb2",
    "value": "Non lu"
   },
@@ -1313,6 +1389,10 @@
    "value": "Pas encore pris en charge sur cet appareil"
   },
   {
+   "name": "s_2f15ac82",
+   "value": "Définissez un code de verrouillage sur cet appareil pour utiliser le verrouillage de l'app"
+  },
+  {
    "name": "s_f4958768",
    "value": "Tous les 3 jours"
   },
@@ -1335,6 +1415,10 @@
   {
    "name": "s_8189ce25",
    "value": "Exportation partagée sandbox"
+  },
+  {
+   "name": "s_3aa61c82",
+   "value": "Sans la phrase secrète, personne ne peut lire ni modifier la sauvegarde. Flash ne conserve pas la phrase secrète : si vous l'oubliez, la sauvegarde est irrécupérable."
   },
   {
    "name": "s_412c1bc9",
@@ -1421,6 +1505,10 @@
    "value": "En colère"
   },
   {
+   "name": "s_8ce87829",
+   "value": "Chiffrer avec une phrase secrète (recommandé)"
+  },
+  {
    "name": "s_9efb941a",
    "value": "Fatigué"
   },
@@ -1497,6 +1585,10 @@
    "value": "Date de fin"
   },
   {
+   "name": "s_70f57871",
+   "value": "Continuer"
+  },
+  {
    "name": "s_010e135c",
    "value": "Continuer"
   },
@@ -1531,6 +1623,18 @@
   {
    "name": "s_a6317c7d",
    "value": "Remplacer"
+  },
+  {
+   "name": "s_64bca37c",
+   "value": "Déchiffrer"
+  },
+  {
+   "name": "s_227fd229",
+   "value": "Déverrouiller"
+  },
+  {
+   "name": "s_f86c7b1b",
+   "value": "Déverrouillez Flash pour voir vos entrées"
   },
   {
    "name": "s_5521c6a5",
@@ -1673,6 +1777,10 @@
    "value": "cette semaine"
   },
   {
+   "name": "s_f8f100e1",
+   "value": "Cette sauvegarde est chiffrée. Saisissez la phrase secrète définie lors de l'export."
+  },
+  {
    "name": "s_d3ce76c1",
    "value": "Cette entrée n'existe plus"
   },
@@ -1717,12 +1825,20 @@
    "value": "Notez à la volée"
   },
   {
+   "name": "s_4552930a",
+   "value": "Confidentialité"
+  },
+  {
    "name": "s_a87d7d3d",
    "value": "Quarantaine vidée"
   },
   {
    "name": "s_80390cc2",
    "value": "Mal à l'aise"
+  },
+  {
+   "name": "s_1f381169",
+   "value": "Mettez Flash à jour pour ouvrir cette sauvegarde chiffrée."
   },
   {
    "name": "s_99546fff",
@@ -1743,6 +1859,14 @@
   {
    "name": "s_9a63360d",
    "value": "Les données locales ont changé après l'aperçu. Différences recalculées. Confirmez avant de remplacer"
+  },
+  {
+   "name": "s_1203f0e4",
+   "value": "Confirmez votre identité pour désactiver le verrouillage de l'app"
+  },
+  {
+   "name": "s_d02b1cf3",
+   "value": "Confirmez votre identité pour activer le verrouillage de l'app"
   },
   {
    "name": "s_39f2623a",

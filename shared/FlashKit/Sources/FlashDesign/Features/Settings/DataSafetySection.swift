@@ -74,7 +74,7 @@ public struct DataSafetySection: View {
                 SettingsRowLabel(title: L("恢复损坏或旧版备份…"), systemImage: "bandage", color: BrandColors.accessibleGreen)
             }
             .hoverFeedback(reduceMotion: reduceMotion)
-            Text("导出的 JSON 文件未加密，仅保存或分享给可信设备或联系人。旧版局域网传输暂时停用。")
+            Text("导出时可用口令加密（推荐）；不加密的 JSON 文件请仅保存或分享给可信设备或联系人。旧版局域网传输暂时停用。")
                 .font(Typography.caption)
                 .foregroundStyle(.secondary)
             if isBusy {

@@ -14,6 +14,12 @@
 
 ![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-brightgreen.svg)
 
+## 官方 App 图标
+
+![Flash Standard Icon](assets/brand/flash-standard-icon.png)
+
+四端采用仓库 2026-11-09 批准的纸张与铅笔 Standard Icon。主资源、平台衍生图与接入规则见 [官方图标规范](docs/brand/APP_ICON.md)。
+
 ## 平台
 
 | 平台 | 技术栈 | 状态 |

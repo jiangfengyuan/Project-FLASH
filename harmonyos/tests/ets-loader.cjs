@@ -3,6 +3,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
+const cryptoFake = require('./crypto-fake.cjs');
 
 function compiler() {
   if (process.env.FLASH_TYPESCRIPT_PATH) return require(process.env.FLASH_TYPESCRIPT_PATH);
@@ -74,7 +75,9 @@ function createLoader(overrides = {}, options = {}) {
       getBundleInfoForSelf: async () => ({ versionName: '0.1.0' }) } },
     '@kit.ArkTS': { util: { generateRandomUUID: () => randomUUID(),
       TextDecoder: NodeTextDecoder,
+      Base64Helper: cryptoFake.Base64Helper,
       TextEncoder: class { encodeInto(value) { return new TextEncoder().encode(value); } } } },
+    '@kit.CryptoArchitectureKit': { cryptoFramework: cryptoFake.cryptoFramework() },
     '@kit.ArkData': { relationalStore: { ConflictResolution: { ON_CONFLICT_REPLACE: 1 } } },
     '@kit.CoreFileKit': { fileIo: nodeFileIo(), fileUri: {
       FileUri: class { constructor(path) { this.path = path; } toString() { return 'file://' + this.path; } } } },
@@ -96,7 +99,7 @@ function createLoader(overrides = {}, options = {}) {
     'data/BackupFiles': { BackupFiles: {
       exportJSON: async () => {},
       importJSON: async () => { throw new Error('Configure the file picker fake for this test'); },
-      sharedExportName: (filePrefix, day) => `${filePrefix}-${day}.json`
+      sharedExportName: (filePrefix, day, encrypted = false) => `${filePrefix}-${day}${encrypted ? '-encrypted' : ''}.json`
     } },
     'data/LocalBackupTransfer': null,
     'data/TaskReminderScheduler': { TaskReminderScheduler: { rebuild: async () => {} } },

@@ -6,6 +6,7 @@
 
 import Foundation
 import SwiftData
+import Observation
 #if canImport(WidgetKit)
 import WidgetKit
 #endif
@@ -17,10 +18,16 @@ public struct FlashSnapshot: Equatable, Sendable {
     public let tasks: [TaskItem]
     /// 快照取自内存降级的临时存储：只含本次启动后写入的内容，不是完整数据，
     /// 导出路径必须拒绝（否则日后「覆盖导入」会用它抹掉真实数据，见 F-07）
+    public let trash: [TrashItem]
+    public let preferences: LibraryPreferences
+    public let automaticTags: [String:[String]]
+    public let library: PersonalLibrary
     public let isFromTemporaryStore: Bool
 
     public init(logs: [LogItem], emotions: [EmotionRecord], tasks: [TaskItem],
-                isFromTemporaryStore: Bool = false) {
+                isFromTemporaryStore: Bool = false, library: PersonalLibrary = .init(), trash: [TrashItem] = [], preferences: LibraryPreferences = .init(), automaticTags: [String:[String]] = [:]) {
+        self.trash = trash; self.preferences = preferences; self.automaticTags = automaticTags
+        self.library = library
         self.logs = logs
         self.emotions = emotions
         self.tasks = tasks
@@ -49,8 +56,8 @@ public enum LogChange: Equatable, Sendable {
 
 /// 对应 Web 版 StorageAdapter / Android FlashRepository。
 /// createdAt 使用 ISO-8601，recordDate 为 yyyy-MM-dd。
-public final class FlashRepository {
-    private let container: ModelContainer
+@Observable public final class FlashRepository {
+    let container: ModelContainer
     private let beforeSave: () throws -> Void
 
     /// 写代际号：每次 commit 成功 +1。视图用它做 O(1) 变更检测（onChange/缓存键），
@@ -58,6 +65,8 @@ public final class FlashRepository {
     /// 相等比较：PersistentModel 的相等走身份，漏掉就地属性更新（编辑/勾选完成）。
     /// 仅在主线程读写（全部写路径经 @MainActor commit）。
     public private(set) var revision = 0
+    public private(set) var contentRevision = 0
+    @ObservationIgnored public var onTextChange: (@MainActor (String,String) -> Void)?
 
     /// true：持久化容器打不开、本次运行使用内存降级的临时存储（RepositoryEnvironment 装配时标记）。
     /// 此时真实数据仍在磁盘上未被改动；任何会改写「磁盘外」状态的副作用（系统提醒、小组件快照、
@@ -75,7 +84,7 @@ public final class FlashRepository {
     }
 
     @MainActor
-    private var context: ModelContext { container.mainContext }
+    var context: ModelContext { container.mainContext }
 
     // MARK: - Logs
 
@@ -97,14 +106,19 @@ public final class FlashRepository {
             recordDate: recordDate.map(DateFormatting.dayString) ?? DateFormatting.today()
         )
         try commit { context.insert(entity) }
+        onTextChange?("log:"+entity.id,entity.content)
         onLogChange?(.upserted([entity.toModel()]))
     }
 
     @MainActor
-    public func updateLog(_ log: LogItem) throws {
+    public func updateLog(_ log: LogItem, tags: TagDraft? = nil) throws {
+        let textChanged = try fetchLog(id:log.id)?.content != log.content
         try commit {
             if let entity = try fetchLog(id: log.id) {
                 entity.apply(log)
+                if log.category != .idea {
+                    var library = try personalLibrary(); library.reminders.removeAll { $0.id == log.id }; try writeLibrary(library)
+                }
             } else {
                 context.insert(LogEntity(id: log.id, content: log.content,
                                          colorTag: log.colorTag.rawValue,
@@ -114,14 +128,16 @@ public final class FlashRepository {
                                          createdAt: log.createdAt,
                                          recordDate: log.recordDate))
             }
+            if let tags { try writeTagDraft(tags,key:"log:"+log.id) }
         }
+        if textChanged { onTextChange?("log:"+log.id,log.content) }
         onLogChange?(.upserted([log]))
     }
 
     @MainActor
     public func deleteLog(id: String) throws {
         if let entity = try fetchLog(id: id) {
-            try commit { context.delete(entity) }
+            try commit { context.delete(entity); try removeLibraryRecord("log:\(id)") }
             onLogChange?(.deleted([id]))
         }
     }
@@ -174,7 +190,7 @@ public final class FlashRepository {
     @MainActor
     public func deleteEmotion(id: String) throws {
         if let entity = try fetchEmotion(id: id) {
-            try commit { context.delete(entity) }
+            try commit { context.delete(entity); try removeLibraryRecord("emotion:\(id)") }
         }
     }
 
@@ -189,20 +205,24 @@ public final class FlashRepository {
     // MARK: - Tasks
 
     @MainActor
-    public func saveTask(_ task: TaskItem) throws {
+    public func saveTask(_ task: TaskItem, tags: TagDraft? = nil) throws {
+        let previous = try fetchTask(id:task.id)
+        let textChanged = previous?.title != task.title || previous?.notes != task.notes
         try commit {
             if let entity = try fetchTask(id: task.id) {
                 entity.apply(task)
             } else {
                 context.insert(TaskEntity(task))
             }
+            if let tags { try writeTagDraft(tags,key:"task:"+task.id) }
         }
+        if textChanged { onTextChange?("task:"+task.id,task.title+"\n"+(task.notes ?? "")) }
     }
 
     @MainActor
     public func deleteTask(id: String) throws {
         if let entity = try fetchTask(id: id) {
-            try commit { context.delete(entity) }
+            try commit { context.delete(entity); try removeLibraryRecord("task:\(id)") }
         }
     }
 
@@ -275,16 +295,19 @@ public final class FlashRepository {
         FlashSnapshot(logs: try allLogs(),
                       emotions: try allEmotions(),
                       tasks: try allTasks(),
-                      isFromTemporaryStore: isTemporaryStore)
+                      isFromTemporaryStore: isTemporaryStore, library: try personalLibrary(), trash: try trashItems(), preferences: try preferences(), automaticTags: try automaticTagLinks())
     }
 
     /// 覆盖式导入：清空后写入（对应 Web 版 overwriteImport）。
     /// 直接内联删除而不走 clearAll()：整个过程只有一次 save，
     /// 避免中间态 save 让 @Query 观察者看到「瞬间空库」的闪烁。
     @MainActor
-    public func replaceAll(logs: [LogItem], emotions: [EmotionRecord], tasks: [TaskItem] = []) throws {
+    public func replaceAll(logs: [LogItem], emotions: [EmotionRecord], tasks: [TaskItem] = [], library: PersonalLibrary = .init(), trash: [TrashItem] = [], preferences: LibraryPreferences = .init(), automaticTags: [String:[String]] = [:]) throws {
         try commit {
             try deleteAllEntities()
+            try writeLibrary(library)
+            try writeTrash(trash,merge:false); try writePreferences(preferences)
+            try writeAutomaticOrigins(automaticTags)
             for log in logs { upsertLogEntity(log) }
             for emotion in emotions { upsertEmotionEntity(emotion) }
             for task in tasks { context.insert(TaskEntity(task)) }
@@ -294,8 +317,22 @@ public final class FlashRepository {
 
     /// 合并式导入：同 id 覆盖，其余保留（对应 Web 版 mergeImport）
     @MainActor
-    public func mergeAll(logs: [LogItem], emotions: [EmotionRecord], tasks: [TaskItem] = []) throws {
+    public func mergeAll(logs: [LogItem], emotions: [EmotionRecord], tasks: [TaskItem] = [], library: PersonalLibrary? = nil, trash: [TrashItem] = [], preferences: LibraryPreferences? = nil, automaticTags: [String:[String]] = [:]) throws {
         try commit {
+            if let library {
+                let previous = try personalLibrary(), origins = try automaticTagLinks()
+                let merged = previous.merging(library)
+                try writeLibrary(merged)
+                for (key,ids) in library.links {
+                    for id in ids {
+                        guard let incoming = library.tags.first(where:{ $0.id == id }), let mapped = merged.tags.first(where:{ $0.normalized == incoming.normalized }) else { continue }
+                        let manualBefore = previous.links[key]?.contains(mapped.id) == true && origins[key]?.contains(mapped.id) != true
+                        let automatic = automaticTags[key]?.contains(id) == true && !manualBefore
+                        for row in try context.fetch(FetchDescriptor<LibraryTagLinkEntity>(predicate:#Predicate { $0.recordKey == key })) where row.tagID == mapped.id { row.automatic = automatic }
+                    }
+                }
+            }
+            try writeTrash(trash,merge:true); if let preferences { try writePreferences(preferences) }
             for log in logs { upsertLogEntity(log) }
             for emotion in emotions { upsertEmotionEntity(emotion) }
             for task in tasks {
@@ -305,6 +342,13 @@ public final class FlashRepository {
                     context.insert(TaskEntity(task))
                 }
             }
+            var current = try personalLibrary()
+            let records = LibraryRecord.records(try snapshot())
+            let keys = Set(records.map(\.key)), ideas = Set(records.filter { $0.kind == .idea }.map(\.recordID))
+            current.links = current.links.filter { keys.contains($0.key) }
+            current.reminders.removeAll { !ideas.contains($0.id) }
+            try current.validated(records: records)
+            try writeLibrary(current)
         }
         if !logs.isEmpty { onLogChange?(.upserted(logs)) }
     }
@@ -315,6 +359,53 @@ public final class FlashRepository {
             try deleteAllEntities()
         }
         onLogChange?(.reset)
+    }
+
+    @MainActor public func personalLibrary(includeLinks: Bool = true) throws -> PersonalLibrary {
+        if supportsV4 { return try readLibraryV4(includeLinks:includeLinks) }
+        guard container.schema.entities.contains(where: { $0.name == "PersonalLibraryEntity" }) else { return .init() }
+        guard let entity = try context.fetch(FetchDescriptor<PersonalLibraryEntity>()).first else { return .init() }
+        return try JSONDecoder().decode(PersonalLibrary.self, from: entity.payload)
+    }
+    @MainActor func writeLibrary(_ value: PersonalLibrary) throws {
+        if supportsV4 { try writeLibraryV4(value); return }
+        guard container.schema.entities.contains(where: { $0.name == "PersonalLibraryEntity" }) else {
+            if value != PersonalLibrary() { throw BackupError.contract("/personalLibrary") }; return
+        }
+        let data = try JSONEncoder().encode(value)
+        if let entity = try context.fetch(FetchDescriptor<PersonalLibraryEntity>()).first { entity.payload = data }
+        else { context.insert(PersonalLibraryEntity(payload: data)) }
+    }
+    @MainActor public func savePersonalLibrary(_ value: PersonalLibrary) throws {
+        guard !isTemporaryStore else { throw BackupError.temporaryStore }
+        // Metadata edits validate structure without mapping the content tables.
+        try value.validated(recordKeys:Set(value.links.keys),ideaIDs:Set(value.reminders.map(\.id)))
+        let previous = try personalLibrary()
+        for key in value.links.keys where previous.links[key] == nil {
+            guard try textForRecord(key) != nil else { throw BackupError.contract("/personalLibrary/links") }
+        }
+        for rule in value.reminders where !previous.reminders.contains(where:{ $0.id == rule.id }) {
+            guard try fetchLog(id:rule.id)?.category == Category.idea.rawValue else { throw BackupError.contract("/personalLibrary/reminders") }
+        }
+        try commit(metadataOnly:true) { try writeLibrary(value) }
+    }
+    @MainActor func removeLibraryRecord(_ key: String) throws {
+        if supportsV4 {
+            for link in try context.fetch(FetchDescriptor<LibraryTagLinkEntity>(predicate:#Predicate { $0.recordKey == key })) { context.delete(link) }
+            if key.hasPrefix("log:"), let metadata = try context.fetch(FetchDescriptor<PersonalLibraryEntity>()).first {
+                var library = try JSONDecoder().decode(PersonalLibrary.self,from:metadata.payload)
+                let id = String(key.dropFirst(4))
+                if library.reminders.contains(where:{ $0.id == id }) {
+                    library.reminders.removeAll { $0.id == id }
+                    metadata.payload = try JSONEncoder().encode(library)
+                }
+            }
+        } else {
+            var library = try personalLibrary()
+            library.links.removeValue(forKey:key)
+            if key.hasPrefix("log:") { library.reminders.removeAll { $0.id == String(key.dropFirst(4)) } }
+            try writeLibrary(library)
+        }
     }
 
     // MARK: - Widget Summary
@@ -353,15 +444,16 @@ public final class FlashRepository {
     /// A failed save must not leave destructive pending changes visible in the
     /// shared main context or allow a later unrelated save to commit them.
     @MainActor
-    private func commit(_ mutation: () throws -> Void) throws {
+    func commit(metadataOnly: Bool = false, _ mutation: () throws -> Void) throws {
         do {
             try mutation()
             try beforeSave()
             try context.save()
             revision += 1
+            if !metadataOnly { contentRevision += 1 }
             // 桌面小组件（WidgetKit）：每次提交成功后刷新共享快照；
             // 组容器不可用（adhoc 构建）时零成本 no-op
-            WidgetSnapshot.refresh(repository: self)
+            if !metadataOnly { WidgetSnapshot.refresh(repository: self) }
         } catch {
             context.rollback()
             throw error
@@ -374,6 +466,9 @@ public final class FlashRepository {
     /// save restores the pre-mutation graph instead of leaking a pending wipe.
     @MainActor
     private func deleteAllEntities() throws {
+        try writeLibrary(.init())
+        try writeTrash([],merge:false)
+        try writePreferences(.init())
         for entity in try context.fetch(FetchDescriptor<LogEntity>()) {
             context.delete(entity)
         }
@@ -386,7 +481,7 @@ public final class FlashRepository {
     }
 
     @MainActor
-    private func fetchLog(id: String) throws -> LogEntity? {
+    func fetchLog(id: String) throws -> LogEntity? {
         let predicate = #Predicate<LogEntity> { $0.id == id }
         var descriptor = FetchDescriptor(predicate: predicate)
         descriptor.fetchLimit = 1 // id 唯一，命中即停
@@ -394,7 +489,7 @@ public final class FlashRepository {
     }
 
     @MainActor
-    private func fetchEmotion(id: String) throws -> EmotionEntity? {
+    func fetchEmotion(id: String) throws -> EmotionEntity? {
         let predicate = #Predicate<EmotionEntity> { $0.id == id }
         var descriptor = FetchDescriptor(predicate: predicate)
         descriptor.fetchLimit = 1
@@ -402,7 +497,7 @@ public final class FlashRepository {
     }
 
     @MainActor
-    private func fetchTask(id: String) throws -> TaskEntity? {
+    func fetchTask(id: String) throws -> TaskEntity? {
         let predicate = #Predicate<TaskEntity> { $0.id == id }
         var descriptor = FetchDescriptor(predicate: predicate)
         descriptor.fetchLimit = 1
@@ -410,7 +505,7 @@ public final class FlashRepository {
     }
 
     @MainActor
-    private func upsertLogEntity(_ log: LogItem) {
+    func upsertLogEntity(_ log: LogItem) {
         let entity = LogEntity(id: log.id, content: log.content,
                                colorTag: log.colorTag.rawValue,
                                category: log.category.rawValue,
@@ -421,7 +516,7 @@ public final class FlashRepository {
     }
 
     @MainActor
-    private func upsertEmotionEntity(_ emotion: EmotionRecord) {
+    func upsertEmotionEntity(_ emotion: EmotionRecord) {
         let entity = EmotionEntity(id: emotion.id, level: emotion.level.rawValue,
                                    subEmotion: emotion.subEmotion?.rawValue,
                                    status: emotion.status, note: emotion.note,

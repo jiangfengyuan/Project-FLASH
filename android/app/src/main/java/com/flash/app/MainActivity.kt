@@ -19,12 +19,33 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.Lifecycle
+import com.flash.app.data.AppLockAuthResult
 import com.flash.app.data.ThemeMode
+import com.flash.app.data.model.Category
+import com.flash.app.system.AppLockAuthenticator
+import com.flash.app.ui.lock.AppLockGate
+import com.flash.app.ui.lock.LocalAppLockAuth
+import com.flash.app.ui.lock.AppLockAuth
+import com.flash.app.ui.lock.requestUnlock
 import com.flash.app.ui.navigation.AppEntry
 import com.flash.app.ui.navigation.FlashApp
 import com.flash.app.ui.theme.FlashTheme
 
 class MainActivity : ComponentActivity() {
+    /** 必须在构造期注册（Android 10 及以下的确认锁屏凭据页走 Activity Result） */
+    private val authenticator = AppLockAuthenticator(this)
+    private val lockAuth = object : AppLockAuth {
+        override fun isAvailable() = authenticator.isAvailable()
+        override fun authenticate(title: String, subtitle: String, onResult: (AppLockAuthResult) -> Unit) =
+            authenticator.authenticate(title, subtitle, onResult)
+    }
+    private val appLock get() = (application as FlashApplication).appLock
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -34,8 +55,30 @@ class MainActivity : ComponentActivity() {
         // 配置变更重建时不重复消费同一个 Intent
         if (savedInstanceState == null) deliver(intent)
         setContent {
-            FlashRoot()
+            CompositionLocalProvider(LocalAppLockAuth provides lockAuth) {
+                FlashRoot()
+            }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        appLock.onForeground()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // 每次上锁自动弹一次系统验证；等窗口就绪再弹，取消后只能手动点「解锁」
+        window.decorView.post {
+            if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) && appLock.consumeAutoPrompt()) {
+                appLock.requestUnlock(lockAuth)
+            }
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (!isChangingConfigurations) appLock.onBackground()
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -73,7 +116,17 @@ private fun FlashRoot() {
         (view.context as? ComponentActivity)?.enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
     }
 
+    val lockAuth = LocalAppLockAuth.current
     FlashTheme(darkTheme = darkTheme) {
-        FlashApp()
+        Box(Modifier.fillMaxSize()) {
+            FlashApp()
+            if (lockAuth != null) {
+                AppLockGate(
+                    lock = app.appLock,
+                    auth = lockAuth,
+                    onQuickCapture = { app.pendingEntry.value = AppEntry.Capture(Category.IDEA) },
+                )
+            }
+        }
     }
 }

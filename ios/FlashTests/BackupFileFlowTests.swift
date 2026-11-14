@@ -30,7 +30,7 @@ struct BackupFileFlowTests {
         let document = BackupJSONDocument(json: json)
         let file = directory.appendingPathComponent("backup.json")
         try Data(document.json.utf8).write(to: file)
-        let schema = Schema(versionedSchema: FlashSchemaV2.self)
+        let schema = Schema(versionedSchema: FlashSchemaV4.self)
         let storeURL = directory.appendingPathComponent("roundtrip.store")
         func openRepository() throws -> FlashRepository {
             FlashRepository(container: try ModelContainer(for: schema,

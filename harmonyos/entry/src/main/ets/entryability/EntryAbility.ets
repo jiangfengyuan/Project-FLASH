@@ -9,6 +9,7 @@ import { cleanupExpiredShareCopies } from '../data/ShareService';
 import { resourceManager } from '@kit.LocalizationKit';
 import { installI18n, StringSource } from '../data/I18n';
 import { setFontScale } from '../components/DesignTokens';
+import { appLockRuntime } from '../state/AppLockRuntime';
 
 const DOMAIN = 0x0000;
 
@@ -39,6 +40,8 @@ export default class EntryAbility extends UIAbility {
     this.syncSystemColorMode(this.context.config.colorMode);
     installI18n(new ManagerStrings(this.context.resourceManager), i18n.System.getSystemLanguage());
     setFontScale(this.context.config.fontSizeScale ?? 1);
+    // 应用锁：在加载页面之前同步读设置，首帧即按锁定状态渲染
+    appLockRuntime.install(this.context);
     this.deliverEntry(want);
     this.watchFoldStatus();
     FlashStore.instance.initialize(this.context).catch((error: Error) => {
@@ -46,6 +49,14 @@ export default class EntryAbility extends UIAbility {
     });
     // 被放弃的明文分享副本到期删除（与 Android / Apple 启动时清理同口径）
     cleanupExpiredShareCopies(this.context.cacheDir).catch(() => {});
+  }
+
+  onForeground(): void {
+    appLockRuntime.controller.onForeground();
+  }
+
+  onBackground(): void {
+    appLockRuntime.controller.onBackground();
   }
 
   onNewWant(want: Want): void {

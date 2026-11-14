@@ -35,6 +35,7 @@ import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.FileUpload
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Lightbulb
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Shield
@@ -69,12 +70,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.flash.app.BuildConfig
 import com.flash.app.FlashApplication
+import com.flash.app.data.AppLockToggleOutcome
+import com.flash.app.data.AppLockToggleStart
 import com.flash.app.data.IdeaReminderFrequency
 import com.flash.app.data.ThemeMode
 import com.flash.app.data.reminder.IdeaReminderWork
 import com.flash.app.i18n.tr
 import com.flash.app.ui.components.FlashCard
 import com.flash.app.ui.components.FlashSegmentedControl
+import com.flash.app.ui.lock.LocalAppLockAuth
 import com.flash.app.ui.navigation.LocalPageBottomPadding
 import com.flash.app.ui.paper.pageGutter
 import com.flash.app.ui.theme.FlashTokens
@@ -150,6 +154,8 @@ fun SettingsScreen(
             )
         }
 
+        AppLockSettingsGroup(app)
+
         SettingsGroup(title = tr("数据与安全")) {
             SettingsRow(
                 icon = Icons.Outlined.Save,
@@ -178,6 +184,68 @@ fun SettingsScreen(
                 showChevron = false,
             )
         }
+    }
+}
+
+/**
+ * 「隐私」：应用锁开关。开、关都先验证一次（开启时确认此刻能解开，避免把自己锁在门外；
+ * 关闭时防止拿到已解锁手机的人顺手关掉）。设备没设锁屏时不许开启，关闭总是允许。
+ */
+@Composable
+private fun AppLockSettingsGroup(app: FlashApplication) {
+    val enabled by app.settings.appLockEnabled.collectAsStateWithLifecycle()
+    val verifying by app.appLock.authenticating.collectAsStateWithLifecycle()
+    val auth = LocalAppLockAuth.current
+    var message by remember { mutableStateOf<String?>(null) }
+
+    fun apply(on: Boolean) {
+        app.settings.setAppLockEnabled(on)
+        app.appLock.settingChanged(on)
+    }
+
+    fun change(on: Boolean) {
+        val lockAuth = auth ?: return
+        when (app.appLock.beginToggle(on)) {
+            AppLockToggleStart.BUSY -> Unit
+            AppLockToggleStart.APPLY -> apply(on)
+            AppLockToggleStart.REFUSE_UNAVAILABLE -> message = tr("此设备未设置锁屏密码，无法开启应用锁")
+            AppLockToggleStart.VERIFY -> lockAuth.authenticate(
+                tr("应用锁"),
+                if (on) tr("验证身份以开启应用锁") else tr("验证身份以关闭应用锁"),
+            ) { result ->
+                when (app.appLock.finishToggle(on, result)) {
+                    AppLockToggleOutcome.APPLY -> apply(on)
+                    AppLockToggleOutcome.REFUSE_UNAVAILABLE -> message = tr("此设备未设置锁屏密码，无法开启应用锁")
+                    AppLockToggleOutcome.REFUSE_FAILED -> message = tr("未能验证身份，设置未更改")
+                    AppLockToggleOutcome.NONE -> Unit
+                }
+            }
+        }
+    }
+
+    SettingsGroup(
+        title = tr("隐私"),
+        footnote = tr("开启应用锁后，冷启动或离开超过 1 分钟再回来时，需要用生物识别或设备密码解锁。小组件、快速记录和通知操作不受影响。"),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Icon(
+                Icons.Outlined.Lock,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(22.dp),
+            )
+            Spacer(Modifier.width(FlashTokens.Spacing.SM))
+            Text(tr("应用锁"), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+            Switch(checked = enabled, enabled = !verifying && auth != null, onCheckedChange = ::change)
+        }
+    }
+
+    message?.let { text ->
+        AlertDialog(
+            onDismissRequest = { message = null },
+            text = { Text(text) },
+            confirmButton = { TextButton(onClick = { message = null }) { Text(tr("好")) } },
+        )
     }
 }
 
@@ -292,12 +360,15 @@ fun BackupSettingsScreen(onBack: () -> Unit) {
     val importPreview by viewModel.importPreview.collectAsStateWithLifecycle()
     val shareUri by viewModel.shareUri.collectAsStateWithLifecycle()
     val transferInProgress by viewModel.transferInProgress.collectAsStateWithLifecycle()
+    val passphrasePrompt by viewModel.passphrasePrompt.collectAsStateWithLifecycle()
     var showClearConfirm by remember { mutableStateOf(false) }
+    /** 加密选择框：导出到文件或系统分享（null = 未打开） */
+    var exportOptionsFor by remember { mutableStateOf<BackupExportTarget?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json"),
-    ) { uri -> uri?.let(viewModel::exportBackup) }
+    ) { uri -> if (uri != null) viewModel.exportBackup(uri) else viewModel.cancelExport() }
     val recoveryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
         uri -> uri?.let { viewModel.loadImport(it, recovery = true) }
     }
@@ -331,19 +402,14 @@ fun BackupSettingsScreen(onBack: () -> Unit) {
     SettingsPageScaffold(tr("备份与恢复"), onBack, snackbarHostState) {
         SettingsGroup(
             title = tr("数据与安全"),
-            note = tr("备份为明文 JSON，包含日志、情绪和任务内容；请只保存或分享至可信位置"),
+            note = tr("导出时可用口令加密（推荐）；不加密的备份是明文 JSON，包含日志、情绪和任务内容，请只保存或分享至可信位置"),
         ) {
             SettingsRow(
                 icon = Icons.Outlined.FileUpload,
                 iconTint = MaterialTheme.colorScheme.primary,
                 title = tr("导出备份"),
                 subtitle = tr("保存为 JSON 文件"),
-                onClick = {
-                    // 文件名固定用与语言无关的数字，便于跨端识别
-                    val timestamp = LocalDateTime.now()
-                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HHmmss", Locale.ROOT))
-                    exportLauncher.launch("flash-backup-$timestamp.json")
-                },
+                onClick = { exportOptionsFor = BackupExportTarget.FILE },
             )
             RowDivider()
             SettingsRow(
@@ -353,7 +419,7 @@ fun BackupSettingsScreen(onBack: () -> Unit) {
                 subtitle = tr("通过系统分享发送备份"),
                 value = if (transferInProgress) tr("准备中…") else null,
                 enabled = !transferInProgress,
-                onClick = viewModel::prepareBackupTransfer,
+                onClick = { exportOptionsFor = BackupExportTarget.SHARE },
             )
             RowDivider()
             SettingsRow(
@@ -383,6 +449,33 @@ fun BackupSettingsScreen(onBack: () -> Unit) {
                 onClick = { showClearConfirm = true },
             )
         }
+    }
+
+    exportOptionsFor?.let { target ->
+        BackupExportOptionsDialog(
+            onConfirm = { passphrase ->
+                exportOptionsFor = null
+                when (target) {
+                    BackupExportTarget.FILE -> {
+                        viewModel.chooseExport(passphrase)
+                        // 文件名固定用与语言无关的数字，便于跨端识别；加密备份带 -encrypted，扩展名仍为 .json
+                        val timestamp = LocalDateTime.now()
+                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HHmmss", Locale.ROOT))
+                        exportLauncher.launch("flash-backup-$timestamp${if (passphrase != null) "-encrypted" else ""}.json")
+                    }
+                    BackupExportTarget.SHARE -> viewModel.prepareBackupTransfer(passphrase)
+                }
+            },
+            onDismiss = { exportOptionsFor = null },
+        )
+    }
+
+    passphrasePrompt?.let { prompt ->
+        BackupPassphrasePromptDialog(
+            error = prompt.error,
+            onSubmit = viewModel::submitPassphrase,
+            onDismiss = viewModel::cancelPassphrase,
+        )
     }
 
     importPreview?.let { preview ->
@@ -558,3 +651,6 @@ internal fun ThemeMode.displayName(): String = when (this) {
     ThemeMode.LIGHT -> com.flash.app.i18n.tr("浅色")
     ThemeMode.DARK -> com.flash.app.i18n.tr("深色")
 }
+
+/** 加密选择框之后的去向 */
+internal enum class BackupExportTarget { FILE, SHARE }

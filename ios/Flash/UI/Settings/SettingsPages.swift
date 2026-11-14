@@ -16,20 +16,10 @@ enum SettingsPage: Hashable {
     case transfer
 }
 
-/// 灵感提醒子页：沿用 IdeaReminderSection（开关 + 频率 + 说明）
+/// 灵感提醒子页：统一周期提醒入口
 struct IdeaReminderSettingsPage: View {
     var body: some View {
-        Form {
-            Group {
-                IdeaReminderSection()
-            }
-            // 纸上书写：分组行用纸白卡面
-            .flashFormRowBackground()
-        }
-        .scrollContentBackground(.hidden)
-        .flashPageBackground()
-        .navigationTitle("灵感提醒")
-        .navigationBarTitleDisplayMode(.inline)
+        PersonalLibraryScreen(mode: .reminders)
     }
 }
 
@@ -99,7 +89,7 @@ struct BackupSettingsPage: View {
                 } header: {
                     Text("导出")
                 } footer: {
-                    Text("备份为明文 JSON，可存到「文件」或用隔空投送发给自己的其他设备。")
+                    Text("导出时可用口令加密（推荐）；不加密的备份是明文 JSON。可存到「文件」或用隔空投送发给自己的其他设备。")
                 }
                 .disabled(isBusy || isTemporaryStore)
 

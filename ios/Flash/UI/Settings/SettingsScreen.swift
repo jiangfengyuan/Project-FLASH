@@ -27,6 +27,8 @@ struct SettingsScreen: View {
     // 导出 / 分享
     @State private var exportDocument: BackupJSONDocument? = nil
     @State private var shareFile: ShareFile? = nil
+    /// 导出 / 分享前的加密选择，或导入加密备份时的口令输入
+    @State private var passphraseRequest: PassphraseRequest? = nil
 
     // 导入
     @State private var importerPresented = false
@@ -61,15 +63,15 @@ struct SettingsScreen: View {
                     }
 
                     AppearanceSection(appeared: true)
+                    Section {
+                        NavigationLink(L("本地智能标签")) { TaggingSettingsScreen() }
+                        NavigationLink(L("回收站")) { TrashScreen() }
+                    }
 
                     Section("通知") {
                         NavigationLink(value: SettingsPage.ideaReminder) {
-                            LabeledContent {
-                                Text(settings.ideaReminderEnabled ? settings.ideaReminderFrequency.displayName : L("已关闭"))
-                            } label: {
-                                SettingsRowLabel(title: L("灵感提醒"), systemImage: "lightbulb.max",
-                                                 color: BrandColors.ideaYellowText)
-                            }
+                            SettingsRowLabel(title: L("灵感周期提醒"), systemImage: "lightbulb.max",
+                                             color: BrandColors.ideaYellowText)
                         }
                     }
 
@@ -80,13 +82,20 @@ struct SettingsScreen: View {
                                              color: BrandColors.accessibleGreen)
                         }
                         .tint(BrandColors.brandPrimary)
+                        AppLockToggleRow()
                     } header: {
                         Text("隐私")
                     } footer: {
-                        Text("开启后，日志与灵感的首行和摘录会写入本机的系统搜索索引（不含情绪与任务，不离开此设备）。关闭即从系统搜索中移除。")
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
+                            Text("开启后，日志与灵感的首行和摘录会写入本机的系统搜索索引（不含情绪与任务，不离开此设备）。关闭即从系统搜索中移除。")
+                            Text("开启应用锁后，冷启动或离开超过 1 分钟再回来时，需要用生物识别或设备密码解锁。小组件、快速记录和通知操作不受影响。")
+                        }
                     }
 
                     Section {
+                        NavigationLink { PersonalLibraryScreen(mode: .tags) } label: {
+                            SettingsRowLabel(title: L("自由标签"), systemImage: "tag", color: BrandColors.accessibleGreen)
+                        }
                         NavigationLink(value: SettingsPage.backup) {
                             SettingsRowLabel(title: L("备份与恢复"), systemImage: "externaldrive",
                                              color: BrandColors.accessibleGreen)
@@ -118,7 +127,7 @@ struct SettingsScreen: View {
         // 导出：先在后台生成 JSON，再交给系统「存储到文件」
         .fileExporter(isPresented: exportPresented, document: exportDocument,
                       contentType: .json,
-                      defaultFilename: "flash-backup-\(DateFormatting.today()).json") { result in
+                      defaultFilename: BackupImportCoordinator.exportFileName(encrypted: exportDocument?.encrypted == true)) { result in
             exportDocument = nil
             switch result {
             case .success: showToast(L("✓ 备份已导出"))
@@ -136,8 +145,12 @@ struct SettingsScreen: View {
             }
         }
         .sheet(item: $shareFile) { file in
-            ShareBackupSheet(url: file.url)
+            ShareBackupSheet(url: file.url, encrypted: file.encrypted)
                 .presentationDetents([.height(260)])
+        }
+        .sheet(item: $passphraseRequest) { request in
+            passphraseSheet(request)
+                .presentationDetents([.medium, .large])
         }
         .sheet(isPresented: lanTransferPresented) {
             LanTransferSheet(controller: lanTransfer)
@@ -195,8 +208,8 @@ struct SettingsScreen: View {
             BackupSettingsPage(isTemporaryStore: isTemporaryStore,
                                isBusy: isBusy,
                                isClearDisabled: isBusy || lanTransfer.mode != .idle,
-                               onExport: prepareExport,
-                               onShare: prepareShare,
+                               onExport: { passphraseRequest = .export },
+                               onShare: { passphraseRequest = .share },
                                onImport: { chooseImportFile(recovery: false) },
                                onRecoveryImport: { chooseImportFile(recovery: true) },
                                onClearAll: { showClearConfirm = true })
@@ -231,14 +244,31 @@ struct SettingsScreen: View {
 
     // MARK: - 导出 / 分享 / 局域网发送
 
-    private func prepareExport() {
+    @ViewBuilder
+    private func passphraseSheet(_ request: PassphraseRequest) -> some View {
+        switch request.kind {
+        case .export, .share:
+            BackupPassphraseSheet(mode: .export { passphrase in
+                passphraseRequest = nil
+                if request.kind == .export { prepareExport(passphrase: passphrase) } else { prepareShare(passphrase: passphrase) }
+            }, onCancel: { passphraseRequest = nil })
+        case .unlock(let text, let error):
+            BackupPassphraseSheet(mode: .unlock(error: error) { passphrase in
+                passphraseRequest = nil
+                prepareEncryptedImport(text, passphrase: passphrase)
+            }, onCancel: { passphraseRequest = nil })
+        }
+    }
+
+    private func prepareExport(passphrase: String?) {
         isBusy = true
         Task {
             defer { isBusy = false }
             do {
                 let json = try await BackupImportCoordinator.exportJSON(
-                    snapshot: try currentSnapshot(), appVersion: BackupImportCoordinator.appVersion)
-                exportDocument = BackupJSONDocument(json: json)
+                    snapshot: try currentSnapshot(), appVersion: BackupImportCoordinator.appVersion,
+                    passphrase: passphrase)
+                exportDocument = BackupJSONDocument(json: json, encrypted: passphrase != nil)
             } catch let error as BackupError {
                 message = error.userMessage
             } catch {
@@ -248,18 +278,20 @@ struct SettingsScreen: View {
         }
     }
 
-    private func prepareShare() {
+    private func prepareShare(passphrase: String?) {
         isBusy = true
         Task {
             defer { isBusy = false }
             do {
                 let json = try await BackupImportCoordinator.exportJSON(
-                    snapshot: try currentSnapshot(), appVersion: BackupImportCoordinator.appVersion)
+                    snapshot: try currentSnapshot(), appVersion: BackupImportCoordinator.appVersion,
+                    passphrase: passphrase)
+                let encrypted = passphrase != nil
                 // 沙箱缓存副本（0600，过期自动清理），交给系统分享面板
                 let url = try await Task.detached(priority: .userInitiated) {
-                    try BackupTransfer.createShareFile(json: json)
+                    try BackupTransfer.createShareFile(json: json, encrypted: encrypted)
                 }.value
-                shareFile = ShareFile(url: url)
+                shareFile = ShareFile(url: url, encrypted: encrypted)
             } catch let error as BackupError {
                 message = error.userMessage
             } catch {
@@ -294,11 +326,40 @@ struct SettingsScreen: View {
             defer { if accessing { url.stopAccessingSecurityScopedResource() } }
             do {
                 let snapshot = try currentSnapshot()
-                let preview = try await BackupImportCoordinator.preview(fileAt: url, recovery: recoveryImport,
-                                                                        against: snapshot)
+                // 文本留在内存里：加密备份输入口令期间不必再次访问安全作用域文件
+                let text = try await BackupImportCoordinator.readBackupText(fileAt: url)
+                do {
+                    let preview = try await BackupImportCoordinator.preview(text: text, recovery: recoveryImport,
+                                                                            passphrase: nil, against: snapshot)
+                    pendingImport = preview
+                    pendingSnapshot = snapshot
+                    importPreview = preview
+                } catch BackupError.encrypted {
+                    passphraseRequest = .unlock(text, error: nil)
+                }
+            } catch let error as BackupError {
+                message = error.userMessage
+            } catch {
+                FlashLog.failure("backup_import_failed", error)
+                message = L("导入失败，请确认选择的是 Flash 备份文件后重试")
+            }
+        }
+    }
+
+    /// 加密备份：口令错误时回到口令框（带错误提示），其余错误按普通导入失败处理
+    private func prepareEncryptedImport(_ text: String, passphrase: String) {
+        isBusy = true
+        Task {
+            defer { isBusy = false }
+            do {
+                let snapshot = try currentSnapshot()
+                let preview = try await BackupImportCoordinator.preview(text: text, recovery: recoveryImport,
+                                                                        passphrase: passphrase, against: snapshot)
                 pendingImport = preview
                 pendingSnapshot = snapshot
                 importPreview = preview
+            } catch BackupError.encryptedAuthenticationFailed {
+                passphraseRequest = .unlock(text, error: BackupError.encryptedAuthenticationFailed.userMessage)
             } catch let error as BackupError {
                 message = error.userMessage
             } catch {
@@ -405,9 +466,12 @@ struct SettingsScreen: View {
 struct BackupJSONDocument: FileDocument {
     static let readableContentTypes: [UTType] = [.json]
     let json: String
+    /// 加密信封：只影响默认文件名（`-encrypted.json`）
+    var encrypted = false
 
-    init(json: String) {
+    init(json: String, encrypted: Bool = false) {
         self.json = json
+        self.encrypted = encrypted
     }
 
     init(configuration: ReadConfiguration) throws {
@@ -426,12 +490,31 @@ struct BackupJSONDocument: FileDocument {
 /// 待分享的备份副本（sheet(item:) 承载）
 struct ShareFile: Identifiable {
     let url: URL
+    var encrypted = false
     var id: URL { url }
+}
+
+/// 口令弹层：导出 / 分享前选择是否加密，或为加密备份输入口令（文本在内存中保留到用户取消）
+struct PassphraseRequest: Identifiable {
+    enum Kind: Equatable {
+        case export
+        case share
+        case unlock(String, error: String?)
+    }
+    let id = UUID()
+    let kind: Kind
+
+    static let export = PassphraseRequest(kind: .export)
+    static let share = PassphraseRequest(kind: .share)
+    static func unlock(_ text: String, error: String?) -> PassphraseRequest {
+        PassphraseRequest(kind: .unlock(text, error: error))
+    }
 }
 
 /// 分享面板：备份副本已生成，由 ShareLink 交给系统分享（AirDrop / 信息 / 邮件 / 云盘）
 private struct ShareBackupSheet: View {
     let url: URL
+    let encrypted: Bool
 
     var body: some View {
         VStack(spacing: Spacing.md) {
@@ -440,7 +523,9 @@ private struct ShareBackupSheet: View {
                 .foregroundStyle(BrandColors.brandPrimary)
             Text("备份文件已准备好")
                 .font(Typography.cardTitle)
-            Text("明文 JSON，仅分享给可信设备或联系人。")
+            Text(encrypted
+                 ? L("已用口令加密。接收方需要同一口令才能导入。")
+                 : L("明文 JSON，仅分享给可信设备或联系人。"))
                 .font(Typography.caption)
                 .foregroundStyle(.secondary)
             ShareLink(item: url, preview: SharePreview(L("Flash 备份"), image: Image(systemName: "doc"))) {

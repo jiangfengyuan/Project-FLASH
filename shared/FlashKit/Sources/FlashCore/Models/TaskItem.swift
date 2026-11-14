@@ -12,7 +12,7 @@ public enum TaskDueKind: String, Codable, Sendable {
 }
 
 /// flash-backup-v2 的跨端任务模型。日期时间一律存 UTC ISO-8601，展示日期由 IANA 时区计算。
-public struct TaskItem: Identifiable, Equatable, Sendable {
+public struct TaskItem: Identifiable, Equatable, Codable, Sendable {
     public let id: String
     public var title: String
     public var notes: String?

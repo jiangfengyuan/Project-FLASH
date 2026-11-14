@@ -1,0 +1,59 @@
+{
+  "sourceLanguage": "zh-Hans",
+  "strings": {
+    "NSFaceIDUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يستخدم Flash بصمة الوجه (Face ID) لفتح سجلاتك عند تفعيل قفل التطبيق."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flash verwendet Face ID, um deine Einträge zu entsperren, wenn die App-Sperre aktiv ist."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flash uses Face ID to unlock your records when App Lock is on."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flash utilise Face ID pour déverrouiller vos entrées lorsque le verrouillage de l'app est activé."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アプリロックがオンのとき、Flash は Face ID で記録のロックを解除します。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱 잠금을 켜면 Flash가 Face ID로 기록의 잠금을 해제합니다."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flash использует Face ID, чтобы разблокировать ваши записи, когда включена блокировка приложения."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开启应用锁后，Flash 用面容 ID 解锁你的记录"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

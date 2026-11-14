@@ -8,7 +8,8 @@ import Foundation
 
 /// 备份导入/导出流水线（macOS 设置页与 iOS 设置页共用；平台只负责选文件与呈现）。
 ///
-/// 导入：读文件（50 MB 上限）→ 严格解析 v2 或恢复解析 → 与本机快照做差异分析 → 预览 →
+/// 导入：读文件（明文 50 MB、加密信封 72 MB 上限）→ 加密备份先凭口令解密 →
+/// 严格解析 v2 或恢复解析 → 与本机快照做差异分析 → 预览 →
 /// 合并或覆盖写库（覆盖前 TOCTOU 重校验）→ 重建系统提醒。
 /// 序列化、解析与差异分析在后台执行；写库经 `@MainActor` 的 FlashRepository。
 public enum BackupImportCoordinator {
@@ -46,30 +47,77 @@ public enum BackupImportCoordinator {
     // MARK: - 导出
 
     /// 严格 v2 导出 JSON（后台序列化）。临时存储的快照一律拒绝：
-    /// 它不是完整备份，日后被当作备份覆盖导入会抹掉真实数据（F-07）
-    public static func exportJSON(snapshot: FlashSnapshot, appVersion: String) async throws -> String {
+    /// 它不是完整备份，日后被当作备份覆盖导入会抹掉真实数据（F-07）。
+    /// 给出 `passphrase` 时把校验过的明文包进 flash-backup-enc-v1 信封；nil 为明文导出，字节不变。
+    public static func exportJSON(snapshot: FlashSnapshot, appVersion: String,
+                                  passphrase: String? = nil) async throws -> String {
         guard !snapshot.isFromTemporaryStore else { throw BackupError.temporaryStore }
+        if let passphrase { try BackupEncryption.validateExportPassphrase(passphrase) }
         return try await background {
-            try BackupService.exportStrictJSON(logs: snapshot.logs,
-                                               emotions: snapshot.emotions,
-                                               tasks: snapshot.tasks,
-                                               appVersion: appVersion)
+            let json = try LibraryBackup.export(snapshot, appVersion: appVersion)
+            guard let passphrase else { return json }
+            return try BackupEncryption.encrypt(json, passphrase: passphrase)
         }
+    }
+
+    /// 导出文件的默认名：加密备份带 `-encrypted`，扩展名保持 `.json` 以便各端选择器识别
+    public static func exportFileName(encrypted: Bool) -> String {
+        "flash-backup-\(DateFormatting.today())\(encrypted ? "-encrypted" : "").json"
     }
 
     // MARK: - 预览
 
-    /// 从用户选择的文件生成导入预览：先查大小（超 50 MB 直接拒绝）再全量读入
+    /// 从用户选择的文件生成导入预览。加密备份抛出 `BackupError.encrypted`：
+    /// 调用方应改用 `readBackupText` 保留文本，取得口令后调用 `preview(text:…)`。
     public static func preview(fileAt url: URL, recovery: Bool,
                                against snapshot: FlashSnapshot) async throws -> ImportPreview {
+        let text = try await readBackupText(fileAt: url)
+        return try await preview(text: text, recovery: recovery, passphrase: nil, against: snapshot)
+    }
+
+    /// 先查大小再流式限额读入（加密信封上限 72 MB；明文超过 50 MB 在解析时拒绝）。
+    /// 读出的文本可在输入口令期间保留，无需再次访问安全作用域文件。
+    public static func readBackupText(fileAt url: URL) async throws -> String {
         try await background {
             let values = try url.resourceValues(forKeys: [.fileSizeKey])
-            if let size = values.fileSize, size > BackupService.maxFileBytes {
+            if let size = values.fileSize, size > BackupEncryption.maxEnvelopeBytes {
                 throw BackupError.fileTooLarge
             }
-            let json = try BackupService.readJSON(from: url)
-            let parsed = try recovery ? BackupService.parseRecovery(json) : BackupService.parseStrict(json)
-            return analyzed(parsed, against: snapshot)
+            return try BackupService.readJSON(from: url, maxBytes: BackupEncryption.maxEnvelopeBytes)
+        }
+    }
+
+    /// 文本 → 预览。明文 v1/v2 行为不变；加密备份缺口令时抛 `.encrypted`，
+    /// 口令错误抛 `.encryptedAuthenticationFailed`（可直接重试，不必重选文件）。
+    /// 解出的明文只按 v2 解析，不递归解密嵌套信封。
+    public static func preview(text: String, recovery: Bool, passphrase: String?,
+                               against snapshot: FlashSnapshot) async throws -> ImportPreview {
+        try await background {
+            analyzed(try parseBackupText(text, recovery: recovery, passphrase: passphrase), against: snapshot)
+        }
+    }
+
+    static func parseBackupText(_ text: String, recovery: Bool, passphrase: String?) throws -> ImportPreview {
+        func parse(_ json: String) throws -> ImportPreview {
+            recovery ? try BackupService.parseRecovery(json) : try BackupService.parseStrict(json)
+        }
+        let isOversized = text.utf8.count > BackupService.maxFileBytes
+        if isOversized {
+            // 明文备份不可能超过 50 MB；只有加密信封才继续
+            guard BackupEncryption.isEnvelope(text) else { throw BackupError.fileTooLarge }
+        } else {
+            do {
+                return try parse(text)
+            } catch BackupError.encrypted {
+                // 加密信封：继续走解密
+            }
+        }
+        guard let passphrase else { throw BackupError.encrypted }
+        let plaintext = try BackupEncryption.decrypt(text, passphrase: passphrase)
+        do {
+            return try parse(plaintext)
+        } catch BackupError.encrypted {
+            throw BackupError.contract("/version")
         }
     }
 
@@ -111,9 +159,9 @@ public enum BackupImportCoordinator {
             guard previewSnapshot == current else {
                 return .changedSincePreview(preview: analyzed(preview, against: current), snapshot: current)
             }
-            try repository.replaceAll(logs: preview.logs, emotions: preview.emotions, tasks: preview.tasks)
+            try repository.replaceAll(logs: preview.logs, emotions: preview.emotions, tasks: preview.tasks, library: preview.library.map { var v = $0; v.remindersNeedConfirmation = v != PersonalLibrary(); return v } ?? .init(), trash: preview.trash, preferences: preview.preferences ?? .init(), automaticTags: preview.automaticTags)
         } else {
-            try repository.mergeAll(logs: preview.logs, emotions: preview.emotions, tasks: preview.tasks)
+            try repository.mergeAll(logs: preview.logs, emotions: preview.emotions, tasks: preview.tasks, library: preview.library, trash: preview.trash, preferences: preview.preferences, automaticTags: preview.automaticTags)
         }
         do {
             // 默认重建系统提醒；测试注入替身，避免触达通知中心
@@ -137,6 +185,14 @@ public enum BackupImportCoordinator {
     /// 导入预览弹窗正文：条目数、跳过数与三分区差异
     public static func analysisText(_ preview: ImportPreview) -> String {
         var text = L("包含 \(preview.logCount) 条日志、\(preview.emotionCount) 条情绪、\(preview.taskCount) 个任务")
+        text += "\n" + L("回收站") + ": \(preview.trash.count)"
+        if preview.preferences == nil { text += "\n" + L("覆盖旧版备份将清除本机回收站与本地智能设置") }
+        if let library = preview.library {
+            text += "\n" + L("自由标签") + ": \(library.tags.count) · " + L("已保存筛选") + ": \(library.filters.count)"
+            text += "\n" + L("导入的灵感提醒需要确认后启用")
+        } else {
+            text += "\n" + L("覆盖旧版备份将清除本机自由标签、保存筛选与灵感提醒配置")
+        }
         let skipped = preview.skippedLogs + preview.skippedEmotions + preview.skippedTasks
         if skipped > 0 { text += L("\n跳过异常数据 \(skipped) 条") }
         if let difference = preview.difference {

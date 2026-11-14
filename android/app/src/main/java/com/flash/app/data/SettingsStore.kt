@@ -90,6 +90,15 @@ class SettingsStore(context: Context) {
         get() = prefs.getString(KEY_QUICK_DRAFT, "").orEmpty()
         set(value) = prefs.edit { putString(KEY_QUICK_DRAFT, value) }
 
+    private val _appLockEnabled = MutableStateFlow(prefs.getBoolean(KEY_APP_LOCK_ENABLED, false))
+    /** 应用锁：默认关闭；开启后冷启动与离开超过宽限期需验证（见 AppLockController） */
+    val appLockEnabled: StateFlow<Boolean> = _appLockEnabled.asStateFlow()
+
+    fun setAppLockEnabled(enabled: Boolean) {
+        _appLockEnabled.value = enabled
+        prefs.edit { putBoolean(KEY_APP_LOCK_ENABLED, enabled) }
+    }
+
     /** Welcome 页完成后调用 */
     fun setWelcomed() {
         _welcomed.value = true
@@ -103,5 +112,6 @@ class SettingsStore(context: Context) {
         const val KEY_IDEA_REMINDER_LAST_FIRED = "ideaReminderLastFiredAt"
         const val KEY_QUICK_DRAFT = "quickCaptureDraft"
         const val KEY_WELCOMED = "welcomed"
+        const val KEY_APP_LOCK_ENABLED = "appLockEnabled"
     }
 }

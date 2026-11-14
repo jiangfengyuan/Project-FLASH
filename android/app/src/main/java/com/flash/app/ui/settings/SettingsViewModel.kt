@@ -18,6 +18,7 @@ import com.flash.app.data.Backup
 import com.flash.app.data.BackupTransfer
 import com.flash.app.data.BackupDiff
 import com.flash.app.data.BackupDifference
+import com.flash.app.data.BackupEncryption
 import com.flash.app.data.BackupImportSession
 import com.flash.app.data.LocalBackupTransfer
 import com.flash.app.data.SettingsStore
@@ -59,6 +60,9 @@ data class ImportPreview(
     val localSnapshot: com.flash.app.data.FlashSnapshot,
 )
 
+/** 加密备份的口令框：`error` 为上次尝试的错误（口令错误等） */
+data class PassphrasePrompt(val recovery: Boolean, val error: String? = null)
+
 class SettingsViewModel(
     private val app: Application,
     private val settings: SettingsStore,
@@ -77,6 +81,22 @@ class SettingsViewModel(
     private val importSession = BackupImportSession()
     private val importCommitMutex = Mutex()
 
+    private val _passphrasePrompt = MutableStateFlow<PassphrasePrompt?>(null)
+    val passphrasePrompt: StateFlow<PassphrasePrompt?> = _passphrasePrompt.asStateFlow()
+    /** 等待口令的加密备份原文：只在内存中，取消或成功后清空 */
+    private var pendingEncryptedText: String? = null
+
+    /**
+     * 导出前的加密选择（明文或带口令），`null` 为尚未选择。系统「创建文件」页面期间保存在
+     * ViewModel（随配置变更保留）；进程被回收则丢失，导出会中止而不是悄悄写明文。
+     */
+    private var pendingExport: ExportChoice? = null
+
+    private sealed interface ExportChoice {
+        data object Plain : ExportChoice
+        class Encrypted(val passphrase: String) : ExportChoice
+    }
+
     private val _shareUri = MutableStateFlow<Uri?>(null)
     val shareUri: StateFlow<Uri?> = _shareUri.asStateFlow()
 
@@ -92,11 +112,28 @@ class SettingsViewModel(
         _message.value = null
     }
 
+    /** 第一步：记下加密选择（`null` = 不加密），随后界面打开系统「创建文件」 */
+    fun chooseExport(passphrase: String?) {
+        pendingExport = if (passphrase == null) ExportChoice.Plain else ExportChoice.Encrypted(passphrase)
+    }
+
+    /** 用户取消了系统「创建文件」：丢弃记下的口令 */
+    fun cancelExport() {
+        pendingExport = null
+    }
+
     fun exportBackup(target: Uri) {
+        val choice = pendingExport
+        pendingExport = null
+        if (choice == null) {
+            _message.value = com.flash.app.i18n.tr("导出已中断，请重新导出")
+            return
+        }
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 val snapshot = repository.exportSnapshot()
-                val json = Backup.exportJson(snapshot.logs, snapshot.emotions, snapshot.tasks)
+                val plain = Backup.exportJson(snapshot.logs, snapshot.emotions, snapshot.tasks)
+                val json = if (choice is ExportChoice.Encrypted) BackupEncryption.encrypt(plain, choice.passphrase) else plain
                 app.contentResolver.openOutputStream(target, "wt")?.use { out ->
                     out.write(json.toByteArray(Charsets.UTF_8))
                 } ?: error(com.flash.app.i18n.tr("无法写入文件"))
@@ -108,14 +145,16 @@ class SettingsViewModel(
         }
     }
 
-    fun prepareBackupTransfer() {
+    /** `passphrase` 为 null 时分享明文备份 */
+    fun prepareBackupTransfer(passphrase: String?) {
         if (_transferInProgress.value) return
         _transferInProgress.value = true
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 val snapshot = repository.exportSnapshot()
-                val json = Backup.exportJson(snapshot.logs, snapshot.emotions, snapshot.tasks)
-                BackupTransfer.createShareUri(app, json)
+                val plain = Backup.exportJson(snapshot.logs, snapshot.emotions, snapshot.tasks)
+                val json = if (passphrase != null) BackupEncryption.encrypt(plain, passphrase) else plain
+                BackupTransfer.createShareUri(app, json, encrypted = passphrase != null)
             }.onSuccess {
                 _shareUri.value = it
             }.onFailure {
@@ -164,35 +203,26 @@ class SettingsViewModel(
                         cursor.getLong(cursor.getColumnIndexOrThrow(android.provider.OpenableColumns.SIZE))
                     } else 0L
                 } ?: 0L
-                if (size > Backup.MAX_FILE_BYTES) {
-                    throw Backup.BackupFormatException(com.flash.app.i18n.tr("备份文件超过 {0} MB，无法导入", Backup.MAX_FILE_BYTES / 1024 / 1024))
+                if (size > BackupEncryption.MAX_ENVELOPE_BYTES) {
+                    throw Backup.BackupFormatException(com.flash.app.i18n.tr("备份文件超过 {0} MB，无法导入", BackupEncryption.MAX_ENVELOPE_BYTES / 1024 / 1024))
                 }
 
                 val text = app.contentResolver.openInputStream(source)?.use { input ->
                     importSession.attachResource(generation, input)
-                    try { Backup.readJson(input) } finally { importSession.releaseResource(generation, input) }
+                    try { Backup.readJson(input, BackupEncryption.MAX_ENVELOPE_BYTES) } finally { importSession.releaseResource(generation, input) }
                 }
                     ?: error(com.flash.app.i18n.tr("无法读取文件"))
                 currentCoroutineContext().ensureActive()
-                val result = if (recovery) Backup.parseRecovery(text) else Backup.parseStrict(text)
-                val local = repository.exportSnapshot()
-                ImportPreview(
-                    recovery = recovery,
-                    logCount = result.logs.size,
-                    emotionCount = result.emotions.size,
-                    skippedLogs = result.skippedLogs,
-                    skippedEmotions = result.skippedEmotions,
-                    taskCount = result.tasks.size,
-                    skippedTasks = result.skippedTasks,
-                    logs = result.logs,
-                    emotions = result.emotions,
-                    tasks = result.tasks,
-                    difference = BackupDiff.analyze(
-                        local.logs, local.emotions, result.logs, result.emotions,
-                        local.tasks, result.tasks,
-                    ),
-                    localSnapshot = local,
-                )
+                try {
+                    buildPreview(text, recovery, passphrase = null)
+                } catch (e: BackupEncryption.PassphraseRequiredException) {
+                    // 原文留在内存里，等用户输入口令；不必再次读取 content:// 文件
+                    importSession.publish(generation) {
+                        pendingEncryptedText = text
+                        _passphrasePrompt.value = PassphrasePrompt(recovery)
+                    }
+                    return@launch
+                }
             }.onSuccess {
                 importSession.publish(generation) { _importPreview.value = it }
             }.onFailure { e ->
@@ -206,6 +236,66 @@ class SettingsViewModel(
             }
         }
         importSession.attach(generation, operation)
+    }
+
+    /** 加密备份：用口令解密并生成预览；口令错误时口令框带错误提示重新出现 */
+    fun submitPassphrase(passphrase: String) {
+        val prompt = _passphrasePrompt.value ?: return
+        val text = pendingEncryptedText ?: return
+        _passphrasePrompt.value = null
+        val generation = importSession.begin()
+        val operation = viewModelScope.launch(Dispatchers.IO) {
+            runCatching {
+                buildPreview(text, prompt.recovery, passphrase)
+            }.onSuccess {
+                importSession.publish(generation) {
+                    pendingEncryptedText = null
+                    _importPreview.value = it
+                }
+            }.onFailure { e ->
+                if (e is CancellationException) return@onFailure
+                importSession.publish(generation) {
+                    if (e is BackupEncryption.AuthenticationFailedException) {
+                        _passphrasePrompt.value = prompt.copy(error = e.message)
+                    } else {
+                        pendingEncryptedText = null
+                        _message.value = when (e) {
+                            is Backup.BackupFormatException -> e.message
+                            else -> com.flash.app.i18n.tr("导入失败：{0}", e.message)
+                        }
+                    }
+                }
+            }
+        }
+        importSession.attach(generation, operation)
+    }
+
+    fun cancelPassphrase() {
+        _passphrasePrompt.value = null
+        pendingEncryptedText = null
+    }
+
+    private suspend fun buildPreview(text: String, recovery: Boolean, passphrase: String?): ImportPreview {
+        val result = BackupEncryption.parseText(text, recovery, passphrase)
+        currentCoroutineContext().ensureActive()
+        val local = repository.exportSnapshot()
+        return ImportPreview(
+            recovery = recovery,
+            logCount = result.logs.size,
+            emotionCount = result.emotions.size,
+            skippedLogs = result.skippedLogs,
+            skippedEmotions = result.skippedEmotions,
+            taskCount = result.tasks.size,
+            skippedTasks = result.skippedTasks,
+            logs = result.logs,
+            emotions = result.emotions,
+            tasks = result.tasks,
+            difference = BackupDiff.analyze(
+                local.logs, local.emotions, result.logs, result.emotions,
+                local.tasks, result.tasks,
+            ),
+            localSnapshot = local,
+        )
     }
 
     fun confirmImport(overwrite: Boolean) {

@@ -22,6 +22,9 @@ class FlashApplication : Application() {
         private set
     lateinit var taskReminders: TaskReminderScheduler
         private set
+    /** 应用锁状态随进程存活：配置变更重建 Activity 不重新上锁，进程重启即冷启动上锁 */
+    lateinit var appLock: com.flash.app.data.AppLockController
+        private set
 
     /** 深链、通知与系统分享交给界面层的待处理入口 */
     val pendingEntry = kotlinx.coroutines.flow.MutableStateFlow<com.flash.app.ui.navigation.AppEntry?>(null)
@@ -39,6 +42,10 @@ class FlashApplication : Application() {
             .build()
         repository = FlashRepository(db)
         settings = SettingsStore(this)
+        appLock = com.flash.app.data.AppLockController(
+            isEnabled = { settings.appLockEnabled.value },
+            isAvailable = { com.flash.app.system.AppLockAuthenticator.isDeviceSecure(this) },
+        )
         taskReminders = TaskReminderScheduler(this)
         com.flash.app.data.reminder.IdeaReminderWork.sync(this, settings.ideaReminderEnabled.value)
         com.flash.app.widget.TodayWidgetUpdater.observe(this, repository)

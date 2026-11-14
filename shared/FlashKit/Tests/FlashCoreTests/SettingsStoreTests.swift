@@ -24,6 +24,14 @@ struct SettingsStoreTests {
         #expect(!store.welcomed)
     }
 
+    @Test func appLockDefaultsOffAndPersists() {
+        let (name, suite) = makeSuite()
+        defer { suite.removePersistentDomain(forName: name) }
+        #expect(!SettingsStore(defaults: suite).appLockEnabled)
+        SettingsStore(defaults: suite).setAppLockEnabled(true)
+        #expect(SettingsStore(defaults: suite).appLockEnabled)
+    }
+
     @Test func setThemeModePersists() {
         let (name, suite) = makeSuite()
         defer { suite.removePersistentDomain(forName: name) }

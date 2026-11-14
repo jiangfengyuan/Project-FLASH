@@ -1,5 +1,7 @@
 # Flash 首版跨端数据契约
 
+> 2026-11-14：iOS 新功能使用 [flash-backup-v3](flash-backup-v3.md) 完整保存自由标签、筛选、回忆偏好和周期提醒。Apple 继续读旧备份，未升级的 Android/HarmonyOS 明确拒绝 v3。以下 v2 规范保留，不授予旧端新格式支持。
+
 > 契约修订：0.2.0（草案）｜日期：2026-10-05<br>
 > 范围：iOS / macOS / Android / HarmonyOS 的完整备份快照<br>
 > 状态：当前加固候选四端均支持既有分区 schema 1/2，导出 schema 2；Android 获批采用增量 Room4→5，Harmony 保持 payload 表。原生设备验收范围及历史状态见 [执行与验收记录](acceptance.md)。
@@ -11,7 +13,7 @@
 - 文件版本仍为 `flash-backup-v2`；分区 schema 现支持 `1` 与 `2`：**分区版本声明该分区记录结构**，schema 2 仅新增可选字段（日志/情绪/任务 `isFavorite`，情绪 `intensity`，任务 `sourceLogId`），必填集不变。只实现 schema 1 的客户端读取 schema 2 文件时必须显式拒绝并提示升级。`0.2.0` 是本次契约草案修订号，不是新的文件版本，也不是客户端版本。
 - [flash-backup-v2.schema.json](flash-backup-v2.schema.json) 使用 JSON Schema Draft 2020-12；`$id` 是标识符，不是需要联网获取的地址。
 - 文件是完整快照，不是增量消息；当前支持文件与系统分享，不规定各端 UI、数据库表或通知 API。旧版局域网因接收方未认证且明文传输而经批准暂时停用；历史协议见 [lan-handshake-v1.1.md](lan-handshake-v1.1.md)，不属于本 Schema 范围。
-- 本次不定义账号、云端 API、自动同步、加密或删除传播。`flash-sync-v1` 仍只是预留设计，不能交给本 Schema 校验或现有备份导入器处理。
+- 本次不定义账号、云端 API、自动同步或删除传播。可选的口令加密由独立的外层信封 [flash-backup-enc-v1](flash-backup-enc-v1.md) 定义（2026-11-08）：信封解密后得到的明文仍是本 Schema 校验的 v2 文件，本 Schema 不校验信封。`flash-sync-v1` 仍只是预留设计，不能交给本 Schema 校验或现有备份导入器处理。
 - 此 Schema 定义“严格互通文件”，不是现有“跳过坏记录、尽量恢复”的导入算法。不能直接用它替换旧解析器而不评估兼容性与交互变化。
 
 ## 2. 文件结构
@@ -114,6 +116,7 @@ JSON 对象不得包含重复键。三端严格入口与参考文件校验器都
 - [valid-full.json](fixtures/valid-full.json)：三分区、全天/定时任务、可选空值，内容全部虚构（分区 schema 1）。
 - [valid-schema2.json](fixtures/valid-schema2.json)：分区 schema 2 样例——收藏、情绪强度、任务来源关联（2026-10-05 起由 macOS 与参考校验器消费；Android/HarmonyOS 跟进前不接入其测试）。
 - [legacy-v1.json](fixtures/legacy-v1.json)：旧版兼容样例；严格 v2 校验应失败。
+- [encrypted/](fixtures/encrypted/cases.json)：`flash-backup-enc-v1` 加密信封正反例与独立清单，由 `generate-encrypted.cjs` 确定性生成，四端共同消费。
 - [contract.test.cjs](../../scripts/backup-contract/contract.test.cjs)：从有效样例变异产生非法日期、枚举、重复 ID、超限、版本和时间冲突等测试输入。负例同时落在 `fixtures/cases.json` 清单与独立 JSON 文件中，由三端共同消费。
 - [HarmonyOS codec 测试](../../harmonyos/tests/backup-contract.test.cjs)：使用实际 `.ets` 编解码源文件，平台能力由主机替身提供。
 
@@ -145,3 +148,7 @@ HarmonyOS 主机测试还需 TypeScript；加载规则见 `harmonyos/tests/ets-l
 | CI、真机 | 工作流已运行，远端运行和 `main` 分支保护已确认；真实设备互传待验收，且缺 HarmonyOS 真机 |
 
 后续顺序：完成可用设备验收 → HarmonyOS 原生设备验证 → 查询/日期窗口与搜索性能。未完成设备验收前不能宣布“三端全面互通”。
+
+## iOS 本地资料库扩展
+
+[flash-backup-v3](flash-backup-v3.md) 保存自由标签与筛选；[flash-backup-v4](flash-backup-v4.md) 另外保存回收站、标签自动来源与本地智能设置。v2 正文互通格式保持不变。旧客户端必须显式拒绝它们不支持的版本。

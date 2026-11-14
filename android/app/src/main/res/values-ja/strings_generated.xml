@@ -12,6 +12,7 @@
     <string name="s_aafdda63" formatted="false">/data/{0}/{1}: 記録はオブジェクトである必要があります</string>
     <string name="s_10db0315" formatted="false">/data/{0}: 配列が上限を超えています</string>
     <string name="s_b7cc858a" formatted="false">/data: 不正または重複したデータがあります。復元読み込みで復元できる内容をご確認ください</string>
+    <string name="s_8cc3cbe4" formatted="false">/version: 暗号化バックアップの中に別の暗号化バックアップは入れられません</string>
     <string name="s_90ef682e" formatted="false">/version: 古いファイルは復元読み込みをお使いください</string>
     <string name="s_b9ce0fb9" formatted="false">/: JSON の値が多すぎます</string>
     <string name="s_307d96fc" formatted="false">/: JSON オブジェクトに重複キーがあります: {0}</string>
@@ -23,6 +24,7 @@
     <string name="s_355b83a3" formatted="false">心に残る一週間でした。✦</string>
     <string name="s_a1486dba" formatted="false">Flash Aero バックアップ</string>
     <string name="s_eeecd281" formatted="false">Flash タスクのリマインダー</string>
+    <string name="s_2534b43c" formatted="false">Flash はロックされています</string>
     <string name="s_f6ff76b6" formatted="false">Flash クイック記録</string>
     <string name="s_9a2b6832" formatted="false">Flash いま</string>
     <string name="s_2a0b1ddf" formatted="false">Flash アイデア</string>
@@ -78,10 +80,12 @@
     <string name="s_6bcf17c2" formatted="false">次の月</string>
     <string name="s_10c83c81" formatted="false">次へ</string>
     <string name="s_82b6cabb" formatted="false">こんにちは 🌤</string>
+    <string name="s_e08c4ba9" formatted="false">暗号化しないバックアップは平文の JSON で、ファイルを持つ人は誰でもすべての記録・感情・タスクを読めます。信頼できる端末や連絡先にのみ保存・共有してください。</string>
     <string name="s_1344f491" formatted="false">悲しい</string>
     <string name="s_4cc036be" formatted="false">通知なし</string>
     <string name="s_12e8587a" formatted="false">未対応の {0} セクションのバージョン</string>
     <string name="s_ba358518" formatted="false">指定なし</string>
+    <string name="s_9ae60760" formatted="false">パスフレーズが一致しません。</string>
     <string name="s_b13672cd" formatted="false">ふつう</string>
     <string name="s_51f6517e" formatted="false">テーマ</string>
     <string name="s_0a416847" formatted="false">その前の 30 日</string>
@@ -121,6 +125,7 @@
     <string name="s_801be77b" formatted="false">内容</string>
     <string name="s_dc24135d" formatted="false">内容を入力してください</string>
     <string name="s_043cda7f" formatted="false">長すぎます ({0} 文字、上限 {1} 文字)。短くしてから保存してください</string>
+    <string name="s_d15889f8" formatted="false">パスフレーズをもう一度入力</string>
     <string name="s_87000edc" formatted="false">もう少し記録しましょう。未来のあなたが見返します。</string>
     <string name="s_95a71bc9" formatted="false">準備中…</string>
     <string name="s_9aa7d416" formatted="false">共有</string>
@@ -135,10 +140,17 @@
     <string name="s_e6dedfa0" formatted="false">この気分の記録を削除しますか?</string>
     <string name="s_98f7e648" formatted="false">このログを削除しますか?</string>
     <string name="s_c51f5912" formatted="false">期限時刻</string>
+    <string name="s_d26ab92b" formatted="false">暗号化バックアップ</string>
+    <string name="s_e78a9d95" formatted="false">暗号化バックアップファイルが壊れているか、形式が正しくありません。</string>
     <string name="s_c628e28d" formatted="false">ログ {0} 件、気分 {1} 件、タスク {2} 件を含みます</string>
     <string name="s_60b4c5ae" formatted="false">危険な操作</string>
     <string name="s_949856b3" formatted="false">キャンセル</string>
     <string name="s_d1d62fb0" formatted="false">お気に入りを解除</string>
+    <string name="s_53c7e602" formatted="false">パスフレーズ</string>
+    <string name="s_f7e8d7e8" formatted="false">パスフレーズは 1024 文字以内にしてください。</string>
+    <string name="s_ad879bae" formatted="false">パスフレーズは 8 文字以上にしてください。</string>
+    <string name="s_4db1b243" formatted="false">パスフレーズが違うか、ファイルが壊れています。</string>
+    <string name="s_ef638194" formatted="false">パスフレーズ(8 文字以上)</string>
     <string name="s_4d55cb75" formatted="false">バックアップを書き出すか、システムの共有で送信できます</string>
     <string name="s_5e53c03a" formatted="false">木</string>
     <string name="s_40163b46" formatted="false">今日に戻る</string>
@@ -156,6 +168,7 @@
     <string name="s_d82fe22c" formatted="false">メモが長すぎます。短くしてから保存してください</string>
     <string name="s_d9dac7dd" formatted="false">メモ (任意)</string>
     <string name="s_e4a4815a" formatted="false">外観と操作</string>
+    <string name="s_f849ada8" formatted="false">OK</string>
     <string name="s_1e13bd21" formatted="false">完了</string>
     <string name="s_dd03e6ad" formatted="false">読み込み前にローカルデータとの差分を確認</string>
     <string name="s_9b60ff74" formatted="false">読み込みに失敗しました: {0}</string>
@@ -163,6 +176,8 @@
     <string name="s_7fdaf616" formatted="false">書き出し・読み込み・消去</string>
     <string name="s_f97fded3" formatted="false">バックアップを書き出す</string>
     <string name="s_7436fb8d" formatted="false">書き出しに失敗しました: {0}</string>
+    <string name="s_0bd03067" formatted="false">書き出しが中断されました。もう一度書き出してください。</string>
+    <string name="s_1a26bd57" formatted="false">書き出し時にパスフレーズで暗号化できます(推奨)。暗号化しないバックアップは記録・感情・タスクを含む平文の JSON なので、信頼できる場所にのみ保存・共有してください</string>
     <string name="s_b1632a8b" formatted="false">すべてのログ・気分・タスクが完全に削除されます。先にバックアップを書き出してください。</string>
     <string name="s_479481d2" formatted="false">ローカルネットワーク転送は現在停止中です</string>
     <string name="s_f8eef707" formatted="false">旧プロトコルにセキュリティ上のリスクがあるため LAN 転送は停止中です。書き出しまたはシステムの共有で、信頼できる経路から JSON ファイルを送ってください。</string>
@@ -179,6 +194,8 @@
     <string name="s_c13b3522" formatted="false">すべて消去しましたが、システム通知を消せませんでした。アプリを再起動してお試しください</string>
     <string name="s_c8fa62c1" formatted="false">{0} 件を選択</string>
     <string name="s_01133500" formatted="false">平均の気分 {0} · 合計 {1} 件</string>
+    <string name="s_ee490e90" formatted="false">アプリロック</string>
+    <string name="s_fb13a35f" formatted="false">アプリロックをオンにすると、Flash の起動時や 1 分以上離れて戻ったときに、生体認証または端末のパスコードでロックを解除します。ウィジェット、クイック記録、通知の操作はそのまま使えます。</string>
     <string name="s_22696cbc" formatted="false">開始</string>
     <string name="s_499be303" formatted="false">はじめる</string>
     <string name="s_5d62764c" formatted="false">開始日</string>
@@ -257,6 +274,8 @@
     <string name="s_87b8867d" formatted="false">新しい順</string>
     <string name="s_ceb8f642" formatted="false">古い順</string>
     <string name="s_56b38d0f" formatted="false">最近のひらめき</string>
+    <string name="s_4f2beab6" formatted="false">本人確認できなかったため、設定は変更されていません。</string>
+    <string name="s_5665b744" formatted="false">本人確認できませんでした。もう一度お試しください。</string>
     <string name="s_be2c2eb2" formatted="false">未読</string>
     <string name="s_27c37899" formatted="false">今週</string>
     <string name="s_ccb42197" formatted="false">今週の記録 {0} 件 · 未整理 {1} 件</string>
@@ -277,11 +296,13 @@
     <string name="s_aef45eb7" formatted="false">読み込み中…</string>
     <string name="s_6af40858" formatted="false">いま</string>
     <string name="s_b060afd3" formatted="false">この端末はバックアップ内のタイムゾーンに対応していません。システムを更新してお試しください。何も読み込まれていません</string>
+    <string name="s_2f15ac82" formatted="false">アプリロックを使うには、この端末に画面ロックのパスコードを設定してください</string>
     <string name="s_f4958768" formatted="false">3 日ごと</string>
     <string name="s_41be2fe2" formatted="false">毎週</string>
     <string name="s_02c285b5" formatted="false">毎日</string>
     <string name="s_18fa51bd" formatted="false">日別のログ・アイデア・気分の回数 · タスクは含みません</string>
     <string name="s_6d03477d" formatted="false">日平均の気分: {0}</string>
+    <string name="s_3aa61c82" formatted="false">パスフレーズがなければ、誰もバックアップを読んだり変更したりできません。Flash はパスフレーズを保存しないため、忘れると復元できません。</string>
     <string name="s_5816c303" formatted="false">共有できるアプリがありません</string>
     <string name="s_43c975df" formatted="false">記録が見つかりません</string>
     <string name="s_f8bc527e" formatted="false">条件に合うログはありません</string>
@@ -299,6 +320,7 @@
     <string name="s_436e2c82" formatted="false">今、何を記録しますか?</string>
     <string name="s_78fe07cc" formatted="false">転送ファイルを作成できませんでした: {0}</string>
     <string name="s_f60bb44e" formatted="false">怒り</string>
+    <string name="s_8ce87829" formatted="false">パスフレーズで暗号化(推奨)</string>
     <string name="s_621a8231" formatted="false">OK</string>
     <string name="s_869f8d0c" formatted="false">すべて消去</string>
     <string name="s_5716f5ef" formatted="false">{0} 分後</string>
@@ -311,6 +333,7 @@
     <string name="s_78a510f0" formatted="false">累計の概要 · 全期間</string>
     <string name="s_1da8a247" formatted="false">終了</string>
     <string name="s_476d405b" formatted="false">終了日</string>
+    <string name="s_70f57871" formatted="false">続ける</string>
     <string name="s_010e135c" formatted="false">編集を続ける</string>
     <string name="s_e60fd56d" formatted="false">記録を続けると振り返りがはっきりしてきます</string>
     <string name="s_607348a8" formatted="false">編集</string>
@@ -320,6 +343,10 @@
     <string name="s_72ecf883" formatted="false">{0} から</string>
     <string name="s_85b25df8" formatted="false">{0} まで</string>
     <string name="s_a6317c7d" formatted="false">上書き</string>
+    <string name="s_64bca37c" formatted="false">復号</string>
+    <string name="s_227fd229" formatted="false">ロック解除</string>
+    <string name="s_8b2f5c73" formatted="false">Flash のロックを解除</string>
+    <string name="s_f86c7b1b" formatted="false">記録を見るには Flash のロックを解除してください</string>
     <string name="s_5521c6a5" formatted="false">すべての思いつきに居場所を · クラウドアカウントなし</string>
     <string name="s_dad3d89f" formatted="false">最初の思いつきを書く</string>
     <string name="s_6dfa9df7" formatted="false">Flash に保存</string>
@@ -354,6 +381,7 @@
     <string name="s_fa547131" formatted="false">この日の予定や記録はありません</string>
     <string name="s_6d67abd6" formatted="false">今月</string>
     <string name="s_09e1a534" formatted="false">今週</string>
+    <string name="s_f8f100e1" formatted="false">暗号化されたバックアップです。書き出し時に設定したパスフレーズを入力してください。</string>
     <string name="s_d3ce76c1" formatted="false">この記録はもうありません</string>
     <string name="s_1a959a39" formatted="false">この期間の記録はまだありません。空の日は 0 と表示されます。</string>
     <string name="s_5fe370b7" formatted="false">選択</string>
@@ -363,10 +391,14 @@
     <string name="s_4de22934" formatted="false">重要度</string>
     <string name="s_490a6afa" formatted="false">ひらめいたら残しましょう。最初の 1 件を書いてみましょう</string>
     <string name="s_aef2df88" formatted="false">すぐに記録</string>
+    <string name="s_4552930a" formatted="false">プライバシー</string>
     <string name="s_80390cc2" formatted="false">つらい</string>
+    <string name="s_1f381169" formatted="false">この暗号化バックアップを開くには Flash をアップデートしてください。</string>
     <string name="s_99546fff" formatted="false">とてもつらい</string>
     <string name="s_22566806" formatted="false">最高にうれしい</string>
     <string name="s_9a63360d" formatted="false">プレビュー後にローカルデータが変わったため差分を再計算しました。確認してから上書きしてください</string>
+    <string name="s_1203f0e4" formatted="false">アプリロックをオフにするには本人確認をしてください</string>
+    <string name="s_d02b1cf3" formatted="false">アプリロックをオンにするには本人確認をしてください</string>
     <string name="s_a14edc19" formatted="false">(無題)</string>
     <string name="s_12cea83b" formatted="false">(スキップした不正データ: {0} 件)</string>
     <string name="s_be6a75ae" formatted="false">、今日</string>

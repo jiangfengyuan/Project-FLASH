@@ -360,7 +360,7 @@ public struct CalendarView: View {
     private func delete(_ task: TaskItem) {
         do {
             guard let repository else { throw CalendarDataError.repositoryUnavailable }
-            try repository.deleteTask(id: task.id)
+            try repository.deleteTaskFromUI(id: task.id)
             Task { await TaskReminderScheduler.shared.cancel(task.id) }
         } catch {
             message = L("任务删除失败，请重试")

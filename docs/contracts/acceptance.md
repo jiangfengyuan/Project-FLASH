@@ -26,6 +26,19 @@
 - 用户仍需预览并选择合并/覆盖。数据提交失败保持数据库原状；提醒重建失败单独报告数据已提交但提醒恢复失败。
 - 三端严格入口统一拒绝 JSON 对象重复键；Android 标准入口还额外拒绝 org.json 宽松接受的非 JSON 语法。
 
+## 加密备份信封 flash-backup-enc-v1（2026-11-08）
+
+- 规格见 [flash-backup-enc-v1.md](flash-backup-enc-v1.md)：PBKDF2-HMAC-SHA256（导出 600,000 次）+ AES-256-GCM，AAD 为版本字段；明文导出保留、字节不变；导出与系统分享默认选中加密。
+- 自动测试：参考实现与 Schema 跑 `fixtures/encrypted/` 的 31 个信封文件、33 条清单用例；FlashKit、Android JVM、HarmonyOS 主机测试跑同一清单，并以注入的 salt/nonce 逐字节复现 Node 生成的 `valid-enc-minimal.json`。Android 另在 API 36 模拟器上以系统加密提供者跑完整清单。
+- 未验证：HarmonyOS 原生 cryptoFramework（主机测试为 Node 替身，HAP 仅构建通过）；任一真机上的导出→跨端导入。
+- 真机验收步骤：在 A 端加密导出 `valid-full.json` 初始化的测试数据 → 传到 B 端标准导入 → 输错口令应留在口令框并提示 → 输对后预览与明文导入一致；再用旧版本客户端打开同一文件，应提示版本不兼容且不写库。
+
+| 方向 | 加密导出 → 导入 | 错误口令重试 | 旧版拒绝 |
+| --- | --- | --- | --- |
+| Android → macOS / iOS | 待验收 | 待验收 | 待验收 |
+| macOS / iOS → Android | 待验收 | 待验收 | 待验收 |
+| 任一 ↔ HarmonyOS | 缺设备 | 缺设备 | 缺设备 |
+
 ## 分区 schema 2（2026-10-05，macOS 先行）
 
 - 新增可选字段：日志/情绪/任务 `isFavorite`，情绪 `intensity`（1–5），任务 `sourceLogId`（Idea→Task 来源）。分区版本声明结构：schema 1 分区携带新字段即非法。
@@ -92,3 +105,8 @@
 - 六位 PIN、接收方挑战/发送方证明、payload HMAC、标准时区白名单已进入三端代码。历史明文 PIN 首包不兼容。
 - 本文 2026-09-05 测试数量仅是历史执行记录；后续阶段三验证见工作区 CHANGELOG（HarmonyOS 105/105、契约 63/63，Android/macOS 测试与构建通过）。不把历史计数当作本轮重跑结果。
 - 当前设备品质工作独立记录于 [品质矩阵](../quality/device-matrix.md)。模拟器视觉/无障碍树检查不替代本页的真机传输验收，以上双向传输表仍保留未验收状态。
+
+
+## 2026-11-14 iOS personal library v3
+
+实现与规格见 [v3](flash-backup-v3.md)。新增自动覆盖包括标签/筛选、旧库存储迁移、加密备份往返、元数据错误拒绝、失败事务回滚、日期回忆边界及两次提醒间隔。设备验收分别记录于工作区 `outputs/ios-library-20261114/`，不沿用历史 v2、LAN 或真机通过结论。DeviceHub 中的 iPhone 18 Pro 是 iOS 27.2 模拟器；真实 iPhone 未在本轮连接。

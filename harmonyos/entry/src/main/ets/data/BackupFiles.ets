@@ -4,6 +4,7 @@ import { util } from '@kit.ArkTS';
 import { Environment, fileIo, picker } from '@kit.CoreFileKit';
 import { BackupService } from './BackupService';
 import { dayString } from './DateUtils';
+import { MAX_ENVELOPE_BYTES } from './BackupEnvelope';
 
 export enum SharedExportStatus {
   READY = 'ready',
@@ -24,11 +25,12 @@ export class BackupFiles {
   static async exportJSON(
     context: common.UIAbilityContext,
     json: string,
-    filePrefix: string = 'flash-aero-backup'
+    filePrefix: string = 'flash-aero-backup',
+    encrypted: boolean = false
   ): Promise<void> {
     const options = new picker.DocumentSaveOptions();
     const day = dayString();
-    options.newFileNames = [`${filePrefix}-${day}.json`];
+    options.newFileNames = [BackupFiles.sharedExportName(filePrefix, day, encrypted)];
     options.fileSuffixChoices = [tr('JSON 备份|.json')];
     const viewPicker = new picker.DocumentViewPicker(context);
     const uris = await viewPicker.save(options);
@@ -59,7 +61,8 @@ export class BackupFiles {
     const file = await fileIo.open(uris[0], fileIo.OpenMode.READ_ONLY);
     try {
       const size = (await fileIo.stat(file.fd)).size;
-      if (size > BackupService.MAX_BYTES) throw new Error(tr('备份文件超过 50 MB'));
+      // 加密信封可到 72 MB；明文超过 50 MB 在解析时拒绝
+      if (size > MAX_ENVELOPE_BYTES) throw new Error(tr('备份文件超过 72 MB'));
       if (size < 1) throw new Error(tr('备份文件为空'));
       const buffer = new ArrayBuffer(size);
       const bytesRead = await fileIo.read(file.fd, buffer, { length: size });
@@ -73,8 +76,9 @@ export class BackupFiles {
     }
   }
 
-  static sharedExportName(filePrefix: string, day: string): string {
-    return `${filePrefix}-${day}.json`;
+  /** 加密备份带 `-encrypted`，扩展名保持 `.json` 以便各端选择器识别 */
+  static sharedExportName(filePrefix: string, day: string, encrypted: boolean = false): string {
+    return `${filePrefix}-${day}${encrypted ? '-encrypted' : ''}.json`;
   }
 
   static sharedExportStatus(): SharedExportStatus {
@@ -93,7 +97,8 @@ export class BackupFiles {
 
   static async exportToSharedDir(
     json: string,
-    filePrefix: string = 'flash-aero-backup'
+    filePrefix: string = 'flash-aero-backup',
+    encrypted: boolean = false
   ): Promise<SharedExportResult> {
     const status = BackupFiles.sharedExportStatus();
     if (status !== SharedExportStatus.READY) return { status };
@@ -110,7 +115,7 @@ export class BackupFiles {
       dir = baseDir;
     }
     const day = dayString();
-    const target = BackupFiles.joinPath(dir, BackupFiles.sharedExportName(filePrefix, day));
+    const target = BackupFiles.joinPath(dir, BackupFiles.sharedExportName(filePrefix, day, encrypted));
     const temp = `${target}.tmp`;
     try { await fileIo.unlink(temp); } catch (_) {}
     const file = await fileIo.open(temp, fileIo.OpenMode.READ_WRITE | fileIo.OpenMode.CREATE | fileIo.OpenMode.TRUNC);

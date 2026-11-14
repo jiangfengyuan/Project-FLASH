@@ -47,7 +47,7 @@ struct SchemaMigrationTests {
         let schemaV2 = Schema(versionedSchema: FlashSchemaV2.self)
         let containerV2 = try ModelContainer(
             for: schemaV2,
-            migrationPlan: FlashMigrationPlan.self,
+            migrationPlan: FrozenV2MigrationPlan.self,
             configurations: [ModelConfiguration(schema: schemaV2, url: storeURL)]
         )
         let contextV2 = containerV2.mainContext
@@ -89,4 +89,9 @@ struct SchemaMigrationTests {
         let logs = try context.fetch(FetchDescriptor<LogEntity>())
         #expect(logs.first?.isFavorite == true)
     }
+}
+
+private enum FrozenV2MigrationPlan: SchemaMigrationPlan {
+    static var schemas: [any VersionedSchema.Type] { [FlashSchemaV1.self,FlashSchemaV2.self] }
+    static var stages: [MigrationStage] { [.lightweight(fromVersion:FlashSchemaV1.self,toVersion:FlashSchemaV2.self)] }
 }

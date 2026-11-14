@@ -21,6 +21,15 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate, Se
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 didReceive response: UNNotificationResponse) async {
         let userInfo = response.notification.request.content.userInfo
+        if let cycles = userInfo["libraryCycles"] as? [String], response.actionIdentifier.hasPrefix("library-") {
+            let libraryAction = response.actionIdentifier
+            let unread = userInfo["libraryUnreadIDs"] as? [String] ?? []
+            await MainActor.run {
+                IntentBridge.appState?.pendingIdeaAction = PendingIdeaAction(action: libraryAction, cycles: cycles, unreadIDs: unread)
+                _ = IntentBridge.appState?.handle(url: URL(string: "flash://ideas")!)
+            }
+            return
+        }
         // 任务提醒「完成 / 稍后」：不打开 App，直接写库并重排
         let actionIdentifier = response.actionIdentifier
         if let taskID = userInfo[TaskReminderScheduler.taskIDKey] as? String,

@@ -6,7 +6,7 @@
 
 import Foundation
 
-public struct EmotionRecord: Identifiable, Equatable, Sendable {
+public struct EmotionRecord: Identifiable, Equatable, Codable, Sendable {
     public let id: String
     public var level: EmotionLevel
     public var subEmotion: SubEmotion?

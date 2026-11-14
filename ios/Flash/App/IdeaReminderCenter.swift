@@ -17,11 +17,9 @@ final class IdeaReminderCenter {
     private(set) var unreadIdeas: [LogItem] = []
 
     @ObservationIgnored private let store: IdeaViewStateStore
-    @ObservationIgnored private let scheduler: IdeaReminderScheduler
 
-    init(store: IdeaViewStateStore = IdeaViewStateStore(), scheduler: IdeaReminderScheduler = .shared) {
+    init(store: IdeaViewStateStore = IdeaViewStateStore()) {
         self.store = store
-        self.scheduler = scheduler
     }
 
     var unreadIDs: Set<String> { Set(unreadIdeas.map(\.id)) }
@@ -48,9 +46,7 @@ final class IdeaReminderCenter {
         let count = unreadCount
         // 小组件快照带上未读灵感数（写库路径不知道已读状态，由这里补齐）
         WidgetSnapshot.refresh(repository: repository, unreadIdeaCount: count)
-        let enabled = settings.ideaReminderEnabled
-        let frequency = settings.ideaReminderFrequency
-        Task { await scheduler.reschedule(unreadCount: count, enabled: enabled, frequency: frequency) }
+        PeriodicIdeaNotifications.shared.refresh(repository: repository, settings: settings, unreadIDs: unreadIdeas.map(\.id))
     }
 
     /// 灵感被打开查看 → 已读

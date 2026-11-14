@@ -12,6 +12,7 @@
     <string name="s_aafdda63" formatted="false">/data/{0}/{1} : l\'entrée doit être un objet</string>
     <string name="s_10db0315" formatted="false">/data/{0} : le tableau dépasse la limite</string>
     <string name="s_b7cc858a" formatted="false">/data : entrées non valides ou en double. Utilisez la restauration pour voir ce qui peut être récupéré</string>
+    <string name="s_8cc3cbe4" formatted="false">/version : une sauvegarde chiffrée ne peut pas en contenir une autre</string>
     <string name="s_90ef682e" formatted="false">/version : utilisez la restauration pour les anciens fichiers</string>
     <string name="s_b9ce0fb9" formatted="false">/ : trop de valeurs JSON</string>
     <string name="s_307d96fc" formatted="false">/ : clé en double dans l\'objet JSON : {0}</string>
@@ -23,6 +24,7 @@
     <string name="s_355b83a3" formatted="false">Une semaine à retenir. ✦</string>
     <string name="s_a1486dba" formatted="false">Sauvegarde Flash Aero</string>
     <string name="s_eeecd281" formatted="false">Rappel de tâche Flash</string>
+    <string name="s_2534b43c" formatted="false">Flash est verrouillé</string>
     <string name="s_f6ff76b6" formatted="false">Capture rapide Flash</string>
     <string name="s_9a2b6832" formatted="false">Flash Maintenant</string>
     <string name="s_2a0b1ddf" formatted="false">Idée Flash</string>
@@ -78,10 +80,12 @@
     <string name="s_6bcf17c2" formatted="false">Mois suivant</string>
     <string name="s_10c83c81" formatted="false">Suivant</string>
     <string name="s_82b6cabb" formatted="false">Bon après-midi 🌤</string>
+    <string name="s_e08c4ba9" formatted="false">Une sauvegarde non chiffrée est du JSON en clair : quiconque possède le fichier peut lire tous vos journaux, émotions et tâches. Ne l\'enregistrez ou ne la partagez qu\'avec des appareils ou contacts de confiance.</string>
     <string name="s_1344f491" formatted="false">Pas content</string>
     <string name="s_4cc036be" formatted="false">Pas de rappel</string>
     <string name="s_12e8587a" formatted="false">Version de la section {0} non prise en charge</string>
     <string name="s_ba358518" formatted="false">Tous</string>
+    <string name="s_9ae60760" formatted="false">Les phrases secrètes ne correspondent pas.</string>
     <string name="s_b13672cd" formatted="false">Neutre</string>
     <string name="s_51f6517e" formatted="false">Thème</string>
     <string name="s_0a416847" formatted="false">les 30 jours précédents</string>
@@ -121,6 +125,7 @@
     <string name="s_801be77b" formatted="false">Contenu</string>
     <string name="s_dc24135d" formatted="false">Le contenu ne peut pas être vide</string>
     <string name="s_043cda7f" formatted="false">Trop long ({0} caractères, max {1}). Raccourcissez avant d\'enregistrer</string>
+    <string name="s_d15889f8" formatted="false">Saisissez à nouveau la phrase secrète</string>
     <string name="s_87000edc" formatted="false">Continuez à noter, votre futur vous le verra.</string>
     <string name="s_95a71bc9" formatted="false">Préparation…</string>
     <string name="s_9aa7d416" formatted="false">Partager</string>
@@ -135,10 +140,17 @@
     <string name="s_e6dedfa0" formatted="false">Supprimer cette humeur ?</string>
     <string name="s_98f7e648" formatted="false">Supprimer cette entrée de journal ?</string>
     <string name="s_c51f5912" formatted="false">À l\'échéance</string>
+    <string name="s_d26ab92b" formatted="false">Sauvegarde chiffrée</string>
+    <string name="s_e78a9d95" formatted="false">Le fichier de sauvegarde chiffré est endommagé ou mal formé.</string>
     <string name="s_c628e28d" formatted="false">Contient journal : {0}, humeurs : {1}, tâches : {2}</string>
     <string name="s_60b4c5ae" formatted="false">Zone sensible</string>
     <string name="s_949856b3" formatted="false">Annuler</string>
     <string name="s_d1d62fb0" formatted="false">Retirer des favoris</string>
+    <string name="s_53c7e602" formatted="false">Phrase secrète</string>
+    <string name="s_f7e8d7e8" formatted="false">La phrase secrète ne peut pas dépasser 1024 caractères.</string>
+    <string name="s_ad879bae" formatted="false">La phrase secrète doit comporter au moins 8 caractères.</string>
+    <string name="s_4db1b243" formatted="false">Phrase secrète incorrecte, ou fichier endommagé.</string>
+    <string name="s_ef638194" formatted="false">Phrase secrète (8 caractères minimum)</string>
     <string name="s_4d55cb75" formatted="false">Exportez une sauvegarde ou envoyez-la via le partage système</string>
     <string name="s_5e53c03a" formatted="false">Jeu</string>
     <string name="s_40163b46" formatted="false">Revenir à aujourd\'hui</string>
@@ -156,6 +168,7 @@
     <string name="s_d82fe22c" formatted="false">Note trop longue. Raccourcissez avant d\'enregistrer</string>
     <string name="s_d9dac7dd" formatted="false">Notes (facultatif)</string>
     <string name="s_e4a4815a" formatted="false">Apparence et utilisation</string>
+    <string name="s_f849ada8" formatted="false">OK</string>
     <string name="s_1e13bd21" formatted="false">Terminé</string>
     <string name="s_dd03e6ad" formatted="false">Aperçu des différences avec les données locales avant l\'importation</string>
     <string name="s_9b60ff74" formatted="false">Échec de l\'importation : {0}</string>
@@ -163,6 +176,8 @@
     <string name="s_7fdaf616" formatted="false">Exporter, importer et effacer</string>
     <string name="s_f97fded3" formatted="false">Exporter une sauvegarde</string>
     <string name="s_7436fb8d" formatted="false">Échec de l\'exportation : {0}</string>
+    <string name="s_0bd03067" formatted="false">L\'export a été interrompu. Veuillez recommencer.</string>
+    <string name="s_1a26bd57" formatted="false">Vous pouvez chiffrer l\'export avec une phrase secrète (recommandé). Une sauvegarde non chiffrée est du JSON en clair contenant journaux, émotions et tâches ; ne l\'enregistrez ou ne la partagez qu\'en lieu sûr</string>
     <string name="s_b1632a8b" formatted="false">Le journal, les humeurs et les tâches seront définitivement supprimés. Exportez d\'abord une sauvegarde.</string>
     <string name="s_479481d2" formatted="false">Le transfert par réseau local est désactivé pour le moment</string>
     <string name="s_f8eef707" formatted="false">Le transfert par réseau local est désactivé en raison des risques de l\'ancien protocole. Utilisez l\'exportation ou le partage système pour envoyer le fichier JSON par un canal de confiance.</string>
@@ -179,6 +194,8 @@
     <string name="s_c13b3522" formatted="false">Toutes les données ont été effacées, mais les rappels système n\'ont pas pu être retirés. Redémarrez l\'app et réessayez</string>
     <string name="s_c8fa62c1" formatted="false">Sélectionnés : {0}</string>
     <string name="s_01133500" formatted="false">Humeur moyenne {0} · Total {1}</string>
+    <string name="s_ee490e90" formatted="false">Verrouillage de l\'app</string>
+    <string name="s_fb13a35f" formatted="false">Avec le verrouillage activé, Flash se déverrouille par biométrie ou avec le code de l\'appareil au démarrage ou après plus d\'une minute d\'absence. Les widgets, la capture rapide et les actions de notification restent disponibles.</string>
     <string name="s_22696cbc" formatted="false">Début</string>
     <string name="s_499be303" formatted="false">Commencer</string>
     <string name="s_5d62764c" formatted="false">Date de début</string>
@@ -257,6 +274,8 @@
     <string name="s_87b8867d" formatted="false">Plus récent</string>
     <string name="s_ceb8f642" formatted="false">Plus ancien</string>
     <string name="s_56b38d0f" formatted="false">Moments récents</string>
+    <string name="s_4f2beab6" formatted="false">Identité non confirmée. Le réglage n\'a pas été modifié.</string>
+    <string name="s_5665b744" formatted="false">Identité non confirmée. Réessayez.</string>
     <string name="s_be2c2eb2" formatted="false">Non lu</string>
     <string name="s_27c37899" formatted="false">Cette semaine</string>
     <string name="s_ccb42197" formatted="false">Cette semaine : entrées {0} · à trier {1}</string>
@@ -277,11 +296,13 @@
     <string name="s_aef45eb7" formatted="false">Chargement…</string>
     <string name="s_6af40858" formatted="false">Maintenant</string>
     <string name="s_b060afd3" formatted="false">Cet appareil ne prend pas en charge un fuseau horaire de la sauvegarde. Mettez à jour le système et réessayez. Rien n\'a été importé</string>
+    <string name="s_2f15ac82" formatted="false">Définissez un code de verrouillage sur cet appareil pour utiliser le verrouillage de l\'app</string>
     <string name="s_f4958768" formatted="false">Tous les 3 jours</string>
     <string name="s_41be2fe2" formatted="false">Chaque semaine</string>
     <string name="s_02c285b5" formatted="false">Chaque jour</string>
     <string name="s_18fa51bd" formatted="false">Journal, idées et humeurs par jour · tâches non incluses</string>
     <string name="s_6d03477d" formatted="false">Humeur moyenne quotidienne : {0}</string>
+    <string name="s_3aa61c82" formatted="false">Sans la phrase secrète, personne ne peut lire ni modifier la sauvegarde. Flash ne conserve pas la phrase secrète : si vous l\'oubliez, la sauvegarde est irrécupérable.</string>
     <string name="s_5816c303" formatted="false">Aucune app disponible pour le partage</string>
     <string name="s_43c975df" formatted="false">Aucune entrée trouvée</string>
     <string name="s_f8bc527e" formatted="false">Aucune entrée de journal ne correspond</string>
@@ -299,6 +320,7 @@
     <string name="s_436e2c82" formatted="false">Qu\'avez-vous en tête ?</string>
     <string name="s_78fe07cc" formatted="false">Impossible de créer le fichier de transfert : {0}</string>
     <string name="s_f60bb44e" formatted="false">En colère</string>
+    <string name="s_8ce87829" formatted="false">Chiffrer avec une phrase secrète (recommandé)</string>
     <string name="s_621a8231" formatted="false">OK</string>
     <string name="s_869f8d0c" formatted="false">Tout effacer</string>
     <string name="s_5716f5ef" formatted="false">Dans {0} minutes</string>
@@ -311,6 +333,7 @@
     <string name="s_78a510f0" formatted="false">Aperçu · depuis le début</string>
     <string name="s_1da8a247" formatted="false">Fin</string>
     <string name="s_476d405b" formatted="false">Date de fin</string>
+    <string name="s_70f57871" formatted="false">Continuer</string>
     <string name="s_010e135c" formatted="false">Continuer</string>
     <string name="s_e60fd56d" formatted="false">Continuez à noter, votre bilan se précisera</string>
     <string name="s_607348a8" formatted="false">Modifier</string>
@@ -320,6 +343,10 @@
     <string name="s_72ecf883" formatted="false">Depuis {0}</string>
     <string name="s_85b25df8" formatted="false">Jusqu\'au {0}</string>
     <string name="s_a6317c7d" formatted="false">Remplacer</string>
+    <string name="s_64bca37c" formatted="false">Déchiffrer</string>
+    <string name="s_227fd229" formatted="false">Déverrouiller</string>
+    <string name="s_8b2f5c73" formatted="false">Déverrouiller Flash</string>
+    <string name="s_f86c7b1b" formatted="false">Déverrouillez Flash pour voir vos entrées</string>
     <string name="s_5521c6a5" formatted="false">Une place pour chaque pensée · sans compte cloud</string>
     <string name="s_dad3d89f" formatted="false">Notez votre première pensée</string>
     <string name="s_6dfa9df7" formatted="false">Enregistrer dans Flash</string>
@@ -354,6 +381,7 @@
     <string name="s_fa547131" formatted="false">Aucun projet ni entrée ce jour-là</string>
     <string name="s_6d67abd6" formatted="false">ce mois-ci</string>
     <string name="s_09e1a534" formatted="false">cette semaine</string>
+    <string name="s_f8f100e1" formatted="false">Cette sauvegarde est chiffrée. Saisissez la phrase secrète définie lors de l\'export.</string>
     <string name="s_d3ce76c1" formatted="false">Cette entrée n\'existe plus</string>
     <string name="s_1a959a39" formatted="false">Rien de noté sur cette période. Les jours vides affichent 0.</string>
     <string name="s_5fe370b7" formatted="false">Sélectionner</string>
@@ -363,10 +391,14 @@
     <string name="s_4de22934" formatted="false">Importance</string>
     <string name="s_490a6afa" formatted="false">Saisissez-la au vol. Écrivez la première</string>
     <string name="s_aef2df88" formatted="false">Notez à la volée</string>
+    <string name="s_4552930a" formatted="false">Confidentialité</string>
     <string name="s_80390cc2" formatted="false">Mal à l\'aise</string>
+    <string name="s_1f381169" formatted="false">Mettez Flash à jour pour ouvrir cette sauvegarde chiffrée.</string>
     <string name="s_99546fff" formatted="false">Très contrarié</string>
     <string name="s_22566806" formatted="false">Ravi</string>
     <string name="s_9a63360d" formatted="false">Les données locales ont changé après l\'aperçu. Différences recalculées. Confirmez avant de remplacer</string>
+    <string name="s_1203f0e4" formatted="false">Confirmez votre identité pour désactiver le verrouillage de l\'app</string>
+    <string name="s_d02b1cf3" formatted="false">Confirmez votre identité pour activer le verrouillage de l\'app</string>
     <string name="s_a14edc19" formatted="false">(Sans titre)</string>
     <string name="s_12cea83b" formatted="false">(éléments non valides ignorés : {0})</string>
     <string name="s_be6a75ae" formatted="false">, aujourd\'hui</string>

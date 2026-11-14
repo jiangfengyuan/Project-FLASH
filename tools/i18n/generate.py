@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """把 docs/i18n/parts/*.tsv 合成 translations.json，并生成三端的语言资源。
 
-- iOS：ios/Flash、ios/FlashWidget、ios/FlashShare 下的 Localizable.xcstrings
+- iOS：ios/Flash、ios/FlashWidget、ios/FlashShare 下的 Localizable.xcstrings，ios/Flash/InfoPlist.xcstrings（权限说明）
 - Android：res/values*/strings_generated.xml + i18n/I18nKeys.kt
 - HarmonyOS：resources/<locale>/element/string.json（资源名 = 原文 FNV-1a）
 
@@ -79,6 +79,27 @@ INTENT_SUMMARIES = {
         "ja": "${text} を ${category} として記録",
     },
 }
+
+
+# Info.plist 的权限说明：键是 plist 键，值是 TSV 里的中文原文
+INFO_PLIST_KEYS = {
+    "NSFaceIDUsageDescription": "开启应用锁后，Flash 用面容 ID 解锁你的记录",
+}
+
+
+def info_plist_catalog(table, path):
+    strings = {}
+    for plist_key, source in sorted(INFO_PLIST_KEYS.items()):
+        row = table.get(source)
+        if row is None:
+            sys.exit(f"InfoPlist: missing translation for {source!r}")
+        loc = {lang: {"stringUnit": {"state": "translated", "value": row[lang]}} for lang in LANGS}
+        loc["zh-Hans"] = {"stringUnit": {"state": "translated", "value": source}}
+        strings[plist_key] = {"extractionState": "manual", "localizations": loc}
+    catalog = {"sourceLanguage": "zh-Hans", "strings": strings, "version": "1.0"}
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(catalog, fh, ensure_ascii=False, indent=2, sort_keys=True)
+        fh.write("\n")
 
 
 def ios_catalog(table, ios_map, path, extras=None):
@@ -215,6 +236,7 @@ def main():
     for folder in ("ios/Flash", "ios/FlashWidget", "ios/FlashShare"):
         ios_catalog(table, keys_doc["ios"], os.path.join(ROOT, folder, "Localizable.xcstrings"),
                     INTENT_SUMMARIES if folder == "ios/Flash" else None)
+    info_plist_catalog(table, os.path.join(ROOT, "ios/Flash/InfoPlist.xcstrings"))
     android(table, sorted(set(keys_doc["android"]) | {k for k in keys_doc["resources"] if k in HAND_ANDROID.values()}))
     harmony(table, sorted(set(keys_doc["harmony"])))
 

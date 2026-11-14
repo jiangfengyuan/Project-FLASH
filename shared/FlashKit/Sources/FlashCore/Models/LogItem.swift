@@ -6,7 +6,7 @@
 
 import Foundation
 
-public struct LogItem: Identifiable, Equatable, Sendable {
+public struct LogItem: Identifiable, Equatable, Codable, Sendable {
     public let id: String
     public var content: String
     public var colorTag: ColorTag

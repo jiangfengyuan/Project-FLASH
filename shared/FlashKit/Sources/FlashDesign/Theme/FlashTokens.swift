@@ -22,10 +22,10 @@ public enum Spacing {
     public static let xl: CGFloat = 32
     public static let xxl: CGFloat = 48
     #if os(iOS)
-    /// 纸上书写：页面边距较通行的 16 宽 25%（最大字号档位由 flashPageGutter 退回 16）
-    public static let page: CGFloat = 20
+    /// 页面、图表和记录卡使用相同的 16pt 基线。
+    public static let page: CGFloat = 16
     /// 卡片内边距
-    public static let card: CGFloat = 20
+    public static let card: CGFloat = 16
     /// 列表行卡内边距
     public static let row: CGFloat = 16
     #else

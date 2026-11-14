@@ -18,6 +18,8 @@ struct FlashApp: App {
     private let assembly: RepositoryEnvironment.Assembly
     @State private var appState: AppState
     @StateObject private var settings: SettingsStore
+    /// 应用锁（默认关闭）：只遮主窗口；Quick Capture 面板与菜单栏照常可用
+    @State private var appLock: AppLockController
 
     init() {
         // 过期分享副本清理是纯沙箱文件 IO（FileManager 线程安全、无共享可变状态、
@@ -32,6 +34,9 @@ struct FlashApp: App {
         _appState = State(initialValue: appState)
         let settings = SettingsStore()
         _settings = StateObject(wrappedValue: settings)
+        let appLock = AppLockController(isEnabled: { settings.appLockEnabled }, policy: .desktop)
+        _appLock = State(initialValue: appLock)
+        AppLockObserver.shared.start(appLock)
         // Quick Capture 面板与仓储/设置同源装配；热键注册推迟到
         // AppDelegate.applicationDidFinishLaunching（QuickCaptureController.start()）
         QuickCaptureController.shared.configure(repository: assembly.repository, settings: settings)
@@ -49,6 +54,15 @@ struct FlashApp: App {
                     }
                 }
             }
+            // 应用锁：盖住整个主窗口内容（含工具栏下方区域），不显示任何记录
+            .overlay {
+                if appLock.isLocked {
+                    AppLockScreen()
+                        .ignoresSafeArea()
+                        .transition(.opacity)
+                }
+            }
+            .environment(appLock)
             .environment(appState)
             .environment(appState.focusRouter)
             .environment(\.flashRepository, assembly.repository)
@@ -79,23 +93,28 @@ struct FlashApp: App {
         .windowResizability(.contentMinSize)
         .defaultSize(width: 1200, height: 760)
         .commands {
+            // 锁定时菜单命令一律不可用：导出、搜索、新建与模块切换都会绕过锁定页
             // 单 WindowGroup、无 Settings scene 时系统不会生成「设置 ⌘,」，手动补
             CommandGroup(replacing: .appSettings) {
                 Button("设置…") { appState.selectedModule = .settings }
                     .keyboardShortcut(",", modifiers: .command)
+                    .disabled(appLock.isLocked)
             }
             // .importExport 锚点仅在文档型应用存在，非文档型 WindowGroup 下挂其上的命令组会被系统静默丢弃；
             // 「导出备份…」改挂 .newItem 组内（快捷键 ⇧⌘E 不变）
             CommandGroup(replacing: .newItem) {
                 Button("新建记录") { appState.requestNewLog() }
                     .keyboardShortcut("n", modifiers: .command)
+                    .disabled(appLock.isLocked)
                 Button("导出备份…") { appState.requestExport() }
                     .keyboardShortcut("e", modifiers: [.command, .shift])
+                    .disabled(appLock.isLocked)
             }
             // ⌘K 全局搜索：唤起 RootView 层浮层（不切模块；记录页内搜索是独立能力）
             CommandGroup(after: .sidebar) {
                 Button("搜索") { appState.requestSearch() }
                     .keyboardShortcut("k", modifiers: .command)
+                    .disabled(appLock.isLocked)
             }
             // 模块切换 ⌘1…⌘7（对齐 PRD：⌘1 此刻 ⌘2 记录 ⌘3 日志流 ⌘4 日历 ⌘5 情绪 ⌘6 回顾
             // ⌘7 Memory 周报。设置已有 ⌘,，不重复占用）；菜单文案跟随 Module.title，与侧栏命名同源
@@ -106,18 +125,25 @@ struct FlashApp: App {
                 Divider()
                 Button(Module.home.title) { appState.selectedModule = .home }
                     .keyboardShortcut("1", modifiers: .command)
+                    .disabled(appLock.isLocked)
                 Button(Module.explore.title) { appState.selectedModule = .explore }
                     .keyboardShortcut("2", modifiers: .command)
+                    .disabled(appLock.isLocked)
                 Button(Module.logflow.title) { appState.selectedModule = .logflow }
                     .keyboardShortcut("3", modifiers: .command)
+                    .disabled(appLock.isLocked)
                 Button(Module.calendar.title) { appState.selectedModule = .calendar }
                     .keyboardShortcut("4", modifiers: .command)
+                    .disabled(appLock.isLocked)
                 Button(Module.emotion.title) { appState.selectedModule = .emotion }
                     .keyboardShortcut("5", modifiers: .command)
+                    .disabled(appLock.isLocked)
                 Button(Module.stats.title) { appState.selectedModule = .stats }
                     .keyboardShortcut("6", modifiers: .command)
+                    .disabled(appLock.isLocked)
                 Button(Module.memory.title) { appState.selectedModule = .memory }
                     .keyboardShortcut("7", modifiers: .command)
+                    .disabled(appLock.isLocked)
             }
         }
 

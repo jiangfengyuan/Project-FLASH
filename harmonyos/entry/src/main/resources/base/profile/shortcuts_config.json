@@ -3,7 +3,7 @@
     {
       "shortcutId": "capture_idea",
       "label": "$string:shortcut_idea",
-      "icon": "$media:icon",
+      "icon": "$media:flash_standard_icon",
       "wants": [
         {
           "bundleName": "com.flash.app.harmonyos",
@@ -18,7 +18,7 @@
     {
       "shortcutId": "capture_log",
       "label": "$string:shortcut_log",
-      "icon": "$media:icon",
+      "icon": "$media:flash_standard_icon",
       "wants": [
         {
           "bundleName": "com.flash.app.harmonyos",

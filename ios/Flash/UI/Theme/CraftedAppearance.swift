@@ -10,7 +10,7 @@ import FlashDesign
 
 /// 纸上书写的 UIKit 外观：系统导航栏标题改用展示字体与炭墨色。
 /// 只设标题属性、不替换导航栏背景外观，保留系统玻璃 / 滚动边缘效果。
-enum CraftedAppearance {
+@MainActor enum CraftedAppearance {
     static func apply() {
         let ink = UIColor { traits in
             UIColor(Color(hex: traits.userInterfaceStyle == .dark

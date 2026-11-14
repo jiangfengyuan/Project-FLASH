@@ -294,10 +294,12 @@ public typealias TaskEntity = FlashSchemaV2.TaskEntity
 /// V1→V2 轻量迁移：纯增列（可选属性），无数据变换
 public enum FlashMigrationPlan: SchemaMigrationPlan, Sendable {
     public static var schemas: [any VersionedSchema.Type] {
-        [FlashSchemaV1.self, FlashSchemaV2.self]
+        [FlashSchemaV1.self, FlashSchemaV2.self, FlashSchemaV3.self, FlashSchemaV4.self]
     }
 
     public static var stages: [MigrationStage] {
-        [.lightweight(fromVersion: FlashSchemaV1.self, toVersion: FlashSchemaV2.self)]
+        [.lightweight(fromVersion: FlashSchemaV1.self, toVersion: FlashSchemaV2.self),
+         .lightweight(fromVersion: FlashSchemaV2.self, toVersion: FlashSchemaV3.self),
+         .custom(fromVersion: FlashSchemaV3.self, toVersion: FlashSchemaV4.self, willMigrate: nil, didMigrate: { try FlashSchemaV4.migrate($0) })]
     }
 }

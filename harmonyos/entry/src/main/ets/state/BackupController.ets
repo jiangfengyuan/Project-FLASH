@@ -8,6 +8,8 @@ import { ControllerRuntime } from './ControllerRuntime';
 import { BackupDiff } from '../data/BackupDiff';
 import { BackupFiles, SharedExportStatus } from '../data/BackupFiles';
 import { BackupImport, BackupService } from '../data/BackupService';
+import { BackupEncryption } from '../data/BackupEncryption';
+import { EnvelopeError, EnvelopeErrorKind } from '../data/BackupEnvelope';
 import { dayString } from '../data/DateUtils';
 import { shareBackupFile } from '../data/ShareService';
 import { LAN_UNAVAILABLE_MESSAGE } from '../data/LocalBackupTransfer';
@@ -27,12 +29,43 @@ export class BackupController {
    * preview and confirmation would be deleted without being counted. */
   private pendingSnapshot?: BackupData;
   private generation: number = 0;
+  /** 等待口令的加密备份原文与入口：只在内存中，取消或成功后清空 */
+  private pendingEncryptedText?: string;
+  private pendingEncryptedRecovery: boolean = false;
   cancelImport(): void {
     if (this.state.busy) return;
     this.pendingImport = undefined;
     this.pendingSnapshot = undefined;
+    this.pendingEncryptedText = undefined;
     this.state.importSummary = '';
+    this.state.passphraseError = '';
     this.state.importPhase = ImportPhase.IDLE;
+  }
+
+  /** 打开导出前的加密选择（默认加密）；target 为 'file' / 'shared' / 'share' */
+  requestExport(target: string): void {
+    if (this.state.fileBusy) return;
+    this.state.exportTarget = target;
+  }
+
+  cancelExportRequest(): void {
+    this.state.exportTarget = '';
+  }
+
+  /** 加密选择确认：`passphrase` 为 undefined 表示不加密 */
+  async confirmExport(passphrase?: string): Promise<void> {
+    const target = this.state.exportTarget;
+    this.state.exportTarget = '';
+    if (target === 'shared') await this.exportBackupToSharedDir(passphrase);
+    else if (target === 'share') await this.shareBackupExport(passphrase);
+    else if (target === 'file') await this.exportBackup(passphrase);
+  }
+
+  /** 正式导出文本；给出口令时包进 flash-backup-enc-v1 信封，否则为明文（字节不变） */
+  private async exportText(passphrase?: string): Promise<string> {
+    const snapshot = this.store.snapshot();
+    const json = BackupService.exportJSON(snapshot.logs, snapshot.emotions, snapshot.tasks);
+    return passphrase === undefined ? json : await BackupEncryption.encrypt(json, passphrase);
   }
 
   dispose(): void {
@@ -42,7 +75,7 @@ export class BackupController {
     this.cancelImport();
   }
 
-  async exportBackup(): Promise<void> {
+  async exportBackup(passphrase?: string): Promise<void> {
     if (this.state.fileBusy) return;
     if (!this.store.ready) {
       this.runtime.notify(tr('本地数据尚未加载完成，无法导出备份'), 'error');
@@ -52,9 +85,8 @@ export class BackupController {
     this.state.fileBusy = true;
     try {
       const context = this.runtime.context() as common.UIAbilityContext;
-      const snapshot = this.store.snapshot();
-      const json = BackupService.exportJSON(snapshot.logs, snapshot.emotions, snapshot.tasks);
-      await BackupFiles.exportJSON(context, json);
+      const json = await this.exportText(passphrase);
+      await BackupFiles.exportJSON(context, json, 'flash-aero-backup', passphrase !== undefined);
       if (generation === this.generation) this.runtime.notify(tr('备份已导出'), 'success');
     } catch (error) {
       if (generation === this.generation) this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
@@ -68,7 +100,7 @@ export class BackupController {
   }
 
   /** 分享导出：生成备份文件后调起系统分享面板（入口由 settings.systemShareSupported 守卫）。 */
-  async shareBackupExport(): Promise<void> {
+  async shareBackupExport(passphrase?: string): Promise<void> {
     if (this.state.fileBusy) return;
     if (!this.store.ready) {
       this.runtime.notify(tr('本地数据尚未加载完成，无法导出备份'), 'error');
@@ -78,9 +110,8 @@ export class BackupController {
     this.state.fileBusy = true;
     try {
       const context = this.runtime.context() as common.UIAbilityContext;
-      const snapshot = this.store.snapshot();
-      const json = BackupService.exportJSON(snapshot.logs, snapshot.emotions, snapshot.tasks);
-      const fileName = BackupFiles.sharedExportName('flash-aero-backup', dayString());
+      const json = await this.exportText(passphrase);
+      const fileName = BackupFiles.sharedExportName('flash-aero-backup', dayString(), passphrase !== undefined);
       await shareBackupFile(context, json, fileName);
       if (generation === this.generation) this.runtime.notify(tr('已调起系统分享'), 'success');
     } catch (error) {
@@ -90,7 +121,7 @@ export class BackupController {
     }
   }
 
-  async exportBackupToSharedDir(): Promise<void> {
+  async exportBackupToSharedDir(passphrase?: string): Promise<void> {
     if (this.state.fileBusy) return;
     if (!this.store.ready) {
       this.runtime.notify(tr('本地数据尚未加载完成，无法导出备份'), 'error');
@@ -99,9 +130,8 @@ export class BackupController {
     const generation = this.generation;
     this.state.fileBusy = true;
     try {
-      const snapshot = this.store.snapshot();
-      const json = BackupService.exportJSON(snapshot.logs, snapshot.emotions, snapshot.tasks);
-      const result = await BackupFiles.exportToSharedDir(json);
+      const json = await this.exportText(passphrase);
+      const result = await BackupFiles.exportToSharedDir(json, 'flash-aero-backup', passphrase !== undefined);
       if (generation !== this.generation) return;
       if (result.status === SharedExportStatus.EXPORTED) {
         this.runtime.notify(tr('备份已导出到「文件管理」应用的下载目录'), 'success');
@@ -157,10 +187,24 @@ export class BackupController {
     try {
       const context = this.runtime.context() as common.UIAbilityContext;
       const json = await BackupFiles.importJSON(context);
-      const incoming = recovery ? BackupService.parseRecovery(json) : BackupService.parseStrict(json);
+      let incoming: BackupImport;
+      try {
+        incoming = await BackupEncryption.parseText(json, recovery);
+      } catch (error) {
+        if (!(error instanceof EnvelopeError) || error.kind !== EnvelopeErrorKind.PASSPHRASE_REQUIRED) throw error as Error;
+        if (generation !== this.generation) return;
+        // 原文留在内存里等口令，不必再次打开文件选择器
+        this.pendingImport = undefined;
+        this.pendingSnapshot = undefined;
+        this.pendingEncryptedText = json;
+        this.pendingEncryptedRecovery = recovery;
+        this.state.passphraseError = '';
+        this.state.importSummary = '';
+        this.state.importPhase = ImportPhase.PASSPHRASE;
+        return;
+      }
       if (generation !== this.generation) return;
-      this.stageImport(incoming);
-      this.state.importSummary = (recovery ? tr("部分恢复（跳过非法、重复和超限记录；原文件不变）") : tr("标准导入")) + "\n" + this.state.importSummary;
+      this.stageRecoveryAware(incoming, recovery);
     } catch (error) {
       if (generation === this.generation) {
         this.cancelImport();
@@ -169,6 +213,37 @@ export class BackupController {
     } finally {
       if (generation === this.generation) this.state.fileBusy = false;
     }
+  }
+
+  /** 加密备份：用口令解密并生成预览；口令错误时留在口令面板并显示错误 */
+  async submitPassphrase(passphrase: string): Promise<void> {
+    const text = this.pendingEncryptedText;
+    if (text === undefined || this.state.fileBusy || this.state.busy || passphrase.length === 0) return;
+    const recovery = this.pendingEncryptedRecovery;
+    const generation = this.generation;
+    this.state.fileBusy = true;
+    try {
+      const incoming = await BackupEncryption.parseText(text, recovery, passphrase);
+      if (generation !== this.generation) return;
+      this.pendingEncryptedText = undefined;
+      this.state.passphraseError = '';
+      this.stageRecoveryAware(incoming, recovery);
+    } catch (error) {
+      if (generation !== this.generation) return;
+      if (error instanceof EnvelopeError && error.kind === EnvelopeErrorKind.AUTHENTICATION_FAILED) {
+        this.state.passphraseError = error.message;
+      } else {
+        this.cancelImport();
+        this.runtime.notify(this.runtime.errorMessage(error as Error), 'error');
+      }
+    } finally {
+      if (generation === this.generation) this.state.fileBusy = false;
+    }
+  }
+
+  private stageRecoveryAware(incoming: BackupImport, recovery: boolean): void {
+    this.stageImport(incoming);
+    this.state.importSummary = (recovery ? tr("部分恢复（跳过非法、重复和超限记录；原文件不变）") : tr("标准导入")) + "\n" + this.state.importSummary;
   }
 
   stageImport(incoming: BackupImport): void {

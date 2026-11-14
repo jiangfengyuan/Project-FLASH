@@ -24,7 +24,7 @@ public struct FormSection<Content: View>: View {
             Text(title)
                 .font(Typography.secondary)
                 .foregroundStyle(BrandColors.textSecondary)
-                .padding(.horizontal, Spacing.sm)
+                .padding(.horizontal, Spacing.card)
             SolidCard {
                 content
             }

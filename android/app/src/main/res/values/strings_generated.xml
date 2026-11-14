@@ -12,6 +12,7 @@
     <string name="s_aafdda63" formatted="false">/data/{0}/{1}: entry must be an object</string>
     <string name="s_10db0315" formatted="false">/data/{0}: array exceeds the limit</string>
     <string name="s_b7cc858a" formatted="false">/data: invalid or duplicate entries. Use the recovery import to see what can be restored</string>
+    <string name="s_8cc3cbe4" formatted="false">/version: an encrypted backup cannot contain another encrypted backup</string>
     <string name="s_90ef682e" formatted="false">/version: use the recovery import for older files</string>
     <string name="s_b9ce0fb9" formatted="false">/: too many JSON values</string>
     <string name="s_307d96fc" formatted="false">/: JSON object has a duplicate key: {0}</string>
@@ -23,6 +24,7 @@
     <string name="s_355b83a3" formatted="false">A week worth remembering. ✦</string>
     <string name="s_a1486dba" formatted="false">Flash Aero backup</string>
     <string name="s_eeecd281" formatted="false">Flash task reminder</string>
+    <string name="s_2534b43c" formatted="false">Flash is locked</string>
     <string name="s_f6ff76b6" formatted="false">Flash Quick Capture</string>
     <string name="s_9a2b6832" formatted="false">Flash Now</string>
     <string name="s_2a0b1ddf" formatted="false">Flash idea</string>
@@ -78,10 +80,12 @@
     <string name="s_6bcf17c2" formatted="false">Next month</string>
     <string name="s_10c83c81" formatted="false">Next</string>
     <string name="s_82b6cabb" formatted="false">Good afternoon 🌤</string>
+    <string name="s_e08c4ba9" formatted="false">An unencrypted backup is plain JSON: anyone with the file can read all your logs, emotions and tasks. Only save or share it with trusted devices or contacts.</string>
     <string name="s_1344f491" formatted="false">Unhappy</string>
     <string name="s_4cc036be" formatted="false">No reminder</string>
     <string name="s_12e8587a" formatted="false">Unsupported {0} section version</string>
     <string name="s_ba358518" formatted="false">Any</string>
+    <string name="s_9ae60760" formatted="false">The passphrases don\'t match.</string>
     <string name="s_b13672cd" formatted="false">Neutral</string>
     <string name="s_51f6517e" formatted="false">Theme</string>
     <string name="s_0a416847" formatted="false">the previous 30 days</string>
@@ -121,6 +125,7 @@
     <string name="s_801be77b" formatted="false">Content</string>
     <string name="s_dc24135d" formatted="false">Content can\'t be empty</string>
     <string name="s_043cda7f" formatted="false">Too long ({0} characters, max {1}). Shorten it before saving</string>
+    <string name="s_d15889f8" formatted="false">Enter the passphrase again</string>
     <string name="s_87000edc" formatted="false">Keep recording; future you will see it.</string>
     <string name="s_95a71bc9" formatted="false">Preparing…</string>
     <string name="s_9aa7d416" formatted="false">Share</string>
@@ -135,10 +140,17 @@
     <string name="s_e6dedfa0" formatted="false">Delete this mood?</string>
     <string name="s_98f7e648" formatted="false">Delete this log?</string>
     <string name="s_c51f5912" formatted="false">At due time</string>
+    <string name="s_d26ab92b" formatted="false">Encrypted backup</string>
+    <string name="s_e78a9d95" formatted="false">The encrypted backup file is damaged or malformed.</string>
     <string name="s_c628e28d" formatted="false">Contains logs: {0}, moods: {1}, tasks: {2}</string>
     <string name="s_60b4c5ae" formatted="false">Danger zone</string>
     <string name="s_949856b3" formatted="false">Cancel</string>
     <string name="s_d1d62fb0" formatted="false">Remove favorite</string>
+    <string name="s_53c7e602" formatted="false">Passphrase</string>
+    <string name="s_f7e8d7e8" formatted="false">The passphrase can\'t be longer than 1024 characters.</string>
+    <string name="s_ad879bae" formatted="false">The passphrase needs at least 8 characters.</string>
+    <string name="s_4db1b243" formatted="false">Wrong passphrase, or the file is damaged.</string>
+    <string name="s_ef638194" formatted="false">Passphrase (at least 8 characters)</string>
     <string name="s_4d55cb75" formatted="false">Export a backup or send it with system share</string>
     <string name="s_5e53c03a" formatted="false">Thu</string>
     <string name="s_40163b46" formatted="false">Back to today</string>
@@ -156,6 +168,7 @@
     <string name="s_d82fe22c" formatted="false">Note is too long. Shorten it before saving</string>
     <string name="s_d9dac7dd" formatted="false">Notes (optional)</string>
     <string name="s_e4a4815a" formatted="false">Appearance &amp; use</string>
+    <string name="s_f849ada8" formatted="false">OK</string>
     <string name="s_1e13bd21" formatted="false">Done</string>
     <string name="s_dd03e6ad" formatted="false">Preview differences from local data before importing</string>
     <string name="s_9b60ff74" formatted="false">Import failed: {0}</string>
@@ -163,6 +176,8 @@
     <string name="s_7fdaf616" formatted="false">Export, import and clear</string>
     <string name="s_f97fded3" formatted="false">Export backup</string>
     <string name="s_7436fb8d" formatted="false">Export failed: {0}</string>
+    <string name="s_0bd03067" formatted="false">Export was interrupted. Please export again.</string>
+    <string name="s_1a26bd57" formatted="false">You can encrypt exports with a passphrase (recommended). Unencrypted backups are plain JSON containing your logs, emotions and tasks; only save or share them somewhere you trust</string>
     <string name="s_b1632a8b" formatted="false">All logs, moods and tasks will be deleted permanently. Export a backup first.</string>
     <string name="s_479481d2" formatted="false">Local network transfer is turned off for now</string>
     <string name="s_f8eef707" formatted="false">Local network transfer is off because the old protocol has security risks. Use Export backup or system share to send the JSON file through a channel you trust.</string>
@@ -179,6 +194,8 @@
     <string name="s_c13b3522" formatted="false">All data cleared, but system reminders couldn\'t be removed. Restart the app and try again</string>
     <string name="s_c8fa62c1" formatted="false">Selected: {0}</string>
     <string name="s_01133500" formatted="false">Average mood {0} · Total {1}</string>
+    <string name="s_ee490e90" formatted="false">App Lock</string>
+    <string name="s_fb13a35f" formatted="false">With App Lock on, you unlock Flash with biometrics or your device passcode when it starts or after you\'ve been away for more than 1 minute. Widgets, Quick Capture and notification actions keep working.</string>
     <string name="s_22696cbc" formatted="false">Start</string>
     <string name="s_499be303" formatted="false">Get started</string>
     <string name="s_5d62764c" formatted="false">Start date</string>
@@ -257,6 +274,8 @@
     <string name="s_87b8867d" formatted="false">Newest</string>
     <string name="s_ceb8f642" formatted="false">Oldest</string>
     <string name="s_56b38d0f" formatted="false">Recent moments</string>
+    <string name="s_4f2beab6" formatted="false">Couldn\'t verify it\'s you. The setting wasn\'t changed.</string>
+    <string name="s_5665b744" formatted="false">Couldn\'t verify it\'s you. Try again.</string>
     <string name="s_be2c2eb2" formatted="false">Unread</string>
     <string name="s_27c37899" formatted="false">This week</string>
     <string name="s_ccb42197" formatted="false">This week: records {0} · to sort {1}</string>
@@ -277,11 +296,13 @@
     <string name="s_aef45eb7" formatted="false">Loading more…</string>
     <string name="s_6af40858" formatted="false">Now</string>
     <string name="s_b060afd3" formatted="false">This device doesn\'t support a task time zone in the backup. Update the system and try again. Nothing was imported</string>
+    <string name="s_2f15ac82" formatted="false">Set a screen lock passcode on this device to use App Lock</string>
     <string name="s_f4958768" formatted="false">Every 3 days</string>
     <string name="s_41be2fe2" formatted="false">Weekly</string>
     <string name="s_02c285b5" formatted="false">Daily</string>
     <string name="s_18fa51bd" formatted="false">Daily logs, ideas and moods · tasks not included</string>
     <string name="s_6d03477d" formatted="false">Daily average mood: {0}</string>
+    <string name="s_3aa61c82" formatted="false">Without the passphrase, no one can read or change the backup. Flash doesn\'t store the passphrase; if you forget it, the backup can\'t be recovered.</string>
     <string name="s_5816c303" formatted="false">No app available to share with</string>
     <string name="s_43c975df" formatted="false">No records found</string>
     <string name="s_f8bc527e" formatted="false">No logs match</string>
@@ -299,6 +320,7 @@
     <string name="s_436e2c82" formatted="false">What\'s on your mind?</string>
     <string name="s_78fe07cc" formatted="false">Couldn\'t create the transfer file: {0}</string>
     <string name="s_f60bb44e" formatted="false">Angry</string>
+    <string name="s_8ce87829" formatted="false">Encrypt with a passphrase (recommended)</string>
     <string name="s_621a8231" formatted="false">OK</string>
     <string name="s_869f8d0c" formatted="false">Clear everything</string>
     <string name="s_5716f5ef" formatted="false">In {0} minutes</string>
@@ -311,6 +333,7 @@
     <string name="s_78a510f0" formatted="false">Overview · all time</string>
     <string name="s_1da8a247" formatted="false">End</string>
     <string name="s_476d405b" formatted="false">End date</string>
+    <string name="s_70f57871" formatted="false">Continue</string>
     <string name="s_010e135c" formatted="false">Keep editing</string>
     <string name="s_e60fd56d" formatted="false">Keep recording and your review will take shape</string>
     <string name="s_607348a8" formatted="false">Edit</string>
@@ -320,6 +343,10 @@
     <string name="s_72ecf883" formatted="false">From {0}</string>
     <string name="s_85b25df8" formatted="false">To {0}</string>
     <string name="s_a6317c7d" formatted="false">Overwrite</string>
+    <string name="s_64bca37c" formatted="false">Decrypt</string>
+    <string name="s_227fd229" formatted="false">Unlock</string>
+    <string name="s_8b2f5c73" formatted="false">Unlock Flash</string>
+    <string name="s_f86c7b1b" formatted="false">Unlock Flash to see your records</string>
     <string name="s_5521c6a5" formatted="false">A place for every passing thought · no cloud account</string>
     <string name="s_dad3d89f" formatted="false">Note your first thought</string>
     <string name="s_6dfa9df7" formatted="false">Save to Flash</string>
@@ -354,6 +381,7 @@
     <string name="s_fa547131" formatted="false">No plans or records on this day</string>
     <string name="s_6d67abd6" formatted="false">this month</string>
     <string name="s_09e1a534" formatted="false">this week</string>
+    <string name="s_f8f100e1" formatted="false">This is an encrypted backup. Enter the passphrase set when it was exported.</string>
     <string name="s_d3ce76c1" formatted="false">This record no longer exists</string>
     <string name="s_1a959a39" formatted="false">Nothing recorded in this period yet. Empty days show as 0.</string>
     <string name="s_5fe370b7" formatted="false">Select</string>
@@ -363,10 +391,14 @@
     <string name="s_4de22934" formatted="false">Importance</string>
     <string name="s_490a6afa" formatted="false">Catch it as it passes. Write your first one</string>
     <string name="s_aef2df88" formatted="false">Capture on the go</string>
+    <string name="s_4552930a" formatted="false">Privacy</string>
     <string name="s_80390cc2" formatted="false">Unwell</string>
+    <string name="s_1f381169" formatted="false">Update Flash to open this encrypted backup.</string>
     <string name="s_99546fff" formatted="false">Very upset</string>
     <string name="s_22566806" formatted="false">Delighted</string>
     <string name="s_9a63360d" formatted="false">Local data changed after the preview. Differences were recalculated. Confirm before overwriting</string>
+    <string name="s_1203f0e4" formatted="false">Verify it\'s you to turn off App Lock</string>
+    <string name="s_d02b1cf3" formatted="false">Verify it\'s you to turn on App Lock</string>
     <string name="s_a14edc19" formatted="false">(Untitled)</string>
     <string name="s_12cea83b" formatted="false">(skipped invalid items: {0})</string>
     <string name="s_be6a75ae" formatted="false">, today</string>

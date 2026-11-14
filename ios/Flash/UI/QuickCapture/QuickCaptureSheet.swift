@@ -11,7 +11,7 @@ import FlashDesign
 /// 快速记录面板（iOS 版 Quick Capture，规则对齐 macOS PRD §13–14）：
 /// - 「✦ Flash / 现在想记录什么？」+ 自动增高输入（1–5 行），默认类型为灵感，可点选切到日志，不强制分类；
 /// - 回车或「保存」提交（粘贴的多行文本保留换行），保存后立即关闭（成功触感）；
-/// - 面板高度随内容测量（大字号不截断），接近字数上限时显示剩余字数；
+/// - 稳定高度并允许滚动（大字号不截断），接近字数上限时显示剩余字数；
 /// - 未提交关闭（下滑 / 点外部 / 取消）保留草稿，下次打开恢复正文与类型（QuickCaptureDraftStore，与 macOS 同语义）；
 /// - 保存规则（去空白 / 契约上限 / 标签与重要度）走共享 QuickCaptureCommit。
 struct QuickCaptureSheet: View {
@@ -28,8 +28,6 @@ struct QuickCaptureSheet: View {
     @State private var errorMessage: String? = nil
     @State private var committed = false
     @State private var saveCount = 0
-    /// 内容实测高度：驱动自适应 detent（0 = 尚未测量，先用 .medium）
-    @State private var contentHeight: CGFloat = 0
     @FocusState private var focused: Bool
 
     private let draftStore = QuickCaptureDraftStore()
@@ -39,23 +37,11 @@ struct QuickCaptureSheet: View {
     }
 
     var body: some View {
-        Group {
-            if dynamicTypeSize.isAccessibilitySize {
-                // A fixed 260pt detent cannot contain AX text. Keep native text
-                // sizing and make all content reachable even with the keyboard.
-                ScrollView { captureContent(includeActions: false) }
-                    .safeAreaInset(edge: .bottom, spacing: 0) {
-                        // Keep both actions in the keyboard-adjusted safe area;
-                        // long AX content may scroll independently above them.
-                        captureActions
-                            .padding(.horizontal, Spacing.lg)
-                            .padding(.vertical, Spacing.sm)
-                    }
-            } else {
-                captureContent(includeActions: true)
+        ScrollView { captureContent }
+            .safeAreaInset(edge:.bottom,spacing:0) {
+                captureActions.padding(.horizontal,Spacing.page).padding(.vertical,Spacing.sm)
             }
-        }
-        .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : (contentHeight > 0 ? [.height(contentHeight), .large] : [.medium, .large]))
+        .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : [.height(280), .large])
         .presentationDragIndicator(.visible)
         // 硫酸纸面板：半透明纸（减弱透明度时不透明）
         .presentationBackground { QuickCapturePaperBackground() }
@@ -66,7 +52,7 @@ struct QuickCaptureSheet: View {
         .onDisappear(perform: keepDraftIfNeeded)
     }
 
-    private func captureContent(includeActions: Bool) -> some View {
+    private var captureContent: some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
             captureHeader
 
@@ -99,11 +85,10 @@ struct QuickCaptureSheet: View {
                     .transition(.appear(reduceMotion: reduceMotion))
             }
 
-            if includeActions { captureActions }
         }
-        .padding(Spacing.lg)
+        .padding(Spacing.page)
         .fixedSize(horizontal: false, vertical: true)
-        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
+
     }
 
     private var captureActions: some View {

@@ -141,7 +141,7 @@ object Backup {
         val sourceVersion: String,
     )
 
-    class BackupFormatException(message: String) : Exception(message)
+    open class BackupFormatException(message: String) : Exception(message)
 
     /**
      * 从外部来源读取 UTF-8 备份时始终按“字节”限额，不能信任内容提供方上报的文件大小。
@@ -157,7 +157,7 @@ object Backup {
             if (read < 0) break
             total += read
             if (total > maxBytes) {
-                throw BackupFormatException(com.flash.app.i18n.tr("备份文件超过 {0} MB，无法导入", MAX_FILE_BYTES / 1024 / 1024))
+                throw BackupFormatException(com.flash.app.i18n.tr("备份文件超过 {0} MB，无法导入", maxBytes / 1024 / 1024))
             }
             output.write(buffer, 0, read)
         }
@@ -224,7 +224,12 @@ object Backup {
                 root.optJSONObject("data")
                     ?: throw BackupFormatException(com.flash.app.i18n.tr("data 必须是对象"))
             }
-            else -> throw BackupFormatException(com.flash.app.i18n.tr("备份版本不兼容：期望 {0}，实际 {1}", BACKUP_VERSION, version))
+            // 加密信封（任何 flash-backup-enc-* 版本）不是 v2 文档：交给 BackupEncryption 识别
+            else -> if (version.startsWith(BackupEncryption.VERSION_PREFIX)) {
+                throw BackupEncryption.PassphraseRequiredException()
+            } else {
+                throw BackupFormatException(com.flash.app.i18n.tr("备份版本不兼容：期望 {0}，实际 {1}", BACKUP_VERSION, version))
+            }
         }
         val logsJson = sectionRoot.optJSONArray("logs")
             ?: throw BackupFormatException(com.flash.app.i18n.tr("logs 必须是数组"))

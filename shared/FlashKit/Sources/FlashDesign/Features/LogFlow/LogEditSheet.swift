@@ -12,6 +12,7 @@ import FlashCore
 /// 编辑既有灵感时左下角提供「转为任务」（onConvertToTask，PRD §18）。
 /// 保存无效时说明原因：正文为空禁用保存；超出契约上限禁用保存并显示计数。
 public struct LogEditSheet: View {
+    @Environment(\.flashRepository) private var repository
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -23,6 +24,10 @@ public struct LogEditSheet: View {
     /// 新建草稿尚未入库（sourceLogId 会悬空），不显示该入口
     public var onConvertToTask: ((LogItem) -> Void)? = nil
 
+    @State private var tagDraft = TagDraft()
+    @State private var initialTags: [String] = []
+    @State private var textSelection: TextSelection?
+    @State private var placedTemplateCursor = false
     @State private var content: String
     @State private var category: Category
     @State private var colorTag: ColorTag
@@ -60,7 +65,7 @@ public struct LogEditSheet: View {
     private var dirty: Bool {
         content != log.content || category != log.category || colorTag != log.colorTag ||
         importance != log.importance || isFavorite != (log.isFavorite ?? false) ||
-        DateFormatting.dayString(recordDate) != log.recordDate
+        DateFormatting.dayString(recordDate) != log.recordDate || tagDraft.selected.sorted() != initialTags
     }
 
     private func close() {
@@ -90,9 +95,9 @@ public struct LogEditSheet: View {
                         .animation(Motion.quick(reduceMotion), value: category)
 
                         ZStack(alignment: .topLeading) {
-                            TextEditor(text: $content)
+                            TextEditor(text: $content, selection:$textSelection)
                                 .font(Typography.body)
-                                .frame(minHeight: 120) // 正文编辑区最小高度（几何值）
+                                .frame(minHeight: RecordTemplate.containsOnlyPrompts(log.content) ? 200 : 120)
                                 .padding(Spacing.xxs)
                                 .scrollContentBackground(.hidden)
                                 .background(BrandColors.weakSurface)
@@ -150,6 +155,9 @@ public struct LogEditSheet: View {
                 }
                 .staggeredIn(index: 2, appeared: appeared, reduceMotion: reduceMotion)
 
+                #if os(iOS)
+                DraftTagsEditor(draft: $tagDraft, text: content).padding(Spacing.card)
+                #endif
                 HStack {
                     if !saved, category == .idea, onConvertToTask != nil {
                         Button("转为任务") { convertToTask() }
@@ -195,12 +203,20 @@ public struct LogEditSheet: View {
         .flashPageBackground()
         .flashEditorChrome(title: title, saveTitle: isSaving ? L("保存中…") : L("保存"),
                            saveDisabled: content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                               || contentExceedsLimit || isSaving || saved,
+                               || contentExceedsLimit || RecordTemplate.containsOnlyPrompts(content) || isSaving || saved,
                            onCancel: close, onSave: save)
         .flashHaptic(.success, trigger: saved)
         .onAppear {
+            tagDraft = (try? repository?.tagDraft(for: "log:"+log.id)) ?? .init()
+            initialTags = tagDraft.selected.sorted()
             appeared = true
             contentFocused = true
+        }
+        .onChange(of:contentFocused) {
+            if contentFocused, !placedTemplateCursor, RecordTemplate.containsOnlyPrompts(content) {
+                textSelection = TextSelection(insertionPoint:content.firstIndex(of:"\n") ?? content.startIndex)
+                placedTemplateCursor = true
+            }
         }
         .alert("提示", isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
             Button("好") { errorMessage = nil }
@@ -237,7 +253,7 @@ public struct LogEditSheet: View {
     }
 
     private func save() {
-        guard !isSaving && !saved && !contentExceedsLimit && !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        guard !isSaving && !saved && !contentExceedsLimit && !RecordTemplate.containsOnlyPrompts(content) && !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         isSaving = true
         var updated = log
         updated.content = content
@@ -250,7 +266,11 @@ public struct LogEditSheet: View {
         updated.recordDate = DateFormatting.dayString(recordDate)
         Task {
             do {
+                #if os(iOS)
+                if let repository { try repository.updateLog(updated,tags:tagDraft) } else { try await onSave(updated) }
+                #else
                 try await onSave(updated)
+                #endif
                 await MainActor.run {
                     isSaving = false
                     saved = true

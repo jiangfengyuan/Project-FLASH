@@ -10,6 +10,10 @@ public struct TaskEditorView: View {
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.flashRepository) private var repository
+    @State private var tagDraft = TagDraft()
+    @State private var errorMessage: String?
+    @State private var saving = false
     @State private var title: String
     @State private var notes: String
     @State private var allDay: Bool
@@ -41,7 +45,7 @@ public struct TaskEditorView: View {
     private var notesExceedsLimit: Bool { !TextLimits.fits(notes) }
 
     private var saveDisabled: Bool {
-        title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || titleExceedsLimit || notesExceedsLimit
+        saving || title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || titleExceedsLimit || notesExceedsLimit
     }
 
     public var body: some View {
@@ -50,6 +54,7 @@ public struct TaskEditorView: View {
         Form {
             Group {
                 Section { fields }
+                Section { DraftTagsEditor(draft:$tagDraft,text:title+"\n"+notes) }
             }
             // 纸上书写：分组行用纸白卡面（macOS 不变）
             .flashFormRowBackground()
@@ -57,7 +62,9 @@ public struct TaskEditorView: View {
         .scrollContentBackground(.hidden)
         .flashPageBackground()
         .flashEditorChrome(title: task == nil ? L("新建任务") : L("编辑任务"), saveDisabled: saveDisabled,
-                           onCancel: { dismiss() }, onSave: { onSave(makeTask()) })
+                           onCancel: { dismiss() }, onSave: submitTask)
+        .task { if let task { tagDraft = (try? repository?.tagDraft(for:"task:"+task.id)) ?? .init() } }
+        .alert(L("提示"),isPresented:Binding(get:{ errorMessage != nil },set:{ if !$0 { errorMessage = nil } })) { Button(L("好")) { errorMessage = nil } } message: { Text(errorMessage ?? "") }
         .environment(\.timeZone, editorTimeZone)
         #else
         VStack(alignment: .leading, spacing: Spacing.md) {
@@ -75,6 +82,15 @@ public struct TaskEditorView: View {
         .flashPanelWidth(430) // 编辑器固有宽度（几何值，仅 macOS）
         .environment(\.timeZone, editorTimeZone)
         #endif
+    }
+
+    private func submitTask() {
+        guard !saving else { return }
+        let value = makeTask()
+        guard let repository else { onSave(value); return }
+        do { try repository.saveTask(value,tags:tagDraft); saving = true
+            Task { do { try await TaskReminderScheduler.shared.schedule(value); dismiss() } catch { errorMessage = L("任务已保存，提醒未能启用"); saving = false } }
+        } catch { errorMessage = error.localizedDescription }
     }
 
     @ViewBuilder

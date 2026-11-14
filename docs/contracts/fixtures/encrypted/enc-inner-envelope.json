@@ -1,0 +1,13 @@
+{
+  "version": "flash-backup-enc-v1",
+  "kdf": {
+    "name": "PBKDF2-HMAC-SHA256",
+    "iterations": 100000,
+    "salt": "8fKV3ijZpTrT1EDmcCJ7vA=="
+  },
+  "cipher": {
+    "name": "AES-256-GCM",
+    "nonce": "Hk5P4iE1N2dLn4Im"
+  },
+  "ciphertext": "rtzoDJwdtyryTzjaNtNHFJOR98qWViR35WicHgpfy++IzC3KfAAVP2Bu2DKMvOQTwq9J66tWdPbmEO/Vp/9yyCDVT7ftW7Ct29Kk98Eh0jqNJHsmrlWOb5Li8YlSFOyI7Gn9igx70GRoH75TBInIvR572jBlKWV7PPNBeSPEstf18LUsbQvTG6/FZv4lpqlGchiIo/TBWfbL0XDAvBs/E01hEo1GU7faKiUGBKSv6uxew5ee5co1RQHxjwz0KqAVXqvq5N95nGTDB3d2gZm2p12fBsz87MEq2zQwEyDL1urJcXkWvVAtBxwHQqlGgYYwSmj98XxLaIJM8w41IeJGU9FH5sHufZumKXAnl0sUfjxOf4jKfx4X/Yx9TsqkI8GmBeKVzO/tr5x4FsJdLTIczDvodtrYNBX3aRkqNRBrpRTiUxKimykSaqL9VZwRywXexIbm+XmhgMRp/x0/4/gb2i4Amvy8o8c83Tby8Rrj73ZQki88gtjYWlanarznoBMKzKd94vjaXMzoJ81T0A+YU+z0/WLj9xAVYO04IuESXqO5DDvfjhcQM8ve/e3OePHTkwNTMSI0fMPlN5SEe5Xnidz/AgB5mk2loemIzTISJ9aiG2Dws7byqS1hPxamq5G2ObER8cxAqW5WN6VHfRCRbSNtlKhA0g0gsIiMsLGyznol5YVw839wWcHMze1xLGOEvCwHm1T3qmHrAlfJ0/6Y01qMTQC6YDKC3C0yneKLp5BaJGo3gnUW2ThscTL+FhlqxU5EtARrajVhziVWKLMHgT/c7JU="
+}

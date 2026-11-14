@@ -12,6 +12,7 @@
     <string name="s_aafdda63" formatted="false">/data/{0}/{1}: يجب أن يكون السجل كائنًا</string>
     <string name="s_10db0315" formatted="false">/data/{0}: تجاوزت المصفوفة الحد</string>
     <string name="s_b7cc858a" formatted="false">/data: سجلات غير صالحة أو مكررة. استخدم الاستعادة لمعرفة ما يمكن استرجاعه</string>
+    <string name="s_8cc3cbe4" formatted="false">/version: لا يمكن أن تحتوي نسخة احتياطية مشفّرة على نسخة مشفّرة أخرى</string>
     <string name="s_90ef682e" formatted="false">/version: استخدم الاستعادة للملفات القديمة</string>
     <string name="s_b9ce0fb9" formatted="false">/: عدد قيم JSON كبير جدًا</string>
     <string name="s_307d96fc" formatted="false">/: مفتاح مكرر في كائن JSON: {0}</string>
@@ -23,6 +24,7 @@
     <string name="s_355b83a3" formatted="false">أسبوع يستحق أن يُذكر. ✦</string>
     <string name="s_a1486dba" formatted="false">نسخة Flash Aero الاحتياطية</string>
     <string name="s_eeecd281" formatted="false">تذكير مهمة Flash</string>
+    <string name="s_2534b43c" formatted="false">Flash مقفل</string>
     <string name="s_f6ff76b6" formatted="false">الالتقاط السريع في Flash</string>
     <string name="s_9a2b6832" formatted="false">Flash الآن</string>
     <string name="s_2a0b1ddf" formatted="false">فكرة Flash</string>
@@ -78,10 +80,12 @@
     <string name="s_6bcf17c2" formatted="false">الشهر التالي</string>
     <string name="s_10c83c81" formatted="false">التالي</string>
     <string name="s_82b6cabb" formatted="false">مساء الخير 🌤</string>
+    <string name="s_e08c4ba9" formatted="false">النسخة الاحتياطية غير المشفّرة هي JSON نصّي واضح: يستطيع أي شخص لديه الملف قراءة كل سجلاتك ومشاعرك ومهامك. احفظها أو شاركها مع أجهزة أو جهات اتصال موثوقة فقط.</string>
     <string name="s_1344f491" formatted="false">غير سعيد</string>
     <string name="s_4cc036be" formatted="false">بلا تذكير</string>
     <string name="s_12e8587a" formatted="false">إصدار قسم {0} غير مدعوم</string>
     <string name="s_ba358518" formatted="false">الكل</string>
+    <string name="s_9ae60760" formatted="false">عبارتا المرور غير متطابقتين.</string>
     <string name="s_b13672cd" formatted="false">محايد</string>
     <string name="s_51f6517e" formatted="false">المظهر</string>
     <string name="s_0a416847" formatted="false">الثلاثين يومًا السابقة</string>
@@ -121,6 +125,7 @@
     <string name="s_801be77b" formatted="false">المحتوى</string>
     <string name="s_dc24135d" formatted="false">لا يمكن أن يكون المحتوى فارغًا</string>
     <string name="s_043cda7f" formatted="false">طويل جدًا ({0} حرفًا، الحد {1}). اختصره قبل الحفظ</string>
+    <string name="s_d15889f8" formatted="false">أعد إدخال عبارة المرور</string>
     <string name="s_87000edc" formatted="false">واصل التسجيل، سيراه أنت في المستقبل.</string>
     <string name="s_95a71bc9" formatted="false">جارٍ التحضير…</string>
     <string name="s_9aa7d416" formatted="false">مشاركة</string>
@@ -135,10 +140,17 @@
     <string name="s_e6dedfa0" formatted="false">حذف هذا المزاج؟</string>
     <string name="s_98f7e648" formatted="false">حذف هذه اليومية؟</string>
     <string name="s_c51f5912" formatted="false">عند الموعد</string>
+    <string name="s_d26ab92b" formatted="false">نسخة احتياطية مشفّرة</string>
+    <string name="s_e78a9d95" formatted="false">ملف النسخة الاحتياطية المشفّرة تالف أو بتنسيق غير صحيح.</string>
     <string name="s_c628e28d" formatted="false">يحتوي اليوميات: {0}، المزاج: {1}، المهام: {2}</string>
     <string name="s_60b4c5ae" formatted="false">منطقة الخطر</string>
     <string name="s_949856b3" formatted="false">إلغاء</string>
     <string name="s_d1d62fb0" formatted="false">إزالة من المفضلة</string>
+    <string name="s_53c7e602" formatted="false">عبارة المرور</string>
+    <string name="s_f7e8d7e8" formatted="false">لا يمكن أن تتجاوز عبارة المرور 1024 حرفًا.</string>
+    <string name="s_ad879bae" formatted="false">يجب أن تتكون عبارة المرور من 8 أحرف على الأقل.</string>
+    <string name="s_4db1b243" formatted="false">عبارة المرور خاطئة، أو أن الملف تالف.</string>
+    <string name="s_ef638194" formatted="false">عبارة المرور (8 أحرف على الأقل)</string>
     <string name="s_4d55cb75" formatted="false">صدّر نسخة احتياطية أو أرسلها عبر مشاركة النظام</string>
     <string name="s_5e53c03a" formatted="false">خ</string>
     <string name="s_40163b46" formatted="false">العودة إلى اليوم</string>
@@ -156,6 +168,7 @@
     <string name="s_d82fe22c" formatted="false">الملاحظة طويلة جدًا. اختصرها قبل الحفظ</string>
     <string name="s_d9dac7dd" formatted="false">ملاحظات (اختياري)</string>
     <string name="s_e4a4815a" formatted="false">المظهر والاستخدام</string>
+    <string name="s_f849ada8" formatted="false">حسنًا</string>
     <string name="s_1e13bd21" formatted="false">تم</string>
     <string name="s_dd03e6ad" formatted="false">معاينة الفروق مع البيانات المحلية قبل الاستيراد</string>
     <string name="s_9b60ff74" formatted="false">فشل الاستيراد: {0}</string>
@@ -163,6 +176,8 @@
     <string name="s_7fdaf616" formatted="false">التصدير والاستيراد والمسح</string>
     <string name="s_f97fded3" formatted="false">تصدير نسخة احتياطية</string>
     <string name="s_7436fb8d" formatted="false">فشل التصدير: {0}</string>
+    <string name="s_0bd03067" formatted="false">توقف التصدير. يُرجى التصدير مرة أخرى.</string>
+    <string name="s_1a26bd57" formatted="false">يمكنك تشفير التصدير بعبارة مرور (موصى به). النسخ غير المشفّرة هي JSON نصّي واضح يحتوي على السجلات والمشاعر والمهام؛ احفظها أو شاركها في أماكن موثوقة فقط</string>
     <string name="s_b1632a8b" formatted="false">ستُحذف كل اليوميات والمزاج والمهام نهائيًا. صدّر نسخة احتياطية أولًا.</string>
     <string name="s_479481d2" formatted="false">النقل عبر الشبكة المحلية متوقف حاليًا</string>
     <string name="s_f8eef707" formatted="false">النقل عبر الشبكة المحلية متوقف لمخاطر البروتوكول القديم. استخدم التصدير أو مشاركة النظام لإرسال ملف JSON عبر قناة موثوقة.</string>
@@ -179,6 +194,8 @@
     <string name="s_c13b3522" formatted="false">مُسحت كل البيانات، لكن تعذرت إزالة تذكيرات النظام. أعد تشغيل التطبيق وحاول مجددًا</string>
     <string name="s_c8fa62c1" formatted="false">المحدد: {0}</string>
     <string name="s_01133500" formatted="false">متوسط المزاج {0} · الإجمالي {1}</string>
+    <string name="s_ee490e90" formatted="false">قفل التطبيق</string>
+    <string name="s_fb13a35f" formatted="false">عند تفعيل قفل التطبيق، يلزم فتح Flash بالقياسات الحيوية أو رمز الجهاز عند تشغيله أو بعد الابتعاد عنه أكثر من دقيقة واحدة. تبقى الأدوات المصغّرة والالتقاط السريع وإجراءات الإشعارات متاحة.</string>
     <string name="s_22696cbc" formatted="false">البداية</string>
     <string name="s_499be303" formatted="false">ابدأ</string>
     <string name="s_5d62764c" formatted="false">تاريخ البدء</string>
@@ -257,6 +274,8 @@
     <string name="s_87b8867d" formatted="false">الأحدث</string>
     <string name="s_ceb8f642" formatted="false">الأقدم</string>
     <string name="s_56b38d0f" formatted="false">اللحظات الأخيرة</string>
+    <string name="s_4f2beab6" formatted="false">تعذّر التحقق من هويتك. لم يتغير الإعداد.</string>
+    <string name="s_5665b744" formatted="false">تعذّر التحقق من هويتك. حاول مرة أخرى.</string>
     <string name="s_be2c2eb2" formatted="false">غير مقروء</string>
     <string name="s_27c37899" formatted="false">هذا الأسبوع</string>
     <string name="s_ccb42197" formatted="false">هذا الأسبوع: السجلات {0} · للفرز {1}</string>
@@ -277,11 +296,13 @@
     <string name="s_aef45eb7" formatted="false">جارٍ تحميل المزيد…</string>
     <string name="s_6af40858" formatted="false">الآن</string>
     <string name="s_b060afd3" formatted="false">لا يدعم هذا الجهاز منطقة زمنية في النسخة. حدّث النظام وحاول مجددًا. لم يُستورد شيء</string>
+    <string name="s_2f15ac82" formatted="false">عيّن رمز قفل الشاشة على هذا الجهاز لاستخدام قفل التطبيق</string>
     <string name="s_f4958768" formatted="false">كل 3 أيام</string>
     <string name="s_41be2fe2" formatted="false">أسبوعيًا</string>
     <string name="s_02c285b5" formatted="false">يوميًا</string>
     <string name="s_18fa51bd" formatted="false">اليوميات والأفكار والمزاج يوميًا · دون المهام</string>
     <string name="s_6d03477d" formatted="false">متوسط المزاج اليومي: {0}</string>
+    <string name="s_3aa61c82" formatted="false">لا يمكن لأحد قراءة النسخة الاحتياطية أو تغييرها دون عبارة المرور. لا يحفظ Flash عبارة المرور، وإذا نسيتها فلا يمكن استعادة النسخة.</string>
     <string name="s_5816c303" formatted="false">لا تطبيق متاح للمشاركة</string>
     <string name="s_43c975df" formatted="false">لم يُعثر على سجلات</string>
     <string name="s_f8bc527e" formatted="false">لا يوميات مطابقة</string>
@@ -299,6 +320,7 @@
     <string name="s_436e2c82" formatted="false">بماذا تفكر الآن؟</string>
     <string name="s_78fe07cc" formatted="false">تعذر إنشاء ملف النقل: {0}</string>
     <string name="s_f60bb44e" formatted="false">غاضب</string>
+    <string name="s_8ce87829" formatted="false">التشفير بعبارة مرور (موصى به)</string>
     <string name="s_621a8231" formatted="false">حسنًا</string>
     <string name="s_869f8d0c" formatted="false">مسح الكل</string>
     <string name="s_5716f5ef" formatted="false">بعد {0} دقيقة</string>
@@ -311,6 +333,7 @@
     <string name="s_78a510f0" formatted="false">نظرة عامة · كل الوقت</string>
     <string name="s_1da8a247" formatted="false">النهاية</string>
     <string name="s_476d405b" formatted="false">تاريخ الانتهاء</string>
+    <string name="s_70f57871" formatted="false">متابعة</string>
     <string name="s_010e135c" formatted="false">متابعة التحرير</string>
     <string name="s_e60fd56d" formatted="false">واصل التسجيل وستتضح مراجعتك</string>
     <string name="s_607348a8" formatted="false">تعديل</string>
@@ -320,6 +343,10 @@
     <string name="s_72ecf883" formatted="false">من {0}</string>
     <string name="s_85b25df8" formatted="false">إلى {0}</string>
     <string name="s_a6317c7d" formatted="false">استبدال</string>
+    <string name="s_64bca37c" formatted="false">فك التشفير</string>
+    <string name="s_227fd229" formatted="false">فتح القفل</string>
+    <string name="s_8b2f5c73" formatted="false">فتح قفل Flash</string>
+    <string name="s_f86c7b1b" formatted="false">افتح قفل Flash لعرض سجلاتك</string>
     <string name="s_5521c6a5" formatted="false">مكان لكل فكرة عابرة · بلا حساب سحابي</string>
     <string name="s_dad3d89f" formatted="false">دوّن فكرتك الأولى</string>
     <string name="s_6dfa9df7" formatted="false">احفظ في Flash</string>
@@ -354,6 +381,7 @@
     <string name="s_fa547131" formatted="false">لا خطط أو سجلات في هذا اليوم</string>
     <string name="s_6d67abd6" formatted="false">هذا الشهر</string>
     <string name="s_09e1a534" formatted="false">هذا الأسبوع</string>
+    <string name="s_f8f100e1" formatted="false">هذه نسخة احتياطية مشفّرة. أدخل عبارة المرور التي عيّنتها عند التصدير.</string>
     <string name="s_d3ce76c1" formatted="false">لم يعد هذا السجل موجودًا</string>
     <string name="s_1a959a39" formatted="false">لا تسجيل في هذه الفترة بعد. تظهر الأيام الفارغة بقيمة 0.</string>
     <string name="s_5fe370b7" formatted="false">تحديد</string>
@@ -363,10 +391,14 @@
     <string name="s_4de22934" formatted="false">الأهمية</string>
     <string name="s_490a6afa" formatted="false">التقطها وهي تمر. اكتب أولاها</string>
     <string name="s_aef2df88" formatted="false">سجّل أينما كنت</string>
+    <string name="s_4552930a" formatted="false">الخصوصية</string>
     <string name="s_80390cc2" formatted="false">متضايق</string>
+    <string name="s_1f381169" formatted="false">حدّث Flash لفتح هذه النسخة الاحتياطية المشفّرة.</string>
     <string name="s_99546fff" formatted="false">مستاء جدًا</string>
     <string name="s_22566806" formatted="false">مسرور جدًا</string>
     <string name="s_9a63360d" formatted="false">تغيرت البيانات المحلية بعد المعاينة. أُعيد حساب الفروق. أكّد قبل الاستبدال</string>
+    <string name="s_1203f0e4" formatted="false">تحقق من هويتك لإيقاف قفل التطبيق</string>
+    <string name="s_d02b1cf3" formatted="false">تحقق من هويتك لتفعيل قفل التطبيق</string>
     <string name="s_a14edc19" formatted="false">(بلا عنوان)</string>
     <string name="s_12cea83b" formatted="false">(العناصر غير الصالحة المتخطاة: {0})</string>
     <string name="s_be6a75ae" formatted="false">، اليوم</string>

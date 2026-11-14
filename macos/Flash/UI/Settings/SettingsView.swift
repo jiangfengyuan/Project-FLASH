@@ -31,6 +31,8 @@ struct SettingsView: View {
     @State private var showClearConfirm = false
     @State private var message: String? = nil
     @State private var sharingPicker: NSSharingServicePicker? = nil
+    /// 导出 / 分享前的加密选择，或导入加密备份时的口令输入
+    @State private var passphraseRequest: PassphraseRequest? = nil
     /// 共享控制器：切走模块时视图销毁但进行中的传输继续，回到设置页可看到进度与结果
     @State private var lanTransfer = LocalBackupTransferController.shared
     /// 导入/导出进行中（大文件 IO 已移到后台，期间禁用按钮防重入）
@@ -61,11 +63,13 @@ struct SettingsView: View {
 
                 QuickCaptureSection(appeared: appearanceAppeared)
 
+                PrivacySection(appeared: appearanceAppeared)
+
                 DataSafetySection(isBusy: isBusy, appeared: dataAppeared,
-                                  onShare: transferBackup,
+                                  onShare: { passphraseRequest = .share },
                                   onLanSend: startLanSend,
                                   onLanReceive: { lanTransfer.startReceiving() },
-                                  onExport: exportBackup,
+                                  onExport: { passphraseRequest = .export },
                                   onImport: { chooseImportFile() },
                                   onRecoveryImport: { chooseImportFile(recovery: true) })
 
@@ -96,6 +100,7 @@ struct SettingsView: View {
             }
         }
         .sheet(isPresented: lanTransferPresented) { lanTransferSheet }
+        .sheet(item: $passphraseRequest) { request in passphraseSheet(request) }
         .onChange(of: lanTransfer.receivedJSON) { _, json in
             guard let json else { return }
             lanTransfer.receivedJSON = nil
@@ -190,16 +195,37 @@ struct SettingsView: View {
 
     // MARK: - 导出
 
-    private func transferBackup() {
+    @ViewBuilder
+    private func passphraseSheet(_ request: PassphraseRequest) -> some View {
+        switch request.kind {
+        case .export, .share:
+            BackupPassphraseSheet(mode: .export { passphrase in
+                passphraseRequest = nil
+                // 等 sheet 收起后再弹系统面板，避免模态叠加
+                DispatchQueue.main.async {
+                    if request.kind == .export { exportBackup(passphrase: passphrase) } else { transferBackup(passphrase: passphrase) }
+                }
+            }, onCancel: { passphraseRequest = nil })
+        case .unlock(let text, let error):
+            BackupPassphraseSheet(mode: .unlock(error: error) { passphrase in
+                passphraseRequest = nil
+                prepareEncryptedImport(text, passphrase: passphrase)
+            }, onCancel: { passphraseRequest = nil })
+        }
+    }
+
+    private func transferBackup(passphrase: String?) {
         isBusy = true
         Task {
             defer { isBusy = false }
             do {
                 let snapshot = try currentSnapshot()
                 let version = appVersion
-                let json = try await BackupImportCoordinator.exportJSON(snapshot: snapshot, appVersion: version)
+                let json = try await BackupImportCoordinator.exportJSON(snapshot: snapshot, appVersion: version,
+                                                                        passphrase: passphrase)
+                let encrypted = passphrase != nil
                 let url = try await Task.detached(priority: .userInitiated) {
-                    try BackupTransfer.createShareFile(json: json)
+                    try BackupTransfer.createShareFile(json: json, encrypted: encrypted)
                 }.value
                 guard let view = NSApp.keyWindow?.contentView ?? NSApp.mainWindow?.contentView else {
                     throw TransferPresentationError.noWindow
@@ -265,13 +291,13 @@ struct SettingsView: View {
         appState.markExportHandled()
         // 菜单 action 在 AppKit 菜单跟踪事件循环内同步触发，同步 runModal() 会被吞；
         // 异步逃逸出菜单跟踪后再弹面板（onAppear 路径同样安全）
-        DispatchQueue.main.async { exportBackup() }
+        DispatchQueue.main.async { passphraseRequest = .export }
     }
 
-    private func exportBackup() {
+    private func exportBackup(passphrase: String?) {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.json]
-        panel.nameFieldStringValue = "flash-backup-\(DateFormatting.today()).json"
+        panel.nameFieldStringValue = BackupImportCoordinator.exportFileName(encrypted: passphrase != nil)
         guard panel.runModal() == .OK, let url = panel.url else { return }
         isBusy = true
         Task {
@@ -280,7 +306,8 @@ struct SettingsView: View {
                 // repository 写库/读库方法均为 @MainActor，序列化与文件 IO 移出主线程
                 let snapshot = try currentSnapshot()
                 let version = appVersion
-                let json = try await BackupImportCoordinator.exportJSON(snapshot: snapshot, appVersion: version)
+                let json = try await BackupImportCoordinator.exportJSON(snapshot: snapshot, appVersion: version,
+                                                                        passphrase: passphrase)
                 try await Task.detached(priority: .userInitiated) {
                     try BackupTransfer.writeExportFile(json: json, to: url)
                 }.value
@@ -308,12 +335,40 @@ struct SettingsView: View {
             defer { isBusy = false }
             do {
                 let snapshot = try currentSnapshot()
-                // 全量读入前先查文件大小，超 50MB 直接拒绝（BackupImportCoordinator 内）
-                let preview = try await BackupImportCoordinator.preview(fileAt: url, recovery: recovery,
-                                                                        against: snapshot)
+                // 全量读入前先查文件大小（明文 50MB、加密 72MB 上限，BackupImportCoordinator 内）
+                let text = try await BackupImportCoordinator.readBackupText(fileAt: url)
+                do {
+                    let preview = try await BackupImportCoordinator.preview(text: text, recovery: recovery,
+                                                                            passphrase: nil, against: snapshot)
+                    pendingImport = preview
+                    pendingSnapshot = snapshot
+                    importPreview = preview
+                } catch BackupError.encrypted {
+                    passphraseRequest = .unlock(text, error: nil)
+                }
+            } catch let error as BackupError {
+                message = error.userMessage
+            } catch {
+                print("导入备份失败: \(error)")
+                message = "导入失败，请确认选择的是 Flash 备份文件后重试"
+            }
+        }
+    }
+
+    /// 加密备份：口令错误时回到口令框（带错误提示），其余错误按普通导入失败处理
+    private func prepareEncryptedImport(_ text: String, passphrase: String) {
+        isBusy = true
+        Task {
+            defer { isBusy = false }
+            do {
+                let snapshot = try currentSnapshot()
+                let preview = try await BackupImportCoordinator.preview(text: text, recovery: recoveryImport,
+                                                                        passphrase: passphrase, against: snapshot)
                 pendingImport = preview
                 pendingSnapshot = snapshot
                 importPreview = preview
+            } catch BackupError.encryptedAuthenticationFailed {
+                passphraseRequest = .unlock(text, error: BackupError.encryptedAuthenticationFailed.userMessage)
             } catch let error as BackupError {
                 message = error.userMessage
             } catch {
@@ -388,5 +443,22 @@ struct SettingsView: View {
 
     private enum SettingsDataError: Error {
         case repositoryUnavailable
+    }
+}
+
+/// 口令弹层：导出 / 分享前选择是否加密，或为加密备份输入口令（文本在内存中保留到用户取消）
+private struct PassphraseRequest: Identifiable {
+    enum Kind: Equatable {
+        case export
+        case share
+        case unlock(String, error: String?)
+    }
+    let id = UUID()
+    let kind: Kind
+
+    static let export = PassphraseRequest(kind: .export)
+    static let share = PassphraseRequest(kind: .share)
+    static func unlock(_ text: String, error: String?) -> PassphraseRequest {
+        PassphraseRequest(kind: .unlock(text, error: error))
     }
 }

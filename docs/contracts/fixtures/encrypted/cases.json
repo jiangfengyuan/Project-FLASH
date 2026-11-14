@@ -1,0 +1,151 @@
+{
+  "passphrase": "Flash \u5907\u4efd caf\u00e9 2026",
+  "cases": [
+    {
+      "file": "valid-enc-full.json",
+      "expect": "ok",
+      "plaintext": "valid-full.json",
+      "innerValid": true
+    },
+    {
+      "file": "valid-enc-full.json",
+      "expect": "ok",
+      "passphrase": "Flash \u5907\u4efd cafe\u0301 2026",
+      "plaintext": "valid-full.json",
+      "innerValid": true
+    },
+    {
+      "file": "valid-enc-full.json",
+      "expect": "authenticationFailed",
+      "passphrase": "Flash \u5907\u4efd cafe 2026"
+    },
+    {
+      "file": "valid-enc-schema2.json",
+      "expect": "ok",
+      "plaintext": "valid-schema2.json",
+      "innerValid": true
+    },
+    {
+      "file": "valid-enc-minimal.json",
+      "expect": "ok",
+      "plaintext": "valid-minimal.json",
+      "innerValid": true
+    },
+    {
+      "file": "enc-inner-invalid.json",
+      "expect": "ok",
+      "plaintext": "invalid-importance-range.json",
+      "innerValid": false
+    },
+    {
+      "file": "enc-inner-envelope.json",
+      "expect": "ok",
+      "plaintext": "encrypted/valid-enc-minimal.json",
+      "innerValid": false
+    },
+    {
+      "file": "enc-tampered-ciphertext.json",
+      "expect": "authenticationFailed"
+    },
+    {
+      "file": "enc-tampered-tag.json",
+      "expect": "authenticationFailed"
+    },
+    {
+      "file": "enc-tampered-nonce.json",
+      "expect": "authenticationFailed"
+    },
+    {
+      "file": "enc-tampered-salt.json",
+      "expect": "authenticationFailed"
+    },
+    {
+      "file": "enc-tampered-iterations.json",
+      "expect": "authenticationFailed"
+    },
+    {
+      "file": "enc-unknown-version.json",
+      "expect": "unsupported"
+    },
+    {
+      "file": "enc-unknown-kdf.json",
+      "expect": "unsupported"
+    },
+    {
+      "file": "enc-unknown-cipher.json",
+      "expect": "unsupported"
+    },
+    {
+      "file": "enc-iterations-low.json",
+      "expect": "invalidEnvelope"
+    },
+    {
+      "file": "enc-iterations-high.json",
+      "expect": "invalidEnvelope"
+    },
+    {
+      "file": "enc-iterations-boolean.json",
+      "expect": "invalidEnvelope"
+    },
+    {
+      "file": "enc-iterations-fraction.json",
+      "expect": "invalidEnvelope"
+    },
+    {
+      "file": "enc-iterations-string.json",
+      "expect": "invalidEnvelope"
+    },
+    {
+      "file": "enc-salt-short.json",
+      "expect": "invalidEnvelope"
+    },
+    {
+      "file": "enc-nonce-long.json",
+      "expect": "invalidEnvelope"
+    },
+    {
+      "file": "enc-salt-noncanonical.json",
+      "expect": "invalidEnvelope"
+    },
+    {
+      "file": "enc-salt-unpadded.json",
+      "expect": "invalidEnvelope"
+    },
+    {
+      "file": "enc-ciphertext-whitespace.json",
+      "expect": "invalidEnvelope"
+    },
+    {
+      "file": "enc-ciphertext-short.json",
+      "expect": "invalidEnvelope"
+    },
+    {
+      "file": "enc-ciphertext-not-string.json",
+      "expect": "invalidEnvelope"
+    },
+    {
+      "file": "enc-missing-ciphertext.json",
+      "expect": "invalidEnvelope"
+    },
+    {
+      "file": "enc-unknown-root-field.json",
+      "expect": "invalidEnvelope"
+    },
+    {
+      "file": "enc-unknown-kdf-field.json",
+      "expect": "invalidEnvelope"
+    },
+    {
+      "file": "enc-kdf-not-object.json",
+      "expect": "invalidEnvelope"
+    },
+    {
+      "file": "enc-cipher-name-not-string.json",
+      "expect": "invalidEnvelope"
+    },
+    {
+      "file": "enc-duplicate-key.json",
+      "expect": "invalidJSON"
+    }
+  ]
+}

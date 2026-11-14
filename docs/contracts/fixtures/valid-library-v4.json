@@ -1,0 +1,147 @@
+{
+  "appVersion" : "v4-test",
+  "automaticTags" : {
+    "log:7D61E89B-A0FD-4FA0-BC35-DEE676FD674F" : [
+      "CFF848E4-C58C-427C-BA9F-A63D8660ECB0"
+    ]
+  },
+  "data" : {
+    "emotions" : [
+
+    ],
+    "logs" : [
+      {
+        "category" : "log",
+        "colorTag" : "daily",
+        "content" : "Still active",
+        "createdAt" : "2026-11-14T08:35:14.540Z",
+        "id" : "7D61E89B-A0FD-4FA0-BC35-DEE676FD674F",
+        "importance" : 0,
+        "recordDate" : "2026-11-14"
+      }
+    ],
+    "tasks" : [
+
+    ]
+  },
+  "exportedAt" : "2026-11-14T08:35:14.547Z",
+  "notes" : "",
+  "personalLibrary" : {
+    "filters" : [
+
+    ],
+    "links" : {
+      "log:7D61E89B-A0FD-4FA0-BC35-DEE676FD674F" : [
+        "CFF848E4-C58C-427C-BA9F-A63D8660ECB0"
+      ]
+    },
+    "reminders" : [
+
+    ],
+    "remindersNeedConfirmation" : false,
+    "showEmotions" : true,
+    "summaryEnabled" : true,
+    "summaryHour" : 20,
+    "summaryIntervalDays" : 1,
+    "summaryMinute" : 0,
+    "tags" : [
+      {
+        "id" : "CFF848E4-C58C-427C-BA9F-A63D8660ECB0",
+        "name" : "阅读"
+      }
+    ]
+  },
+  "preferences" : {
+    "retentionDays" : 0,
+    "taggingMode" : "existing"
+  },
+  "schemas" : {
+    "emotions" : 2,
+    "logs" : 2,
+    "tasks" : 2
+  },
+  "trash" : [
+    {
+      "automaticTagIDs" : [
+
+      ],
+      "deletedAt" : 816338114.53322804,
+      "id" : "00EF6FFB-880B-4F68-8505-BCB8054FC870",
+      "log" : {
+        "category" : "log",
+        "colorTag" : "daily",
+        "content" : "Archived daily",
+        "createdAt" : "2026-11-14T08:35:14.488Z",
+        "id" : "7B91F4DE-254E-4419-8434-688C33C42298",
+        "importance" : 0,
+        "recordDate" : "2026-11-14"
+      },
+      "tags" : [
+
+      ]
+    },
+    {
+      "automaticTagIDs" : [
+
+      ],
+      "deletedAt" : 816338114.53322804,
+      "emotion" : {
+        "createdAt" : "2026-11-14T08:35:14.490Z",
+        "id" : "07878625-544C-4168-BDCC-698633073836",
+        "intensity" : 3,
+        "level" : 2,
+        "note" : "Archived emotion",
+        "recordDate" : "2026-11-14"
+      },
+      "id" : "33B31395-F7DE-4E5C-A7CA-43098FE83482",
+      "tags" : [
+
+      ]
+    },
+    {
+      "automaticTagIDs" : [
+        "CFF848E4-C58C-427C-BA9F-A63D8660ECB0"
+      ],
+      "deletedAt" : 816338114.53322804,
+      "id" : "68981178-0380-4286-A55A-67654621716B",
+      "log" : {
+        "category" : "idea",
+        "colorTag" : "idea",
+        "content" : "Archived idea",
+        "createdAt" : "2026-11-14T08:35:14.476Z",
+        "id" : "68A1E059-8BD8-45A9-B445-AF8BA98143E7",
+        "importance" : 0,
+        "recordDate" : "2026-11-14"
+      },
+      "tags" : [
+        {
+          "id" : "CFF848E4-C58C-427C-BA9F-A63D8660ECB0",
+          "name" : "阅读"
+        }
+      ]
+    },
+    {
+      "automaticTagIDs" : [
+
+      ],
+      "deletedAt" : 816338114.53322804,
+      "id" : "B1B14139-FE12-4C0B-A1B1-68D5CD59F1D7",
+      "tags" : [
+
+      ],
+      "task" : {
+        "colorTag" : "memo",
+        "createdAt" : "2026-11-14T08:00:00.000Z",
+        "dueDate" : "2026-11-14",
+        "dueKind" : "allDay",
+        "id" : "3D69663D-FC9E-4937-9409-C4CCDCE6926A",
+        "importance" : 2,
+        "isFavorite" : true,
+        "notes" : "Page 42",
+        "title" : "Read a book",
+        "updatedAt" : "2026-11-14T08:00:00.000Z"
+      }
+    }
+  ],
+  "version" : "flash-backup-v4"
+}

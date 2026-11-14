@@ -365,6 +365,7 @@ private struct EmotionHistoryView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Query private var emotionEntities: [EmotionEntity]
 
+    @State private var taggingRecord: EmotionRecord? = nil
     @State private var deletingRecord: EmotionRecord? = nil
     @State private var errorMessage: String? = nil
 
@@ -397,12 +398,15 @@ private struct EmotionHistoryView: View {
                 }
             }
         }
+        .sheet(item: $taggingRecord) { record in
+            ScrollView { RecordTagsEditor(recordKey: "emotion:" + record.id).padding() }
+        }
         .alert("删除这条情绪记录？", isPresented: deletePresented) {
             Button("删除", role: .destructive) {
                 if let record = deletingRecord {
                     // 包一层动画，让行删除做柔和的消失过渡
                     Motion.animate(Motion.soft(reduceMotion), reduceMotion: reduceMotion) {
-                        do { try repository?.deleteEmotion(id: record.id) }
+                        do { try repository?.deleteEmotionFromUI(id: record.id) }
                         catch {
                             FlashLog.failure("emotion_delete_failed", error)
                             errorMessage = L("删除失败，请重试")
@@ -459,6 +463,7 @@ private struct EmotionHistoryView: View {
         .background(BrandColors.cardSurface)
         .clipShape(RoundedRectangle(cornerRadius: Radius.field))
         .contextMenu {
+            Button(L("自由标签")) { taggingRecord = record }
             Button(record.isFavorite == true ? L("取消收藏") : L("收藏")) { toggleFavorite(record) }
             Button("删除", role: .destructive) { deletingRecord = record }
         }

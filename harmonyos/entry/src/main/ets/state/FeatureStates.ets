@@ -184,6 +184,8 @@ export enum TransferPhase {
 
 export enum ImportPhase {
   IDLE = 'idle',
+  /** 加密备份：等待用户输入口令（原文只在 BackupController 内存中） */
+  PASSPHRASE = 'passphrase',
   PREVIEW = 'preview',
   APPLYING = 'applying'
 }
@@ -192,6 +194,10 @@ export enum ImportPhase {
 export class BackupState {
   importPhase: ImportPhase = ImportPhase.IDLE;
   importSummary: string = '';
+  /** 上次口令尝试的错误文案（口令错误等） */
+  passphraseError: string = '';
+  /** 导出前的加密选择面板：'' 未打开，'file' / 'shared' / 'share' 为随后的导出方式 */
+  exportTarget: string = '';
   lanMode: TransferPhase = TransferPhase.IDLE;
   lanPin: string = '';
   lanEnteredPin: string = '';

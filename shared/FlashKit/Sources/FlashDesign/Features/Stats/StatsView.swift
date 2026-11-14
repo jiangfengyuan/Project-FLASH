@@ -12,8 +12,6 @@ import FlashCore
 /// 统计页：洞察结论（ReviewInsights 窗口对比）+ 活跃度/KPI + 情绪趋势/子情绪分布
 /// （对齐 Android StatsViewModel + EmotionStatsSection）
 public struct StatsView: View {
-    @Query(sort: \LogEntity.createdAt, order: .reverse) private var logEntities: [LogEntity]
-    @Query(sort: \EmotionEntity.createdAt, order: .reverse) private var emotionEntities: [EmotionEntity]
     @Environment(\.flashRepository) private var repository
 
     @State private var window: ReviewWindow = .week
@@ -24,11 +22,13 @@ public struct StatsView: View {
     /// 聚合基准日：跨天翻转由 refreshBaseDateAtMidnight 推进（替代原 TimelineView 分钟级刷新）
     @State private var baseDate = Date()
     /// 映射/聚合缓存：仅在数据写代际、时间窗口或基准日变化时重算
-    @State private var aggregateCache = ViewComputeCache<StatsKey, StatsValues>()
+    @State private var stats = Self.aggregate(logs:[],emotions:[],window:.week,today:Date())
+    @State private var loadError: String?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.flashUsesSystemNavigationTitle) private var usesSystemNavigationTitle
 
-    public init() {}
+    public init(initialWindow: ReviewWindow = .week) { _window = State(initialValue:initialWindow) }
 
     public var body: some View {
         VStack(spacing: 0) {
@@ -45,7 +45,7 @@ public struct StatsView: View {
                 // 系统导航栏承载标题时分段占满一行；否则固有宽度 180（几何值）
                 .frame(maxWidth: usesSystemNavigationTitle ? .infinity : 180)
             }
-            .padding(.horizontal, usesSystemNavigationTitle ? Spacing.md : Spacing.lg)
+            .padding(.horizontal, Spacing.page)
             .padding(.vertical, usesSystemNavigationTitle ? Spacing.sm : Spacing.lg)
             ZStack {
                 trendsContent
@@ -60,22 +60,27 @@ public struct StatsView: View {
             }
         }.flashPageBackground()
         .task { await refreshBaseDateAtMidnight() }
+        .task(id:statsKey) {
+            let key = statsKey
+            let date = baseDate
+            do {
+                let snapshot = try await repository?.readReviewSnapshot() ?? .init(logs:[],emotions:[],tasks:[])
+                let value = await Task.detached { Self.aggregate(logs:snapshot.logs,emotions:snapshot.emotions,window:key.window,today:date) }.value
+                guard !Task.isCancelled, statsKey == key else { return }
+                stats = value; loadError = nil
+            } catch { if !Task.isCancelled { loadError = L("统计加载失败，请重试") } }
+        }
     }
 
     /// 趋势页：时间窗口选择 + 洞察结论 + 活跃度 + 累计 KPI + 情绪趋势/子情绪分布
     private var trendsContent: some View {
-        let stats = aggregateCache.value(for: StatsKey(revision: repository?.revision ?? 0,
-                                                       window: window,
-                                                       day: DateFormatting.dayString(baseDate))) {
-            Self.aggregate(logEntities: logEntities, emotionEntities: emotionEntities,
-                           window: window, today: baseDate)
-        }
         let daily = stats.daily
         let start = daily.first!.date
         let end = daily.last!.date
 
         return ScrollView {
             VStack(alignment: .leading, spacing: Spacing.lg) {
+                if let loadError { Text(loadError).foregroundStyle(BrandColors.destructive) }
                 Picker("时间范围", selection: $window) {
                     ForEach(ReviewWindow.allCases) { Text($0.title).tag($0) }
                 }.pickerStyle(.segmented).frame(maxWidth: 400) // 窗口选择器最大宽度（几何值）
@@ -83,13 +88,15 @@ public struct StatsView: View {
                 VStack(alignment: .leading, spacing: Spacing.xs) {
                     Text(stats.comparison.conclusion)
                         .font(Typography.cardTitle)
-                    Text("\(start) — \(end)").font(Typography.caption).foregroundStyle(.secondary)
+                    Text(verbatim: "\(start) — \(end)").font(Typography.caption).foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .transaction { $0.animation = nil }
                     Text(insightDataLine(comparison: stats.comparison,
                                          logs: stats.periodLogCount,
                                          emotions: stats.periodEmotionCount))
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(20) // 洞察卡内边距：md 与 lg 之间的特调值
+                .padding(Spacing.card) // 洞察卡内边距：md 与 lg 之间的特调值
                 .flashPaperCard(seed: "stats")
 
                 activityChart(stats.activity)
@@ -128,12 +135,12 @@ public struct StatsView: View {
                             ForEach(Array(daily.enumerated()), id: \.offset) { _, item in
                                 if let average = item.average {
                                     LineMark(
-                                        x: .value(L("日期"), item.date),
+                                        x: .value(L("日期"), DateFormatting.parseDay(item.date)!,unit:.day),
                                         y: .value(L("均值"), average)
                                     )
                                     .foregroundStyle(BrandColors.accent)
                                     PointMark(
-                                        x: .value(L("日期"), item.date),
+                                        x: .value(L("日期"), DateFormatting.parseDay(item.date)!,unit:.day),
                                         y: .value(L("均值"), average)
                                     )
                                     .foregroundStyle(BrandColors.accent)
@@ -144,9 +151,10 @@ public struct StatsView: View {
                         .chartYAxis {
                             AxisMarks(values: [-3, -2, -1, 0, 1, 2, 3])
                         }
-                        .chartXAxis { Self.sparseDateAxis(daily.map(\.date)) }
+                        .chartXAxis { Self.sparseDateAxis(daily.map(\.date),maximum:dynamicTypeSize.isAccessibilitySize ? 2 : 4) }
                         .frame(height: 220)
-                        .animation(Motion.soft(reduceMotion), value: windowDays)
+                        .id(window)
+                        .transaction { $0.animation = nil }
                     }
 
                     if !stats.distribution.isEmpty {
@@ -167,7 +175,8 @@ public struct StatsView: View {
                                 }
                             }
                             .frame(height: 140) // 图表固有高度（几何值）
-                            .animation(Motion.soft(reduceMotion), value: windowDays)
+                            .id(window)
+                        .transaction { $0.animation = nil }
                         }
                     }
                 } else {
@@ -181,7 +190,7 @@ public struct StatsView: View {
                     .frame(minHeight: 180) // 嵌入 ScrollView 内容流，给空态最小高度
                 }
             }
-            .padding(Spacing.lg)
+            .padding(Spacing.page)
         }
         .flashPageBackground()
         .onAppear {
@@ -195,14 +204,16 @@ public struct StatsView: View {
 
     /// 聚合缓存键：数据写代际（任一表提交即递增）+ 时间窗口 + 基准日。
     /// 不能改用 @Query 实体数组比较：PersistentModel 相等走身份，漏掉就地属性更新。
-    private struct StatsKey: Equatable {
+    private var statsKey: StatsKey { StatsKey(revision:repository?.contentRevision ?? 0,window:window,day:DateFormatting.dayString(baseDate)) }
+
+    private struct StatsKey: Equatable, Sendable {
         let revision: Int
         let window: ReviewWindow
         let day: String
     }
 
     /// 一次聚合的全部产物：body 各区块只读不重算
-    private struct StatsValues {
+    private struct StatsValues: Sendable {
         let daily: [(date: String, average: Double?)]
         let activity: [DailyActivity]
         let comparison: ReviewInsights.Comparison
@@ -217,13 +228,11 @@ public struct StatsView: View {
         let periodEmotionCount: Int
     }
 
-    /// 实体 → 模型只映射一次，KPI 与图表统计复用同一结果；仅在缓存键变化时执行
-    private static func aggregate(logEntities: [LogEntity], emotionEntities: [EmotionEntity],
+    /// 接收后台读取的值模型，窗口变化时在后台聚合；不会跨 actor 传递 SwiftData 实体。
+    nonisolated private static func aggregate(logs: [LogItem], emotions: [EmotionRecord],
                                   window: ReviewWindow, today: Date) -> StatsValues {
         let windowDays = window.days(today: today)
         return Perf.measure("StatsAggregate") {
-            let logs = logEntities.map { $0.toModel() }
-            let emotions = emotionEntities.map { $0.toModel() }
             let daily = EmotionStats.dailyAverages(emotions, days: windowDays, today: today)
             let totalLogs = logs.filter { $0.category == .log }.count
             let totalIdeas = logs.filter { $0.category == .idea }.count
@@ -263,18 +272,15 @@ public struct StatsView: View {
         }
     }
 
-    /// 动画观测值：窗口天数（与原实现一致，窗口切换驱动图表过渡）
-    private var windowDays: Int { window.days(today: baseDate) }
-
     /// 横轴日期刻度：最多约 5 个均匀分布的刻度，标签只显示 MM-dd（窄屏下完整 yyyy-MM-dd 会被截断）
-    static func sparseDateAxis(_ dates: [String]) -> some AxisContent {
-        let step = max(1, Int((Double(dates.count) / 5).rounded(.up)))
-        let ticks = dates.enumerated().filter { $0.offset % step == 0 }.map(\.element)
-        return AxisMarks(values: ticks) { value in
+    static func sparseDateAxis(_ dates: [String], maximum: Int = 4) -> some AxisContent {
+        let ticks = ReviewDateAxis.ticks(dates,maximum:maximum).compactMap(DateFormatting.parseDay)
+        return AxisMarks(values:ticks) { value in
             AxisGridLine()
             AxisValueLabel {
-                if let date = value.as(String.self) {
-                    Text(date.count >= 10 ? String(date.suffix(5)) : date)
+                if let date = value.as(Date.self) {
+                    Text(String(DateFormatting.dayString(date).suffix(5)))
+                        .fixedSize().monospacedDigit()
                 }
             }
         }
@@ -288,14 +294,16 @@ public struct StatsView: View {
             Text("每天的日志、灵感与情绪次数 · 不含任务").font(Typography.caption).foregroundStyle(.secondary)
             Text("\(active) 个活跃日 · 共 \(days.reduce(0) { $0 + $1.total }) 次")
             Chart(days) { day in
-                BarMark(x: .value(L("日期"), day.date), y: .value(L("次数"), day.total))
+                BarMark(x: .value(L("日期"), DateFormatting.parseDay(day.date)!,unit:.day), y: .value(L("次数"), day.total))
                     .foregroundStyle(BrandColors.brandPrimary)
                     .accessibilityLabel(day.date)
                     .accessibilityValue("\(day.records) 条记录，\(day.emotions) 次情绪")
             }
+            .id(window)
+            .transaction { $0.animation = nil }
             .chartYScale(domain: 0...maximum)
             .chartYAxis { AxisMarks(values: [0, maximum]) }
-            .chartXAxis { Self.sparseDateAxis(days.map(\.date)) }
+            .chartXAxis { Self.sparseDateAxis(days.map(\.date),maximum:dynamicTypeSize.isAccessibilitySize ? 2 : 4) }
             .frame(height: 160)
             if active == 0 { Text("这段时间还没有记录，空白日期按 0 次显示。").font(Typography.caption) }
             DisclosureGroup("每日明细", isExpanded: $showActivityDetails) {
@@ -305,7 +313,7 @@ public struct StatsView: View {
                 }
             }
         }
-        .padding(20) // 图表卡内边距：md 与 lg 之间的特调值
+        .padding(Spacing.card) // 图表卡内边距：md 与 lg 之间的特调值
         .flashPaperCard(seed: "stats")
     }
 

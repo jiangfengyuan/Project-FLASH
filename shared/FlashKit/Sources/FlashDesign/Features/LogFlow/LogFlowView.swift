@@ -148,7 +148,7 @@ public struct LogFlowView: View {
         .alert("删除这条记录？", isPresented: deletePresented) {
             Button("删除", role: .destructive) {
                 if let log = deletingLog {
-                    do { try repository?.deleteLog(id: log.id) }
+                    do { try repository?.deleteLogFromUI(id: log.id) }
                     catch {
                         FlashLog.failure("log_delete_failed", error)
                         errorMessage = L("删除失败，请重试")

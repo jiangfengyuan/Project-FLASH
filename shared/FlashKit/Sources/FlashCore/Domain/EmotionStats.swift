@@ -130,3 +130,13 @@ public enum ActivityStats: Sendable {
         }
     }
 }
+
+/// A deterministic, bounded date axis including both endpoints. The chart uses
+/// these as temporal values so Swift Charts cannot reinsert categorical labels.
+public enum ReviewDateAxis {
+    public static func ticks(_ dates: [String], maximum: Int = 4) -> [String] {
+        let unique = Array(Set(dates)).sorted()
+        guard maximum > 1, unique.count > maximum else { return maximum > 0 ? Array(unique.prefix(maximum)) : [] }
+        return (0..<maximum).map { index in unique[Int((Double(index) * Double(unique.count-1) / Double(maximum-1)).rounded())] }
+    }
+}

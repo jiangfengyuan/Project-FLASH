@@ -5,17 +5,21 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import SwiftUI
+import SwiftData
 import FlashCore
 import FlashDesign
 
 /// 根视图：底部 Tab（iPhone）承载 macOS 侧栏的一级入口，每个 Tab 自带导航栈；
 /// 次级页面（日志流 / 日历 / Memory）按 AppRoute 推入。全局搜索与首启欢迎页在此层弹出。
 struct RootView: View {
+    @Query private var libraryMetadata: [PersonalLibraryEntity]
+    @Environment(TagAutomationCoordinator.self) private var tagAutomation
     @Environment(AppState.self) private var appState
     @EnvironmentObject private var settings: SettingsStore
     @Environment(IdeaReminderCenter.self) private var ideaReminders
     @Environment(\.flashRepository) private var repository
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(AppLockController.self) private var appLock
     /// 分享扩展投递的内容收入后的提示
     @State private var inboxToast: FlashToast? = nil
     /// 快速记录入口 → 面板的缩放转场
@@ -77,22 +81,49 @@ struct RootView: View {
         .environment(appState.focusRouter)
         // 灵感提醒接入共享列表：未读标记与「打开即已读」
         .environment(\.flashUnreadIdeaIDs, ideaReminders.unreadIDs)
+        .environment(\.flashTaggingAllowed, !appLock.isLocked && scenePhase == .active)
         .environment(\.flashMarkIdeaViewed, FlashMarkIdeaViewedAction { id in
             ideaReminders.markViewed(id, repository: repository, settings: settings)
         })
         // 任一写入 / 启动 / 提醒设置变化：重算未读并重排通知
         .task { refreshIdeaReminders() }
-        .onChange(of: repository?.revision ?? 0) { refreshIdeaReminders() }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in refreshIdeaReminders() }
+        .onChange(of: repository?.contentRevision ?? 0) { refreshIdeaReminders() }
+        .onChange(of: libraryMetadata.first?.payload) { refreshIdeaReminders() }
         .onChange(of: settings.ideaReminderEnabled) { refreshIdeaReminders() }
         .onChange(of: settings.ideaReminderFrequency) { refreshIdeaReminders() }
         // 分享扩展只投递到 App Group 收件箱（不碰主库）：启动与每次回到前台时收入
         .onChange(of: scenePhase, initial: true) { previous, phase in
-            if phase == .active { drainCaptureInbox() }
+            tagAutomation.allowed = phase == .active && !appLock.isLocked
+            if phase == .background { appLock.didEnterBackground() }
+            if phase == .active {
+                // 先判定是否该上锁、挂好锁定窗口，再撤纸面遮罩：回到前台时正文不露一帧
+                appLock.willEnterForeground()
+                updateLockWindow()
+                drainCaptureInbox()
+                refreshIdeaReminders()
+                try? repository?.purgeExpiredTrash()
+            }
             // 多任务快照不留正文；只在离开前台时遮挡，启动时的 inactive 不闪一下遮罩
             if phase == .active {
                 PrivacyShield.shared.update(isActive: true)
+                Task { await appLock.autoPromptIfNeeded(reason: L("解锁 Flash 以查看你的记录")) }
             } else if previous == .active || phase == .background {
                 PrivacyShield.shared.update(isActive: false)
+            }
+        }
+        // 应用锁：冷启动即挂锁定窗口；解锁 / 关闭设置后撤下
+        .onChange(of: appLock.isLocked, initial: true) { updateLockWindow(); consumeIdeaAction(); tagAutomation.allowed = !appLock.isLocked && scenePhase == .active }
+        .onChange(of: appState.pendingIdeaAction?.action) { consumeIdeaAction() }
+        .overlay {
+            // 锁定窗口挂上之前的兜底遮挡（只遮根视图，sheet 由锁定窗口负责）
+            if appLock.isLocked {
+                BrandColors.pageBackground.ignoresSafeArea().accessibilityHidden(true)
+            }
+        }
+        .safeAreaInset(edge: .top) {
+            if let message = tagAutomation.message, !appLock.isLocked {
+                HStack { Text(message); Spacer(); Button(L("撤销")) { tagAutomation.undoLast() } }.font(.caption).padding(Spacing.sm).background(BrandColors.cardSurface)
             }
         }
         .flashToast($inboxToast)
@@ -102,7 +133,8 @@ struct RootView: View {
                 // Share the same instance so result selection keeps cross-tab routing.
                 .environment(appState.focusRouter)
         }
-        .sheet(item: $appState.quickCapture) { request in
+        // 锁定时快速记录由锁定窗口弹出（只写不读），根视图这边不重复弹
+        .sheet(item: appLock.isLocked ? .constant(nil) : $appState.quickCapture) { request in
             QuickCaptureSheet(initialCategory: request.category)
                 .id(request.id)
                 .flashZoomTransition(sourceID: "quickCapture", in: captureNamespace)
@@ -124,6 +156,10 @@ struct RootView: View {
             case .logFlow: LogFlowView()
             case .calendar: CalendarView()
             case .memory: MemoryView()
+            case .history: PersonalLibraryScreen(mode: .history)
+            case .savedFilters: PersonalLibraryScreen(mode: .filters)
+            case .tags: PersonalLibraryScreen(mode: .tags)
+            case .periodicReminders: PersonalLibraryScreen(mode: .reminders)
             }
         }
         .flashPageBackground()
@@ -131,10 +167,22 @@ struct RootView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
+    private func updateLockWindow() {
+        AppLockWindow.shared.update(isLocked: appLock.isLocked) {
+            AppLockRoot(lock: appLock, appState: appState, settings: settings, repository: repository)
+        }
+    }
+
     private func drainCaptureInbox() {
         guard let repository else { return }
         let imported = CaptureInboxImporter.drain(.shared, into: repository)
         if imported > 0 { inboxToast = FlashToast(L("✓ 已收入 \(imported) 条分享内容")) }
+    }
+
+    private func consumeIdeaAction() {
+        guard !appLock.isLocked, let action = appState.pendingIdeaAction else { return }
+        appState.pendingIdeaAction = nil
+        PeriodicIdeaNotifications.shared.perform(action, repository: repository)
     }
 
     private func refreshIdeaReminders() {

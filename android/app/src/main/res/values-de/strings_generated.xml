@@ -12,6 +12,7 @@
     <string name="s_aafdda63" formatted="false">/data/{0}/{1}: Eintrag muss ein Objekt sein</string>
     <string name="s_10db0315" formatted="false">/data/{0}: Array überschreitet das Limit</string>
     <string name="s_b7cc858a" formatted="false">/data: ungültige oder doppelte Einträge. Über die Wiederherstellung sehen, was sich retten lässt</string>
+    <string name="s_8cc3cbe4" formatted="false">/version: Ein verschlüsseltes Backup darf kein weiteres verschlüsseltes Backup enthalten</string>
     <string name="s_90ef682e" formatted="false">/version: Für ältere Dateien die Wiederherstellung verwenden</string>
     <string name="s_b9ce0fb9" formatted="false">/: zu viele JSON-Werte</string>
     <string name="s_307d96fc" formatted="false">/: doppelter Schlüssel im JSON-Objekt: {0}</string>
@@ -23,6 +24,7 @@
     <string name="s_355b83a3" formatted="false">Eine Woche, die in Erinnerung bleibt. ✦</string>
     <string name="s_a1486dba" formatted="false">Flash Aero-Backup</string>
     <string name="s_eeecd281" formatted="false">Flash-Aufgabenerinnerung</string>
+    <string name="s_2534b43c" formatted="false">Flash ist gesperrt</string>
     <string name="s_f6ff76b6" formatted="false">Flash-Schnellerfassung</string>
     <string name="s_9a2b6832" formatted="false">Flash Jetzt</string>
     <string name="s_2a0b1ddf" formatted="false">Flash-Idee</string>
@@ -78,10 +80,12 @@
     <string name="s_6bcf17c2" formatted="false">Nächster Monat</string>
     <string name="s_10c83c81" formatted="false">Weiter</string>
     <string name="s_82b6cabb" formatted="false">Guten Tag 🌤</string>
+    <string name="s_e08c4ba9" formatted="false">Ein unverschlüsseltes Backup ist Klartext-JSON: Jeder mit der Datei kann alle Einträge, Emotionen und Aufgaben lesen. Speichere oder teile es nur mit vertrauenswürdigen Geräten oder Kontakten.</string>
     <string name="s_1344f491" formatted="false">Unglücklich</string>
     <string name="s_4cc036be" formatted="false">Keine Erinnerung</string>
     <string name="s_12e8587a" formatted="false">Nicht unterstützte Version des Abschnitts {0}</string>
     <string name="s_ba358518" formatted="false">Alle</string>
+    <string name="s_9ae60760" formatted="false">Die Passphrasen stimmen nicht überein.</string>
     <string name="s_b13672cd" formatted="false">Neutral</string>
     <string name="s_51f6517e" formatted="false">Design</string>
     <string name="s_0a416847" formatted="false">die 30 Tage davor</string>
@@ -121,6 +125,7 @@
     <string name="s_801be77b" formatted="false">Inhalt</string>
     <string name="s_dc24135d" formatted="false">Inhalt darf nicht leer sein</string>
     <string name="s_043cda7f" formatted="false">Zu lang ({0} Zeichen, max. {1}). Vor dem Speichern kürzen</string>
+    <string name="s_d15889f8" formatted="false">Passphrase wiederholen</string>
     <string name="s_87000edc" formatted="false">Schreib weiter, dein künftiges Ich wird es sehen.</string>
     <string name="s_95a71bc9" formatted="false">Wird vorbereitet…</string>
     <string name="s_9aa7d416" formatted="false">Teilen</string>
@@ -135,10 +140,17 @@
     <string name="s_e6dedfa0" formatted="false">Diese Stimmung löschen?</string>
     <string name="s_98f7e648" formatted="false">Diesen Tagebucheintrag löschen?</string>
     <string name="s_c51f5912" formatted="false">Bei Fälligkeit</string>
+    <string name="s_d26ab92b" formatted="false">Verschlüsseltes Backup</string>
+    <string name="s_e78a9d95" formatted="false">Die verschlüsselte Backup-Datei ist beschädigt oder fehlerhaft.</string>
     <string name="s_c628e28d" formatted="false">Enthält Tagebuch: {0}, Stimmungen: {1}, Aufgaben: {2}</string>
     <string name="s_60b4c5ae" formatted="false">Gefahrenbereich</string>
     <string name="s_949856b3" formatted="false">Abbrechen</string>
     <string name="s_d1d62fb0" formatted="false">Aus Favoriten entfernen</string>
+    <string name="s_53c7e602" formatted="false">Passphrase</string>
+    <string name="s_f7e8d7e8" formatted="false">Die Passphrase darf höchstens 1024 Zeichen lang sein.</string>
+    <string name="s_ad879bae" formatted="false">Die Passphrase muss mindestens 8 Zeichen lang sein.</string>
+    <string name="s_4db1b243" formatted="false">Falsche Passphrase oder beschädigte Datei.</string>
+    <string name="s_ef638194" formatted="false">Passphrase (mindestens 8 Zeichen)</string>
     <string name="s_4d55cb75" formatted="false">Backup exportieren oder über „Teilen“ senden</string>
     <string name="s_5e53c03a" formatted="false">Do</string>
     <string name="s_40163b46" formatted="false">Zurück zu heute</string>
@@ -156,6 +168,7 @@
     <string name="s_d82fe22c" formatted="false">Notiz zu lang. Vor dem Speichern kürzen</string>
     <string name="s_d9dac7dd" formatted="false">Notizen (optional)</string>
     <string name="s_e4a4815a" formatted="false">Darstellung &amp; Nutzung</string>
+    <string name="s_f849ada8" formatted="false">OK</string>
     <string name="s_1e13bd21" formatted="false">Fertig</string>
     <string name="s_dd03e6ad" formatted="false">Vor dem Import Unterschiede zu lokalen Daten ansehen</string>
     <string name="s_9b60ff74" formatted="false">Import fehlgeschlagen: {0}</string>
@@ -163,6 +176,8 @@
     <string name="s_7fdaf616" formatted="false">Exportieren, importieren, löschen</string>
     <string name="s_f97fded3" formatted="false">Backup exportieren</string>
     <string name="s_7436fb8d" formatted="false">Export fehlgeschlagen: {0}</string>
+    <string name="s_0bd03067" formatted="false">Der Export wurde unterbrochen. Bitte erneut exportieren.</string>
+    <string name="s_1a26bd57" formatted="false">Beim Export kannst du mit einer Passphrase verschlüsseln (empfohlen). Unverschlüsselte Backups sind Klartext-JSON mit Einträgen, Emotionen und Aufgaben; nur an vertrauenswürdigen Orten speichern oder teilen</string>
     <string name="s_b1632a8b" formatted="false">Alle Tagebucheinträge, Stimmungen und Aufgaben werden endgültig gelöscht. Zuerst ein Backup exportieren.</string>
     <string name="s_479481d2" formatted="false">Übertragung im lokalen Netzwerk ist vorerst deaktiviert</string>
     <string name="s_f8eef707" formatted="false">Die Übertragung im lokalen Netzwerk ist wegen Sicherheitsrisiken des alten Protokolls aus. Sende die JSON-Datei per Backup-Export oder „Teilen“ über einen vertrauenswürdigen Weg.</string>
@@ -179,6 +194,8 @@
     <string name="s_c13b3522" formatted="false">Alle Daten gelöscht, aber Systemerinnerungen konnten nicht entfernt werden. App neu starten und erneut versuchen</string>
     <string name="s_c8fa62c1" formatted="false">Ausgewählt: {0}</string>
     <string name="s_01133500" formatted="false">Durchschnittsstimmung {0} · Gesamt {1}</string>
+    <string name="s_ee490e90" formatted="false">App-Sperre</string>
+    <string name="s_fb13a35f" formatted="false">Mit App-Sperre entsperrst du Flash beim Start oder nach mehr als 1 Minute Abwesenheit per Biometrie oder Gerätecode. Widgets, Schnellerfassung und Mitteilungsaktionen funktionieren weiter.</string>
     <string name="s_22696cbc" formatted="false">Start</string>
     <string name="s_499be303" formatted="false">Loslegen</string>
     <string name="s_5d62764c" formatted="false">Startdatum</string>
@@ -257,6 +274,8 @@
     <string name="s_87b8867d" formatted="false">Neueste</string>
     <string name="s_ceb8f642" formatted="false">Älteste</string>
     <string name="s_56b38d0f" formatted="false">Letzte Momente</string>
+    <string name="s_4f2beab6" formatted="false">Identität nicht bestätigt. Die Einstellung bleibt unverändert.</string>
+    <string name="s_5665b744" formatted="false">Identität nicht bestätigt. Versuch es erneut.</string>
     <string name="s_be2c2eb2" formatted="false">Ungelesen</string>
     <string name="s_27c37899" formatted="false">Diese Woche</string>
     <string name="s_ccb42197" formatted="false">Diese Woche: Einträge {0} · zu sortieren {1}</string>
@@ -277,11 +296,13 @@
     <string name="s_aef45eb7" formatted="false">Mehr wird geladen…</string>
     <string name="s_6af40858" formatted="false">Jetzt</string>
     <string name="s_b060afd3" formatted="false">Dieses Gerät unterstützt eine Aufgaben-Zeitzone im Backup nicht. System aktualisieren und erneut versuchen. Es wurde nichts importiert</string>
+    <string name="s_2f15ac82" formatted="false">Lege auf diesem Gerät eine Displaysperre fest, um die App-Sperre zu nutzen</string>
     <string name="s_f4958768" formatted="false">Alle 3 Tage</string>
     <string name="s_41be2fe2" formatted="false">Wöchentlich</string>
     <string name="s_02c285b5" formatted="false">Täglich</string>
     <string name="s_18fa51bd" formatted="false">Tagebuch, Ideen und Stimmungen pro Tag · ohne Aufgaben</string>
     <string name="s_6d03477d" formatted="false">Tagesdurchschnitt: {0}</string>
+    <string name="s_3aa61c82" formatted="false">Ohne die Passphrase kann niemand das Backup lesen oder ändern. Flash speichert die Passphrase nicht; wenn du sie vergisst, ist das Backup nicht wiederherstellbar.</string>
     <string name="s_5816c303" formatted="false">Keine App zum Teilen verfügbar</string>
     <string name="s_43c975df" formatted="false">Keine Einträge gefunden</string>
     <string name="s_f8bc527e" formatted="false">Keine passenden Tagebucheinträge</string>
@@ -299,6 +320,7 @@
     <string name="s_436e2c82" formatted="false">Was geht dir durch den Kopf?</string>
     <string name="s_78fe07cc" formatted="false">Übertragungsdatei konnte nicht erstellt werden: {0}</string>
     <string name="s_f60bb44e" formatted="false">Wütend</string>
+    <string name="s_8ce87829" formatted="false">Mit Passphrase verschlüsseln (empfohlen)</string>
     <string name="s_621a8231" formatted="false">OK</string>
     <string name="s_869f8d0c" formatted="false">Alles löschen</string>
     <string name="s_5716f5ef" formatted="false">In {0} Minuten</string>
@@ -311,6 +333,7 @@
     <string name="s_78a510f0" formatted="false">Überblick · gesamt</string>
     <string name="s_1da8a247" formatted="false">Ende</string>
     <string name="s_476d405b" formatted="false">Enddatum</string>
+    <string name="s_70f57871" formatted="false">Weiter</string>
     <string name="s_010e135c" formatted="false">Weiter bearbeiten</string>
     <string name="s_e60fd56d" formatted="false">Schreib weiter, dann wird dein Rückblick klarer</string>
     <string name="s_607348a8" formatted="false">Bearbeiten</string>
@@ -320,6 +343,10 @@
     <string name="s_72ecf883" formatted="false">Ab {0}</string>
     <string name="s_85b25df8" formatted="false">Bis {0}</string>
     <string name="s_a6317c7d" formatted="false">Überschreiben</string>
+    <string name="s_64bca37c" formatted="false">Entschlüsseln</string>
+    <string name="s_227fd229" formatted="false">Entsperren</string>
+    <string name="s_8b2f5c73" formatted="false">Flash entsperren</string>
+    <string name="s_f86c7b1b" formatted="false">Entsperre Flash, um deine Einträge zu sehen</string>
     <string name="s_5521c6a5" formatted="false">Ein Platz für jeden Gedanken · kein Cloud-Konto</string>
     <string name="s_dad3d89f" formatted="false">Ersten Gedanken festhalten</string>
     <string name="s_6dfa9df7" formatted="false">In Flash sichern</string>
@@ -354,6 +381,7 @@
     <string name="s_fa547131" formatted="false">Keine Pläne oder Einträge an diesem Tag</string>
     <string name="s_6d67abd6" formatted="false">diesen Monat</string>
     <string name="s_09e1a534" formatted="false">diese Woche</string>
+    <string name="s_f8f100e1" formatted="false">Dieses Backup ist verschlüsselt. Gib die beim Export festgelegte Passphrase ein.</string>
     <string name="s_d3ce76c1" formatted="false">Dieser Eintrag existiert nicht mehr</string>
     <string name="s_1a959a39" formatted="false">In diesem Zeitraum noch nichts erfasst. Leere Tage zeigen 0.</string>
     <string name="s_5fe370b7" formatted="false">Auswählen</string>
@@ -363,10 +391,14 @@
     <string name="s_4de22934" formatted="false">Wichtigkeit</string>
     <string name="s_490a6afa" formatted="false">Halte es fest, wenn es vorbeizieht. Schreib deinen ersten Eintrag</string>
     <string name="s_aef2df88" formatted="false">Unterwegs erfassen</string>
+    <string name="s_4552930a" formatted="false">Datenschutz</string>
     <string name="s_80390cc2" formatted="false">Unwohl</string>
+    <string name="s_1f381169" formatted="false">Aktualisiere Flash, um dieses verschlüsselte Backup zu öffnen.</string>
     <string name="s_99546fff" formatted="false">Sehr aufgebracht</string>
     <string name="s_22566806" formatted="false">Begeistert</string>
     <string name="s_9a63360d" formatted="false">Lokale Daten haben sich nach der Vorschau geändert. Unterschiede neu berechnet. Vor dem Überschreiben bestätigen</string>
+    <string name="s_1203f0e4" formatted="false">Bestätige deine Identität, um die App-Sperre auszuschalten</string>
+    <string name="s_d02b1cf3" formatted="false">Bestätige deine Identität, um die App-Sperre einzuschalten</string>
     <string name="s_a14edc19" formatted="false">(Ohne Titel)</string>
     <string name="s_12cea83b" formatted="false">(übersprungene ungültige Einträge: {0})</string>
     <string name="s_be6a75ae" formatted="false">, heute</string>

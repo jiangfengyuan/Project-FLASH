@@ -1,0 +1,21 @@
+const schema = require('../../docs/contracts/flash-backup-v3.schema.json');
+module.exports = function validateLibrary(document, ajv, validateV2) {
+  const validate = ajv.getSchema(schema.$id) || ajv.compile(schema);
+  const fail = message => ({valid:false,errors:[{path:'/personalLibrary',code:'LIBRARY',message}]});
+  if (!validate(document)) return fail(ajv.errorsText(validate.errors));
+  const {personalLibrary: p,...base} = document;
+  const {validDay} = require('./validate.cjs');
+  const checked = validateV2({...base,version:'flash-backup-v2'});
+  if (!checked.valid) return checked;
+  const unique = xs => new Set(xs).size === xs.length;
+  const norm = name => name.trim().normalize('NFC').toLowerCase();
+  if (!unique(p.tags.map(t=>t.id)) || !unique(p.tags.map(t=>norm(t.name)))) return fail('Duplicate tags');
+  if (p.tags.some(t=>t.name !== t.name.trim().normalize('NFC'))) return fail('Noncanonical tag name');
+  const ids = new Set(p.tags.map(t=>t.id));
+  const records = new Set(['logs','emotions','tasks'].flatMap((type,i)=>document.data[type].map(r=>['log','emotion','task'][i]+':'+r.id)));
+  for (const [key,links] of Object.entries(p.links)) if (!records.has(key) || !unique(links) || links.some(id=>!ids.has(id))) return fail('Invalid tag association');
+  if (!unique(p.filters.map(f=>f.id)) || p.filters.some(f=>!f.name.trim() || (f.startDay && !validDay(f.startDay)) || (f.endDay && !validDay(f.endDay)) || f.tagIDs.some(id=>!ids.has(id)) || (f.startDay && f.endDay && f.startDay>f.endDay))) return fail('Invalid filter');
+  const ideas = new Set(document.data.logs.filter(r=>r.category==='idea').map(r=>r.id));
+  if (!unique(p.reminders.map(r=>r.id)) || p.reminders.some(r=>!ideas.has(r.id))) return fail('Invalid reminder');
+  return {valid:true,errors:[]};
+};

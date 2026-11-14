@@ -4,7 +4,7 @@ package com.flash.app.i18n
 import com.flash.app.R
 
 internal object I18nKeys {
-    val strings: Map<String, Int> = HashMap<String, Int>(730).apply {
+    val strings: Map<String, Int> = HashMap<String, Int>(794).apply {
         chunk0(this)
         chunk1(this)
     }
@@ -17,6 +17,7 @@ internal object I18nKeys {
         map["/data/{0}/{1}：记录必须是对象"] = R.string.s_aafdda63
         map["/data/{0}：数组超过上限"] = R.string.s_10db0315
         map["/data：存在非法或重复记录，请使用损坏文件恢复入口查看可恢复内容"] = R.string.s_b7cc858a
+        map["/version：加密备份里不能再嵌套加密备份"] = R.string.s_8cc3cbe4
         map["/version：旧版文件请使用兼容恢复入口"] = R.string.s_90ef682e
         map["/：JSON 值数量超过资源上限"] = R.string.s_b9ce0fb9
         map["/：JSON 对象包含重复键：{0}"] = R.string.s_307d96fc
@@ -28,6 +29,7 @@ internal object I18nKeys {
         map["A week worth remembering. ✦"] = R.string.s_355b83a3
         map["Flash Aero 备份"] = R.string.s_a1486dba
         map["Flash 任务提醒"] = R.string.s_eeecd281
+        map["Flash 已锁定"] = R.string.s_2534b43c
         map["Flash 快速记录"] = R.string.s_f6ff76b6
         map["Flash 此刻"] = R.string.s_9a2b6832
         map["Flash 灵感"] = R.string.s_2a0b1ddf
@@ -83,10 +85,12 @@ internal object I18nKeys {
         map["下一月"] = R.string.s_6bcf17c2
         map["下一步"] = R.string.s_10c83c81
         map["下午好 🌤"] = R.string.s_82b6cabb
+        map["不加密的备份是明文 JSON，任何拿到文件的人都能读取全部日志、情绪和任务。仅保存或分享给可信设备或联系人。"] = R.string.s_e08c4ba9
         map["不开心"] = R.string.s_1344f491
         map["不提醒"] = R.string.s_4cc036be
         map["不支持的 {0} 分区版本"] = R.string.s_12e8587a
         map["不限"] = R.string.s_ba358518
+        map["两次输入的口令不一致"] = R.string.s_9ae60760
         map["中性"] = R.string.s_b13672cd
         map["主题模式"] = R.string.s_51f6517e
         map["之前 30 天"] = R.string.s_0a416847
@@ -126,6 +130,7 @@ internal object I18nKeys {
         map["内容"] = R.string.s_801be77b
         map["内容不能为空"] = R.string.s_dc24135d
         map["内容过长（{0} 字），最多 {1} 字，请删减后再保存"] = R.string.s_043cda7f
+        map["再次输入口令"] = R.string.s_d15889f8
         map["再记录一点，未来的你会看到。"] = R.string.s_87000edc
         map["准备中…"] = R.string.s_95a71bc9
         map["分享"] = R.string.s_9aa7d416
@@ -140,10 +145,17 @@ internal object I18nKeys {
         map["删除这条情绪记录？"] = R.string.s_e6dedfa0
         map["删除这条日志？"] = R.string.s_98f7e648
         map["到期时"] = R.string.s_c51f5912
+        map["加密备份"] = R.string.s_d26ab92b
+        map["加密备份文件已损坏或格式不正确"] = R.string.s_e78a9d95
         map["包含 {0} 条日志、{1} 条情绪、{2} 个任务"] = R.string.s_c628e28d
         map["危险操作"] = R.string.s_60b4c5ae
         map["取消"] = R.string.s_949856b3
         map["取消收藏"] = R.string.s_d1d62fb0
+        map["口令"] = R.string.s_53c7e602
+        map["口令不能超过 1024 个字符"] = R.string.s_f7e8d7e8
+        map["口令至少需要 8 个字符"] = R.string.s_ad879bae
+        map["口令错误，或文件已损坏"] = R.string.s_4db1b243
+        map["口令（至少 8 个字符）"] = R.string.s_ef638194
         map["可导出备份或通过系统分享传输"] = R.string.s_4d55cb75
         map["四"] = R.string.s_5e53c03a
         map["回到今天"] = R.string.s_40163b46
@@ -161,6 +173,7 @@ internal object I18nKeys {
         map["备注过长，请删减后再保存"] = R.string.s_d82fe22c
         map["备注（可选）"] = R.string.s_d9dac7dd
         map["外观与使用"] = R.string.s_e4a4815a
+        map["好"] = R.string.s_f849ada8
         map["完成"] = R.string.s_1e13bd21
         map["导入前预览与本地数据的差异"] = R.string.s_dd03e6ad
         map["导入失败：{0}"] = R.string.s_9b60ff74
@@ -168,6 +181,8 @@ internal object I18nKeys {
         map["导出、导入与清空"] = R.string.s_7fdaf616
         map["导出备份"] = R.string.s_f97fded3
         map["导出失败：{0}"] = R.string.s_7436fb8d
+        map["导出已中断，请重新导出"] = R.string.s_0bd03067
+        map["导出时可用口令加密（推荐）；不加密的备份是明文 JSON，包含日志、情绪和任务内容，请只保存或分享至可信位置"] = R.string.s_1a26bd57
         map["将删除所有日志、情绪记录与任务，且无法恢复。建议先导出备份。"] = R.string.s_b1632a8b
         map["局域网传输暂时停用"] = R.string.s_479481d2
         map["局域网传输暂时停用：旧协议存在安全风险。请使用‘导出备份’或‘系统分享’，通过可信渠道传输 JSON 文件。"] = R.string.s_f8eef707
@@ -184,6 +199,8 @@ internal object I18nKeys {
         map["已清空全部数据，但系统提醒清理失败，请重启应用后重试"] = R.string.s_c13b3522
         map["已选 {0} 项"] = R.string.s_c8fa62c1
         map["平均情绪 {0} · 共 {1} 条"] = R.string.s_01133500
+        map["应用锁"] = R.string.s_ee490e90
+        map["开启应用锁后，冷启动或离开超过 1 分钟再回来时，需要用生物识别或设备密码解锁。小组件、快速记录和通知操作不受影响。"] = R.string.s_fb13a35f
         map["开始"] = R.string.s_22696cbc
         map["开始使用"] = R.string.s_499be303
         map["开始日期"] = R.string.s_5d62764c
@@ -262,6 +279,8 @@ internal object I18nKeys {
         map["最新"] = R.string.s_87b8867d
         map["最早"] = R.string.s_ceb8f642
         map["最近闪念"] = R.string.s_56b38d0f
+        map["未能验证身份，设置未更改"] = R.string.s_4f2beab6
+        map["未能验证身份，请重试"] = R.string.s_5665b744
         map["未读"] = R.string.s_be2c2eb2
         map["本周"] = R.string.s_27c37899
         map["本周 {0} 条记录 · {1} 条待整理"] = R.string.s_ccb42197
@@ -282,15 +301,20 @@ internal object I18nKeys {
         map["正在加载更多…"] = R.string.s_aef45eb7
         map["此刻"] = R.string.s_6af40858
         map["此设备不支持备份中的任务时区，请更新系统后重试；未导入任何数据"] = R.string.s_b060afd3
+        map["此设备未设置锁屏密码，无法开启应用锁"] = R.string.s_2f15ac82
         map["每 3 天"] = R.string.s_f4958768
         map["每周"] = R.string.s_41be2fe2
         map["每天"] = R.string.s_02c285b5
         map["每天的日志、灵感与情绪次数 · 不含任务"] = R.string.s_18fa51bd
         map["每日情绪均值：{0}"] = R.string.s_6d03477d
+        map["没有口令的人无法读取或改动备份内容。Flash 不保存口令，忘记后无法恢复。"] = R.string.s_3aa61c82
         map["没有可用的分享应用"] = R.string.s_5816c303
         map["没有找到相关记录"] = R.string.s_43c975df
         map["没有符合条件的日志"] = R.string.s_f8bc527e
         map["活跃天数"] = R.string.s_0fed9772
+    }
+
+    private fun chunk1(map: MutableMap<String, Int>) {
         map["浅色"] = R.string.s_11b5fdf6
         map["深色"] = R.string.s_2a8baaea
         map["清空全部数据"] = R.string.s_da340c1c
@@ -304,6 +328,7 @@ internal object I18nKeys {
         map["现在想记录什么？"] = R.string.s_436e2c82
         map["生成传输文件失败：{0}"] = R.string.s_78fe07cc
         map["生气"] = R.string.s_f60bb44e
+        map["用口令加密备份（推荐）"] = R.string.s_8ce87829
         map["确定"] = R.string.s_621a8231
         map["确认清空"] = R.string.s_869f8d0c
         map["稍后 {0} 分钟"] = R.string.s_5716f5ef
@@ -312,13 +337,11 @@ internal object I18nKeys {
         map["类型"] = R.string.s_26640f43
         map["系统通知或任务提醒频道已关闭"] = R.string.s_f8ede304
         map["紧急"] = R.string.s_235f3e59
-    }
-
-    private fun chunk1(map: MutableMap<String, Int>) {
         map["累计 {0} 个以上时，晚上 8 点提醒你梳理；打开查看过的想法不再计入。"] = R.string.s_64db55af
         map["累计概览 · 全部时间"] = R.string.s_78a510f0
         map["结束"] = R.string.s_1da8a247
         map["结束日期"] = R.string.s_476d405b
+        map["继续"] = R.string.s_70f57871
         map["继续编辑"] = R.string.s_010e135c
         map["继续记录，回顾会慢慢清晰"] = R.string.s_e60fd56d
         map["编辑"] = R.string.s_607348a8
@@ -328,6 +351,10 @@ internal object I18nKeys {
         map["自 {0}"] = R.string.s_72ecf883
         map["至 {0}"] = R.string.s_85b25df8
         map["覆盖"] = R.string.s_a6317c7d
+        map["解密"] = R.string.s_64bca37c
+        map["解锁"] = R.string.s_227fd229
+        map["解锁 Flash"] = R.string.s_8b2f5c73
+        map["解锁 Flash 以查看你的记录"] = R.string.s_f86c7b1b
         map["让每一次闪念都有落点 · 无云端账号"] = R.string.s_5521c6a5
         map["记下第一个念头"] = R.string.s_dad3d89f
         map["记到 Flash"] = R.string.s_6dfa9df7
@@ -362,6 +389,7 @@ internal object I18nKeys {
         map["这一天还没有计划或记录"] = R.string.s_fa547131
         map["这个月"] = R.string.s_6d67abd6
         map["这周"] = R.string.s_09e1a534
+        map["这是加密备份，请输入导出时设置的口令"] = R.string.s_f8f100e1
         map["这条记录已不存在"] = R.string.s_d3ce76c1
         map["这段时间还没有记录，空白日期按 0 次显示。"] = R.string.s_1a959a39
         map["选择"] = R.string.s_5fe370b7
@@ -371,10 +399,14 @@ internal object I18nKeys {
         map["重要性"] = R.string.s_4de22934
         map["闪过即留，写下第一条吧"] = R.string.s_490a6afa
         map["随手记录"] = R.string.s_aef2df88
+        map["隐私"] = R.string.s_4552930a
         map["难受"] = R.string.s_80390cc2
+        map["需要更新 Flash 才能打开此加密备份"] = R.string.s_1f381169
         map["非常不开心"] = R.string.s_99546fff
         map["非常开心"] = R.string.s_22566806
         map["预览后本地数据有变化，差异已重新计算，请确认后再覆盖"] = R.string.s_9a63360d
+        map["验证身份以关闭应用锁"] = R.string.s_1203f0e4
+        map["验证身份以开启应用锁"] = R.string.s_d02b1cf3
         map["（无标题）"] = R.string.s_a14edc19
         map["（跳过异常数据 {0} 条）"] = R.string.s_12cea83b
         map["，今天"] = R.string.s_be6a75ae

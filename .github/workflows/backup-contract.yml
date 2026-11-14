@@ -18,6 +18,7 @@ jobs:
           cache-dependency-path: scripts/backup-contract/package-lock.json
       - run: npm ci --prefix scripts/backup-contract --ignore-scripts
       - run: node scripts/backup-contract/generate-cases.cjs --check
+      - run: node scripts/backup-contract/generate-encrypted.cjs --check
       - run: node --test scripts/backup-contract/contract.test.cjs harmonyos/tests/*.test.cjs
         env:
           FLASH_TYPESCRIPT_PATH: ${{ github.workspace }}/scripts/backup-contract/node_modules/typescript

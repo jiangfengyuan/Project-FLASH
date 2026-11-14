@@ -31,6 +31,7 @@ struct ExploreScreen: View {
     @State private var focusedLog: LogItem? = nil
     @State private var ideaTaskDraft: IdeaTaskDraft? = nil
     @State private var batchMode = false
+    @State private var showBatchDelete = false
     @State private var selection: Set<String> = []
     @State private var errorMessage: String? = nil
     @State private var toast: FlashToast? = nil
@@ -41,6 +42,14 @@ struct ExploreScreen: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            LazyVGrid(columns:[GridItem(.flexible()),GridItem(.flexible())],spacing:Spacing.xs) {
+                ForEach(RecordTemplate.allCases) { template in
+                    Button { presentTemplate(template) } label: {
+                        Text(template.title).font(Typography.caption)
+                            .frame(maxWidth:.infinity,minHeight:32,alignment:.leading)
+                    }.buttonStyle(.bordered).buttonBorderShape(.roundedRectangle(radius:Radius.field))
+                }
+            }.padding(.horizontal,Spacing.page).padding(.vertical,Spacing.xs)
             chipsRow
             if filter == .unsorted {
                 unsortedBar
@@ -60,7 +69,16 @@ struct ExploreScreen: View {
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always),
                     prompt: L("输入关键词或标签"))
         .toolbar { toolbarContent }
+        .toolbar { ToolbarItem(placement: .topBarTrailing) { Menu {
+            Button(L("已保存筛选")) { appState.explorePath.append(.savedFilters) }
+            Button(L("自由标签")) { appState.explorePath.append(.tags) }
+            Button(L("灵感周期提醒")) { appState.explorePath.append(.periodicReminders) }
+        } label: { Image(systemName: "tag") } } }
         .toolbar { batchToolbar }
+        .confirmationDialog(L("请确认操作"),isPresented:$showBatchDelete) {
+            Button(L("删除"),role:.destructive) { batchDelete() }
+            Button(L("取消"),role:.cancel) {}
+        } message: { Text(L("回收站")+": \(selection.count)") }
         .toolbar(batchMode ? .hidden : .automatic, for: .tabBar)
         .flashToast($toast)
         .sensoryFeedback(.success, trigger: toast) { _, new in new != nil }
@@ -126,6 +144,11 @@ struct ExploreScreen: View {
         } message: {
             Text(errorMessage ?? "")
         }
+    }
+
+    private func presentTemplate(_ template: RecordTemplate) {
+        let now = DateFormatting.isoNow()
+        newLogDraft = LogItem(id:UUID().uuidString,content:template.body,colorTag: template.category == .idea ? .idea : .daily,category:template.category,importance:0,createdAt:now,recordDate:DateFormatting.today())
     }
 
     // MARK: - 工具栏
@@ -226,6 +249,8 @@ struct ExploreScreen: View {
                     ForEach(ColorTag.allCases, id: \.self) { tag in
                         Button(tag.displayName) { batchUpdate { $0.colorTag = tag } }
                     }
+                    Divider()
+                    Button(L("删除"),systemImage:"trash",role:.destructive) { showBatchDelete = true }
                 } label: {
                     Label("改标签", systemImage: "tag")
                 }
@@ -237,7 +262,7 @@ struct ExploreScreen: View {
     // MARK: - 数据
 
     private var statsSummary: String {
-        statsSummaryCache.value(for: repository?.revision ?? 0) {
+        statsSummaryCache.value(for: repository?.contentRevision ?? 0) {
             let logs = allLogEntities.map { $0.toModel() }
             let logCount = logs.filter { $0.category == .log }.count
             let ideaCount = logs.filter { $0.category == .idea }.count
@@ -308,6 +333,18 @@ struct ExploreScreen: View {
             errorMessage = L("任务保存失败，请重试")
             return false
         }
+    }
+
+    private func batchDelete() {
+        guard let repository else { return }
+        do {
+            let ids = try repository.moveToTrash(selection.map { "log:"+$0 })
+            toast = FlashToast(L("已删除记录"),actionTitle:L("撤销")) {
+                do { try repository.restoreTrash(ids) }
+                catch { errorMessage = L("操作失败，请重试") }
+            }
+            selection = []; batchMode = false
+        } catch { errorMessage = L("删除失败，请重试") }
     }
 
     /// 批量修改：逐条 updateLog，任一条失败即中断并提示（已写入的不回滚，与单条编辑粒度一致）

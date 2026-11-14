@@ -24,7 +24,7 @@ object BackupTransfer {
     private const val MAX_CACHE_AGE_MILLIS = 24L * 60 * 60 * 1000
     private val FILE_TIMESTAMP = DateTimeFormatter.ofPattern("yyyy-MM-dd-HHmmss")
 
-    fun createShareUri(context: Context, json: String): Uri {
+    fun createShareUri(context: Context, json: String, encrypted: Boolean = false): Uri {
         val directory = File(context.cacheDir, SHARE_DIRECTORY).apply {
             check(exists() || mkdirs()) { com.flash.app.i18n.tr("无法创建备份传输目录") }
         }
@@ -32,7 +32,7 @@ object BackupTransfer {
         val suffix = UUID.randomUUID().toString().take(8)
         val file = File(
             directory,
-            "$FILE_PREFIX${LocalDateTime.now().format(FILE_TIMESTAMP)}-$suffix.json",
+            "$FILE_PREFIX${LocalDateTime.now().format(FILE_TIMESTAMP)}-$suffix${if (encrypted) "-encrypted" else ""}.json",
         )
         file.writeText(json, Charsets.UTF_8)
         return FileProvider.getUriForFile(

@@ -129,7 +129,7 @@ public struct ExploreLogListView: View {
         .alert(deleteTitle, isPresented: deletePresented) {
             Button("删除", role: .destructive) {
                 if let log = deletingLog {
-                    do { try repository?.deleteLog(id: log.id); deleteCount += 1 }
+                    do { try repository?.deleteLogFromUI(id: log.id); deleteCount += 1 }
                     catch {
                         FlashLog.failure("log_delete_failed", error)
                         errorMessage = L("删除失败，请重试")
@@ -229,10 +229,10 @@ public struct ExploreLogListView: View {
         #if os(iOS)
         guard let repository else { return }
         do {
-            try repository.deleteLog(id: log.id)
+            try repository.deleteLogFromUI(id: log.id)
             deleteCount += 1
             toast = FlashToast(log.category == .idea ? L("已删除灵感") : L("已删除记录"), actionTitle: L("撤销")) {
-                do { try repository.updateLog(log) }
+                do { try repository.undoLogDeletion(log) }
                 catch {
                     FlashLog.failure("undo_delete_failed", error)
                     errorMessage = L("撤销失败，请重试")

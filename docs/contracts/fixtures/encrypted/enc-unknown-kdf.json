@@ -1,0 +1,14 @@
+{
+  "version": "flash-backup-enc-v1",
+  "kdf": {
+    "name": "Argon2id",
+    "memoryKiB": 65536,
+    "passes": 3,
+    "salt": "kGIwkWgtg619G0SCrDfoZw=="
+  },
+  "cipher": {
+    "name": "AES-256-GCM",
+    "nonce": "Bwm+BwSgA78yIoP1"
+  },
+  "ciphertext": "6s3hOuGP/M4UX06gFzMPlo6hkchRaXykygD/WS29VpcYv9hPZxM81jMXT5lcwwn47Npu74+JM51MhDNHc1Zsc/L4PL1CMB4or9B+DGJLQM0wfO2laHhXLUgC9l0Dgobg+1gSSy9a1P8SUwohMecUMhS6b0eUaDaAyogap9DN/b0gK0eIfgBNakihiEx3dLDdcdylcjhGAKisf6arHa3RkRSrcX8hPe8HttEbFm+hDn3iaoNOJ98FhPqeaWAgyrjD35Atw1+j2u/WjfSHw2ptuJwFGQEpiLxjykjFPPtaRp9SUjF2ah9k1MX4P4myHunXSjwPHEA="
+}

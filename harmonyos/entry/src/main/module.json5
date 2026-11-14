@@ -10,16 +10,17 @@
     "pages": "$profile:main_pages",
     "requestPermissions": [
       { "name": "ohos.permission.PUBLISH_AGENT_REMINDER" },
-      { "name": "ohos.permission.VIBRATE" }
+      { "name": "ohos.permission.VIBRATE" },
+      { "name": "ohos.permission.ACCESS_BIOMETRIC" }
     ],
     "abilities": [
       {
         "name": "EntryAbility",
         "srcEntry": "./ets/entryability/EntryAbility.ets",
         "description": "$string:EntryAbility_desc",
-        "icon": "$media:icon",
+        "icon": "$media:flash_standard_icon",
         "label": "$string:EntryAbility_label",
-        "startWindowIcon": "$media:icon",
+        "startWindowIcon": "$media:flash_standard_icon",
         "startWindowBackground": "$color:start_window_background",
         "exported": true,
         "skills": [
