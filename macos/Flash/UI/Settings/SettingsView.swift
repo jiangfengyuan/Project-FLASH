@@ -236,7 +236,7 @@ struct SettingsView: View {
             } catch let error as BackupError {
                 message = error.userMessage
             } catch {
-                print("传输备份失败: \(error)")
+                FlashLog.failure("backup_share_failed", error)
                 message = "生成传输文件失败，请重试"
             }
         }
@@ -316,7 +316,7 @@ struct SettingsView: View {
                 message = error.userMessage
             } catch {
                 // 弹窗只给固定文案，路径等详情只进日志
-                print("导出备份失败: \(error)")
+                FlashLog.failure("backup_export_failed", error)
                 message = "导出失败，请检查目标位置的写入权限后重试"
             }
         }
@@ -349,7 +349,7 @@ struct SettingsView: View {
             } catch let error as BackupError {
                 message = error.userMessage
             } catch {
-                print("导入备份失败: \(error)")
+                FlashLog.failure("backup_import_failed", error)
                 message = "导入失败，请确认选择的是 Flash 备份文件后重试"
             }
         }
@@ -372,7 +372,7 @@ struct SettingsView: View {
             } catch let error as BackupError {
                 message = error.userMessage
             } catch {
-                print("导入备份失败: \(error)")
+                FlashLog.failure("backup_import_failed", error)
                 message = "导入失败，请确认选择的是 Flash 备份文件后重试"
             }
         }
@@ -404,7 +404,7 @@ struct SettingsView: View {
             } catch let error as BackupError {
                 message = error.userMessage
             } catch {
-                print("导入写库失败: \(error)")
+                FlashLog.failure("backup_apply_failed", error)
                 message = "导入失败：写入数据库时出错，请重试"
             }
             pendingImport = nil
@@ -430,7 +430,7 @@ struct SettingsView: View {
                     message = "数据已清空，但系统提醒清理失败，请重启应用后重试"
                 }
             } catch {
-                print("清空数据失败: \(error)")
+                FlashLog.failure("clear_all_failed", error)
                 message = "清空失败，请重试"
             }
         }
