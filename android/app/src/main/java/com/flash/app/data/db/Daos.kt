@@ -101,6 +101,9 @@ interface LogDao {
     @Upsert
     suspend fun upsertAll(logs: List<LogEntity>)
 
+    @Query("UPDATE logs SET isFavorite = :favorite WHERE id = :id")
+    suspend fun setFavorite(id: String, favorite: Boolean)
+
     @Query("DELETE FROM logs WHERE id = :id")
     suspend fun deleteById(id: String)
 
@@ -138,6 +141,9 @@ interface EmotionDao {
     @Upsert
     suspend fun upsertAll(emotions: List<EmotionEntity>)
 
+    @Query("UPDATE emotions SET isFavorite = :favorite WHERE id = :id")
+    suspend fun setFavorite(id: String, favorite: Boolean)
+
     @Query("DELETE FROM emotions WHERE id = :id")
     suspend fun deleteById(id: String)
 
@@ -147,6 +153,9 @@ interface EmotionDao {
 
 @Dao
 interface TaskDao {
+    @Query("SELECT * FROM tasks WHERE id = :id LIMIT 1")
+    suspend fun getById(id: String): TaskEntity?
+
     @Query("SELECT * FROM tasks ORDER BY completedAt IS NOT NULL, updatedAt DESC")
     fun observeAll(): Flow<List<TaskEntity>>
 

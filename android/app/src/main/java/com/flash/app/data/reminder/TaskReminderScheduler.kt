@@ -248,11 +248,13 @@ class TaskReminderActionReceiver : android.content.BroadcastReceiver() {
                         app.taskReminders.schedule(done)
                     }
                     ACTION_SNOOZE -> {
-                        val snoozed = task.copy(reminderAt = Instant.now().plusSeconds(SNOOZE_MINUTES * 60L).toString())
-                        app.repository.updateTask(snoozed)
+                        val snoozed = app.repository.snoozeTask(taskId, Instant.now().plusSeconds(SNOOZE_MINUTES * 60L).toString())
                         app.taskReminders.schedule(snoozed)
                     }
                 }
+            } catch (_: Exception) {
+                // A task may be deleted after the notification action read it.
+                // The transaction refuses to resurrect it; finish the broadcast safely.
             } finally {
                 pending.finish()
             }

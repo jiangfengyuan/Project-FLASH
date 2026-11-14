@@ -85,6 +85,7 @@ sealed interface CalendarEvent {
 class CalendarViewModel(
     private val repository: FlashRepository,
     private val reminders: TaskReminderScheduler,
+    private val scheduleTask: suspend (TaskItem) -> Unit = { reminders.schedule(it) },
 ) : ViewModel() {
 
     private val eventChannel = Channel<CalendarEvent>(Channel.BUFFERED)
@@ -172,40 +173,41 @@ class CalendarViewModel(
         if (month != _displayedMonth.value) _displayedMonth.value = month
     }
 
-    fun saveTask(existing: TaskItem?, draft: TaskDraft) {
-        if (draft.title.isBlank()) return
-        viewModelScope.launch {
-            runCatching {
-                val task = if (existing == null) {
-                    repository.newTask(
-                        draft.title,
-                        draft.notes,
-                        draft.colorTag,
-                        draft.importance,
-                        draft.dueKind,
-                        draft.dueDate,
-                        draft.dueAt,
-                        draft.timeZone,
-                        draft.reminderAt,
-                        isFavorite = draft.isFavorite,
-                    ).also { repository.addTask(it) }
-                } else {
-                    existing.copy(
-                        title = draft.title.trim().take(200),
-                        notes = draft.notes?.trim()?.ifEmpty { null },
-                        colorTag = draft.colorTag,
-                        importance = draft.importance.coerceIn(0, 4),
-                        dueKind = draft.dueKind,
-                        dueDate = draft.dueDate,
-                        dueAt = draft.dueAt,
-                        timeZone = draft.timeZone,
-                        reminderAt = draft.reminderAt,
-                        isFavorite = draft.isFavorite,
-                    ).also { repository.updateTask(it) }
-                }
-                reminders.schedule(task)
-            }.onFailure {
-                eventChannel.send(CalendarEvent.Failed(it.message ?: com.flash.app.i18n.tr("任务保存失败")))
+    suspend fun saveTask(existing: TaskItem?, draft: TaskDraft) {
+        require(draft.title.isNotBlank())
+        val task = run {
+            if (existing == null) {
+                repository.newTask(
+                    draft.title,
+                    draft.notes,
+                    draft.colorTag,
+                    draft.importance,
+                    draft.dueKind,
+                    draft.dueDate,
+                    draft.dueAt,
+                    draft.timeZone,
+                    draft.reminderAt,
+                    isFavorite = draft.isFavorite,
+                ).also { repository.addTask(it) }
+            } else {
+                repository.updateTaskFromEditor(existing.copy(
+                    title = draft.title.trim().take(200),
+                    notes = draft.notes?.trim()?.ifEmpty { null },
+                    colorTag = draft.colorTag,
+                    importance = draft.importance.coerceIn(0, 4),
+                    dueKind = draft.dueKind,
+                    dueDate = draft.dueDate,
+                    dueAt = draft.dueAt,
+                    timeZone = draft.timeZone,
+                    reminderAt = draft.reminderAt,
+                    isFavorite = draft.isFavorite,
+                ))
+            }
+        }
+        // Persistence succeeded: a reminder failure must not invite saving a duplicate task.
+        kotlinx.coroutines.withContext(kotlinx.coroutines.NonCancellable) {
+            runCatching { scheduleTask(task) }.onFailure {
+                eventChannel.send(CalendarEvent.Failed(com.flash.app.i18n.tr("任务已保存，但系统提醒恢复失败")))
             }
         }
     }
@@ -214,7 +216,8 @@ class CalendarViewModel(
         viewModelScope.launch {
             runCatching { repository.setTaskCompleted(task, completed) }
                 .onSuccess { updated ->
-                    if (completed) reminders.cancel(task.id) else reminders.schedule(updated)
+                    runCatching { if (completed) reminders.cancel(task.id) else reminders.schedule(updated) }
+                        .onFailure { eventChannel.send(CalendarEvent.Failed(com.flash.app.i18n.tr("任务已保存，但系统提醒恢复失败"))) }
                 }
                 .onFailure { eventChannel.send(CalendarEvent.Failed(it.message ?: com.flash.app.i18n.tr("任务更新失败"))) }
         }
@@ -223,7 +226,10 @@ class CalendarViewModel(
     fun deleteTask(task: TaskItem) {
         viewModelScope.launch {
             runCatching { repository.deleteTask(task.id) }
-                .onSuccess { reminders.cancel(task.id) }
+                .onSuccess {
+                    runCatching { reminders.cancel(task.id) }
+                        .onFailure { eventChannel.send(CalendarEvent.Failed(com.flash.app.i18n.tr("任务已删除，但系统提醒清理失败"))) }
+                }
                 .onFailure { eventChannel.send(CalendarEvent.Failed(it.message ?: com.flash.app.i18n.tr("任务删除失败"))) }
         }
     }

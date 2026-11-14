@@ -63,7 +63,7 @@ internal fun isTypedTrailingReturn(previous: String, next: String): Boolean =
  * 快速记录面板（对齐 iOS QuickCapture）：默认灵感，可切日志；输入框随内容增高；
  * 回车即存；保存成功关闭并有触感，失败保留输入；未提交的内容留作草稿。
  *
- * `initialText` 来自系统分享时，由用户确认后才保存，且不覆盖既有草稿。
+ * `initialText` 由不可变 CaptureSession 提供；分享/锁定会话的回调拒绝访问私人草稿。
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,7 +75,6 @@ fun QuickCaptureSheet(
     onDismiss: () -> Unit,
     onSave: suspend (String, Category) -> Unit,
 ) {
-    val shared = initialText != null
     var text by rememberSaveable { mutableStateOf(initialText ?: draft) }
     var category by rememberSaveable { mutableStateOf(initialCategory) }
     var saving by remember { mutableStateOf(false) }
@@ -91,6 +90,8 @@ fun QuickCaptureSheet(
     val canSave = text.isNotBlank() && !overLimit && !saving
 
     LaunchedEffect(Unit) { focus.requestFocus() }
+    // Removing this session on lock cancels an in-flight save. If Room already
+    // committed, stale callbacks still cannot clear the owner's draft while locked.
     LaunchedEffect(pendingSave) {
         if (!pendingSave) return@LaunchedEffect
         pendingSave = false
@@ -100,7 +101,7 @@ fun QuickCaptureSheet(
         runCatching { onSave(text, category) }
             .onSuccess {
                 haptics.success()
-                if (!shared) onDraftChange("")
+                onDraftChange("")
                 onDismiss()
             }
             .onFailure { error = it.message ?: tr("保存失败，请重试") }
@@ -109,7 +110,7 @@ fun QuickCaptureSheet(
 
     ModalBottomSheet(
         onDismissRequest = {
-            if (!shared) onDraftChange(text)
+            onDraftChange(text)
             onDismiss()
         },
         sheetState = sheetState,
@@ -142,6 +143,7 @@ fun QuickCaptureSheet(
                             pendingSave = true
                         } else {
                             text = next
+                            onDraftChange(next)
                         }
                     },
                     placeholder = { Text(tr("现在想记录什么？")) },

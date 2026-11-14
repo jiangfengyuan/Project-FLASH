@@ -195,16 +195,17 @@ fun CalendarScreen(
                 // 换月：方向性横移（减弱动画时由系统动画缩放归零）
                 val monthState = uiState
                 androidx.compose.animation.AnimatedContent(
-                    targetState = monthState.month,
+                    targetState = monthState,
+                    contentKey = { it.month },
                     transitionSpec = {
-                        val forward = targetState > initialState
+                        val forward = targetState.month > initialState.month
                         (androidx.compose.animation.slideInHorizontally(androidx.compose.animation.core.tween(220)) { if (forward) it / 14 else -it / 14 } +
                             androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(220)))
                             .togetherWith(androidx.compose.animation.fadeOut(androidx.compose.animation.core.tween(120)))
                     },
                     label = "calendar-month",
-                ) { _ ->
-                    MonthGrid(uiState = monthState, onSelect = viewModel::selectDate)
+                ) { targetMonthState ->
+                    MonthGrid(uiState = targetMonthState, onSelect = viewModel::selectDate)
                 }
             }
             item(key = "detail-header") {

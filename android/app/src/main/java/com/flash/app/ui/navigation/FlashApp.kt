@@ -65,6 +65,10 @@ import com.flash.app.i18n.tr
 import com.flash.app.ui.calendar.CalendarScreen
 import com.flash.app.ui.calendar.TaskEditorDialog
 import com.flash.app.ui.capture.QuickCaptureSheet
+import com.flash.app.ui.capture.CaptureSession
+import androidx.compose.runtime.key
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import com.flash.app.ui.detail.RecordDetailScreen
 import com.flash.app.ui.emotion.EmotionScreen
 import com.flash.app.ui.explore.ExploreScreen
@@ -85,7 +89,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 
 private data class TaskRequest(val sourceLogId: String? = null, val title: String = "")
 
-private data class CaptureRequest(val category: Category, val sharedText: String? = null)
+
 
 private fun NavHostController.openTab(route: String) {
     navigate(route) {
@@ -111,7 +115,15 @@ fun FlashApp() {
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    var capture by remember { mutableStateOf<CaptureRequest?>(null) }
+    var capture by remember { mutableStateOf<CaptureSession?>(null) }
+    val locked by app.appLock.locked.collectAsStateWithLifecycle()
+    fun captureSession(category: Category, shared: String? = null) =
+        CaptureSession.create(app.appLock.locked.value, category, shared) { app.settings.quickCaptureDraft }
+    // Remove the private sheet immediately, before the lock transition effect runs.
+    val visibleCapture = capture?.whenLocked(locked)
+    LaunchedEffect(locked) {
+        if (locked) capture = capture?.whenLocked(true)
+    }
     var taskRequest by remember { mutableStateOf<TaskRequest?>(null) }
     var calendarFocusDate by rememberSaveable { mutableStateOf<String?>(null) }
     var explorePresetIdeas by rememberSaveable { mutableStateOf(false) }
@@ -132,7 +144,7 @@ fun FlashApp() {
 
     val actions = remember(navController) {
         AppActions(
-            quickCapture = { capture = CaptureRequest(it) },
+            quickCapture = { capture = captureSession(it) },
             newTask = { taskRequest = TaskRequest() },
             newTaskFromIdea = { id, title -> taskRequest = TaskRequest(id, title) },
             openTab = { navController.openTab(it) },
@@ -148,8 +160,8 @@ fun FlashApp() {
         if (!welcomed) return@LaunchedEffect
         app.pendingEntry.value = null
         when (entry) {
-            is AppEntry.Capture -> capture = CaptureRequest(entry.category)
-            is AppEntry.Shared -> capture = CaptureRequest(Category.IDEA, entry.text)
+            is AppEntry.Capture -> capture = captureSession(entry.category)
+            is AppEntry.Shared -> capture = captureSession(Category.IDEA, entry.text)
             AppEntry.Today -> navController.openTab(Routes.HOME)
             AppEntry.Ideas -> {
                 explorePresetIdeas = true
@@ -277,7 +289,7 @@ fun FlashApp() {
                     verticalArrangement = Arrangement.spacedBy(FlashTokens.Spacing.XS),
                 ) {
                     AnimatedVisibility(visible = !wide) {
-                        QuickCaptureBar(onClick = { capture = CaptureRequest(Category.IDEA) })
+                        QuickCaptureBar(onClick = { capture = captureSession(Category.IDEA) })
                     }
                     FlashDock(
                         currentRoute = currentRoute,
@@ -289,7 +301,7 @@ fun FlashApp() {
                 }
                 if (wide) {
                     QuickCaptureFab(
-                        onClick = { capture = CaptureRequest(Category.IDEA) },
+                        onClick = { capture = captureSession(Category.IDEA) },
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .navigationBarsPadding()
@@ -300,22 +312,25 @@ fun FlashApp() {
         }
     }
 
-    capture?.let { request ->
-        var draft by remember { mutableStateOf(app.settings.quickCaptureDraft) }
-        QuickCaptureSheet(
-            initialCategory = request.category,
-            initialText = request.sharedText,
-            draft = draft,
-            onDraftChange = {
-                draft = it
-                app.settings.quickCaptureDraft = it
-            },
-            onDismiss = { capture = null },
-            onSave = { text, category ->
-                app.repository.quickAdd(text, category)
-                toast(if (category == Category.IDEA) tr("✓ 已保存到灵感") else tr("✓ 已保存到日志"), null, null)
-            },
-        )
+    // A private sheet is absent while its immutable replacement is being installed.
+    capture?.takeIf { it === visibleCapture }?.let { session ->
+        key(session.id) {
+            QuickCaptureSheet(
+                initialCategory = session.category,
+                initialText = session.initialText,
+                draft = session.initialText,
+                onDraftChange = { text ->
+                    if (session.canWriteDraft(capture?.id, app.appLock.locked.value)) {
+                        app.settings.quickCaptureDraft = text
+                    }
+                },
+                onDismiss = { if (capture?.id == session.id) capture = null },
+                onSave = { text, category ->
+                    app.repository.quickAdd(text, category)
+                    toast(if (category == Category.IDEA) tr("✓ 已保存到灵感") else tr("✓ 已保存到日志"), null, null)
+                },
+            )
+        }
     }
 
     taskRequest?.let { request ->
@@ -326,27 +341,25 @@ fun FlashApp() {
             sourceLogId = request.sourceLogId,
             onDismiss = { taskRequest = null },
             onSave = { draft ->
-                taskRequest = null
-                scope.launch {
-                    runCatching {
-                        val task = app.repository.newTask(
-                            draft.title, draft.notes, draft.colorTag, draft.importance, draft.dueKind,
-                            draft.dueDate, draft.dueAt, draft.timeZone, draft.reminderAt,
-                            sourceLogId = request.sourceLogId,
-                            isFavorite = draft.isFavorite,
-                        )
-                        app.repository.addTask(task)
-                        app.taskReminders.schedule(task)
-                        // 从「+」创建的任务同样要申请通知权限，否则提醒会静默丢失
-                        if (draft.reminderAt != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
-                            PackageManager.PERMISSION_GRANTED
-                        ) {
-                            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
-                        }
-                    }.onFailure {
-                        snackbar.showSnackbar(it.message ?: tr("任务保存失败"))
+                val task = app.repository.newTask(
+                    draft.title, draft.notes, draft.colorTag, draft.importance, draft.dueKind,
+                    draft.dueDate, draft.dueAt, draft.timeZone, draft.reminderAt,
+                    sourceLogId = request.sourceLogId,
+                    isFavorite = draft.isFavorite,
+                )
+                app.repository.addTask(task)
+                withContext(NonCancellable) {
+                    runCatching { app.taskReminders.schedule(task) }.onFailure {
+                        toast(tr("任务已保存，但系统提醒恢复失败"), null, null)
                     }
+                }
+                taskRequest = null
+                // 从「+」创建的任务同样要申请通知权限，否则提醒会静默丢失
+                if (draft.reminderAt != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                    ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+                    PackageManager.PERMISSION_GRANTED
+                ) {
+                    notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
             },
         )

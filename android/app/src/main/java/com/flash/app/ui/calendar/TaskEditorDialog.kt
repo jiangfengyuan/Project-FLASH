@@ -26,6 +26,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -63,9 +66,12 @@ fun TaskEditorDialog(
     initialTitle: String = "",
     sourceLogId: String? = null,
     onDismiss: () -> Unit,
-    onSave: (TaskDraft) -> Unit,
+    onSave: suspend (TaskDraft) -> Unit,
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var saving by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
     val initialZone = existing?.timeZone?.let { CanonicalTimeZones.zoneId(it) }
         ?: ZoneId.systemDefault()
     val initialDate = existing?.let { runCatching { LocalDate.parse(it.calendarDate) }.getOrNull() }
@@ -89,14 +95,16 @@ fun TaskEditorDialog(
     }
 
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { if (!saving) onDismiss() },
         title = { Text(if (existing == null) com.flash.app.i18n.tr("新建任务") else com.flash.app.i18n.tr("编辑任务")) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
+                error?.let { Text(it, color = androidx.compose.material3.MaterialTheme.colorScheme.error) }
                 OutlinedTextField(
+                    enabled = !saving,
                     value = title,
                     onValueChange = { title = it.take(200) },
                     label = { Text(com.flash.app.i18n.tr("任务")) },
@@ -105,6 +113,7 @@ fun TaskEditorDialog(
                     modifier = Modifier.fillMaxWidth(),
                 )
                 OutlinedTextField(
+                    enabled = !saving,
                     value = notes,
                     onValueChange = { notes = it.take(Backup.MAX_FIELD_LENGTH) },
                     label = { Text(com.flash.app.i18n.tr("备注（可选）")) },
@@ -197,7 +206,7 @@ fun TaskEditorDialog(
         },
         confirmButton = {
             TextButton(
-                enabled = title.isNotBlank(),
+                enabled = title.isNotBlank() && !saving,
                 onClick = {
                     // 编辑时保留原任务时区；新任务的 initialZone 才是当前系统时区。
                     val zone = initialZone
@@ -205,8 +214,7 @@ fun TaskEditorDialog(
                         .atZone(zone)
                         .toInstant()
                     val reminderAt = reminder.minutesBefore?.let { anchor.minusSeconds(it * 60).toString() }
-                    onSave(
-                        TaskDraft(
+                    val draft = TaskDraft(
                             title = title.trim(),
                             notes = notes.trim().ifEmpty { null },
                             colorTag = tag,
@@ -218,11 +226,18 @@ fun TaskEditorDialog(
                             reminderAt = reminderAt,
                             isFavorite = if (favorite) true else existing?.isFavorite?.let { false },
                         )
-                    )
+                    saving = true
+                    error = null
+                    scope.launch {
+                        try { onSave(draft) }
+                        catch (cancelled: CancellationException) { throw cancelled }
+                        catch (failure: Exception) { error = failure.message ?: com.flash.app.i18n.tr("任务保存失败") }
+                        finally { saving = false }
+                    }
                 },
             ) { Text(com.flash.app.i18n.tr("保存")) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(com.flash.app.i18n.tr("取消")) } },
+        dismissButton = { TextButton(onClick = onDismiss, enabled = !saving) { Text(com.flash.app.i18n.tr("取消")) } },
     )
 }
 

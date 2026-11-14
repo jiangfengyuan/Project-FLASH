@@ -137,11 +137,11 @@ class FlashRepository(private val db: FlashDatabase) {
 
     /** 收藏切换（与 Apple 端同义：显式写入 true / false） */
     suspend fun setLogFavorite(log: LogItem, favorite: Boolean) {
-        db.logDao().upsert(log.copy(isFavorite = favorite).toEntity())
+        db.logDao().setFavorite(log.id, favorite)
     }
 
     suspend fun setEmotionFavorite(emotion: EmotionRecord, favorite: Boolean) {
-        db.emotionDao().upsert(emotion.copy(isFavorite = favorite).toEntity())
+        db.emotionDao().setFavorite(emotion.id, favorite)
     }
 
     /**
@@ -210,19 +210,42 @@ class FlashRepository(private val db: FlashDatabase) {
         db.taskDao().upsert(task.toEntity())
     }
 
-    suspend fun updateTask(task: TaskItem) {
-        db.taskDao().upsert(task.copy(updatedAt = isoNow()).toEntity())
-    }
+    /** Apply editor-owned fields to the current row; never restore a deleted task. */
+    suspend fun updateTask(task: TaskItem): TaskItem = applyTaskEdit(task, preserveSource = false)
 
-    suspend fun setTaskCompleted(task: TaskItem, completed: Boolean): TaskItem {
-        val now = isoNow()
-        val updated = task.copy(
-            completedAt = if (completed) now else null,
-            updatedAt = now,
+    suspend fun updateTaskFromEditor(task: TaskItem): TaskItem = applyTaskEdit(task, preserveSource = true)
+
+    private suspend fun applyTaskEdit(task: TaskItem, preserveSource: Boolean): TaskItem = db.withTransaction {
+        val current = requiredTask(task.id)
+        val updated = current.copy(
+            title = task.title, notes = task.notes, colorTag = task.colorTag,
+            importance = task.importance, dueKind = task.dueKind, dueDate = task.dueDate,
+            dueAt = task.dueAt, timeZone = task.timeZone, reminderAt = task.reminderAt,
+            isFavorite = task.isFavorite,
+            sourceLogId = if (preserveSource) current.sourceLogId else task.sourceLogId,
+            updatedAt = isoNow(),
         )
         db.taskDao().upsert(updated.toEntity())
-        return updated
+        updated
     }
+
+    suspend fun setTaskCompleted(task: TaskItem, completed: Boolean): TaskItem = db.withTransaction {
+        val current = requiredTask(task.id)
+        val now = isoNow()
+        val updated = current.copy(completedAt = if (completed) now else null, updatedAt = now)
+        db.taskDao().upsert(updated.toEntity())
+        updated
+    }
+
+    suspend fun snoozeTask(id: String, reminderAt: String): TaskItem = db.withTransaction {
+        val current = requiredTask(id)
+        val updated = current.copy(reminderAt = reminderAt, updatedAt = isoNow())
+        db.taskDao().upsert(updated.toEntity())
+        updated
+    }
+
+    private suspend fun requiredTask(id: String): TaskItem =
+        db.taskDao().getById(id)?.toModel() ?: error(com.flash.app.i18n.tr("这条任务已不存在"))
 
     suspend fun deleteTask(id: String) = db.taskDao().deleteById(id)
 

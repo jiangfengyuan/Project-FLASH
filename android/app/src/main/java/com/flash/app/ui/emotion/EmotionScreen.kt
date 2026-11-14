@@ -108,6 +108,7 @@ fun EmotionScreen() {
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
+                EmotionEvent.Saved -> haptics.success()
                 is EmotionEvent.Failed -> actions.toast(event.message, null, null)
             }
         }
@@ -155,6 +156,7 @@ fun EmotionScreen() {
                 }
                 Spacer(Modifier.height(FlashTokens.Spacing.SM))
                 OutlinedTextField(
+                    enabled = !viewModel.saving,
                     value = viewModel.note,
                     onValueChange = viewModel::updateNote,
                     label = { Text(tr("想说点什么？（可选）")) },
@@ -171,7 +173,6 @@ fun EmotionScreen() {
                 Button(
                     onClick = {
                         viewModel.save()
-                        haptics.success()
                     },
                     enabled = !viewModel.saving,
                     colors = ButtonDefaults.buttonColors(

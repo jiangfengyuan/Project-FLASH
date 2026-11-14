@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 sealed interface EmotionEvent {
+    data object Saved : EmotionEvent
     data class Failed(val message: String) : EmotionEvent
 }
 
@@ -85,16 +86,19 @@ class EmotionViewModel(private val repository: FlashRepository) : ViewModel() {
         private set
 
     fun selectLevel(level: EmotionLevel) {
+        if (saving) return
         selectedLevel = level
         // 子情绪仅存在于负面等级（与 Web 版 setCurrentLevel 逻辑一致）
         if (!level.isNegative) selectedSubEmotion = null
     }
 
     fun selectSubEmotion(sub: SubEmotion?) {
+        if (saving) return
         selectedSubEmotion = if (selectedSubEmotion == sub) null else sub
     }
 
     fun selectIntensity(value: Int) {
+        if (saving) return
         intensity = if (intensity == value) null else value
     }
 
@@ -106,6 +110,7 @@ class EmotionViewModel(private val repository: FlashRepository) : ViewModel() {
     }
 
     fun updateNote(value: String) {
+        if (saving) return
         note = value
     }
 
@@ -126,15 +131,18 @@ class EmotionViewModel(private val repository: FlashRepository) : ViewModel() {
             }
             return
         }
-        // 先同步置 saving + 清状态再 launch，防止连点产生重复记录
+        // 先同步置 saving 防止连点；成功入库后才清空输入。
         saving = true
         val savedIntensity = intensity
-        note = ""
-        selectedSubEmotion = null
-        intensity = null
         viewModelScope.launch {
             try {
                 runCatching { repository.addEmotion(level = level, subEmotion = sub, note = noteValue, intensity = savedIntensity) }
+                    .onSuccess {
+                        note = ""
+                        selectedSubEmotion = null
+                        intensity = null
+                        eventChannel.send(EmotionEvent.Saved)
+                    }
                     .onFailure {
                         eventChannel.send(EmotionEvent.Failed(it.message ?: com.flash.app.i18n.tr("保存失败，请重试")))
                     }
