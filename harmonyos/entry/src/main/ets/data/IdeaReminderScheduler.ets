@@ -19,19 +19,38 @@ const IDEA_NOTIFICATION_ID = 2147480001;
  * 不满足条件或已关闭时撤销。通知只含数量，不含灵感内容。
  */
 export class IdeaReminderScheduler {
+  private static queue: Promise<void> = Promise.resolve();
+  private static generation: number = 0;
+  private static rescheduleRequested: boolean = false;
+
   /** 返回本次是否排程了新提醒 */
-  static async sync(context: common.UIAbilityContext, enabled: boolean, unread: number, frequency: string,
-    lastFiredDay: string, requestPermission: boolean): Promise<boolean> {
+  static sync(context: common.UIAbilityContext, enabled: boolean, unread: number, frequency: string,
+    lastFiredDay: string, requestPermission: boolean, reschedule: boolean = false): Promise<boolean> {
+    const generation = ++IdeaReminderScheduler.generation;
+    IdeaReminderScheduler.rescheduleRequested = IdeaReminderScheduler.rescheduleRequested || reschedule;
+    const operation = IdeaReminderScheduler.queue.then(() => IdeaReminderScheduler.performSync(
+      context, enabled, unread, frequency, lastFiredDay, requestPermission, generation));
+    IdeaReminderScheduler.queue = operation.then(() => {}, () => {});
+    return operation;
+  }
+
+  private static async performSync(context: common.UIAbilityContext, enabled: boolean, unread: number, frequency: string,
+    lastFiredDay: string, requestPermission: boolean, generation: number): Promise<boolean> {
+    if (generation !== IdeaReminderScheduler.generation) return false;
     const existing = (await reminderAgentManager.getAllValidReminders())
       .filter((item: reminderAgentManager.ReminderInfo) => item.reminderReq.groupId === IDEA_GROUP);
+    if (generation !== IdeaReminderScheduler.generation) return false;
     const due = enabled && shouldShowIdeaReminder(unread);
     if (!due) {
       for (const item of existing) await reminderAgentManager.cancelReminder(item.reminderId);
+      if (generation === IdeaReminderScheduler.generation) IdeaReminderScheduler.rescheduleRequested = false;
       return false;
     }
     if (requestPermission) await notificationManager.requestEnableNotification(context);
-    if (existing.length > 0) return false;
+    if (generation !== IdeaReminderScheduler.generation) return false;
+    if (existing.length > 0 && !IdeaReminderScheduler.rescheduleRequested) return false;
     await NotificationChannels.ensureReminderSlot(context);
+    if (generation !== IdeaReminderScheduler.generation) return false;
     const when = nextIdeaReminderDate(new Date(), frequency, lastFiredDay);
     const request: reminderAgentManager.ReminderRequestCalendar = {
       reminderType: reminderAgentManager.ReminderType.REMINDER_TYPE_CALENDAR,
@@ -50,6 +69,10 @@ export class IdeaReminderScheduler {
     const slotType = NotificationChannels.reminderSlotType();
     if (slotType !== undefined) request.slotType = slotType;
     await reminderAgentManager.publishReminder(request);
-    return true;
+    // Publish first to retain the previous schedule if the replacement fails.
+    // A newer queued disable also sees/removes a publication already in flight.
+    for (const item of existing) await reminderAgentManager.cancelReminder(item.reminderId);
+    if (generation === IdeaReminderScheduler.generation) IdeaReminderScheduler.rescheduleRequested = false;
+    return generation === IdeaReminderScheduler.generation;
   }
 }

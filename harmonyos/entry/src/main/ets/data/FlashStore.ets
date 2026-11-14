@@ -123,6 +123,9 @@ export class FlashStore {
   private initializing?: Promise<void>;
   private initialized: boolean = false;
   private filesDir: string = '';
+  // Rejected rows are absent from the normal snapshot. A merge must not
+  // rewrite their tables until their originals have a complete recovery copy.
+  private unpreservedDatabaseRows: boolean = false;
 
   /** True only after initialize() completed successfully. Read paths that
    * produce user-facing exports must refuse to run before this, otherwise a
@@ -207,16 +210,19 @@ export class FlashStore {
     let migratedEmotions: EmotionRecord[] = [];
     let migratedTasks: TaskItem[] = [];
     this.recoveryWarning = '';
+    let logsPreserved = true;
+    let emotionsPreserved = true;
+    let tasksPreserved = true;
     try {
       const document = `{"version":"${BackupService.LEGACY_VERSION}","exportedAt":"${isoNow()}",` +
         `"appVersion":"0.1.0","notes":"migration","logs":${logsJson},"emotions":[]}`;
       const parsed = BackupService.parse(document);
       migratedLogs = parsed.logs;
       if (parsed.skippedLogs > 0) {
-        await this.keepLegacyRaw(QUARANTINE_LOGS_FILE, logsJson, tr('旧版日志有异常项目'));
+        logsPreserved = await this.keepLegacyRaw(QUARANTINE_LOGS_FILE, logsJson, tr('旧版日志有异常项目'));
       }
     } catch (_) {
-      await this.keepLegacyRaw(QUARANTINE_LOGS_FILE, logsJson, tr('旧版日志数据损坏'));
+      logsPreserved = await this.keepLegacyRaw(QUARANTINE_LOGS_FILE, logsJson, tr('旧版日志数据损坏'));
     }
     try {
       const document = `{"version":"${BackupService.LEGACY_VERSION}","exportedAt":"${isoNow()}",` +
@@ -224,10 +230,10 @@ export class FlashStore {
       const parsed = BackupService.parse(document);
       migratedEmotions = parsed.emotions;
       if (parsed.skippedEmotions > 0) {
-        await this.keepLegacyRaw(QUARANTINE_EMOTIONS_FILE, emotionsJson, tr('旧版情绪有异常项目'));
+        emotionsPreserved = await this.keepLegacyRaw(QUARANTINE_EMOTIONS_FILE, emotionsJson, tr('旧版情绪有异常项目'));
       }
     } catch (_) {
-      await this.keepLegacyRaw(QUARANTINE_EMOTIONS_FILE, emotionsJson, tr('旧版情绪数据损坏'));
+      emotionsPreserved = await this.keepLegacyRaw(QUARANTINE_EMOTIONS_FILE, emotionsJson, tr('旧版情绪数据损坏'));
     }
     try {
       const document = `{"version":"${BackupService.VERSION}","exportedAt":"${isoNow()}",` +
@@ -236,16 +242,16 @@ export class FlashStore {
       const parsed = BackupService.parse(document);
       migratedTasks = parsed.tasks;
       if (parsed.skippedTasks > 0) {
-        await this.keepLegacyRaw(QUARANTINE_TASKS_FILE, tasksJson, tr('旧版任务有异常项目'));
+        tasksPreserved = await this.keepLegacyRaw(QUARANTINE_TASKS_FILE, tasksJson, tr('旧版任务有异常项目'));
       }
     } catch (_) {
-      await this.keepLegacyRaw(QUARANTINE_TASKS_FILE, tasksJson, tr('旧版任务数据损坏'));
+      tasksPreserved = await this.keepLegacyRaw(QUARANTINE_TASKS_FILE, tasksJson, tr('旧版任务数据损坏'));
     }
     await this.replaceDatabase(migratedLogs, migratedEmotions, migratedTasks);
     await settings.put(RDB_MIGRATED_KEY, true);
-    await settings.delete(LOGS_KEY);
-    await settings.delete(EMOTIONS_KEY);
-    await settings.delete(TASKS_KEY);
+    if (logsPreserved) await settings.delete(LOGS_KEY);
+    if (emotionsPreserved) await settings.delete(EMOTIONS_KEY);
+    if (tasksPreserved) await settings.delete(TASKS_KEY);
     await settings.flush();
   }
 
@@ -282,6 +288,7 @@ export class FlashStore {
     // Quarantine persistence is best-effort: the originals stay in the database,
     // so a failed copy downgrades to a warning and must never fail initialization.
     const quarantined = await this.persistDatabaseRecovery(rejected);
+    this.unpreservedDatabaseRows = rejected.length > 0 && !quarantined;
     this.logs = logs;
     this.emotions = emotions;
     this.tasks = tasks;
@@ -295,10 +302,10 @@ export class FlashStore {
   }
 
   private async loadRecoveryState(): Promise<void> {
-    const logs = await this.readQuarantineFile(QUARANTINE_LOGS_FILE);
-    const emotions = await this.readQuarantineFile(QUARANTINE_EMOTIONS_FILE);
-    const tasks = await this.readQuarantineFile(QUARANTINE_TASKS_FILE);
-    const databaseRaw = await this.readQuarantineFile(QUARANTINE_RDB_FILE);
+    const logs = await this.readRecoveryPayload(QUARANTINE_LOGS_FILE);
+    const emotions = await this.readRecoveryPayload(QUARANTINE_EMOTIONS_FILE);
+    const tasks = await this.readRecoveryPayload(QUARANTINE_TASKS_FILE);
+    const databaseRaw = await this.readRecoveryPayload(QUARANTINE_RDB_FILE);
     this.hasRecoveryData = this.hasRecoveryData ||
       logs.length > 0 || emotions.length > 0 || tasks.length > 0 || databaseRaw.length > 0;
     if (this.hasRecoveryData && !this.recoveryWarning) {
@@ -331,14 +338,16 @@ export class FlashStore {
     return true;
   }
 
-  /** A failed quarantine copy degrades to a warning. Losing the copy is
-   * acceptable; blocking startup over it is not. */
-  private async keepLegacyRaw(file: string, content: string, warning: string): Promise<void> {
+  /** A failed quarantine copy degrades to a warning. The source remains in Preferences
+   * until a complete copy exists; startup can continue with accepted RDB rows. */
+  private async keepLegacyRaw(file: string, content: string, warning: string): Promise<boolean> {
     this.hasRecoveryData = true;
     if (await this.writeQuarantineFile(file, content)) {
       this.appendRecoveryWarning(tr('{0}，原始数据已保留用于恢复', warning));
+      return true;
     } else {
-      this.appendRecoveryWarning(tr('{0}，但恢复副本写入失败，原始数据未能保留', warning));
+      this.appendRecoveryWarning(tr('{0}，但隔离副本写入失败，原始数据仍保留在旧版存储中', warning));
+      return false;
     }
   }
 
@@ -355,18 +364,41 @@ export class FlashStore {
       } catch (_) {
         await fileIo.mkdir(dir, true);
       }
-      const file = await fileIo.open(`${dir}/${name}`,
-        fileIo.OpenMode.READ_WRITE | fileIo.OpenMode.CREATE | fileIo.OpenMode.TRUNC);
+      const target = `${dir}/${name}`;
+      const temp = `${target}.tmp`;
       try {
-        await fileIo.write(file.fd, content, { encoding: 'utf-8' });
+        const file = await fileIo.open(temp,
+          fileIo.OpenMode.READ_WRITE | fileIo.OpenMode.CREATE | fileIo.OpenMode.TRUNC);
+        let written = 0;
+        try {
+          written = await fileIo.write(file.fd, content, { encoding: 'utf-8' });
+        } finally {
+          await fileIo.close(file);
+        }
+        if (written !== new util.TextEncoder().encodeInto(content).length) return false;
+        await fileIo.rename(temp, target);
+        return true;
       } finally {
-        await fileIo.close(file);
+        try { await fileIo.unlink(temp); } catch (_) {}
       }
-      return true;
     } catch (error) {
       console.error('Flash quarantine write failed');
       return false;
     }
+  }
+
+  private async readRecoveryPayload(name: string): Promise<string> {
+    const settings = this.settings;
+    if (settings && await settings.get(RDB_MIGRATED_KEY, false) as boolean) {
+      const key = name === QUARANTINE_LOGS_FILE ? LOGS_KEY :
+        name === QUARANTINE_EMOTIONS_FILE ? EMOTIONS_KEY :
+        name === QUARANTINE_TASKS_FILE ? TASKS_KEY : '';
+      if (key) {
+        const retained = await settings.get(key, '') as string;
+        if (retained) return retained;
+      }
+    }
+    return this.readQuarantineFile(name);
   }
 
   private quarantinePath(name: string): string {
@@ -436,6 +468,13 @@ export class FlashStore {
           console.error('Flash quarantine clear failed');
         }
       }
+    }
+    const settings = this.settings;
+    if (settings && await settings.get(RDB_MIGRATED_KEY, false) as boolean) {
+      await settings.delete(LOGS_KEY);
+      await settings.delete(EMOTIONS_KEY);
+      await settings.delete(TASKS_KEY);
+      await settings.flush();
     }
     this.hasRecoveryData = false;
     this.recoveryWarning = '';
@@ -512,10 +551,10 @@ export class FlashStore {
 
   async recoveryArchive(): Promise<string | undefined> {
     if (!this.hasRecoveryData) return undefined;
-    const logs = await this.readQuarantineFile(QUARANTINE_LOGS_FILE);
-    const emotions = await this.readQuarantineFile(QUARANTINE_EMOTIONS_FILE);
-    const tasks = await this.readQuarantineFile(QUARANTINE_TASKS_FILE);
-    const databaseRaw = await this.readQuarantineFile(QUARANTINE_RDB_FILE) || '[]';
+    const logs = await this.readRecoveryPayload(QUARANTINE_LOGS_FILE);
+    const emotions = await this.readRecoveryPayload(QUARANTINE_EMOTIONS_FILE);
+    const tasks = await this.readRecoveryPayload(QUARANTINE_TASKS_FILE);
+    const databaseRaw = await this.readRecoveryPayload(QUARANTINE_RDB_FILE) || '[]';
     const raw: RecoveryRaw = { logs: logs, emotions: emotions, tasks: tasks };
     const archive: RecoveryArchive = {
       version: 'flash-recovery-v1',
@@ -821,6 +860,9 @@ export class FlashStore {
 
   async mergeAll(logs: LogItem[], emotions: EmotionRecord[], tasks: TaskItem[] = []): Promise<void> {
     return this.enqueue(async () => {
+      if (this.unpreservedDatabaseRows) {
+        throw new Error(tr('数据库中有异常原始记录尚未安全保全，已暂停合并以保留原始数据；请释放存储空间后重启应用重试'));
+      }
       const logMap = new Map<string, LogItem>();
       this.logs.forEach((item: LogItem) => logMap.set(item.id, item));
       logs.forEach((item: LogItem) => logMap.set(item.id, item));
@@ -873,6 +915,7 @@ export class FlashStore {
         await this.pruneIdeaViewState(new Set<string>(logs.map((item: LogItem) => item.id))) : this.viewedIdeaIds;
       database.commit();
       this.viewedIdeaIds = nextViewed;
+      this.unpreservedDatabaseRows = false;
     } catch (error) {
       database.rollBack();
       throw error as Error;

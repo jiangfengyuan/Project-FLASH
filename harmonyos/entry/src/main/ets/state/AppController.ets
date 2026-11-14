@@ -179,10 +179,10 @@ export class AppController {
     this.session.settings.ideaReminderFrequency = frequency;
     this.writeSetting(IDEA_REMINDER_ENABLED_KEY, enabled);
     this.writeSetting(IDEA_REMINDER_FREQUENCY_KEY, frequency);
-    this.syncIdeaReminder(enabled);
+    this.syncIdeaReminder(enabled, true);
   }
 
-  private syncIdeaReminder(requestPermission: boolean = false): void {
+  private syncIdeaReminder(requestPermission: boolean = false, reschedule: boolean = false): void {
     const store = FlashStore.instance;
     const unread = typeof store.unviewedIdeas === 'function' ? store.unviewedIdeas().length : 0;
     let context: common.UIAbilityContext;
@@ -192,7 +192,7 @@ export class AppController {
       return;
     }
     IdeaReminderScheduler.sync(context, this.session.settings.ideaReminderEnabled, unread,
-      this.session.settings.ideaReminderFrequency, this.ideaReminderLast, requestPermission).then((fired: boolean) => {
+      this.session.settings.ideaReminderFrequency, this.ideaReminderLast, requestPermission, reschedule).then((fired: boolean) => {
         if (fired) {
           this.ideaReminderLast = today();
           this.writeSetting(IDEA_REMINDER_LAST_KEY, this.ideaReminderLast);
