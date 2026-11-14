@@ -30,7 +30,15 @@ struct QuickCaptureSheet: View {
     @State private var saveCount = 0
     @FocusState private var focused: Bool
 
-    private let draftStore = QuickCaptureDraftStore()
+    private let draftStore: QuickCaptureDraftStore?
+
+    init(initialCategory: Category?, preservesPrivateDraft: Bool = true,
+         draftStoreFactory: () -> QuickCaptureDraftStore = { QuickCaptureDraftStore() }) {
+        self.initialCategory = initialCategory
+        // Immutable presentation policy: locked capture never constructs the store,
+        // including its legacy migration, and cannot save or clear the owner's draft.
+        draftStore = preservesPrivateDraft ? draftStoreFactory() : nil
+    }
 
     private var hasText: Bool {
         !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -150,7 +158,7 @@ struct QuickCaptureSheet: View {
     // MARK: - 草稿
 
     private func restoreDraft() {
-        if let draft = draftStore.load() {
+        if let draft = draftStore?.load() {
             text = draft.text
             category = draft.category
         }
@@ -162,9 +170,9 @@ struct QuickCaptureSheet: View {
     private func keepDraftIfNeeded() {
         guard !committed else { return }
         if hasText {
-            draftStore.save(QuickCaptureDraft(text: text, category: category))
+            draftStore?.save(QuickCaptureDraft(text: text, category: category))
         } else {
-            draftStore.clear()
+            draftStore?.clear()
         }
     }
 
@@ -176,7 +184,7 @@ struct QuickCaptureSheet: View {
             switch try QuickCaptureCommit.commit(text, as: category, repository: repository) {
             case .saved:
                 committed = true
-                draftStore.clear()
+                draftStore?.clear()
                 saveCount += 1
                 dismiss()
             case .empty:

@@ -51,7 +51,7 @@ struct AppLockRoot: View {
         @Bindable var appState = appState
         AppLockScreen(onQuickCapture: { appState.presentQuickCapture() })
             .sheet(item: $appState.quickCapture) { request in
-                QuickCaptureSheet(initialCategory: request.category)
+                QuickCaptureSheet(initialCategory: request.category, preservesPrivateDraft: false)
                     .id(request.id)
             }
             .environment(lock)
