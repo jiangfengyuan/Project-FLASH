@@ -50,7 +50,7 @@ jobs:
           set -euo pipefail
           rustup toolchain install 1.99.1 --profile minimal
           rustup target add --toolchain 1.99.1 x86_64-linux-android
-          sdkmanager "ndk;29.0.14206865"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;29.0.14206865"
           curl --fail --location --retry 3 \
             https://download.libsodium.org/libsodium/releases/libsodium-1.0.22.tar.gz \
             --output "$RUNNER_TEMP/libsodium-1.0.22.tar.gz"
