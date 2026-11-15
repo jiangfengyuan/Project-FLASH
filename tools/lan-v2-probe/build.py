@@ -33,6 +33,15 @@ TARGETS = {
 }
 
 
+def android_ndk_binaries(ndk):
+    """Select the NDK host toolchain, not the Android target architecture."""
+    tags = {"Darwin": "darwin-x86_64", "Linux": "linux-x86_64"}
+    system = platform.system()
+    if system not in tags:
+        raise ValueError(f"Unsupported Android NDK build host: {system}")
+    return ndk.resolve() / "toolchains/llvm/prebuilt" / tags[system] / "bin"
+
+
 def source_digest(crate_root):
     paths = [crate_root / name for name in ('Cargo.toml', 'Cargo.lock', 'build.rs', 'rust-toolchain.toml')]
     for directory, suffixes in [('src', ('.rs',)), ('include', ('.h', '.modulemap')),
@@ -97,7 +106,7 @@ def build(args, report):
     else:
         if not args.android_ndk:
             raise ValueError("Android NDK missing; set --android-ndk (API 26)")
-        binaries = args.android_ndk.resolve() / "toolchains/llvm/prebuilt/darwin-x86_64/bin"
+        binaries = android_ndk_binaries(args.android_ndk)
         compiler_prefix = 'armv7a-linux-androideabi' if args.target == 'android-armv7' else target
         compiler = str(binaries / f"{compiler_prefix}26-clang")
         if not Path(compiler).is_file():
