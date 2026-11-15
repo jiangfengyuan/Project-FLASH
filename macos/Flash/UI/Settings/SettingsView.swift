@@ -48,7 +48,7 @@ struct SettingsView: View {
     @State private var dataAppeared = false
     @State private var aboutAppeared = false
 
-    var body: some View {
+    private var settingsContent: some View {
         // 标题与表单同处一列（同一最大宽度、同一页边距）：宽窗口下标题不再贴最左而表单居中，
         // 「设置」左缘与分组卡片左缘落在同一条线上
         VStack(alignment: .leading, spacing: 0) {
@@ -61,6 +61,8 @@ struct SettingsView: View {
                 StorageBannerSection()
 
                 AppearanceSection(appeared: appearanceAppeared)
+
+                AccessibilitySection { settings.resetWelcomed() }
 
                 QuickCaptureSection(appeared: appearanceAppeared)
 
@@ -89,6 +91,10 @@ struct SettingsView: View {
         .frame(maxWidth: Metrics.readingMaxWidth)
         .frame(maxWidth: .infinity)
         .background(BrandColors.pageBackground)
+    }
+
+    private var interactiveContent: some View {
+        settingsContent
         .onAppear {
             flushExportRequest()
             flushLanTransferResults()
@@ -104,10 +110,9 @@ struct SettingsView: View {
         }
         .sheet(isPresented: lanTransferPresented) { lanTransferSheet }
         .sheet(item: $passphraseRequest) { request in passphraseSheet(request) }
-        .onChange(of: lanTransfer.receivedJSON) { _, json in
-            guard let json else { return }
-            lanTransfer.receivedJSON = nil
-            prepareLanImport(json)
+        .onChange(of: lanTransfer.receivedBackup != nil) { _, ready in
+            guard ready, let backup = lanTransfer.takeReceivedBackup() else { return }
+            prepareLanImport(backup)
         }
         .onChange(of: lanTransfer.errorMessage) { _, error in
             guard let error else { return }
@@ -133,6 +138,10 @@ struct SettingsView: View {
             guard !Task.isCancelled else { return }
             toastMessage = nil
         }
+    }
+
+    var body: some View {
+        interactiveContent
         .alert(recoveryImport ? "部分恢复预览（原文件不变）" : "标准导入预览", isPresented: previewPresented) {
             Button("按差异合并") { pendingImport = importPreview; confirmImport(overwrite: false) }
             Button("覆盖导入", role: .destructive) { pendingImport = importPreview; showOverwriteConfirm = true }
@@ -246,13 +255,16 @@ struct SettingsView: View {
     }
 
     private func startLanSend() {
-        lanTransfer.startSending()
+        lanTransfer.startSending {
+            let snapshot = try currentSnapshot()
+            let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.0"
+            return try await BackupImportCoordinator.exportJSON(snapshot: snapshot, appVersion: version)
+        }
     }
 
     private func flushLanTransferResults() {
-        if let json = lanTransfer.receivedJSON {
-            lanTransfer.receivedJSON = nil
-            prepareLanImport(json)
+        if let backup = lanTransfer.takeReceivedBackup() {
+            prepareLanImport(backup)
         }
         if let error = lanTransfer.errorMessage {
             lanTransfer.errorMessage = nil
@@ -264,14 +276,14 @@ struct SettingsView: View {
         }
     }
 
-    private func prepareLanImport(_ json: String) {
+    private func prepareLanImport(_ backup: ImportPreview) {
         recoveryImport = false
         isBusy = true
         Task {
             defer { isBusy = false }
             do {
                 let snapshot = try currentSnapshot()
-                let preview = try await BackupImportCoordinator.preview(json: json, against: snapshot)
+                let preview = try await BackupImportCoordinator.preview(validated: backup, against: snapshot)
                 pendingImport = preview
                 pendingSnapshot = snapshot
                 importPreview = preview

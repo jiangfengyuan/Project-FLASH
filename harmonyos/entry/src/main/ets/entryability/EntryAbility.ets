@@ -1,3 +1,4 @@
+import { SecureLanTransfer } from '../data/LocalBackupTransfer';
 import { AbilityConstant, Configuration, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { display, window } from '@kit.ArkUI';
@@ -56,6 +57,7 @@ export default class EntryAbility extends UIAbility {
   }
 
   onBackground(): void {
+    SecureLanTransfer.stopForBackground();
     appLockRuntime.controller.onBackground();
   }
 
@@ -138,6 +140,7 @@ export default class EntryAbility extends UIAbility {
   }
 
   onDestroy(): void {
+    SecureLanTransfer.stopForBackground();
     this.onWindowStageDestroy();
     if (this.foldStatusChangeCallback) {
       try {

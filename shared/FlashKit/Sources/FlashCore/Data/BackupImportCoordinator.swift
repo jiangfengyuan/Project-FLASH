@@ -16,7 +16,7 @@ public enum BackupImportCoordinator {
     /// Detached work must not outlive cancellation as a successful preview.
     /// JSONSerialization itself has no interruption hook; discard its result
     /// if cancellation arrives during that bounded synchronous operation.
-    private static func background<Value: Sendable>(
+    static func background<Value: Sendable>(
         _ operation: @escaping @Sendable () throws -> Value
     ) async throws -> Value {
         try Task.checkCancellation()
@@ -126,6 +126,11 @@ public enum BackupImportCoordinator {
         try await background {
             analyzed(try BackupService.parseStrict(json), against: snapshot)
         }
+    }
+
+    /// LAN 已在发送回执前严格解析，仅在后台计算本机差异。
+    public static func preview(validated: ImportPreview, against snapshot: FlashSnapshot) async throws -> ImportPreview {
+        try await background { analyzed(validated, against: snapshot) }
     }
 
     /// 为预览附上与本机快照的差异分析

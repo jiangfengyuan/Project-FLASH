@@ -30,6 +30,7 @@ object FlashTokens {
 
     /** 间距体系 8/12/16/24/32/48，移动端横向边距 20 */
     object Spacing {
+        val CardInset = 16.dp
         val XS = 8.dp
         val SM = 12.dp
         val MD = 16.dp

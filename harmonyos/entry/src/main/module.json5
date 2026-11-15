@@ -4,14 +4,26 @@
     "type": "entry",
     "description": "$string:module_desc",
     "mainElement": "EntryAbility",
-    "deviceTypes": ["phone", "tablet"],
+    "deviceTypes": [
+      "phone",
+      "tablet"
+    ],
     "deliveryWithInstall": true,
     "installationFree": false,
     "pages": "$profile:main_pages",
     "requestPermissions": [
-      { "name": "ohos.permission.PUBLISH_AGENT_REMINDER" },
-      { "name": "ohos.permission.VIBRATE" },
-      { "name": "ohos.permission.ACCESS_BIOMETRIC" }
+      {
+        "name": "ohos.permission.PUBLISH_AGENT_REMINDER"
+      },
+      {
+        "name": "ohos.permission.VIBRATE"
+      },
+      {
+        "name": "ohos.permission.ACCESS_BIOMETRIC"
+      },
+      {
+        "name": "ohos.permission.INTERNET"
+      }
     ],
     "abilities": [
       {
@@ -25,27 +37,55 @@
         "exported": true,
         "skills": [
           {
-            "entities": ["entity.system.home"],
-            "actions": ["action.system.home"]
-          },
-          {
-            "actions": ["ohos.want.action.viewData"],
-            "uris": [
-              { "scheme": "flash", "host": "capture" },
-              { "scheme": "flash", "host": "today" },
-              { "scheme": "flash", "host": "ideas" }
+            "entities": [
+              "entity.system.home"
+            ],
+            "actions": [
+              "action.system.home"
             ]
           },
           {
-            "actions": ["ohos.want.action.sendData"],
+            "actions": [
+              "ohos.want.action.viewData"
+            ],
             "uris": [
-              { "scheme": "file", "utd": "general.text", "maxFileSupported": 1 },
-              { "scheme": "file", "utd": "general.plain-text", "maxFileSupported": 1 }
+              {
+                "scheme": "flash",
+                "host": "capture"
+              },
+              {
+                "scheme": "flash",
+                "host": "today"
+              },
+              {
+                "scheme": "flash",
+                "host": "ideas"
+              }
+            ]
+          },
+          {
+            "actions": [
+              "ohos.want.action.sendData"
+            ],
+            "uris": [
+              {
+                "scheme": "file",
+                "utd": "general.text",
+                "maxFileSupported": 1
+              },
+              {
+                "scheme": "file",
+                "utd": "general.plain-text",
+                "maxFileSupported": 1
+              }
             ]
           }
         ],
         "metadata": [
-          { "name": "ohos.ability.shortcuts", "resource": "$profile:shortcuts_config" }
+          {
+            "name": "ohos.ability.shortcuts",
+            "resource": "$profile:shortcuts_config"
+          }
         ]
       }
     ],

@@ -147,7 +147,7 @@ struct TransferSettingsPage: View {
                 } header: {
                     Text("局域网传输")
                 } footer: {
-                    Text("两台设备连接同一局域网，接收方输入发送方显示的配对 PIN 即可。备份内容未做端到端加密，请仅在可信的家庭或办公网络使用。")
+                    Text("安全 LAN v2 尚待真机验收。新流程需要两端核对三组短码并主动确认；不兼容旧版 LAN。当前请使用文件备份或系统分享。")
                 }
                 .disabled(isDisabled || isTemporaryStore)
             }

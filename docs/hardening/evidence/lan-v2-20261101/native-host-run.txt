@@ -1,0 +1,2 @@
+/Users/haydenjiang/Documents/DEV/flash-Alpha/outputs/lan-v2-20261101/macos-arm64/sodium-probe
+libsodium native probe code=0 (not production pairing)

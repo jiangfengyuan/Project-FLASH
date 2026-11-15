@@ -6,6 +6,8 @@
 
 package com.flash.app.ui.emotion
 
+import com.flash.app.ui.theme.LocalReduceMotion
+
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn

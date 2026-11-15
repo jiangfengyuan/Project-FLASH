@@ -10,6 +10,24 @@ import Foundation
 
 @Suite("SettingsStore")
 struct SettingsStoreTests {
+    @Test func onboardingReplayPreservesPrivateSettingsAndAccessibility() {
+        let (name, suite) = makeSuite()
+        defer { suite.removePersistentDomain(forName: name) }
+        let store = SettingsStore(defaults: suite)
+        store.setWelcomed()
+        store.setAppLockEnabled(true)
+        store.setReduceMotion(true)
+        store.setTextSize(.extraLarge)
+        store.setHapticsEnabled(false)
+        store.resetWelcomed()
+        let restored = SettingsStore(defaults: suite)
+        #expect(!restored.welcomed)
+        #expect(restored.appLockEnabled)
+        #expect(restored.reduceMotion)
+        #expect(restored.textSize == .extraLarge)
+        #expect(!restored.hapticsEnabled)
+    }
+
     /// 独立随机 suite，避免污染标准 defaults；各测试 defer 清理残留
     private func makeSuite() -> (name: String, suite: UserDefaults) {
         let name = "test-\(UUID().uuidString)"

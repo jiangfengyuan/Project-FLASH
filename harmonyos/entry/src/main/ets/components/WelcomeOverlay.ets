@@ -126,7 +126,7 @@ export struct WelcomeOverlay {
               this.infoRow(row)
             }, (row: OnboardingRow) => row.title)
           }
-          .margin({ top: 12 })
+
         }
         if (step.key === 'preferences') {
           Column() {

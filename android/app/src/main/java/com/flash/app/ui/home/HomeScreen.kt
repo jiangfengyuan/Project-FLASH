@@ -6,6 +6,8 @@
 
 package com.flash.app.ui.home
 
+import com.flash.app.ui.theme.LocalReduceMotion
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints

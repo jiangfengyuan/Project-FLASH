@@ -1,0 +1,4 @@
+module CFlashLanProbe {
+    header "flash_lan_probe.h"
+    export *
+}

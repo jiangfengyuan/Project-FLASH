@@ -12,7 +12,7 @@ import { BackupEncryption } from '../data/BackupEncryption';
 import { EnvelopeError, EnvelopeErrorKind } from '../data/BackupEnvelope';
 import { dayString } from '../data/DateUtils';
 import { shareBackupFile } from '../data/ShareService';
-import { LAN_UNAVAILABLE_MESSAGE } from '../data/LocalBackupTransfer';
+import { LAN_ENABLED, LAN_UNAVAILABLE_MESSAGE, LanPhase, LanDevice, LanEvents, SecureLanTransfer } from '../data/LocalBackupTransfer';
 
 export class BackupController {
   private state: BackupState;
@@ -265,9 +265,48 @@ export class BackupController {
       tr('无效项目：{0}', incoming.skippedLogs + incoming.skippedEmotions + incoming.skippedTasks);
   }
 
-  async startLanSend(): Promise<void> { this.reportLanUnavailable(); }
-  startLanReceive(): void { this.reportLanUnavailable(); }
-  async receiveLan(): Promise<void> { this.reportLanUnavailable(); }
+  private lan?: SecureLanTransfer;
+  private lanTransfer(): SecureLanTransfer {
+    if (!this.lan) {
+      const events: LanEvents = {
+        phase: (phase: LanPhase, code: number[]) => {
+          this.state.lanPhase = phase;
+          if (phase !== LanPhase.WAITING_FOR_PEER) this.state.lanShortCode = code;
+          this.state.lanMode = phase === LanPhase.WAITING ? TransferPhase.SENDING :
+            phase === LanPhase.DISCOVERING ? TransferPhase.RECEIVING :
+            phase === LanPhase.IDLE || phase === LanPhase.COMPLETED || phase === LanPhase.FAILED ? TransferPhase.IDLE : TransferPhase.CONNECTING;
+        },
+        devices: (devices: LanDevice[]) => { this.state.lanDevices = devices; },
+        sent: () => this.runtime.notify('传输完成，请在接收设备另行确认导入', 'success'),
+        received: (backup: BackupImport) => {
+          try { this.stageImport(backup); }
+          catch (_) { this.runtime.notify('无法生成备份导入预览，请重试', 'error'); }
+        },
+        failed: (message: string) => this.runtime.notify(message, 'error')
+      };
+      this.lan = new SecureLanTransfer(this.runtime.context() as common.UIAbilityContext, events);
+    }
+    return this.lan;
+  }
+  async startLanSend(): Promise<void> {
+    if (!LAN_ENABLED) { this.reportLanUnavailable(); return; }
+    await this.lanTransfer().send(async (): Promise<string> => {
+      if (!this.store.ready) throw new Error('本地数据尚未加载完成');
+      const snapshot = this.store.snapshot();
+      return BackupService.exportJSON(snapshot.logs, snapshot.emotions, snapshot.tasks);
+    });
+  }
+  startLanReceive(): void {
+    if (!LAN_ENABLED) { this.reportLanUnavailable(); return; }
+    this.lanTransfer().receive();
+  }
+  async receiveLan(): Promise<void> {
+    if (!LAN_ENABLED) { this.reportLanUnavailable(); return; }
+    const device = this.state.lanDevices.find((item: LanDevice) => item.id === this.state.selectedLanDevice);
+    if (device) await this.lanTransfer().connect(device);
+  }
+  confirmLanMatch(): void { this.lan?.confirm(); }
+  rejectLan(): void { this.lan?.reject(); }
 
   private reportLanUnavailable(): void {
     this.stopLan();
@@ -275,9 +314,10 @@ export class BackupController {
   }
 
   stopLan(): void {
+    this.lan?.cancel();
     this.state.lanMode = TransferPhase.IDLE;
-    this.state.lanPin = '';
-    this.state.lanEnteredPin = '';
+    this.state.lanPhase = LanPhase.IDLE;
+    this.state.lanShortCode = [];
     this.state.lanDevices = [];
     this.state.selectedLanDevice = '';
   }

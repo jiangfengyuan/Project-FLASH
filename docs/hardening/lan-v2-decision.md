@@ -1,72 +1,50 @@
-# LAN replacement decision — approval required
+# 替代传输协议决策：FLASH-LAN/2
 
-2026-10-31: integration retains legacy disablement and removes unused legacy network declarations. The concrete next-stage comparison, dependency checks and proposed acceptance gates are in [LAN rebuild proposal](lan-rebuild-20261031.md). This historical decision record does not enable any protocol.
+决策更新：2026-11-07。状态：**方案已确认、四端候选已实现，正式启用待验收**。
+本文替代此前“选型未定、实施待批准”的描述；旧论证保留在[历史档案](lan-v2-decision-history-20261107.md)。当前源码基线为 `a1fb292`，本次只更新决策记录，不更改运行开关。
 
-Status: **design blocked by F-01/F-06; proposal is not finalized or implemented**. The user approved temporary disablement of all legacy LAN send/receive. The candidate ships no legacy network adapter; historical v1.1 (`FLASH-AERO/1`) remains only in test fixtures. No new wire protocol has been enabled. Compatible parser, lifecycle and privacy maintenance must not be presented as solving its authentication/confidentiality gaps. F-02/F-03 are separate compatibility acceptance blockers; see `compatibility-blockers.md`.
+## 决策
 
-## Established current behavior
+采用用户已确认的“双端核对短码并主动确认”，以共享 Rust 核心实现 `FLASH-LAN/2`。旧 LAN 永久停用，不保留兼容监听、自动降级或隐藏的旧协议入口。故障回退仅关闭 v2，并提供文件备份或系统分享指引。
 
-The sender runs an ephemeral TCP listener and answers **any** syntactically valid `CHALLENGE <nonce>` with sender proof, OK header, MAC and the complete plaintext backup. The receiver never proves PIN knowledge to the sender. A LAN client can obtain the backup without guessing the PIN. Inspect `LocalBackupSender.handleClientLine/answer` in shared FlashCore, Android `handleSenderConnection/writeAnswer`, and Harmony `LocalBackupSender.answer/handle`.
+| 层次 | 确定方案 |
+| --- | --- |
+| 配对 | vodozemac **0.11.1** SAS；两端显示库生成的三组十进制短码，全部核对一致后各自主动确认 |
+| 握手组合 | 承诺/揭示、固定角色、有序 transcript、会话随机数及版本/能力绑定；本地接受与对端确认 MAC 同时成立才允许取得发送快照 |
+| 记录保护 | libsodium **1.0.22** XChaCha20-Poly1305；双向独立密钥、nonce 前缀和计数器，AAD 绑定会话、方向、类型、序号及长度 |
+| 传输与发现 | TCP 承载认证加密记录；独立服务 `_flashbackup2._tcp`，发现信息无稳定设备标识和备份正文。Android API 使用带末尾点的服务类型写法 |
+| 共享边界 | Rust 负责密码与协议状态机；Apple C ABI、Android JNI、HarmonyOS N-API；平台负责发现、套接字、生命周期与界面 |
+| 数据兼容 | 保持 `flash-backup-v2`、现有分区 schema 1/2、数据库及合并/覆盖规则；严格导入预览后仍由用户确认提交，并保留提交前重校验和回滚 |
 
-The six-digit PIN is the direct HMAC key. Captured `nonce, proof` permits a local enumeration of 000000–999999 using the documented HMAC vector; there is no further interaction to rate-limit. The payload itself is also plaintext. A recovered PIN permits forged proofs/MACs; the payload MAC binds neither challenge nor roles/version. Fresh challenges reject a verbatim proof replay under a new challenge, but do not repair these gaps. A rogue advertiser can obtain a challenge and target active guessing; spoofable names must not establish identity. A transparent relay cannot be detected by discovery.
+具体编码以[字节规范](../contracts/lan-v2-review-draft.md)与[共享向量及构建说明](../../shared/FlashLAN/README.md)为准。历史提案中的 `FLASH-BACKUP/2`、五次失败预算及“Android/Harmony 拒绝 schema 2”不再适用。
 
-No PIN-length-only fix, added HMAC round, unauthenticated ECDH, certificate-accept-all TLS, or homemade PAKE is acceptable.
+## 选择理由与取舍
 
-## Reproduction and control-flow evidence
+原协议的六位 PIN 直接参与 HMAC，接收端未证明身份即可取得明文备份，捕获值也可用于离线枚举。加长 PIN、再加 HMAC 或只加入未经认证的 ECDH 不能满足此次改造目标。
 
-`tools/verification/lan-baseline-repro.cjs` runs the actual e9a0aa6 Harmony sender with explicit native network/crypto fakes. A public all-zero16-byte challenge released all1,619 bytes of the fictional three-section fixture without reading or supplying the PIN; SHA256 `de80b8601d5f83e70484b99c21352602a84c5227db53fcdf4a80eaa8fbb3a3e1`. A malformed challenge sent zero bytes and preserved the session. A separate `ERR PIN` then disconnect, before any challenge, withdrew the service/closed the sender with failure. Raw JSON evidence is retained in `../evidence` of the isolated checkout, not a real-device trace.
+当前选择取消 PIN 输入，通过双方核对临时会话短码认证握手。三组码只是用户核对信息，不是备份加密密码。必须当面或通过能核实对方身份的可信通话核对；发现名称、IP 和 Bonjour/mDNS 本身不认证设备。用户不核对或端点已被控制时，本方案不提供相应保证。
 
-Existing executed native host tests also exercise the broken release path: Apple `senderServesAtMostFiveChallengesPerConnection` sends only CHALLENGE and reads the complete synthetic payload (`m6-flashkit-fuzz.log`, passed); Android `sender answers challenge with spec proof and pipelined payload`/`challengeRound` sends only CHALLENGE and reads the full `{}` payload (retained JUnit XML and `m8-android-gates.log`, passed). PIN use in these tests is a **local assertion on received bytes**, not receiver authentication on the wire. These old happy-path tests demonstrate the flaw; they must not become v2 security acceptance criteria. Dedicated full-fixture Apple/Android attack runs are still pending native execution access. Shared Apple code covers both iOS/macOS source, not separate physical-device proof.
+| 曾考虑方案 | 本次决定 |
+| --- | --- |
+| 平衡 PAKE，保留输入 PIN | 未采用。此前四端同一变体、实现依赖及审查门槛尚未落实；用户随后明确选定双端短码确认，不自行实现 PAKE 或换库 |
+| 临时身份 TLS 1.3 + 指纹/SAS | 未采用为当前 wire。临时证书仍需双向身份核对及通道绑定，不能用“接受所有证书”替代；本次按已选共享 SAS/AEAD 组合实施 |
+| 共享 SAS + 应用层 AEAD 记录 | 采用。四端统一实现与向量，代价是 Flash 自身必须承担握手组合、记录边界、超时及适配生命周期的审查与测试责任 |
 
-F-06 differs by adapter: Apple `handleClientLine` immediately calls `finish(.failed)` for unauthenticated ERR PIN; Android marks `rejected` then returns SESSION_FAILED on EOF; Harmony marks `rejected` and stops on close. An untrusted peer can therefore end a user-created global session. At e9a0aa6 Android's per-read socket timeout does not create a total CHALLENGE deadline. Committed `fbb5c9e` now bounds sender active sockets by a monotonic60s session lifetime; pending receiver deadline/backoff changes are not a complete F-06 fix and their latest native rerun is blocked.
+上游库的安全声誉或审计不等同于 Flash 组合通过审查。用户要求“你自行审查”，本轮据此执行并记录[Codex 自审](lan-v2-self-review-20261101.md)，不称为外部独立审计或安全认证。
 
-Severity: unauthenticated complete-backup disclosure is high, release-blocking, and affects all four app targets when the owner opens a reachable LAN sender. The user's potential-P0 classification is retained for independent prioritization; unattended remote exploitation outside an opened session has not been demonstrated. Passive disclosure/offline guessing remain separate findings even after enforcing receiver authentication.
+## 必须保持的运行约束
 
-## Options and selection gates
+- **双向确认前零备份正文**：不生成发送快照，不发送正文；没有单端确认、默认确认或自动接受。
+- **有界会话**：开启窗口 120 秒，连接及网络空闲 10 秒，人工核对 60 秒，传输独立总时限 120 秒，均使用单调时钟。人工核对阶段按 60 秒预算允许网络静默。
+- **有界尝试与数据**：每次开启最多一个活跃连接、三次失败，失败后按 1/2 秒退避；不重置开启窗口，重试产生新密钥和新会话。最大明文帧 64 KiB，整包上限 50 MiB。
+- **认证完成语义**：结束帧绑定总长度与摘要；接收端完整校验并通过既有严格解析后发送认证 ACK。EOF、声称成功或 ACK 丢失不构成发送成功；传输完成不等于导入完成。
+- **生命周期隔离**：未认证错误只关闭当前连接；本地失败预算耗尽可结束本次开启。取消、后台、超时和结束释放资源，以代次隔离旧回调；日志不包含短码、密钥或正文。恶意连接仍可消耗有限尝试预算，不声称消除局域网拒绝服务。
+- **最小权限与范围**：仅主应用具备所选发现/传输 API 所需网络权限；分享扩展、小组件不参与 LAN。不包含永久配对、自动同步或断点续传。
 
-| Option | Security/product consequences | Prerequisites before implementation |
-| --- | --- | --- |
-| Reviewed balanced PAKE, e.g. SPAKE2 as specified in RFC9382, then reviewed authenticated record protection | Closest to existing sender-displays-PIN/receiver-enters-PIN flow. Both roles must confirm keys before **any** backup bytes leave sender; passive transcript must not verify PIN guesses. Still needs bounded online attempts and session lifetime | Identify an audited, maintained implementation with the **same standardized variant/suite** available for Apple, Android and HarmonyOS; review licenses/version/ABI/support; approve any new cryptographic dependency. Platform HMAC/ECC support alone is not a PAKE implementation. Do not implement curve/password algebra locally |
-| Platform TLS1.3 with ephemeral identity plus a reviewed out-of-band fingerprint/SAS pairing design | TLS supplies forward-secret AEAD/unique record nonces. Identity must be authenticated by both humans/roles before backup release; simply accepting a temporary certificate does not stop MITM. Removes PIN-as-password verifier if no low-entropy secret is used as TLS PSK | Select a reviewed pairing construction and prove native platform support for ephemeral identities/exporter or exact fingerprint confirmation. Define usability/error/confirmation flow and probability/attempt policy. A hash-truncation invented for this task is not a reviewed SAS protocol |
+## 当前证据与启用门槛
 
-Recommendation: first approve a bounded feasibility/design milestone for a maintained balanced PAKE implementation; preserve the familiar PIN flow if it satisfies all four targets. If no reviewed implementation is deployable on HarmonyOS, return the dependency/platform evidence for a separate decision; do not ship a homegrown substitute or silently leave that platform insecure. The TLS/SAS alternative is architectural exploration, not an implementation-ready cryptographic choice.
+截至 [2026-11-06 验收记录](lan-v2-acceptance-20261106.md)，已记录共享核心 31 项、FlashKit 247 项、11 架构原生链接、四端构建和有限模糊测试结果；Android 有专用模拟器 JNI/Socket 测试，Harmony 有宿主 Node 真实 N-API/ArkTS 分片测试。各项跳过、运行限制与摘要见该记录，不能据此宣称四端真机互通。
 
-Candidate screening is incomplete. The [RustCrypto SPAKE2 README](https://github.com/RustCrypto/PAKEs/blob/master/spake2/README.md), checked2026-10-24, explicitly says the implementation has not received an independent audit; this does not meet the reviewed-implementation gate by itself. The [OpenHarmony netstack documentation](https://github.com/openharmony/communication_netstack/blob/master/README_zh.md) documents TLS1.3 support, but does not establish ephemeral identity, mutual confirmation, channel-binding or a reviewed SAS flow for Flash. No exact cryptographic library/version has been selected or added. Approval of a protocol direction is not approval of an unspecified dependency.
+Apple、Android、Harmony 的正式启用常量在本次检查时均为 `false`。iOS 模拟器运行尚无成功回执；HarmonyOS 实际运行时及四端真机两两双向 **12 个方向**、同平台互传、最低支持系统、权限拒绝、锁屏/后台、重试、大文件和签名后实际权限检查仍待完成。
 
-References checked 2026-10-24: [RFC9382](https://www.rfc-editor.org/rfc/rfc9382.html) (IRTF Informational, including key confirmation and test vectors, **not** an Internet Standards Track designation); [TLS1.3 RFC8446](https://www.rfc-editor.org/rfc/rfc8446.html); [TLS exporter channel binding RFC9266](https://www.rfc-editor.org/rfc/rfc9266.html). These support protocol building blocks, not approval of a new Flash composition or proof that a maintained cross-platform library is present.
-
-## Compatibility and rollout contract
-
-1. New protocol identity `FLASH-BACKUP/2`, separate discovery service `_flashbackup2._tcp` and TLS ALPN/application context where applicable. Use neutral per-session labels and no stable personal/device identifiers in TXT records. A discovery TXT hint is unauthenticated.
-2. Bounded explicit hello offers versions and capabilities (security suite identifiers, role, backup section-schema versions, maximum bytes). The exact canonical encoding/limits require protocol review. Bind both complete offers, selected values, both fresh random session nonces, role identities, application protocol and handshake transcript into the reviewed key schedule/confirmation. Reject incompatible/unknown mandatory capabilities; never use `appVersion` as a backup schema selector.
-3. No backup before mutual key confirmation and explicit pairing acceptance. Separate directional keys and confirmation/application purposes as prescribed by the selected reviewed protocol. Record protection must reject duplicate/out-of-order sequence numbers, foreign-session/version/role data and altered lengths. Use maintained AEAD record implementation; abort on nonce exhaustion. No resumption/0-RTT in first version.
-4. Pair only after user starts send/receive. Monotonic 60s pairing deadline, one active attempt, session-wide maximum5 failed authentications with 1/2/4/8s backoff enforced by the holder of protected data. Define transfer deadline separately, close active I/O/listeners and withdraw advertisements on cancel/expiry/success. Errors/logs contain state codes, never PIN/key/backup content.
-   Before authentication, malformed input, EOF, remote error text and timeout affect only the active connection, with bounded resource cleanup. A remote `ERR PIN`, claimed success or disconnect is never a trusted global-session state transition. Only local cancel/deadline/locally counted handshake failures exhaust the session policy. After authentication, errors and completion ACKs are protected and bound to session/direction/transcript; EOF alone is not proof of delivery. Invalid clients must not reset the global deadline/attempt budget. Specify monotonic total plus idle limits for connect, hello, authentication, backoff, record IO and ACK; timers must close blocked reads/writes and wake backoff. Test cancel/expiry races and queued callbacks after closure. Attempts count at the protected-data holder, not from the peer's claimed counter; residual DoS from exhausting real authentication attempts is distinct from accepting arbitrary error claims.
-5. Keep `flash-backup-v2` and existing strict/recovery semantics unchanged. Apple exports section schema2; current Android/Harmony accept1 and **reject2**. Security migration must not erase favorites/intensity/source links or reinterpret a rejection as a transfer success. Preserve schema rejection and provide upgrade guidance.
-6. Proposed new peers **reject v1.1 and historical plaintext-PIN peers**. No automatic fallback, compatibility retry, hidden insecure option or dual plaintext listener. Existing installations continue operating until upgraded; new builds give: “此设备使用旧版局域网传输协议。请将两端升级到支持安全传输的版本；也可通过可信渠道导出并导入 JSON 备份。” Existing old peers cannot be retroactively given new UI; record their actual legacy failure behavior.
-7. Rollout: approve protocol/dependencies -> review specification and vectors -> separately land/test primitives -> platform adapters -> disabled development interoperability fixture -> approved enablement. Preserve original backup file compatibility. After release, reverting UI or compatible resource fixes must never enable v1.1 fallback. Emergency rollback disables v2 LAN with actionable export/import guidance, pending owner approval; it does not restore insecure transport.
-
-## Required interoperability and attack evidence
-
-Run all12 ordered cross-platform directions (iOS↔macOS, iOS↔Android, iOS↔HarmonyOS, macOS↔Android, macOS↔HarmonyOS, Android↔HarmonyOS), plus same-platform peers. For each record model/OS/commit/build, wire version and backup schema separately.
-
-| Sender / receiver versions | Required result | Current status |
-| --- | --- | --- |
-| v1.1 / v1.1 | Document existing behavior and vulnerabilities; schema1/2 rules unchanged | Apple host loopback covered by existing tests; physical cross-platform directions not verified this pass |
-| v2 / v2 | Mutual pairing, encrypted payload, strict preview; no commit until user confirmation | not implemented / not verified |
-| v2 / v1.1, v1.1 / v2 | No plaintext release or insecure fallback by new peer; actionable new-peer error | proposed rejection; not implemented / not verified |
-| v2 / historical plaintext PIN | Fail closed, same upgrade guidance | not implemented / not verified |
-| Modified capability/version/role, cross-session replay, duplicate record, stripped hello option | Reject before preview/write | not implemented / not verified |
-
-Exercise captured-traffic offline guessing, MITM and rogue advertisements, wrong PIN/global attempt exhaustion/reconnect, backoff, expiry/cancel before and during handshake, stalled reads/writes, interruption at every frame, malformed/oversized lengths, extra data and replay after completion. Demonstrate unchanged database and no partial imports. Keep any capture synthetic and redact pairing secrets before reviewer screenshots. Real devices are needed for real LAN claims.
-
-Owner approved temporary legacy LAN disablement on2026-10-24 (M9 below). Breaking replacement/enablement, exact dependencies and final cryptographic composition still require a concrete later review. Approval is not inferred from compatible maintenance.
-
-
-## Approved temporary disablement (M9)
-
-Owner approval received2026-10-24 for temporary legacy LAN disablement on all four apps. Production shared Apple, Android and Harmony facades contain only device/state/message data; networking implementations are quarantined in SwiftPM Tests, Android src/test and Harmony tests/fixtures. All send/discovery/direct-connect actions reset to idle and show file-export/share guidance before snapshots, exports, permission prompts or native networking. Stale Apple receivedJSON is discarded. Existing file flows remain; Apple schema2 acceptance on Android/Harmony is still a separate blocker. No runtime override or fallback is present.
-
-New↔new and new↔old LAN combinations intentionally do not transfer while disabled. The new app displays the local explanation rather than attempting capability negotiation or connecting to an old advertiser. An old app cannot be updated retroactively and sees no new-app service; its old errors remain. No v2 compatibility or physical-device networking success is claimed. Existing legacy loopback/framing/discovery tests exercise archived fixtures, not an exposed secure transport. The NetService main-RunLoop fix and its regression test are retained in that fixture.
-
-Re-enablement is a new reviewed protocol milestone and cannot consist of restoring the legacy source, enabling a flag, or reverting security changes for UI rollback. Only a reviewed replacement with version/capability/transcript binding, mutual confirmation before payload, AEAD and bounded authenticated controls may be proposed. No new dependency or final v2 composition is approved yet.
+只有剩余门槛全部有实际证据后，才能正式启用并标记改造完成。当前结论是：**协议决策已定，候选实现已落地，发布验收尚未完成。**

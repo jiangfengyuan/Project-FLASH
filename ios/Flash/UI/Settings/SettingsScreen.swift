@@ -157,10 +157,9 @@ struct SettingsScreen: View {
             LanTransferSheet(controller: lanTransfer)
                 .presentationDetents([.medium, .large])
         }
-        .onChange(of: lanTransfer.receivedJSON) { _, json in
-            guard let json else { return }
-            lanTransfer.receivedJSON = nil
-            prepareLanImport(json)
+        .onChange(of: lanTransfer.receivedBackup != nil) { _, ready in
+            guard ready, let backup = lanTransfer.takeReceivedBackup() else { return }
+            prepareLanImport(backup)
         }
         .onChange(of: lanTransfer.errorMessage) { _, error in
             guard let error else { return }
@@ -303,7 +302,11 @@ struct SettingsScreen: View {
     }
 
     private func startLanSend() {
-        lanTransfer.startSending()
+        lanTransfer.startSending {
+            let snapshot = try currentSnapshot()
+            let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.0"
+            return try await BackupImportCoordinator.exportJSON(snapshot: snapshot, appVersion: version)
+        }
     }
 
     // MARK: - 导入
@@ -370,14 +373,14 @@ struct SettingsScreen: View {
         }
     }
 
-    private func prepareLanImport(_ json: String) {
+    private func prepareLanImport(_ backup: ImportPreview) {
         recoveryImport = false
         isBusy = true
         Task {
             defer { isBusy = false }
             do {
                 let snapshot = try currentSnapshot()
-                let preview = try await BackupImportCoordinator.preview(json: json, against: snapshot)
+                let preview = try await BackupImportCoordinator.preview(validated: backup, against: snapshot)
                 pendingImport = preview
                 pendingSnapshot = snapshot
                 importPreview = preview

@@ -21,6 +21,7 @@ import com.flash.app.data.BackupDifference
 import com.flash.app.data.BackupEncryption
 import com.flash.app.data.BackupImportSession
 import com.flash.app.data.LocalBackupTransfer
+import com.flash.app.data.SecureLanController
 import com.flash.app.data.SettingsStore
 import com.flash.app.data.ThemeMode
 import kotlinx.coroutines.Dispatchers
@@ -40,7 +41,8 @@ enum class LanTransferMode { IDLE, SENDING, RECEIVING, CONNECTING }
 
 data class LanTransferState(
     val mode: LanTransferMode = LanTransferMode.IDLE,
-    val pin: String = "",
+    val phase: LocalBackupTransfer.Phase = LocalBackupTransfer.Phase.IDLE,
+    val shortCode: List<Int> = emptyList(),
     val devices: List<LocalBackupTransfer.Device> = emptyList(),
 )
 
@@ -177,13 +179,69 @@ class SettingsViewModel(
         _message.value = LocalBackupTransfer.UNAVAILABLE_MESSAGE
     }
 
-    fun startLanSend() = reportLanUnavailable()
-    fun startLanReceive() = reportLanUnavailable()
-    @Suppress("UNUSED_PARAMETER")
-    fun receiveLanBackup(device: LocalBackupTransfer.Device, pin: String) = reportLanUnavailable()
+    private val lanController by lazy {
+        SecureLanController(app, viewModelScope,
+            onPhase = { phase, code ->
+                val mode = when (phase) {
+                    LocalBackupTransfer.Phase.WAITING -> LanTransferMode.SENDING
+                    LocalBackupTransfer.Phase.DISCOVERING -> LanTransferMode.RECEIVING
+                    LocalBackupTransfer.Phase.IDLE, LocalBackupTransfer.Phase.COMPLETED,
+                    LocalBackupTransfer.Phase.FAILED -> LanTransferMode.IDLE
+                    else -> LanTransferMode.CONNECTING
+                }
+                _lanTransfer.value = _lanTransfer.value.copy(mode = mode, phase = phase,
+                    shortCode = if (phase == LocalBackupTransfer.Phase.WAITING_FOR_PEER) _lanTransfer.value.shortCode else code)
+            },
+            onDevices = { _lanTransfer.value = _lanTransfer.value.copy(devices = it) },
+            onSent = { _message.value = "传输完成，请在接收设备另行确认导入" },
+            onReceived = ::prepareLanImport,
+            onFailure = { _message.value = it },
+        )
+    }
+    fun startLanSend() {
+        if (!LocalBackupTransfer.ENABLED) { reportLanUnavailable(); return }
+        lanController.send {
+            val snapshot = repository.exportSnapshot()
+            Backup.exportJson(snapshot.logs, snapshot.emotions, snapshot.tasks)
+        }
+    }
+    fun startLanReceive() {
+        if (!LocalBackupTransfer.ENABLED) { reportLanUnavailable(); return }
+        lanController.receive()
+    }
+    fun receiveLanBackup(device: LocalBackupTransfer.Device) {
+        if (!LocalBackupTransfer.ENABLED) { reportLanUnavailable(); return }
+        lanController.connect(device)
+    }
+    fun confirmLanMatch() { if (LocalBackupTransfer.ENABLED) lanController.confirm() }
+    fun rejectLan() { if (LocalBackupTransfer.ENABLED) lanController.reject() }
 
     fun cancelLanTransfer() {
+        if (LocalBackupTransfer.ENABLED) lanController.cancel()
         _lanTransfer.value = LanTransferState()
+    }
+
+    private fun prepareLanImport(result: Backup.ImportResult) {
+        val generation = importSession.begin()
+        _importPreview.value = null
+        val operation = viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val local = repository.exportSnapshot()
+                val preview = ImportPreview(
+                    logCount = result.logs.size, emotionCount = result.emotions.size,
+                    skippedLogs = result.skippedLogs, skippedEmotions = result.skippedEmotions,
+                    taskCount = result.tasks.size, skippedTasks = result.skippedTasks,
+                    logs = result.logs, emotions = result.emotions, tasks = result.tasks,
+                    difference = BackupDiff.analyze(local.logs, local.emotions, result.logs, result.emotions, local.tasks, result.tasks),
+                    localSnapshot = local, recovery = false,
+                )
+                currentCoroutineContext().ensureActive()
+                importSession.publish(generation) { _importPreview.value = preview }
+            } catch (error: Exception) {
+                if (error !is CancellationException) importSession.publish(generation) { _message.value = "备份预览失败，请重新传输" }
+            }
+        }
+        importSession.attach(generation, operation)
     }
 
     /** 第一步：读取并解析，弹出预览让用户选择合并或覆盖 */

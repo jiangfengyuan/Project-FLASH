@@ -21,5 +21,11 @@
 	<array>
 		<string>LXGWWenKai-Medium.ttf</string>
 	</array>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_flashbackup2._tcp</string>
+	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>用于在你主动开启安全局域网传输时发现并连接另一台 Flash 设备；两端核对短码并确认后才传输备份。</string>
 </dict>
 </plist>

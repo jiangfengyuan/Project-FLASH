@@ -1,3 +1,5 @@
+> 2026-11-15：此文保留原固定基线的历史记录；最新整合和验证状态见 [统一记录](../integration/unified-main-20261115.md)。
+
 # Flash — architecture overview, technical debt and risk inventory
 
 Date: 2026-11-11. Reviewed: `main` at `65c9212`, plus every remote branch, the two open PRs (#3, #5), CI run history, and all existing audit documents. Read-only review; no product code was changed.

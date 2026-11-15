@@ -22,3 +22,6 @@ android/release-signing.env
 
 # Generated Python bytecode
 __pycache__/
+
+# Kotlin compiler session markers
+android/.kotlin/

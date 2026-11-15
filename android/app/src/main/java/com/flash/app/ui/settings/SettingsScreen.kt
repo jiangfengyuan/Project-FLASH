@@ -70,6 +70,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.flash.app.BuildConfig
 import com.flash.app.FlashApplication
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material.icons.outlined.Settings
 import com.flash.app.data.TextScale
 import com.flash.app.data.AppLockToggleOutcome
 import com.flash.app.data.AppLockToggleStart

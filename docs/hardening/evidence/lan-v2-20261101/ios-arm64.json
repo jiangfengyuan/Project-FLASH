@@ -1,0 +1,13 @@
+{
+  "target": "ios-arm64",
+  "production_enabled": false,
+  "sodium_built": true,
+  "rust_staticlib_built": false,
+  "native_dependency_linked": true,
+  "native_host_probe_passed": false,
+  "native_app_linked": false,
+  "device_executed": false,
+  "sodium_archive_sha256": "adbdd8f16149e81ac6078a03aca6fc03b592b89ef7b5ed83841c086191be3349",
+  "rust_target": "aarch64-apple-ios",
+  "sodium_library_sha256": "e58a37ac17fb0d6c96967907ca6c8664dc4274b21b9e821b9751959f30b8241a"
+}

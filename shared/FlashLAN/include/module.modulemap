@@ -1,0 +1,4 @@
+module CFlashLAN {
+    header "flash_lan.h"
+    export *
+}

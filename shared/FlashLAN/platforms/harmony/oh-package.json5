@@ -1,0 +1,7 @@
+{
+  "name": "libflash_lan.so",
+  "version": "0.1.0",
+  "description": "FLASH-LAN/2 opaque native session bridge",
+  "types": "./Index.d.ts",
+  "license": "MPL-2.0"
+}

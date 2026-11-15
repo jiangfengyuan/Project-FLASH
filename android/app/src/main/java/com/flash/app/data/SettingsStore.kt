@@ -141,6 +141,8 @@ class SettingsStore(context: Context) {
     }
 
     private companion object {
+        const val KEY_REDUCE_MOTION = "reduceMotion"
+        const val KEY_TEXT_SCALE = "textScale"
         const val KEY_THEME_MODE = "themeMode"
         const val KEY_IDEA_REMINDER_ENABLED = "ideaReminderEnabled"
         const val KEY_IDEA_REMINDER_FREQUENCY = "ideaReminderFrequency"

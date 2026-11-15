@@ -40,7 +40,7 @@ export const RADIUS_CARD = 24;
 
 // 对齐栅格：所有页面共用，保证跨页、跨区块的左右边缘落在同一条线上（与 Android PageHorizontal 一致）。
 /** 页面左右边距：页标题、工具行、卡片外缘、底部 Dock 都从这条线开始 */
-export const PAGE_GUTTER = 20;
+
 /** 卡片内容内距：所有卡片统一；卡片上方的分组标题也缩进同样距离，与卡内内容左缘对齐 */
 export const CARD_INSET = 16;
 /** 图标列宽：设置行 / 能力行的图标放进等宽列，其后文字逐行左对齐 */

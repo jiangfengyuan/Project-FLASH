@@ -7,7 +7,7 @@ import { BackupEncryption } from '../data/BackupEncryption';
 import {
   PageHeader, DOCK_CLEARANCE, RADIUS_CARD, SegmentedControl, FlashCard, brandText, brandFill, onBrandFill, cardShadowColor, pageGutter, paperShadow,
   dangerText, hairlineColor, iconSemantic, motionDuration, MOTION_PRESS,
-  TYPE_SECTION, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION
+  CARD_INSET, ICON_COLUMN, TYPE_SECTION, TYPE_GROUP, TYPE_BODY, TYPE_SECONDARY, TYPE_CAPTION
 } from '../components/CommonBuilders';
 
 const IDEA_FREQUENCIES: string[] = ['daily', 'every3days', 'weekly'];

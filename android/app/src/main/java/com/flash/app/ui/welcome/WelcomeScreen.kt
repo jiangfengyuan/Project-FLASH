@@ -81,24 +81,24 @@ import kotlinx.coroutines.launch
 /** 新手引导四步（四端同一内容与顺序：欢迎 → 能做什么 → 隐私 → 偏好） */
 private enum class OnboardingStep(
     val icon: ImageVector,
-    val tint: Color,
+    val tint: @Composable () -> Color,
     val title: String,
     val subtitle: String,
 ) {
     WELCOME(
-        Icons.Filled.Bolt, ModuleColors.Log, "欢迎来到 Flash",
+        Icons.Filled.Bolt, { ModuleColors.Log }, "欢迎来到 Flash",
         "闪过即留，一目了然。\n把一闪而过的念头、情绪与待办，安心留在这台设备上。",
     ),
     FEATURES(
-        Icons.Filled.AutoAwesome, ModuleColors.Log, "Flash 能帮你做什么",
+        Icons.Filled.AutoAwesome, { ModuleColors.Log }, "Flash 能帮你做什么",
         "四个模块，覆盖从记下到回看的全过程。",
     ),
     PRIVACY(
-        Icons.Filled.Lock, ModuleColors.Calendar, "你的记录只属于你",
+        Icons.Filled.Lock, { ModuleColors.Calendar }, "你的记录只属于你",
         "本地优先：没有账号，也没有后端。",
     ),
     PREFERENCES(
-        Icons.Filled.Accessibility, ModuleColors.Log, "让 Flash 更适合你",
+        Icons.Filled.Accessibility, { ModuleColors.Log }, "让 Flash 更适合你",
         "以下选项随时可在「设置 › 辅助功能」中修改。",
     ),
 }
@@ -209,13 +209,13 @@ private fun OnboardingPage(step: OnboardingStep) {
                 modifier = Modifier
                     .size(if (step == OnboardingStep.WELCOME) 112.dp else 88.dp)
                     .clip(CircleShape)
-                    .background(step.tint.copy(alpha = 0.14f)),
+                    .background(step.tint().copy(alpha = 0.14f)),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     step.icon,
                     contentDescription = null,
-                    tint = step.tint,
+                    tint = step.tint(),
                     modifier = Modifier.size(if (step == OnboardingStep.WELCOME) 60.dp else 44.dp),
                 )
             }
