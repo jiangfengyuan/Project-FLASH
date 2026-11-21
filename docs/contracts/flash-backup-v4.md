@@ -12,6 +12,6 @@ v4 保持 v3 的正文 `data`、分区 `schemas` 和 `personalLibrary`，新增�
 
 v1/v2/v3 导入继续支持。覆盖旧格式会清除本机回收站与本地智能设置，预览显示提示；合并旧格式保留它们。v4 合并按归档 ID 去重，标签按规范名称合并，并保持手动标签优先于自动来源。覆盖导入与正文、元数据、归档一起提交，失败全部回滚。
 
-外层 `flash-backup-enc-v1` 不变，解密后再识别 v4。尚未支持 v4 的 Android/HarmonyOS 客户端会明确拒绝新版本，不能删除版本字段来绕过检查；纯 v2 正文互通入口仍然保留。本次没有改变三端 v2 契约。
+外层 `flash-backup-enc-v1` 不变，解密后再识别 v4。2026-11-21 起，本次 Android 与 Mac 候选的文件导出和系统分享默认写 v4。兼容格式选项显式导出 v2 正文，适用于仍读 v2 的旧版 Android 或 HarmonyOS。Android Room 6 将资料库扩展字段与正文一起持久化，标准导入支持 v2/v3/v4，v1 沿用恢复入口。
 
 参考检查器：`npm test --prefix scripts/backup-contract`。`fixtures/valid-library-v4.json` 是原生 Swift 导出样本，不含真实用户内容。

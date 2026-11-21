@@ -86,7 +86,7 @@ FlashKit，用 `cd ../shared/FlashKit && swift test` 运行。测试数量以当
 
 ## 备份格式
 
-与 Android/HarmonyOS 互通的 `flash-backup-v2` JSON（同时兼容导入 v1）：
+文件与系统分享默认导出 v4 完整资料库，支持 Android v4 客户端。需要与 HarmonyOS 或较旧客户端交换正文时，可选择兼容格式，并选择明文或口令加密。兼容格式使用如下 v2 JSON：
 
 ```json
 { "version": "flash-backup-v2", "exportedAt": "...", "appVersion": "...",
@@ -95,7 +95,7 @@ FlashKit，用 `cd ../shared/FlashKit && swift test` 运行。测试数量以当
 ```
 
 - 分区 schema 2（2026-10-05 起）：新增可选字段——三分区 `isFavorite`、情绪 `intensity`（1–5）、任务 `sourceLogId`（灵感转任务的来源关联）。候选四端导出写2、读取接受1/2并保留可空元数据；旧schema1-only客户端仍须显式拒绝schema2（不静默丢弃），详见 `app/docs/contracts/README.md`。
-- 标准入口严格校验 v2，任何非法条目整体拒绝；独立恢复入口用于 v1 或旧/损坏备份，逐条跳过可恢复范围内的非法记录。未知版本/分区拒绝导入；单文件上限 50 MB。
+- 标准入口严格校验 v2/v3/v4，任何非法条目整体拒绝；独立恢复入口用于 v1 或旧/损坏备份，逐条跳过可恢复范围内的非法记录。未知版本/分区拒绝导入；单文件上限 50 MB。
 - 读写走 App Sandbox 的用户择定文件授权，导出文件权限 0600。
 - 「通过系统分享」会创建沙箱缓存副本并调用系统分享服务，可选择 AirDrop、
   信息、邮件或云盘；Flash 不会自行上传文件。

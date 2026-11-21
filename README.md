@@ -4,11 +4,11 @@
 
 闪过即留，一目了然。本地优先的日志 / 灵感 / 情绪记录应用。
 
-当前候选：**Flash Paper 1.0 Alpha 1**（数字版本1.0，build 1）。正式版采用三段版本号1.0.0；本轮验收结论为**不通过**，修复与可执行测试已完成，仍有备份互读／旧库升级及签名设备验证阻断，不能视为可发布。
+当前候选：**Flash Paper 1.0 Alpha 1**（数字版本1.0，build 1）。正式版采用三段版本号1.0.0；本轮验收结论为**不通过**，修复与可执行测试已完成，签名安装升级及物理设备矩阵仍待验证，不能视为可发布。
 
 [版本规则](docs/release/versioning.md)、Flash Aero最后Beta的冻结快照及验收阻断项见[Paper Alpha 1验收记录](docs/acceptance/paper-alpha1-20261114.md)。
 
-没有账号、没有后端；数据默认保存在本机。换设备可通过 JSON 文件，但当前 Apple 默认 v4 备份不能由 Android／Harmony v1/v2 导入，详见验收报告。
+没有账号、没有后端；数据默认保存在本机。换设备可通过 JSON 文件。Android 和 Mac 默认导出 v4 完整备份，向 HarmonyOS 或较旧的 v2 客户端传输时可主动选择 v2 正文格式。
 旧版局域网直传因安全风险暂时停用，请使用文件备份或系统分享。
 
 [爱发电主页](https://ifdian.net/a/HEY10086D)
@@ -40,7 +40,7 @@
 - **情绪**：七级选择（macOS / HarmonyOS 为滑块，Android 为 emoji 按钮）+ 子情绪标签 + 备注，周趋势与统计图表；
 - **日历**：日志与情绪按日聚合的月历视图；
 - **回顾**：本周/本月/近 30 天/近 90 天窗口、每日活跃度、与前一窗口的趋势洞察、情绪分布，以及页内趋势/日历切换；
-- **备份与传输**：JSON 导出 / 严格导入（合并或覆盖）、系统分享。旧版局域网发送/接收已暂时停用；点击入口会说明替代方式，不启动发现、监听或连接。四端候选现读写既有分区 schema 1/2，Android 使用获批的增量 Room4→5，保留新增可空字段；实际 app/真机导入矩阵未完成，不能宣称全部设备互读。[实际验收与限制](docs/contracts/acceptance.md)。
+- **备份与传输**：JSON 导出 / 严格导入（合并或覆盖）、系统分享。旧版局域网发送/接收已暂时停用；点击入口会说明替代方式，不启动发现、监听或连接。四端候选现读写既有分区 schema 1/2，Android 通过增量 Room 5→6 迁移持久化资料库扩展字段；实际 app/真机导入矩阵未完成，不能宣称全部设备互读。[实际验收与限制](docs/contracts/acceptance.md)。
 
 2026-10-25 加固进行中：现行 LAN v1.1 的公开 CHALLENGE 即释放完整明文备份、离线猜 PIN、未认证错误结束会话等缺陷已复核。用户批准本轮暂时停用旧协议，历史实现在测试目标内保留回归，应用中没有启用开关或不安全回退。替代协议尚未选定，也未添加密码库。见 [加固基线](docs/hardening/baseline-2026-10-24.md)、[LAN 决策与停用边界](docs/hardening/lan-v2-decision.md)、[时区/schema 兼容阻塞](docs/hardening/compatibility-blockers.md)。
 
@@ -122,7 +122,7 @@ assembleHap --mode module -p product=default -p module=entry@default \
 
 ## 备份格式
 
-三端共享同一分区版本化 JSON 格式 `flash-backup-v2`，并继续兼容导入 v1：
+Android 与 Mac 的默认完整文件使用 [flash-backup-v4](docs/contracts/flash-backup-v4.md)，包含正文、标签、筛选、周期提醒、回收站及资料库偏好。文件导出和系统分享均可选择口令加密。需要将正文交给支持 v2 的旧版客户端时，在导出选项中选择兼容格式。v2 文件结构如下：
 
 ```json
 { "version": "flash-backup-v2", "exportedAt": "...", "appVersion": "...",
@@ -138,12 +138,7 @@ v2 增加 Calendar 任务、截止时间、完成状态和提醒时间。协议�
 `flash-sync-v1` 自动同步层分离，后续同步可复用相同分区模型而不改变备份语义；
 完整定义见 [docs/flash-backup-v2.md](docs/flash-backup-v2.md)。
 
-也可使用系统分享面板，或选择「局域网发送 / 接收」进行直传。局域网发送方会
-生成随机六位 PIN，接收方只有输入正确 PIN 才能取得备份；PIN 60 秒失效、最多
-尝试五次，成功后服务立即关闭。接收方会看到新增、修改、相同与仅本机数据的差异，
-再选择保留本机数据并合并，或覆盖全部。数据不经过 Flash 服务器。
-设备互传尚待真机验收（见 [docs/contracts/acceptance.md](docs/contracts/acceptance.md)），
-局域网直传建议只在可信的家庭或办公网络使用。
+也可通过系统分享面板传送备份文件。局域网直传的生产入口保持关闭。验证范围见 [契约验收记录](docs/contracts/acceptance.md)。
 
 ## 路线图与参与
 

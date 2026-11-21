@@ -16,7 +16,7 @@ Android 端原生实现。Kotlin + Jetpack Compose，严格遵循 Material Desig
 ## 技术栈
 
 - Kotlin 2.2 + Jetpack Compose（BOM 2025.06）+ Material 3
-- Room 2.7，数据库名 `flash-db`；候选数据库版本5，获批4→5仅增加五个可空schema2列，无破坏性降级
+- Room 2.7，数据库名 `flash-db`；候选数据库版本 6，4→5 增加 schema 2 可空字段，5→6 新增资料库元数据表并保留原有记录和阅读状态
 - MVVM + StateFlow，单 Activity
 - Gradle 8.14.3 / AGP 8.11 / JDK 17+（本机用 Temurin 21 亦可）
 
@@ -39,8 +39,7 @@ Android 端原生实现。Kotlin + Jetpack Compose，严格遵循 Material Desig
 - 日志管理删除后提供 Snackbar 撤销入口
 - Calendar 支持全天/定时任务、截止时间、完成状态与 WorkManager 本地提醒；Android 13+
   在用户设置提醒时按需申请通知权限
-- `flash-backup-v2` 以分区 schema 携带日志、情绪和任务，继续兼容导入 v1，并为未来
-  独立的自动同步协议保留稳定数据模型
+- 文件与系统分享默认导出 v4，含标签、筛选、周期提醒、回收站和偏好；明确选择 v2 时导出正文。支持 v3/v4 完整导入、v2 标准导入及 v1 兼容恢复。
 
 ## 常用命令
 

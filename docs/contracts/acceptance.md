@@ -112,3 +112,13 @@
 ## 2026-11-14 iOS personal library v3
 
 实现与规格见 [v3](flash-backup-v3.md)。新增自动覆盖包括标签/筛选、旧库存储迁移、加密备份往返、元数据错误拒绝、失败事务回滚、日期回忆边界及两次提醒间隔。设备验收分别记录于工作区 `outputs/ios-library-20261114/`，不沿用历史 v2、LAN 或真机通过结论。DeviceHub 中的 iPhone 18 Pro 是 iOS 27.2 模拟器；真实 iPhone 未在本轮连接。
+
+## 2026-11-21 · Android 与 Mac 文件恢复候选
+
+Android Room 6 和 Mac 的文件／系统分享默认导出 v4，用户可主动选择 v2 正文，明文与现有加密信封均覆盖。v3/v4 资料库与正文在一次事务内提交。初始本机标签与传入标签无法一一对应时，合并明确失败并保全原数据。Android 5→6 增量迁移及 Apple Aero 两实体旧库升级均有回归。
+
+使用虚构数据在专用 Android API 36 模拟器和 Mac 独立 SwiftData 磁盘库互换四类真实文件。Android 使用设置 ViewModel、系统内容 URI、Room、实际分享文件与进程重启；Mac 使用设置页的生产协调器、文件 URL 和各自独立进程。Android 还经真实系统文件面板保存 v2、再选择同一文件完成合并。异常用例包括错口令、损坏、未知版本、取消及资料库写入回滚。HarmonyOS 的生产编码器在主机上验证 v2 兼容文件。
+
+旧库直升采用 Beta1 归档中的原始模型二进制和 Beta2 对应的历史模型源码。分别验证旧记录、增加新记录及进程重开。Beta2 历史包 SHA 与发布记录相符，整包严格验签失败。Android 实机、历史 Mac 安装包在同一 bundle ID 下的签名原位升级、macOS 15、Mac 系统面板及通知送达仍待验。宿主探针使用显式测试路径。
+
+可复验的 Mac 侧入口为 [PaperBackupInterop](../../tools/verification/README.md)，Android 对端为 `LibraryFileInteropTest`。工作区原始日志和实际文件位于 `outputs/controlled-candidate-20261121/backup-interop/`，旧库复验位于 `outputs/macos-upgrade-20261121/`。

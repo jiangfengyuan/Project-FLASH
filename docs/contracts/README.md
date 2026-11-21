@@ -1,6 +1,8 @@
 # Flash 首版跨端数据契约
 
-> 2026-11-14：iOS 新功能使用 [flash-backup-v3](flash-backup-v3.md) 完整保存自由标签、筛选、回忆偏好和周期提醒。Apple 继续读旧备份，未升级的 Android/HarmonyOS 明确拒绝 v3。以下 v2 规范保留，不授予旧端新格式支持。
+> 2026-11-21：Android 与 Mac 文件和系统分享默认使用 [v4 完整备份](flash-backup-v4.md)，支持显式 v2 正文交换与现有口令信封。HarmonyOS 继续使用 v1/v2。
+
+> 2026-11-14 历史记录：iOS 新功能使用 [flash-backup-v3](flash-backup-v3.md) 完整保存自由标签、筛选、回忆偏好和周期提醒。Apple 继续读旧备份，未升级的 Android/HarmonyOS 明确拒绝 v3。以下 v2 规范保留，不授予旧端新格式支持。
 
 > 契约修订：0.2.0（草案）｜日期：2026-10-05<br>
 > 范围：iOS / macOS / Android / HarmonyOS 的完整备份快照<br>
