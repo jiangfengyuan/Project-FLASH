@@ -13,6 +13,60 @@ import Testing
 /// 验证数据完好且新增可选字段缺省为 nil。
 struct SchemaMigrationTests {
 
+    @Test @MainActor func aeroBetaStoreUpgradesAndPreservesDataAfterReopen() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let url = directory.appendingPathComponent("default.store")
+        // Build 1 used an unversioned schema containing exactly these two
+        // entities. Construct it independently of the current migration plan.
+        do {
+            let schema = Schema([FlashSchemaV1.LogEntity.self, FlashSchemaV1.EmotionEntity.self])
+            let old = try ModelContainer(for: schema, configurations: [ModelConfiguration(schema: schema, url: url)])
+            old.mainContext.insert(FlashSchemaV1.LogEntity(
+                id: "11111111-1111-4111-8111-111111111111", content: "Beta diary", colorTag: "daily",
+                category: "log", importance: 2, createdAt: "2026-08-18T01:02:03.000Z", recordDate: "2026-08-18"))
+            old.mainContext.insert(FlashSchemaV1.EmotionEntity(
+                id: "22222222-2222-4222-8222-222222222222", level: 3, subEmotion: nil, status: "walking",
+                note: "Beta note", recordDate: "2026-08-18", createdAt: "2026-08-18T01:02:03.000Z"))
+            try old.mainContext.save()
+        }
+        do {
+            let upgraded = FlashDatabase.makeContainerWithFallback(storeURL: url)
+            try #require(!upgraded.didFallbackToMemory)
+            let repository = FlashRepository(container: upgraded.container)
+            let snapshot = try repository.snapshot()
+            #expect(snapshot.logs.map(\.content) == ["Beta diary"])
+            #expect(snapshot.emotions.map(\.note) == ["Beta note"])
+            #expect(snapshot.tasks.isEmpty)
+            try repository.addLog(content: "Paper diary", colorTag: .daily)
+        }
+        let reopened = FlashDatabase.makeContainerWithFallback(storeURL: url)
+        try #require(!reopened.didFallbackToMemory)
+        let logs = try reopened.container.mainContext.fetch(FetchDescriptor<LogEntity>())
+        #expect(Set(logs.map(\.content)) == ["Beta diary", "Paper diary"])
+    }
+
+    @Test @MainActor func unrecognizedStoreFallsBackAndRemainsReadableByItsOwnModel() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let url = directory.appendingPathComponent("default.store")
+        let schema = Schema([FlashSchemaV1.LogEntity.self])
+        let config = ModelConfiguration(schema: schema, url: url)
+        do {
+            let old = try ModelContainer(for: schema, configurations: [config])
+            old.mainContext.insert(FlashSchemaV1.LogEntity(
+                id: "11111111-1111-4111-8111-111111111111", content: "Unrecognized store", colorTag: "daily",
+                category: "log", importance: 1, createdAt: "2026-08-18T01:02:03.000Z", recordDate: "2026-08-18"))
+            try old.mainContext.save()
+        }
+        try #require(FlashDatabase.makeContainerWithFallback(storeURL: url).didFallbackToMemory)
+        let original = try ModelContainer(for: schema, configurations: [config])
+        let logs = try original.mainContext.fetch(FetchDescriptor<FlashSchemaV1.LogEntity>())
+        #expect(logs.map(\.content) == ["Unrecognized store"])
+    }
+
     @Test @MainActor func v1StoreMigratesToV2KeepingData() throws {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent("flash-migration-\(UUID().uuidString)")

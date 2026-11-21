@@ -291,14 +291,23 @@ public typealias LogEntity = FlashSchemaV2.LogEntity
 public typealias EmotionEntity = FlashSchemaV2.EmotionEntity
 public typealias TaskEntity = FlashSchemaV2.TaskEntity
 
-/// V1→V2 轻量迁移：纯增列（可选属性），无数据变换
+/// Aero 0.1.0 build 1 predates tasks and VersionedSchema. Its two entities
+/// match the frozen V1 entities, but its store has a distinct model checksum.
+private enum AeroBetaStore: VersionedSchema {
+    static let versionIdentifier = Schema.Version(0, 1, 0)
+    static var models: [any PersistentModel.Type] {
+        [FlashSchemaV1.LogEntity.self, FlashSchemaV1.EmotionEntity.self]
+    }
+}
+
 public enum FlashMigrationPlan: SchemaMigrationPlan, Sendable {
     public static var schemas: [any VersionedSchema.Type] {
-        [FlashSchemaV1.self, FlashSchemaV2.self, FlashSchemaV3.self, FlashSchemaV4.self]
+        [AeroBetaStore.self, FlashSchemaV1.self, FlashSchemaV2.self, FlashSchemaV3.self, FlashSchemaV4.self]
     }
 
     public static var stages: [MigrationStage] {
-        [.lightweight(fromVersion: FlashSchemaV1.self, toVersion: FlashSchemaV2.self),
+        [.lightweight(fromVersion: AeroBetaStore.self, toVersion: FlashSchemaV1.self),
+         .lightweight(fromVersion: FlashSchemaV1.self, toVersion: FlashSchemaV2.self),
          .lightweight(fromVersion: FlashSchemaV2.self, toVersion: FlashSchemaV3.self),
          .custom(fromVersion: FlashSchemaV3.self, toVersion: FlashSchemaV4.self, willMigrate: nil, didMigrate: { try FlashSchemaV4.migrate($0) })]
     }
