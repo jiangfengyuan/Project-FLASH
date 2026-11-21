@@ -207,7 +207,9 @@ test('wiring: lock layer covers edit dialogs, quick capture stays above it, perm
   assert.match(build, /!this\.appLocked && this\.logs\.quickCategory !== ''/);
   const ability = fs.readFileSync(path.join(ets, 'entryability/EntryAbility.ets'), 'utf8');
   assert.ok(ability.indexOf('appLockRuntime.install') < ability.indexOf('this.deliverEntry(want)'));
-  assert.match(ability, /onBackground\(\): void \{\s*appLockRuntime\.controller\.onBackground\(\)/);
+  // Match the whole synchronous lifecycle body: stop transfer first, then record
+  // the lock background transition. Neither call may be conditional or omitted.
+  assert.match(ability, /onBackground\(\): void \{\s*SecureLanTransfer\.stopForBackground\(\);\s*appLockRuntime\.controller\.onBackground\(\);\s*\}/);
   const moduleJson = fs.readFileSync(path.resolve(ets, '../module.json5'), 'utf8');
   assert.match(moduleJson, /ohos\.permission\.ACCESS_BIOMETRIC/);
   const profile = fs.readFileSync(path.join(ets, 'pages/ProfilePage.ets'), 'utf8');

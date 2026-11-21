@@ -78,6 +78,17 @@ in `harmonyos` after packaging. Its hvigor plugin rejects missing/mismatched
 native libraries because a static ArkTS import must never ship without its `.so`.
 No step signs a release or changes the disabled production switches.
 
+## Android instrumentation CI
+
+The `android-database` job builds the real x86_64 JNI library with the pinned
+Rust toolchain, NDK and checksum-verified sodium source before starting the
+API 35 emulator. The builder supports Linux and macOS NDK host directories.
+CI places this one-ABI library in `android/app/src/debug/jniLibs/x86_64` and
+checks its presence in the debug APK before executing instrumentation tests.
+This is a disposable debug-only payload, not a complete licensed release
+artifact set produced by `tools/package-lan-v2.py`. Production remains disabled;
+other ABIs, release packaging and physical devices still require acceptance.
+
 ## Verification boundaries
 
 - `cargo test --locked --offline`: requires `FLASH_SODIUM_LIB_DIR` from the host

@@ -17,6 +17,7 @@ jobs:
           cache: npm
           cache-dependency-path: scripts/backup-contract/package-lock.json
       - run: npm ci --prefix scripts/backup-contract --ignore-scripts
+      - run: python3 tools/lan-v2-probe/test_build.py
       - run: python3 scripts/check-lan-quarantine.py
       - run: node scripts/backup-contract/generate-cases.cjs --check
       - run: node scripts/backup-contract/generate-encrypted.cjs --check
@@ -43,6 +44,32 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      - name: Build FlashLAN JNI for the x86_64 instrumentation target
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.99.1 --profile minimal
+          rustup target add --toolchain 1.99.1 x86_64-linux-android
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;29.0.14206865"
+          curl --fail --location --retry 3 \
+            https://download.libsodium.org/libsodium/releases/libsodium-1.0.22.tar.gz \
+            --output "$RUNNER_TEMP/libsodium-1.0.22.tar.gz"
+          # The existing builder validates the pinned sodium SHA-256 and links
+          # the real JNI bridge. Cargo fetch uses the checked-in lockfile.
+          (cd shared/FlashLAN && cargo fetch --locked --target x86_64-linux-android)
+          python3 tools/lan-v2-probe/build.py --core --target android-x86_64 \
+            --sodium-archive "$RUNNER_TEMP/libsodium-1.0.22.tar.gz" \
+            --android-ndk "$ANDROID_HOME/ndk/29.0.14206865" \
+            --output "$RUNNER_TEMP/flash-lan-build"
+          # CI-only debug payload: do not create a partial release artifact set
+          # or change the disabled production gate.
+          install -D "$RUNNER_TEMP/flash-lan-build/android-x86_64/libflash_lan.so" \
+            android/app/src/debug/jniLibs/x86_64/libflash_lan.so
+      - name: Verify JNI is packaged in the debug APK
+        working-directory: android
+        run: |
+          ./gradlew :app:assembleDebug --console=plain
+          unzip -l app/build/outputs/apk/debug/app-debug.apk | grep 'lib/x86_64/libflash_lan.so'
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
