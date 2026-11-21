@@ -55,5 +55,5 @@ object BackupDiff {
      * BackupController.applyBackup 的 pendingSnapshot + sameData 模式。
      */
     fun sameData(left: FlashSnapshot, right: FlashSnapshot): Boolean =
-        left.logs == right.logs && left.emotions == right.emotions && left.tasks == right.tasks
+        left.logs == right.logs && left.emotions == right.emotions && left.tasks == right.tasks && left.library == right.library
 }

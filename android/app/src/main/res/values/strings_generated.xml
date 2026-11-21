@@ -45,6 +45,7 @@
     <string name="s_22c3caa0" formatted="false">schemas must be an object</string>
     <string name="s_ad2e48cd" formatted="false">tasks</string>
     <string name="s_002e97a4" formatted="false">tasks must be an array</string>
+    <string name="s_cdf354f5" formatted="false">v2 exports logs, moods and tasks only. It omits tags, filters, recurring idea reminders, trash and library preferences.</string>
     <string name="s_6e425eba" formatted="false">{0}: {1} · {2}: {3}</string>
     <string name="s_39ac061e" formatted="false">{0} — {1} · days with no entries aren\'t averaged</string>
     <string name="s_e2a8c96b" formatted="false">Tasks: {0}</string>
@@ -111,6 +112,7 @@
     <string name="s_79955ed0" formatted="false">Sad</string>
     <string name="s_d7974514" formatted="false">Ideas waiting: {0}. Start with the oldest</string>
     <string name="s_d908f279" formatted="false">Ideas waiting for review: {0}. Take a look</string>
+    <string name="s_ba9285be" formatted="false">Use the v2 content-only format</string>
     <string name="s_ad5b82b0" formatted="false">Save</string>
     <string name="s_9b95e293" formatted="false">Saving…</string>
     <string name="s_64911de5" formatted="false">Save as a JSON file</string>
@@ -154,6 +156,7 @@
     <string name="s_4db1b243" formatted="false">Wrong passphrase, or the file is damaged.</string>
     <string name="s_ef638194" formatted="false">Passphrase (at least 8 characters)</string>
     <string name="s_4d55cb75" formatted="false">Export a backup or send it with system share</string>
+    <string name="s_8e31f574" formatted="false">The merged library exceeds the backup limit.</string>
     <string name="s_5e53c03a" formatted="false">Thu</string>
     <string name="s_40163b46" formatted="false">Back to today</string>
     <string name="s_bed63d2f" formatted="false">This week</string>
@@ -172,6 +175,7 @@
     <string name="s_e4a4815a" formatted="false">Appearance &amp; use</string>
     <string name="s_f849ada8" formatted="false">OK</string>
     <string name="s_1e13bd21" formatted="false">Done</string>
+    <string name="s_ebe90a32" formatted="false">A full backup (v4) includes your records and library. Restore it on an Android device or Mac that supports v4.</string>
     <string name="s_dd03e6ad" formatted="false">Preview differences from local data before importing</string>
     <string name="s_9b60ff74" formatted="false">Import failed: {0}</string>
     <string name="s_da193966" formatted="false">Import cancelled</string>
@@ -294,9 +298,12 @@
     <string name="s_198c9fe3" formatted="false">Import</string>
     <string name="s_5606df17" formatted="false">Import preview</string>
     <string name="s_2b1626c8" formatted="false">Tag</string>
+    <string name="s_cc4407d1" formatted="false">Tags {0} · Filters {1} · Recurring reminders {2} · Trash {3}</string>
+    <string name="s_91bff25f" formatted="false">Conflicting tags cannot be merged without losing associations.</string>
     <string name="s_f7d7a0ce" formatted="false">Welcome to Flash</string>
     <string name="s_aef45eb7" formatted="false">Loading more…</string>
     <string name="s_6af40858" formatted="false">Now</string>
+    <string name="s_cf449d80" formatted="false">This file omits some library fields. Replacing clears the omitted data. Merging keeps it on this device.</string>
     <string name="s_b060afd3" formatted="false">This device doesn\'t support a task time zone in the backup. Update the system and try again. Nothing was imported</string>
     <string name="s_2f15ac82" formatted="false">Set a screen lock passcode on this device to use App Lock</string>
     <string name="s_f4958768" formatted="false">Every 3 days</string>

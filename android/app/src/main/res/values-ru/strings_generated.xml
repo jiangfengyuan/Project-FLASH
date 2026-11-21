@@ -45,6 +45,7 @@
     <string name="s_22c3caa0" formatted="false">schemas должно быть объектом</string>
     <string name="s_ad2e48cd" formatted="false">задачи</string>
     <string name="s_002e97a4" formatted="false">tasks должно быть массивом</string>
+    <string name="s_cdf354f5" formatted="false">В v2 сохраняются только записи, настроения и задачи. Метки, фильтры, периодические напоминания об идеях, корзина и настройки библиотеки будут пропущены.</string>
     <string name="s_6e425eba" formatted="false">{0}: {1} · {2}: {3}</string>
     <string name="s_39ac061e" formatted="false">{0} — {1} · дни без записей не учитываются</string>
     <string name="s_e2a8c96b" formatted="false">Задач: {0}</string>
@@ -111,6 +112,7 @@
     <string name="s_79955ed0" formatted="false">Грустно</string>
     <string name="s_d7974514" formatted="false">Ждут идей: {0}. Начните с самой ранней</string>
     <string name="s_d908f279" formatted="false">Идей ждут разбора: {0}. Загляните</string>
+    <string name="s_ba9285be" formatted="false">Использовать формат v2 только для записей</string>
     <string name="s_ad5b82b0" formatted="false">Сохранить</string>
     <string name="s_9b95e293" formatted="false">Сохранение…</string>
     <string name="s_64911de5" formatted="false">Сохранить файлом JSON</string>
@@ -154,6 +156,7 @@
     <string name="s_4db1b243" formatted="false">Неверная парольная фраза или файл повреждён.</string>
     <string name="s_ef638194" formatted="false">Парольная фраза (не менее 8 символов)</string>
     <string name="s_4d55cb75" formatted="false">Экспортируйте копию или отправьте через «Поделиться»</string>
+    <string name="s_8e31f574" formatted="false">Объединённая библиотека превышает лимит резервной копии.</string>
     <string name="s_5e53c03a" formatted="false">Чт</string>
     <string name="s_40163b46" formatted="false">Вернуться к сегодня</string>
     <string name="s_bed63d2f" formatted="false">К этой неделе</string>
@@ -172,6 +175,7 @@
     <string name="s_e4a4815a" formatted="false">Оформление и использование</string>
     <string name="s_f849ada8" formatted="false">ОК</string>
     <string name="s_1e13bd21" formatted="false">Готово</string>
+    <string name="s_ebe90a32" formatted="false">Полная копия (v4) включает записи и библиотеку. Её можно восстановить на Android или Mac с поддержкой v4.</string>
     <string name="s_dd03e6ad" formatted="false">Предпросмотр отличий от локальных данных перед импортом</string>
     <string name="s_9b60ff74" formatted="false">Импорт не удался: {0}</string>
     <string name="s_da193966" formatted="false">Импорт отменён</string>
@@ -294,9 +298,12 @@
     <string name="s_198c9fe3" formatted="false">Импорт</string>
     <string name="s_5606df17" formatted="false">Предпросмотр импорта</string>
     <string name="s_2b1626c8" formatted="false">Метка</string>
+    <string name="s_cc4407d1" formatted="false">Метки {0} · Фильтры {1} · Периодические напоминания {2} · Корзина {3}</string>
+    <string name="s_91bff25f" formatted="false">Из-за конфликта меток объединение привело бы к потере связей.</string>
     <string name="s_f7d7a0ce" formatted="false">Добро пожаловать во Flash</string>
     <string name="s_aef45eb7" formatted="false">Загрузка…</string>
     <string name="s_6af40858" formatted="false">Сейчас</string>
+    <string name="s_cf449d80" formatted="false">В файле отсутствуют некоторые поля библиотеки. При замене эти данные будут удалены, при объединении останутся на устройстве.</string>
     <string name="s_b060afd3" formatted="false">Это устройство не поддерживает часовой пояс задачи из копии. Обновите систему и повторите. Ничего не импортировано</string>
     <string name="s_2f15ac82" formatted="false">Задайте пароль блокировки экрана, чтобы включить блокировку приложения</string>
     <string name="s_f4958768" formatted="false">Каждые 3 дня</string>

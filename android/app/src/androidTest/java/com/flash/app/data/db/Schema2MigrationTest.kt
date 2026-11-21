@@ -32,7 +32,7 @@ class Schema2MigrationTest {
     }
 
     private fun open() = Room.databaseBuilder(context, FlashDatabase::class.java, DB)
-        .addMigrations(FlashDatabase.MIGRATION_4_5).build()
+        .addMigrations(FlashDatabase.MIGRATION_4_5, FlashDatabase.MIGRATION_5_6).build()
 
     @Test fun additiveMigrationPreservesReadStateAndAllFieldsAcrossCloseAndReopen() = runBlocking {
         populatedV4()
@@ -40,7 +40,7 @@ class Schema2MigrationTest {
         try {
             val repo = FlashRepository(database)
             val before = repo.exportSnapshot()
-            assertEquals(5, database.openHelper.writableDatabase.version)
+            assertEquals(6, database.openHelper.writableDatabase.version)
             assertEquals(1, before.logs.size); assertEquals(1, before.emotions.size); assertEquals(1, before.tasks.size)
             assertNull(before.logs.single().isFavorite)
             assertNull(before.emotions.single().isFavorite); assertNull(before.emotions.single().intensity)
@@ -68,6 +68,34 @@ class Schema2MigrationTest {
         } finally { database.close(); context.deleteDatabase(DB) }
     }
 
+    @Test fun migrationFromPopulatedFivePreservesFavoritesSourcesAndReadState() = runBlocking {
+        helper.createDatabase(DB, 5).use { db ->
+            db.execSQL("INSERT INTO logs (id,content,colorTag,category,importance,createdAt,recordDate,isFavorite) " +
+                "VALUES ('$LOG','Fictional idea','daily','idea',2,'2026-09-04T00:00:00.000Z','2026-09-04',1)")
+            db.execSQL("INSERT INTO idea_view_state (logId,viewedAt) VALUES ('$LOG','$VIEWED')")
+            db.execSQL("INSERT INTO emotions (id,level,recordDate,createdAt,intensity,isFavorite) " +
+                "VALUES ('$EMOTION',1,'2026-09-04','2026-09-04T01:00:00.000Z',5,0)")
+            db.execSQL("INSERT INTO tasks (id,title,colorTag,importance,dueKind,dueDate,createdAt,updatedAt,sourceLogId) " +
+                "VALUES ('$TASK','Fictional task','daily',1,'allDay','2026-09-05'," +
+                "'2026-09-04T02:00:00.000Z','2026-09-04T02:00:00.000Z','$LOG')")
+        }
+        val db = open()
+        try {
+            val repo = FlashRepository(db)
+            val after = repo.exportSnapshot()
+            assertTrue(repo.isIdeaViewed(LOG))
+            assertEquals(true, after.logs.single().isFavorite)
+            assertEquals(5, after.emotions.single().intensity)
+            assertEquals(false, after.emotions.single().isFavorite)
+            assertEquals(LOG, after.tasks.single().sourceLogId)
+            assertFalse(after.library.hasExtendedData)
+            assertNotNull(Backup.parseStrict(Backup.exportSnapshot(after)).library)
+        } finally {
+            db.close()
+            context.deleteDatabase(DB)
+        }
+    }
+
     @Test fun failedMigrationRollsBackColumnsVersionAndExistingRecords() {
         populatedV4()
         var reachedFault = false
@@ -78,7 +106,7 @@ class Schema2MigrationTest {
                 error("synthetic migration failure after additive DDL")
             }
         }
-        val database = Room.databaseBuilder(context, FlashDatabase::class.java, DB).addMigrations(failure).build()
+        val database = Room.databaseBuilder(context, FlashDatabase::class.java, DB).addMigrations(failure, FlashDatabase.MIGRATION_5_6).build()
         try {
             assertThrows(Exception::class.java) { database.openHelper.writableDatabase }
             assertTrue(reachedFault)

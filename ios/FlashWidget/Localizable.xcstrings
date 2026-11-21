@@ -20645,6 +20645,58 @@
         }
       }
     },
+    "标签冲突，无法无损合并": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يمنع تعارض الوسوم الدمج دون فقدان الارتباطات."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Tag-Konflikt verhindert das Zusammenführen ohne Verlust von Zuordnungen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conflicting tags cannot be merged without losing associations."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un conflit entre étiquettes empêche la fusion sans perte de liens."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "タグが競合しており、関連付けを保持したまま結合できません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "태그가 충돌하여 연결을 유지한 채 병합할 수 없습니다."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Из-за конфликта меток объединение привело бы к потере связей."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "标签冲突，无法无损合并"
+          }
+        }
+      }
+    },
     "标签推荐": {
       "localizations": {
         "ar": {

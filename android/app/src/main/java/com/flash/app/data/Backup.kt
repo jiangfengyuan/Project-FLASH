@@ -58,7 +58,14 @@ object Backup {
         emotions: List<EmotionRecord>,
         tasks: List<TaskItem>,
         notes: String = "",
-    ): String {
+    ): String = contentDocument(logs, emotions, tasks, notes).toString(2).also { parseStrict(it) }
+
+    private fun contentDocument(
+        logs: List<LogItem>,
+        emotions: List<EmotionRecord>,
+        tasks: List<TaskItem>,
+        notes: String,
+    ): JSONObject {
         val logsArray = JSONArray()
         logs.forEach { log ->
             logsArray.put(
@@ -133,7 +140,13 @@ object Backup {
             .put("notes", CanonicalTimeZones.exportNotes(notes, replacedTimeZones))
             .put("schemas", schemas)
             .put("data", data)
-            .toString(2).also { parseStrict(it) }
+    }
+
+    fun exportSnapshot(snapshot: FlashSnapshot, compatibleV2: Boolean = false): String {
+        if (compatibleV2) return exportJson(snapshot.logs, snapshot.emotions, snapshot.tasks)
+        val root = contentDocument(snapshot.logs, snapshot.emotions, snapshot.tasks, "").put("version", LibraryBackup.V4)
+        snapshot.library.withoutExpired().writeTo(root)
+        return root.toString().also { parseStrict(it) }
     }
 
     data class ImportResult(
@@ -144,6 +157,7 @@ object Backup {
         val skippedEmotions: Int,
         val skippedTasks: Int,
         val sourceVersion: String,
+        val library: LibraryMetadata? = null,
     )
 
     open class BackupFormatException(message: String) : Exception(message)
@@ -177,14 +191,14 @@ object Backup {
         }
     }
 
-    private val UUID_REGEX =
+    internal val UUID_REGEX =
         Regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
     private val INSTANT_REGEX = Regex("""^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,9}))?(Z|[+-]\d{2}:\d{2})$""")
     private val RECORD_DATE_REGEX = Regex("^\\d{4}-\\d{2}-\\d{2}$")
     private val VALID_COLOR_TAGS = ColorTag.entries.map { it.storageKey }.toSet()
     private val VALID_CATEGORIES = Category.entries.map { it.storageKey }.toSet()
 
-    private fun isValidRecordDate(value: String): Boolean {
+    internal fun isValidRecordDate(value: String): Boolean {
         if (!RECORD_DATE_REGEX.matches(value)) return false
         return try {
             LocalDate.parse(value).let { it.year in 1..9999 && it.toString() == value }
@@ -207,12 +221,16 @@ object Backup {
         if (json.toByteArray(Charsets.UTF_8).size > MAX_FILE_BYTES) {
             throw BackupFormatException(com.flash.app.i18n.tr("备份文件超过 {0} MB，无法导入", MAX_FILE_BYTES / 1024 / 1024))
         }
-        val root = try {
-            JSONObject(json)
-        } catch (e: Exception) {
-            throw BackupFormatException(com.flash.app.i18n.tr("备份文件不是有效的 JSON 对象"))
-        }
+        return parse(rootObject(json))
+    }
 
+    private fun rootObject(json: String): JSONObject = try {
+        JSONObject(json)
+    } catch (error: org.json.JSONException) {
+        throw BackupFormatException(com.flash.app.i18n.tr("备份文件不是有效的 JSON 对象"))
+    }
+
+    private fun parse(root: JSONObject): ImportResult {
         val version = root.stringOrNull("version")
             ?: throw BackupFormatException(com.flash.app.i18n.tr("备份版本不兼容：缺少 version 字段"))
         val sectionRoot = when (version) {
@@ -297,8 +315,13 @@ object Backup {
         if (json.startsWith("\uFEFF")) throw BackupFormatException(com.flash.app.i18n.tr("/：不允许 UTF-8 BOM"))
         if (json.toByteArray(Charsets.UTF_8).size > MAX_FILE_BYTES) throw BackupFormatException(com.flash.app.i18n.tr("文件超过 50 MiB"))
         StrictJson(json).validate()
-        val result = parse(json)
-        val root = JSONObject(json)
+        val root = rootObject(json)
+        if (LibraryBackup.supports(root)) return LibraryBackup.parse(root)
+        return parseStrictCore(root)
+    }
+
+    internal fun parseStrictCore(root: JSONObject): ImportResult {
+        val result = parse(root)
         root.checkFields(setOf("version", "exportedAt", "appVersion", "notes", "schemas", "data"), "/")
         if (result.sourceVersion != BACKUP_VERSION) throw BackupFormatException(com.flash.app.i18n.tr("/version：旧版文件请使用兼容恢复入口"))
         if (normalizeIsoDate(root.stringOrNull("exportedAt")) == null || root.stringOrNull("appVersion") == null ||
@@ -340,9 +363,11 @@ object Backup {
     fun parseRecovery(json: String): ImportResult {
         // 先用 StrictJson 做限深/重复键/严格语法校验，再交给 org.json：
         // 恢复入口同样不接受深度炸弹或重复键文件。
+        if (json.toByteArray(Charsets.UTF_8).size > MAX_FILE_BYTES) throw BackupFormatException(com.flash.app.i18n.tr("文件超过 50 MiB"))
         StrictJson(json).validate()
-        val result = parse(json)
-        val root = JSONObject(json)
+        val root = rootObject(json)
+        if (LibraryBackup.supports(root)) return LibraryBackup.parse(root)
+        val result = parse(root)
         val legacy = result.sourceVersion == LEGACY_BACKUP_VERSION
         root.checkFields(emptySet(), "/", if (legacy) setOf("version", "exportedAt", "appVersion", "notes", "logs", "emotions") else setOf("version", "exportedAt", "appVersion", "notes", "schemas", "data"))
         val data = if (legacy) root else root.getJSONObject("data")
@@ -388,7 +413,7 @@ object Backup {
         }
     }
 
-    private fun parseLog(obj: JSONObject): LogItem? {
+    internal fun parseLog(obj: JSONObject): LogItem? {
         if (!obj.hasValidOptionalBoolean("isFavorite")) return null
         val id = obj.optString("id").takeIf { UUID_REGEX.matches(it) } ?: return null
         val content = obj.stringOrNull("content")?.takeIf { it.length <= MAX_FIELD_LENGTH }
@@ -414,7 +439,7 @@ object Backup {
         )
     }
 
-    private fun parseEmotion(obj: JSONObject): EmotionRecord? {
+    internal fun parseEmotion(obj: JSONObject): EmotionRecord? {
         if (!obj.hasValidOptionalBoolean("isFavorite")) return null
         val intensity = if (!obj.has("intensity") || obj.isNull("intensity")) null else {
             obj.integerOrNull("intensity")?.takeIf { it in 1..5 } ?: return null
@@ -447,7 +472,7 @@ object Backup {
         )
     }
 
-    private fun parseTask(obj: JSONObject): TaskItem? {
+    internal fun parseTask(obj: JSONObject): TaskItem? {
         if (!obj.hasValidOptionalBoolean("isFavorite")) return null
         val sourceLogId = if (!obj.has("sourceLogId") || obj.isNull("sourceLogId")) null else {
             obj.stringOrNull("sourceLogId")?.takeIf { UUID_REGEX.matches(it) } ?: return null

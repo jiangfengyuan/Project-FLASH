@@ -56,6 +56,65 @@ struct BackupContractTests {
         #expect(roundTrip.skippedLogs + roundTrip.skippedEmotions + roundTrip.skippedTasks == 0)
     }
 
+    @Test(arguments: [false, true])
+    func fullAndCompatibleExportsPreserveTheirSelectedScope(encrypted: Bool) async throws {
+        let records = try BackupService.parseStrict(fixture("valid-schema2"))
+        let full = try BackupService.parseStrict(fixture("valid-library-v4"))
+        let snapshot = FlashSnapshot(
+            logs: full.logs + records.logs, emotions: records.emotions, tasks: records.tasks,
+            library: try #require(full.library), trash: full.trash,
+            preferences: try #require(full.preferences), automaticTags: full.automaticTags)
+        let passphrase = encrypted ? "sample-共享口令" : nil
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        for format in [BackupExportFormat.fullLibrary, .compatibleRecords] {
+            let json: String
+            if format == .fullLibrary {
+                json = try await BackupImportCoordinator.exportJSON(snapshot: snapshot, appVersion: "test",
+                                                                    passphrase: passphrase)
+            } else {
+                json = try await BackupImportCoordinator.exportJSON(snapshot: snapshot, appVersion: "test",
+                                                                    format: format, passphrase: passphrase)
+            }
+            #expect(BackupEncryption.isEnvelope(json) == encrypted)
+            let file = directory.appendingPathComponent(BackupImportCoordinator.exportFileName(encrypted: encrypted, format: format))
+            try BackupTransfer.writeExportFile(json: json, to: file)
+            let share = try BackupTransfer.createShareFile(json: json, encrypted: encrypted, format: format,
+                                                          baseDirectory: directory)
+            for url in [file, share] {
+                #expect(url.lastPathComponent.contains("-records-v2") == (format == .compatibleRecords))
+                #expect(try String(contentsOf: url, encoding: .utf8) == json)
+            }
+            let preview = try BackupImportCoordinator.parseBackupText(json, recovery: false, passphrase: passphrase)
+            #expect(preview.logs == snapshot.logs)
+            #expect(preview.emotions == snapshot.emotions)
+            #expect(preview.tasks == snapshot.tasks)
+            if format == .fullLibrary {
+                #expect(preview.sourceVersion == LibraryBackup.version)
+                #expect(preview.library == snapshot.library)
+                #expect(preview.preferences == snapshot.preferences)
+                #expect(preview.trash == snapshot.trash)
+                #expect(preview.automaticTags == snapshot.automaticTags)
+            } else {
+                #expect(preview.sourceVersion == BackupService.backupVersion)
+                #expect(preview.library == nil)
+                #expect(preview.preferences == nil)
+                #expect(preview.trash.isEmpty)
+                #expect(preview.automaticTags.isEmpty)
+            }
+        }
+    }
+
+    @Test func temporaryStoreCannotExportCompatibleRecords() async throws {
+        let snapshot = FlashSnapshot(logs: [], emotions: [], tasks: [], isFromTemporaryStore: true)
+        await #expect(throws: BackupError.temporaryStore) {
+            _ = try await BackupImportCoordinator.exportJSON(snapshot: snapshot, appVersion: "test",
+                                                             format: .compatibleRecords)
+        }
+    }
+
     @Test func sharedStrictCorpus() throws {
         struct Case: Decodable { let file: String; let valid: Bool }
         let cases = try JSONDecoder().decode([Case].self, from: Data(fixture("cases").utf8))

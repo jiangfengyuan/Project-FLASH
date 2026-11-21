@@ -99,12 +99,27 @@ public struct PersonalLibrary: Codable, Equatable, Sendable {
         try require(reminders.allSatisfy { ideas.contains($0.id) && [1,3,7].contains($0.intervalDays) && (9...21).contains($0.hour) && (0...59).contains($0.minute) && DateFormatting.parseDay($0.anchorDay) != nil })
         try require((9...21).contains(summaryHour) && (0...59).contains(summaryMinute) && [1,3,7].contains(summaryIntervalDays))
     }
-    public func merging(_ incoming: Self) -> Self {
+    public func merging(_ incoming: Self) throws -> Self {
         var result = self
+        // Resolve against the original catalog. A simultaneous rename must not
+        // make the result depend on which incoming tag happens to appear first.
+        var localByName: [String: String] = [:]
+        for tag in tags {
+            guard localByName.updateValue(tag.id, forKey: tag.normalized) == nil else {
+                throw BackupError.conflictingLibraryTags
+            }
+        }
         var mapping: [String: String] = [:]
+        var destinations = Set<String>()
         for tag in incoming.tags {
-            if let existing = result.tags.first(where: { $0.normalized == tag.normalized }) { mapping[tag.id] = existing.id }
-            else { result.tags.removeAll { $0.id == tag.id }; result.tags.append(tag); mapping[tag.id] = tag.id }
+            let existingID = localByName[tag.normalized]
+            let destination = existingID ?? tag.id
+            guard destinations.insert(destination).inserted else { throw BackupError.conflictingLibraryTags }
+            mapping[tag.id] = destination
+            if existingID == nil {
+                result.tags.removeAll { $0.id == tag.id }
+                result.tags.append(tag)
+            }
         }
         for (key, tags) in incoming.links { result.links[key] = Array(Set((result.links[key] ?? []) + tags.compactMap { mapping[$0] })).sorted() }
         for var filter in incoming.filters { filter.tagIDs = filter.tagIDs.compactMap { mapping[$0] }; result.filters.removeAll { $0.id == filter.id }; result.filters.append(filter) }

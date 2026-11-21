@@ -321,7 +321,7 @@ public enum LogChange: Equatable, Sendable {
         try commit {
             if let library {
                 let previous = try personalLibrary(), origins = try automaticTagLinks()
-                let merged = previous.merging(library)
+                let merged = try previous.merging(library)
                 try writeLibrary(merged)
                 for (key,ids) in library.links {
                     for id in ids {

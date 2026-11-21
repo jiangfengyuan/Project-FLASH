@@ -15,6 +15,7 @@ public enum BackupTransfer: Sendable {
     private static let maxCacheAge: TimeInterval = 24 * 60 * 60
 
     public static func createShareFile(json: String, encrypted: Bool = false,
+                                       format: BackupExportFormat = .fullLibrary,
                                        baseDirectory: URL? = nil) throws -> URL {
         let fileManager = FileManager.default
         let base = try baseDirectory ?? fileManager.url(
@@ -27,7 +28,7 @@ public enum BackupTransfer: Sendable {
 
         try cleanupExpired(in: base)
 
-        let suffix = encrypted ? "-encrypted" : ""
+        let suffix = format.fileNameSuffix + (encrypted ? "-encrypted" : "")
         let fileName = "\(filePrefix)\(DateFormatting.today())-\(UUID().uuidString.prefix(8))\(suffix).json"
         let file = directory.appendingPathComponent(fileName)
         try writePrivateFile(Data(json.utf8), to: file)

@@ -8,4 +8,6 @@ let package = Package(name: "FlashBackupProbe", platforms: [.macOS(.v15)],
         .product(name: "FlashCore", package: "FlashKit")
     ]), .executableTarget(name: "FlashPersistenceProbe", dependencies: [
         .product(name: "FlashCore", package: "FlashKit")
+    ]), .executableTarget(name: "PaperBackupInterop", dependencies: [
+        .product(name: "FlashCore", package: "FlashKit")
     ])])

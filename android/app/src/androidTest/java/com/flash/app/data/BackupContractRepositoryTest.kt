@@ -43,6 +43,25 @@ class BackupContractRepositoryTest {
             .bufferedReader().use { it.readText() }
     )
 
+    @Test fun libraryOnlyChangeRequiresReconfirmationAndFailedMetadataWriteRollsBackContent() = runBlocking {
+        val db = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext(), FlashDatabase::class.java).build()
+        try {
+            val repo = FlashRepository(db)
+            val file = fixture("valid-library-v4")
+            val plain = fixture("valid-schema2")
+            repo.replaceAll(file.logs, file.emotions, file.tasks)
+            val preview = repo.exportSnapshot()
+            repo.mergeAll(file.logs, file.emotions, file.tasks, file.library)
+            val merged = repo.exportSnapshot()
+            assertEquals(preview.logs, merged.logs)
+            assertNotNull(repo.replaceAllIfCurrent(preview, plain.logs, plain.emotions, plain.tasks))
+            assertEquals(merged, repo.exportSnapshot())
+            db.openHelper.writableDatabase.execSQL("CREATE TRIGGER fail_metadata BEFORE INSERT ON library_entries BEGIN SELECT RAISE(ABORT, 'synthetic metadata failure'); END")
+            assertTrue(runCatching { repo.replaceAll(plain.logs, plain.emotions, plain.tasks, file.library) }.isFailure)
+            assertEquals(merged, repo.exportSnapshot())
+        } finally { db.close() }
+    }
+
     @Test fun sharedCorpusOnAndroidJsonRuntime() {
         val assets = InstrumentationRegistry.getInstrumentation().context.assets
         val cases = JSONArray(assets.open("fixtures/cases.json").bufferedReader().use { it.readText() })

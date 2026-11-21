@@ -6,6 +6,13 @@
 
 import Foundation
 
+public enum BackupExportFormat: Sendable, Hashable {
+    case fullLibrary
+    case compatibleRecords
+
+    var fileNameSuffix: String { self == .compatibleRecords ? "-records-v2" : "" }
+}
+
 /// 备份导入/导出流水线（macOS 设置页与 iOS 设置页共用；平台只负责选文件与呈现）。
 ///
 /// 导入：读文件（明文 50 MB、加密信封 72 MB 上限）→ 加密备份先凭口令解密 →
@@ -46,23 +53,31 @@ public enum BackupImportCoordinator {
 
     // MARK: - 导出
 
-    /// 严格 v2 导出 JSON（后台序列化）。临时存储的快照一律拒绝：
+    /// 默认导出完整 v4；主动选择兼容模式时只导出严格 v2 正文。临时存储的快照一律拒绝：
     /// 它不是完整备份，日后被当作备份覆盖导入会抹掉真实数据（F-07）。
     /// 给出 `passphrase` 时把校验过的明文包进 flash-backup-enc-v1 信封；nil 为明文导出，字节不变。
     public static func exportJSON(snapshot: FlashSnapshot, appVersion: String,
+                                  format: BackupExportFormat = .fullLibrary,
                                   passphrase: String? = nil) async throws -> String {
         guard !snapshot.isFromTemporaryStore else { throw BackupError.temporaryStore }
         if let passphrase { try BackupEncryption.validateExportPassphrase(passphrase) }
         return try await background {
-            let json = try LibraryBackup.export(snapshot, appVersion: appVersion)
+            let json: String
+            switch format {
+            case .fullLibrary:
+                json = try LibraryBackup.export(snapshot, appVersion: appVersion)
+            case .compatibleRecords:
+                json = try BackupService.exportStrictJSON(logs: snapshot.logs, emotions: snapshot.emotions,
+                                                         tasks: snapshot.tasks, appVersion: appVersion)
+            }
             guard let passphrase else { return json }
             return try BackupEncryption.encrypt(json, passphrase: passphrase)
         }
     }
 
     /// 导出文件的默认名：加密备份带 `-encrypted`，扩展名保持 `.json` 以便各端选择器识别
-    public static func exportFileName(encrypted: Bool) -> String {
-        "flash-backup-\(DateFormatting.today())\(encrypted ? "-encrypted" : "").json"
+    public static func exportFileName(encrypted: Bool, format: BackupExportFormat = .fullLibrary) -> String {
+        "flash-backup-\(DateFormatting.today())\(format.fileNameSuffix)\(encrypted ? "-encrypted" : "").json"
     }
 
     // MARK: - 预览

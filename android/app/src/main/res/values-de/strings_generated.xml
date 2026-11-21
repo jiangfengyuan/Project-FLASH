@@ -45,6 +45,7 @@
     <string name="s_22c3caa0" formatted="false">schemas muss ein Objekt sein</string>
     <string name="s_ad2e48cd" formatted="false">Aufgaben</string>
     <string name="s_002e97a4" formatted="false">tasks muss ein Array sein</string>
+    <string name="s_cdf354f5" formatted="false">v2 exportiert nur Einträge, Stimmungen und Aufgaben. Tags, Filter, wiederkehrende Ideenerinnerungen, Papierkorb und Bibliothekseinstellungen entfallen.</string>
     <string name="s_6e425eba" formatted="false">{0}: {1} · {2}: {3}</string>
     <string name="s_39ac061e" formatted="false">{0} — {1} · Tage ohne Einträge zählen nicht</string>
     <string name="s_e2a8c96b" formatted="false">Aufgaben: {0}</string>
@@ -111,6 +112,7 @@
     <string name="s_79955ed0" formatted="false">Traurig</string>
     <string name="s_d7974514" formatted="false">Wartende Ideen: {0}. Fang mit der ältesten an</string>
     <string name="s_d908f279" formatted="false">Ideen zum Durchgehen: {0}. Schau mal rein</string>
+    <string name="s_ba9285be" formatted="false">v2-Format nur für Inhalte verwenden</string>
     <string name="s_ad5b82b0" formatted="false">Speichern</string>
     <string name="s_9b95e293" formatted="false">Wird gespeichert…</string>
     <string name="s_64911de5" formatted="false">Als JSON-Datei speichern</string>
@@ -154,6 +156,7 @@
     <string name="s_4db1b243" formatted="false">Falsche Passphrase oder beschädigte Datei.</string>
     <string name="s_ef638194" formatted="false">Passphrase (mindestens 8 Zeichen)</string>
     <string name="s_4d55cb75" formatted="false">Backup exportieren oder über „Teilen“ senden</string>
+    <string name="s_8e31f574" formatted="false">Die zusammengeführte Bibliothek überschreitet die Sicherungsgrenze.</string>
     <string name="s_5e53c03a" formatted="false">Do</string>
     <string name="s_40163b46" formatted="false">Zurück zu heute</string>
     <string name="s_bed63d2f" formatted="false">Diese Woche</string>
@@ -172,6 +175,7 @@
     <string name="s_e4a4815a" formatted="false">Darstellung &amp; Nutzung</string>
     <string name="s_f849ada8" formatted="false">OK</string>
     <string name="s_1e13bd21" formatted="false">Fertig</string>
+    <string name="s_ebe90a32" formatted="false">Die vollständige Sicherung (v4) enthält Einträge und Bibliothek. Sie lässt sich auf Android-Geräten und Macs mit v4-Unterstützung wiederherstellen.</string>
     <string name="s_dd03e6ad" formatted="false">Vor dem Import Unterschiede zu lokalen Daten ansehen</string>
     <string name="s_9b60ff74" formatted="false">Import fehlgeschlagen: {0}</string>
     <string name="s_da193966" formatted="false">Import abgebrochen</string>
@@ -294,9 +298,12 @@
     <string name="s_198c9fe3" formatted="false">Importieren</string>
     <string name="s_5606df17" formatted="false">Import-Vorschau</string>
     <string name="s_2b1626c8" formatted="false">Schlagwort</string>
+    <string name="s_cc4407d1" formatted="false">Tags {0} · Filter {1} · Wiederkehrende Erinnerungen {2} · Papierkorb {3}</string>
+    <string name="s_91bff25f" formatted="false">Ein Tag-Konflikt verhindert das Zusammenführen ohne Verlust von Zuordnungen.</string>
     <string name="s_f7d7a0ce" formatted="false">Willkommen bei Flash</string>
     <string name="s_aef45eb7" formatted="false">Mehr wird geladen…</string>
     <string name="s_6af40858" formatted="false">Jetzt</string>
+    <string name="s_cf449d80" formatted="false">Einige Bibliotheksfelder fehlen in dieser Datei. Ersetzen löscht die fehlenden Daten. Zusammenführen behält sie auf diesem Gerät.</string>
     <string name="s_b060afd3" formatted="false">Dieses Gerät unterstützt eine Aufgaben-Zeitzone im Backup nicht. System aktualisieren und erneut versuchen. Es wurde nichts importiert</string>
     <string name="s_2f15ac82" formatted="false">Lege auf diesem Gerät eine Displaysperre fest, um die App-Sperre zu nutzen</string>
     <string name="s_f4958768" formatted="false">Alle 3 Tage</string>

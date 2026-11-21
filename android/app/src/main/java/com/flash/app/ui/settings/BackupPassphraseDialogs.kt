@@ -10,6 +10,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -31,11 +35,12 @@ import com.flash.app.data.BackupEncryption
 import com.flash.app.i18n.tr
 
 /**
- * 导出 / 分享前的加密选择（默认加密）。`onConfirm(null)` 表示用户选择不加密。
+ * 导出 / 分享前的加密选择（默认加密）。`onConfirm(null, compatibleV2)` 表示用户选择不加密。
  * 口令只放在 `remember`（不进 saved state），Flash 不保存口令。
  */
 @Composable
-internal fun BackupExportOptionsDialog(onConfirm: (String?) -> Unit, onDismiss: () -> Unit) {
+internal fun BackupExportOptionsDialog(onConfirm: (passphrase: String?, compatibleV2: Boolean) -> Unit, onDismiss: () -> Unit) {
+    var compatibleV2 by remember { mutableStateOf(false) }
     var encrypt by remember { mutableStateOf(true) }
     var passphrase by remember { mutableStateOf("") }
     var confirmation by remember { mutableStateOf("") }
@@ -44,10 +49,25 @@ internal fun BackupExportOptionsDialog(onConfirm: (String?) -> Unit, onDismiss: 
         onDismissRequest = onDismiss,
         title = { Text(tr("导出备份")) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().toggleable(value = compatibleV2, role = Role.Switch) { compatibleV2 = it },
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(tr("使用 v2 正文兼容格式"), modifier = Modifier.weight(1f))
+                    Switch(checked = compatibleV2, onCheckedChange = null)
+                }
+                Text(
+                    if (compatibleV2) tr("v2 仅导出日志、情绪和任务。标签、筛选、周期提醒、回收站与资料库偏好均会省略。")
+                    else tr("完整备份（v4）包含正文和资料库，可在支持 v4 的 Android 与 Mac 上恢复。"),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth().toggleable(value = encrypt, role = Role.Switch) { encrypt = it; problem = null },
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Text(tr("用口令加密备份（推荐）"), modifier = Modifier.weight(1f))
-                    Switch(checked = encrypt, onCheckedChange = { encrypt = it; problem = null })
+                    Switch(checked = encrypt, onCheckedChange = null)
                 }
                 Text(
                     if (encrypt) tr("没有口令的人无法读取或改动备份内容。Flash 不保存口令，忘记后无法恢复。")
@@ -66,10 +86,10 @@ internal fun BackupExportOptionsDialog(onConfirm: (String?) -> Unit, onDismiss: 
             TextButton(
                 enabled = !encrypt || passphrase.isNotEmpty(),
                 onClick = {
-                    if (!encrypt) return@TextButton onConfirm(null)
+                    if (!encrypt) return@TextButton onConfirm(null, compatibleV2)
                     val issue = BackupEncryption.exportPassphraseProblem(passphrase)
                         ?: if (passphrase != confirmation) tr("两次输入的口令不一致") else null
-                    if (issue != null) problem = issue else onConfirm(passphrase)
+                    if (issue != null) problem = issue else onConfirm(passphrase, compatibleV2)
                 },
             ) { Text(tr("继续")) }
         },

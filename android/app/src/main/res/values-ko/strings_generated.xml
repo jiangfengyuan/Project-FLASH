@@ -45,6 +45,7 @@
     <string name="s_22c3caa0" formatted="false">schemas는 객체여야 합니다</string>
     <string name="s_ad2e48cd" formatted="false">할 일</string>
     <string name="s_002e97a4" formatted="false">tasks는 배열이어야 합니다</string>
+    <string name="s_cdf354f5" formatted="false">v2는 기록, 감정, 작업만 내보냅니다. 태그, 필터, 반복 알림, 휴지통, 보관함 설정은 제외됩니다.</string>
     <string name="s_6e425eba" formatted="false">{0}: {1} · {2}: {3}</string>
     <string name="s_39ac061e" formatted="false">{0} — {1} · 기록 없는 날은 평균에서 제외</string>
     <string name="s_e2a8c96b" formatted="false">할 일 {0}개</string>
@@ -111,6 +112,7 @@
     <string name="s_79955ed0" formatted="false">슬픔</string>
     <string name="s_d7974514" formatted="false">기다리는 아이디어 {0}개. 가장 오래된 것부터 보세요</string>
     <string name="s_d908f279" formatted="false">정리를 기다리는 아이디어 {0}개. 확인해 보세요</string>
+    <string name="s_ba9285be" formatted="false">v2 본문 호환 형식 사용</string>
     <string name="s_ad5b82b0" formatted="false">저장</string>
     <string name="s_9b95e293" formatted="false">저장 중…</string>
     <string name="s_64911de5" formatted="false">JSON 파일로 저장</string>
@@ -154,6 +156,7 @@
     <string name="s_4db1b243" formatted="false">암호 문구가 틀렸거나 파일이 손상되었습니다.</string>
     <string name="s_ef638194" formatted="false">암호 문구(8자 이상)</string>
     <string name="s_4d55cb75" formatted="false">백업을 내보내거나 시스템 공유로 보내세요</string>
+    <string name="s_8e31f574" formatted="false">병합한 보관함이 백업 한도를 초과합니다.</string>
     <string name="s_5e53c03a" formatted="false">목</string>
     <string name="s_40163b46" formatted="false">오늘로 이동</string>
     <string name="s_bed63d2f" formatted="false">이번 주로</string>
@@ -172,6 +175,7 @@
     <string name="s_e4a4815a" formatted="false">화면 및 사용</string>
     <string name="s_f849ada8" formatted="false">확인</string>
     <string name="s_1e13bd21" formatted="false">완료</string>
+    <string name="s_ebe90a32" formatted="false">전체 백업(v4)에는 기록과 보관함이 포함됩니다. v4를 지원하는 Android 기기와 Mac에서 복원할 수 있습니다.</string>
     <string name="s_dd03e6ad" formatted="false">가져오기 전에 로컬 데이터와의 차이를 미리 봅니다</string>
     <string name="s_9b60ff74" formatted="false">가져오기 실패: {0}</string>
     <string name="s_da193966" formatted="false">가져오기를 취소했습니다</string>
@@ -294,9 +298,12 @@
     <string name="s_198c9fe3" formatted="false">가져오기</string>
     <string name="s_5606df17" formatted="false">가져오기 미리 보기</string>
     <string name="s_2b1626c8" formatted="false">태그</string>
+    <string name="s_cc4407d1" formatted="false">태그 {0} · 필터 {1} · 반복 알림 {2} · 휴지통 {3}</string>
+    <string name="s_91bff25f" formatted="false">태그가 충돌하여 연결을 유지한 채 병합할 수 없습니다.</string>
     <string name="s_f7d7a0ce" formatted="false">Flash에 오신 것을 환영합니다</string>
     <string name="s_aef45eb7" formatted="false">더 불러오는 중…</string>
     <string name="s_6af40858" formatted="false">지금</string>
+    <string name="s_cf449d80" formatted="false">이 파일에 일부 보관함 필드가 없습니다. 덮어쓰면 누락된 데이터가 삭제되고 병합하면 기기에 유지됩니다.</string>
     <string name="s_b060afd3" formatted="false">이 기기는 백업의 할 일 시간대를 지원하지 않습니다. 시스템을 업데이트한 뒤 다시 시도하세요. 아무것도 가져오지 않았습니다</string>
     <string name="s_2f15ac82" formatted="false">앱 잠금을 사용하려면 이 기기에 화면 잠금 암호를 설정하세요</string>
     <string name="s_f4958768" formatted="false">3일마다</string>

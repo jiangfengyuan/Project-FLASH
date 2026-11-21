@@ -33,6 +33,7 @@ data class FlashSnapshot(
     val logs: List<LogItem>,
     val emotions: List<EmotionRecord>,
     val tasks: List<TaskItem>,
+    val library: LibraryMetadata = LibraryMetadata(),
 )
 
 /**
@@ -130,10 +131,14 @@ class FlashRepository(private val db: FlashDatabase) {
         db.logDao().upsert(
             log.copy(content = normalized, importance = log.importance.coerceIn(0, 4)).toEntity()
         )
+        if (log.category != Category.IDEA) db.libraryDao().removeReminders(listOf(log.id))
         if (markViewed && log.category == Category.IDEA) markIdeaViewed(log.id)
     }
 
-    suspend fun deleteLog(id: String) = db.logDao().deleteById(id)
+    suspend fun deleteLog(id: String) = db.withTransaction {
+        db.libraryDao().detach("log:$id", id)
+        db.logDao().deleteById(id)
+    }
 
     /** 收藏切换（与 Apple 端同义：显式写入 true / false） */
     suspend fun setLogFavorite(log: LogItem, favorite: Boolean) {
@@ -149,11 +154,27 @@ class FlashRepository(private val db: FlashDatabase) {
      * 先记住已读状态，撤销时一并恢复。
      */
     suspend fun deleteLogWithUndo(log: LogItem): suspend () -> Unit {
-        val wasViewed = log.category == Category.IDEA && isIdeaViewed(log.id)
-        deleteLog(log.id)
+        val (wasViewed, associations) = db.withTransaction {
+            val state = (log.category == Category.IDEA && isIdeaViewed(log.id)) to
+                db.libraryDao().recordEntries("log:" + log.id, log.id)
+            deleteLog(log.id)
+            state
+        }
         return {
             db.withTransaction {
                 db.logDao().upsert(log.toEntity())
+                // An intervening import can replace the tag catalog. Only restore still-valid links.
+                val current = LibraryMetadata.fromRows(db.libraryDao().entries())
+                val restored = LibraryMetadata.fromRows(associations)
+                val key = "log:" + log.id
+                val valid = restored.links[key].orEmpty().filter { it in current.tags }
+                val origins = restored.automaticTags[key].orEmpty().filter { it in valid }
+                val toRestore = LibraryMetadata(
+                    links = if (valid.isEmpty()) emptyMap() else mapOf(key to valid),
+                    automaticTags = if (origins.isEmpty()) emptyMap() else mapOf(key to origins),
+                    reminders = restored.reminders,
+                ).rows().filter { it.kind in setOf("link", "automatic", "reminder") }
+                db.libraryDao().put(toRestore)
                 if (wasViewed) markIdeaViewed(log.id)
             }
         }
@@ -166,7 +187,12 @@ class FlashRepository(private val db: FlashDatabase) {
     /** 批量修改分类（记录页「待整理」整理动作用） */
     suspend fun updateLogCategories(ids: List<String>, category: Category) {
         if (ids.isEmpty()) return
-        db.logDao().updateCategoryFor(ids, category.storageKey)
+        db.withTransaction {
+            for (batch in ids.chunked(900)) {
+                db.logDao().updateCategoryFor(batch, category.storageKey)
+                if (category != Category.IDEA) db.libraryDao().removeReminders(batch)
+            }
+        }
     }
 
     /** 批量修改标签（记录页「待整理」整理动作用） */
@@ -204,7 +230,10 @@ class FlashRepository(private val db: FlashDatabase) {
         )
     }
 
-    suspend fun deleteEmotion(id: String) = db.emotionDao().deleteById(id)
+    suspend fun deleteEmotion(id: String) = db.withTransaction {
+        db.libraryDao().detach("emotion:$id", null)
+        db.emotionDao().deleteById(id)
+    }
 
     suspend fun addTask(task: TaskItem) {
         db.taskDao().upsert(task.toEntity())
@@ -247,7 +276,10 @@ class FlashRepository(private val db: FlashDatabase) {
     private suspend fun requiredTask(id: String): TaskItem =
         db.taskDao().getById(id)?.toModel() ?: error(com.flash.app.i18n.tr("这条任务已不存在"))
 
-    suspend fun deleteTask(id: String) = db.taskDao().deleteById(id)
+    suspend fun deleteTask(id: String) = db.withTransaction {
+        db.libraryDao().detach("task:$id", null)
+        db.taskDao().deleteById(id)
+    }
 
     fun newTask(
         title: String,
@@ -291,6 +323,7 @@ class FlashRepository(private val db: FlashDatabase) {
                 logs = db.logDao().getAll().map { it.toModel() },
                 emotions = db.emotionDao().getAll().map { it.toModel() },
                 tasks = db.taskDao().getAll().map { it.toModel() },
+                library = LibraryMetadata.fromRows(db.libraryDao().entries()).withoutExpired(),
             )
         }
     }
@@ -300,6 +333,7 @@ class FlashRepository(private val db: FlashDatabase) {
         logs: List<LogItem>,
         emotions: List<EmotionRecord>,
         tasks: List<TaskItem>,
+        library: LibraryMetadata? = null,
     ) {
         db.withTransaction {
             db.logDao().clearAll()
@@ -308,6 +342,7 @@ class FlashRepository(private val db: FlashDatabase) {
             db.logDao().upsertAll(logs.map { it.toEntity() })
             db.emotionDao().upsertAll(emotions.map { it.toEntity() })
             db.taskDao().upsertAll(tasks.map { it.toEntity() })
+            writeLibrary((library ?: LibraryMetadata()).imported().withoutExpired())
         }
     }
 
@@ -317,13 +352,14 @@ class FlashRepository(private val db: FlashDatabase) {
         logs: List<LogItem>,
         emotions: List<EmotionRecord>,
         tasks: List<TaskItem>,
+        library: LibraryMetadata? = null,
     ): FlashSnapshot? = db.withTransaction {
         val current = exportSnapshot()
         currentCoroutineContext().ensureActive()
         if (!BackupDiff.sameData(expected, current)) return@withTransaction current
         // Nested Room transactions share this transaction: compare and replace
         // cannot be separated by another local writer.
-        replaceAll(logs, emotions, tasks)
+        replaceAll(logs, emotions, tasks, library)
         null
     }
 
@@ -332,6 +368,7 @@ class FlashRepository(private val db: FlashDatabase) {
         logs: List<LogItem>,
         emotions: List<EmotionRecord>,
         tasks: List<TaskItem>,
+        library: LibraryMetadata? = null,
     ) {
         db.withTransaction {
             db.logDao().upsertAll(logs.map { it.toEntity() })
@@ -342,7 +379,27 @@ class FlashRepository(private val db: FlashDatabase) {
                 local == null || Backup.normalizedTimestamp(incoming.updatedAt) >= Backup.normalizedTimestamp(local.updatedAt)
             }
             db.taskDao().upsertAll(accepted.map { it.toEntity() })
+            if (library != null) {
+                val current = LibraryMetadata.fromRows(db.libraryDao().entries()).withoutExpired()
+                val merged = current.merge(library)
+                // Two legal files can exceed a contract limit when combined. Reject the
+                // entire transaction rather than commit a library that cannot be exported.
+                if (merged.tagCount > 1000 || merged.filterCount > 100 ||
+                    merged.links.values.any { it.size > 20 } ||
+                    merged.trashCount > Backup.MAX_ENTRY_COUNT || merged.reminderCount > Backup.MAX_ENTRY_COUNT) {
+                    throw Backup.BackupFormatException(com.flash.app.i18n.tr("合并后资料库超出备份上限"))
+                }
+                writeLibrary(merged)
+            }
+            for (batch in logs.filter { it.category != Category.IDEA }.map { it.id }.chunked(900)) {
+                db.libraryDao().removeReminders(batch)
+            }
         }
+    }
+
+    private suspend fun writeLibrary(library: LibraryMetadata) {
+        db.libraryDao().clear()
+        db.libraryDao().put(library.rows())
     }
 
     suspend fun clearAll() {
@@ -350,6 +407,7 @@ class FlashRepository(private val db: FlashDatabase) {
             db.logDao().clearAll()
             db.emotionDao().clearAll()
             db.taskDao().clearAll()
+            db.libraryDao().clear()
         }
     }
 }

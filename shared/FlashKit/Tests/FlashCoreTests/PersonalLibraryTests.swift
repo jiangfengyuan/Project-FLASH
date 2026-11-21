@@ -4,6 +4,38 @@ import SwiftData
 @testable import FlashCore
 
 @Suite @MainActor struct PersonalLibraryTests {
+    @Test(arguments: [false, true])
+    func ambiguousTagRenameRefusesMergeAtomically(reverseIncomingOrder: Bool) async throws {
+        let repo = FlashRepository(container: FlashDatabase.makeContainer(inMemory: true))
+        let logID = UUID().uuidString
+        try repo.addLog(id: logID, content: "Keep local text", colorTag: .daily)
+        let original = PersonalTag(name: "Reading")
+        var local = PersonalLibrary()
+        local.tags = [original]
+        local.links["log:" + logID] = [original.id]
+        try repo.savePersonalLibrary(local)
+        let before = try repo.snapshot()
+
+        var renamed = original
+        renamed.name = "Journal"
+        let alias = PersonalTag(name: "Reading")
+        var incoming = PersonalLibrary()
+        incoming.tags = reverseIncomingOrder ? [renamed, alias] : [alias, renamed]
+        incoming.links["log:" + logID] = [alias.id, renamed.id]
+        var changedLog = before.logs[0]
+        changedLog.content = "Incoming text"
+        let file = try LibraryBackup.export(FlashSnapshot(logs: [changedLog], emotions: [], tasks: [],
+                                                          library: incoming), appVersion: "test")
+        let preview = try await BackupImportCoordinator.preview(text: file, recovery: false, passphrase: nil, against: before)
+        var rebuilt = false
+        await #expect(throws: BackupError.conflictingLibraryTags) {
+            _ = try await BackupImportCoordinator.apply(preview, overwrite: false, previewSnapshot: before,
+                                                        repository: repo, rebuildReminders: { _ in rebuilt = true })
+        }
+        #expect(try repo.snapshot() == before)
+        #expect(!rebuilt)
+    }
+
     @Test func tagsFiltersAndEncryptedBackupRoundTrip() async throws {
         let container = FlashDatabase.makeContainer(inMemory:true)
         let repository = FlashRepository(container:container)

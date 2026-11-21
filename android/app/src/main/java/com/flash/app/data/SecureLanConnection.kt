@@ -75,6 +75,8 @@ internal class SecureLanConnection(private val socket: Socket) {
                             // Core already rejects malformed UTF-8 and BOM.
                             val json = bytes.toString(Charsets.UTF_8)
                             val backup = Backup.parseStrict(json)
+                            // The quarantined LAN contract only negotiates v2 content.
+                            check(backup.sourceVersion == Backup.BACKUP_VERSION) { "LAN_BACKUP" }
                             currentCoroutineContext().ensureActive()
                             check(!cancelled.get())
                             checked(LanNative.action(id, 8, SystemClock.elapsedRealtime(), 1))

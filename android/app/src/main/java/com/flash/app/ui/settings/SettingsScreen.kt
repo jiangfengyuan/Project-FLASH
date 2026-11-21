@@ -469,17 +469,18 @@ fun BackupSettingsScreen(onBack: () -> Unit) {
 
     exportOptionsFor?.let { target ->
         BackupExportOptionsDialog(
-            onConfirm = { passphrase ->
+            onConfirm = { passphrase, compatibleV2 ->
                 exportOptionsFor = null
                 when (target) {
                     BackupExportTarget.FILE -> {
-                        viewModel.chooseExport(passphrase)
+                        viewModel.chooseExport(passphrase, compatibleV2)
                         // 文件名固定用与语言无关的数字，便于跨端识别；加密备份带 -encrypted，扩展名仍为 .json
                         val timestamp = LocalDateTime.now()
                             .format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HHmmss", Locale.ROOT))
-                        exportLauncher.launch("flash-backup-$timestamp${if (passphrase != null) "-encrypted" else ""}.json")
+                        val format = if (compatibleV2) "v2" else "v4"
+                        exportLauncher.launch("flash-backup-$format-$timestamp${if (passphrase != null) "-encrypted" else ""}.json")
                     }
-                    BackupExportTarget.SHARE -> viewModel.prepareBackupTransfer(passphrase)
+                    BackupExportTarget.SHARE -> viewModel.prepareBackupTransfer(passphrase, compatibleV2)
                 }
             },
             onDismiss = { exportOptionsFor = null },
@@ -506,6 +507,12 @@ fun BackupSettingsScreen(onBack: () -> Unit) {
                 Text(
                     buildString {
                         append(tr("包含 {0} 条日志、{1} 条情绪、{2} 个任务", preview.logCount, preview.emotionCount, preview.taskCount))
+                        preview.library?.let { library ->
+                            append("\n" + tr("标签 {0} · 筛选 {1} · 周期提醒 {2} · 回收站 {3}", library.tagCount, library.filterCount, library.reminderCount, library.trashCount))
+                        }
+                        if (preview.sourceVersion != "flash-backup-v4" && preview.localSnapshot.library.hasExtendedData) {
+                            append("\n" + tr("此文件未包含全部资料库字段。覆盖将清除文件中缺少的资料，合并会保留这些本机资料。"))
+                        }
                         if (skipped > 0) append("\n" + tr("{0} 条数据格式异常，将被跳过。", skipped))
                         append("\n\n" + tr("差异分析"))
                         append("\n" + line(tr("日志"), preview.difference.logs))
@@ -513,6 +520,7 @@ fun BackupSettingsScreen(onBack: () -> Unit) {
                         append("\n" + line(tr("任务"), preview.difference.tasks))
                         append("\n\n" + tr("差异合并会新增或更新接收数据，并保留仅本机数据；覆盖会先清空本机数据。"))
                     },
+                    modifier = Modifier.verticalScroll(rememberScrollState()),
                 )
             },
             confirmButton = {

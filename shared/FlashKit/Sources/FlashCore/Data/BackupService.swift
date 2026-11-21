@@ -14,6 +14,7 @@ public enum BackupError: Error, Equatable, Sendable {
     case invalidArray(String)
     case invalidObject(String)
     case contract(String)
+    case conflictingLibraryTags
     case fileTooLarge
     case unsupportedTimeZone
     /// 当前为内存降级的临时存储：导出只会包含本次启动后的内容，导入也会在退出后丢失（F-07）
@@ -39,6 +40,7 @@ public enum BackupError: Error, Equatable, Sendable {
         case .invalidArray(let name): L("\(name) 必须是数组")
         case .invalidObject(let name): L("\(name) 必须是对象")
         case .contract(let path): L("\(path)：不符合备份契约，请检查文件或使用恢复入口")
+        case .conflictingLibraryTags: L("标签冲突，无法无损合并")
         case .fileTooLarge: L("文件过大，不是有效的备份")
         case .unsupportedTimeZone: L("此设备不支持备份中的任务时区，请更新系统后重试；未导入任何数据")
         case .temporaryStore: L("本地数据库暂时无法打开，当前只有本次启动后的临时内容，不能导出或导入。原有数据未被改动，请完全退出 Flash 后重新打开再试")

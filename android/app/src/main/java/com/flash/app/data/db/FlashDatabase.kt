@@ -12,8 +12,8 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
-    entities = [LogEntity::class, EmotionEntity::class, IdeaViewStateEntity::class, TaskEntity::class],
-    version = 5,
+    entities = [LogEntity::class, EmotionEntity::class, IdeaViewStateEntity::class, TaskEntity::class, LibraryEntry::class],
+    version = 6,
     exportSchema = true,
 )
 abstract class FlashDatabase : RoomDatabase() {
@@ -21,7 +21,17 @@ abstract class FlashDatabase : RoomDatabase() {
     abstract fun emotionDao(): EmotionDao
     abstract fun taskDao(): TaskDao
 
+    abstract fun libraryDao(): LibraryDao
+
     companion object {
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""CREATE TABLE IF NOT EXISTS `library_entries` (
+                    `kind` TEXT NOT NULL, `entryKey` TEXT NOT NULL, `position` INTEGER NOT NULL,
+                    `value` TEXT NOT NULL, PRIMARY KEY(`kind`, `entryKey`))""")
+            }
+        }
+
         /** v2 仅增加本地 Idea 阅读状态，不改动任何跨平台内容字段。 */
         val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(db: SupportSQLiteDatabase) {

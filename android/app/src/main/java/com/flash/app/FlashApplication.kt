@@ -38,7 +38,7 @@ class FlashApplication : Application() {
             .addMigrations(FlashDatabase.MIGRATION_1_2)
             .addMigrations(FlashDatabase.MIGRATION_2_3)
             .addMigrations(FlashDatabase.MIGRATION_3_4)
-            .addMigrations(FlashDatabase.MIGRATION_4_5)
+            .addMigrations(FlashDatabase.MIGRATION_4_5, FlashDatabase.MIGRATION_5_6)
             .build()
         repository = FlashRepository(db)
         settings = SettingsStore(this)

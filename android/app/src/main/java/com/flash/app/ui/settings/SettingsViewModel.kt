@@ -20,6 +20,7 @@ import com.flash.app.data.BackupDiff
 import com.flash.app.data.BackupDifference
 import com.flash.app.data.BackupEncryption
 import com.flash.app.data.BackupImportSession
+import com.flash.app.data.LibraryMetadata
 import com.flash.app.data.LocalBackupTransfer
 import com.flash.app.data.SecureLanController
 import com.flash.app.data.SettingsStore
@@ -58,6 +59,8 @@ data class ImportPreview(
     val tasks: List<com.flash.app.data.model.TaskItem>,
     val difference: BackupDifference,
     val recovery: Boolean = false,
+    val library: LibraryMetadata?,
+    val sourceVersion: String,
     /** 预览生成时的本地快照；覆盖导入前用它做 TOCTOU 重校验。 */
     val localSnapshot: com.flash.app.data.FlashSnapshot,
 )
@@ -94,10 +97,7 @@ class SettingsViewModel(
      */
     private var pendingExport: ExportChoice? = null
 
-    private sealed interface ExportChoice {
-        data object Plain : ExportChoice
-        class Encrypted(val passphrase: String) : ExportChoice
-    }
+    private class ExportChoice(val passphrase: String?, val compatibleV2: Boolean)
 
     private val _shareUri = MutableStateFlow<Uri?>(null)
     val shareUri: StateFlow<Uri?> = _shareUri.asStateFlow()
@@ -115,8 +115,8 @@ class SettingsViewModel(
     }
 
     /** 第一步：记下加密选择（`null` = 不加密），随后界面打开系统「创建文件」 */
-    fun chooseExport(passphrase: String?) {
-        pendingExport = if (passphrase == null) ExportChoice.Plain else ExportChoice.Encrypted(passphrase)
+    fun chooseExport(passphrase: String?, compatibleV2: Boolean = false) {
+        pendingExport = ExportChoice(passphrase, compatibleV2)
     }
 
     /** 用户取消了系统「创建文件」：丢弃记下的口令 */
@@ -134,8 +134,8 @@ class SettingsViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 val snapshot = repository.exportSnapshot()
-                val plain = Backup.exportJson(snapshot.logs, snapshot.emotions, snapshot.tasks)
-                val json = if (choice is ExportChoice.Encrypted) BackupEncryption.encrypt(plain, choice.passphrase) else plain
+                val plain = Backup.exportSnapshot(snapshot, compatibleV2 = choice.compatibleV2)
+                val json = choice.passphrase?.let { BackupEncryption.encrypt(plain, it) } ?: plain
                 app.contentResolver.openOutputStream(target, "wt")?.use { out ->
                     out.write(json.toByteArray(Charsets.UTF_8))
                 } ?: error(com.flash.app.i18n.tr("无法写入文件"))
@@ -148,13 +148,13 @@ class SettingsViewModel(
     }
 
     /** `passphrase` 为 null 时分享明文备份 */
-    fun prepareBackupTransfer(passphrase: String?) {
+    fun prepareBackupTransfer(passphrase: String?, compatibleV2: Boolean = false) {
         if (_transferInProgress.value) return
         _transferInProgress.value = true
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 val snapshot = repository.exportSnapshot()
-                val plain = Backup.exportJson(snapshot.logs, snapshot.emotions, snapshot.tasks)
+                val plain = Backup.exportSnapshot(snapshot, compatibleV2 = compatibleV2)
                 val json = if (passphrase != null) BackupEncryption.encrypt(plain, passphrase) else plain
                 BackupTransfer.createShareUri(app, json, encrypted = passphrase != null)
             }.onSuccess {
@@ -234,6 +234,7 @@ class SettingsViewModel(
                     logs = result.logs, emotions = result.emotions, tasks = result.tasks,
                     difference = BackupDiff.analyze(local.logs, local.emotions, result.logs, result.emotions, local.tasks, result.tasks),
                     localSnapshot = local, recovery = false,
+                    library = result.library, sourceVersion = result.sourceVersion,
                 )
                 currentCoroutineContext().ensureActive()
                 importSession.publish(generation) { _importPreview.value = preview }
@@ -339,6 +340,8 @@ class SettingsViewModel(
         val local = repository.exportSnapshot()
         return ImportPreview(
             recovery = recovery,
+            library = result.library,
+            sourceVersion = result.sourceVersion,
             logCount = result.logs.size,
             emotionCount = result.emotions.size,
             skippedLogs = result.skippedLogs,
@@ -368,7 +371,7 @@ class SettingsViewModel(
                     currentCoroutineContext().ensureActive()
                     if (overwrite) {
                         val current = repository.replaceAllIfCurrent(
-                            preview.localSnapshot, preview.logs, preview.emotions, preview.tasks)
+                            preview.localSnapshot, preview.logs, preview.emotions, preview.tasks, library = preview.library)
                         if (current != null) {
                             importSession.publish(generation) {
                                 _importPreview.value = preview.copy(
@@ -383,7 +386,7 @@ class SettingsViewModel(
                             return@launch
                         }
                     } else {
-                        repository.mergeAll(preview.logs, preview.emotions, preview.tasks)
+                        repository.mergeAll(preview.logs, preview.emotions, preview.tasks, library = preview.library)
                     }
                 }
                 if (databaseResult.isFailure) {

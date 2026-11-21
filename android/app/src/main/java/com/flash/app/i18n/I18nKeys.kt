@@ -4,7 +4,7 @@ package com.flash.app.i18n
 import com.flash.app.R
 
 internal object I18nKeys {
-    val strings: Map<String, Int> = HashMap<String, Int>(800).apply {
+    val strings: Map<String, Int> = HashMap<String, Int>(814).apply {
         chunk0(this)
         chunk1(this)
     }
@@ -50,6 +50,7 @@ internal object I18nKeys {
         map["schemas 必须是对象"] = R.string.s_22c3caa0
         map["tasks"] = R.string.s_ad2e48cd
         map["tasks 必须是数组"] = R.string.s_002e97a4
+        map["v2 仅导出日志、情绪和任务。标签、筛选、周期提醒、回收站与资料库偏好均会省略。"] = R.string.s_cdf354f5
         map["{0} {1} 条 · {2} {3} 条"] = R.string.s_6e425eba
         map["{0} — {1} · 无记录日期不计入均值"] = R.string.s_39ac061e
         map["{0} 个任务"] = R.string.s_e2a8c96b
@@ -116,6 +117,7 @@ internal object I18nKeys {
         map["伤心"] = R.string.s_79955ed0
         map["你还有 {0} 个想法，先看看最早的一条"] = R.string.s_d7974514
         map["你还有{0}个想法等待梳理，去看看吧"] = R.string.s_d908f279
+        map["使用 v2 正文兼容格式"] = R.string.s_ba9285be
         map["保存"] = R.string.s_ad5b82b0
         map["保存中…"] = R.string.s_9b95e293
         map["保存为 JSON 文件"] = R.string.s_64911de5
@@ -159,6 +161,7 @@ internal object I18nKeys {
         map["口令错误，或文件已损坏"] = R.string.s_4db1b243
         map["口令（至少 8 个字符）"] = R.string.s_ef638194
         map["可导出备份或通过系统分享传输"] = R.string.s_4d55cb75
+        map["合并后资料库超出备份上限"] = R.string.s_8e31f574
         map["四"] = R.string.s_5e53c03a
         map["回到今天"] = R.string.s_40163b46
         map["回到本周"] = R.string.s_bed63d2f
@@ -177,6 +180,7 @@ internal object I18nKeys {
         map["外观与使用"] = R.string.s_e4a4815a
         map["好"] = R.string.s_f849ada8
         map["完成"] = R.string.s_1e13bd21
+        map["完整备份（v4）包含正文和资料库，可在支持 v4 的 Android 与 Mac 上恢复。"] = R.string.s_ebe90a32
         map["导入前预览与本地数据的差异"] = R.string.s_dd03e6ad
         map["导入失败：{0}"] = R.string.s_9b60ff74
         map["导入已取消"] = R.string.s_da193966
@@ -299,12 +303,18 @@ internal object I18nKeys {
         map["标准导入"] = R.string.s_198c9fe3
         map["标准导入预览"] = R.string.s_5606df17
         map["标签"] = R.string.s_2b1626c8
+        map["标签 {0} · 筛选 {1} · 周期提醒 {2} · 回收站 {3}"] = R.string.s_cc4407d1
+        map["标签冲突，无法无损合并"] = R.string.s_91bff25f
         map["欢迎来到 Flash"] = R.string.s_f7d7a0ce
         map["正在加载更多…"] = R.string.s_aef45eb7
         map["此刻"] = R.string.s_6af40858
+        map["此文件未包含全部资料库字段。覆盖将清除文件中缺少的资料，合并会保留这些本机资料。"] = R.string.s_cf449d80
         map["此设备不支持备份中的任务时区，请更新系统后重试；未导入任何数据"] = R.string.s_b060afd3
         map["此设备未设置锁屏密码，无法开启应用锁"] = R.string.s_2f15ac82
         map["每 3 天"] = R.string.s_f4958768
+    }
+
+    private fun chunk1(map: MutableMap<String, Int>) {
         map["每周"] = R.string.s_41be2fe2
         map["每天"] = R.string.s_02c285b5
         map["每天的日志、灵感与情绪次数 · 不含任务"] = R.string.s_18fa51bd
@@ -312,9 +322,6 @@ internal object I18nKeys {
         map["没有口令的人无法读取或改动备份内容。Flash 不保存口令，忘记后无法恢复。"] = R.string.s_3aa61c82
         map["没有可用的分享应用"] = R.string.s_5816c303
         map["没有找到相关记录"] = R.string.s_43c975df
-    }
-
-    private fun chunk1(map: MutableMap<String, Int>) {
         map["没有符合条件的日志"] = R.string.s_f8bc527e
         map["活跃天数"] = R.string.s_0fed9772
         map["浅色"] = R.string.s_11b5fdf6

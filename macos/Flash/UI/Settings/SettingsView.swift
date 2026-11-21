@@ -211,11 +211,15 @@ struct SettingsView: View {
     private func passphraseSheet(_ request: PassphraseRequest) -> some View {
         switch request.kind {
         case .export, .share:
-            BackupPassphraseSheet(mode: .export { passphrase in
+            BackupPassphraseSheet(mode: .exportWithFormat { format, passphrase in
                 passphraseRequest = nil
                 // 等 sheet 收起后再弹系统面板，避免模态叠加
                 DispatchQueue.main.async {
-                    if request.kind == .export { exportBackup(passphrase: passphrase) } else { transferBackup(passphrase: passphrase) }
+                    if request.kind == .export {
+                        exportBackup(format: format, passphrase: passphrase)
+                    } else {
+                        transferBackup(format: format, passphrase: passphrase)
+                    }
                 }
             }, onCancel: { passphraseRequest = nil })
         case .unlock(let text, let error):
@@ -226,7 +230,7 @@ struct SettingsView: View {
         }
     }
 
-    private func transferBackup(passphrase: String?) {
+    private func transferBackup(format: BackupExportFormat, passphrase: String?) {
         isBusy = true
         Task {
             defer { isBusy = false }
@@ -234,10 +238,10 @@ struct SettingsView: View {
                 let snapshot = try currentSnapshot()
                 let version = appVersion
                 let json = try await BackupImportCoordinator.exportJSON(snapshot: snapshot, appVersion: version,
-                                                                        passphrase: passphrase)
+                                                                        format: format, passphrase: passphrase)
                 let encrypted = passphrase != nil
                 let url = try await Task.detached(priority: .userInitiated) {
-                    try BackupTransfer.createShareFile(json: json, encrypted: encrypted)
+                    try BackupTransfer.createShareFile(json: json, encrypted: encrypted, format: format)
                 }.value
                 guard let view = NSApp.keyWindow?.contentView ?? NSApp.mainWindow?.contentView else {
                     throw TransferPresentationError.noWindow
@@ -309,10 +313,10 @@ struct SettingsView: View {
         DispatchQueue.main.async { passphraseRequest = .export }
     }
 
-    private func exportBackup(passphrase: String?) {
+    private func exportBackup(format: BackupExportFormat, passphrase: String?) {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.json]
-        panel.nameFieldStringValue = BackupImportCoordinator.exportFileName(encrypted: passphrase != nil)
+        panel.nameFieldStringValue = BackupImportCoordinator.exportFileName(encrypted: passphrase != nil, format: format)
         guard panel.runModal() == .OK, let url = panel.url else { return }
         isBusy = true
         Task {
@@ -322,7 +326,7 @@ struct SettingsView: View {
                 let snapshot = try currentSnapshot()
                 let version = appVersion
                 let json = try await BackupImportCoordinator.exportJSON(snapshot: snapshot, appVersion: version,
-                                                                        passphrase: passphrase)
+                                                                        format: format, passphrase: passphrase)
                 try await Task.detached(priority: .userInitiated) {
                     try BackupTransfer.writeExportFile(json: json, to: url)
                 }.value

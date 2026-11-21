@@ -629,6 +629,15 @@
   "ko": "tasks는 배열이어야 합니다",
   "ru": "tasks должно быть массивом"
  },
+ "v2 仅导出日志、情绪和任务。标签、筛选、周期提醒、回收站与资料库偏好均会省略。": {
+  "ar": "يصدّر v2 السجلات والحالات المزاجية والمهام فقط. ويستبعد الوسوم والمرشحات والتذكيرات الدورية وسلة المحذوفات وتفضيلات المكتبة.",
+  "de": "v2 exportiert nur Einträge, Stimmungen und Aufgaben. Tags, Filter, wiederkehrende Ideenerinnerungen, Papierkorb und Bibliothekseinstellungen entfallen.",
+  "en": "v2 exports logs, moods and tasks only. It omits tags, filters, recurring idea reminders, trash and library preferences.",
+  "fr": "Le format v2 exporte uniquement les entrées, les humeurs et les tâches. Il exclut les étiquettes, les filtres, les rappels récurrents, la corbeille et les préférences.",
+  "ja": "v2 では記録・気分・タスクのみを書き出します。タグ、フィルター、定期リマインダー、ゴミ箱、ライブラリ設定は含まれません。",
+  "ko": "v2는 기록, 감정, 작업만 내보냅니다. 태그, 필터, 반복 알림, 휴지통, 보관함 설정은 제외됩니다.",
+  "ru": "В v2 сохраняются только записи, настроения и задачи. Метки, фильтры, периодические напоминания об идеях, корзина и настройки библиотеки будут пропущены."
+ },
  "{0} {1} 条 · {2} {3} 条": {
   "ar": "{0}: {1} · {2}: {3}",
   "de": "{0}: {1} · {2}: {3}",
@@ -1844,6 +1853,15 @@
   "ko": "정리를 기다리는 아이디어 {0}개. 확인해 보세요",
   "ru": "Идей ждут разбора: {0}. Загляните"
  },
+ "使用 v2 正文兼容格式": {
+  "ar": "استخدام تنسيق v2 للمحتوى فقط",
+  "de": "v2-Format nur für Inhalte verwenden",
+  "en": "Use the v2 content-only format",
+  "fr": "Utiliser le format v2 (contenu seul)",
+  "ja": "本文のみの互換形式（v2）を使う",
+  "ko": "v2 본문 호환 형식 사용",
+  "ru": "Использовать формат v2 только для записей"
+ },
  "保存": {
   "ar": "حفظ",
   "de": "Speichern",
@@ -2654,6 +2672,15 @@
   "ko": "병합",
   "ru": "Объединить"
  },
+ "合并后资料库超出备份上限": {
+  "ar": "تتجاوز المكتبة المدمجة الحد الأقصى للنسخة الاحتياطية.",
+  "de": "Die zusammengeführte Bibliothek überschreitet die Sicherungsgrenze.",
+  "en": "The merged library exceeds the backup limit.",
+  "fr": "La bibliothèque fusionnée dépasse la limite de sauvegarde.",
+  "ja": "結合後のライブラリはバックアップの上限を超えています。",
+  "ko": "병합한 보관함이 백업 한도를 초과합니다.",
+  "ru": "Объединённая библиотека превышает лимит резервной копии."
+ },
  "名称": {
   "ar": "الاسم",
   "de": "Name",
@@ -3130,6 +3157,15 @@
   "ja": "完了",
   "ko": "완료",
   "ru": "Готово"
+ },
+ "完整备份（v4）包含正文和资料库，可在支持 v4 的 Android 与 Mac 上恢复。": {
+  "ar": "تتضمن النسخة الكاملة (v4) سجلاتك ومكتبتك. يمكنك استعادتها على أجهزة Android وMac التي تدعم v4.",
+  "de": "Die vollständige Sicherung (v4) enthält Einträge und Bibliothek. Sie lässt sich auf Android-Geräten und Macs mit v4-Unterstützung wiederherstellen.",
+  "en": "A full backup (v4) includes your records and library. Restore it on an Android device or Mac that supports v4.",
+  "fr": "La sauvegarde complète (v4) inclut vos entrées et votre bibliothèque. Elle peut être restaurée sur un appareil Android ou un Mac compatible v4.",
+  "ja": "完全バックアップ（v4）には記録とライブラリが含まれます。v4 対応の Android と Mac で復元できます。",
+  "ko": "전체 백업(v4)에는 기록과 보관함이 포함됩니다. v4를 지원하는 Android 기기와 Mac에서 복원할 수 있습니다.",
+  "ru": "Полная копия (v4) включает записи и библиотеку. Её можно восстановить на Android или Mac с поддержкой v4."
  },
  "实况窗": {
   "ar": "العرض المباشر",
@@ -5957,6 +5993,15 @@
   "ko": "태그",
   "ru": "Метка"
  },
+ "标签 {0} · 筛选 {1} · 周期提醒 {2} · 回收站 {3}": {
+  "ar": "الوسوم {0} · المرشحات {1} · التذكيرات الدورية {2} · المحذوفات {3}",
+  "de": "Tags {0} · Filter {1} · Wiederkehrende Erinnerungen {2} · Papierkorb {3}",
+  "en": "Tags {0} · Filters {1} · Recurring reminders {2} · Trash {3}",
+  "fr": "Étiquettes {0} · Filtres {1} · Rappels récurrents {2} · Corbeille {3}",
+  "ja": "タグ {0} · フィルター {1} · 定期リマインダー {2} · ゴミ箱 {3}",
+  "ko": "태그 {0} · 필터 {1} · 반복 알림 {2} · 휴지통 {3}",
+  "ru": "Метки {0} · Фильтры {1} · Периодические напоминания {2} · Корзина {3}"
+ },
  "标签、重要度、日期": {
   "ar": "الوسم والأهمية والتاريخ",
   "de": "Schlagwort, Wichtigkeit, Datum",
@@ -5965,6 +6010,15 @@
   "ja": "タグ・重要度・日付",
   "ko": "태그, 중요도, 날짜",
   "ru": "Метка, важность, дата"
+ },
+ "标签冲突，无法无损合并": {
+  "ar": "يمنع تعارض الوسوم الدمج دون فقدان الارتباطات.",
+  "de": "Ein Tag-Konflikt verhindert das Zusammenführen ohne Verlust von Zuordnungen.",
+  "en": "Conflicting tags cannot be merged without losing associations.",
+  "fr": "Un conflit entre étiquettes empêche la fusion sans perte de liens.",
+  "ja": "タグが競合しており、関連付けを保持したまま結合できません。",
+  "ko": "태그가 충돌하여 연결을 유지한 채 병합할 수 없습니다.",
+  "ru": "Из-за конфликта меток объединение привело бы к потере связей."
  },
  "标签推荐": {
   "ar": "اقتراحات الوسوم",
@@ -6172,6 +6226,15 @@
   "ja": "この操作は取り消せません。",
   "ko": "이 작업은 취소할 수 없습니다.",
   "ru": "Это действие нельзя отменить."
+ },
+ "此文件未包含全部资料库字段。覆盖将清除文件中缺少的资料，合并会保留这些本机资料。": {
+  "ar": "يفتقد هذا الملف بعض حقول المكتبة. يؤدي الاستبدال إلى حذف البيانات الغائبة، بينما يحتفظ الدمج بها على هذا الجهاز.",
+  "de": "Einige Bibliotheksfelder fehlen in dieser Datei. Ersetzen löscht die fehlenden Daten. Zusammenführen behält sie auf diesem Gerät.",
+  "en": "This file omits some library fields. Replacing clears the omitted data. Merging keeps it on this device.",
+  "fr": "Certains champs de la bibliothèque sont absents de ce fichier. Le remplacement les efface. La fusion les conserve sur cet appareil.",
+  "ja": "このファイルには一部のライブラリ項目がありません。上書きすると省略されたデータが消去され、結合すると端末に保持されます。",
+  "ko": "이 파일에 일부 보관함 필드가 없습니다. 덮어쓰면 누락된 데이터가 삭제되고 병합하면 기기에 유지됩니다.",
+  "ru": "В файле отсутствуют некоторые поля библиотеки. При замене эти данные будут удалены, при объединении останутся на устройстве."
  },
  "此设备不支持任务时区，请更新系统后重试": {
   "ar": "لا يدعم هذا الجهاز المنطقة الزمنية للمهمة. حدّث النظام وحاول مجددًا",

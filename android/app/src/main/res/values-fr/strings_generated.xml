@@ -45,6 +45,7 @@
     <string name="s_22c3caa0" formatted="false">schemas doit être un objet</string>
     <string name="s_ad2e48cd" formatted="false">tâches</string>
     <string name="s_002e97a4" formatted="false">tasks doit être un tableau</string>
+    <string name="s_cdf354f5" formatted="false">Le format v2 exporte uniquement les entrées, les humeurs et les tâches. Il exclut les étiquettes, les filtres, les rappels récurrents, la corbeille et les préférences.</string>
     <string name="s_6e425eba" formatted="false">{0} : {1} · {2} : {3}</string>
     <string name="s_39ac061e" formatted="false">{0} — {1} · les jours sans entrée ne comptent pas</string>
     <string name="s_e2a8c96b" formatted="false">Tâches : {0}</string>
@@ -111,6 +112,7 @@
     <string name="s_79955ed0" formatted="false">Triste</string>
     <string name="s_d7974514" formatted="false">Idées en attente : {0}. Commencez par la plus ancienne</string>
     <string name="s_d908f279" formatted="false">Idées à revoir : {0}. Jetez-y un œil</string>
+    <string name="s_ba9285be" formatted="false">Utiliser le format v2 (contenu seul)</string>
     <string name="s_ad5b82b0" formatted="false">Enregistrer</string>
     <string name="s_9b95e293" formatted="false">Enregistrement…</string>
     <string name="s_64911de5" formatted="false">Enregistrer en fichier JSON</string>
@@ -154,6 +156,7 @@
     <string name="s_4db1b243" formatted="false">Phrase secrète incorrecte, ou fichier endommagé.</string>
     <string name="s_ef638194" formatted="false">Phrase secrète (8 caractères minimum)</string>
     <string name="s_4d55cb75" formatted="false">Exportez une sauvegarde ou envoyez-la via le partage système</string>
+    <string name="s_8e31f574" formatted="false">La bibliothèque fusionnée dépasse la limite de sauvegarde.</string>
     <string name="s_5e53c03a" formatted="false">Jeu</string>
     <string name="s_40163b46" formatted="false">Revenir à aujourd\'hui</string>
     <string name="s_bed63d2f" formatted="false">Cette semaine</string>
@@ -172,6 +175,7 @@
     <string name="s_e4a4815a" formatted="false">Apparence et utilisation</string>
     <string name="s_f849ada8" formatted="false">OK</string>
     <string name="s_1e13bd21" formatted="false">Terminé</string>
+    <string name="s_ebe90a32" formatted="false">La sauvegarde complète (v4) inclut vos entrées et votre bibliothèque. Elle peut être restaurée sur un appareil Android ou un Mac compatible v4.</string>
     <string name="s_dd03e6ad" formatted="false">Aperçu des différences avec les données locales avant l\'importation</string>
     <string name="s_9b60ff74" formatted="false">Échec de l\'importation : {0}</string>
     <string name="s_da193966" formatted="false">Importation annulée</string>
@@ -294,9 +298,12 @@
     <string name="s_198c9fe3" formatted="false">Importer</string>
     <string name="s_5606df17" formatted="false">Aperçu de l\'importation</string>
     <string name="s_2b1626c8" formatted="false">Étiquette</string>
+    <string name="s_cc4407d1" formatted="false">Étiquettes {0} · Filtres {1} · Rappels récurrents {2} · Corbeille {3}</string>
+    <string name="s_91bff25f" formatted="false">Un conflit entre étiquettes empêche la fusion sans perte de liens.</string>
     <string name="s_f7d7a0ce" formatted="false">Bienvenue dans Flash</string>
     <string name="s_aef45eb7" formatted="false">Chargement…</string>
     <string name="s_6af40858" formatted="false">Maintenant</string>
+    <string name="s_cf449d80" formatted="false">Certains champs de la bibliothèque sont absents de ce fichier. Le remplacement les efface. La fusion les conserve sur cet appareil.</string>
     <string name="s_b060afd3" formatted="false">Cet appareil ne prend pas en charge un fuseau horaire de la sauvegarde. Mettez à jour le système et réessayez. Rien n\'a été importé</string>
     <string name="s_2f15ac82" formatted="false">Définissez un code de verrouillage sur cet appareil pour utiliser le verrouillage de l\'app</string>
     <string name="s_f4958768" formatted="false">Tous les 3 jours</string>

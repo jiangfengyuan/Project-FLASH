@@ -45,6 +45,7 @@
     <string name="s_22c3caa0" formatted="false">schemas 必须是对象</string>
     <string name="s_ad2e48cd" formatted="false">任务</string>
     <string name="s_002e97a4" formatted="false">tasks 必须是数组</string>
+    <string name="s_cdf354f5" formatted="false">v2 仅导出日志、情绪和任务。标签、筛选、周期提醒、回收站与资料库偏好均会省略。</string>
     <string name="s_6e425eba" formatted="false">{0} {1} 条 · {2} {3} 条</string>
     <string name="s_39ac061e" formatted="false">{0} — {1} · 无记录日期不计入均值</string>
     <string name="s_e2a8c96b" formatted="false">{0} 个任务</string>
@@ -111,6 +112,7 @@
     <string name="s_79955ed0" formatted="false">伤心</string>
     <string name="s_d7974514" formatted="false">你还有 {0} 个想法，先看看最早的一条</string>
     <string name="s_d908f279" formatted="false">你还有{0}个想法等待梳理，去看看吧</string>
+    <string name="s_ba9285be" formatted="false">使用 v2 正文兼容格式</string>
     <string name="s_ad5b82b0" formatted="false">保存</string>
     <string name="s_9b95e293" formatted="false">保存中…</string>
     <string name="s_64911de5" formatted="false">保存为 JSON 文件</string>
@@ -154,6 +156,7 @@
     <string name="s_4db1b243" formatted="false">口令错误，或文件已损坏</string>
     <string name="s_ef638194" formatted="false">口令（至少 8 个字符）</string>
     <string name="s_4d55cb75" formatted="false">可导出备份或通过系统分享传输</string>
+    <string name="s_8e31f574" formatted="false">合并后资料库超出备份上限</string>
     <string name="s_5e53c03a" formatted="false">四</string>
     <string name="s_40163b46" formatted="false">回到今天</string>
     <string name="s_bed63d2f" formatted="false">回到本周</string>
@@ -172,6 +175,7 @@
     <string name="s_e4a4815a" formatted="false">外观与使用</string>
     <string name="s_f849ada8" formatted="false">好</string>
     <string name="s_1e13bd21" formatted="false">完成</string>
+    <string name="s_ebe90a32" formatted="false">完整备份（v4）包含正文和资料库，可在支持 v4 的 Android 与 Mac 上恢复。</string>
     <string name="s_dd03e6ad" formatted="false">导入前预览与本地数据的差异</string>
     <string name="s_9b60ff74" formatted="false">导入失败：{0}</string>
     <string name="s_da193966" formatted="false">导入已取消</string>
@@ -294,9 +298,12 @@
     <string name="s_198c9fe3" formatted="false">标准导入</string>
     <string name="s_5606df17" formatted="false">标准导入预览</string>
     <string name="s_2b1626c8" formatted="false">标签</string>
+    <string name="s_cc4407d1" formatted="false">标签 {0} · 筛选 {1} · 周期提醒 {2} · 回收站 {3}</string>
+    <string name="s_91bff25f" formatted="false">标签冲突，无法无损合并</string>
     <string name="s_f7d7a0ce" formatted="false">欢迎来到 Flash</string>
     <string name="s_aef45eb7" formatted="false">正在加载更多…</string>
     <string name="s_6af40858" formatted="false">此刻</string>
+    <string name="s_cf449d80" formatted="false">此文件未包含全部资料库字段。覆盖将清除文件中缺少的资料，合并会保留这些本机资料。</string>
     <string name="s_b060afd3" formatted="false">此设备不支持备份中的任务时区，请更新系统后重试；未导入任何数据</string>
     <string name="s_2f15ac82" formatted="false">此设备未设置锁屏密码，无法开启应用锁</string>
     <string name="s_f4958768" formatted="false">每 3 天</string>

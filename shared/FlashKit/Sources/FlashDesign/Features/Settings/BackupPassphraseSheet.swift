@@ -13,6 +13,7 @@ public struct BackupPassphraseSheet: View {
     public enum Mode {
         /// 导出 / 分享：`nil` 表示用户选择不加密
         case export(onConfirm: (String?) -> Void)
+        case exportWithFormat(onConfirm: (BackupExportFormat, String?) -> Void)
         /// 导入加密备份：`error` 为上次尝试的错误文案（口令错误等）
         case unlock(error: String?, onSubmit: (String) -> Void)
     }
@@ -20,6 +21,7 @@ public struct BackupPassphraseSheet: View {
     private let mode: Mode
     private let onCancel: () -> Void
     @State private var encrypt = true
+    @State private var format = BackupExportFormat.fullLibrary
     @State private var passphrase = ""
     @State private var confirmation = ""
     @State private var problem: String? = nil
@@ -35,6 +37,9 @@ public struct BackupPassphraseSheet: View {
             Form {
                 switch mode {
                 case .export: exportContent
+                case .exportWithFormat:
+                    formatSection
+                    exportContent
                 case .unlock(let error, _): unlockContent(error: error)
                 }
             }
@@ -52,13 +57,33 @@ public struct BackupPassphraseSheet: View {
         }
         .onAppear { focused = true }
         #if os(macOS)
-        .frame(minWidth: 420, minHeight: 340)
+        .frame(minWidth: 420, minHeight: offersFormatChoice ? 510 : 340)
         #endif
     }
 
     private var isExport: Bool {
-        if case .export = mode { return true }
+        if case .unlock = mode { return false }
+        return true
+    }
+
+    private var offersFormatChoice: Bool {
+        if case .exportWithFormat = mode { return true }
         return false
+    }
+
+    private var formatSection: some View {
+        Section {
+            Picker("导出内容", selection: $format) {
+                Text("完整资料库（v4）").tag(BackupExportFormat.fullLibrary)
+                Text("兼容正文（v2）").tag(BackupExportFormat.compatibleRecords)
+            }
+        } footer: {
+            if format == .compatibleRecords {
+                Text("仅导出当前日志、情绪和任务，可在 Android 或 HarmonyOS 导入。此文件不含自由标签及其关联、已保存筛选、灵感提醒、回忆偏好、自动标签设置和回收站。")
+            } else {
+                Text("完整备份包含正文、资料库设置和回收站，恢复时需要支持 v4 的 Flash。")
+            }
+        }
     }
 
     @ViewBuilder
@@ -101,23 +126,29 @@ public struct BackupPassphraseSheet: View {
     private func submit() {
         switch mode {
         case .export(let onConfirm):
-            guard encrypt else { onConfirm(nil); return }
-            do {
-                try BackupEncryption.validateExportPassphrase(passphrase)
-            } catch let error as BackupError {
-                problem = error.userMessage
-                return
-            } catch {
-                return
-            }
-            guard passphrase == confirmation else {
-                problem = L("两次输入的口令不一致")
-                return
-            }
-            onConfirm(passphrase)
+            confirmExport(onConfirm)
+        case .exportWithFormat(let onConfirm):
+            confirmExport { onConfirm(format, $0) }
         case .unlock(_, let onSubmit):
             guard !passphrase.isEmpty else { return }
             onSubmit(passphrase)
         }
+    }
+
+    private func confirmExport(_ onConfirm: (String?) -> Void) {
+        guard encrypt else { onConfirm(nil); return }
+        do {
+            try BackupEncryption.validateExportPassphrase(passphrase)
+        } catch let error as BackupError {
+            problem = error.userMessage
+            return
+        } catch {
+            return
+        }
+        guard passphrase == confirmation else {
+            problem = L("两次输入的口令不一致")
+            return
+        }
+        onConfirm(passphrase)
     }
 }

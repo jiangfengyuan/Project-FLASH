@@ -45,6 +45,7 @@
     <string name="s_22c3caa0" formatted="false">schemas はオブジェクトである必要があります</string>
     <string name="s_ad2e48cd" formatted="false">タスク</string>
     <string name="s_002e97a4" formatted="false">tasks は配列である必要があります</string>
+    <string name="s_cdf354f5" formatted="false">v2 では記録・気分・タスクのみを書き出します。タグ、フィルター、定期リマインダー、ゴミ箱、ライブラリ設定は含まれません。</string>
     <string name="s_6e425eba" formatted="false">{0}: {1} · {2}: {3}</string>
     <string name="s_39ac061e" formatted="false">{0} — {1} · 記録のない日は平均に含みません</string>
     <string name="s_e2a8c96b" formatted="false">タスク {0} 件</string>
@@ -111,6 +112,7 @@
     <string name="s_79955ed0" formatted="false">悲しい</string>
     <string name="s_d7974514" formatted="false">待っているアイデアが {0} 件あります。古いものから見てみましょう</string>
     <string name="s_d908f279" formatted="false">整理を待つアイデアが {0} 件あります。見てみましょう</string>
+    <string name="s_ba9285be" formatted="false">本文のみの互換形式（v2）を使う</string>
     <string name="s_ad5b82b0" formatted="false">保存</string>
     <string name="s_9b95e293" formatted="false">保存中…</string>
     <string name="s_64911de5" formatted="false">JSON ファイルとして保存</string>
@@ -154,6 +156,7 @@
     <string name="s_4db1b243" formatted="false">パスフレーズが違うか、ファイルが壊れています。</string>
     <string name="s_ef638194" formatted="false">パスフレーズ(8 文字以上)</string>
     <string name="s_4d55cb75" formatted="false">バックアップを書き出すか、システムの共有で送信できます</string>
+    <string name="s_8e31f574" formatted="false">結合後のライブラリはバックアップの上限を超えています。</string>
     <string name="s_5e53c03a" formatted="false">木</string>
     <string name="s_40163b46" formatted="false">今日に戻る</string>
     <string name="s_bed63d2f" formatted="false">今週に戻る</string>
@@ -172,6 +175,7 @@
     <string name="s_e4a4815a" formatted="false">外観と操作</string>
     <string name="s_f849ada8" formatted="false">OK</string>
     <string name="s_1e13bd21" formatted="false">完了</string>
+    <string name="s_ebe90a32" formatted="false">完全バックアップ（v4）には記録とライブラリが含まれます。v4 対応の Android と Mac で復元できます。</string>
     <string name="s_dd03e6ad" formatted="false">読み込み前にローカルデータとの差分を確認</string>
     <string name="s_9b60ff74" formatted="false">読み込みに失敗しました: {0}</string>
     <string name="s_da193966" formatted="false">読み込みをキャンセルしました</string>
@@ -294,9 +298,12 @@
     <string name="s_198c9fe3" formatted="false">読み込み</string>
     <string name="s_5606df17" formatted="false">読み込みのプレビュー</string>
     <string name="s_2b1626c8" formatted="false">タグ</string>
+    <string name="s_cc4407d1" formatted="false">タグ {0} · フィルター {1} · 定期リマインダー {2} · ゴミ箱 {3}</string>
+    <string name="s_91bff25f" formatted="false">タグが競合しており、関連付けを保持したまま結合できません。</string>
     <string name="s_f7d7a0ce" formatted="false">Flash へようこそ</string>
     <string name="s_aef45eb7" formatted="false">読み込み中…</string>
     <string name="s_6af40858" formatted="false">いま</string>
+    <string name="s_cf449d80" formatted="false">このファイルには一部のライブラリ項目がありません。上書きすると省略されたデータが消去され、結合すると端末に保持されます。</string>
     <string name="s_b060afd3" formatted="false">この端末はバックアップ内のタイムゾーンに対応していません。システムを更新してお試しください。何も読み込まれていません</string>
     <string name="s_2f15ac82" formatted="false">アプリロックを使うには、この端末に画面ロックのパスコードを設定してください</string>
     <string name="s_f4958768" formatted="false">3 日ごと</string>

@@ -45,6 +45,7 @@
     <string name="s_22c3caa0" formatted="false">يجب أن يكون schemas كائنًا</string>
     <string name="s_ad2e48cd" formatted="false">مهام</string>
     <string name="s_002e97a4" formatted="false">يجب أن يكون tasks مصفوفة</string>
+    <string name="s_cdf354f5" formatted="false">يصدّر v2 السجلات والحالات المزاجية والمهام فقط. ويستبعد الوسوم والمرشحات والتذكيرات الدورية وسلة المحذوفات وتفضيلات المكتبة.</string>
     <string name="s_6e425eba" formatted="false">{0}: {1} · {2}: {3}</string>
     <string name="s_39ac061e" formatted="false">{0} — {1} · الأيام بلا تسجيل لا تُحسب</string>
     <string name="s_e2a8c96b" formatted="false">المهام: {0}</string>
@@ -111,6 +112,7 @@
     <string name="s_79955ed0" formatted="false">حزين</string>
     <string name="s_d7974514" formatted="false">أفكار بانتظارك: {0}. ابدأ بالأقدم</string>
     <string name="s_d908f279" formatted="false">أفكار بانتظار المراجعة: {0}. ألقِ نظرة</string>
+    <string name="s_ba9285be" formatted="false">استخدام تنسيق v2 للمحتوى فقط</string>
     <string name="s_ad5b82b0" formatted="false">حفظ</string>
     <string name="s_9b95e293" formatted="false">جارٍ الحفظ…</string>
     <string name="s_64911de5" formatted="false">حفظ كملف JSON</string>
@@ -154,6 +156,7 @@
     <string name="s_4db1b243" formatted="false">عبارة المرور خاطئة، أو أن الملف تالف.</string>
     <string name="s_ef638194" formatted="false">عبارة المرور (8 أحرف على الأقل)</string>
     <string name="s_4d55cb75" formatted="false">صدّر نسخة احتياطية أو أرسلها عبر مشاركة النظام</string>
+    <string name="s_8e31f574" formatted="false">تتجاوز المكتبة المدمجة الحد الأقصى للنسخة الاحتياطية.</string>
     <string name="s_5e53c03a" formatted="false">خ</string>
     <string name="s_40163b46" formatted="false">العودة إلى اليوم</string>
     <string name="s_bed63d2f" formatted="false">هذا الأسبوع</string>
@@ -172,6 +175,7 @@
     <string name="s_e4a4815a" formatted="false">المظهر والاستخدام</string>
     <string name="s_f849ada8" formatted="false">حسنًا</string>
     <string name="s_1e13bd21" formatted="false">تم</string>
+    <string name="s_ebe90a32" formatted="false">تتضمن النسخة الكاملة (v4) سجلاتك ومكتبتك. يمكنك استعادتها على أجهزة Android وMac التي تدعم v4.</string>
     <string name="s_dd03e6ad" formatted="false">معاينة الفروق مع البيانات المحلية قبل الاستيراد</string>
     <string name="s_9b60ff74" formatted="false">فشل الاستيراد: {0}</string>
     <string name="s_da193966" formatted="false">أُلغي الاستيراد</string>
@@ -294,9 +298,12 @@
     <string name="s_198c9fe3" formatted="false">استيراد</string>
     <string name="s_5606df17" formatted="false">معاينة الاستيراد</string>
     <string name="s_2b1626c8" formatted="false">الوسم</string>
+    <string name="s_cc4407d1" formatted="false">الوسوم {0} · المرشحات {1} · التذكيرات الدورية {2} · المحذوفات {3}</string>
+    <string name="s_91bff25f" formatted="false">يمنع تعارض الوسوم الدمج دون فقدان الارتباطات.</string>
     <string name="s_f7d7a0ce" formatted="false">مرحبًا بك في Flash</string>
     <string name="s_aef45eb7" formatted="false">جارٍ تحميل المزيد…</string>
     <string name="s_6af40858" formatted="false">الآن</string>
+    <string name="s_cf449d80" formatted="false">يفتقد هذا الملف بعض حقول المكتبة. يؤدي الاستبدال إلى حذف البيانات الغائبة، بينما يحتفظ الدمج بها على هذا الجهاز.</string>
     <string name="s_b060afd3" formatted="false">لا يدعم هذا الجهاز منطقة زمنية في النسخة. حدّث النظام وحاول مجددًا. لم يُستورد شيء</string>
     <string name="s_2f15ac82" formatted="false">عيّن رمز قفل الشاشة على هذا الجهاز لاستخدام قفل التطبيق</string>
     <string name="s_f4958768" formatted="false">كل 3 أيام</string>
